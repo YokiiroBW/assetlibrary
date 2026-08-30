@@ -108,7 +108,7 @@
       "id": "M0-008",
       "title": "官方 Provider 隔离进程与资源限制验证",
       "module": "provider-sandbox-spike",
-      "status": "in_progress",
+      "status": "partial",
       "depends_on": [
         "M0-001",
         "M0-003"

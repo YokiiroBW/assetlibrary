@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
   "status": "m0_second_wave_in_progress",
-  "next_action": "complete M0-005 and M0-008, then activate M0-006 while preserving the M0-002 and M0-004 external evidence gates",
+  "next_action": "complete M0-005, then activate M0-006 while preserving the M0-002, M0-004 and M0-008 external evidence gates",
   "architecture_contract_status": "draft",
   "implementation_status": "m0_spikes_in_progress",
   "notes": [
@@ -17,6 +17,7 @@
     "M0-003 completion unlocked independent M0-005 PostgreSQL and M0-008 Provider-sandbox worktrees.",
     "M0-002 static candidate merged as partial at da75e34 after 13 tests; Windows build, Explorer behavior and soak remain unmet gates.",
     "M0-004 clean replacement merged as partial at e46cbe9 after 6 behavior tests, two matching cold-publish manifests and repository verification; real Docker and Windows Service execution remain unmet gates.",
+    "M0-008 merged as partial at 14e8cc0 and its process-tree correction was merged after 25 Provider tests; hard Linux network/filesystem confinement, Windows isolation and RPC cancel acknowledgement remain unmet gates.",
     "Current host has no Windows executor and cannot access the Docker daemon; environment-specific gates must remain explicit."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"
