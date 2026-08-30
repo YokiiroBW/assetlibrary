@@ -68,7 +68,6 @@ class SpikeTests(unittest.TestCase):
                         try: occupied.wait(timeout=2)
                         except subprocess.TimeoutExpired: occupied.terminate(); occupied.wait(timeout=3)
                         self.assertNotEqual(occupied.returncode, 0)
-                        self.assertNotEqual(occupied.returncode, 0)
                     finally:
                         if occupied.poll() is None: occupied.kill(); occupied.wait()
                 finally:
@@ -94,7 +93,8 @@ class SpikeTests(unittest.TestCase):
         self.assertTrue((ROOT / "systemd/assetlibrary-m0-004-spike.service").exists())
         self.assertTrue((ROOT / "scripts/windows-service.ps1").exists())
         self.assertTrue((REPO / ".runtime/sandbox-storage/M0-004/artifact/win-x64/ServerPackagingSpike.exe").exists())
-        self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip())
+        expected = subprocess.check_output(["git", "log", "-1", "--format=%H", "--", "tests/spikes/server-packaging", ".codex/tasks/M0-004.md"], cwd=REPO, text=True).strip()
+        self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), expected)
         files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip(), subprocess.check_output(["sha256sum", str(files)], text=True).split()[0])
 

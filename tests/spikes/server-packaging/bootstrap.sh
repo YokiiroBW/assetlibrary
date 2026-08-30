@@ -18,8 +18,8 @@ git -C "$repo" status --porcelain --untracked-files=all | grep -q . && { echo 'w
 artifact="$runtime/artifact"
 if [[ -e "$artifact" ]]; then find "$artifact" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; fi
 mkdir -p "$artifact"
-git -C "$repo" diff --quiet -- tests/spikes/server-packaging docs/spikes/M0-004 .codex/tasks/M0-004.md || { echo 'working tree changes in provenance scope' >&2; exit 2; }
-source_commit="$(git -C "$repo" rev-parse HEAD)"
+git -C "$repo" diff --quiet -- tests/spikes/server-packaging .codex/tasks/M0-004.md || { echo 'uncommitted issuance inputs' >&2; exit 2; }
+source_commit="$(git -C "$repo" log -1 --format=%H -- tests/spikes/server-packaging .codex/tasks/M0-004.md)"
 for rid in linux-x64 win-x64; do
   "$sdk/dotnet" publish "$root/src/ServerPackagingSpike.csproj" -c Release -r "$rid" --self-contained true -p:DebugType=None -p:DebugSymbols=false -p:BaseIntermediateOutputPath="$obj/" -p:OutputPath="$bin/" -o "$artifact/$rid"
 done
