@@ -1,0 +1,33 @@
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+*.local
+*.secret
+
+# Build outputs
+bin/
+obj/
+dist/
+build/
+out/
+node_modules/
+.gradle/
+.vscode/
+.idea/
+
+# Runtime data — never commit
+.runtime/
+data/
+cache/
+logs/
+tmp/
+worktrees/
+
+# Generated office QA output
+.docx-render/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

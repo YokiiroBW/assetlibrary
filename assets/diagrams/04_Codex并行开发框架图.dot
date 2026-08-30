@@ -1,0 +1,43 @@
+digraph G {
+    rankdir=TB;
+
+    graph [bgcolor="#F7F9FC", pad="0.35", nodesep="0.45", ranksep="0.75", fontname="Noto Sans CJK SC"];
+    node [shape=box, style="rounded,filled", fontname="Noto Sans CJK SC", fontsize=11, color="#C7D1E2", fillcolor="#FFFFFF", fontcolor="#172033", margin="0.15,0.09"];
+    edge [fontname="Noto Sans CJK SC", fontsize=9.5, color="#8290A7", fontcolor="#526078", arrowsize=0.72, penwidth=1.2];
+
+    labelloc="t"; label="Codex 主协调线程与并行开发框架"; fontsize=24; fontname="Noto Sans CJK SC"; fontcolor="#172033";
+
+    master [label="主协调线程\n读取需求基线 · ADR · 里程碑 · 任务图\n拆分 / 派工 / 审查 / 集成 / 更新状态", fillcolor="#244C7A", fontcolor="white", color="#244C7A", fontsize=13];
+    baseline [label="仓库内权威上下文\nAGENTS.md · START_HERE · CONFIRMED_BASELINE\nADR · contracts · project-state · task-registry", shape=folder, fillcolor="#EEF4FC"];
+    master -> baseline [dir=both, label="持续读取与更新"];
+
+    subgraph cluster_worktrees {
+        label="独立 worktree / 分支（禁止共用同一工作目录）"; color="#B8D7C6"; style="rounded,filled"; fillcolor="#EFF9F3"; fontname="Noto Sans CJK SC";
+        a [label="A · 服务端核心\nservices/core-server/**"];
+        b [label="B · 扫描与索引\nservices/indexer/**"];
+        c [label="C · 传输与文件操作\nservices/operations/**"];
+        d [label="D · Web 管理端\napps/web/**"];
+        e [label="E · AssetLink 与 SDK\ncontracts/** · packages/sdk/**"];
+        f [label="F · Windows 客户端\napps/windows-client/**"];
+        g [label="G · Android 客户端\napps/android/**"];
+        h [label="H · 测试与性能门禁\ntests/** · tools/**"];
+    }
+
+    packet [label="标准任务包\n目标 · 上下文 · 约束 · 可改目录 · 禁改目录 · 完成标准", shape=note, fillcolor="#FFF7E8"];
+    master -> packet;
+    packet -> a; packet -> b; packet -> c; packet -> d; packet -> e; packet -> f; packet -> g; packet -> h;
+
+    handoff [label="标准交接契约\ncommit / diff / tests / risks / changed contracts\n.codex/handoffs/<task-id>/summary.md + result.json", shape=folder, fillcolor="#FFF1F4"];
+    a -> handoff; b -> handoff; c -> handoff; d -> handoff; e -> handoff; f -> handoff; g -> handoff; h -> handoff;
+    handoff -> master [label="机器可读汇总与验收依据"];
+
+    deeplink [label="Codex 深度链接\ncodex://new?... 或 codex://threads/<id>\n仅用于打开线程 / 人工追溯，不是唯一交接渠道", shape=note, fillcolor="#F5F2FF"];
+    a -> deeplink [style=dashed]; b -> deeplink [style=dashed]; c -> deeplink [style=dashed]; d -> deeplink [style=dashed];
+    deeplink -> master [style=dashed, label="需要时查看原线程"];
+
+    ci [label="自动验证\n静态检查 · 单元/集成测试 · 契约兼容 · 安全门禁 · 性能回归", fillcolor="#FFFFFF"];
+    handoff -> ci;
+    ci -> master [label="通过后才可合并"];
+    master -> release [label="更新里程碑与集成分支"];
+    release [label="主分支 / 集成候选\n可重放 · 可审计 · 可回滚", fillcolor="#EAF6EE", color="#8BC09E"];
+}

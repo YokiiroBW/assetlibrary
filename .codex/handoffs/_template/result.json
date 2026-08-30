@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "TASK-000",
+  "title": "template",
+  "milestone": "M0",
+  "status": "ready_for_review",
+  "owner": "agent-name",
+  "branch": "codex/task-000-template",
+  "worktree": "../worktrees/task-000",
+  "commit": "",
+  "changed_files": [],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": "summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "",
+    "dependency_direction_ok": false,
+    "reused_existing_logic": [],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [],
+    "technical_debt": []
+  }
+}

@@ -1,0 +1,76 @@
+digraph G {
+    rankdir=LR;
+
+    graph [bgcolor="#F7F9FC", pad="0.35", nodesep="0.45", ranksep="0.75", fontname="Noto Sans CJK SC"];
+    node [shape=box, style="rounded,filled", fontname="Noto Sans CJK SC", fontsize=11, color="#C7D1E2", fillcolor="#FFFFFF", fontcolor="#172033", margin="0.15,0.09"];
+    edge [fontname="Noto Sans CJK SC", fontsize=9.5, color="#8290A7", fontcolor="#526078", arrowsize=0.72, penwidth=1.2];
+
+    labelloc="t"; label="AssetLibrary 系统总体架构"; fontsize=24; fontname="Noto Sans CJK SC"; fontcolor="#172033";
+
+    subgraph cluster_clients {
+        label="官方客户端与入口"; color="#C7D8F4"; style="rounded,filled"; fillcolor="#EDF4FF"; fontname="Noto Sans CJK SC";
+        win_shell [label="Windows Explorer\nAssetShell + 右侧视图", fillcolor="#FFFFFF"];
+        win_client [label="Windows 独立客户端\n浏览 / 同步 / 播放", fillcolor="#FFFFFF"];
+        android [label="Android / 平板\n预览 / 相册与文件夹同步", fillcolor="#FFFFFF"];
+        web [label="Web\n浏览 + 完整管理控制面", fillcolor="#FFFFFF"];
+        browser [label="浏览器扩展\n下载 / 文本簿 / 网页剪藏", fillcolor="#FFFFFF"];
+        win_shell -> win_client [style=dashed, label="本机 IPC / AssetHost"];
+    }
+
+    subgraph cluster_channels {
+        label="接入通道"; color="#D3C7F2"; style="rounded,filled"; fillcolor="#F4F0FF"; fontname="Noto Sans CJK SC";
+        assetlink [label="AssetLink 官方协议\n控制 + 事件 + 数据传输", fillcolor="#FFFFFF"];
+        webdav [label="WebDAV 兼容网关\n默认关闭 / 启用后只读", fillcolor="#FFFFFF"];
+        devapi [label="Developer API\n开发者模式 + 访问令牌", fillcolor="#FFFFFF"];
+        mcp [label="MCP / 官方插件适配层\nAstrBot · Hermes · Codex", fillcolor="#FFFFFF"];
+    }
+
+    subgraph cluster_core {
+        label="统一服务端业务内核"; color="#A8D6C5"; style="rounded,filled"; fillcolor="#EBF8F3"; fontname="Noto Sans CJK SC";
+        gateway [label="认证 · 会话 · 主备链接\n能力协商 · 限流 · 审计", fillcolor="#FFFFFF"];
+        library [label="资源库 / 存储源 / 权限\n分类 → 模板 → 库实例 → 物理根", fillcolor="#FFFFFF"];
+        asset [label="资产 / 文件夹 / 关系\n稳定 ID · 相对路径 · Sidecar", fillcolor="#FFFFFF"];
+        operation [label="传输 / 同步 / 文件操作\n计划 · 锁 · 校验 · 垃圾桶", fillcolor="#FFFFFF"];
+        search [label="搜索 / OCR / 查重 / AI\n全文 · 语义 · 元数据增强", fillcolor="#FFFFFF"];
+        task [label="任务 / 通知 / 健康\n调度 · 限速 · 恢复 · 更新", fillcolor="#FFFFFF"];
+        gateway -> library -> asset;
+        asset -> operation;
+        asset -> search;
+        operation -> task;
+        search -> task;
+    }
+
+    subgraph cluster_workers {
+        label="隔离 Worker 与 Provider"; color="#F2CE9B"; style="rounded,filled"; fillcolor="#FFF6E8"; fontname="Noto Sans CJK SC";
+        image_worker [label="图片 / RAW / PSD / HDR\n缩略图与显示代理", fillcolor="#FFFFFF"];
+        doc_worker [label="PDF / Office / 电子书 / 漫画\n安全预览与全文", fillcolor="#FFFFFF"];
+        media_worker [label="音乐 / 视频 / 3D\n播放代理与技术信息", fillcolor="#FFFFFF"];
+        enhance_worker [label="OCR / 人物 / 同源分析\n音乐与书籍元数据 / AI", fillcolor="#FFFFFF"];
+        security_worker [label="入站安全扫描\n归档炸弹与不可信内容", fillcolor="#FFFFFF"];
+    }
+
+    subgraph cluster_data {
+        label="数据与真实存储"; color="#E4B7C2"; style="rounded,filled"; fillcolor="#FFF0F3"; fontname="Noto Sans CJK SC";
+        pg [label="PostgreSQL\n不可重建逻辑数据 · 索引 · 审计", shape=cylinder, fillcolor="#FFFFFF"];
+        cache [label="内容寻址缓存\n缩略图 · 预览 · 代理 · 临时分块", shape=cylinder, fillcolor="#FFFFFF"];
+        storage [label="真实物理资产\n本机卷 · SMB/NFS · 外接盘", shape=folder, fillcolor="#FFFFFF"];
+        sidecar [label="可携带 Sidecar\n.assetmeta · XMP · LRC · CUE", shape=folder, fillcolor="#FFFFFF"];
+    }
+
+    subgraph cluster_external {
+        label="外部系统"; color="#CFD5DE"; style="rounded,filled"; fillcolor="#F1F3F6"; fontname="Noto Sans CJK SC";
+        agents [label="AstrBot / Hermes / Codex", fillcolor="#FFFFFF"];
+        notify [label="Webhook / 群晖 Chat\nTelegram / OneBot", fillcolor="#FFFFFF"];
+        providers [label="地图 / 元数据源 / AI 中转站", fillcolor="#FFFFFF"];
+    }
+
+    win_client -> assetlink; android -> assetlink; web -> assetlink; browser -> assetlink;
+    assetlink -> gateway; webdav -> gateway; devapi -> gateway; mcp -> gateway;
+    agents -> mcp; task -> notify; enhance_worker -> providers [dir=both, label="受控增强"];
+    asset -> pg; search -> pg; task -> pg; operation -> pg;
+    asset -> storage [dir=both, label="真实文件事实"];
+    asset -> sidecar [dir=both, label="按需读写"];
+    operation -> cache [dir=both]; search -> cache [dir=both];
+    image_worker -> cache; doc_worker -> cache; media_worker -> cache; enhance_worker -> cache; security_worker -> cache;
+    task -> image_worker; task -> doc_worker; task -> media_worker; task -> enhance_worker; task -> security_worker;
+}

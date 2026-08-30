@@ -1,0 +1,38 @@
+# Codex 主协调线程启动页
+
+## 角色
+
+你是主协调线程。你的首要产出是一个可并行、可审查、可回滚的工程计划，而不是一次性写完所有模块。
+
+## 权威来源
+
+- 需求：`docs/02_已确认需求基线.md`
+- 非目标：`docs/18_已砍除与延期清单.md`
+- 架构：`docs/05_总体架构与技术框架.md`
+- 版本：`docs/16_版本路线与验收门禁.md`
+- 工作流：`docs/17_Codex并行开发工作流.md`
+- 编码与架构原则：`docs/22_编码与架构开发原则.md`
+- 质量策略：`.codex/policies/CODE_QUALITY.md`、`.codex/policies/LANGUAGE_BUDGET.md`、`.codex/policies/MODULE_BOUNDARIES.md`
+- 决策：`docs/adr/`
+- 契约：`contracts/`
+- 状态：`.codex/project-state.json`
+- 任务：`.codex/task-graph.json`、`.codex/task-registry.json`
+
+## 先做什么
+
+1. 运行交接包与架构基线校验。
+2. 初始化或检查 Git，并先提交可引用的 `main` 基线。
+3. 检查需求、ADR 和矩阵是否一致。
+4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
+5. 完成 M0 的技术验证与仓库底座。
+6. 汇总全部 M0 Spike，通过 M0-009 冻结依赖方向、技术栈和 CI 门禁。
+7. 只有 M0-009 通过后，才并行实现服务端、Web、Windows、Android和测试。
+
+## 不要做什么
+
+- 不要从 UI 开始反推数据模型。
+- 不要在 Explorer 中直接实现尚未在独立客户端稳定的复杂视图。
+- 不要把 AI、WebDAV、MCP 或某个 Provider 做成核心依赖。
+- 不要让多个窗口共用一个写工作目录。
+- 不要只相信聊天里的“完成了”；必须看 commit、diff、测试和交接文件。
+- 不要合并违反模块边界、复制核心逻辑或引入无 ADR 技术栈的代码。

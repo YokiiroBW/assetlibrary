@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/handshake.schema.json",
+  "title": "AssetLink Handshake Draft",
+  "type": "object",
+  "required": [
+    "protocol_version",
+    "client",
+    "server_id",
+    "capabilities"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "string"
+    },
+    "client": {
+      "type": "object",
+      "required": [
+        "kind",
+        "version"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "web",
+            "windows-client",
+            "windows-host",
+            "android",
+            "browser-extension"
+          ]
+        },
+        "version": {
+          "type": "string"
+        },
+        "device_id": {
+          "type": "string"
+        }
+      }
+    },
+    "server_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "server_version": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "endpoint_role": {
+      "enum": [
+        "primary",
+        "secondary",
+        "unknown"
+      ]
+    },
+    "request_id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

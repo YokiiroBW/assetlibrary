@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "architecture_style": "modular-monolith-ports-adapters-isolated-workers",
+  "layers": [
+    "Domain",
+    "Application",
+    "Infrastructure",
+    "Adapters"
+  ],
+  "allowed_dependency_direction": [
+    "Adapters->Application",
+    "Application->Domain",
+    "Infrastructure->ApplicationPorts"
+  ],
+  "forbidden_dependencies": [
+    "Domain->Infrastructure",
+    "Domain->UI",
+    "Domain->Database",
+    "Domain->PlatformSDK",
+    "Client->PostgreSQL",
+    "Provider->PostgreSQL",
+    "Shell->Network",
+    "Shell->Database",
+    "Shell->MediaDecoder"
+  ],
+  "forbidden_unbounded_directories": [
+    "common",
+    "shared",
+    "utils",
+    "helpers"
+  ],
+  "language_budget_policy": ".codex/policies/LANGUAGE_BUDGET.md",
+  "full_enforcement_task": "M0-009"
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/events/domain-event.schema.json",
+  "title": "Domain Event Draft",
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "occurred_at",
+    "server_id",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "server_id": {
+      "type": "string"
+    },
+    "library_id": {
+      "type": "string"
+    },
+    "asset_id": {
+      "type": "string"
+    },
+    "cursor": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

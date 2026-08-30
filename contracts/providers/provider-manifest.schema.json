@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/providers/provider-manifest.schema.json",
+  "title": "Provider Manifest Draft",
+  "type": "object",
+  "required": [
+    "provider_id",
+    "version",
+    "provider_api",
+    "capabilities",
+    "permissions"
+  ],
+  "properties": {
+    "provider_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "provider_api": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "detect",
+          "metadata",
+          "thumbnail",
+          "preview",
+          "reader",
+          "analysis",
+          "sidecar",
+          "external-open",
+          "connector",
+          "security-scan"
+        ]
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "required": [
+        "network",
+        "original_write"
+      ],
+      "properties": {
+        "network": {
+          "type": "boolean"
+        },
+        "original_write": {
+          "const": false
+        },
+        "library_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "resource_limits": {
+      "type": "object"
+    },
+    "supported_formats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

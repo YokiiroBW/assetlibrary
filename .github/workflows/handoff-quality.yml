@@ -1,0 +1,20 @@
+name: Handoff quality gates
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile helper scripts
+        run: python -m compileall -q scripts
+      - name: Validate handoff structure
+        run: python scripts/validate_handoff.py
+      - name: Validate architecture baseline
+        run: python scripts/validate_architecture_baseline.py

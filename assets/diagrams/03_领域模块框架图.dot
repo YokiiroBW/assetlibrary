@@ -1,0 +1,67 @@
+digraph G {
+    rankdir=TB;
+
+    graph [bgcolor="#F7F9FC", pad="0.35", nodesep="0.45", ranksep="0.75", fontname="Noto Sans CJK SC"];
+    node [shape=box, style="rounded,filled", fontname="Noto Sans CJK SC", fontsize=11, color="#C7D1E2", fillcolor="#FFFFFF", fontcolor="#172033", margin="0.15,0.09"];
+    edge [fontname="Noto Sans CJK SC", fontsize=9.5, color="#8290A7", fontcolor="#526078", arrowsize=0.72, penwidth=1.2];
+
+    labelloc="t"; label="AssetLibrary 领域模块与产品框架"; fontsize=24; fontname="Noto Sans CJK SC"; fontcolor="#172033";
+
+    principles [label="不可变产品原则\n物理目录权威 · 文件名不作身份 · AI仅增强 · 原文件非破坏 · 统一内核", fillcolor="#1F4B7A", fontcolor="white", color="#1F4B7A", fontsize=13];
+
+    subgraph cluster_domain {
+        label="领域核心"; color="#B7CCE6"; style="rounded,filled"; fillcolor="#EDF4FB"; fontname="Noto Sans CJK SC";
+        lib [label="资源库与存储源\n分类 / 模板 / 实例 / 物理根"];
+        identity [label="资产与文件夹身份\n稳定 ID / 哈希 / 路径历史"];
+        meta [label="元数据与 Sidecar\n标签 / 评分 / 时间 / 位置 / 来源"];
+        rel [label="资产关系\n复合资产 / 衍生 / 连拍 / 人物"];
+        permission [label="用户与按库权限\n管理员 / 用户 / 库权限档位"];
+    }
+
+    subgraph cluster_ops {
+        label="可靠性与操作闭环"; color="#B9DDC8"; style="rounded,filled"; fillcolor="#EEF9F2"; fontname="Noto Sans CJK SC";
+        scan [label="扫描与外部变化\n首次只读 / 监听 / 核对 / 重指向"];
+        transfer [label="传输与同步\n临时接收 / 断点续传 / 基线 / 冲突"];
+        fileops [label="文件操作与垃圾桶\n计划 / 锁 / 校验 / 撤销 / 保护"];
+        search [label="搜索与查重\n全文 / OCR / 精确 / 同源 / AI语义"];
+        task [label="任务与维护\n调度 / 性能 / 健康 / 更新 / 备份"];
+    }
+
+    subgraph cluster_experience {
+        label="专业资源库体验"; color="#E9C5A1"; style="rounded,filled"; fillcolor="#FFF5EB"; fontname="Noto Sans CJK SC";
+        photo [label="照片\n时间轴 / 地图 / 人物 / 实况 / GPX"];
+        image [label="图片与表情\n瀑布流 / 色彩 / 轻编辑 / 快速发送"];
+        music [label="音乐与视频\n专辑 / 歌词 / 基础播放 / 续播"];
+        docs [label="文档与阅读\nPDF / MD / Office / 电子书 / 漫画"];
+        project [label="工程与 3D\n混合目录 / 伴随预览 / 专业打开"];
+        clip [label="文本簿与网页剪藏\n摘录 / MHTML / 截图 / 来源"];
+        character [label="角色库\n身份卡 / 人设 / 相册 / 日记 / 联动"];
+    }
+
+    subgraph cluster_surface {
+        label="产品端与扩展面"; color="#D1C4E9"; style="rounded,filled"; fillcolor="#F5F1FC"; fontname="Noto Sans CJK SC";
+        windows [label="Windows 独立客户端\n先稳定专业视图"];
+        explorer [label="Windows Explorer\n后嵌入稳定视图"];
+        mobile [label="Android / 平板\n完整预览 + 文件夹同步"];
+        web [label="Web\n完整管理控制面"];
+        extension [label="浏览器扩展\n图片 / 文件 / 文字 / 网页剪藏"];
+        connect [label="WebDAV / API / MCP\n兼容与开发者接入"];
+    }
+
+    principles -> lib; principles -> identity; principles -> permission;
+    lib -> scan; identity -> scan; meta -> search; rel -> search; permission -> fileops;
+    scan -> transfer; transfer -> fileops; fileops -> task; search -> task;
+    lib -> photo; meta -> photo; rel -> photo;
+    lib -> image; search -> image;
+    lib -> music; meta -> music;
+    lib -> docs; search -> docs;
+    lib -> project; rel -> project;
+    lib -> clip; meta -> clip;
+    lib -> character; rel -> character;
+    photo -> windows; image -> windows; music -> windows; docs -> windows; project -> windows; character -> windows;
+    windows -> explorer [label="复用视图与业务组件"];
+    photo -> mobile; music -> mobile; docs -> mobile; character -> mobile;
+    task -> web; fileops -> web; search -> web;
+    clip -> extension; transfer -> extension;
+    permission -> connect; fileops -> connect; search -> connect;
+}

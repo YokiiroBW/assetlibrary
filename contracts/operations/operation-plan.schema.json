@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/operations/operation-plan.schema.json",
+  "title": "Physical Operation Plan Draft",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "operation",
+    "status",
+    "items",
+    "preflight"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string"
+    },
+    "operation": {
+      "enum": [
+        "copy",
+        "move",
+        "rename",
+        "trash",
+        "restore",
+        "metadata-writeback",
+        "export"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "preflight",
+        "awaiting-confirmation",
+        "executing",
+        "partially-completed",
+        "completed",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "asset_id",
+          "source"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object"
+          },
+          "target": {
+            "type": "object"
+          },
+          "expected_hash": {
+            "type": "string"
+          },
+          "sidecars": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "preflight": {
+      "type": "object"
+    },
+    "idempotency_key": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

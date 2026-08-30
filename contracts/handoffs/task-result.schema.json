@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/handoffs/task-result.schema.json",
+  "title": "Codex Task Result",
+  "type": "object",
+  "required": [
+    "task_id",
+    "status",
+    "branch",
+    "tests",
+    "handoff_summary",
+    "architecture_review"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "milestone": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ready_for_review",
+        "partial",
+        "blocked",
+        "rejected"
+      ]
+    },
+    "owner": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "worktree": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string"
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "changed_contracts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tests": {
+      "type": "object"
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_merge_order": {
+      "type": "integer"
+    },
+    "handoff_summary": {
+      "type": "string"
+    },
+    "thread_deep_link": {
+      "type": "string"
+    },
+    "architecture_review": {
+      "type": "object",
+      "required": [
+        "module",
+        "dependency_direction_ok",
+        "reused_existing_logic",
+        "duplicated_logic",
+        "cross_module_access",
+        "new_language_or_framework",
+        "new_major_dependencies",
+        "contract_changes",
+        "architecture_tests",
+        "technical_debt"
+      ],
+      "properties": {
+        "module": {
+          "type": "string"
+        },
+        "dependency_direction_ok": {
+          "type": "boolean"
+        },
+        "reused_existing_logic": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "duplicated_logic": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cross_module_access": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "new_language_or_framework": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "new_major_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contract_changes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "architecture_tests": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "technical_debt": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

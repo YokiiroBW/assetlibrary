@@ -1,0 +1,17 @@
+{
+  "project": "AssetLibrary",
+  "handoff_version": "2.1",
+  "requirements_frozen_at": "2026-08-31",
+  "current_milestone": "M0",
+  "status": "requirements_frozen_architecture_quality_handoff_ready",
+  "next_action": "run handoff and architecture validation, initialize git, execute M0 tasks",
+  "architecture_contract_status": "draft",
+  "implementation_status": "not_started",
+  "notes": [
+    "Windows standalone client precedes deep Explorer integration.",
+    "All destructive tests must use isolated sandbox storage.",
+    "Deep links are navigation only; handoff files and commits are authoritative.",
+    "Architecture boundaries, reuse rules and language budget are mandatory CI gates, not style suggestions."
+  ],
+  "architecture_quality_gate": "M0-009 required before V0.1"
+}

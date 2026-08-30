@@ -1,0 +1,138 @@
+{
+  "tasks": [
+    {
+      "id": "M0-001",
+      "title": "冻结仓库结构、构建系统与模块所有权",
+      "module": "repo-foundation",
+      "status": "planned",
+      "depends_on": [],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-001/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-002",
+      "title": "Windows Explorer 自定义命名空间与右侧视图技术验证",
+      "module": "windows-shell-spike",
+      "status": "planned",
+      "depends_on": [
+        "M0-001"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-002/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-003",
+      "title": "AssetLink 控制/事件/传输协议契约验证",
+      "module": "assetlink-contract",
+      "status": "planned",
+      "depends_on": [
+        "M0-001"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-003/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-004",
+      "title": "跨平台服务端 Windows/Linux/Docker 发行验证",
+      "module": "server-packaging-spike",
+      "status": "planned",
+      "depends_on": [
+        "M0-001"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-004/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-005",
+      "title": "PostgreSQL 领域模型、持久任务与迁移策略验证",
+      "module": "postgres-domain-spike",
+      "status": "planned",
+      "depends_on": [
+        "M0-001",
+        "M0-003"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-005/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-006",
+      "title": "文件操作崩溃恢复、强哈希与垃圾桶验证",
+      "module": "file-safety-spike",
+      "status": "planned",
+      "depends_on": [
+        "M0-001",
+        "M0-005"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-006/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-007",
+      "title": "50万资产模拟器、性能基线与故障注入框架",
+      "module": "test-performance-foundation",
+      "status": "planned",
+      "depends_on": [
+        "M0-001"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-007/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-008",
+      "title": "官方 Provider 隔离进程与资源限制验证",
+      "module": "provider-sandbox-spike",
+      "status": "planned",
+      "depends_on": [
+        "M0-001",
+        "M0-003"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-008/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "M0-009",
+      "title": "冻结编码架构原则、语言预算与CI质量门禁",
+      "module": "architecture-quality-gate",
+      "status": "planned",
+      "depends_on": [
+        "M0-001",
+        "M0-002",
+        "M0-003",
+        "M0-004",
+        "M0-005",
+        "M0-006",
+        "M0-007",
+        "M0-008"
+      ],
+      "owner": "unassigned",
+      "branch": "",
+      "worktree": "",
+      "handoff": ".codex/handoffs/M0-009/summary.md",
+      "thread_deep_link": ""
+    }
+  ]
+}
