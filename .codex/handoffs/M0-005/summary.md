@@ -1,7 +1,7 @@
 # M0-005 handoff
 
 status: ready_for_review
-implementation_commit: `6bc35bd39b0cf653cf46c32f3aebc6bf86b8642d`
+implementation_commit: `314f02a81a3c293688bb60e983b8bae2eba729b4`
 handoff_commit: recorded by the commit containing this file
 branch: `codex/m0-005-postgres-domain-spike`
 
@@ -16,6 +16,8 @@ owner-aware outbox claim/release/publish 及完整并发/回滚/重启/500k 证�
 建议 M0-009 冻结迁移 owner、查询权限边界和备份/恢复门禁；在真实负载 P95 或写放大
 持续超预算前不引入缓存/独立搜索。非目标风险是生产 ORM/备份编排及权限过滤合同尚未验证。
 最终 fresh bootstrap 数据库表/索引大小为 114 MB / 201 MB；端到端（含 psql 启动）warm
-分布(ms)：keyset 32.991/34.569/36.278/36.278，FTS 60.415/61.424/64.501/64.501，
-trigram 35.375/36.090/36.409/36.409（依次 min/median/p95/max）。Keyset
-32.316/32.683/36.054/36.054，FTS 59.803/60.626/63.834/63.834；相同端到端观测。
+分布(ms，端到端含 psql 启动)：keyset 231.874/235.097/253.587/253.587，FTS
+58.985/59.228/61.652/61.652，trigram 35.852/36.273/36.782/36.782（依次
+min/median/p95/max）。表/索引 114 MB / 201 MB。相对路径过滤为 Parallel Seq Scan，
+约 28.4 ms，path index 留待 M0-009 决策。Tuple cursor/order 与权限过滤实际使用
+`asset_library_path_keyset`。

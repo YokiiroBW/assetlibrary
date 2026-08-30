@@ -13,7 +13,7 @@ to ignored runtime storage. Final warm distributions (ms): keyset min 32.991 / m
 34.569 / p95 36.278 / max 36.278; FTS min 60.415 / median 61.424 / p95 64.501 /
 max 64.501; trigram min 35.700 / median 36.008 / p95 37.249 / max 37.249. Table/index sizes were
 114 MB / 201 MB. These are end-to-end observations including psql process startup.
-Latest distributions (min/median/p95/max ms): keyset 32.316/32.683/36.054/36.054,
-FTS 59.803/60.626/63.834/63.834, trigram 35.375/36.090/36.409/36.409. Table/index
+Latest distributions (min/median/p95/max ms): keyset 231.874/235.097/253.587/253.587,
+FTS 58.985/59.228/61.652/61.652, trigram 35.852/36.273/36.782/36.782. Table/index
 sizes: 114 MB / 201 MB. Path-filter EXPLAIN is included in dynamic evidence.
 `git diff --check`: pass; no live server or bytecode remains.
