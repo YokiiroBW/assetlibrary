@@ -62,14 +62,15 @@
       "id": "M0-005",
       "title": "PostgreSQL 领域模型、持久任务与迁移策略验证",
       "module": "postgres-domain-spike",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M0-001",
         "M0-003"
       ],
-      "owner": "unassigned",
-      "branch": "",
-      "worktree": "",
+      "owner": "codex-agent-m0-005",
+      "branch": "codex/m0-005-postgres-domain-spike",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-005",
+      "task_file": ".codex/tasks/M0-005.md",
       "handoff": ".codex/handoffs/M0-005/summary.md",
       "thread_deep_link": ""
     },
@@ -107,14 +108,15 @@
       "id": "M0-008",
       "title": "官方 Provider 隔离进程与资源限制验证",
       "module": "provider-sandbox-spike",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M0-001",
         "M0-003"
       ],
-      "owner": "unassigned",
-      "branch": "",
-      "worktree": "",
+      "owner": "codex-agent-m0-008",
+      "branch": "codex/m0-008-provider-sandbox-spike",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-008",
+      "task_file": ".codex/tasks/M0-008.md",
       "handoff": ".codex/handoffs/M0-008/summary.md",
       "thread_deep_link": ""
     },

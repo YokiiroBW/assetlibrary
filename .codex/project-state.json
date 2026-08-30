@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
-  "status": "m0_second_wave_starting",
-  "next_action": "review M0-002 and M0-004 partial candidates while dispatching M0-005 and M0-008",
+  "status": "m0_second_wave_in_progress",
+  "next_action": "execute M0-005 and M0-008 while correcting M0-002 and reviewing M0-004",
   "architecture_contract_status": "draft",
   "implementation_status": "m0_spikes_in_progress",
   "notes": [
@@ -14,6 +14,7 @@
     "Architecture boundaries, reuse rules and language budget are mandatory CI gates, not style suggestions.",
     "Baseline commit: ae33ad0. M0-001 merged to main at 1af7fed after independent verification.",
     "First-wave worktrees: M0-002, M0-003, M0-004 and M0-007. M0-007 merged at d117291; M0-003 passed 21 contract tests and merged at cd650b8.",
+    "M0-003 completion unlocked independent M0-005 PostgreSQL and M0-008 Provider-sandbox worktrees.",
     "Current host has no Windows or dotnet toolchain and cannot access the Docker daemon; environment-specific gates must remain explicit."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"
