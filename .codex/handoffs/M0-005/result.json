@@ -1,7 +1,7 @@
 {
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "M0-005", "title": "PostgreSQL domain, durable task, outbox and search spike", "milestone": "M0", "status": "ready_for_review",
-  "owner": "codex-agent-m0-005", "branch": "codex/m0-005-postgres-domain-spike", "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-005", "commit": "80babf5325071a227fa20d14420f7c47201a3885",
+  "owner": "codex-agent-m0-005", "branch": "codex/m0-005-postgres-domain-spike", "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-005", "commit": "2daceef40525f18eb48c0784d2b9cbe0d59aa2f9",
   "changed_files": [".codex/tasks/M0-005.md", "database/migrations/001_core.sql", "database/migrations/002_ledger.sql", "tests/spikes/postgres/bootstrap.sh", "tests/spikes/postgres/migration_runner.py", "tests/spikes/postgres/test_postgres_spike.py", "docs/spikes/M0-005/README.md", "docs/spikes/M0-005/500k-plan.txt", ".codex/handoffs/M0-005/summary.md", ".codex/handoffs/M0-005/result.json", ".codex/handoffs/M0-005/tests.md"],
   "changed_contracts": [], "tests": {"passed": 2, "failed": 0, "skipped": 0, "report": "tests.md"},
   "risks": ["Production ORM and backup/restore orchestration remain outside this spike", "Permission query semantics and SQL are not frozen until M0-009"], "blocked_by": [], "recommended_merge_order": 0, "handoff_summary": ".codex/handoffs/M0-005/summary.md", "thread_deep_link": "",
