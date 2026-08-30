@@ -11,7 +11,9 @@ $namespace = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\N
 $expected = [IO.Path]::GetFullPath($DllPath)
 $registration = Get-ItemProperty -LiteralPath $inproc -ErrorAction SilentlyContinue
 if (-not $registration) { Write-Host 'M0-002 is already unregistered.'; exit 0 }
-if ($registration.AssetLibraryOwner -ne 'AssetLibrary.M0-002') { throw 'Refusing to remove a registration without the M0-002 owner marker.' }
+if ($registration.AssetLibraryOwner -ne 'AssetLibrary.M0-002') {
+  throw 'Refusing to remove a registration without the M0-002 owner marker.'
+}
 if ([IO.Path]::GetFullPath($registration.'(default)') -ne $expected) { throw 'Refusing to remove a registration owned by another binary.' }
 
 if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'unregister M0-002 shell extension')) {

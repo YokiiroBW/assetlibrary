@@ -44,6 +44,10 @@ crashed, slow, malformed, or oversized host frames result in a status message an
 the view remains usable; the bridge does not retry forever. `run-host.ps1` exposes
 normal, delayed, crash-after-one-request, and invalid-frame substitutes.
 
+`soak.ps1` is a host-cycle helper only; it does not navigate Explorer. Use
+`docs/spikes/M0-002/explorer-soak-protocol.md` for the manual Explorer
+navigation, bounded-response, failure-recovery, and evidence-collection gate.
+
 ## Linux checks
 
 From the repository root:

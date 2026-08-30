@@ -5,6 +5,7 @@
 #include <shlobj.h>
 #include <shobjidl.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cwchar>
 #include <cstring>
@@ -26,7 +27,12 @@ constexpr GUID kClsid = {0x9d52b2f8, 0x9ef4, 0x4f4c, {0x9c, 0x1a, 0x52, 0x9f, 0x
 std::atomic_ulong g_object_count{0};
 HMODULE g_module = nullptr;
 
-bool TransferBounded(HANDLE pipe, void* buffer, DWORD length, bool write) {
+ULONGLONG RemainingBudget(ULONGLONG deadline) {
+  const ULONGLONG now = GetTickCount64();
+  return now >= deadline ? 0 : deadline - now;
+}
+
+bool TransferBounded(HANDLE pipe, void* buffer, DWORD length, bool write, ULONGLONG deadline) {
   if (length == 0) return true;
   OVERLAPPED overlapped{};
   overlapped.hEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
@@ -39,54 +45,63 @@ bool TransferBounded(HANDLE pipe, void* buffer, DWORD length, bool write) {
     CloseHandle(overlapped.hEvent);
     return false;
   }
-  if (!started && WaitForSingleObject(overlapped.hEvent, kClientTimeoutMs) != WAIT_OBJECT_0) {
-    CancelIoEx(pipe, &overlapped);
-    CloseHandle(overlapped.hEvent);
-    return false;
+  if (!started) {
+    const DWORD remaining = static_cast<DWORD>(std::min<ULONGLONG>(RemainingBudget(deadline), INFINITE - 1));
+    if (WaitForSingleObject(overlapped.hEvent, remaining) != WAIT_OBJECT_0) {
+      // Cancellation completion must be observed before the OVERLAPPED, event, or buffer go out of scope.
+      CancelIoEx(pipe, &overlapped);
+      WaitForSingleObject(overlapped.hEvent, INFINITE);
+      DWORD cancelled_bytes = 0;
+      GetOverlappedResult(pipe, &overlapped, &cancelled_bytes, FALSE);
+      CloseHandle(overlapped.hEvent);
+      return false;
+    }
   }
   const BOOL finished = started || GetOverlappedResult(pipe, &overlapped, &completed, FALSE);
   CloseHandle(overlapped.hEvent);
   return finished && completed == length;
 }
 
-bool WriteExact(HANDLE pipe, void* buffer, DWORD length) {
-  return TransferBounded(pipe, buffer, length, true);
+bool WriteExact(HANDLE pipe, void* buffer, DWORD length, ULONGLONG deadline) {
+  return TransferBounded(pipe, buffer, length, true, deadline);
 }
 
-bool ReadExact(HANDLE pipe, void* buffer, DWORD length) {
-  return TransferBounded(pipe, buffer, length, false);
+bool ReadExact(HANDLE pipe, void* buffer, DWORD length, ULONGLONG deadline) {
+  return TransferBounded(pipe, buffer, length, false, deadline);
 }
 
 // explorer.exe must never inherit an unbounded wait from a missing or wedged host.
-bool WriteFrame(HANDLE pipe, FrameHeader* header, const void* payload) {
-  if (!WriteExact(pipe, header, sizeof(*header))) return false;
+bool WriteFrame(HANDLE pipe, FrameHeader* header, const void* payload, ULONGLONG deadline) {
+  if (!WriteExact(pipe, header, sizeof(*header), deadline)) return false;
   if (header->payload_length == 0) return true;
-  return WriteExact(pipe, const_cast<void*>(payload), header->payload_length);
+  return WriteExact(pipe, const_cast<void*>(payload), header->payload_length, deadline);
 }
 
-bool ReadFrame(HANDLE pipe, FrameHeader* header) {
-  if (!ReadExact(pipe, header, sizeof(*header))) return false;
+bool ReadFrame(HANDLE pipe, FrameHeader* header, ULONGLONG deadline) {
+  if (!ReadExact(pipe, header, sizeof(*header), deadline)) return false;
   return header->payload_length <= kMaxPayloadBytes;
 }
 
 bool AskAssetHost() {
-  if (WaitNamedPipeW(kPipeName, kClientTimeoutMs) == FALSE) return false;
+  const ULONGLONG deadline = GetTickCount64() + kClientTimeoutMs;
+  const DWORD wait_ms = static_cast<DWORD>(std::min<ULONGLONG>(RemainingBudget(deadline), INFINITE - 1));
+  if (WaitNamedPipeW(kPipeName, wait_ms) == FALSE) return false;
   HANDLE pipe = CreateFileW(kPipeName, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING,
                             FILE_FLAG_OVERLAPPED | SECURITY_SQOS_PRESENT | SECURITY_ANONYMOUS, nullptr);
   if (pipe == INVALID_HANDLE_VALUE) return false;
   constexpr char request_payload[] = "view-ping";
   FrameHeader request{kMagic, kVersion, kMessageViewPing,
                       static_cast<std::uint32_t>(sizeof(request_payload) - 1), 1};
-  bool ok = WriteFrame(pipe, &request, request_payload);
+  bool ok = WriteFrame(pipe, &request, request_payload, deadline);
   if (ok) {
     FrameHeader response{};
-    ok = ReadFrame(pipe, &response);
+    ok = ReadFrame(pipe, &response, deadline);
     ok = ok && response.magic == kMagic && response.version == kVersion &&
          response.message_type == kMessageViewPong && response.request_id == request.request_id &&
          response.payload_length <= kMaxPayloadBytes;
     if (ok && response.payload_length != 0) {
       std::string payload(response.payload_length, '\0');
-      ok = ReadExact(pipe, payload.data(), response.payload_length);
+      ok = ReadExact(pipe, payload.data(), response.payload_length, deadline);
     }
   }
   CloseHandle(pipe);
@@ -230,7 +245,7 @@ class OneItemEnumerator final : public IEnumIDList {
     items[0] = item;
     returned_ = true;
     if (fetched) *fetched = 1;
-    return S_OK;
+    return count == 1 ? S_OK : S_FALSE;
   }
   HRESULT STDMETHODCALLTYPE Skip(ULONG count) override { if (count) returned_ = true; return S_OK; }
   HRESULT STDMETHODCALLTYPE Reset() override { returned_ = false; return S_OK; }
@@ -280,7 +295,9 @@ class AssetShellFolder final : public IShellFolder {
     if (!folder) return E_OUTOFMEMORY; HRESULT result = folder->QueryInterface(iid, object); folder->Release(); return result;
   }
   HRESULT STDMETHODCALLTYPE BindToStorage(PCUIDLIST_RELATIVE, IBindCtx*, REFIID, void**) override { return E_NOTIMPL; }
-  HRESULT STDMETHODCALLTYPE CompareIDs(LPARAM, PCUIDLIST_RELATIVE, PCUIDLIST_RELATIVE) override { return MAKE_HRESULT(SEVERITY_SUCCESS, 0, 0); }
+  HRESULT STDMETHODCALLTYPE CompareIDs(LPARAM, PCUIDLIST_RELATIVE, PCUIDLIST_RELATIVE) override {
+    return MAKE_HRESULT(SEVERITY_SUCCESS, 0, 0);
+  }
   HRESULT STDMETHODCALLTYPE CreateViewObject(HWND, REFIID iid, void** object) override {
     if (!object) return E_POINTER;
     *object = nullptr; auto* view = new (std::nothrow) AssetShellView();

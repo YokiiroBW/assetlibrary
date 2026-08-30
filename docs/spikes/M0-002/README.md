@@ -39,7 +39,10 @@ Explorer 集成、业务规则、网络、哈希、媒体解析、Provider 或�
 ```
 
 重启 Explorer，确认该 namespace 消失且 Explorer 正常。重复 crash/restart
-至少 20 次后执行 `soak.ps1 -Hours 8`；soak 未执行不得记为通过。
+至少 20 次后，在保持 Explorer 视图打开并按
+`explorer-soak-protocol.md` 采集证据的同时执行 `soak.ps1 -Hours 8`。
+该脚本本身只是 host-cycle helper，不执行 Explorer 导航；soak 未执行或缺少
+人工 Explorer 证据不得记为通过。
 
 ## 观察与结论边界
 

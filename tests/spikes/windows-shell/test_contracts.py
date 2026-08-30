@@ -6,6 +6,7 @@ import unittest
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / "src"
 SCRIPTS = ROOT / "scripts"
+REPO_ROOT = ROOT.parents[2]
 
 
 class PackageContractTests(unittest.TestCase):
@@ -43,7 +44,18 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("FILE_FLAG_OVERLAPPED", shell)
         self.assertIn("WaitForSingleObject", shell)
         self.assertIn("CancelIoEx", shell)
+        self.assertIn("RemainingBudget", shell)
+        self.assertIn("const ULONGLONG deadline = GetTickCount64() + kClientTimeoutMs", shell)
+        cancel_at = shell.index("CancelIoEx(pipe, &overlapped)")
+        drain_at = shell.index("WaitForSingleObject(overlapped.hEvent, INFINITE)", cancel_at)
+        close_at = shell.index("CloseHandle(overlapped.hEvent)", drain_at)
+        self.assertLess(cancel_at, drain_at)
+        self.assertLess(drain_at, close_at)
         self.assertIn("payload_length <= kMaxPayloadBytes", shell)
+
+    def test_enumerator_reports_partial_multi_item_fetch(self):
+        shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
+        self.assertIn("return count == 1 ? S_OK : S_FALSE", shell)
 
     def test_registration_is_hkcu_only_and_symmetric(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
@@ -55,6 +67,11 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("AssetLibraryOwner", register)
         self.assertIn("AssetLibraryOwner", unregister)
         self.assertIn("AssetLibraryOwner", verify)
+        self.assertIn("try {", register)
+        self.assertIn("} catch {", register)
+        self.assertIn("createdKeys", register)
+        self.assertIn("namespaceOwned", register)
+        self.assertIn("[array]::Reverse", register)
         self.assertIn("ShellFolder", register)
         self.assertIn("Refusing to replace", register)
         self.assertIn("Refusing to remove", unregister)
@@ -69,6 +86,14 @@ class PackageContractTests(unittest.TestCase):
             self.assertIn(mode, host)
         for mode in ("slow", "crash", "invalid"):
             self.assertIn("'" + mode + "'", entrypoint)
+
+    def test_soak_entrypoint_is_explicitly_host_only(self):
+        soak = (SCRIPTS / "soak.ps1").read_text(encoding="utf-8")
+        protocol = (REPO_ROOT / "docs/spikes/M0-002/explorer-soak-protocol.md").read_text(encoding="utf-8")
+        self.assertIn("host-cycle helper", soak)
+        self.assertNotIn("shell:::{", soak)
+        self.assertIn("shell:::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}", protocol)
+        self.assertIn("Explorer soak evidence", protocol)
 
     def test_no_generated_or_private_artifacts_are_packaged(self):
         names = {path.name for path in ROOT.rglob("*") if path.is_file()}
