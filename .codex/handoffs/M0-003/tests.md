@@ -24,4 +24,13 @@ Linux，Python 3 标准库，AssetLink worktree。
 
 ## 尚未覆盖
 
+## 完整命令清单
+
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/assetlink -p 'test_*.py' -v` — 14 passed。
+`python3 scripts/verify_repository.py` — passed。
+`python3 scripts/validate_handoff.py` — passed。
+`python3 scripts/validate_architecture_baseline.py` — passed。
+`git diff --check` — passed。JSON/ref/dialect/$id checks are test_01 and test_14;
+allowed-path and cache-residue checks passed; no generated cache remains.
+
 真实 HTTP/2、浏览器运行时和跨进程断电注入待后续实现 Spike；本任务明确不实现网络或存储业务。
