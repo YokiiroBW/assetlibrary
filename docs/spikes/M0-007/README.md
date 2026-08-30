@@ -24,8 +24,8 @@ hot_directory_count=100000`；首条记录表示 `100 * 1024**3` bytes 的逻辑
 PYTHONDONTWRITEBYTECODE=1 python3 tests/spikes/performance/profile_500k.py
 ```
 
-结果（2026-08-31，seed `20260831`）：500,000 条；墙钟 10.375704 s；峰值 RSS
-394,368 KiB；JSONL 194,334,025 bytes；48,189.50 records/s；manifest SHA-256
+结果（2026-08-31，seed `20260831`）：500,000 条；墙钟 9.256015 s（外部 9.33 s）；峰值 RSS
+19,608 KiB（外部 19,736 KiB）；JSONL 194,334,025 bytes；54,018.93 records/s；manifest SHA-256
 `c7e7e79937fe376a65b37cfd29bfb685ed343650dfe7a72d694f67955601e748`。输出已从
 `.runtime/sandbox-storage/M0-007/` 清理，未提交生成数据。
 

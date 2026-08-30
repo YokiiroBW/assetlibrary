@@ -7,11 +7,11 @@
   "owner": "codex-agent-m0-007",
   "branch": "codex/m0-007-performance-foundation",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-007",
-  "commit": "3124518b366e133b8580462e05c48939937a7118",
+  "commit": "c3599c9bf9675a2b443e51935fcf6bb148d1e676",
   "changed_files": ["packages/test-support/performance/__init__.py", "packages/test-support/performance/generator.py", "packages/test-support/performance/faults.py", "packages/test-support/performance/cli.py", "tests/spikes/performance/test_generator.py", "tests/spikes/performance/profile_500k.py", "docs/spikes/M0-007/README.md", ".codex/tasks/M0-007.md"],
   "changed_contracts": [],
   "tests": {
-    "passed": 4,
+    "passed": 5,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"

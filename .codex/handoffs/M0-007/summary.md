@@ -34,7 +34,7 @@ JSONL 通过 partial + fsync + 原子替换输出。
 
 ## 测试结果
 
-4 个 unittest 全部通过；500k profile 通过并精确生成 500,000 条。
+5 个 unittest 全部通过；500k profile 通过并精确生成 500,000 条。
 
 ## 架构测试与质量门禁
 
@@ -43,7 +43,7 @@ JSONL 通过 partial + fsync + 原子替换输出。
 ## 文件安全、权限与性能影响
 
 输出限制在 sandbox/temp，拒绝逃逸和 symlink；无权限或真实系统修改。500k 基线：
-10.375704s、峰值 RSS 394,368KiB、194,334,025 bytes、48,189.50 records/s。
+9.256015s（外部 9.33s）、峰值 RSS 19,608KiB（外部 19,736KiB）、194,334,025 bytes、54,018.93 records/s；profile 直接断言 100,000 热目录和逻辑 100GiB 资产。
 
 ## 技术债、已知问题与风险
 

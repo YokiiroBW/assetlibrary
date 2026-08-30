@@ -26,8 +26,10 @@ Linux worktree，Python 3.12，标准库；输出目录为 `.runtime/sandbox-sto
 
 ## 性能数据
 
-墙钟 10.375704 s；峰值 RSS 394,368 KiB；输出 194,334,025 bytes；吞吐 48,189.50
-records/s；digest `c7e7e79937fe376a65b37cfd29bfb685ed343650dfe7a72d694f67955601e748`。
+墙钟 9.256015 s（外部 9.33 s）；峰值 RSS 19,608 KiB（外部 19,736 KiB）；输出
+194,334,025 bytes；吞吐 54,018.93 records/s；digest
+`c7e7e79937fe376a65b37cfd29bfb685ed343650dfe7a72d694f67955601e748`。profile 直接
+断言 records=500000、hot_directory_records=100000、has_100gib_asset=true。
 
 ## 尚未覆盖
 
