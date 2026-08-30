@@ -1,0 +1,11 @@
+{
+  "manifest_version": "1.0",
+  "provider_id": "fixture.provider",
+  "provider_version": "0.1.0",
+  "api_versions": ["1.0"],
+  "capabilities": ["metadata"],
+  "trust_class": "side_loaded",
+  "library_scope": ["library-token:test"],
+  "permissions": {"network": false, "original_write": true, "input_tokens_only": true},
+  "resource_limits": {"max_request_bytes": 65536, "max_response_bytes": 65536, "max_artifact_bytes": 1048576, "request_deadline_ms": 500, "cpu_ms": 1000, "memory_bytes": 134217728, "processes": 16, "file_descriptors": 64}
+}
