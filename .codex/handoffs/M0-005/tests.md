@@ -1,19 +1,12 @@
 # Verification
 
-Final command: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/postgres -p 'test_*.py' -v`
+Final command: `M005_PG_BIN=/tmp/m005-independent-bootstrap-kV8peC/install/bin PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/postgres -p 'test_*.py' -v`
 
-Result: 2 tests OK in 45.2 seconds. PostgreSQL 16.15 was built from the official
-v16.15 source in `/tmp/m005-final-bootstrap`; fresh private Unix-socket clusters were
-used and removed after each run. Coverage includes same-transaction migration
-locking, concurrent runners, checksum drift/rollback, task lease/heartbeat/
-reclaim/cancel/idempotency, owner-aware outbox retry, permission positive/negative
-examples, restart persistence, and 500,000 deterministic assets with selective
-FTS/trigram assertions. Dynamic plans, sizes and five warm timings are written only
-to ignored runtime storage. Final warm distributions (ms): keyset min 32.991 / median
-34.569 / p95 36.278 / max 36.278; FTS min 60.415 / median 61.424 / p95 64.501 /
-max 64.501; trigram min 35.700 / median 36.008 / p95 37.249 / max 37.249. Table/index sizes were
-114 MB / 201 MB. These are end-to-end observations including psql process startup.
-Latest distributions (min/median/p95/max ms): keyset 231.874/235.097/253.587/253.587,
-FTS 58.985/59.228/61.652/61.652, trigram 35.852/36.273/36.782/36.782. Table/index
-sizes: 114 MB / 201 MB. Path-filter EXPLAIN is included in dynamic evidence.
-`git diff --check`: pass; no live server or bytecode remains.
+Result: 2 tests OK in 46.7 seconds on fresh PostgreSQL 16.15. Keyset uses the
+permission-filtered EXISTS tuple cursor and `asset_library_path_keyset`; its plan
+is ordered Index Only Scan without Bitmap/Incremental Sort. Path filtering is a
+Parallel Seq Scan (~28.4 ms), retained as an M0-009 path-index decision. Table/index
+sizes: 114 MB / 201 MB. End-to-end warm distributions including psql startup
+(min/median/p95/max ms): keyset 32.406/33.323/35.190/35.190; FTS
+59.480/61.445/66.773/66.773; trigram 34.856/35.190/40.346/40.346.
+Handoff and architecture validators passed; no live server, cluster, cache or bytecode remains.
