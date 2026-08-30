@@ -32,11 +32,11 @@ Windows 主机上的精确命令：
 ## 架构与契约测试
 
 `test_contracts.py` 检查：包文件完整性；Shell 源码不含网络/数据库/Provider 等
-重型依赖；协议版本、16-byte header、4 KiB payload、250 ms overall deadline、
-overlapped cancel completion ordering、async view activation；`IPersistFolder` PIDL
-clone/lifetime 与 factory lifetime；注册脚本 HKCU-only、owner marker、collision
-guard、rollback 和注册/卸载对称；枚举 partial-fetch；host-only soak 与人工
-Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
+重型依赖；协议版本、16-byte header、4 KiB payload、250 ms 逻辑 I/O deadline、
+overlapped cancel completion ordering、async view activation；`IPersistFolder` 实际
+方法/PIDL clone/lifetime 与 factory lifetime；注册脚本 HKCU-only、owner marker、
+collision guard、新键/旧值 rollback 和注册/卸载对称；枚举 partial-fetch/skip；
+host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
 ## 通过
 
@@ -60,8 +60,8 @@ Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
 ## 性能数据
 
-无真实性能数据。协议静态上限为 4 KiB payload 与 250 ms Shell 侧 overall deadline；
-soak 结果待 Windows 门禁。
+无真实性能数据。协议静态上限为 4 KiB payload，逻辑 I/O 尝试预算为 250 ms；
+deadline 后的取消排空在 worker 执行且尚无时长上限证据。soak 结果待 Windows 门禁。
 
 ## 尚未覆盖
 

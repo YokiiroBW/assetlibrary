@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-shell-spike",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
-  "commit": "d9cbeaaa91c993b9589944a53fe2fc4a30eff3f3",
+  "commit": "dd8e3536ed6f1bf11593052317ade2def085a74a",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
@@ -37,6 +37,7 @@
   },
   "risks": [
     "真实 Windows 11 x64 COM/Explorer 生命周期与故障隔离尚未验证。",
+    "取消后的 overlapped I/O 排空不阻塞 Explorer UI，但其独立时长上限尚未在 Windows 证明。",
     "8 小时 soak 尚未执行；当前无稳定性结论。",
     "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
   ],
