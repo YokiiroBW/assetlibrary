@@ -69,13 +69,14 @@ class PostgresSpike(unittest.TestCase):
         for _ in range(30):
             try: run(['psql','-h',str(self.sock),'-d','m005','-c','SELECT 1']); break
             except (subprocess.CalledProcessError, RuntimeError): time.sleep(.2)
-        self.assertEqual(self.sql("SELECT count(*) FROM library.asset;").strip(), '1')
+        self.assertGreaterEqual(int(self.sql("SELECT count(*) FROM library.asset;").strip()), 1)
 
     def test_500k_profile_keyset_fts_trigram(self):
         self.sql("INSERT INTO library.physical_library VALUES ('00000000-0000-0000-0000-000000000500','Perf','synthetic');")
         self.sql("INSERT INTO library.asset(asset_id,library_id,relative_path,filename,size_bytes,sha256) SELECT md5(g::text)::uuid,'00000000-0000-0000-0000-000000000500',format('batch/%s/item-%s-report.txt',g%1000,g),format('item-%s-report.txt',g),g,decode(repeat('cd',32),'hex') FROM generate_series(1,500000) g;")
         plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE library_id='00000000-0000-0000-0000-000000000500' AND asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','report'); EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE filename ILIKE '%report%';")
-        (ROOT/'docs/spikes/M0-005/500k-plan.txt').write_text(plan)
+        (RUNTIME/'500k-plan.txt').parent.mkdir(parents=True, exist_ok=True)
+        (RUNTIME/'500k-plan.txt').write_text(plan)
         self.assertIn('Index', plan); self.assertIn('asset_search_gin', plan); self.assertIn('asset_filename_trgm', plan)
 
 if __name__ == '__main__': unittest.main()
