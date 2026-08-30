@@ -6,7 +6,7 @@
 
 ## 完成内容
 
-交付 AssetLink v1 JSON 控制、握手、事件/重放、统一错误和 Range/分块传输候选；JSON/NDJSON/流式 octet-stream 映射、版本能力协商、同 server_id 主备切换、幂等、游标过期重建、强哈希和 64 位边界均已规范化。
+交付 AssetLink v1 JSON 控制、握手、事件/重放、统一错误和 Range/分块传输候选；JSON/NDJSON/流式 octet-stream 映射、版本能力协商、同 server_id 主备切换、幂等、游标过期重建、强哈希和 canonical uint64 字符串边界均已规范化。
 
 ## 关键决策
 
@@ -14,7 +14,7 @@
 
 ## 修改文件
 
-`contracts/assetlink/**`、`packages/sdk/assetlink/README.md`、`tests/spikes/assetlink/test_contracts.py`、`docs/spikes/M0-003/protocol-candidate.md`。
+`contracts/assetlink/**`、`packages/sdk/assetlink/README.md`、`tests/spikes/assetlink/**`、`docs/spikes/M0-003/protocol-candidate.md`。
 
 ## 模块边界、依赖方向与复用
 
@@ -46,7 +46,11 @@ JSON 解析、Draft/$id 唯一性和 git diff --check 通过；运行 handoff/ar
 
 ## 建议合并顺序
 
+先合并实现/测试 commit `6f550e1`，再合并本 handoff 元数据 commit。
+
 ## 下一步
+
+协调器评审并在 M0-009 冻结生成器、正式 HTTP/2/浏览器消费测试；服务端状态机不属于本任务。
 
 ## Codex 线程链接（可选）
 

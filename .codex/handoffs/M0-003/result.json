@@ -7,9 +7,9 @@
   "owner": "codex-agent-m0-003",
   "branch": "codex/m0-003-assetlink-contract",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-003",
-  "commit": "9eac2856776eafbed890bba1580577cddd59fd38",
-  "changed_files": ["contracts/assetlink/README.md", "contracts/assetlink/common.schema.json", "contracts/assetlink/handshake.schema.json", "contracts/assetlink/handshake-response.schema.json", "contracts/assetlink/control.schema.json", "contracts/assetlink/error.schema.json", "contracts/assetlink/event.schema.json", "contracts/assetlink/replay.schema.json", "contracts/assetlink/transfer.schema.json", "packages/sdk/assetlink/README.md", "tests/spikes/assetlink/test_contracts.py", "docs/spikes/M0-003/protocol-candidate.md"],
-  "changed_contracts": ["AssetLink v1 handshake/control/error/event/replay/transfer schemas"],
+  "commit": "6f550e14170f916579c079ef7a1a383395e08d02",
+  "changed_files": ["contracts/assetlink/README.md", "contracts/assetlink/common.schema.json", "contracts/assetlink/handshake.schema.json", "contracts/assetlink/handshake-response.schema.json", "contracts/assetlink/control.schema.json", "contracts/assetlink/error.schema.json", "contracts/assetlink/event.schema.json", "contracts/assetlink/replay.schema.json", "contracts/assetlink/transfer.schema.json", "contracts/assetlink/upload-create.schema.json", "contracts/assetlink/upload-chunk.schema.json", "contracts/assetlink/upload-status.schema.json", "contracts/assetlink/upload-complete.schema.json", "contracts/assetlink/upload-cancel.schema.json", "contracts/assetlink/download-range.schema.json", "contracts/assetlink/download-result.schema.json", "packages/sdk/assetlink/README.md", "tests/spikes/assetlink/test_contracts.py", "tests/spikes/assetlink/fixtures/valid-upload-complete.json", "tests/spikes/assetlink/fixtures/invalid-canonical-offset.json", "docs/spikes/M0-003/protocol-candidate.md"],
+  "changed_contracts": ["AssetLink v1 common/handshake/control/error/event/replay/transfer/upload/download schemas"],
   "tests": {
     "passed": 5,
     "failed": 0,
