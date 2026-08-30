@@ -6,7 +6,7 @@
 
 ## 实现提交
 
-源码/测试/任务包提交：`37f5fd821b5d79a3d7b88bb510d8ab717deff183`
+发行输入最后提交：`06dc8cf0a3e0f4df76b56a2e7b8537e21153885d`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
 
 ## 完成内容
 
@@ -30,4 +30,4 @@ Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Wind
 
 ## 建议
 
-协调器只合并 clean branch 的两个提交；在真实 Windows 和 Docker daemon 环境补做外部门禁后，M0-009 再评估是否冻结服务端候选。旧 `codex/m0-004-server-packaging` 分支含历史错误 publish 产物，不应合并。
+协调器只合并 clean branch 的连续源码/测试提交及最后的 handoff metadata；在真实 Windows 和 Docker daemon 环境补做外部门禁后，M0-009 再评估是否冻结服务端候选。旧 `codex/m0-004-server-packaging` 分支含历史错误 publish 产物，不应合并。

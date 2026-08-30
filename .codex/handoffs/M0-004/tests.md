@@ -13,12 +13,12 @@ Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap�
 
 ## Artifact matrix
 
-source commit：`37f5fd821b5d79a3d7b88bb510d8ab717deff183`；aggregate digest：`cedd099f2a57db13b16d7950dd1ebb56d9fff030e54cf4d89a07b88f531515ac`。
+发行输入最后提交：`06dc8cf0a3e0f4df76b56a2e7b8537e21153885d`；aggregate digest：`2d7527b1a165e9b496ce2a30a1a851a7cfb39ed79326bfa1ad8ea08f4e6a2c6f`。
 
 | target | exact bytes | SHA-256 |
 |---|---:|---|
 | linux-x64 apphost | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
-| win-x64 apphost | 162,816 | `655085241e43ff6c182796dc4b5ffc669ced39045bf72b826178a8400a2fdcff` |
+| win-x64 apphost | 162,816 | `5e2a17eb6011c2fee1d30760ac7a014898b18d5a6dd7c6f8d0b6b58c2b9361ff` |
 
 完整目录 manifest 为 runtime 内 `file-sizes.txt` + `files.sha256`；测试重新计算 aggregate digest，不信任 source-commit 文件本身。
 
