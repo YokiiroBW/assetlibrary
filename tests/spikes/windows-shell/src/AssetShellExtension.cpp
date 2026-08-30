@@ -12,6 +12,7 @@
 #include <memory>
 #include <new>
 #include <string>
+#include <system_error>
 #include <thread>
 
 namespace {
@@ -27,6 +28,7 @@ using assetlibrary::m0002::kVersion;
 // M0-002 owns this CLSID only under the current user's registry hive.
 constexpr GUID kClsid = {0x9d52b2f8, 0x9ef4, 0x4f4c, {0x9c, 0x1a, 0x52, 0x9f, 0x66, 0x5f, 0x0a, 0x02}};
 std::atomic_ulong g_object_count{0};
+std::atomic_ulong g_server_lock_count{0};
 HMODULE g_module = nullptr;
 constexpr UINT WM_ASSET_HOST_RESULT = WM_APP + 42;
 
@@ -120,10 +122,17 @@ void StartAssetHostPing(HWND window) {
   // The Shell UI thread only starts this worker and returns. The worker owns its
   // state until the bounded transaction completes, including cancellation drain.
   auto state = std::make_shared<HostPingState>(window);
-  std::thread([state]() {
-    const bool ready = AskAssetHost();
-    PostMessageW(state->window, WM_ASSET_HOST_RESULT, ready ? 1 : 0, 0);
-  }).detach();
+  ++g_object_count; // Keep the DLL loaded while detached worker code is executing.
+  try {
+    std::thread([state]() {
+      const bool ready = AskAssetHost();
+      PostMessageW(state->window, WM_ASSET_HOST_RESULT, ready ? 1 : 0, 0);
+      --g_object_count;
+    }).detach();
+  } catch (const std::system_error&) {
+    --g_object_count;
+    PostMessageW(window, WM_ASSET_HOST_RESULT, 0, 0);
+  }
 }
 
 class AssetShellView final : public IShellView {
@@ -388,7 +397,14 @@ class ClassFactory final : public IClassFactory {
     if (outer) return CLASS_E_NOAGGREGATION; auto* folder = new (std::nothrow) AssetShellFolder();
     if (!folder) return E_OUTOFMEMORY; HRESULT result = folder->QueryInterface(iid, object); folder->Release(); return result;
   }
-  HRESULT STDMETHODCALLTYPE LockServer(BOOL lock) override { if (lock) ++g_object_count; else --g_object_count; return S_OK; }
+  HRESULT STDMETHODCALLTYPE LockServer(BOOL lock) override {
+    if (lock) {
+      ++g_server_lock_count;
+    } else if (g_server_lock_count != 0) {
+      --g_server_lock_count;
+    }
+    return S_OK;
+  }
  private:
   std::atomic_ulong ref_count_;
 };
@@ -401,7 +417,9 @@ extern "C" HRESULT __declspec(dllexport) DllGetClassObject(REFCLSID clsid, REFII
   if (!factory) return E_OUTOFMEMORY; HRESULT result = factory->QueryInterface(iid, object); factory->Release(); return result;
 }
 
-extern "C" HRESULT __declspec(dllexport) DllCanUnloadNow() { return g_object_count == 0 ? S_OK : S_FALSE; }
+extern "C" HRESULT __declspec(dllexport) DllCanUnloadNow() {
+  return g_object_count == 0 && g_server_lock_count == 0 ? S_OK : S_FALSE;
+}
 
 BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
   if (reason == DLL_PROCESS_ATTACH) {

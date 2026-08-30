@@ -77,6 +77,10 @@ class PackageContractTests(unittest.TestCase):
         self.assertNotIn("const bool host_ready = AskAssetHost();", shell)
         self.assertIn("ClassFactory() : ref_count_(1) { ++g_object_count; }", shell)
         self.assertIn("~ClassFactory() { --g_object_count; }", shell)
+        self.assertIn("g_server_lock_count", shell)
+        self.assertIn("g_object_count == 0 && g_server_lock_count == 0", shell)
+        self.assertIn("++g_object_count; // Keep the DLL loaded", shell)
+        self.assertIn("--g_object_count;\n    }).detach();", shell)
 
     def test_registration_is_hkcu_only_and_symmetric(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
