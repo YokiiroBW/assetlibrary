@@ -4,7 +4,7 @@
 
 `partial`
 
-实现 commit：`0c1dd594d0047550af02defd1ebf84731a95090d`（包含此前实现与本轮修正）；metadata commit 在本文件提交后回填。
+实现 commit：`7caf70c4a6d9af3e95018e56714ae99330314705`；本摘要与其余 handoff 文档随 metadata commit 提交。
 
 ## 完成内容
 
@@ -44,7 +44,7 @@ trash/hash 判断，不信 COMPLETE。
 
 ## 测试结果
 
-38 passed, 0 failed, 0 skipped。命令：
+40 passed, 0 failed, 0 skipped。命令：
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v`。
 另执行三项 validators、`git diff --check`（结果写入 tests.md）。
 
@@ -58,7 +58,7 @@ trash/hash 判断，不信 COMPLETE。
 所有 destructive fixture 位于 exact `.runtime/sandbox-storage/M0-006/` 或 owned
 `m006-*` temp；symlink/absolute/..、保护/权限/空间/cancel、mutation、corrupt target、
 collision、restore/replace/delete、lock concurrency/reclaim 均有测试。16MiB 实际 move：
-16,777,216 bytes，1MiB buffer，elapsed 0.763687s，tracemalloc peak 3,181,391 bytes（测试输出直接记录）。
+16,777,216 bytes，1MiB buffer，elapsed 0.585626s，tracemalloc peak 3,181,357 bytes（测试输出直接记录）。
 
 本轮补充：recovery lock 由 operation-bound inspect callback 授权回收；inspect 从已验证
 relative path 派生所有 source/target/stage/trash 与 metadata，拒绝 journal 路径篡改、
@@ -81,6 +81,13 @@ delete reason；长拷贝/hash/trash 使用按 TTL 节流 heartbeat，第二 own
 guard、generation、token 做 owner-aware 条件更新/删除；replacement metadata-only recovery
 完整校验 schema、operation_id、root_role、reason、路径、size/hash 和预检 identity。
 
+最终并发回归补充：target 在 source physical-trash 完成但 journal 更新前被修改时进入
+conflict，source trash 保留且按 metadata/hash 验证；同 owner 第二实例在未过期时不能
+claim/heartbeat/release/recover，过期后必须经物理 inspect/reconcile 获得新 generation/token，
+旧实例不能更新或删除新锁。pinned rename 在 syscall 后复核 containment，越界时通过 pinned
+reverse noreplace 回滚；该原语没有原子 beneath-root 条件，Linux 非协作 namespace mutation
+仍需 M0-009 的 exclusive-lock/ACL/kernel policy 冻结。
+
 Linux same-device/cross-device/fsync/noreplace 均 executed；Windows 无 executor，Windows
 候选原语与 1/20/100GiB release-size 仍为外部门禁，未宣称通过。
 
@@ -90,6 +97,8 @@ Linux same-device/cross-device/fsync/noreplace 均 executed；Windows 无 execut
   fail closed。
 - Windows atomic no-overwrite、fsync 与 restore mapping 尚无执行证据。
 - 真实 1/20/100GiB 压测未运行；仅逻辑 100GiB boundary。
+- Linux 非协作 namespace mutation 的独占锁/ACL/kernel containment policy 尚待 M0-009 冻结；
+  当前 Spike 仅对可协作交错提供 pinned-fd post-check 与 fail-closed rollback 证据。
 
 ## 建议合并顺序
 

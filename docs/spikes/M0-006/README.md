@@ -17,8 +17,12 @@
   `after_source_trashed_journal`、`after_complete_journal`，每点均要求首次子进程
   returncode 77，随后两次新进程 recovery 最终 `complete`、source absent、trash/meta
   valid、stage/lock absent。
-- 16 MiB 实际 bounded move：16,777,216 bytes，1 MiB buffer，实测 elapsed 0.310058s，
-  `tracemalloc` peak 3,171,064 bytes；未物化 1/20/100 GiB，仅导入 M0-007 的
+- source-trash 的 metadata-only、`before_source_physical_trash` 与 post-rename gap 均有
+  恢复矩阵；pinned dirfd 在 syscall 前/后做 containment probe，越界时使用 pinned reverse
+  noreplace rollback，fail closed。`renameat2` 本身没有原子 beneath-root 条件；非协作
+  namespace mutation 的 exclusive-lock/ACL/kernel policy 仍由 M0-009 冻结。
+- 16 MiB 实际 bounded move：16,777,216 bytes，1 MiB buffer，实测 elapsed 0.585626s，
+  `tracemalloc` peak 3,181,357 bytes；未物化 1/20/100 GiB，仅导入 M0-007 的
   `BYTES_100_GIB == 100 * 1024**3` 做 64-bit 逻辑断言。
 
 ## 平台矩阵与 M0-009 门禁
