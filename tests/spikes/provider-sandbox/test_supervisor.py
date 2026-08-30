@@ -4,6 +4,7 @@ import os
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from manifest import degrade_to_l0, result_is_l0_safe
@@ -97,6 +98,13 @@ class ProviderSupervisorTests(unittest.TestCase):
         self.assertEqual(outcome.detail, "response_cleanup")
         self.assertFalse(alive(supervisor.process.pid))
 
+    def test_group_drain_failure_is_visible_to_response_acceptance(self) -> None:
+        supervisor = self.supervisor()
+        with mock.patch.object(supervisor, "_drain_owned_group", return_value=False):
+            outcome = supervisor.run("bad_request_id")
+        self.assertEqual(outcome.status, "protocol_error")
+        self.assertIn("group_drain_timeout", outcome.detail)
+
     def test_stderr_flood_is_drained_and_deadline_still_applies(self) -> None:
         outcome = self.supervisor(Limits(request_deadline_ms=150)).run("stderr_flood")
         self.assertEqual(outcome.status, "timeout")
@@ -116,6 +124,9 @@ class ProviderSupervisorTests(unittest.TestCase):
         outcome = supervisor.run("parent_exit_child")
         self.assertEqual(outcome.status, "crashed")
         child_pid = int((self.runtime / "child.pid").read_text(encoding="utf-8"))
+        child_pgid = int((self.runtime / "child.pgid").read_text(encoding="utf-8"))
+        self.assertEqual(child_pgid, supervisor._pgid, "child did not inherit captured process group")
+        self.assertTrue(supervisor._last_group_drained, "owned process group was not drained before return")
         self.assertTrue(wait_dead(child_pid), f"child survived after parent exit: {child_pid}")
 
     def test_request_limit_is_checked_before_dispatch(self) -> None:

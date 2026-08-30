@@ -119,6 +119,7 @@ class ProviderSupervisor:
         self._pgid: int | None = None
         self._stderr_count = [0]
         self._writer_thread: threading.Thread | None = None
+        self._last_group_drained = True
 
     @property
     def process(self) -> subprocess.Popen[bytes] | None:
@@ -182,23 +183,18 @@ class ProviderSupervisor:
     def _terminate_tree(self, reason: str) -> None:
         process = self._process
         if process is None:
+            self._last_group_drained = True
             return
         pgid = self._pgid if os.name != "nt" else None
         if pgid is not None:
-            try:
-                os.killpg(pgid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+            self._signal_owned_group(pgid, signal.SIGTERM)
         else:
             process.terminate()
         try:
             process.wait(timeout=0.2)
         except subprocess.TimeoutExpired:
             if pgid is not None:
-                try:
-                    os.killpg(pgid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+                self._signal_owned_group(pgid, signal.SIGKILL)
             else:
                 process.kill()
             try:
@@ -210,12 +206,56 @@ class ProviderSupervisor:
             # A parent can exit before its descendants. Reap the whole owned
             # group even when wait() observed a clean parent exit.
             if pgid is not None:
-                try:
-                    os.killpg(pgid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+                self._signal_owned_group(pgid, signal.SIGKILL)
+        if pgid is not None:
+            self._last_group_drained = self._drain_owned_group(pgid)
+        else:
+            self._last_group_drained = True
         self._process = process
         self._close_pipes(process)
+
+    @staticmethod
+    def _group_members(pgid: int) -> list[int]:
+        members: list[int] = []
+        for entry in Path("/proc").glob("[0-9]*"):
+            try:
+                stat = (entry / "stat").read_text(encoding="utf-8")
+                fields = stat[stat.rfind(")") + 2 :].split()
+                if len(fields) >= 3 and int(fields[2]) == pgid:
+                    members.append(int(entry.name))
+            except (FileNotFoundError, ProcessLookupError, ValueError):
+                continue
+        return members
+
+    @classmethod
+    def _signal_owned_group(cls, pgid: int, signum: int) -> None:
+        """Signal the owned group and its observed members to cover orphan races."""
+        try:
+            os.killpg(pgid, signum)
+        except ProcessLookupError:
+            pass
+        for pid in cls._group_members(pgid):
+            try:
+                os.kill(pid, signum)
+            except ProcessLookupError:
+                pass
+
+    @classmethod
+    def _drain_owned_group(cls, pgid: int, timeout: float = 0.2) -> bool:
+        """Confirm the owned PGID is empty, retrying KILL for a bounded interval."""
+        deadline = time.monotonic() + timeout
+        while True:
+            members = cls._group_members(pgid)
+            if not members:
+                return True
+            for pid in members:
+                try:
+                    os.kill(pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+            if time.monotonic() >= deadline:
+                return not cls._group_members(pgid)
+            time.sleep(0.01)
 
     @staticmethod
     def _close_pipes(process: subprocess.Popen[bytes]) -> None:
@@ -229,6 +269,9 @@ class ProviderSupervisor:
     def _join_writer(self) -> None:
         if self._writer_thread is not None:
             self._writer_thread.join(timeout=0.2)
+
+    def _cleanup_detail(self, detail: str) -> str:
+        return detail if self._last_group_drained else f"{detail};group_drain_timeout"
 
     def run(self, mode: str = "happy", request: dict[str, Any] | None = None, deadline_ms: int | None = None) -> Outcome:
         request = request or {"message_type": "request", "rpc_version": "1.0", "request_id": "req-1", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "monotonic", "max_response_bytes": self.manifest["resource_limits"]["max_response_bytes"]}
@@ -268,28 +311,28 @@ class ProviderSupervisor:
         if remaining <= 0:
             self._terminate_tree("deadline")
             self._join_writer()
-            return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+            return Outcome("timeout", self._cleanup_detail("absolute_deadline"), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         try:
             write_result = writes.get(timeout=remaining)
         except queue.Empty:
             self._terminate_tree("write_deadline")
             self._join_writer()
-            return Outcome("timeout", "absolute_deadline_write", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+            return Outcome("timeout", self._cleanup_detail("absolute_deadline_write"), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         if isinstance(write_result, BaseException):
             self._terminate_tree("write_failure")
             self._join_writer()
-            return Outcome("crashed", str(write_result), returncode=process.returncode)
+            return Outcome("crashed", self._cleanup_detail(str(write_result)), returncode=process.returncode)
         remaining = started + deadline_limit_ms / 1000 - time.monotonic()
         if remaining <= 0:
             self._terminate_tree("deadline")
             self._join_writer()
-            return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+            return Outcome("timeout", self._cleanup_detail("absolute_deadline"), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         try:
             value = responses.get(timeout=remaining)
         except queue.Empty:
             self._terminate_tree("deadline")
             self._close_pipes(process)
-            return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+            return Outcome("timeout", self._cleanup_detail("absolute_deadline"), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         finally:
             try:
                 process.stdin.close()
@@ -301,19 +344,19 @@ class ProviderSupervisor:
             self._terminate_tree("protocol")
             status = "protocol_error" if isinstance(value, ProtocolError) else "crashed"
             self._close_pipes(process)
-            return Outcome(status, str(value), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+            return Outcome(status, self._cleanup_detail(str(value)), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
         try:
             accept_response(request, value, self._limits(), set(self.manifest["api_versions"]))
         except ProtocolError as exc:
             self._terminate_tree("response_rejected")
             self._close_pipes(process)
-            return Outcome("protocol_error", str(exc), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+            return Outcome("protocol_error", self._cleanup_detail(str(exc)), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
         cleanup_detail = ""
         try:
             process.wait(timeout=0.2)
         except subprocess.TimeoutExpired:
-            cleanup_detail = "response_cleanup"
             self._terminate_tree("response_cleanup")
+            cleanup_detail = self._cleanup_detail("response_cleanup")
         self._close_pipes(process)
         if process.returncode != 0 and not cleanup_detail:
             return Outcome("crashed", f"returncode={process.returncode}", response=value, stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
