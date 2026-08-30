@@ -28,7 +28,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
 | malformed / oversize / stdout flood | bounded frame reader rejects before payload allocation | `protocol_error` |
 | stderr flood | bounded drain (8 KiB retained) | deadline still fired; no pipe deadlock |
 | no_read + 900 KiB unknown optional padding | pre-encoded frame + writer thread + same absolute deadline | write backpressure timeout bounded; writer released and process tree reaped |
-| descendant | worker spawns one bounded `sleep`, same process group；另测 parent 先退出 | timeout/EOF 后 pid probe 显示 child 不存活 |
+| descendant | worker spawns one bounded `sleep`, same process group；另测 parent 先退出 | timeout/EOF 后 pid probe 显示 child 不存活；parent-exit case 连续 20/20 次确认捕获 PGID 已排空 |
 | memory | Linux `RLIMIT_AS=64 MiB` | worker returns `memory_limit` |
 | CPU | Linux `RLIMIT_CPU=1 s` | return code `-24` (`SIGXCPU`) |
 | descriptors | Linux `RLIMIT_NOFILE=32` | worker returns `descriptor_limit`, 29 descriptors opened |
@@ -40,6 +40,12 @@ input token、deadline 和 request frame 大小；响应 frame 按 manifest 与 
 上限的较小值读取，并在接受前检查 correlation/version/type/status、只读标记、
 artifact 数量、token/size/hash。`/etc/...` 等 host path 在 spawn 前拒绝；结果只允许 metadata、suggestions
 和 supervisor-owned artifact token。结果不会生成或执行核心物理操作计划。
+
+进程清理先记录 worker 的 session/process group，向整个组升级发送 TERM/KILL，
+再在有界 200ms 窗口内重复观察 `/proc` 的 PGID 成员并直接补发 KILL，确认组为空后
+才返回。此前仅在 `wait()` 超时分支做一次 group kill，parent 先退出时可能在 child
+被重新托管前返回；该竞态由 parent-exit fixture（同时记录 child PID/PGID）和排空断言覆盖。
+若排空窗口耗尽，timeout detail 会包含 `group_drain_timeout`，不会把清理失败伪装成普通 timeout。
 
 ## 执行过的隔离探针
 

@@ -8,7 +8,7 @@
 
 - 在 `contracts/providers/**` 交付 manifest 1.0 与 RPC 1.0 candidate，覆盖 discover、handshake、request、result、error、cancel、health。
 - 固定 4-byte big-endian bounded framing、correlation、opaque input token、artifact token、deadline、资源上限、默认拒网和 `original_write=false`。
-- 在 test-only Python fixture 中执行 supervisor/worker 的超时、supervisor 强制 process-tree cancel、崩溃、malformed/oversize frame、stdout/stderr flood、子进程清理、CPU/内存/进程/descriptor limit、restart/backoff/circuit breaker、安全模式和 L0 降级。
+- 在 test-only Python fixture 中执行 supervisor/worker 的超时、supervisor 强制 process-tree cancel、崩溃、malformed/oversize frame、stdout/stderr flood、子进程清理、CPU/内存/进程/descriptor limit、restart/backoff/circuit breaker、安全模式和 L0 降级；父进程先退出场景连续 20 次确认 child 继承捕获 PGID 且返回前已排空。
 - 所有 fixture 只使用系统临时目录；suite 后没有存活的 worker 或 child，未产生 tracked 二进制或 Python cache。
 
 ## 关键决策
@@ -17,7 +17,7 @@
 
 ## 修改文件
 
-implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5`, `75da89129cca86bdbaf8f052ab7c7ed32cfa100c`, `852ebb1f7b4d1f692a1f87086648a6ebfbb909de`, `9cac6ac84fa88849357a92ebbfb24de5cee01b69`, and final correction `24b4f3af933ee9a01d6929cdb6057911ea9c1f3e` 包含：
+implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5`, `75da89129cca86bdbaf8f052ab7c7ed32cfa100c`, `852ebb1f7b4d1f692a1f87086648a6ebfbb909de`, `9cac6ac84fa88849357a92ebbfb24de5cee01b69`, `24b4f3af933ee9a01d6929cdb6057911ea9c1f3e`, and final correction `5251e8306555f24154337237c94525356dfca293` 包含：
 
 - `contracts/providers/README.md`
 - `contracts/providers/provider-manifest.schema.json`
@@ -39,6 +39,8 @@ implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5`, `75da89129cca
 
 ## 测试结果
 
+`PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tests/spikes/provider-sandbox python3 -m unittest test_supervisor.ProviderSupervisorTests.test_parent_exit_does_not_leave_descendant_alive -q` 连续 20/20 通过；每轮 child PGID 等于 supervisor 捕获 PGID，`_last_group_drained=True`，且 child probe 为 dead。
+
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/provider-sandbox -p 'test_*.py' -v`：24 passed，0 failed，0 skipped。
 
 ## 架构测试与质量门禁
@@ -54,6 +56,7 @@ Provider boundary 不接受任意 host path；输入为 supervisor token，输�
 - Linux hard network/filesystem confinement、cgroup delegation/accounting 和 seccomp 未执行通过，不能声称安全沙箱。
 - Windows Job Object + restricted token/AppContainer 没有实机证据。
 - 当前 `cancel()` 是 supervisor 强制 process-tree cancel，没有发送/确认 RPC `cancel` envelope；RPC cancel acknowledgement、restart budget、日志字段和目标平台 overhead 需要 M0-009 冻结/实测。
+- 进程组清理的根因是 parent 先退出时旧实现只做一次 kill、未在返回前确认 PGID 已空；当前实现以捕获 PGID 为边界，重复观察并直接 KILL 成员，窗口耗尽会显式报告 `group_drain_timeout`。
 
 ## 建议合并顺序
 
