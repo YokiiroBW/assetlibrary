@@ -17,7 +17,7 @@ Linux worktree，Python 3.12，标准库；输出目录为 `.runtime/sandbox-sto
 
 ## 通过
 
-4/4 unittest；500,000 条 profile；确定性摘要、100k hot directory、100GiB 逻辑值、
+6/6 unittest；500,000 条 profile；确定性摘要、100k hot directory、100GiB 逻辑值、
 故障九类、取消、路径安全、幂等替换均通过。
 
 ## 失败 / 跳过

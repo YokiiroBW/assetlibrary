@@ -34,7 +34,7 @@ JSONL 通过 partial + fsync + 原子替换输出。
 
 ## 测试结果
 
-5 个 unittest 全部通过；500k profile 通过并精确生成 500,000 条。
+6 个 unittest 全部通过；500k profile 通过并精确生成 500,000 条。
 
 ## 架构测试与质量门禁
 
