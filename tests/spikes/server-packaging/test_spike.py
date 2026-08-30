@@ -70,10 +70,14 @@ class SpikeTests(unittest.TestCase):
                         self.assertNotEqual(occupied.returncode, 0)
                     finally:
                         if occupied.poll() is None: occupied.kill(); occupied.wait()
+                        if occupied.stdout: occupied.stdout.close()
+                        if occupied.stderr: occupied.stderr.close()
                 finally:
                     p2.terminate(); p2.wait(timeout=5)
                     output = (p2.stdout.read() + p2.stderr.read()) if p2.stdout and p2.stderr else ""
                     self.assertNotIn(str(REPO), output)
+                    if p2.stdout: p2.stdout.close()
+                    if p2.stderr: p2.stderr.close()
             finally:
                 if p.poll() is None: p.kill(); p.wait()
                 if p.stdout: p.stdout.close()
@@ -97,5 +101,8 @@ class SpikeTests(unittest.TestCase):
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), expected)
         files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip(), subprocess.check_output(["sha256sum", str(files)], text=True).split()[0])
+        first = files.read_bytes()
+        subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
+        self.assertEqual(first, files.read_bytes(), "cold publish is not reproducible")
 
 if __name__ == "__main__": unittest.main()

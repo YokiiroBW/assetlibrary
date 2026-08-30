@@ -16,7 +16,10 @@ echo "SDK: $($sdk/dotnet --version)"
 git -C "$repo" status --porcelain --untracked-files=all | grep -q . && { echo 'working tree must be clean before provenance build' >&2; exit 2; } || true
 "$sdk/dotnet" restore "$root/src/ServerPackagingSpike.csproj" --packages "$NUGET_PACKAGES" -p:BaseIntermediateOutputPath="$obj/" -p:OutputPath="$bin/"
 artifact="$runtime/artifact"
-if [[ -e "$artifact" ]]; then find "$artifact" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; fi
+for dir in "$obj" "$bin" "$artifact"; do
+  case "$dir" in "$runtime/obj"|"$runtime/bin"|"$runtime/artifact") ;; (*) echo "refusing unexpected cleanup path: $dir" >&2; exit 2 ;; esac
+  if [[ -e "$dir" ]]; then find "$dir" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; fi
+done
 mkdir -p "$artifact"
 git -C "$repo" diff --quiet -- tests/spikes/server-packaging .codex/tasks/M0-004.md || { echo 'uncommitted issuance inputs' >&2; exit 2; }
 source_commit="$(git -C "$repo" log -1 --format=%H -- tests/spikes/server-packaging .codex/tasks/M0-004.md)"
