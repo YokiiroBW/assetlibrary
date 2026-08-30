@@ -413,25 +413,9 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.reco
         self.assertFalse((self.source / "delete-crash").exists())
         self.assertFalse((self.runtime / "operations" / "delete-crash" / "lock").exists())
 
-    def test_cross_copy_heartbeats_keep_short_lease_alive(self):
-        self.use_actual_cross_devices()
-        self.write("heartbeat", b"heartbeat" * (1024 * 1024))
-        calls = []
-        original = TaskLock.heartbeat
-        def heartbeat(lock, now=None):
-            calls.append(lock.owner)
-            return original(lock, now)
-        TaskLock.heartbeat = heartbeat
-        try:
-            self.engine.move("heartbeat", "heartbeat", op_id="heartbeat", lock_ttl=0.001,
-                             heartbeat_every_chunks=1)
-        finally:
-            TaskLock.heartbeat = original
-        self.assertGreaterEqual(len(calls), 2)
-
     def test_foreign_recovery_cannot_reclaim_active_slow_copy(self):
         self.use_actual_cross_devices()
-        self.write("slow-copy", b"s" * (4 * CHUNK))
+        self.write("slow-copy", b"s" * (16 * CHUNK))
         marker = self.runtime / "slow-copy.marker"
         script = """import sys,time
 from pathlib import Path
@@ -440,18 +424,29 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4])); seen=False
 def mutate(path):
  global seen
  if not seen:
-  seen=True; Path(sys.argv[5]).write_text('copy-active'); time.sleep(0.30)
-e.move('slow-copy','slow-copy',op_id='slow-copy',owner='active',lock_ttl=1.0,mutation=mutate)
-"""
+  seen=True; Path(sys.argv[5]).write_text('copy-active')
+ time.sleep(0.03)
+e.move('slow-copy','slow-copy',op_id='slow-copy',owner='active',lock_ttl=0.10,mutation=mutate)
+        """
         child = subprocess.Popen([sys.executable, "-c", script, str(HERE), str(self.source),
                                   str(self.target), str(self.runtime), str(marker)])
-        deadline = time.monotonic() + 5
-        while not marker.exists() and time.monotonic() < deadline:
-            time.sleep(0.01)
-        self.assertTrue(marker.exists())
-        with self.assertRaises(Failure):
-            self.engine.recover("slow-copy", owner="foreign")
-        self.assertEqual(child.wait(timeout=10), 0)
+        try:
+            deadline = time.monotonic() + 5
+            while not marker.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            self.assertTrue(marker.exists())
+            time.sleep(0.20)
+            with self.assertRaises(Failure):
+                self.engine.recover("slow-copy", owner="foreign")
+            self.assertEqual(child.wait(timeout=10), 0)
+        finally:
+            if child.poll() is None:
+                child.terminate()
+                try:
+                    child.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait(timeout=5)
         self.assertFalse((self.runtime / "operations" / "slow-copy" / "lock").exists())
 
     def test_replacement_physical_gap_recovers_old_trash_and_new_target(self):

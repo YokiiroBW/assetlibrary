@@ -287,7 +287,7 @@ class TaskLock:
 def _heartbeat_pulse(lock: TaskLock) -> Callable[[], None]:
     """Throttle durable lease updates while streaming or hashing."""
     last = [0.0]
-    interval = max(min(lock.ttl / 3.0, 0.05), 0.001)
+    interval = max(min(lock.ttl / 3.0, 5.0), 0.001)
 
     def pulse() -> None:
         now = time.monotonic()
@@ -414,8 +414,7 @@ class FileSafety:
 
     def move(self, source_rel: str, target_rel: str, *, op_id: str | None = None,
              owner: str = "worker-1", replace: bool = False, policy: Policy | None = None,
-             mutation: Callable[[Path], None] | None = None, lock_ttl: float = 30.0,
-             heartbeat_every_chunks: int = 32) -> dict:
+             mutation: Callable[[Path], None] | None = None, lock_ttl: float = 30.0) -> dict:
         policy = policy or Policy()
         op_id = op_id or f"op-{secrets.token_hex(8)}"
         _validate_op_id(op_id)
@@ -478,8 +477,6 @@ class FileSafety:
                         dst.write(block)
                         copied += len(block)
                         progress()
-                        if heartbeat_every_chunks > 0 and copied // CHUNK % heartbeat_every_chunks == 0:
-                            progress()
                         if mutation:
                             mutation(source)
                     dst.flush(); os.fsync(dst.fileno())
