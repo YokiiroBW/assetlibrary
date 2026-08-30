@@ -56,16 +56,25 @@ class SpikeTests(unittest.TestCase):
                     except Exception: time.sleep(.1)
                 else: self.fail("health endpoint did not start")
                 p.send_signal(signal.SIGTERM); self.assertEqual(p.wait(timeout=5), 0)
-                p2 = subprocess.Popen([str(RUN_BIN)], env=env)
+                    p2 = subprocess.Popen([str(RUN_BIN)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 try:
                     for _ in range(40):
                         try:
                             if json.loads(urllib.request.urlopen("http://127.0.0.1:5092/healthz", timeout=.2).read())["status"] == "ok": break
                         except Exception: time.sleep(.1)
                     else: self.fail("restart health endpoint did not start")
-                    occupied = subprocess.run([str(RUN_BIN)], env=env, capture_output=True, text=True, timeout=5)
-                    self.assertNotEqual(occupied.returncode, 0)
-                finally: p2.terminate(); p2.wait(timeout=5)
+                    occupied = subprocess.Popen([str(RUN_BIN)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    try:
+                        try: occupied.wait(timeout=2)
+                        except subprocess.TimeoutExpired: occupied.terminate(); occupied.wait(timeout=3)
+                        self.assertNotEqual(occupied.returncode, 0)
+                        self.assertIn("address already in use", occupied.stderr.read().lower())
+                    finally:
+                        if occupied.poll() is None: occupied.kill(); occupied.wait()
+                finally:
+                    p2.terminate(); p2.wait(timeout=5)
+                    output = (p2.stdout.read() + p2.stderr.read()) if p2.stdout and p2.stderr else ""
+                    self.assertNotIn(str(REPO), output)
             finally:
                 if p.poll() is None: p.kill(); p.wait()
                 if p.stdout: p.stdout.close()

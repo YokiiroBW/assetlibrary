@@ -31,6 +31,7 @@ builder.Host.UseWindowsService();
 builder.WebHost.UseUrls($"http://{bindHost}:{port}");
 builder.Logging.ClearProviders();
 builder.Logging.AddJsonConsole(options => options.IncludeScopes = true);
+builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 var app = builder.Build();
 app.MapGet("/healthz", () => Results.Json(new { status = "ok", contract = "m0-004/v1" }));
 app.MapGet("/readyz", () => Results.Json(new { status = "ready", contract = "m0-004/v1", data_path = "configured" }));

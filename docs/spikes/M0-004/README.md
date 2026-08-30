@@ -2,7 +2,7 @@
 
 ## 结论
 
-状态为 **partial**。同一份 `tests/spikes/server-packaging/src/ServerPackagingSpike.csproj` 和 `Program.cs` 已通过 .NET 10.0.100 SDK 生成 linux-x64 与 win-x64 自包含发布定义；Linux 启动、健康、优雅停止、重启、缺少配置、端口占用和只读数据路径测试通过。当前执行机没有 Windows/PowerShell，也没有 Docker daemon 权限，因此 Windows Service 周期和容器 build/run/health 只能保留可执行定义，不能宣称通过。
+状态为 **partial**。同一份 `tests/spikes/server-packaging/src/ServerPackagingSpike.csproj` 和 `Program.cs` 已通过 .NET 10.0.111 SDK 生成 linux-x64 与 win-x64 自包含发布定义；Linux 启动、健康、优雅停止、重启、缺少配置、端口占用和只读数据路径测试通过。当前执行机没有 Windows/PowerShell，也没有 Docker daemon 权限，因此 Windows Service 周期和容器 build/run/health 只能保留可执行定义，不能宣称通过。
 
 ## 工具链与依据
 
