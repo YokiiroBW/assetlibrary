@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-003",
+  "title": "AssetLink 控制/事件/传输协议契约验证",
+  "milestone": "M0",
+  "status": "ready_for_review",
+  "owner": "codex-agent-m0-003",
+  "branch": "codex/m0-003-assetlink-contract",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-003",
+  "commit": "9eac2856776eafbed890bba1580577cddd59fd38",
+  "changed_files": ["contracts/assetlink/README.md", "contracts/assetlink/common.schema.json", "contracts/assetlink/handshake.schema.json", "contracts/assetlink/handshake-response.schema.json", "contracts/assetlink/control.schema.json", "contracts/assetlink/error.schema.json", "contracts/assetlink/event.schema.json", "contracts/assetlink/replay.schema.json", "contracts/assetlink/transfer.schema.json", "packages/sdk/assetlink/README.md", "tests/spikes/assetlink/test_contracts.py", "docs/spikes/M0-003/protocol-candidate.md"],
+  "changed_contracts": ["AssetLink v1 handshake/control/error/event/replay/transfer schemas"],
+  "tests": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/M0-003/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "assetlink-contract",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["Existing handoff schema and Python standard library"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": ["Introduced versioned AssetLink v1 JSON schemas and compatibility rules"],
+    "architecture_tests": ["Schema parse/dialect/$id checks", "Allowed-path and diff checks"],
+    "technical_debt": ["Generated platform SDKs and real transport integration remain future work"]
+  }
+}
