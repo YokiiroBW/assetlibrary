@@ -101,6 +101,7 @@ class SpikeTests(unittest.TestCase):
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), expected)
         files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip(), subprocess.check_output(["sha256sum", str(files)], text=True).split()[0])
+        subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
         first = files.read_bytes()
         subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
         self.assertEqual(first, files.read_bytes(), "cold publish is not reproducible")
