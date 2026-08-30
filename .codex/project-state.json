@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
   "status": "m0_first_wave_in_progress",
-  "next_action": "independently review M0-007 while M0-002/M0-003/M0-004 continue",
+  "next_action": "independently review revised M0-003 and M0-002 while M0-004 continues",
   "architecture_contract_status": "draft",
   "implementation_status": "m0_spikes_in_progress",
   "notes": [
@@ -13,7 +13,7 @@
     "Deep links are navigation only; handoff files and commits are authoritative.",
     "Architecture boundaries, reuse rules and language budget are mandatory CI gates, not style suggestions.",
     "Baseline commit: ae33ad0. M0-001 merged to main at 1af7fed after independent verification.",
-    "First-wave worktrees: M0-002, M0-003, M0-004 and M0-007. All four have been dispatched; M0-007 submitted commit ff2b8e5 for coordinator review.",
+    "First-wave worktrees: M0-002, M0-003, M0-004 and M0-007. All four were dispatched; M0-007 passed independent acceptance and merged at d117291.",
     "Current host has no Windows or dotnet toolchain and cannot access the Docker daemon; environment-specific gates must remain explicit."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"

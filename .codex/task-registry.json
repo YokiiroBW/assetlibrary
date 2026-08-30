@@ -92,7 +92,7 @@
       "id": "M0-007",
       "title": "50万资产模拟器、性能基线与故障注入框架",
       "module": "test-performance-foundation",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "M0-001"
       ],
