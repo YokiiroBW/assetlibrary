@@ -11,6 +11,9 @@ out_dir.mkdir(parents=True, exist_ok=True)
 manifest = out_dir / "manifest-500k.jsonl"
 started = time.perf_counter()
 summary = write_manifest(GeneratorConfig(count=500_000, seed=20260831), manifest)
+assert summary["records"] == 500_000
+assert summary["hot_directory_records"] == 100_000
+assert summary["has_100gib_asset"] is True
 elapsed = time.perf_counter() - started
 summary.update({
     "wall_seconds": round(elapsed, 6),

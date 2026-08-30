@@ -5,7 +5,7 @@ import hashlib
 import json
 import os
 import tempfile
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterator
 
@@ -104,26 +104,43 @@ def write_manifest(config: GeneratorConfig, output: str | os.PathLike[str], canc
     target.parent.mkdir(parents=True, exist_ok=True)
     temp_path = target.with_name(f".{target.name}.partial")
     records = 0
+    hot_directory_records = 0
+    has_100gib_asset = False
     bytes_written = 0
     digest = hashlib.sha256()
     try:
         with temp_path.open("w", encoding="utf-8", newline="\n") as stream:
             for record in generate_assets(config, cancel):
-                line = json.dumps(asdict(record), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n"
+                line = json.dumps(
+                    record.__dict__, ensure_ascii=False, sort_keys=True,
+                    separators=(",", ":"),
+                ) + "\n"
                 stream.write(line)
                 encoded = line.encode("utf-8")
                 digest.update(encoded)
                 bytes_written += len(encoded)
                 records += 1
+                hot_directory_records += record.directory_class == "hot-100k"
+                has_100gib_asset = has_100gib_asset or record.logical_size_bytes >= BYTES_100_GIB
             stream.flush()
             os.fsync(stream.fileno())
-        if cancel is not None and cancel():
+        cancelled = records < config.count
+        if cancelled:
             temp_path.unlink(missing_ok=True)
-            return {"schema_version": SCHEMA_VERSION, "records": records, "cancelled": True}
+            return {
+                "schema_version": SCHEMA_VERSION, "records": records,
+                "hot_directory_records": hot_directory_records,
+                "has_100gib_asset": has_100gib_asset, "cancelled": True,
+            }
         os.replace(temp_path, target)
     finally:
         temp_path.unlink(missing_ok=True)
-    return {"schema_version": SCHEMA_VERSION, "records": records, "output_bytes": bytes_written, "manifest_sha256": digest.hexdigest(), "cancelled": False}
+    return {
+        "schema_version": SCHEMA_VERSION, "records": records,
+        "hot_directory_records": hot_directory_records,
+        "has_100gib_asset": has_100gib_asset, "output_bytes": bytes_written,
+        "manifest_sha256": digest.hexdigest(), "cancelled": False,
+    }
 
 
 def summarize_records(records: Iterator[AssetRecord]) -> dict[str, object]:
