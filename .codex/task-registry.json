@@ -17,13 +17,14 @@
       "id": "M0-002",
       "title": "Windows Explorer 自定义命名空间与右侧视图技术验证",
       "module": "windows-shell-spike",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M0-001"
       ],
-      "owner": "unassigned",
+      "owner": "codex-agent-m0-002",
       "branch": "codex/m0-002-windows-shell-spike",
-      "worktree": "",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
+      "task_file": ".codex/tasks/M0-002.md",
       "handoff": ".codex/handoffs/M0-002/summary.md",
       "thread_deep_link": ""
     },
@@ -31,13 +32,14 @@
       "id": "M0-003",
       "title": "AssetLink 控制/事件/传输协议契约验证",
       "module": "assetlink-contract",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M0-001"
       ],
-      "owner": "unassigned",
+      "owner": "codex-agent-m0-003",
       "branch": "codex/m0-003-assetlink-contract",
-      "worktree": "",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-003",
+      "task_file": ".codex/tasks/M0-003.md",
       "handoff": ".codex/handoffs/M0-003/summary.md",
       "thread_deep_link": ""
     },
@@ -45,13 +47,14 @@
       "id": "M0-004",
       "title": "跨平台服务端 Windows/Linux/Docker 发行验证",
       "module": "server-packaging-spike",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "M0-001"
       ],
-      "owner": "unassigned",
+      "owner": "codex-agent-m0-004",
       "branch": "codex/m0-004-server-packaging",
-      "worktree": "",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-004",
+      "task_file": ".codex/tasks/M0-004.md",
       "handoff": ".codex/handoffs/M0-004/summary.md",
       "thread_deep_link": ""
     },
@@ -89,13 +92,14 @@
       "id": "M0-007",
       "title": "50万资产模拟器、性能基线与故障注入框架",
       "module": "test-performance-foundation",
-      "status": "planned",
+      "status": "in_progress",
       "depends_on": [
         "M0-001"
       ],
-      "owner": "unassigned",
+      "owner": "codex-agent-m0-007",
       "branch": "codex/m0-007-performance-foundation",
-      "worktree": "",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-007",
+      "task_file": ".codex/tasks/M0-007.md",
       "handoff": ".codex/handoffs/M0-007/summary.md",
       "thread_deep_link": ""
     },

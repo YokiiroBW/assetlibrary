@@ -3,16 +3,18 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
-  "status": "m0_first_wave_starting",
-  "next_action": "activate and dispatch M0-002/M0-003/M0-004/M0-007 in isolated worktrees",
+  "status": "m0_first_wave_in_progress",
+  "next_action": "review M0-002/M0-003/M0-007 and dispatch queued M0-004 when an execution slot opens",
   "architecture_contract_status": "draft",
-  "implementation_status": "m0_foundation_complete",
+  "implementation_status": "m0_spikes_in_progress",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
     "Deep links are navigation only; handoff files and commits are authoritative.",
     "Architecture boundaries, reuse rules and language budget are mandatory CI gates, not style suggestions.",
-    "Baseline commit: ae33ad0. M0-001 merged to main at 1af7fed after independent verification."
+    "Baseline commit: ae33ad0. M0-001 merged to main at 1af7fed after independent verification.",
+    "First-wave worktrees: M0-002, M0-003, M0-004 and M0-007. M0-002/M0-003/M0-007 are active; M0-004 is queued for the next execution slot.",
+    "Current host has no Windows or dotnet toolchain and cannot access the Docker daemon; environment-specific gates must remain explicit."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"
 }
