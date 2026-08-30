@@ -18,3 +18,7 @@ jobs:
         run: python scripts/validate_handoff.py
       - name: Validate architecture baseline
         run: python scripts/validate_architecture_baseline.py
+      - name: Repository verification entry
+        run: python scripts/verify_repository.py
+      - name: Repository workflow tests
+        run: python -m unittest discover -s tests/repository -p 'test_*.py'
