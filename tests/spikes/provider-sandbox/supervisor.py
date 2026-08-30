@@ -321,7 +321,7 @@ class ProviderSupervisor:
         if isinstance(write_result, BaseException):
             self._terminate_tree("write_failure")
             self._join_writer()
-            return Outcome("crashed", str(write_result), returncode=process.returncode)
+            return Outcome("crashed", self._cleanup_detail(str(write_result)), returncode=process.returncode)
         remaining = started + deadline_limit_ms / 1000 - time.monotonic()
         if remaining <= 0:
             self._terminate_tree("deadline")
@@ -344,19 +344,19 @@ class ProviderSupervisor:
             self._terminate_tree("protocol")
             status = "protocol_error" if isinstance(value, ProtocolError) else "crashed"
             self._close_pipes(process)
-            return Outcome(status, str(value), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+            return Outcome(status, self._cleanup_detail(str(value)), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
         try:
             accept_response(request, value, self._limits(), set(self.manifest["api_versions"]))
         except ProtocolError as exc:
             self._terminate_tree("response_rejected")
             self._close_pipes(process)
-            return Outcome("protocol_error", str(exc), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+            return Outcome("protocol_error", self._cleanup_detail(str(exc)), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
         cleanup_detail = ""
         try:
             process.wait(timeout=0.2)
         except subprocess.TimeoutExpired:
-            cleanup_detail = "response_cleanup"
             self._terminate_tree("response_cleanup")
+            cleanup_detail = self._cleanup_detail("response_cleanup")
         self._close_pipes(process)
         if process.returncode != 0 and not cleanup_detail:
             return Outcome("crashed", f"returncode={process.returncode}", response=value, stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)

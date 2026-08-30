@@ -4,6 +4,7 @@ import os
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from manifest import degrade_to_l0, result_is_l0_safe
@@ -96,6 +97,13 @@ class ProviderSupervisorTests(unittest.TestCase):
         self.assertEqual(outcome.status, "ok")
         self.assertEqual(outcome.detail, "response_cleanup")
         self.assertFalse(alive(supervisor.process.pid))
+
+    def test_group_drain_failure_is_visible_to_response_acceptance(self) -> None:
+        supervisor = self.supervisor()
+        with mock.patch.object(supervisor, "_drain_owned_group", return_value=False):
+            outcome = supervisor.run("bad_request_id")
+        self.assertEqual(outcome.status, "protocol_error")
+        self.assertIn("group_drain_timeout", outcome.detail)
 
     def test_stderr_flood_is_drained_and_deadline_still_applies(self) -> None:
         outcome = self.supervisor(Limits(request_deadline_ms=150)).run("stderr_flood")
