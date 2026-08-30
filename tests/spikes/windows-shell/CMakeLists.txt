@@ -15,11 +15,17 @@ add_library(AssetShellExtension SHARED
 target_compile_definitions(AssetShellExtension PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX WINRT_LEAN_AND_MEAN)
 target_compile_options(AssetShellExtension PRIVATE /W4 /permissive-)
 target_link_libraries(AssetShellExtension PRIVATE ole32 shell32 user32 advapi32)
-set_target_properties(AssetShellExtension PROPERTIES OUTPUT_NAME "AssetShellExtension")
+set_target_properties(AssetShellExtension PROPERTIES
+  OUTPUT_NAME "AssetShellExtension"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>"
+)
 
 add_executable(AssetHostStub src/AssetHostStub.cpp)
 target_compile_definitions(AssetHostStub PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
 target_compile_options(AssetHostStub PRIVATE /W4 /permissive-)
 target_link_libraries(AssetHostStub PRIVATE kernel32)
+set_target_properties(AssetHostStub PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>"
+)
 
 install(TARGETS AssetShellExtension AssetHostStub RUNTIME DESTINATION bin LIBRARY DESTINATION bin)
