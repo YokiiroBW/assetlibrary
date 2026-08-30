@@ -46,12 +46,18 @@ CREATE INDEX IF NOT EXISTS outbox_unpublished ON events.outbox(occurred_at) WHER
 CREATE OR REPLACE FUNCTION events.claim_one(publisher text, lease_seconds integer DEFAULT 30)
 RETURNS TABLE(event_id uuid, payload jsonb) LANGUAGE sql AS $$
 WITH c AS (SELECT event_id FROM events.outbox WHERE published_at IS NULL AND (lease_until IS NULL OR lease_until < clock_timestamp()) ORDER BY occurred_at FOR UPDATE SKIP LOCKED LIMIT 1)
-UPDATE events.outbox o SET publish_attempts=publish_attempts+1,last_error='claimed by '||publisher,lease_owner=publisher,lease_until=clock_timestamp()+make_interval(secs=>lease_seconds)
+UPDATE events.outbox o SET publish_attempts=publish_attempts+1,last_error=NULL,lease_owner=publisher,lease_until=clock_timestamp()+make_interval(secs=>lease_seconds)
 FROM c WHERE o.event_id=c.event_id RETURNING o.event_id,o.payload
 $$;
 CREATE OR REPLACE FUNCTION events.mark_published(p_event uuid, publisher text)
 RETURNS boolean LANGUAGE plpgsql AS $$ BEGIN
   UPDATE events.outbox SET published_at=clock_timestamp(),last_error=NULL,lease_owner=NULL,lease_until=NULL
+    WHERE event_id=p_event AND published_at IS NULL AND lease_owner=publisher;
+  RETURN FOUND;
+END $$;
+CREATE OR REPLACE FUNCTION events.release(p_event uuid, publisher text, failure text)
+RETURNS boolean LANGUAGE plpgsql AS $$ BEGIN
+  UPDATE events.outbox SET last_error=failure, lease_owner=NULL, lease_until=NULL
     WHERE event_id=p_event AND published_at IS NULL AND lease_owner=publisher;
   RETURN FOUND;
 END $$;

@@ -25,6 +25,8 @@ class PostgresSpike(unittest.TestCase):
         for _ in range(30):
             try: run(['psql','-h',str(cls.sock),'-d','postgres','-c','SELECT 1']) ; break
             except (subprocess.CalledProcessError, RuntimeError): time.sleep(.2)
+        else:
+            cls.server.terminate(); cls.server.wait(timeout=10); cls.log.close(); shutil.rmtree(cls.work, ignore_errors=True); raise RuntimeError('postgres startup timeout')
         cls.db = ['psql','-h',str(cls.sock),'-d','postgres','-v','ON_ERROR_STOP=1','-X','-q','-At']
         run(cls.db + ['-c', 'CREATE DATABASE m005;'])
         cls.db[cls.db.index('postgres')] = 'm005'
@@ -50,6 +52,10 @@ class PostgresSpike(unittest.TestCase):
         results = [p.communicate(timeout=20) for p in runners]
         self.assertTrue(all(p.returncode == 0 for p in runners), results)
         self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger;").strip(), '2')
+        mismatch = self.work/'mismatch'; mismatch.mkdir(); (mismatch/'003.sql').write_text('SELECT 1;\n'); self.sql("INSERT INTO migration.ledger(version,checksum) VALUES (3,'wrong');")
+        drifted = subprocess.run(['python3',str(ROOT/'tests/spikes/postgres/migration_runner.py'),'--socket',str(self.sock),'--database','m005','--migration-dir',str(mismatch)], text=True, capture_output=True)
+        self.assertNotEqual(drifted.returncode, 0); self.assertIn('checksum drift', drifted.stderr)
+        self.sql("DELETE FROM migration.ledger WHERE version=3;")
         drift = self.work/'drift'; drift.mkdir(); (drift/'003_drift.sql').write_text('-- failing migration\nCREATE TABLE migration.partial_probe(x integer); SELECT 1/0;\n')
         bad = subprocess.run(['python3',str(ROOT/'tests/spikes/postgres/migration_runner.py'),'--socket',str(self.sock),'--database','m005','--migration-dir',str(drift)], text=True, capture_output=True)
         self.assertNotEqual(bad.returncode, 0); self.assertEqual(self.sql("SELECT to_regclass('migration.partial_probe') IS NULL;").strip(), 't'); self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger WHERE version=3;").strip(), '0')
@@ -71,6 +77,10 @@ class PostgresSpike(unittest.TestCase):
         self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{cancel_id}','cancel-key','x','{{}}');")
         self.assertEqual(self.sql(f"SELECT tasks.cancel('{cancel_id}');").strip(), 't')
         self.assertEqual(self.sql(f"SELECT state FROM tasks.durable_task WHERE task_id='{cancel_id}';").strip(), 'cancelled')
+        leased_cancel = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{leased_cancel}','leased-cancel','x','{{}}'); SELECT tasks.claim_one('lease-owner',30);")
+        self.assertEqual(self.sql(f"SELECT tasks.cancel('{leased_cancel}');").strip(), 't')
+        conflict = subprocess.run(self.db + ['-c', f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{uuid.uuid4()}','idem-1','index','{{\"different\":true}}');"], text=True, capture_output=True)
+        self.assertNotEqual(conflict.returncode, 0)
         fail_id = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload,max_attempts) VALUES ('{fail_id}','fail-key','x','{{}}',1);")
         for _ in range(5):
             claimed_id = self.sql("SELECT task_id FROM tasks.claim_one('crasher',1);").strip()
@@ -89,6 +99,18 @@ class PostgresSpike(unittest.TestCase):
         time.sleep(1.2)
         self.assertIn(str(ev), self.sql("SELECT event_id FROM events.claim_one('pub-b',30);"))
         self.assertEqual(self.sql(f"SELECT events.mark_published('{ev}','pub-b');").strip(), 't')
+        retry_ev = uuid.uuid4(); self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{retry_ev}','{asset}','retry','{{}}');")
+        self.assertIn(str(retry_ev), self.sql("SELECT event_id FROM events.claim_one('pub-f',30);") + self.sql("SELECT event_id FROM events.claim_one('pub-f',30);"))
+        self.assertEqual(self.sql(f"SELECT events.release('{retry_ev}','pub-f','transport failed');").strip(), 't')
+        self.assertEqual(self.sql(f"SELECT last_error FROM events.outbox WHERE event_id='{retry_ev}';").strip(), 'transport failed')
+        self.assertIn(str(retry_ev), self.sql("SELECT event_id FROM events.claim_one('pub-r',30);"))
+        self.sql(f"SELECT events.mark_published('{retry_ev}','pub-r');")
+        same_ev = uuid.uuid4(); self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','same','{{}}');")
+        pubs = [subprocess.Popen(self.db + ['-c', "SELECT event_id FROM events.claim_one('concurrent',30);"], stdout=subprocess.PIPE, text=True) for _ in range(2)]
+        pub_results = [p.communicate(timeout=10)[0] for p in pubs]
+        self.assertEqual(sum(str(same_ev) in out for out in pub_results), 1)
+        atomic = uuid.uuid4(); failed = subprocess.run(self.db + ['-c', f"BEGIN; UPDATE library.asset SET filename='rolled-back' WHERE asset_id='{asset}'; INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{atomic}','{asset}','rollback','{{}}'); SELECT 1/0; COMMIT;"], text=True, capture_output=True)
+        self.assertNotEqual(failed.returncode, 0); self.assertEqual(self.sql(f"SELECT count(*) FROM library.asset WHERE asset_id='{asset}' AND filename='rolled-back';").strip(), '0'); self.assertEqual(self.sql(f"SELECT count(*) FROM events.outbox WHERE event_id='{atomic}';").strip(), '0')
         self.sql(f"INSERT INTO library.permission_scope VALUES ('{lib}','alice','read');")
         self.assertEqual(self.sql(f"SELECT count(*) FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='alice' AND p.access_level <> 'none';").strip(), '1')
         self.assertEqual(self.sql(f"SELECT count(*) FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='bob' AND p.access_level <> 'none';").strip(), '0')
@@ -100,20 +122,27 @@ class PostgresSpike(unittest.TestCase):
         for _ in range(30):
             try: run(['psql','-h',str(self.sock),'-d','m005','-c','SELECT 1']); break
             except (subprocess.CalledProcessError, RuntimeError): time.sleep(.2)
+        else:
+            self.fail('postgres restart timeout')
         self.assertGreaterEqual(int(self.sql("SELECT count(*) FROM library.asset;").strip()), 1)
 
     def test_500k_profile_keyset_fts_trigram(self):
         self.sql("INSERT INTO library.physical_library VALUES ('00000000-0000-0000-0000-000000000500','Perf','synthetic');")
+        self.sql("INSERT INTO library.permission_scope VALUES ('00000000-0000-0000-0000-000000000500','perf-reader','read');")
         self.sql("INSERT INTO library.asset(asset_id,library_id,relative_path,filename,size_bytes,sha256) SELECT md5(g::text)::uuid,'00000000-0000-0000-0000-000000000500',format('batch/%s/item-%s%s.txt',g%1000,g,CASE WHEN g%10=0 THEN ' reportx' ELSE '' END),format('item %s%s.txt',g,CASE WHEN g%10=0 THEN ' reportx' ELSE '' END),g,decode(repeat('cd',32),'hex') FROM generate_series(1,500000) g;")
         fts_count = self.sql("SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt');").strip()
         self.assertEqual(fts_count, '50000', self.sql("SELECT filename||'|'||searchable::text FROM library.asset WHERE filename LIKE '%reportx%' LIMIT 1;"))
         self.assertEqual(self.sql("SELECT count(*) FROM library.asset WHERE filename ILIKE '%499990 reportx%';").strip(), '1')
-        timings = []
+        self.assertEqual(self.sql("SELECT count(*) FROM (SELECT a.asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50) q;").strip(), '50')
+        self.assertEqual(self.sql("SELECT count(*) FROM library.asset a LEFT JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='denied' AND a.asset_id > '00000000-0000-0000-0000-000000000000';").strip(), '0')
+        timings = {"keyset": [], "fts": [], "trigram": []}
         for _ in range(5):
-            start = time.perf_counter(); self.sql("SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt');"); timings.append((time.perf_counter()-start)*1000)
+            for name, query in [("keyset", "SELECT asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50"), ("fts", "SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt')"), ("trigram", "SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'")]:
+                start = time.perf_counter(); self.sql(query); timings[name].append((time.perf_counter()-start)*1000)
         plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE library_id='00000000-0000-0000-0000-000000000500' AND asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
         (RUNTIME/'500k-plan.txt').parent.mkdir(parents=True, exist_ok=True)
-        (RUNTIME/'500k-plan.txt').write_text(plan + '\nWARM_FTS_MS=' + ','.join(f'{x:.3f}' for x in timings) + '\n')
+        dist = '\n'.join(f"WARM_{name.upper()}_MS=min:{min(vals):.3f},median:{sorted(vals)[len(vals)//2]:.3f},p95:{sorted(vals)[-1]:.3f},max:{max(vals):.3f}" for name, vals in timings.items())
+        (RUNTIME/'500k-plan.txt').write_text(plan + '\n' + dist + '\n')
         self.assertIn('Index', plan); self.assertIn('asset_search_gin', plan); self.assertIn('asset_filename_trgm', plan)
 
 if __name__ == '__main__': unittest.main()
