@@ -124,6 +124,7 @@ class NewTaskTests(unittest.TestCase):
 
     def test_repository_verification_has_no_python_cache_residue(self):
         before = {path for path in ROOT.rglob('__pycache__')} | {path for path in ROOT.rglob('*.pyc')}
+        self.assertEqual(before, set(), 'repository must start cache-free')
         result = subprocess.run(
             ['python3', str(ROOT / 'scripts/verify_repository.py')],
             cwd=ROOT, text=True, capture_output=True,

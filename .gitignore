@@ -4,6 +4,8 @@
 !.env.example
 *.local
 *.secret
+__pycache__/
+*.py[cod]
 
 # Build outputs
 bin/
