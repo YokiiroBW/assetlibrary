@@ -10,7 +10,6 @@ import tempfile
 import time
 import tracemalloc
 import unittest
-from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -66,6 +65,23 @@ class Fixture(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
         return path
+
+    def wait_for_expiry(self, op_id, timeout=2.0):
+        lock_path = self.runtime / "operations" / op_id / "lock"
+        deadline = time.monotonic() + timeout
+        expires = time.time()
+        while lock_path.exists() and time.monotonic() < deadline:
+            try:
+                expires = json.loads(lock_path.read_text())["expires"]
+            except (OSError, ValueError, KeyError):
+                time.sleep(0.01)
+                continue
+            remaining = expires - time.time()
+            if remaining <= 0:
+                return
+            time.sleep(min(0.02, remaining))
+        self.assertFalse(lock_path.exists() and time.time() < expires,
+                         f"lock did not expire: {lock_path}")
 
 
 class StateAndPaths(Fixture):
@@ -140,23 +156,19 @@ class StateAndPaths(Fixture):
         source.write_bytes(b"payload")
         nested = base / "target" / "nested"
         moved_nested = external / "nested-relocated"
-        original_open = os.open
         swapped = False
 
-        def swap_before_deep(path, flags, mode=0o777, *, dir_fd=None):
+        def swap_before_syscall(source_fd, target_fd):
             nonlocal swapped
-            if path == "deep" and dir_fd is not None and not swapped:
-                nested.rename(moved_nested)
-                nested.symlink_to(external, target_is_directory=True)
-                swapped = True
-            return original_open(path, flags, mode, dir_fd=dir_fd)
+            nested.rename(moved_nested)
+            nested.symlink_to(external, target_is_directory=True)
+            swapped = True
 
         try:
-            with mock.patch.object(file_safety_module.os, "open", side_effect=swap_before_deep):
-                with self.assertRaises(Failure):
-                    file_safety_module._rename_noreplace(
-                        source, target_parent / "dest", source_root=base / "source",
-                        target_root=base / "target")
+            with self.assertRaises(Failure):
+                file_safety_module._rename_noreplace(
+                    source, target_parent / "dest", source_root=base / "source",
+                    target_root=base / "target", before_syscall=swap_before_syscall)
             self.assertTrue(swapped)
             self.assertEqual((external / "dest").read_bytes(), b"must-not-touch")
             self.assertFalse((moved_nested / "deep" / "dest").exists())
@@ -391,6 +403,25 @@ class CrossDeviceAndRecovery(Fixture):
         self.assertTrue((self.source / ".m006-trash" / "post-trash" / "source-post-trash").exists())
         self.assertNotEqual((self.target / "post-trash").read_bytes(), b"incoming")
 
+    def test_target_change_after_source_physical_trash_never_completes(self):
+        self.use_actual_cross_devices()
+        self.write("post-physical-trash", b"incoming")
+
+        def change(name, extra):
+            if name == "after_source_physical_trash":
+                (self.target / "post-physical-trash").write_bytes(b"changed-before-journal")
+
+        self.engine.hooks = change
+        with self.assertRaises(Failure):
+            self.engine.move("post-physical-trash", "post-physical-trash",
+                             op_id="post-physical-trash")
+        journal = json.loads((self.runtime / "operations" / "post-physical-trash" / "journal.json").read_text())
+        self.assertEqual(journal["state"], State.CONFLICT.value)
+        source_trash = self.source / ".m006-trash" / "post-physical-trash" / "source-post-physical-trash"
+        self.assertEqual(hash_file(source_trash),
+                         (hashlib.sha256(b"incoming").hexdigest(), len(b"incoming")))
+        self.assertEqual((self.target / "post-physical-trash").read_bytes(), b"changed-before-journal")
+
     def test_recovery_target_change_after_source_trash_never_completes(self):
         self.use_actual_cross_devices()
         self.write("recover-post-trash", b"incoming")
@@ -400,12 +431,13 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name, extra):
  if name == 'after_target_physical_commit': os._exit(77)
 e.hooks=h
-try: e.move('recover-post-trash','recover-post-trash',op_id='recover-post-trash')
+try: e.move('recover-post-trash','recover-post-trash',op_id='recover-post-trash',lock_ttl=0.05)
 except Exception: os._exit(78)
 """
         child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
                                 str(self.target), str(self.runtime)], check=False)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("recover-post-trash")
 
         def change(name, extra):
             if name == "after_source_trashed_journal":
@@ -454,12 +486,13 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name, extra):
  if name == 'after_target_physical_commit': os._exit(77)
 e.hooks=h
-try: e.move('recover-late','recover-late',op_id='recover-late')
+try: e.move('recover-late','recover-late',op_id='recover-late',lock_ttl=0.05)
 except Exception: os._exit(78)
 """
         child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
                                 str(self.target), str(self.runtime)], check=False)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("recover-late")
         (self.source / "recover-late").write_bytes(b"changed-after-crash")
         result = self.engine.recover("recover-late", owner="worker-1")
         self.assertIn(result["state"], (State.CONFLICT.value, State.MANUAL.value))
@@ -508,11 +541,12 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name,extra):
  if name=='after_source_physical_trash':os._exit(77)
 e.hooks=h
-try:e.delete('delete-crash',op_id='delete-crash')
+try:e.delete('delete-crash',op_id='delete-crash',lock_ttl=0.05)
 except Exception:os._exit(78)
 """
         child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.target),str(self.runtime)],capture_output=True)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("delete-crash")
         recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.recover('delete-crash',owner='worker-1')['state'])
 """
@@ -572,11 +606,12 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name,extra):
  if name=='after_replacement_physical_trash': os._exit(77)
 e.hooks=h
-try:e.move('incoming','item',op_id='replacement-gap',replace=True)
+try:e.move('incoming','item',op_id='replacement-gap',replace=True,lock_ttl=0.05)
 except Exception:os._exit(78)
 """
         child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.target),str(self.runtime)], capture_output=True)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry(op)
         recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.recover('replacement-gap',owner='worker-1')['state'])
 """
@@ -602,11 +637,12 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]))
 def h(name,extra):
  if name=='before_replacement_physical_trash':os._exit(77)
 e.hooks=h
-try:e.move('incoming-same','item-same',op_id='same-replacement-gap',replace=True)
+try:e.move('incoming-same','item-same',op_id='same-replacement-gap',replace=True,lock_ttl=0.05)
 except Exception:os._exit(78)
 """
         child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.runtime)], capture_output=True)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("same-replacement-gap")
         recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]));print(e.recover('same-replacement-gap',owner='worker-1')['state'])
 """
@@ -615,6 +651,11 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]));print(e.reco
             self.assertEqual(result.stdout.strip(), "complete")
         old = self.source / ".m006-trash" / "same-replacement-gap" / "replacement-item-same"
         self.assertEqual(hash_file(old), (hashlib.sha256(b"old-same").hexdigest(), len(b"old-same")))
+        old_metadata = old.with_suffix(old.suffix + ".json")
+        self.assertTrue(old_metadata.exists())
+        self.assertEqual(hash_file(old),
+                         (json.loads(old_metadata.read_text())["sha256"],
+                          json.loads(old_metadata.read_text())["size"]))
         self.assertEqual((self.source / "item-same").read_bytes(), b"new-same")
         self.assertFalse((self.source / "incoming-same").exists())
         self.assertFalse((self.runtime / "operations" / "same-replacement-gap" / "lock").exists())
@@ -629,11 +670,12 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name,extra):
  if name=='before_replacement_physical_trash':os._exit(77)
 e.hooks=h
-try:e.move('incoming','item',op_id='replacement-metadata-only',replace=True)
+try:e.move('incoming','item',op_id='replacement-metadata-only',replace=True,lock_ttl=0.05)
 except Exception:os._exit(78)
 """
         child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.target),str(self.runtime)], capture_output=True)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("replacement-metadata-only")
         recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.recover('replacement-metadata-only',owner='worker-1')['state'])
 """
@@ -653,12 +695,13 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name,extra):
  if name=='before_replacement_physical_trash':os._exit(77)
 e.hooks=h
-try:e.move('invalid-meta','invalid-item',op_id='invalid-meta',replace=True)
+try:e.move('invalid-meta','invalid-item',op_id='invalid-meta',replace=True,lock_ttl=0.05)
 except Exception:os._exit(78)
 """
         child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
                                 str(self.target), str(self.runtime)], check=False)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry("invalid-meta")
         metadata = self.target / ".m006-trash" / "invalid-meta" / "replacement-invalid-item.json"
         record = json.loads(metadata.read_text())
         record["reason"] = "forged"
@@ -709,6 +752,49 @@ class LockTests(Fixture):
         self.assertEqual(json.loads(path.read_text()), before)
         second.release()
 
+    def test_same_owner_new_instance_waits_for_expiry_before_reclaim(self):
+        self.write("active-recovery", b"active")
+        source = self.source / "active-recovery"
+        target = self.target / "active-recovery"
+        operation = "active-recovery"
+        ident = file_safety_module.identity(source)
+        self.engine._new(operation, "active-recovery", "active-recovery", source, target,
+                         ident, False, "owner-a")
+        path = self.runtime / "operations" / operation / "lock"
+        first = TaskLock(path, operation, "owner-a", ttl=0.05)
+        first.claim()
+        second = TaskLock(path, operation, "owner-a", ttl=0.05)
+        before = json.loads(path.read_text())
+        with self.assertRaises(Failure):
+            second.claim()
+        with self.assertRaises(Failure):
+            second.heartbeat()
+        with self.assertRaises(Failure):
+            second.release()
+        with self.assertRaises(Failure):
+            self.engine.recover(operation, owner="owner-a")
+        self.assertEqual(json.loads(path.read_text()), before)
+        time.sleep(0.06)
+        captured = {}
+        original_claim = TaskLock._claim_unlocked
+        def capture_claim(lock, now, generation=1):
+            result = original_claim(lock, now, generation)
+            if lock.owner == "owner-b":
+                captured.update(json.loads(path.read_text()))
+            return result
+        TaskLock._claim_unlocked = capture_claim
+        try:
+            result = self.engine.recover(operation, owner="owner-b")
+        finally:
+            TaskLock._claim_unlocked = original_claim
+        self.assertEqual(result["state"], State.COMPLETE.value)
+        self.assertGreater(captured["generation"], before["generation"])
+        self.assertNotEqual(captured["token"], before["token"])
+        with self.assertRaises(Failure):
+            first.heartbeat()
+        with self.assertRaises(Failure):
+            first.release()
+
     def test_concurrent_o_excl_claim_exactly_one_winner(self):
         path = self.runtime / "concurrent.lock"
         script = """import sys; sys.path.insert(0, sys.argv[1]); from file_safety import TaskLock
@@ -748,12 +834,13 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
 def h(name, extra):
  if name == sys.argv[6]: os._exit(77)
 e.hooks=h
-try: e.move('crash.bin',sys.argv[7],op_id=sys.argv[5])
+try: e.move('crash.bin',sys.argv[7],op_id=sys.argv[5],lock_ttl=0.05)
 except Exception: os._exit(78)
 """
         target_rel = f"nested/{op_id}.bin"
         crashed = subprocess.run([sys.executable, "-c", script, str(HERE), str(source), str(target), str(self.runtime), op_id, hook, target_rel], capture_output=True, text=True, check=False)
         self.assertEqual(crashed.returncode, 77, crashed.stderr if crashed.stderr else "crash hook was not reached")
+        self.wait_for_expiry(op_id)
         # New process, then a second new process: recovery is idempotent.
         recover = """import sys; sys.path.insert(0,sys.argv[1]); from pathlib import Path; from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4])); print(e.recover(sys.argv[5],owner='worker-1')['state'])
@@ -787,10 +874,11 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4])); print(e.rec
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]))
 def h(name, extra):
  if name == 'after_target_physical_commit': os._exit(77)
-e.hooks=h; e.move('crash.bin','dest.bin',op_id='same-device-crash')
+e.hooks=h; e.move('crash.bin','dest.bin',op_id='same-device-crash',lock_ttl=0.05)
 """
         child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source), str(self.runtime)], check=False)
         self.assertEqual(child.returncode, 77)
+        self.wait_for_expiry(op_id)
         recover = """import sys; sys.path.insert(0,sys.argv[1]); from pathlib import Path; from file_safety import FileSafety
 e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3])); print(e.recover('same-device-crash',owner='worker-1')['state'])
 """

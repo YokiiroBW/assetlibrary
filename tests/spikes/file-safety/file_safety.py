@@ -154,7 +154,8 @@ def _durable_json(path: Path, value: dict) -> None:
 
 
 def _rename_noreplace(source: Path, target: Path, *, source_root: Path | None = None,
-                      target_root: Path | None = None) -> None:
+                      target_root: Path | None = None,
+                      before_syscall: Callable[[int, int], None] | None = None) -> None:
     """Linux renameat2(RENAME_NOREPLACE), with a fail-closed fallback error."""
     libc_name = ctypes.util.find_library("c")
     if not libc_name:
@@ -205,6 +206,8 @@ def _rename_noreplace(source: Path, target: Path, *, source_root: Path | None = 
         target_fd = open_pinned(target.parent, target_root)
         verify_pinned(source_fd, source_root)
         verify_pinned(target_fd, target_root)
+        if before_syscall:
+            before_syscall(source_fd, target_fd)
         result = fn(source_fd, os.fsencode(source.name), target_fd, os.fsencode(target.name), 1)
         if result != 0:
             code = ctypes.get_errno()
@@ -221,6 +224,24 @@ def _rename_noreplace(source: Path, target: Path, *, source_root: Path | None = 
                 os.fsync(target_fd)
         except OSError as exc:
             raise UnsupportedPrimitive("directory fsync after rename failed") from exc
+        try:
+            verify_pinned(source_fd, source_root)
+            verify_pinned(target_fd, target_root)
+        except Failure as exc:
+            # renameat2 has no atomic "beneath configured root" condition. If
+            # a cooperative test exchange moves a pinned parent meanwhile,
+            # reverse the successful rename through the still-pinned dirfds.
+            try:
+                verify_pinned(source_fd, source_root)
+                rollback = fn(target_fd, os.fsencode(target.name),
+                              source_fd, os.fsencode(source.name), 1)
+                if rollback != 0:
+                    raise OSError(ctypes.get_errno(), os.strerror(ctypes.get_errno()))
+                os.fsync(target_fd)
+                os.fsync(source_fd)
+            except (OSError, Failure) as rollback_exc:
+                raise Failure("pinned directory escaped; rollback failed; manual attention") from rollback_exc
+            raise Failure("pinned directory escaped; rename rolled back") from exc
     finally:
         if source_fd >= 0: os.close(source_fd)
         if target_fd >= 0: os.close(target_fd)
@@ -286,20 +307,6 @@ class TaskLock:
         self.generation = generation
         return "claimed"
 
-    def bind_existing(self) -> None:
-        """Bind a recovery instance to the exact current lock generation."""
-        with self._guard():
-            try:
-                current = json.loads(self.path.read_text(encoding="utf-8"))
-            except (OSError, ValueError) as exc:
-                raise Failure("lock unreadable; reconcile required") from exc
-            if (current.get("operation_id") != self.operation_id
-                    or current.get("owner") != self.owner
-                    or not current.get("token")):
-                raise Failure("lock ownership mismatch")
-            self.token = current["token"]
-            self.generation = int(current.get("generation", 0))
-
     def claim(self, now: float | None = None) -> str:
         now = time.time() if now is None else now
         with self._guard():
@@ -359,6 +366,10 @@ class TaskLock:
 
     def release(self) -> None:
         with self._guard():
+            if not self.path.exists():
+                if self.token is not None:
+                    raise Failure("lock missing")
+                return
             if self.path.exists():
                 current = json.loads(self.path.read_text(encoding="utf-8"))
                 if (current.get("operation_id") != self.operation_id
@@ -694,12 +705,10 @@ class FileSafety:
             now = time.time()
             if current_lock.get("operation_id") != op_id:
                 raise Failure("lock operation identity mismatch")
-            if current_lock.get("owner") != owner and float(current_lock.get("expires", 0)) >= now:
-                raise Failure("foreign unexpired lock")
+            if float(current_lock.get("expires", 0)) >= now:
+                raise Failure("unexpired lock; recovery must wait for expiry")
             if float(current_lock.get("expires", 0)) < now:
                 lock.reconcile_and_reclaim(lambda requested: self.inspect(requested), now=now)
-            else:
-                lock.bind_existing()
         else:
             lock.claim()
         try:
@@ -985,7 +994,8 @@ class FileSafety:
         return "restored"
 
     def delete(self, relative: str, *, op_id: str | None = None,
-               owner: str = "worker-1", policy: Policy | None = None) -> dict:
+               owner: str = "worker-1", policy: Policy | None = None,
+               lock_ttl: float = 30.0) -> dict:
         """Ordinary delete uses the same physical trash and metadata contract."""
         policy = policy or Policy()
         op_id = op_id or f"delete-{secrets.token_hex(8)}"
@@ -1001,7 +1011,7 @@ class FileSafety:
             raise Failure("source missing or not regular file")
         directory = self.ops / op_id
         directory.mkdir(parents=True, exist_ok=False)
-        lock = TaskLock(directory / "lock", op_id, owner)
+        lock = TaskLock(directory / "lock", op_id, owner, ttl=lock_ttl)
         lock.claim()
         progress = _heartbeat_pulse(lock)
         try:
