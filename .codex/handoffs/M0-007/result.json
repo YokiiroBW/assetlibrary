@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-007",
+  "title": "50万资产模拟器、性能基线与故障注入框架",
+  "milestone": "M0",
+  "status": "ready_for_review",
+  "owner": "codex-agent-m0-007",
+  "branch": "codex/m0-007-performance-foundation",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-007",
+  "commit": "7e6694fd63371644c9f371d3666f868e965bf443",
+  "changed_files": ["packages/test-support/performance/__init__.py", "packages/test-support/performance/generator.py", "packages/test-support/performance/faults.py", "packages/test-support/performance/cli.py", "tests/spikes/performance/test_generator.py", "tests/spikes/performance/profile_500k.py", "docs/spikes/M0-007/README.md", ".codex/tasks/M0-007.md"],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/M0-007/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "test-performance-foundation",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["Python 3.12 standard library JSON, hashlib, tempfile, resource"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": ["scripts/validate_architecture_baseline.py", "scripts/validate_handoff.py"],
+    "technical_debt": ["RSS baseline is environment-sensitive; establish CI threshold in M0-009"]
+  }
+}
