@@ -23,7 +23,7 @@
 | target | bytes | SHA-256 |
 |---|---:|---|
 | linux-x64 `ServerPackagingSpike` | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
-| win-x64 `ServerPackagingSpike.exe` | 162,816 | `c5f45531cbe7766689110e1ca4eb8ce8ce5c4d5ed4f65a828b8559ab2ab8a125` |
+| win-x64 `ServerPackagingSpike.exe` | 162,816 | `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9` |
 
 ## 已知环境门禁
 

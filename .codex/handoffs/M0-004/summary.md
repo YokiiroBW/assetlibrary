@@ -24,6 +24,8 @@
 
 空 runtime 目录后执行 bootstrap，并连续两次清理 obj/bin/artifact cold publish；两次完整 files.sha256 一致。restore、Linux/Windows RID publish、6/6 Python unittest、Docker Compose 静态 config 和 `git diff --check` 通过。artifact source commit 为发行输入最后提交；完整每文件 size/SHA256 和 aggregate digest 已在 runtime artifact 清单中记录。
 
+最终样例 hash 是该 Linux 构建环境关闭 MSBuild/C# build servers 后的本机观测，不作跨主机 bit-for-bit 保证；artifact 身份由发行输入 commit 与完整清单共同证明。
+
 ## 外部门禁与风险
 
 Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Windows/PowerShell。Docker build/run/health 未执行：Docker CLI 26.1.4 存在但 daemon 报 `permission denied ... /var/run/docker.sock`。因此不能宣称 Windows/Docker 门禁通过，必须保持 partial。
