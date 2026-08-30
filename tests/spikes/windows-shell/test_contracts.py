@@ -57,6 +57,27 @@ class PackageContractTests(unittest.TestCase):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
         self.assertIn("return count == 1 ? S_OK : S_FALSE", shell)
 
+    def test_shell_folder_persists_initialized_pidl(self):
+        shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
+        self.assertIn("public IPersistFolder", shell)
+        for method in ("GetClassID", "Initialize", "ILCloneFull", "folder_pidl_", "IID_IPersistFolder"):
+            self.assertIn(method, shell)
+
+    def test_explorer_view_activation_is_async_and_factory_is_counted(self):
+        shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
+        self.assertIn("StartAssetHostPing(window_)", shell)
+        self.assertIn("std::thread([state]()", shell)
+        self.assertIn("PostMessageW(state->window", shell)
+        view_body = shell[shell.index("CreateViewWindow("):shell.index("DestroyViewWindow()")]
+        self.assertNotIn("AskAssetHost()", view_body)
+        self.assertNotIn("WaitForSingleObject", view_body)
+        worker_at = shell.index("std::thread([state]()")
+        ask_at = shell.index("AskAssetHost();", worker_at)
+        self.assertGreater(ask_at, worker_at)
+        self.assertNotIn("const bool host_ready = AskAssetHost();", shell)
+        self.assertIn("ClassFactory() : ref_count_(1) { ++g_object_count; }", shell)
+        self.assertIn("~ClassFactory() { --g_object_count; }", shell)
+
     def test_registration_is_hkcu_only_and_symmetric(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
         unregister = (SCRIPTS / "unregister.ps1").read_text(encoding="utf-8")
@@ -72,12 +93,40 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("createdKeys", register)
         self.assertIn("namespaceOwned", register)
         self.assertIn("[array]::Reverse", register)
+        self.assertIn("Created-KeyCanRollback", register)
+        self.assertIn("originalValues", register)
+        self.assertIn("existingNamespace", register)
         self.assertIn("ShellFolder", register)
         self.assertIn("Refusing to replace", register)
         self.assertIn("Refusing to remove", unregister)
         self.assertIn("Unregistration must still work", unregister)
         self.assertIn("Remove-Item -LiteralPath $namespace", unregister)
         self.assertIn("Remove-Item -LiteralPath $classes", unregister)
+        self.assertIn("$namespaceRegistration", unregister)
+        self.assertIn("$inprocOwned", unregister)
+        self.assertIn("$namespaceOwned", unregister)
+
+    def test_new_install_mid_failure_rolls_back_created_keys(self):
+        register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
+        self.assertIn("$createdKeys", register)
+        self.assertIn("$createdArray", register)
+        self.assertIn("Created-KeyCanRollback", register)
+        self.assertIn("# Restore values first", register)
+
+    def test_existing_values_are_restored_and_new_values_removed(self):
+        register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
+        self.assertIn("$originalValues", register)
+        self.assertIn("$missingValues", register)
+        self.assertIn("foreach ($key in $missingValues.Keys)", register)
+        self.assertIn("Remove-ItemProperty", register)
+        self.assertIn("Set-ItemProperty -LiteralPath $parts[0]", register)
+
+    def test_owner_path_mismatch_and_namespace_only_residue_are_negative(self):
+        unregister = (SCRIPTS / "unregister.ps1").read_text(encoding="utf-8")
+        self.assertIn("InprocServer32 registration with an owner/path mismatch", unregister)
+        self.assertIn("Desktop namespace registration with an owner/name mismatch", unregister)
+        self.assertIn("if (-not $inprocExists -and -not $namespaceExists)", unregister)
+        self.assertIn("if ($namespaceOwned)", unregister)
 
     def test_failure_modes_are_exposed_by_the_host_entrypoint(self):
         host = (SRC / "AssetHostStub.cpp").read_text(encoding="utf-8")

@@ -39,9 +39,11 @@ Explorer after unregistering to verify that the shell returns to its normal stat
 
 ## Failure modes
 
-The view's host ping has a 250 ms connection and overlapped-I/O deadline. Missing,
-crashed, slow, malformed, or oversized host frames result in a status message and
-the view remains usable; the bridge does not retry forever. `run-host.ps1` exposes
+The view activation returns immediately after starting a worker. The worker's host
+ping attempt has a 250 ms transaction deadline and overlapped I/O; cancellation is
+drained by the worker before worker-owned resources are released. Missing, crashed, slow, malformed, or
+oversized host frames result in a status message and the view remains usable; the
+bridge does not retry forever. `run-host.ps1` exposes
 normal, delayed, crash-after-one-request, and invalid-frame substitutes.
 
 `soak.ps1` is a host-cycle helper only; it does not navigate Explorer. Use

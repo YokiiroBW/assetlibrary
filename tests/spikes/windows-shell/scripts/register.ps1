@@ -39,6 +39,18 @@ function Owned-Registration {
   return [IO.Path]::GetFullPath($item.'(default)') -eq $resolvedDll
 }
 
+function Created-KeyCanRollback([string] $path) {
+  $item = Get-ItemProperty -LiteralPath $path -ErrorAction SilentlyContinue
+  if (-not $item) { return $true }
+  $hasOwner = $item.AssetLibraryOwner -eq $owner
+  $hasExpectedPath = $item.'(default)' -and
+    [IO.Path]::GetFullPath($item.'(default)') -eq $resolvedDll
+  $userProperties = @($item.PSObject.Properties.Name | Where-Object { $_ -notlike 'PS*' })
+  # A newly created empty key is also safe to remove when the first marker write failed.
+  return ($hasOwner -and ($hasExpectedPath -or $path -ne $inproc)) -or
+    ($hasExpectedPath -and $path -eq $inproc) -or ($userProperties.Count -eq 0)
+}
+
 $existingClasses = Get-ItemProperty -LiteralPath $classes -ErrorAction SilentlyContinue
 if ($existingClasses -and $existingClasses.AssetLibraryOwner -ne $owner) {
   throw 'Refusing to replace a CLSID key without the M0-002 owner marker.'
@@ -77,7 +89,7 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'register M0-002 shell extensio
   } catch {
     # Restore values first, then remove only keys created by this invocation and
     # still proven to belong to this exact owner/path pair.
-    foreach ($key in $originalValues.Keys) {
+    foreach ($key in $missingValues.Keys) {
       $parts = $key -split '\|', 2
       if ($missingValues[$key]) {
         Remove-ItemProperty -LiteralPath $parts[0] -Name $parts[1] -ErrorAction SilentlyContinue
@@ -91,9 +103,11 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'register M0-002 shell extensio
     $createdArray = $createdKeys.ToArray()
     [array]::Reverse($createdArray)
     foreach ($path in $createdArray) {
-      if ((($path -eq $classes) -or ($path -eq $inproc) -or ($path -eq $shellFolder)) -and $ownedBeforeRollback) {
+      $ownedOrPendingInproc = $ownedBeforeRollback -or ($path -eq $inproc)
+      if ((($path -eq $classes) -or ($path -eq $inproc) -or ($path -eq $shellFolder)) -and
+        $ownedOrPendingInproc -and (Created-KeyCanRollback $path)) {
         Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-      } elseif (($path -eq $namespace) -and $namespaceOwned) {
+      } elseif (($path -eq $namespace) -and $namespaceOwned -and (Created-KeyCanRollback $path)) {
         Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
       }
     }

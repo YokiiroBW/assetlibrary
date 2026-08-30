@@ -22,8 +22,10 @@ save the evidence outside the repository or in an approved test-results store.
    view, and confirm Explorer remains responsive and returns to connected state.
 5. Repeat with `-Mode crash -Once`, `-Mode slow -Once`, and
    `-Mode invalid -Once`. Confirm each failure reaches the unavailable status
-   within the 250 ms protocol budget (plus normal UI scheduling), without an
-   Explorer hang or process crash; restart normal host and confirm recovery.
+   within the 250 ms protocol attempt budget (plus worker cancellation cleanup and
+   normal UI scheduling), without an Explorer hang or process crash; restart normal
+   host and confirm recovery. The Explorer view activation thread must return
+   without waiting for this cleanup.
 6. Run `soak.ps1 -Hours 8` in parallel as the host-cycle signal, while keeping
    the manual Explorer view open and periodically recording bounded response,
    memory, and recovery observations. This combined operator run is the only

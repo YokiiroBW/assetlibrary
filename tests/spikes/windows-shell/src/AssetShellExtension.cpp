@@ -9,8 +9,10 @@
 #include <atomic>
 #include <cwchar>
 #include <cstring>
+#include <memory>
 #include <new>
 #include <string>
+#include <thread>
 
 namespace {
 using assetlibrary::m0002::FrameHeader;
@@ -26,6 +28,12 @@ using assetlibrary::m0002::kVersion;
 constexpr GUID kClsid = {0x9d52b2f8, 0x9ef4, 0x4f4c, {0x9c, 0x1a, 0x52, 0x9f, 0x66, 0x5f, 0x0a, 0x02}};
 std::atomic_ulong g_object_count{0};
 HMODULE g_module = nullptr;
+constexpr UINT WM_ASSET_HOST_RESULT = WM_APP + 42;
+
+struct HostPingState {
+  explicit HostPingState(HWND target) : window(target) {}
+  HWND window;
+};
 
 ULONGLONG RemainingBudget(ULONGLONG deadline) {
   const ULONGLONG now = GetTickCount64();
@@ -108,6 +116,16 @@ bool AskAssetHost() {
   return ok;
 }
 
+void StartAssetHostPing(HWND window) {
+  // The Shell UI thread only starts this worker and returns. The worker owns its
+  // state until the bounded transaction completes, including cancellation drain.
+  auto state = std::make_shared<HostPingState>(window);
+  std::thread([state]() {
+    const bool ready = AskAssetHost();
+    PostMessageW(state->window, WM_ASSET_HOST_RESULT, ready ? 1 : 0, 0);
+  }).detach();
+}
+
 class AssetShellView final : public IShellView {
  public:
   AssetShellView() : ref_count_(1), browser_(nullptr), window_(nullptr) { ++g_object_count; }
@@ -165,8 +183,8 @@ class AssetShellView final : public IShellView {
                               browser_window_, nullptr, klass.hInstance, this);
     if (!window_) return HRESULT_FROM_WIN32(GetLastError());
     *window = window_;
-    const bool host_ready = AskAssetHost();
-    SetStatusText(host_ready ? L"AssetHost connected" : L"AssetHost unavailable; retry from the independent client");
+    SetStatusText(L"AssetHost connecting...");
+    StartAssetHostPing(window_);
     return S_OK;
   }
   HRESULT STDMETHODCALLTYPE DestroyViewWindow() override {
@@ -193,6 +211,13 @@ class AssetShellView final : public IShellView {
       auto* create = reinterpret_cast<CREATESTRUCTW*>(lparam);
       view = static_cast<AssetShellView*>(create->lpCreateParams);
       SetWindowLongPtrW(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(view));
+    }
+    if (message == WM_ASSET_HOST_RESULT && view) {
+      view->SetStatusText(wparam != 0
+          ? L"AssetHost connected"
+          : L"AssetHost unavailable; retry from the independent client");
+      InvalidateRect(window, nullptr, TRUE);
+      return 0;
     }
     if (message == WM_PAINT) {
       PAINTSTRUCT paint{};
@@ -260,15 +285,21 @@ class OneItemEnumerator final : public IEnumIDList {
   bool returned_;
 };
 
-class AssetShellFolder final : public IShellFolder {
+class AssetShellFolder final : public IShellFolder, public IPersistFolder {
  public:
   AssetShellFolder() : ref_count_(1) { ++g_object_count; }
-  ~AssetShellFolder() { --g_object_count; }
+  ~AssetShellFolder() {
+    CoTaskMemFree(folder_pidl_);
+    --g_object_count;
+  }
   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** object) override {
     if (!object) return E_POINTER;
     *object = nullptr;
     if (iid == IID_IUnknown || iid == IID_IShellFolder) {
       *object = static_cast<IShellFolder*>(this); AddRef(); return S_OK;
+    }
+    if (iid == IID_IPersist || iid == IID_IPersistFolder) {
+      *object = static_cast<IPersistFolder*>(this); AddRef(); return S_OK;
     }
     return E_NOINTERFACE;
   }
@@ -315,13 +346,37 @@ class AssetShellFolder final : public IShellFolder {
     if (!name->pOleStr) return E_OUTOFMEMORY; memcpy(name->pOleStr, value, bytes); return S_OK;
   }
   HRESULT STDMETHODCALLTYPE SetNameOf(HWND, PCUITEMID_CHILD, LPCWSTR, SHGDNF, PITEMID_CHILD*) override { return E_ACCESSDENIED; }
+
+  HRESULT STDMETHODCALLTYPE GetClassID(CLSID* clsid) override {
+    if (!clsid) return E_POINTER;
+    *clsid = kClsid;
+    return S_OK;
+  }
+  HRESULT STDMETHODCALLTYPE IsDirty() override { return S_FALSE; }
+  HRESULT STDMETHODCALLTYPE Load(LPCOLESTR) override { return E_NOTIMPL; }
+  HRESULT STDMETHODCALLTYPE Save(LPCOLESTR, BOOL) override { return E_NOTIMPL; }
+  HRESULT STDMETHODCALLTYPE SaveCompleted(LPCOLESTR) override { return E_NOTIMPL; }
+  HRESULT STDMETHODCALLTYPE GetCurFile(LPOLESTR* file_name) override {
+    if (!file_name) return E_POINTER;
+    *file_name = nullptr;
+    return E_NOTIMPL;
+  }
+  HRESULT STDMETHODCALLTYPE Initialize(PCIDLIST_ABSOLUTE folder) override {
+    PIDLIST_ABSOLUTE copy = folder ? ILCloneFull(folder) : nullptr;
+    if (folder && !copy) return E_OUTOFMEMORY;
+    CoTaskMemFree(folder_pidl_);
+    folder_pidl_ = copy;
+    return S_OK;
+  }
  private:
   std::atomic_ulong ref_count_;
+  PIDLIST_ABSOLUTE folder_pidl_ = nullptr;
 };
 
 class ClassFactory final : public IClassFactory {
  public:
-  ClassFactory() : ref_count_(1) {}
+  ClassFactory() : ref_count_(1) { ++g_object_count; }
+  ~ClassFactory() { --g_object_count; }
   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** object) override {
     if (!object) return E_POINTER; *object = nullptr;
     if (iid == IID_IUnknown || iid == IID_IClassFactory) { *object = static_cast<IClassFactory*>(this); AddRef(); return S_OK; }
