@@ -7,7 +7,8 @@
     "message_type",
     "request_id",
     "length",
-    "content_sha256"
+    "content_sha256",
+    "idempotency_key"
   ],
   "properties": {
     "message_type": {

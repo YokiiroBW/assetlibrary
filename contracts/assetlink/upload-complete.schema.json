@@ -5,18 +5,26 @@
   "additionalProperties": true,
   "required": [
     "message_type",
+    "request_id",
     "transfer_id",
-    "content_sha256"
+    "content_sha256",
+    "idempotency_key"
   ],
   "properties": {
     "message_type": {
       "const": "upload.complete"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
     },
     "transfer_id": {
       "$ref": "common.schema.json#/$defs/opaque_id"
     },
     "content_sha256": {
       "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "idempotency_key": {
+      "$ref": "common.schema.json#/$defs/opaque_id"
     }
   }
 }

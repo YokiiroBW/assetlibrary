@@ -6,6 +6,7 @@
       "type": "string",
       "pattern": "^(0|[1-9][0-9]*)$",
       "maxLength": 20,
+      "format": "uint64-decimal",
       "description": "Canonical unsigned 64-bit decimal; parser MUST check <= 18446744073709551615"
     },
     "opaque_id": {

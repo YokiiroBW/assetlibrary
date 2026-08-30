@@ -5,6 +5,7 @@
   "additionalProperties": true,
   "required": [
     "message_type",
+    "request_id",
     "after_cursor",
     "limit"
   ],

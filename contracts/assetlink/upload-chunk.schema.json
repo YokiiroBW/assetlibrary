@@ -5,6 +5,7 @@
   "additionalProperties": true,
   "required": [
     "message_type",
+    "request_id",
     "transfer_id",
     "offset",
     "chunk_size",
@@ -13,6 +14,9 @@
   "properties": {
     "message_type": {
       "const": "upload.chunk"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
     },
     "transfer_id": {
       "$ref": "common.schema.json#/$defs/opaque_id"

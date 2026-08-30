@@ -1,1 +1,1 @@
-{"message_type":"handshake.request","client":{"kind":"web","version":"1"},"supported_versions":["1.0","2.0"],"capabilities":[],"endpoint_role":"primary"}
+{"message_type":"handshake.request","client":{"kind":"web","version":"1"},"supported_versions":["1.0","2.0"],"capabilities":["events.replay","transfer.range"],"endpoint_role":"primary"}

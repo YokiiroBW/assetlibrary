@@ -21,6 +21,7 @@
     },
     "received_ranges": {
       "type": "array",
+      "uniqueItems": true,
       "items": {
         "$ref": "common.schema.json#/$defs/byte_range"
       }

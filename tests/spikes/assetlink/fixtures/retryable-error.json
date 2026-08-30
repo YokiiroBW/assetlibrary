@@ -1,0 +1,13 @@
+{
+  "message_type": "error",
+  "request_id": "req-retry",
+  "error": {
+    "code": "temporarily_unavailable",
+    "message": "retry later",
+    "retryable": true,
+    "retry_after_ms": 1500,
+    "details": {
+      "attempt": 1
+    }
+  }
+}

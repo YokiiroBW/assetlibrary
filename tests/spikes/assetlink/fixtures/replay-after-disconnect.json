@@ -1,0 +1,7 @@
+{
+  "message_type": "event.replay.request",
+  "request_id": "req-reconnect",
+  "after_cursor": "opaque:last-committed/cursor",
+  "limit": 100,
+  "resume_reason": "transport-disconnected"
+}

@@ -1,0 +1,1 @@
+{"message_type":"upload.status","transfer_id":"t-1","length":"100000000000","received_ranges":[{"start":"0","end":"1023"},{"start":"2048","end":"4095"}]}

@@ -1,0 +1,15 @@
+{
+  "message_type": "handshake.request",
+  "client": {
+    "kind": "web",
+    "version": "0.9"
+  },
+  "supported_versions": [
+    "1.0"
+  ],
+  "capabilities": [
+    "events.replay"
+  ],
+  "endpoint_role": "primary",
+  "request_id": "req-old-minor"
+}

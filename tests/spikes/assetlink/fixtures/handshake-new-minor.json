@@ -1,0 +1,21 @@
+{
+  "message_type": "handshake.request",
+  "client": {
+    "kind": "future-client",
+    "version": "2.0",
+    "future_client_field": "retained"
+  },
+  "supported_versions": [
+    "1.2",
+    "1.1"
+  ],
+  "capabilities": [
+    "events.replay",
+    "future.capability"
+  ],
+  "endpoint_role": "future-role",
+  "request_id": "req-new-minor",
+  "future_optional": {
+    "retained": true
+  }
+}
