@@ -56,7 +56,7 @@ class SpikeTests(unittest.TestCase):
                     except Exception: time.sleep(.1)
                 else: self.fail("health endpoint did not start")
                 p.send_signal(signal.SIGTERM); self.assertEqual(p.wait(timeout=5), 0)
-                    p2 = subprocess.Popen([str(RUN_BIN)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                p2 = subprocess.Popen([str(RUN_BIN)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 try:
                     for _ in range(40):
                         try:
