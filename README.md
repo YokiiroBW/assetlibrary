@@ -33,6 +33,8 @@
 4. 运行 `python scripts/validate_handoff.py` 和 `python scripts/validate_architecture_baseline.py`。
 5. 初始化 Git 后，由主协调线程建立 M0 任务图，不要直接同时开发所有客户端和 Provider。
 
+仓库级快速验证入口是 `python scripts/verify_repository.py`。它只检查交接骨架、当前架构基线、Python/JSON 解析和结构完整性；语言级依赖图、完整安全与性能门禁仍由 M0-009 根据 Spike 结果确定。
+
 ## 最重要的六条约束
 
 1. **真实物理目录是权威来源。** 收藏夹、保存视图、人物、时间轴等只能是明确标识的逻辑视图。

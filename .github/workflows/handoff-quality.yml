@@ -7,14 +7,18 @@ on:
 jobs:
   validate-handoff:
     runs-on: ubuntu-latest
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile helper scripts
-        run: python -m compileall -q scripts
       - name: Validate handoff structure
         run: python scripts/validate_handoff.py
       - name: Validate architecture baseline
         run: python scripts/validate_architecture_baseline.py
+      - name: Repository verification entry
+        run: python scripts/verify_repository.py
+      - name: Repository workflow tests
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/repository -p 'test_*.py'
