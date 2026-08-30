@@ -12,7 +12,24 @@ def run(cmd, **kw):
 
 class PostgresSpike(unittest.TestCase):
     @classmethod
+    def _cleanup(cls):
+        server = getattr(cls, 'server', None)
+        if server is not None and server.poll() is None:
+            server.terminate(); server.wait(timeout=10)
+        for name in ('log', 'restart_log'):
+            handle = getattr(cls, name, None)
+            if handle and not handle.closed: handle.close()
+        work = getattr(cls, 'work', None)
+        if work: shutil.rmtree(work, ignore_errors=True)
+
+    @classmethod
     def setUpClass(cls):
+        try: cls._setUpClass()
+        except BaseException:
+            cls._cleanup(); raise
+
+    @classmethod
+    def _setUpClass(cls):
         cls.work = pathlib.Path(tempfile.mkdtemp(prefix='m005-pg-'))
         cls.data, cls.sock = cls.work/'data', cls.work/'sock'; cls.data.mkdir(mode=0o700); cls.sock.mkdir(mode=0o700); cls.data.chmod(0o700); cls.sock.chmod(0o700)
         cls.bin = pathlib.Path(os.environ.get('M005_PG_BIN', '/tmp/m005-pg-install/bin'))
@@ -30,14 +47,14 @@ class PostgresSpike(unittest.TestCase):
         cls.db = ['psql','-h',str(cls.sock),'-d','postgres','-v','ON_ERROR_STOP=1','-X','-q','-At']
         run(cls.db + ['-c', 'CREATE DATABASE m005;'])
         cls.db[cls.db.index('postgres')] = 'm005'
+        cls.server_version = cls.sql('SHOW server_version;').strip()
+        cls.client_version = run(['psql','--version']).strip()
+        if not cls.server_version.startswith('16.15') or '16.15' not in cls.client_version: raise RuntimeError(f'version mismatch: {cls.server_version} / {cls.client_version}')
         cls.apply()
 
     @classmethod
     def tearDownClass(cls):
-        if cls.server.poll() is None: cls.server.terminate(); cls.server.wait(timeout=10)
-        cls.log.close()
-        if hasattr(cls, 'restart_log'): cls.restart_log.close()
-        shutil.rmtree(cls.work, ignore_errors=True)
+        cls._cleanup()
 
     @classmethod
     def sql(cls, text): return run(cls.db, input=text)
@@ -77,7 +94,9 @@ class PostgresSpike(unittest.TestCase):
         self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{cancel_id}','cancel-key','x','{{}}');")
         self.assertEqual(self.sql(f"SELECT tasks.cancel('{cancel_id}');").strip(), 't')
         self.assertEqual(self.sql(f"SELECT state FROM tasks.durable_task WHERE task_id='{cancel_id}';").strip(), 'cancelled')
+        self.sql("UPDATE tasks.durable_task SET state='succeeded',lease_owner=NULL,lease_until=NULL WHERE state='queued';")
         leased_cancel = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{leased_cancel}','leased-cancel','x','{{}}'); SELECT tasks.claim_one('lease-owner',30);")
+        self.assertEqual(self.sql(f"SELECT state||':'||lease_owner FROM tasks.durable_task WHERE task_id='{leased_cancel}';").strip(), 'leased:lease-owner')
         self.assertEqual(self.sql(f"SELECT tasks.cancel('{leased_cancel}');").strip(), 't')
         conflict = subprocess.run(self.db + ['-c', f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{uuid.uuid4()}','idem-1','index','{{\"different\":true}}');"], text=True, capture_output=True)
         self.assertNotEqual(conflict.returncode, 0)
@@ -96,6 +115,7 @@ class PostgresSpike(unittest.TestCase):
             if claimed.strip(): self.sql(f"SELECT events.mark_published('{claimed.strip()}','pub-a');")
         self.assertIn(str(ev), claimed)
         self.assertEqual(self.sql(f"SELECT events.mark_published('{ev}','pub-b');").strip(), 'f')
+        self.assertEqual(self.sql(f"SELECT events.release('{ev}','pub-b','wrong owner');").strip(), 'f')
         time.sleep(1.2)
         self.assertIn(str(ev), self.sql("SELECT event_id FROM events.claim_one('pub-b',30);"))
         self.assertEqual(self.sql(f"SELECT events.mark_published('{ev}','pub-b');").strip(), 't')
@@ -106,9 +126,13 @@ class PostgresSpike(unittest.TestCase):
         self.assertIn(str(retry_ev), self.sql("SELECT event_id FROM events.claim_one('pub-r',30);"))
         self.sql(f"SELECT events.mark_published('{retry_ev}','pub-r');")
         same_ev = uuid.uuid4(); self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','same','{{}}');")
-        pubs = [subprocess.Popen(self.db + ['-c', "SELECT event_id FROM events.claim_one('concurrent',30);"], stdout=subprocess.PIPE, text=True) for _ in range(2)]
+        pubs = [subprocess.Popen(self.db + ['-c', f"SELECT event_id FROM events.claim_one('publisher-{i}',30);"], stdout=subprocess.PIPE, text=True) for i in range(2)]
         pub_results = [p.communicate(timeout=10)[0] for p in pubs]
         self.assertEqual(sum(str(same_ev) in out for out in pub_results), 1)
+        self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','same','{{}}') ON CONFLICT (event_id) DO NOTHING;")
+        self.assertEqual(self.sql(f"SELECT count(*) FROM events.outbox WHERE event_id='{same_ev}';").strip(), '1')
+        conflict_event = subprocess.run(self.db + ['-c', f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','different','{{}}');"], text=True, capture_output=True)
+        self.assertNotEqual(conflict_event.returncode, 0)
         atomic = uuid.uuid4(); failed = subprocess.run(self.db + ['-c', f"BEGIN; UPDATE library.asset SET filename='rolled-back' WHERE asset_id='{asset}'; INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{atomic}','{asset}','rollback','{{}}'); SELECT 1/0; COMMIT;"], text=True, capture_output=True)
         self.assertNotEqual(failed.returncode, 0); self.assertEqual(self.sql(f"SELECT count(*) FROM library.asset WHERE asset_id='{asset}' AND filename='rolled-back';").strip(), '0'); self.assertEqual(self.sql(f"SELECT count(*) FROM events.outbox WHERE event_id='{atomic}';").strip(), '0')
         self.sql(f"INSERT INTO library.permission_scope VALUES ('{lib}','alice','read');")
@@ -135,11 +159,13 @@ class PostgresSpike(unittest.TestCase):
         self.assertEqual(self.sql("SELECT count(*) FROM library.asset WHERE filename ILIKE '%499990 reportx%';").strip(), '1')
         self.assertEqual(self.sql("SELECT count(*) FROM (SELECT a.asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50) q;").strip(), '50')
         self.assertEqual(self.sql("SELECT count(*) FROM library.asset a LEFT JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='denied' AND a.asset_id > '00000000-0000-0000-0000-000000000000';").strip(), '0')
+        self.assertEqual(self.sql("SELECT count(*) FROM library.asset WHERE relative_path LIKE 'batch/42/%';").strip(), '500')
+        self.assertEqual(self.sql("SELECT count(*) FROM library.asset WHERE relative_path LIKE 'missing/%';").strip(), '0')
         timings = {"keyset": [], "fts": [], "trigram": []}
         for _ in range(5):
             for name, query in [("keyset", "SELECT asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50"), ("fts", "SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt')"), ("trigram", "SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'")]:
                 start = time.perf_counter(); self.sql(query); timings[name].append((time.perf_counter()-start)*1000)
-        plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE library_id='00000000-0000-0000-0000-000000000500' AND asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
+        plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT a.asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
         (RUNTIME/'500k-plan.txt').parent.mkdir(parents=True, exist_ok=True)
         dist = '\n'.join(f"WARM_{name.upper()}_MS=min:{min(vals):.3f},median:{sorted(vals)[len(vals)//2]:.3f},p95:{sorted(vals)[-1]:.3f},max:{max(vals):.3f}" for name, vals in timings.items())
         (RUNTIME/'500k-plan.txt').write_text(plan + '\n' + dist + '\n')
