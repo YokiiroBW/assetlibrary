@@ -9,6 +9,7 @@ from __future__ import annotations
 import ctypes
 import ctypes.util
 import errno
+import fcntl
 import hashlib
 import json
 import os
@@ -16,6 +17,7 @@ import secrets
 import shutil
 import stat
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -151,7 +153,8 @@ def _durable_json(path: Path, value: dict) -> None:
     _fsync_dir(path.parent)
 
 
-def _rename_noreplace(source: Path, target: Path) -> None:
+def _rename_noreplace(source: Path, target: Path, *, source_root: Path | None = None,
+                      target_root: Path | None = None) -> None:
     """Linux renameat2(RENAME_NOREPLACE), with a fail-closed fallback error."""
     libc_name = ctypes.util.find_library("c")
     if not libc_name:
@@ -163,10 +166,32 @@ def _rename_noreplace(source: Path, target: Path) -> None:
     fn.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
     fn.restype = ctypes.c_int
     flags = getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+
+    def open_pinned(directory: Path, anchor: Path | None) -> int:
+        # Walk every component from the configured root anchor. Each component
+        # is opened with O_NOFOLLOW and the resulting directory fd is retained,
+        # so an ancestor exchanged after containment validation cannot redirect
+        # the rename into an external tree.
+        fd = os.open(os.sep, os.O_RDONLY | flags)
+        try:
+            if anchor is not None:
+                relative = directory.relative_to(anchor)
+                components = anchor.parts[1:] + relative.parts
+            else:
+                components = directory.parts[1:]
+            for part in components:
+                next_fd = os.open(part, os.O_RDONLY | flags, dir_fd=fd)
+                os.close(fd)
+                fd = next_fd
+            return fd
+        except Exception:
+            os.close(fd)
+            raise
+
     source_fd = target_fd = -1
     try:
-        source_fd = os.open(source.parent, os.O_RDONLY | flags)
-        target_fd = os.open(target.parent, os.O_RDONLY | flags)
+        source_fd = open_pinned(source.parent, source_root)
+        target_fd = open_pinned(target.parent, target_root)
         result = fn(source_fd, os.fsencode(source.name), target_fd, os.fsencode(target.name), 1)
         if result != 0:
             code = ctypes.get_errno()
@@ -218,42 +243,82 @@ class TaskLock:
     def __init__(self, path: Path, operation_id: str, owner: str, ttl: float = 30.0):
         _validate_op_id(operation_id)
         self.path, self.operation_id, self.owner, self.ttl = path, operation_id, owner, ttl
+        self.token: str | None = None
+        self.generation: int | None = None
 
-    def claim(self, now: float | None = None) -> str:
-        now = time.time() if now is None else now
-        value = {"schema_version": "m0-006.lock.v1", "operation_id": self.operation_id,
-                 "owner": self.owner, "heartbeat": now, "expires": now + self.ttl}
+    @contextmanager
+    def _guard(self):
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        guard = self.path.with_name(".m006-lock-guard")
+        fd = os.open(guard, os.O_RDWR | os.O_CREAT, 0o600)
         try:
-            fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        except FileExistsError:
-            try:
-                existing = json.loads(self.path.read_text(encoding="utf-8"))
-            except (OSError, ValueError) as exc:
-                raise Failure("lock unreadable; reconcile required") from exc
-            if existing.get("operation_id") != self.operation_id:
-                raise Failure("foreign operation lock")
-            if existing.get("owner") != self.owner:
-                raise Failure("foreign owner lock")
-            if float(existing.get("expires", 0)) >= now:
-                raise Failure("unexpired lock")
-            raise Failure("expired lock requires physical reconciliation")
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+    def _claim_unlocked(self, now: float, generation: int = 1) -> str:
+        token = secrets.token_hex(16)
+        value = {"schema_version": "m0-006.lock.v1", "operation_id": self.operation_id,
+                 "owner": self.owner, "generation": generation, "token": token,
+                 "heartbeat": now, "expires": now + self.ttl}
+        fd = os.open(self.path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
             json.dump(value, stream, sort_keys=True)
             stream.flush()
             os.fsync(stream.fileno())
         _fsync_dir(self.path.parent)
+        self.token = token
+        self.generation = generation
         return "claimed"
+
+    def bind_existing(self) -> None:
+        """Bind a recovery instance to the exact current lock generation."""
+        with self._guard():
+            try:
+                current = json.loads(self.path.read_text(encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                raise Failure("lock unreadable; reconcile required") from exc
+            if (current.get("operation_id") != self.operation_id
+                    or current.get("owner") != self.owner
+                    or not current.get("token")):
+                raise Failure("lock ownership mismatch")
+            self.token = current["token"]
+            self.generation = int(current.get("generation", 0))
+
+    def claim(self, now: float | None = None) -> str:
+        now = time.time() if now is None else now
+        with self._guard():
+            try:
+                return self._claim_unlocked(now)
+            except FileExistsError:
+                try:
+                    existing = json.loads(self.path.read_text(encoding="utf-8"))
+                except (OSError, ValueError) as exc:
+                    raise Failure("lock unreadable; reconcile required") from exc
+                if existing.get("operation_id") != self.operation_id:
+                    raise Failure("foreign operation lock")
+                if existing.get("owner") != self.owner:
+                    raise Failure("foreign owner lock")
+                if float(existing.get("expires", 0)) >= now:
+                    raise Failure("unexpired lock")
+                raise Failure("expired lock requires physical reconciliation")
 
     def heartbeat(self, now: float | None = None) -> None:
         now = time.time() if now is None else now
-        if not self.path.exists():
-            raise Failure("lock missing")
-        current = json.loads(self.path.read_text(encoding="utf-8"))
-        if current.get("operation_id") != self.operation_id or current.get("owner") != self.owner:
-            raise Failure("lock ownership mismatch")
-        current.update(heartbeat=now, expires=now + self.ttl)
-        _durable_json(self.path, current)
+        with self._guard():
+            if not self.path.exists():
+                raise Failure("lock missing")
+            current = json.loads(self.path.read_text(encoding="utf-8"))
+            if (current.get("operation_id") != self.operation_id
+                    or current.get("owner") != self.owner
+                    or self.token is None
+                    or current.get("token") != self.token
+                    or int(current.get("generation", 0)) != self.generation):
+                raise Failure("lock ownership mismatch")
+            current.update(heartbeat=now, expires=now + self.ttl)
+            _durable_json(self.path, current)
 
     def reconcile_and_reclaim(self, physical_check: Callable[[str], dict[str, object]], now: float | None = None) -> None:
         if not callable(physical_check):
@@ -265,23 +330,32 @@ class TaskLock:
                 or set(observation).intersection(required) != required):
             raise Failure("reconcile callback did not inspect this operation")
         now = time.time() if now is None else now
-        if self.path.exists():
-            current = json.loads(self.path.read_text(encoding="utf-8"))
-            if float(current.get("expires", 0)) >= now:
-                raise Failure("unexpired lock")
-            if current.get("operation_id") != self.operation_id:
-                raise Failure("different operation lock")
-            self.path.unlink()
-            _fsync_dir(self.path.parent)
-        self.claim(now)
+        with self._guard():
+            if self.path.exists():
+                current = json.loads(self.path.read_text(encoding="utf-8"))
+                if float(current.get("expires", 0)) >= now:
+                    raise Failure("unexpired lock")
+                if current.get("operation_id") != self.operation_id:
+                    raise Failure("different operation lock")
+                self.path.unlink()
+                _fsync_dir(self.path.parent)
+                generation = int(current.get("generation", 0)) + 1
+            else:
+                generation = 1
+            self._claim_unlocked(now, generation)
 
     def release(self) -> None:
-        if self.path.exists():
-            current = json.loads(self.path.read_text(encoding="utf-8"))
-            if current.get("operation_id") != self.operation_id or current.get("owner") != self.owner:
-                raise Failure("lock ownership mismatch")
-            self.path.unlink()
-            _fsync_dir(self.path.parent)
+        with self._guard():
+            if self.path.exists():
+                current = json.loads(self.path.read_text(encoding="utf-8"))
+                if (current.get("operation_id") != self.operation_id
+                        or current.get("owner") != self.owner
+                        or self.token is None
+                        or current.get("token") != self.token
+                        or int(current.get("generation", 0)) != self.generation):
+                    raise Failure("lock ownership mismatch")
+                self.path.unlink()
+                _fsync_dir(self.path.parent)
 
 
 def _heartbeat_pulse(lock: TaskLock) -> Callable[[], None]:
@@ -363,7 +437,8 @@ class FileSafety:
         return expected
 
     def _new(self, op_id: str, source_rel: str, target_rel: str, source: Path, target: Path,
-             source_id: Identity, replace: bool, owner: str) -> Journal:
+             source_id: Identity, replace: bool, owner: str,
+             replacement_id: Identity | None = None) -> Journal:
         _validate_op_id(op_id)
         directory = self.ops / op_id
         directory.mkdir(parents=True, exist_ok=False)
@@ -372,7 +447,8 @@ class FileSafety:
         journal.write(State.PREFLIGHT, operation_id=op_id, owner=owner,
                       source_relative=source_rel, target_relative=target_rel,
                       source=str(source), target=str(target), source_identity=asdict(source_id),
-                      replace=replace, replacement_required=replace and target.exists(),
+                      replace=replace, replacement_required=replacement_id is not None,
+                      replacement_identity=asdict(replacement_id) if replacement_id else None,
                       same_device=source.stat().st_dev == target.parent.stat().st_dev,
                       stage=str(self.target_root / ".m006-stage" / op_id / "payload"),
                       source_trash="", replacement_trash="")
@@ -405,7 +481,7 @@ class FileSafety:
             self._hook(before_hook, trash_path=trash_path, metadata=metadata)
         if identity(path, progress=progress) != ident:
             raise Failure("trash payload changed before physical move")
-        _rename_noreplace(path, trash_path)
+        _rename_noreplace(path, trash_path, source_root=root, target_root=root)
         if hash_file(trash_path, progress=progress) != (ident.sha256, ident.size):
             raise Failure("trash payload hash mismatch after physical move")
         if hook:
@@ -433,7 +509,13 @@ class FileSafety:
         if policy.insufficient_space or (not same_device(source, target.parent)
                                          and shutil.disk_usage(target.parent).free < source_id.size):
             raise OSError(errno.ENOSPC, "insufficient target volume space")
-        journal = self._new(op_id, source_rel, target_rel, source, target, source_id, replace, owner)
+        replacement_id = identity(target) if replace and target.exists() else None
+        journal = self._new(op_id, source_rel, target_rel, source, target, source_id, replace, owner,
+                            replacement_id)
+        recorded = journal.read()
+        if (recorded.get("replacement_required") != (replacement_id is not None)
+                or recorded.get("replacement_identity") != (asdict(replacement_id) if replacement_id else None)):
+            raise Failure("replacement preflight observation was not durably recorded")
         lock = TaskLock(self.ops / op_id / "lock", op_id, owner, ttl=lock_ttl)
         lock.claim()
         progress = _heartbeat_pulse(lock)
@@ -444,6 +526,9 @@ class FileSafety:
             if journal.read().get("replacement_required") and not target.exists():
                 journal.write(State.CONFLICT, conflict="replacement target disappeared before commit")
                 raise Conflict("replacement target disappeared")
+            if replace and not journal.read().get("replacement_required") and target.exists():
+                journal.write(State.CONFLICT, conflict="replacement target appeared after preflight")
+                raise Conflict("replacement target appeared")
             same = source.stat().st_dev == target.parent.stat().st_dev
             if same:
                 if identity(source, progress=progress) != source_id:
@@ -451,15 +536,22 @@ class FileSafety:
                 if journal.read().get("replacement_required") and not target.exists():
                     journal.write(State.CONFLICT, conflict="replacement target disappeared before commit")
                     raise Conflict("replacement target disappeared")
+                if replace and not journal.read().get("replacement_required") and target.exists():
+                    journal.write(State.CONFLICT, conflict="replacement target appeared after preflight")
+                    raise Conflict("replacement target appeared")
                 if replace and target.exists():
                     old_id = identity(target, progress=progress)
+                    expected_old = journal.read().get("replacement_identity")
+                    if not expected_old or old_id != Identity(**expected_old):
+                        journal.write(State.CONFLICT, conflict="replacement target changed after preflight")
+                        raise Conflict("replacement target changed")
                     replacement = self._trash_record(target, target_rel, op_id, "replacement", old_id,
                                                      role="replacement", hook="after_replacement_physical_trash",
                                                      progress=progress)
                     journal.write(State.PREFLIGHT, replacement_trash=str(replacement))
                 _assert_internal_path(self.source_root, source)
                 _assert_internal_path(self.target_root, target)
-                _rename_noreplace(source, target)
+                _rename_noreplace(source, target, source_root=self.source_root, target_root=self.target_root)
                 self._hook("after_target_physical_commit", journal=journal.path)
             else:
                 stage = Path(journal.read()["stage"])
@@ -495,14 +587,21 @@ class FileSafety:
                 if current.get("replacement_required") and not target.exists():
                     journal.write(State.CONFLICT, conflict="replacement target disappeared before commit")
                     raise Conflict("replacement target disappeared")
+                if replace and not current.get("replacement_required") and target.exists():
+                    journal.write(State.CONFLICT, conflict="replacement target appeared after preflight")
+                    raise Conflict("replacement target appeared")
                 if replace and target.exists():
                     old_id = identity(target, progress=progress)
+                    expected_old = current.get("replacement_identity")
+                    if not expected_old or old_id != Identity(**expected_old):
+                        journal.write(State.CONFLICT, conflict="replacement target changed after preflight")
+                        raise Conflict("replacement target changed")
                     replacement = self._trash_record(target, target_rel, op_id, "replacement", old_id,
                                                      role="replacement", hook="after_replacement_physical_trash",
                                                      progress=progress)
                     journal.write(State.VERIFIED, replacement_trash=str(replacement))
                 _assert_internal_path(self.target_root, target)
-                _rename_noreplace(stage, target)
+                _rename_noreplace(stage, target, source_root=self.target_root, target_root=self.target_root)
                 self._hook("after_target_physical_commit", journal=journal.path)
             _assert_internal_path(self.target_root, target)
             target_hash, target_size = hash_file(target, progress=progress)
@@ -527,6 +626,10 @@ class FileSafety:
                                            progress=progress)
                 journal.write(State.SOURCE_TRASHED, source_trash=str(trash))
                 self._hook("after_source_trashed_journal", journal=journal.path)
+                _assert_internal_path(self.target_root, target)
+                if hash_file(target, progress=progress) != (source_id.sha256, source_id.size):
+                    journal.write(State.CONFLICT, conflict="target changed after source trash")
+                    raise Failure("target changed after source trash")
             elif not journal.read().get("source_trash"):
                 # Same-device rename consumed the source; this is still a valid
                 # move, while cross-device always leaves a physical trash item.
@@ -582,6 +685,8 @@ class FileSafety:
                 raise Failure("foreign unexpired lock")
             if float(current_lock.get("expires", 0)) < now:
                 lock.reconcile_and_reclaim(lambda requested: self.inspect(requested), now=now)
+            else:
+                lock.bind_existing()
         else:
             lock.claim()
         try:
@@ -668,7 +773,7 @@ class FileSafety:
         if source_trash.exists() and not valid_trash(source_trash, "source", data["source_relative"]):
             journal.write(State.MANUAL, conflict="source trash metadata/hash invalid")
             return journal.read()
-        if replacement_trash.exists() and not valid_trash(replacement_trash, "replacement", data["target_relative"]):
+        if replacement_trash.exists() and not valid_trash(replacement_trash, "replacement", data["target_relative"], "replacement"):
             journal.write(State.MANUAL, conflict="replacement trash metadata/hash invalid")
             return journal.read()
         # A replacement crash can leave durable replacement metadata while the
@@ -683,12 +788,19 @@ class FileSafety:
                 return journal.read()
             try:
                 record = json.loads(metadata.read_text(encoding="utf-8"))
-                old_hash, old_size = hash_file(target, progress=progress)
-                if (record.get("operation_id") != op_id or record.get("root_role") != "replacement"
-                        or record.get("sha256") != old_hash or record.get("size") != old_size):
+                expected_old = data.get("replacement_identity")
+                old_id = identity(target, progress=progress)
+                if (record.get("schema_version") != TRASH_SCHEMA
+                        or record.get("operation_id") != op_id
+                        or record.get("root_role") != "replacement"
+                        or record.get("reason") != "replacement"
+                        or record.get("original_relative_path") != data["target_relative"]
+                        or record.get("trash_relative_path") != str(replacement_trash.relative_to(self.target_root))
+                        or not expected_old or old_id != Identity(**expected_old)
+                        or record.get("sha256") != old_id.sha256 or record.get("size") != old_id.size):
                     journal.write(State.CONFLICT, conflict="replacement metadata does not match old target")
                     return journal.read()
-                _rename_noreplace(target, replacement_trash)
+                _rename_noreplace(target, replacement_trash, source_root=self.target_root, target_root=self.target_root)
                 journal.write(State(data["state"]), replacement_trash=str(replacement_trash))
             except (OSError, ValueError, KeyError):
                 journal.write(State.CONFLICT, conflict="replacement metadata invalid")
@@ -703,6 +815,10 @@ class FileSafety:
                                        role="source", progress=progress)
             data["source_trash"] = str(trash)
             journal.write(State.SOURCE_TRASHED, source_trash=str(trash))
+            self._hook("after_source_trashed_journal", journal=journal.path)
+            if not matching(target):
+                journal.write(State.CONFLICT, conflict="target changed after source trash")
+                return journal.read()
         elif target_ok and not source.exists():
             pass
         elif target.exists() and not target_ok:
@@ -712,7 +828,7 @@ class FileSafety:
             if not matching(stage):
                 stage.unlink(); journal.write(State.MANUAL, conflict="stage hash differs")
                 return journal.read()
-            _rename_noreplace(stage, target)
+            _rename_noreplace(stage, target, source_root=self.target_root, target_root=self.target_root)
             journal.write(State.TARGET_COMMITTED, target_hash=hash_file(target, progress=progress)[0])
             self._hook("after_target_committed_journal", journal=journal.path)
             if hash_file(target, progress=progress) != (expected["sha256"], expected["size"]):
@@ -725,11 +841,15 @@ class FileSafety:
                                        "move-source-recovery", identity(source, progress=progress),
                                        role="source", progress=progress)
             journal.write(State.SOURCE_TRASHED, source_trash=str(trash))
+            self._hook("after_source_trashed_journal", journal=journal.path)
+            if not matching(target):
+                journal.write(State.CONFLICT, conflict="target changed after source trash")
+                return journal.read()
         elif source_ok and not target.exists():
             if data.get("same_device"):
                 # A same-device physical commit may not have reached the
                 # journal; retry only with noreplace, never overwrite.
-                _rename_noreplace(source, target)
+                _rename_noreplace(source, target, source_root=self.source_root, target_root=self.target_root)
             else:
                 # A crash before the first stage boundary leaves no stage.
                 # Recreate it on the target volume with the same bounded copy
@@ -750,7 +870,7 @@ class FileSafety:
                     stage.unlink(missing_ok=True)
                     journal.write(State.MANUAL, conflict="recovery stage hash mismatch")
                     return journal.read()
-                _rename_noreplace(stage, target)
+                _rename_noreplace(stage, target, source_root=self.target_root, target_root=self.target_root)
             journal.write(State.TARGET_COMMITTED, target_hash=hash_file(target, progress=progress)[0])
         elif not source.exists() and not target.exists():
             journal.write(State.MANUAL, conflict="neither source nor target is physically present")
@@ -769,11 +889,15 @@ class FileSafety:
                                        "move-source-recovery", identity(source, progress=progress),
                                        role="source", progress=progress)
             journal.write(State.SOURCE_TRASHED, source_trash=str(trash))
+            self._hook("after_source_trashed_journal", journal=journal.path)
+            if not matching(target):
+                journal.write(State.CONFLICT, conflict="target changed after source trash")
+                return journal.read()
             final = journal.read()
         if target.exists() and matching(target):
             if data.get("replacement_required") and not replacement_trash.exists():
                 journal.write(State.MANUAL, conflict="replacement trash missing")
-            elif data.get("replacement_required") and not valid_trash(replacement_trash, "replacement", data["target_relative"]):
+            elif data.get("replacement_required") and not valid_trash(replacement_trash, "replacement", data["target_relative"], "replacement"):
                 journal.write(State.MANUAL, conflict="replacement trash metadata/hash invalid")
             elif data.get("same_device") or (final.get("source_trash")
                                                and valid_trash(Path(final["source_trash"]), "source", data["source_relative"])):
@@ -832,7 +956,7 @@ class FileSafety:
         if not trash.exists() or hash_file(trash) != (record["sha256"], record["size"]):
             raise Failure("trash hash mismatch")
         destination.parent.mkdir(parents=True, exist_ok=True)
-        _rename_noreplace(trash, destination)
+        _rename_noreplace(trash, destination, source_root=root, target_root=root)
         _fsync_dir(destination.parent)
         return "restored"
 

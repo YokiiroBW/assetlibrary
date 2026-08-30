@@ -10,6 +10,7 @@ import tempfile
 import time
 import tracemalloc
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -20,6 +21,7 @@ from file_safety import (  # noqa: E402
     CHUNK, Conflict, Failure, FileSafety, Policy, State, TaskLock,
     UnsupportedPrimitive, hash_file,
 )
+import file_safety as file_safety_module  # noqa: E402
 from performance import BYTES_100_GIB  # noqa: E402
 
 
@@ -125,6 +127,38 @@ class StateAndPaths(Fixture):
             same.move("c.bin", "d.bin")
         self.assertTrue((self.source / "c.bin").exists())
 
+    def test_rename_pins_every_ancestor_against_symlink_swap(self):
+        base = self.root / "pinned"
+        source_parent = base / "source"
+        target_parent = base / "target" / "nested" / "deep"
+        source_parent.mkdir(parents=True)
+        target_parent.mkdir(parents=True)
+        external = Path(tempfile.mkdtemp(prefix="m006-external-"))
+        self.external_dirs.append(external)
+        (external / "dest").write_bytes(b"must-not-touch")
+        source = source_parent / "source"
+        source.write_bytes(b"payload")
+        nested = base / "target" / "nested"
+        moved_nested = base / "target" / "nested-pinned"
+        original_open = os.open
+        swapped = False
+
+        def swap_before_deep(path, flags, mode=0o777, *, dir_fd=None):
+            nonlocal swapped
+            if path == "deep" and dir_fd is not None and not swapped:
+                nested.rename(moved_nested)
+                nested.symlink_to(external, target_is_directory=True)
+                swapped = True
+            return original_open(path, flags, mode, dir_fd=dir_fd)
+
+        with mock.patch.object(file_safety_module.os, "open", side_effect=swap_before_deep):
+            file_safety_module._rename_noreplace(source, target_parent / "dest")
+        self.assertTrue(swapped)
+        self.assertEqual((external / "dest").read_bytes(), b"must-not-touch")
+        self.assertTrue((moved_nested / "deep" / "dest").exists())
+        nested.unlink()
+        moved_nested.rename(nested)
+
     def test_protection_permission_space_and_cancel_are_fail_closed(self):
         self.write()
         cases = (Policy(protected_sources=frozenset({"a.bin"})),
@@ -154,6 +188,35 @@ class StateAndPaths(Fixture):
         self.assertEqual(hash_file(replacement)[0], metadata["sha256"])
         self.assertEqual(self.engine.restore(replacement, target="restored-old"), "restored")
         self.assertEqual((self.target / "restored-old").read_bytes(), b"old")
+
+    def test_replace_target_appearing_after_preflight_is_not_trashed(self):
+        self.write("appears", b"incoming")
+
+        def appear(name, extra):
+            if name == "after_preflight_journal":
+                (self.target / "appears").write_bytes(b"concurrent")
+
+        self.engine.hooks = appear
+        with self.assertRaises(Conflict):
+            self.engine.move("appears", "appears", op_id="replace-appears", replace=True)
+        self.assertTrue((self.source / "appears").exists())
+        self.assertEqual((self.target / "appears").read_bytes(), b"concurrent")
+        self.assertFalse((self.target / ".m006-trash" / "replace-appears").exists())
+
+    def test_replace_target_identity_change_is_not_trashed(self):
+        self.write("changes", b"incoming")
+        (self.target / "changes").write_bytes(b"old")
+
+        def change(name, extra):
+            if name == "after_preflight_journal":
+                (self.target / "changes").write_bytes(b"changed")
+
+        self.engine.hooks = change
+        with self.assertRaises(Conflict):
+            self.engine.move("changes", "changes", op_id="replace-changes", replace=True)
+        self.assertTrue((self.source / "changes").exists())
+        self.assertEqual((self.target / "changes").read_bytes(), b"changed")
+        self.assertFalse((self.target / ".m006-trash" / "replace-changes").exists())
 
     def test_ordinary_delete_reason_and_same_hash_restore(self):
         self.write("remove-me", b"delete-me")
@@ -303,6 +366,48 @@ class CrossDeviceAndRecovery(Fixture):
         self.assertTrue((self.source / "a").exists())
         state = json.loads((self.runtime / "operations" / op_id / "journal.json").read_text())["state"]
         self.assertIn(state, ("conflict", "manual_attention"))
+
+    def test_target_change_after_source_trash_never_completes(self):
+        self.use_actual_cross_devices()
+        self.write("post-trash", b"incoming")
+
+        def change(name, extra):
+            if name == "after_source_trashed_journal":
+                (self.target / "post-trash").write_bytes(b"changed-after-trash")
+
+        self.engine.hooks = change
+        with self.assertRaises(Failure):
+            self.engine.move("post-trash", "post-trash", op_id="post-trash", replace=False)
+        journal = json.loads((self.runtime / "operations" / "post-trash" / "journal.json").read_text())
+        self.assertEqual(journal["state"], State.CONFLICT.value)
+        self.assertTrue((self.source / ".m006-trash" / "post-trash" / "source-post-trash").exists())
+        self.assertNotEqual((self.target / "post-trash").read_bytes(), b"incoming")
+
+    def test_recovery_target_change_after_source_trash_never_completes(self):
+        self.use_actual_cross_devices()
+        self.write("recover-post-trash", b"incoming")
+        script = """import sys,os
+sys.path.insert(0,sys.argv[1]); from pathlib import Path; from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
+def h(name, extra):
+ if name == 'after_target_physical_commit': os._exit(77)
+e.hooks=h
+try: e.move('recover-post-trash','recover-post-trash',op_id='recover-post-trash')
+except Exception: os._exit(78)
+"""
+        child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
+                                str(self.target), str(self.runtime)], check=False)
+        self.assertEqual(child.returncode, 77)
+
+        def change(name, extra):
+            if name == "after_source_trashed_journal":
+                (self.target / "recover-post-trash").write_bytes(b"changed-after-trash")
+
+        self.engine.hooks = change
+        result = self.engine.recover("recover-post-trash", owner="worker-1")
+        self.assertEqual(result["state"], State.CONFLICT.value)
+        self.assertTrue((self.source / ".m006-trash" / "recover-post-trash" / "source-recover-post-trash").exists())
+        self.assertFalse((self.runtime / "operations" / "recover-post-trash" / "lock").exists())
 
     def test_mutation_during_copy_fails_closed(self):
         self.use_actual_cross_devices()
@@ -530,6 +635,32 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.reco
         self.assertEqual(hash_file(old), (hashlib.sha256(b"old-target").hexdigest(), len(b"old-target")))
         self.assertTrue(Path(str(old) + ".json").exists())
 
+    def test_invalid_replacement_metadata_causes_no_physical_write(self):
+        self.use_actual_cross_devices()
+        self.write("invalid-meta", b"incoming")
+        (self.target / "invalid-item").write_bytes(b"old-target")
+        script = """import sys,os
+sys.path.insert(0,sys.argv[1]); from pathlib import Path; from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
+def h(name,extra):
+ if name=='before_replacement_physical_trash':os._exit(77)
+e.hooks=h
+try:e.move('invalid-meta','invalid-item',op_id='invalid-meta',replace=True)
+except Exception:os._exit(78)
+"""
+        child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
+                                str(self.target), str(self.runtime)], check=False)
+        self.assertEqual(child.returncode, 77)
+        metadata = self.target / ".m006-trash" / "invalid-meta" / "replacement-invalid-item.json"
+        record = json.loads(metadata.read_text())
+        record["reason"] = "forged"
+        metadata.write_text(json.dumps(record))
+        result = self.engine.recover("invalid-meta", owner="worker-1")
+        self.assertIn(result["state"], (State.CONFLICT.value, State.MANUAL.value))
+        self.assertEqual((self.target / "invalid-item").read_bytes(), b"old-target")
+        self.assertTrue((self.source / "invalid-meta").exists())
+        self.assertFalse((self.target / ".m006-trash" / "invalid-meta" / "replacement-invalid-item").exists())
+
 
 class LockTests(Fixture):
     def test_owner_heartbeat_expiry_reconcile_and_release(self):
@@ -550,6 +681,25 @@ class LockTests(Fixture):
                     "stage": {}, "source_trash": {}, "replacement_trash": {}}
         first.reconcile_and_reclaim(observed, now=99)
         first.release()
+
+    def test_old_owner_cannot_update_or_release_reclaimed_generation(self):
+        path = self.runtime / "generation.lock"
+        first = TaskLock(path, "generation-op", "owner-a", ttl=2)
+        first.claim(now=10)
+        second = TaskLock(path, "generation-op", "owner-b", ttl=2)
+
+        def observed(op):
+            return {"operation_id": op, "physical_reconciled": True, "source": {}, "target": {},
+                    "stage": {}, "source_trash": {}, "replacement_trash": {}}
+
+        second.reconcile_and_reclaim(observed, now=99)
+        before = json.loads(path.read_text())
+        with self.assertRaises(Failure):
+            first.heartbeat(now=100)
+        with self.assertRaises(Failure):
+            first.release()
+        self.assertEqual(json.loads(path.read_text()), before)
+        second.release()
 
     def test_concurrent_o_excl_claim_exactly_one_winner(self):
         path = self.runtime / "concurrent.lock"
