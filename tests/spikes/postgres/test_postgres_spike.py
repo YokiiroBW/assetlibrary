@@ -176,11 +176,15 @@ class PostgresSpike(unittest.TestCase):
         for _ in range(5):
             for name, query in [("keyset", f"SELECT a.asset_id FROM library.asset a WHERE (a.library_id,a.asset_id) > {cursor} AND EXISTS (SELECT 1 FROM library.permission_scope p WHERE p.library_id=a.library_id AND p.principal_id='perf-reader' AND p.access_level <> 'none') ORDER BY a.library_id,a.asset_id LIMIT 50"), ("fts", "SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt')"), ("trigram", "SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'")]:
                 start = time.perf_counter(); self.sql(query); timings[name].append((time.perf_counter()-start)*1000)
-        plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT a.asset_id FROM library.asset a WHERE (a.library_id,a.asset_id) > ('00000000-0000-0000-0000-000000000500'::uuid,'00000000-0000-0000-0000-000000000000'::uuid) AND EXISTS (SELECT 1 FROM library.permission_scope p WHERE p.library_id=a.library_id AND p.principal_id='perf-reader' AND p.access_level <> 'none') ORDER BY a.library_id,a.asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE relative_path LIKE 'batch/42/%'; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
+        keyset_plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT a.asset_id FROM library.asset a WHERE (a.library_id,a.asset_id) > ('00000000-0000-0000-0000-000000000500'::uuid,'00000000-0000-0000-0000-000000000000'::uuid) AND EXISTS (SELECT 1 FROM library.permission_scope p WHERE p.library_id=a.library_id AND p.principal_id='perf-reader' AND p.access_level <> 'none') ORDER BY a.library_id,a.asset_id LIMIT 50;")
+        path_plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE relative_path LIKE 'batch/42/%';")
+        fts_plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt');")
+        trigram_plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%';")
+        size = self.sql("SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset'));")
+        plan = keyset_plan + path_plan + fts_plan + trigram_plan + size
         (RUNTIME/'500k-plan.txt').parent.mkdir(parents=True, exist_ok=True)
         dist = '\n'.join(f"WARM_{name.upper()}_MS=min:{min(vals):.3f},median:{sorted(vals)[len(vals)//2]:.3f},p95:{sorted(vals)[-1]:.3f},max:{max(vals):.3f}" for name, vals in timings.items())
         (RUNTIME/'500k-plan.txt').write_text(plan + '\n' + dist + '\n')
-        keyset_plan = plan.split('Finalize Aggregate', 1)[0]
-        self.assertIn('asset_library_path_keyset', keyset_plan); self.assertIn('Index Only Scan', keyset_plan); self.assertNotIn('Bitmap', keyset_plan); self.assertNotIn('Incremental Sort', keyset_plan); self.assertIn('asset_search_gin', plan); self.assertIn('asset_filename_trgm', plan)
+        self.assertIn('asset_library_path_keyset', keyset_plan); self.assertIn('Index Only Scan', keyset_plan); self.assertNotIn('Bitmap', keyset_plan); self.assertNotIn('Incremental Sort', keyset_plan); self.assertIn('asset_search_gin', fts_plan); self.assertIn('asset_filename_trgm', trigram_plan)
 
 if __name__ == '__main__': unittest.main()
