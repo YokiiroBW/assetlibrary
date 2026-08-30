@@ -97,11 +97,11 @@ class SpikeTests(unittest.TestCase):
         self.assertTrue((ROOT / "systemd/assetlibrary-m0-004-spike.service").exists())
         self.assertTrue((ROOT / "scripts/windows-service.ps1").exists())
         self.assertTrue((REPO / ".runtime/sandbox-storage/M0-004/artifact/win-x64/ServerPackagingSpike.exe").exists())
+        files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
+        subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
         expected = subprocess.check_output(["git", "log", "-1", "--format=%H", "--", "tests/spikes/server-packaging", ".codex/tasks/M0-004.md"], cwd=REPO, text=True).strip()
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), expected)
-        files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
         self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip(), subprocess.check_output(["sha256sum", str(files)], text=True).split()[0])
-        subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
         first = files.read_bytes()
         subprocess.run(["bash", str(ROOT / "bootstrap.sh")], check=True, env=run_env({"M0_004_DOTNET_DIR": "/tmp/m0-004-dotnet-10.0.111"}), stdout=subprocess.DEVNULL)
         self.assertEqual(first, files.read_bytes(), "cold publish is not reproducible")
