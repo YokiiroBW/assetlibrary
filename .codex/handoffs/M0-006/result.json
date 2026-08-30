@@ -3,34 +3,46 @@
   "task_id": "M0-006",
   "title": "文件操作崩溃恢复、强哈希与垃圾桶验证",
   "milestone": "M0",
-  "status": "ready_for_review",
+  "status": "partial",
   "owner": "codex-agent-m0-006-clean",
   "branch": "codex/m0-006-file-safety-clean",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006-clean",
-  "commit": "",
-  "changed_files": [],
+  "commit": "c75ab69",
+  "changed_files": [
+    "tests/spikes/file-safety/file_safety.py",
+    "tests/spikes/file-safety/test_file_safety.py",
+    "docs/spikes/M0-006/README.md",
+    ".codex/handoffs/M0-006/summary.md",
+    ".codex/handoffs/M0-006/tests.md",
+    ".codex/handoffs/M0-006/result.json"
+  ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 16,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": [],
-  "blocked_by": [],
+  "risks": [
+    "Windows atomic no-overwrite/fsync mapping has no executor evidence",
+    "1/20/100 GiB release-size gates were not run; only logical 100 GiB boundary was asserted"
+  ],
+  "blocked_by": [
+    "Windows executor unavailable for candidate primitive matrix"
+  ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/M0-006/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "module": "",
-    "dependency_direction_ok": false,
-    "reused_existing_logic": [],
+    "module": "file-safety-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["M0-007 performance.BYTES_100_GIB import"],
     "duplicated_logic": [],
     "cross_module_access": [],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [],
-    "architecture_tests": [],
-    "technical_debt": []
+    "architecture_tests": ["validate_handoff.py", "validate_architecture_baseline.py", "verify_repository.py"],
+    "technical_debt": ["M0-009 must freeze Linux capability probes, Windows mapping, fsync policy, and release-size gates"]
   }
 }
