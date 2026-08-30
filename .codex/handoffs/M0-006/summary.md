@@ -4,7 +4,7 @@
 
 `partial`
 
-实现 commits：`c75ab69`、`c3db4665b29a47ddd277e9f2966987dfc3bf4703`；metadata commit 在本文件提交后回填。
+实现 commit：`10c0643a433935f2311fd0b926ad31549f0ee6b3`（包含此前实现与本轮修正）；metadata commit 在本文件提交后回填。
 
 ## 完成内容
 
@@ -44,7 +44,7 @@ trash/hash 判断，不信 COMPLETE。
 
 ## 测试结果
 
-21 passed, 0 failed, 0 skipped。命令：
+31 passed, 0 failed, 0 skipped。命令：
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v`。
 另执行三项 validators、`git diff --check`（结果写入 tests.md）。
 
@@ -58,13 +58,22 @@ trash/hash 判断，不信 COMPLETE。
 所有 destructive fixture 位于 exact `.runtime/sandbox-storage/M0-006/` 或 owned
 `m006-*` temp；symlink/absolute/..、保护/权限/空间/cancel、mutation、corrupt target、
 collision、restore/replace/delete、lock concurrency/reclaim 均有测试。16MiB 实际 move：
-16,777,216 bytes，1MiB buffer，elapsed 0.310058s，tracemalloc peak 3,171,064 bytes。
+16,777,216 bytes，1MiB buffer，elapsed 0.538528s，tracemalloc peak 3,164,406 bytes（测试输出直接记录）。
 
 本轮补充：recovery lock 由 operation-bound inspect callback 授权回收；inspect 从已验证
 relative path 派生所有 source/target/stage/trash 与 metadata，拒绝 journal 路径篡改、
 未知 state、op_id traversal 和 metadata symlink。source/replacement metadata-only 与
 physical-trash gap 均验证后恢复，所有 recovery return/exception 由 owner-aware finally
 释放锁。
+
+最终 correction 补充同卷 replacement metadata-only subprocess crash/recovery；restore 先
+证明 payload 位于 configured task-local trash、逐组件无 symlink，再读取 metadata/hash 并
+校验 root_role、operation_id、trash_relative_path；删除了任意递归清理 helper。
+
+本轮最终修正固定目录 fd 上的 rename 后 fsync；取消替换保留旧 target；恢复与 trash
+cleanup 均从 configured roots 派生路径；trash metadata 额外校验 role、原始相对路径和
+delete reason；长拷贝/hash/trash 使用按 TTL 节流 heartbeat，第二 owner 在超过初始 TTL
+后仍被活跃 owner 拒绝；恢复阶段 source/target 在 source-trash 前再次 full-hash。
 
 Linux same-device/cross-device/fsync/noreplace 均 executed；Windows 无 executor，Windows
 候选原语与 1/20/100GiB release-size 仍为外部门禁，未宣称通过。

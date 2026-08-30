@@ -23,11 +23,11 @@ handoff validator、architecture baseline validator、repository validator、dif
 
 ## 通过
 
-21 passed / 0 failed / 0 skipped。包含 cross-device durable/physical crash boundaries
-（含 metadata-only source/replacement、physical trash gap）、1 个 same-device subprocess
-commit gap、replacement recovery、lock O_EXCL concurrency/expiry、16MiB multi-chunk
+31 passed / 0 failed / 0 skipped。包含 cross-device durable/physical crash boundaries
+（含 metadata-only source/replacement、physical trash gap）、same-device subprocess commit
+与 replacement gap、lock O_EXCL concurrency/expiry、16MiB multi-chunk
 bounded move、trash restore/delete、symlink/path tamper、unknown-state 和 operation-id
-拒绝。
+拒绝，以及 configured-trash containment/metadata consistency。
 
 ## 失败 / 跳过
 
@@ -40,10 +40,15 @@ bounded move、trash restore/delete、symlink/path tamper、unknown-state 和 op
 source absent，deterministic source trash+metadata valid，stage/lock absent。target hash
 full reopen 校验；冲突/损坏路径保留 source 并返回 conflict/manual。
 
+新增回归：cancelled replace 保留旧 target 且 recovery 不移动；journal stage 被篡改为
+外部路径时 cleanup 不删除外部文件；recovery source 在 target commit 后被修改时不入
+trash；慢拷贝在超过初始 lease TTL 后由第二 owner 尝试 recovery 仍被 unexpired lease
+拒绝。
+
 ## 性能数据
 
-最大实际 fixture 16,777,216 bytes；chunk 1,048,576 bytes；独立测量 elapsed 0.310058s，
-`tracemalloc` peak 3,171,064 bytes。逻辑 `BYTES_100_GIB=107374182400`，未物化大文件。
+最大实际 fixture 16,777,216 bytes；chunk 1,048,576 bytes；独立测量 elapsed 0.538528s，
+`tracemalloc` peak 3,164,406 bytes（测试输出直接记录）。逻辑 `BYTES_100_GIB=107374182400`，未物化大文件。
 
 ## 尚未覆盖
 
