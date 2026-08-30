@@ -7,7 +7,7 @@
   "owner": "codex-window-m0-001",
   "branch": "codex/m0-001-repo-foundation",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-001",
-  "commit": "0c631ce284de8a6dd3c9340c12bccf51a86f0603",
+  "commit": "b8bd4735882433866c7e93b5bcf444e8104418af",
   "changed_files": ["scripts/codex-new-task.py", "scripts/verify_repository.py", "tests/repository/test_codex_new_task.py", ".github/workflows/handoff-quality.yml", ".codex/policies/FILE_OWNERSHIP.md", "README.md", ".codex/tasks/M0-001.md", ".codex/handoffs/M0-001/summary.md", ".codex/handoffs/M0-001/result.json", ".codex/handoffs/M0-001/tests.md"],
   "changed_contracts": [],
   "tests": {
