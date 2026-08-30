@@ -47,6 +47,10 @@ class Fixture(unittest.TestCase):
     def use_actual_cross_devices(self):
         # The repository NAS mount (st_dev 147) and /tmp (st_dev 2050) are the
         # actual devices required by this Spike; no mock device classification.
+        if self.external_source is not None:
+            shutil.rmtree(self.external_source, ignore_errors=True)
+        if self.external_target is not None:
+            shutil.rmtree(self.external_target, ignore_errors=True)
         nas = HERE.parents[2] / ".runtime" / "sandbox-storage" / "M0-006" / f"test-{os.getpid()}"
         shutil.rmtree(nas, ignore_errors=True)
         nas.mkdir(parents=True)
@@ -91,6 +95,23 @@ class StateAndPaths(Fixture):
         self.assertEqual(result["state"], "cancelled")
         self.assertFalse((self.runtime / "operations" / "cancel-op" / "lock").exists())
         self.assertFalse((self.target / ".m006-stage" / "cancel-op").exists())
+        (self.target / "cancelled").write_bytes(b"unexpected")
+        recovered = self.engine.recover("cancel-op", owner="worker-1")
+        self.assertEqual(recovered["state"], "manual_attention")
+        self.assertTrue((self.source / "cancelled").exists())
+
+    def test_cancelled_replace_keeps_existing_target_and_never_moves(self):
+        self.write("cancel-replace", b"incoming")
+        (self.target / "cancel-replace").write_bytes(b"old-target")
+        result = self.engine.move("cancel-replace", "cancel-replace", op_id="cancel-replace",
+                                  replace=True, policy=Policy(cancel=True))
+        self.assertEqual(result["state"], State.CANCELLED.value)
+        recovered = self.engine.recover("cancel-replace", owner="worker-1")
+        self.assertEqual(recovered["state"], State.CANCELLED.value)
+        self.assertEqual((self.source / "cancel-replace").read_bytes(), b"incoming")
+        self.assertEqual((self.target / "cancel-replace").read_bytes(), b"old-target")
+        self.assertFalse((self.target / ".m006-stage" / "cancel-replace").exists())
+        self.assertFalse((self.runtime / "operations" / "cancel-replace" / "lock").exists())
 
     def test_same_device_noreplace_and_collision(self):
         same = FileSafety(self.source, self.source, self.runtime)
@@ -185,6 +206,40 @@ class StateAndPaths(Fixture):
         with self.assertRaises(Failure):
             self.engine.restore(payload)
 
+    def test_precommit_cleanup_ignores_tampered_external_stage(self):
+        self.use_actual_cross_devices()
+        self.write("stage-cleanup", b"stage-cleanup")
+        external = Path(tempfile.mkdtemp(prefix="m006-external-"))
+        self.external_dirs.append(external)
+        victim = external / "victim"
+        victim.write_bytes(b"must-survive")
+
+        def tamper(name, extra):
+            if name == "after_verified_journal":
+                journal_path = self.runtime / "operations" / "stage-cleanup" / "journal.json"
+                value = json.loads(journal_path.read_text())
+                value["stage"] = str(victim)
+                journal_path.write_text(json.dumps(value))
+                raise Failure("injected post-verification failure")
+
+        self.engine.hooks = tamper
+        with self.assertRaises(Failure):
+            self.engine.move("stage-cleanup", "stage-cleanup", op_id="stage-cleanup")
+        self.assertEqual(victim.read_bytes(), b"must-survive")
+        self.assertFalse((self.target / ".m006-stage" / "stage-cleanup" / "payload").exists())
+        self.assertTrue((self.source / "stage-cleanup").exists())
+
+    def test_restore_rejects_root_role_or_relative_path_mismatch(self):
+        self.write("restore-check", b"restore")
+        result = self.engine.delete("restore-check", op_id="restore-check")
+        trash = Path(result["source_trash"])
+        metadata = Path(str(trash) + ".json")
+        record = json.loads(metadata.read_text())
+        record["root_role"] = "replacement"
+        metadata.write_text(json.dumps(record))
+        with self.assertRaises(Failure):
+            self.engine.restore(trash)
+
     def test_unknown_journal_state_is_rejected(self):
         self.write("unknown", b"state")
         result = self.engine.move("unknown", "unknown", op_id="unknown-op")
@@ -218,6 +273,8 @@ class StateAndPaths(Fixture):
         self.assertEqual(hash_file(self.target / "16m.bin")[1], 16 * 1024 * 1024)
         self.engine.last_evidence.update(actual_bytes=16 * 1024 * 1024,
                                          elapsed_seconds=elapsed, peak_tracemalloc_bytes=peak)
+        print(f"M0-006 evidence actual_bytes=16777216 elapsed_seconds={elapsed:.6f} "
+              f"peak_tracemalloc_bytes={peak}")
 
 
 class CrossDeviceAndRecovery(Fixture):
@@ -260,6 +317,142 @@ class CrossDeviceAndRecovery(Fixture):
             self.engine.move("changing", "changing", mutation=mutate)
         self.assertTrue((self.source / "changing").exists())
         self.assertFalse((self.target / "changing").exists())
+
+    def test_source_mutation_after_target_commit_stays_out_of_trash(self):
+        self.use_actual_cross_devices()
+        self.write("late-change", b"stable")
+        def late_mutation(name, extra):
+            if name == "after_target_committed_journal":
+                (self.source / "late-change").write_bytes(b"changed-after-commit")
+        self.engine.hooks = late_mutation
+        with self.assertRaises(Failure):
+            self.engine.move("late-change", "late-change", op_id="late-mutation")
+        journal = json.loads((self.runtime / "operations" / "late-mutation" / "journal.json").read_text())
+        self.assertEqual(journal["state"], "conflict")
+        self.assertTrue((self.source / "late-change").exists())
+        self.assertFalse((self.source / ".m006-trash" / "late-mutation" / "source-late-change").exists())
+
+    def test_recovery_rehashes_source_before_trash(self):
+        self.use_actual_cross_devices()
+        self.write("recover-late", b"stable")
+        script = """import sys,os
+sys.path.insert(0,sys.argv[1]); from pathlib import Path; from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
+def h(name, extra):
+ if name == 'after_target_physical_commit': os._exit(77)
+e.hooks=h
+try: e.move('recover-late','recover-late',op_id='recover-late')
+except Exception: os._exit(78)
+"""
+        child = subprocess.run([sys.executable, "-c", script, str(HERE), str(self.source),
+                                str(self.target), str(self.runtime)], check=False)
+        self.assertEqual(child.returncode, 77)
+        (self.source / "recover-late").write_bytes(b"changed-after-crash")
+        result = self.engine.recover("recover-late", owner="worker-1")
+        self.assertIn(result["state"], (State.CONFLICT.value, State.MANUAL.value))
+        self.assertTrue((self.source / "recover-late").exists())
+        self.assertFalse((self.source / ".m006-trash" / "recover-late" / "source-recover-late").exists())
+
+    def test_target_parent_symlink_after_verified_is_not_followed(self):
+        self.use_actual_cross_devices()
+        self.write("escape-check", b"source")
+        external = Path(tempfile.mkdtemp(prefix="m006-external-"))
+        self.external_dirs.append(external)
+        (external / "escape-check").write_bytes(b"must-stay")
+        def swap_parent(name, extra):
+            if name == "after_verified_journal":
+                shutil.rmtree(self.target / "nested")
+                (self.target / "nested").symlink_to(external, target_is_directory=True)
+        self.engine.hooks = swap_parent
+        with self.assertRaises(Failure):
+            self.engine.move("escape-check", "nested/escape-check", op_id="parent-swap")
+        self.assertEqual((external / "escape-check").read_bytes(), b"must-stay")
+        self.assertTrue((self.source / "escape-check").exists())
+
+    def test_internal_stage_and_trash_symlink_fail_closed(self):
+        self.use_actual_cross_devices()
+        shutil.rmtree(self.target / ".m006-trash")
+        (self.target / ".m006-trash-outside").mkdir()
+        (self.target / ".m006-trash").symlink_to(self.target / ".m006-trash-outside", target_is_directory=True)
+        self.write("trash-link", b"trash")
+        (self.target / "trash-link").write_bytes(b"old")
+        with self.assertRaises(Failure):
+            self.engine.move("trash-link", "trash-link", op_id="trash-link", replace=True)
+        self.assertTrue((self.source / "trash-link").exists())
+        self.use_actual_cross_devices()
+        (self.target / ".m006-stage-outside").mkdir()
+        (self.target / ".m006-stage").symlink_to(self.target / ".m006-stage-outside", target_is_directory=True)
+        self.write("stage-link", b"stage")
+        with self.assertRaises(Failure):
+            self.engine.move("stage-link", "stage-link", op_id="stage-link")
+        self.assertTrue((self.source / "stage-link").exists())
+
+    def test_delete_physical_gap_recovers_from_durable_delete_journal(self):
+        self.use_actual_cross_devices()
+        self.write("delete-crash", b"delete-crash")
+        script = """import sys,os;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]))
+def h(name,extra):
+ if name=='after_source_physical_trash':os._exit(77)
+e.hooks=h
+try:e.delete('delete-crash',op_id='delete-crash')
+except Exception:os._exit(78)
+"""
+        child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.target),str(self.runtime)],capture_output=True)
+        self.assertEqual(child.returncode, 77)
+        recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.recover('delete-crash',owner='worker-1')['state'])
+"""
+        for _ in range(2):
+            result = subprocess.run([sys.executable,"-c",recover,str(HERE),str(self.source),str(self.target),str(self.runtime)],capture_output=True,text=True,check=False)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.strip(), "complete")
+        trash = self.source / ".m006-trash" / "delete-crash" / "source-delete-crash"
+        self.assertTrue(trash.exists())
+        self.assertTrue(Path(str(trash) + ".json").exists())
+        self.assertFalse((self.source / "delete-crash").exists())
+        self.assertFalse((self.runtime / "operations" / "delete-crash" / "lock").exists())
+
+    def test_cross_copy_heartbeats_keep_short_lease_alive(self):
+        self.use_actual_cross_devices()
+        self.write("heartbeat", b"heartbeat" * (1024 * 1024))
+        calls = []
+        original = TaskLock.heartbeat
+        def heartbeat(lock, now=None):
+            calls.append(lock.owner)
+            return original(lock, now)
+        TaskLock.heartbeat = heartbeat
+        try:
+            self.engine.move("heartbeat", "heartbeat", op_id="heartbeat", lock_ttl=0.001,
+                             heartbeat_every_chunks=1)
+        finally:
+            TaskLock.heartbeat = original
+        self.assertGreaterEqual(len(calls), 2)
+
+    def test_foreign_recovery_cannot_reclaim_active_slow_copy(self):
+        self.use_actual_cross_devices()
+        self.write("slow-copy", b"s" * (4 * CHUNK))
+        marker = self.runtime / "slow-copy.marker"
+        script = """import sys,time
+from pathlib import Path
+sys.path.insert(0,sys.argv[1]); from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4])); seen=False
+def mutate(path):
+ global seen
+ if not seen:
+  seen=True; Path(sys.argv[5]).write_text('copy-active'); time.sleep(0.30)
+e.move('slow-copy','slow-copy',op_id='slow-copy',owner='active',lock_ttl=1.0,mutation=mutate)
+"""
+        child = subprocess.Popen([sys.executable, "-c", script, str(HERE), str(self.source),
+                                  str(self.target), str(self.runtime), str(marker)])
+        deadline = time.monotonic() + 5
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        self.assertTrue(marker.exists())
+        with self.assertRaises(Failure):
+            self.engine.recover("slow-copy", owner="foreign")
+        self.assertEqual(child.wait(timeout=10), 0)
+        self.assertFalse((self.runtime / "operations" / "slow-copy" / "lock").exists())
 
     def test_replacement_physical_gap_recovers_old_trash_and_new_target(self):
         self.use_actual_cross_devices()
