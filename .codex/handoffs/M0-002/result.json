@@ -1,0 +1,75 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-002",
+  "title": "Windows Explorer 自定义命名空间与右侧视图技术验证",
+  "milestone": "M0",
+  "status": "partial",
+  "owner": "codex-agent-m0-002",
+  "branch": "codex/m0-002-windows-shell-spike",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
+  "commit": "PENDING_COMMIT",
+  "changed_files": [
+    "tests/spikes/windows-shell/CMakeLists.txt",
+    "tests/spikes/windows-shell/README.md",
+    "tests/spikes/windows-shell/src/AssetShellProtocol.h",
+    "tests/spikes/windows-shell/src/AssetShellExtension.cpp",
+    "tests/spikes/windows-shell/src/AssetHostStub.cpp",
+    "tests/spikes/windows-shell/scripts/build.ps1",
+    "tests/spikes/windows-shell/scripts/register.ps1",
+    "tests/spikes/windows-shell/scripts/verify-registration.ps1",
+    "tests/spikes/windows-shell/scripts/unregister.ps1",
+    "tests/spikes/windows-shell/scripts/run-host.ps1",
+    "tests/spikes/windows-shell/scripts/soak.ps1",
+    "tests/spikes/windows-shell/test_contracts.py",
+    "docs/spikes/M0-002/README.md",
+    ".codex/handoffs/M0-002/summary.md",
+    ".codex/handoffs/M0-002/result.json",
+    ".codex/handoffs/M0-002/tests.md"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 8,
+    "report": "tests.md"
+  },
+  "risks": [
+    "真实 Windows 11 x64 COM/Explorer 生命周期与故障隔离尚未验证。",
+    "8 小时 soak 尚未执行；当前无稳定性结论。",
+    "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
+  ],
+  "blocked_by": [
+    "Windows 11 x64 + Visual Studio 2022 Desktop C++ + Windows 11 SDK + CMake: ./tests/spikes/windows-shell/scripts/build.ps1",
+    "真实注册/导航/自定义视图/故障/卸载恢复: ./tests/spikes/windows-shell/scripts/register.ps1 -> verify-registration.ps1 -> run-host.ps1 (normal, invalid, crash, slow) -> unregister.ps1",
+    "20 次 crash/restart 与 8 小时 soak: ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8"
+  ],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/M0-002/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "windows-shell-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Windows SDK COM/Shell ABI and C++/WinRT base header"
+    ],
+    "duplicated_logic": [
+      "None; host ping is intentionally Spike-local and not shared business logic"
+    ],
+    "cross_module_access": [],
+    "new_language_or_framework": [
+      "C++17 + Windows SDK C++/WinRT/COM, limited to this Spike per task package"
+    ],
+    "new_major_dependencies": [
+      "None; no third-party runtime or library"
+    ],
+    "contract_changes": [],
+    "architecture_tests": [
+      "test_contracts.py forbidden-dependency and package-boundary checks",
+      "test_contracts.py version/length/timeout and HKCU registration symmetry checks"
+    ],
+    "technical_debt": [
+      "Real Windows evidence and 8-hour soak required before any architecture freeze",
+      "Spike-local PIDL/IPC must not become a production contract"
+    ]
+  }
+}
