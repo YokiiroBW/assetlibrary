@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-008",
+  "title": "官方 Provider 隔离进程与资源限制验证",
+  "milestone": "M0",
+  "status": "partial",
+  "owner": "codex-agent-m0-008",
+  "branch": "codex/m0-008-provider-sandbox-spike",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-008",
+  "commit": "24b4f3af933ee9a01d6929cdb6057911ea9c1f3e",
+  "changed_files": [".codex/handoffs/M0-008/result.json", ".codex/handoffs/M0-008/summary.md", ".codex/handoffs/M0-008/tests.md", ".codex/tasks/M0-008.md", "contracts/providers/README.md", "contracts/providers/provider-manifest.schema.json", "contracts/providers/provider-rpc.schema.json", "docs/spikes/M0-008/README.md", "tests/spikes/provider-sandbox/fixtures/manifest-invalid-write.json", "tests/spikes/provider-sandbox/fixtures/manifest-valid.json", "tests/spikes/provider-sandbox/fixtures/messages.json", "tests/spikes/provider-sandbox/isolation_probe.py", "tests/spikes/provider-sandbox/manifest.py", "tests/spikes/provider-sandbox/protocol.py", "tests/spikes/provider-sandbox/supervisor.py", "tests/spikes/provider-sandbox/test_contracts.py", "tests/spikes/provider-sandbox/test_isolation.py", "tests/spikes/provider-sandbox/test_supervisor.py", "tests/spikes/provider-sandbox/worker_fixture.py"],
+  "changed_contracts": ["contracts/providers/provider-manifest.schema.json", "contracts/providers/provider-rpc.schema.json"],
+  "tests": {"passed": 24, "failed": 0, "skipped": 0, "report": "tests.md"},
+  "risks": ["Linux unshare/bwrap network namespace enforcement failed with Operation not permitted; hard network denial is unproven.", "Filesystem read-only input, writable-temp confinement, cgroup resource/accounting and seccomp are unproven.", "Windows Job Object and restricted-token/AppContainer enforcement has no executed evidence.", "Candidate RPC/limits/restart semantics require M0-009 production-host validation and freeze.", "RPC cancel envelope is present in the contract but this supervisor only performs forced process-tree cancellation; no cancel acknowledgement was executed."],
+  "blocked_by": ["No executed resource/accounting enforcement evidence from the successful systemd user scope; cgroup root is not writable and namespace launcher is not permitted", "No Windows x64 executor in this environment"],
+  "recommended_merge_order": 8,
+  "handoff_summary": "summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "provider-sandbox-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["Evolved the existing contracts/providers/provider-manifest.schema.json boundary", "Used only versioned Provider contract concepts; no production supervisor import", "Reused read-only tests/spikes/assetlink/schema_support.py SchemaStore for Provider schema validation"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": ["Python 3 standard library in test-only supervisor/worker/probe fixtures"],
+    "new_major_dependencies": [],
+    "contract_changes": ["Versioned Provider manifest 1.0 candidate", "Versioned Provider RPC 1.0 candidate"],
+    "architecture_tests": ["Provider contract tests and Linux process/fault/isolation probe suite: 24 passed; changed_files exact set compared with main...HEAD"],
+    "technical_debt": ["M0-009 must execute and select Linux cgroup/namespace/seccomp or approved launcher enforcement", "M0-009 must execute Windows Job Object plus restricted-token/AppContainer evidence", "M0-009 must decide RPC cancel acknowledgement semantics", "Production Worker integration and 500k-asset overhead remain out of scope"]
+  }
+}
