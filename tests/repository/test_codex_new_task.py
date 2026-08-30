@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import subprocess
 import tempfile
 import unittest
@@ -49,6 +50,7 @@ class NewTaskTests(unittest.TestCase):
         self.assertEqual(item['status'], 'ready')
         self.assertEqual(item['depends_on'], ['M0-001'])
         self.assertEqual(item['module'], 'shell')
+        self.assertEqual(item['handoff'], '.codex/handoffs/M0-002/summary.md')
         self.assertTrue((repo/'worktrees/M0-002/.codex/tasks/M0-002.md').exists())
 
     def test_unmet_dependency_and_duplicate_activation_leave_no_worktree(self):
@@ -75,6 +77,33 @@ class NewTaskTests(unittest.TestCase):
         second = subprocess.run(['python3', 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'other'], cwd=repo, text=True, capture_output=True)
         self.assertNotEqual(second.returncode, 0)
         self.assertFalse((repo/'other/M0-002').exists())
+
+    def test_task_file_write_failure_removes_partial_artifacts(self):
+        spec = importlib.util.spec_from_file_location('new_task', SCRIPT)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader
+        spec.loader.exec_module(module)
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        args = type('Args', (), {'task_id': 'M0-099', 'title': 'Failure', 'milestone': 'M0', 'owner': 'test'})()
+        original = Path.write_text
+        def fail_task(path, data, *call_args, **call_kwargs):
+            if path.name == 'M0-099.md':
+                raise OSError('injected task-file failure')
+            return original(path, data, *call_args, **call_kwargs)
+        module.Path.write_text = fail_task
+        with self.assertRaises(OSError):
+            module.write_task_files(root, args, 'codex/m0-099-failure', root / 'worktree')
+        self.assertFalse((root / '.codex/handoffs/M0-099').exists())
+        self.assertFalse((root / '.codex/tasks').exists())
+
+    def test_repository_verification_has_no_python_cache_residue(self):
+        before = {path for path in ROOT.rglob('__pycache__')} | {path for path in ROOT.rglob('*.pyc')}
+        result = subprocess.run(['python3', str(ROOT/'scripts/verify_repository.py')], cwd=ROOT, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        after = {path for path in ROOT.rglob('__pycache__')} | {path for path in ROOT.rglob('*.pyc')}
+        self.assertEqual(after, before)
 
 
 if __name__ == '__main__':

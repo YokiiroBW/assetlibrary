@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.parse
 from pathlib import Path
 
@@ -61,7 +63,7 @@ def git_worktree_paths() -> set[Path]:
     }
 
 
-def remove_created_files(handoff_dir: Path, task_file: Path) -> None:
+def remove_created_files(handoff_dir: Path, task_file: Path, task_parent: Path | None = None) -> None:
     """Remove only files created by this invocation, including partial output."""
     if task_file.exists():
         task_file.unlink()
@@ -70,11 +72,15 @@ def remove_created_files(handoff_dir: Path, task_file: Path) -> None:
             if child.is_file() or child.is_symlink():
                 child.unlink()
         handoff_dir.rmdir()
+    if task_parent is not None and task_parent.exists() and not any(task_parent.iterdir()):
+        task_parent.rmdir()
 
 
 def write_task_files(task_root: Path, args: argparse.Namespace, branch: str, worktree: Path) -> tuple[Path, Path]:
     handoff_dir = task_root / '.codex' / 'handoffs' / args.task_id
     task_file = task_root / '.codex' / 'tasks' / f'{args.task_id}.md'
+    task_parent = task_file.parent
+    task_parent_existed = task_parent.exists()
 
     if handoff_dir.exists() or task_file.exists():
         raise FileExistsError(f'Task files already exist for {args.task_id} in {task_root}')
@@ -102,7 +108,7 @@ def write_task_files(task_root: Path, args: argparse.Namespace, branch: str, wor
         task_file.write_text(task_prompt, encoding='utf-8')
         return handoff_dir, task_file
     except Exception:
-        remove_created_files(handoff_dir, task_file)
+        remove_created_files(handoff_dir, task_file, None if task_parent_existed else task_parent)
         raise
 
 
@@ -210,7 +216,20 @@ def main() -> int:
     else:
         registry.setdefault('tasks', []).append(updated)
     try:
-        REGISTRY.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        payload = json.dumps(registry, ensure_ascii=False, indent=2) + '\n'
+        temp_name: str | None = None
+        try:
+            with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=REGISTRY.parent,
+                                             prefix='.task-registry.', suffix='.tmp', delete=False) as temp:
+                temp.write(payload)
+                temp.flush()
+                os.fsync(temp.fileno())
+                temp_name = temp.name
+            os.replace(temp_name, REGISTRY)
+            temp_name = None
+        finally:
+            if temp_name:
+                Path(temp_name).unlink(missing_ok=True)
     except Exception:
         if handoff_dir is not None and task_file is not None:
             remove_created_files(handoff_dir, task_file)

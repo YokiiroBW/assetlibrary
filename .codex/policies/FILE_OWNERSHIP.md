@@ -39,9 +39,9 @@ M0-002、M0-003、M0-004 与 M0-007 可在 M0-001 完成后并行启动：
 | 任务 | 独占验证区域 | 明确不拥有 |
 |---|---|---|
 | M0-002 | `tests/spikes/windows-shell/**`、Shell Spike 记录 | `contracts/**`、核心服务实现 |
-| M0-003 | `contracts/**`（仅由该任务及协调线程批准后修改） | 数据库迁移、客户端实现 |
-| M0-004 | `tests/spikes/server-packaging/**`、发行 Spike 记录 | 根级依赖锁、发布版本 |
-| M0-007 | `tests/spikes/performance/**`、模拟器与故障夹具 | 领域模型、生产文件操作 |
+| M0-003 | `contracts/assetlink/**`、官方/生成 SDK 适配、AssetLink Spike 测试 | 其他契约、数据库迁移、客户端实现 |
+| M0-004 | `tests/spikes/server-packaging/**`、发行 Spike 记录 | 根级依赖锁、发布版本、运行时实现 |
+| M0-007 | `tests/spikes/performance/**`、模拟器与故障夹具 | 领域模型、生产文件操作、共享契约 |
 
 以上目录当前可为空；表格是首轮任务启动时的所有权约定，不代表技术栈或 M0-009 质量门禁已经冻结。
 
