@@ -1,12 +1,12 @@
 # M0-005 handoff
 
 status: ready_for_review
-implementation_commit: `8978dee9a77644b8959f4a703ae780625fa9a11e`
+implementation_commit: `4e287717f6419b6959f79ee9661ab96e680ca588`
 handoff_commit: recorded by the commit containing this file
 branch: `codex/m0-005-postgres-domain-spike`
 
 补充了 task-local 官方源码 bootstrap、同事务 advisory-lock migration runner、权限投影、
-owner-aware outbox claim/publish 及完整并发/重启/500k 证据。当前 ready_for_review：
+owner-aware outbox claim/release/publish 及完整并发/回滚/重启/500k 证据。当前 ready_for_review：
 
 完成了 PostgreSQL 16.15 隔离 Spike：模块 schema/table ownership、前向迁移 ledger
 与 checksum、事务失败回滚、durable task lease/heartbeat/reclaim/cancel/idempotency、
