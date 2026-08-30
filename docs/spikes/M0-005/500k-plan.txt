@@ -1,0 +1,12 @@
+# 500k evidence summary
+
+The test harness creates 500,000 deterministic synthetic assets. Ten percent
+contain the distinct token `reportx.txt`; one filename contains `499990 reportx`.
+The FTS assertion is exactly 50,000 rows and the trigram assertion is exactly
+one row. The keyset query uses `(library_id, asset_id)` and has no OFFSET.
+
+Each run writes complete host-specific `EXPLAIN (ANALYZE, BUFFERS)` output,
+index usage, table/index sizes, and five warm timings for each of keyset, FTS,
+and trigram to ignored
+`.runtime/sandbox-storage/M0-005/500k-plan.txt`. This tracked file intentionally
+contains no stale timing or misleading all-match/zero-match evidence.
