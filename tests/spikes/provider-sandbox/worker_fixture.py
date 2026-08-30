@@ -1,9 +1,7 @@
 """Opaque, bounded fault fixtures. Never run against real assets or network."""
 from __future__ import annotations
 
-import json
 import os
-import resource
 import subprocess
 import sys
 import time
@@ -33,6 +31,30 @@ def main() -> int:
     elif mode == "malformed":
         sys.stdout.buffer.write(b"\x00\x00\x00\x04oops")
         sys.stdout.buffer.flush()
+    elif mode in {"bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid"}:
+        response = {"message_type": "result", "rpc_version": "1.0", "request_id": request_id, "status": "ok", "asset_level": "L1", "original_write": False}
+        if mode == "bad_request_id":
+            response["request_id"] = "other-request"
+        elif mode == "bad_version":
+            response["rpc_version"] = "9.0"
+        elif mode == "bad_message_type":
+            response["message_type"] = "health"
+        elif mode == "write_true":
+            response["original_write"] = True
+        elif mode == "artifact_oversize":
+            response["artifacts"] = [{"artifact_token": "artifact:test", "size_bytes": 2 * 1024 * 1024, "sha256": "0" * 64}]
+        else:
+            response["artifacts"] = [{"artifact_token": "../host-path", "size_bytes": 1, "sha256": "not-a-hash"}]
+        send(response)
+    elif mode == "response_oversize":
+        send({"message_type": "result", "rpc_version": "1.0", "request_id": request_id, "status": "ok", "asset_level": "L1", "original_write": False, "metadata": {"padding": "x" * 1024}})
+    elif mode == "stay_alive":
+        send({"message_type": "result", "rpc_version": "1.0", "request_id": request_id, "status": "ok", "asset_level": "L1", "original_write": False})
+        time.sleep(30)
+    elif mode == "parent_exit_child":
+        child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
+        Path(sys.argv[2] if len(sys.argv) > 2 else os.environ["PROVIDER_RUNTIME_DIR"] + "/child.pid").write_text(str(child.pid), encoding="utf-8")
+        os._exit(0)
     elif mode == "oversized":
         sys.stdout.buffer.write((2 * 1024 * 1024).to_bytes(4, "big"))
         sys.stdout.buffer.flush()

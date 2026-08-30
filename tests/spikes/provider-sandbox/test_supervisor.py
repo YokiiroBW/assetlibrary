@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import json
 import os
-import signal
-import subprocess
 import tempfile
 import time
 import unittest
 from pathlib import Path
 
-from manifest import result_is_l0_safe
-from supervisor import Limits, Outcome, ProviderSupervisor, RestartPolicy, default_manifest
+from manifest import degrade_to_l0, result_is_l0_safe
+from supervisor import Limits, ProviderSupervisor, RestartPolicy, default_manifest
 
 
 def alive(pid: int) -> bool:
@@ -24,9 +21,19 @@ def alive(pid: int) -> bool:
         return True
     proc_status = Path(f"/proc/{pid}/stat")
     if proc_status.exists():
-        fields = proc_status.read_text(encoding="utf-8").split()
+        try:
+            fields = proc_status.read_text(encoding="utf-8").split()
+        except (FileNotFoundError, ProcessLookupError):
+            return False
         return len(fields) < 3 or fields[2] != "Z"
     return True
+
+
+def wait_dead(pid: int, timeout: float = 1.0) -> bool:
+    end = time.monotonic() + timeout
+    while alive(pid) and time.monotonic() < end:
+        time.sleep(0.01)
+    return not alive(pid)
 
 
 class ProviderSupervisorTests(unittest.TestCase):
@@ -68,6 +75,28 @@ class ProviderSupervisorTests(unittest.TestCase):
                 outcome = self.supervisor().run(mode)
                 self.assertEqual(outcome.status, expected)
 
+    def test_response_acceptance_checks_correlation_version_type_write_and_artifacts(self) -> None:
+        for mode in ("bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid"):
+            with self.subTest(mode=mode):
+                outcome = self.supervisor().run(mode)
+                self.assertEqual(outcome.status, "protocol_error")
+
+        limited_request = {
+            "message_type": "request", "rpc_version": "1.0", "request_id": "small-response",
+            "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "now",
+            "max_response_bytes": 128,
+        }
+        outcome = self.supervisor().run("response_oversize", request=limited_request)
+        self.assertEqual(outcome.status, "protocol_error")
+        self.assertIn("limit 128", outcome.detail)
+
+    def test_response_cleanup_is_bounded_when_worker_stays_alive(self) -> None:
+        supervisor = self.supervisor(Limits(request_deadline_ms=1000))
+        outcome = supervisor.run("stay_alive")
+        self.assertEqual(outcome.status, "ok")
+        self.assertEqual(outcome.detail, "response_cleanup")
+        self.assertFalse(alive(supervisor.process.pid))
+
     def test_stderr_flood_is_drained_and_deadline_still_applies(self) -> None:
         outcome = self.supervisor(Limits(request_deadline_ms=150)).run("stderr_flood")
         self.assertEqual(outcome.status, "timeout")
@@ -80,7 +109,14 @@ class ProviderSupervisorTests(unittest.TestCase):
         outcome = supervisor.run("child")
         self.assertEqual(outcome.status, "timeout")
         child_pid = int((self.runtime / "child.pid").read_text(encoding="utf-8"))
-        self.assertFalse(alive(child_pid), f"child survived process-group cleanup: {child_pid}")
+        self.assertTrue(wait_dead(child_pid), f"child survived process-group cleanup: {child_pid}")
+
+    def test_parent_exit_does_not_leave_descendant_alive(self) -> None:
+        supervisor = self.supervisor(Limits(request_deadline_ms=1000, processes=1024))
+        outcome = supervisor.run("parent_exit_child")
+        self.assertEqual(outcome.status, "crashed")
+        child_pid = int((self.runtime / "child.pid").read_text(encoding="utf-8"))
+        self.assertTrue(wait_dead(child_pid), f"child survived after parent exit: {child_pid}")
 
     def test_request_limit_is_checked_before_dispatch(self) -> None:
         outcome = self.supervisor(Limits(max_request_bytes=128)).run(request={"message_type": "request", "rpc_version": "1.0", "request_id": "large", "operation": "metadata", "input_tokens": ["opaque:" + "x" * 1000], "deadline_at": "now", "max_response_bytes": 10})
@@ -89,9 +125,8 @@ class ProviderSupervisorTests(unittest.TestCase):
 
     def test_memory_cpu_process_and_descriptor_limits_have_observable_outcomes(self) -> None:
         memory = self.supervisor(Limits(memory_bytes=64 * 1024 * 1024, request_deadline_ms=1000)).run("memory")
-        self.assertIn(memory.status, {"ok", "crashed", "protocol_error"})
-        if memory.status == "ok":
-            self.assertEqual(memory.response["code"], "memory_limit")
+        self.assertEqual(memory.status, "ok")
+        self.assertEqual(memory.response["code"], "memory_limit")
 
         cpu = self.supervisor(Limits(cpu_ms=1000, request_deadline_ms=3000)).run("cpu")
         self.assertEqual(cpu.status, "crashed")
@@ -124,9 +159,10 @@ class ProviderSupervisorTests(unittest.TestCase):
         from manifest import safe_mode_allows
         self.assertTrue(safe_mode_allows(official, safe_mode=True))
         self.assertFalse(safe_mode_allows(side_loaded, safe_mode=True))
-        base_asset = {"asset_id": "opaque-asset", "asset_level": "L0", "browseable": True, "external_open": True, "original_write": False}
-        self.assertTrue(base_asset["browseable"] and base_asset["external_open"])
-        self.assertTrue(result_is_l0_safe(base_asset))
+        base_asset = {"asset_id": "opaque-asset", "asset_level": "L1", "browseable": True, "external_open": True, "original_write": False}
+        fallback = degrade_to_l0(base_asset, "provider_crash")
+        self.assertTrue(fallback["browseable"] and fallback["external_open"])
+        self.assertTrue(result_is_l0_safe(fallback))
 
 
 if __name__ == "__main__":

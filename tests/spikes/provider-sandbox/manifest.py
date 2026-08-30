@@ -58,3 +58,18 @@ def safe_mode_allows(manifest: dict[str, Any], *, safe_mode: bool) -> bool:
 
 def result_is_l0_safe(result: dict[str, Any]) -> bool:
     return result.get("original_write") is False and result.get("asset_level") in {"L0", "L1", None}
+
+
+def degrade_to_l0(asset: dict[str, Any], reason: str) -> dict[str, Any]:
+    """Provider failure fallback: keep base browsing and external-open metadata."""
+    if not reason or asset.get("original_write") is True:
+        raise ManifestError("unsafe asset cannot enter L0 fallback")
+    return {
+        **asset,
+        "asset_level": "L0",
+        "browseable": True,
+        "external_open": True,
+        "provider_status": "degraded",
+        "provider_failure": reason,
+        "original_write": False,
+    }

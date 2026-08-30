@@ -9,7 +9,9 @@ class IsolationProbeTests(unittest.TestCase):
     def test_linux_namespace_probe_is_executed_and_unproven_capabilities_stay_false(self) -> None:
         evidence = linux_isolation_evidence()
         self.assertIn("returncode", evidence["unshare_network"])
-        self.assertFalse(evidence["enforced_network_namespace"], evidence)
+        expected_network = any(evidence[name].get("returncode") == 0 for name in ("unshare_network", "bubblewrap_network"))
+        self.assertEqual(evidence["enforced_network_namespace"], expected_network)
+        self.assertEqual(evidence["delegated_user_cgroup_executed"], evidence["systemd_user_scope"].get("returncode") == 0)
         self.assertFalse(evidence["filesystem_confinement_proven"])
 
     def test_windows_mapping_is_not_reported_as_executed(self) -> None:

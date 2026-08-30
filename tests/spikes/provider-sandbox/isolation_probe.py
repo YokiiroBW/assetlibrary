@@ -22,8 +22,10 @@ def linux_isolation_evidence() -> dict[str, Any]:
         "cgroup_root_writable": os.access("/sys/fs/cgroup", os.W_OK),
         "unshare_network": run_probe(["unshare", "-n", "--", "/bin/true"]),
         "bubblewrap_network": run_probe(["bwrap", "--unshare-net", "--ro-bind", "/", "/", "/bin/true"]),
+        "systemd_user_scope": run_probe(["systemd-run", "--user", "--scope", "--quiet", "/bin/true"]),
     }
     result["enforced_network_namespace"] = bool(result["unshare_network"].get("returncode") == 0 or result["bubblewrap_network"].get("returncode") == 0)
+    result["delegated_user_cgroup_executed"] = result["systemd_user_scope"].get("returncode") == 0
     result["filesystem_confinement_proven"] = False
     return result
 

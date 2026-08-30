@@ -6,7 +6,6 @@ production code.
 """
 from __future__ import annotations
 
-import errno
 import os
 import queue
 import resource
@@ -44,6 +43,33 @@ class Outcome:
     stderr_bytes: int = 0
     returncode: int | None = None
     elapsed_ms: int = 0
+
+
+def accept_response(request: dict[str, Any], response: dict[str, Any], limits: Limits) -> None:
+    """Validate the trust boundary before exposing Provider output to callers."""
+    if response.get("rpc_version") != request.get("rpc_version") or response.get("rpc_version") not in {"1.0"}:
+        raise ProtocolError("response rpc_version mismatch")
+    if response.get("request_id") != request.get("request_id"):
+        raise ProtocolError("response request_id mismatch")
+    if response.get("message_type") not in {"result", "error"}:
+        raise ProtocolError("unexpected response message_type")
+    if response["message_type"] == "error":
+        if not isinstance(response.get("code"), str) or not isinstance(response.get("retryable"), bool):
+            raise ProtocolError("invalid error envelope")
+        return
+    if response.get("status") != "ok" or response.get("original_write") is not False:
+        raise ProtocolError("result is not a read-only successful result")
+    artifacts = response.get("artifacts", [])
+    if not isinstance(artifacts, list):
+        raise ProtocolError("artifacts must be a list")
+    for artifact in artifacts:
+        token = artifact.get("artifact_token") if isinstance(artifact, dict) else None
+        size = artifact.get("size_bytes") if isinstance(artifact, dict) else None
+        digest = artifact.get("sha256") if isinstance(artifact, dict) else None
+        if (not isinstance(token, str) or not token or len(token) > 256 or "/" in token or "\\" in token
+                or not isinstance(size, int) or isinstance(size, bool) or size < 0 or size > limits.max_artifact_bytes
+                or not isinstance(digest, str) or len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest)):
+            raise ProtocolError("invalid or oversized artifact descriptor")
 
 
 def default_manifest(limits: Limits | None = None, trust_class: str = "test_only") -> dict[str, Any]:
@@ -84,6 +110,7 @@ class ProviderSupervisor:
         self.runtime_dir = runtime_dir.resolve()
         self.runtime_dir.mkdir(parents=True, exist_ok=True)
         self._process: subprocess.Popen[bytes] | None = None
+        self._pgid: int | None = None
         self._stderr_count = [0]
 
     @property
@@ -102,25 +129,23 @@ class ProviderSupervisor:
             "PROVIDER_RUNTIME_DIR": str(self.runtime_dir),
         }
         command = [sys.executable, str(worker), mode]
-        if mode == "child":
+        if mode in {"child", "parent_exit_child"}:
             command.append(str(self.runtime_dir / "child.pid"))
         preexec = (lambda: (_set_limits(self._limits(), self.runtime_dir), os.setsid())) if os.name != "nt" else None
         process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    cwd=self.runtime_dir, env=env, close_fds=True, start_new_session=False,
                                    preexec_fn=preexec)
         self._process = process
+        self._pgid = os.getpgid(process.pid) if os.name != "nt" else None
         self._stderr_count = [0]
         threading.Thread(target=_read_stderr, args=(process.stderr, self._stderr_count), daemon=True).start()
         return process
 
     def _terminate_tree(self, reason: str) -> None:
         process = self._process
-        if process is None or process.poll() is not None:
-            if process is not None:
-                process.wait()
-                self._close_pipes(process)
+        if process is None:
             return
-        pgid = os.getpgid(process.pid) if os.name != "nt" else None
+        pgid = self._pgid if os.name != "nt" else None
         if pgid is not None:
             try:
                 os.killpg(pgid, signal.SIGTERM)
@@ -138,7 +163,19 @@ class ProviderSupervisor:
                     pass
             else:
                 process.kill()
-            process.wait(timeout=0.5)
+            try:
+                process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=0.5)
+        else:
+            # A parent can exit before its descendants. Reap the whole owned
+            # group even when wait() observed a clean parent exit.
+            if pgid is not None:
+                try:
+                    os.killpg(pgid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
         self._process = process
         self._close_pipes(process)
 
@@ -160,9 +197,15 @@ class ProviderSupervisor:
         started = time.monotonic()
         responses: queue.Queue[dict[str, Any] | BaseException] = queue.Queue(maxsize=1)
 
+        request_max_response = request.get("max_response_bytes")
+        if not isinstance(request_max_response, int) or isinstance(request_max_response, bool) or request_max_response <= 0:
+            self._terminate_tree("invalid_request_limit")
+            return Outcome("rejected", "invalid_request_max_response")
+        response_limit = min(self.manifest["resource_limits"]["max_response_bytes"], request_max_response)
+
         def read_response() -> None:
             try:
-                responses.put(read_frame(process.stdout, self.manifest["resource_limits"]["max_response_bytes"]))
+                responses.put(read_frame(process.stdout, response_limit))
             except BaseException as exc:
                 responses.put(exc)
 
@@ -191,11 +234,22 @@ class ProviderSupervisor:
             status = "protocol_error" if isinstance(value, ProtocolError) else "crashed"
             self._close_pipes(process)
             return Outcome(status, str(value), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
-        process.wait(timeout=1)
+        try:
+            accept_response(request, value, self._limits())
+        except ProtocolError as exc:
+            self._terminate_tree("response_rejected")
+            self._close_pipes(process)
+            return Outcome("protocol_error", str(exc), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+        cleanup_detail = ""
+        try:
+            process.wait(timeout=0.2)
+        except subprocess.TimeoutExpired:
+            cleanup_detail = "response_cleanup"
+            self._terminate_tree("response_cleanup")
         self._close_pipes(process)
-        if process.returncode != 0:
+        if process.returncode != 0 and not cleanup_detail:
             return Outcome("crashed", f"returncode={process.returncode}", response=value, stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
-        return Outcome("ok", response=value, stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
+        return Outcome("ok", detail=cleanup_detail, response=value, stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
 
     def cancel(self) -> None:
         self._terminate_tree("cancel")
