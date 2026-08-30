@@ -8,14 +8,17 @@
 
 已交付可审查的 Windows Shell Spike 包：
 
-- C++17/Windows SDK C++/WinRT base + COM `IShellFolder`、单项 PIDL 枚举器、
+- C++17/Windows SDK C++/WinRT base + COM `IShellFolder`、`IPersistFolder`（保存
+  初始化 PIDL 的 clone 生命周期）、单项 PIDL 枚举器、
   COM class factory 与 custom `IShellView` 最小桥接；Shell 只创建视图、导航
   和本机 IPC，不包含网络、哈希、媒体解码、Provider 或业务规则。
 - 进程外 `AssetHostStub.exe`，通过 Spike-local named pipe 提供 ping/pong。
   帧有 magic、版本、固定 16 字节头、4 KiB payload 上限和 request id；Shell
-  使用 overlapped I/O，单次 `AskAssetHost` 共享一个 250 ms absolute deadline。
-  超时后调用 `CancelIoEx`，等待取消完成并确认 `GetOverlappedResult` 后才销毁
-  event/`OVERLAPPED`/buffer，随后显示可恢复状态。
+  使用 overlapped I/O，单次 `AskAssetHost` 共享一个 250 ms transaction deadline。
+  Explorer view activation 只启动 worker 即返回；worker 在超时后调用 `CancelIoEx`，
+  等待取消完成并确认 `GetOverlappedResult` 后才销毁 event/`OVERLAPPED`/buffer，
+  随后通过 window message 更新可恢复状态。取消排空是 worker cleanup，不延长
+  Explorer 调用线程的返回路径。
 - CMake x64 构建入口（非 Windows 仅配置检查，MSVC/Windows-only 选项受条件
   保护）；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障模式和 host-cycle
   helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
@@ -72,7 +75,7 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 
 ## 测试结果
 
-- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（8/8）。
+- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（13/13）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
 - 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
@@ -82,8 +85,9 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 ## 架构测试与质量门禁
 
 Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/整体 deadline、取消完成顺序、
-HKCU-only 注册回滚/对称性、枚举 partial-fetch、故障模式入口、host-only soak
-定位和二进制/日志/凭证产物排除。没有真实 Windows 运行时证据，
+异步 view activation、`IPersistFolder` PIDL 生命周期、factory lifetime、HKCU-only
+注册回滚/对称性、枚举 partial-fetch、故障模式入口、host-only soak 定位和生成/
+私密产物排除。没有真实 Windows 运行时证据，
 故障隔离和 Explorer 恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响

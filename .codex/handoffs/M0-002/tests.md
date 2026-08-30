@@ -9,7 +9,7 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，8/8 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，13/13 |
 | `git diff --check` | 通过 |
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
 | `python3 scripts/validate_handoff.py` | 通过 |
@@ -33,13 +33,14 @@ Windows 主机上的精确命令：
 
 `test_contracts.py` 检查：包文件完整性；Shell 源码不含网络/数据库/Provider 等
 重型依赖；协议版本、16-byte header、4 KiB payload、250 ms overall deadline、
-overlapped cancel completion ordering；注册脚本 HKCU-only、owner marker、collision
+overlapped cancel completion ordering、async view activation；`IPersistFolder` PIDL
+clone/lifetime 与 factory lifetime；注册脚本 HKCU-only、owner marker、collision
 guard、rollback 和注册/卸载对称；枚举 partial-fetch；host-only soak 与人工
 Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
 ## 通过
 
-- Python 静态/契约测试 8/8。
+- Python 静态/契约测试 13/13。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
 
