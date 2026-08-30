@@ -11,9 +11,16 @@ def main() -> int:
     parser.add_argument("--fault-plan", action="store_true")
     args = parser.parse_args()
     if args.fault_plan:
-        print(json.dumps(build_fault_plan(args.seed).__dict__, default=lambda x: x.value if hasattr(x, "value") else x, sort_keys=True))
+        print(json.dumps(
+            build_fault_plan(args.seed).__dict__,
+            default=lambda x: x.value if hasattr(x, "value") else x,
+            sort_keys=True,
+        ))
     else:
-        print(json.dumps(write_manifest(GeneratorConfig(count=args.count, seed=args.seed), args.output), sort_keys=True))
+        result = write_manifest(
+            GeneratorConfig(count=args.count, seed=args.seed), args.output,
+        )
+        print(json.dumps(result, sort_keys=True))
     return 0
 
 if __name__ == "__main__":

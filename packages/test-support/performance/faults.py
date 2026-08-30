@@ -22,5 +22,15 @@ class FaultPlan:
 
 def build_fault_plan(seed: int = 0) -> FaultPlan:
     kinds = tuple(FaultKind)
-    events = tuple({"sequence": i, "kind": kind.value, "trigger": "before_commit", "recoverable": kind not in (FaultKind.PERMISSION_DENIED, FaultKind.NAME_COLLISION)} for i, kind in enumerate(kinds))
+    events = tuple(
+        {
+            "sequence": i,
+            "kind": kind.value,
+            "trigger": "before_commit",
+            "recoverable": kind not in (
+                FaultKind.PERMISSION_DENIED, FaultKind.NAME_COLLISION,
+            ),
+        }
+        for i, kind in enumerate(kinds)
+    )
     return FaultPlan("m0-007.fault-plan.v1", f"fault-plan-{seed:08x}", events)

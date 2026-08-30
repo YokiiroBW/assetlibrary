@@ -98,7 +98,11 @@ def validate_output_path(path: str | os.PathLike[str], repository_root: str | os
     return candidate
 
 
-def write_manifest(config: GeneratorConfig, output: str | os.PathLike[str], cancel: Callable[[], bool] | None = None) -> dict[str, int | str | bool]:
+def write_manifest(
+    config: GeneratorConfig,
+    output: str | os.PathLike[str],
+    cancel: Callable[[], bool] | None = None,
+) -> dict[str, int | str | bool]:
     """Atomically stream JSONL to a validated sandbox path and return its summary."""
     target = validate_output_path(output)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -155,10 +159,21 @@ def summarize_records(records: Iterator[AssetRecord]) -> dict[str, object]:
         classes[item.extension] = classes.get(item.extension, 0) + 1
         hot += item.directory_class == "hot-100k"
         huge = huge or item.logical_size_bytes >= BYTES_100_GIB
-    return {"schema_version": SCHEMA_VERSION, "records": count, "logical_size_bytes": logical, "extensions": classes, "hot_directory_records": hot, "has_100gib_asset": huge}
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "records": count,
+        "logical_size_bytes": logical,
+        "extensions": classes,
+        "hot_directory_records": hot,
+        "has_100gib_asset": huge,
+    }
 
 
-def write_summary(summary: dict[str, object], output: str | os.PathLike[str], repository_root: str | os.PathLike[str] | None = None) -> Path:
+def write_summary(
+    summary: dict[str, object],
+    output: str | os.PathLike[str],
+    repository_root: str | os.PathLike[str] | None = None,
+) -> Path:
     target = validate_output_path(output, repository_root)
     target.parent.mkdir(parents=True, exist_ok=True)
     temp_path = target.with_name(f".{target.name}.partial")
