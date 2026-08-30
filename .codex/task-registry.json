@@ -83,9 +83,9 @@
         "M0-001",
         "M0-005"
       ],
-      "owner": "codex-agent-m0-006",
-      "branch": "codex/m0-006-file-safety-spike",
-      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006",
+      "owner": "codex-agent-m0-006-clean",
+      "branch": "codex/m0-006-file-safety-clean",
+      "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006-clean",
       "task_file": ".codex/tasks/M0-006.md",
       "handoff": ".codex/handoffs/M0-006/summary.md",
       "thread_deep_link": ""
