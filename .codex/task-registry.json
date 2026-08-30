@@ -4,7 +4,7 @@
       "id": "M0-001",
       "title": "冻结仓库结构、构建系统与模块所有权",
       "module": "repo-foundation",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [],
       "owner": "codex-window-m0-001",
       "branch": "codex/m0-001-repo-foundation",
@@ -22,7 +22,7 @@
         "M0-001"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-002-windows-shell-spike",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-002/summary.md",
       "thread_deep_link": ""
@@ -36,7 +36,7 @@
         "M0-001"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-003-assetlink-contract",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-003/summary.md",
       "thread_deep_link": ""
@@ -50,7 +50,7 @@
         "M0-001"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-004-server-packaging",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-004/summary.md",
       "thread_deep_link": ""
@@ -94,7 +94,7 @@
         "M0-001"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-007-performance-foundation",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-007/summary.md",
       "thread_deep_link": ""
