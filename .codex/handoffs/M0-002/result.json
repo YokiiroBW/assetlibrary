@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-shell-spike",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
-  "commit": "27a8ef5457d4275098ecc21c3945c92d9bfb38aa",
+  "commit": "8daeb4befe33213cbd0113bba84aa16cd9697b84",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
