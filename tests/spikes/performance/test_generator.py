@@ -32,6 +32,21 @@ class GeneratorTests(unittest.TestCase):
             self.assertFalse(output.exists())
             self.assertFalse(output.with_name(".cancel.jsonl.partial").exists())
 
+    def test_edge_trigger_cancel_does_not_replace_incomplete_output(self):
+        calls = 0
+
+        def cancel_once():
+            nonlocal calls
+            calls += 1
+            return calls == 3
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "edge-cancel.jsonl"
+            result = write_manifest(GeneratorConfig(count=100), output, cancel_once)
+            self.assertTrue(result["cancelled"])
+            self.assertFalse(output.exists())
+            self.assertFalse(output.with_name(".edge-cancel.jsonl.partial").exists())
+
     def test_path_safety_and_idempotent_replacement(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "manifest.jsonl"
