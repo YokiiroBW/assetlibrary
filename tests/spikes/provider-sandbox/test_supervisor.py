@@ -116,6 +116,9 @@ class ProviderSupervisorTests(unittest.TestCase):
         outcome = supervisor.run("parent_exit_child")
         self.assertEqual(outcome.status, "crashed")
         child_pid = int((self.runtime / "child.pid").read_text(encoding="utf-8"))
+        child_pgid = int((self.runtime / "child.pgid").read_text(encoding="utf-8"))
+        self.assertEqual(child_pgid, supervisor._pgid, "child did not inherit captured process group")
+        self.assertTrue(supervisor._last_group_drained, "owned process group was not drained before return")
         self.assertTrue(wait_dead(child_pid), f"child survived after parent exit: {child_pid}")
 
     def test_request_limit_is_checked_before_dispatch(self) -> None:

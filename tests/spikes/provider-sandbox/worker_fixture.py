@@ -58,7 +58,9 @@ def main() -> int:
         time.sleep(30)
     elif mode == "parent_exit_child":
         child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
-        Path(sys.argv[2] if len(sys.argv) > 2 else os.environ["PROVIDER_RUNTIME_DIR"] + "/child.pid").write_text(str(child.pid), encoding="utf-8")
+        pid_file = Path(sys.argv[2] if len(sys.argv) > 2 else os.environ["PROVIDER_RUNTIME_DIR"] + "/child.pid")
+        pid_file.write_text(str(child.pid), encoding="utf-8")
+        pid_file.with_suffix(".pgid").write_text(str(os.getpgid(child.pid)), encoding="utf-8")
         os._exit(0)
     elif mode == "oversized":
         sys.stdout.buffer.write((2 * 1024 * 1024).to_bytes(4, "big"))
