@@ -11,9 +11,10 @@ Explorer 集成、业务规则、网络、哈希、媒体解析、Provider 或�
 - `AssetShellExtension.dll` 的最小 `IShellFolder`、`IPersistFolder`（含初始化
   PIDL 克隆与生命周期）、单项枚举器、COM class factory 和 `IShellView` 桥接源代码。
 - `AssetHostStub.exe` 及 spike-local named pipe frame：magic、版本、16 字节
-  固定头、4 KiB payload 上限、250 ms `AskAssetHost` transaction deadline。Explorer
-  view activation 只启动 worker 并立即返回；worker 自持有事务状态，在取消后确认
-  overlapped 完成再释放资源，并通过 window message 回传结果。
+  固定头、4 KiB payload 上限、250 ms `AskAssetHost` 逻辑 I/O deadline。Explorer
+  view activation 只启动 worker 并立即返回；worker 自持有事务状态，在 deadline
+  后取消并确认 overlapped 完成再释放资源，通过 window message 回传结果。取消
+  排空不阻塞 Explorer UI 线程，其独立时长上限仍须在真实 Windows 门禁验证。
 - PowerShell 构建、HKCU 注册/验证/卸载、host 故障模式和 soak 入口。
 - Linux 可运行的 Python 静态/契约测试，阻止生产目录、共享契约和生成产物
   被带入此 Spike。

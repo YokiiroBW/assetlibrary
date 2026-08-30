@@ -56,12 +56,17 @@ class PackageContractTests(unittest.TestCase):
     def test_enumerator_reports_partial_multi_item_fetch(self):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
         self.assertIn("return count == 1 ? S_OK : S_FALSE", shell)
+        skip = shell[shell.index("Skip(ULONG count)"):shell.index("Reset() override")]
+        self.assertIn("if (returned_) return S_FALSE", skip)
+        self.assertIn("return count == 1 ? S_OK : S_FALSE", skip)
 
     def test_shell_folder_persists_initialized_pidl(self):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
         self.assertIn("public IPersistFolder", shell)
         for method in ("GetClassID", "Initialize", "ILCloneFull", "folder_pidl_", "IID_IPersistFolder"):
             self.assertIn(method, shell)
+        for ipersist_file_method in ("IsDirty() override", "SaveCompleted(", "GetCurFile("):
+            self.assertNotIn(ipersist_file_method, shell)
 
     def test_explorer_view_activation_is_async_and_factory_is_counted(self):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
@@ -95,9 +100,11 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("try {", register)
         self.assertIn("} catch {", register)
         self.assertIn("createdKeys", register)
-        self.assertIn("namespaceOwned", register)
         self.assertIn("[array]::Reverse", register)
         self.assertIn("Created-KeyCanRollback", register)
+        self.assertIn("Get-ChildItem -LiteralPath $path", register)
+        self.assertIn("if (Created-KeyCanRollback $path)", register)
+        self.assertNotIn("$ownedBeforeRollback", register)
         self.assertIn("originalValues", register)
         self.assertIn("existingNamespace", register)
         self.assertIn("ShellFolder", register)
@@ -107,8 +114,11 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("Remove-Item -LiteralPath $namespace", unregister)
         self.assertIn("Remove-Item -LiteralPath $classes", unregister)
         self.assertIn("$namespaceRegistration", unregister)
+        self.assertIn("$classRegistration", unregister)
+        self.assertIn("$classOwned", unregister)
         self.assertIn("$inprocOwned", unregister)
         self.assertIn("$namespaceOwned", unregister)
+        self.assertIn("$unknownChildren", unregister)
 
     def test_new_install_mid_failure_rolls_back_created_keys(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
@@ -116,6 +126,7 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("$createdArray", register)
         self.assertIn("Created-KeyCanRollback", register)
         self.assertIn("# Restore values first", register)
+        self.assertIn("$children.Count -ne 0", register)
 
     def test_existing_values_are_restored_and_new_values_removed(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
@@ -129,8 +140,10 @@ class PackageContractTests(unittest.TestCase):
         unregister = (SCRIPTS / "unregister.ps1").read_text(encoding="utf-8")
         self.assertIn("InprocServer32 registration with an owner/path mismatch", unregister)
         self.assertIn("Desktop namespace registration with an owner/name mismatch", unregister)
-        self.assertIn("if (-not $inprocExists -and -not $namespaceExists)", unregister)
+        self.assertIn("if (-not $classExists -and -not $namespaceExists)", unregister)
         self.assertIn("if ($namespaceOwned)", unregister)
+        self.assertIn("CLSID tree without the expected root owner/name", unregister)
+        self.assertIn("CLSID tree containing unknown child keys", unregister)
 
     def test_failure_modes_are_exposed_by_the_host_entrypoint(self):
         host = (SRC / "AssetHostStub.cpp").read_text(encoding="utf-8")
@@ -142,7 +155,9 @@ class PackageContractTests(unittest.TestCase):
 
     def test_soak_entrypoint_is_explicitly_host_only(self):
         soak = (SCRIPTS / "soak.ps1").read_text(encoding="utf-8")
-        protocol = (REPO_ROOT / "docs/spikes/M0-002/explorer-soak-protocol.md").read_text(encoding="utf-8")
+        protocol = (
+            REPO_ROOT / "docs/spikes/M0-002/explorer-soak-protocol.md"
+        ).read_text(encoding="utf-8")
         self.assertIn("host-cycle helper", soak)
         self.assertNotIn("shell:::{", soak)
         self.assertIn("shell:::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}", protocol)
@@ -151,8 +166,18 @@ class PackageContractTests(unittest.TestCase):
     def test_no_generated_or_private_artifacts_are_packaged(self):
         names = {path.name for path in ROOT.rglob("*") if path.is_file()}
         self.assertFalse({"AssetShellExtension.dll", "AssetHostStub.exe"} & names)
-        self.assertFalse(any(path.suffix.lower() in {".reg", ".log", ".pdb"} for path in ROOT.rglob("*")))
-        content = "\n".join(path.read_text(encoding="utf-8") for path in ROOT.rglob("*") if path.is_file() and path.suffix in {".md", ".ps1", ".py", ".h", ".cpp", ".txt"})
+        self.assertFalse(
+            any(
+                path.suffix.lower() in {".reg", ".log", ".pdb"}
+                for path in ROOT.rglob("*")
+            ),
+        )
+        text_suffixes = {".md", ".ps1", ".py", ".h", ".cpp", ".txt"}
+        content = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in ROOT.rglob("*")
+            if path.is_file() and path.suffix in text_suffixes
+        )
         self.assertNotRegex(content, r"(?i)(password|access[_ -]?token|private[_ -]?key)\s*[:=]")
 
 

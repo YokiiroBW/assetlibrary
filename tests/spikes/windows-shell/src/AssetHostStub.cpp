@@ -126,7 +126,10 @@ int Serve(const Options& options) {
 int wmain(int argc, wchar_t** argv) {
   Options options;
   if (!ParseOptions(argc, argv, &options)) {
-    std::fwprintf(stderr, L"usage: AssetHostStub [--once] [--delay-ms=0..10000] [--crash-after=N] [--invalid-response]\n");
+    std::fwprintf(
+        stderr,
+        L"usage: AssetHostStub [--once] [--delay-ms=0..10000] "
+        L"[--crash-after=N] [--invalid-response]\n");
     return 64;
   }
   return Serve(options);

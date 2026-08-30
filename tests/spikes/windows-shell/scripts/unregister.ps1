@@ -6,13 +6,21 @@ $ErrorActionPreference = 'Stop'
 $clsid = '{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}'
 $classes = "HKCU:\Software\Classes\CLSID\$clsid"
 $inproc = Join-Path $classes 'InprocServer32'
+$shellFolder = Join-Path $classes 'ShellFolder'
 $namespace = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\$clsid"
 # Unregistration must still work if a failed build or rollback removed the DLL.
 $expected = [IO.Path]::GetFullPath($DllPath)
+$classRegistration = Get-ItemProperty -LiteralPath $classes -ErrorAction SilentlyContinue
 $registration = Get-ItemProperty -LiteralPath $inproc -ErrorAction SilentlyContinue
+$shellRegistration = Get-ItemProperty -LiteralPath $shellFolder -ErrorAction SilentlyContinue
 $namespaceRegistration = Get-ItemProperty -LiteralPath $namespace -ErrorAction SilentlyContinue
+$classExists = $null -ne $classRegistration
 $inprocExists = $null -ne $registration
+$shellFolderExists = $null -ne $shellRegistration
 $namespaceExists = $null -ne $namespaceRegistration
+$classOwned = $classExists -and
+  $classRegistration.AssetLibraryOwner -eq 'AssetLibrary.M0-002' -and
+  $classRegistration.'(default)' -eq 'AssetLibrary M0-002 Shell Namespace'
 $inprocOwned = $inprocExists -and
   $registration.AssetLibraryOwner -eq 'AssetLibrary.M0-002' -and
   $registration.'(default)' -and
@@ -20,13 +28,23 @@ $inprocOwned = $inprocExists -and
 $namespaceOwned = $namespaceExists -and
   $namespaceRegistration.AssetLibraryOwner -eq 'AssetLibrary.M0-002' -and
   $namespaceRegistration.'(default)' -eq 'AssetLibrary M0-002'
+if (($classExists -or $inprocExists -or $shellFolderExists) -and -not $classOwned) {
+  throw 'Refusing to remove a CLSID tree without the expected root owner/name.'
+}
 if ($inprocExists -and -not $inprocOwned) {
   throw 'Refusing to remove an InprocServer32 registration with an owner/path mismatch.'
 }
 if ($namespaceExists -and -not $namespaceOwned) {
   throw 'Refusing to remove a Desktop namespace registration with an owner/name mismatch.'
 }
-if (-not $inprocExists -and -not $namespaceExists) {
+if ($classOwned) {
+  $unknownChildren = @(Get-ChildItem -LiteralPath $classes -ErrorAction SilentlyContinue |
+    Where-Object { $_.PSChildName -notin @('InprocServer32', 'ShellFolder') })
+  if ($unknownChildren.Count -ne 0) {
+    throw 'Refusing to remove a CLSID tree containing unknown child keys.'
+  }
+}
+if (-not $classExists -and -not $namespaceExists) {
   Write-Host 'M0-002 is already unregistered.'
   exit 0
 }
@@ -35,7 +53,7 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'unregister M0-002 shell extens
   if ($namespaceOwned) {
     Remove-Item -LiteralPath $namespace -Recurse -Force
   }
-  if ($inprocOwned) {
+  if ($classOwned) {
     Remove-Item -LiteralPath $classes -Recurse -Force
   }
   Write-Host 'Removed M0-002 HKCU registration. Restart Explorer to confirm recovery.'

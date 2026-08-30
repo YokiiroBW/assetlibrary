@@ -120,7 +120,7 @@ bool AskAssetHost() {
 
 void StartAssetHostPing(HWND window) {
   // The Shell UI thread only starts this worker and returns. The worker owns its
-  // state until the bounded transaction completes, including cancellation drain.
+  // state until the logical transaction finishes and any cancelled I/O drains.
   auto state = std::make_shared<HostPingState>(window);
   ++g_object_count; // Keep the DLL loaded while detached worker code is executing.
   try {
@@ -281,7 +281,12 @@ class OneItemEnumerator final : public IEnumIDList {
     if (fetched) *fetched = 1;
     return count == 1 ? S_OK : S_FALSE;
   }
-  HRESULT STDMETHODCALLTYPE Skip(ULONG count) override { if (count) returned_ = true; return S_OK; }
+  HRESULT STDMETHODCALLTYPE Skip(ULONG count) override {
+    if (count == 0) return S_OK;
+    if (returned_) return S_FALSE;
+    returned_ = true;
+    return count == 1 ? S_OK : S_FALSE;
+  }
   HRESULT STDMETHODCALLTYPE Reset() override { returned_ = false; return S_OK; }
   HRESULT STDMETHODCALLTYPE Clone(IEnumIDList** clone) override {
     if (!clone) return E_POINTER;
@@ -332,7 +337,10 @@ class AssetShellFolder final : public IShellFolder, public IPersistFolder {
     if (!object) return E_POINTER;
     *object = nullptr; if (iid != IID_IShellFolder && iid != IID_IUnknown) return E_NOINTERFACE;
     auto* folder = new (std::nothrow) AssetShellFolder();
-    if (!folder) return E_OUTOFMEMORY; HRESULT result = folder->QueryInterface(iid, object); folder->Release(); return result;
+    if (!folder) return E_OUTOFMEMORY;
+    HRESULT result = folder->QueryInterface(iid, object);
+    folder->Release();
+    return result;
   }
   HRESULT STDMETHODCALLTYPE BindToStorage(PCUIDLIST_RELATIVE, IBindCtx*, REFIID, void**) override { return E_NOTIMPL; }
   HRESULT STDMETHODCALLTYPE CompareIDs(LPARAM, PCUIDLIST_RELATIVE, PCUIDLIST_RELATIVE) override {
@@ -343,10 +351,17 @@ class AssetShellFolder final : public IShellFolder, public IPersistFolder {
     *object = nullptr; auto* view = new (std::nothrow) AssetShellView();
     if (!view) return E_OUTOFMEMORY; HRESULT result = view->QueryInterface(iid, object); view->Release(); return result;
   }
-  HRESULT STDMETHODCALLTYPE GetAttributesOf(UINT count, PCUITEMID_CHILD_ARRAY, SFGAOF* attributes) override {
-    if (!attributes) return E_POINTER; *attributes = count ? SFGAO_FOLDER | SFGAO_CANRENAME : SFGAO_FOLDER; return S_OK;
+  HRESULT STDMETHODCALLTYPE GetAttributesOf(UINT, PCUITEMID_CHILD_ARRAY, SFGAOF* attributes) override {
+    if (!attributes) return E_POINTER;
+    *attributes = SFGAO_FOLDER;
+    return S_OK;
   }
-  HRESULT STDMETHODCALLTYPE GetUIObjectOf(HWND, UINT, PCUITEMID_CHILD_ARRAY, REFIID, UINT*, void**) override { return E_NOINTERFACE; }
+  HRESULT STDMETHODCALLTYPE GetUIObjectOf(
+      HWND, UINT, PCUITEMID_CHILD_ARRAY, REFIID, UINT*, void** object) override {
+    if (!object) return E_POINTER;
+    *object = nullptr;
+    return E_NOINTERFACE;
+  }
   HRESULT STDMETHODCALLTYPE GetDisplayNameOf(PCUITEMID_CHILD, SHGDNF flags, STRRET* name) override {
     if (!name) return E_POINTER; name->uType = STRRET_WSTR;
     const wchar_t* value = (flags & SHGDNF_FORPARSING) ? L"AssetHost" : L"AssetHost (M0-002)";
@@ -354,21 +369,15 @@ class AssetShellFolder final : public IShellFolder, public IPersistFolder {
     name->pOleStr = static_cast<LPOLESTR>(CoTaskMemAlloc(bytes));
     if (!name->pOleStr) return E_OUTOFMEMORY; memcpy(name->pOleStr, value, bytes); return S_OK;
   }
-  HRESULT STDMETHODCALLTYPE SetNameOf(HWND, PCUITEMID_CHILD, LPCWSTR, SHGDNF, PITEMID_CHILD*) override { return E_ACCESSDENIED; }
+  HRESULT STDMETHODCALLTYPE SetNameOf(
+      HWND, PCUITEMID_CHILD, LPCWSTR, SHGDNF, PITEMID_CHILD*) override {
+    return E_ACCESSDENIED;
+  }
 
   HRESULT STDMETHODCALLTYPE GetClassID(CLSID* clsid) override {
     if (!clsid) return E_POINTER;
     *clsid = kClsid;
     return S_OK;
-  }
-  HRESULT STDMETHODCALLTYPE IsDirty() override { return S_FALSE; }
-  HRESULT STDMETHODCALLTYPE Load(LPCOLESTR) override { return E_NOTIMPL; }
-  HRESULT STDMETHODCALLTYPE Save(LPCOLESTR, BOOL) override { return E_NOTIMPL; }
-  HRESULT STDMETHODCALLTYPE SaveCompleted(LPCOLESTR) override { return E_NOTIMPL; }
-  HRESULT STDMETHODCALLTYPE GetCurFile(LPOLESTR* file_name) override {
-    if (!file_name) return E_POINTER;
-    *file_name = nullptr;
-    return E_NOTIMPL;
   }
   HRESULT STDMETHODCALLTYPE Initialize(PCIDLIST_ABSOLUTE folder) override {
     PIDLIST_ABSOLUTE copy = folder ? ILCloneFull(folder) : nullptr;
@@ -388,14 +397,21 @@ class ClassFactory final : public IClassFactory {
   ~ClassFactory() { --g_object_count; }
   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** object) override {
     if (!object) return E_POINTER; *object = nullptr;
-    if (iid == IID_IUnknown || iid == IID_IClassFactory) { *object = static_cast<IClassFactory*>(this); AddRef(); return S_OK; }
+    if (iid == IID_IUnknown || iid == IID_IClassFactory) {
+      *object = static_cast<IClassFactory*>(this);
+      AddRef();
+      return S_OK;
+    }
     return E_NOINTERFACE;
   }
   ULONG STDMETHODCALLTYPE AddRef() override { return ++ref_count_; }
   ULONG STDMETHODCALLTYPE Release() override { ULONG value = --ref_count_; if (!value) delete this; return value; }
   HRESULT STDMETHODCALLTYPE CreateInstance(IUnknown* outer, REFIID iid, void** object) override {
     if (outer) return CLASS_E_NOAGGREGATION; auto* folder = new (std::nothrow) AssetShellFolder();
-    if (!folder) return E_OUTOFMEMORY; HRESULT result = folder->QueryInterface(iid, object); folder->Release(); return result;
+    if (!folder) return E_OUTOFMEMORY;
+    HRESULT result = folder->QueryInterface(iid, object);
+    folder->Release();
+    return result;
   }
   HRESULT STDMETHODCALLTYPE LockServer(BOOL lock) override {
     if (lock) {
@@ -414,7 +430,10 @@ extern "C" HRESULT __declspec(dllexport) DllGetClassObject(REFCLSID clsid, REFII
   if (!object) return E_POINTER; *object = nullptr;
   if (clsid != kClsid) return CLASS_E_CLASSNOTAVAILABLE;
   auto* factory = new (std::nothrow) ClassFactory();
-  if (!factory) return E_OUTOFMEMORY; HRESULT result = factory->QueryInterface(iid, object); factory->Release(); return result;
+  if (!factory) return E_OUTOFMEMORY;
+  HRESULT result = factory->QueryInterface(iid, object);
+  factory->Release();
+  return result;
 }
 
 extern "C" HRESULT __declspec(dllexport) DllCanUnloadNow() {

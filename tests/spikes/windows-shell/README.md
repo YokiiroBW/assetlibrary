@@ -40,8 +40,10 @@ Explorer after unregistering to verify that the shell returns to its normal stat
 ## Failure modes
 
 The view activation returns immediately after starting a worker. The worker's host
-ping attempt has a 250 ms transaction deadline and overlapped I/O; cancellation is
-drained by the worker before worker-owned resources are released. Missing, crashed, slow, malformed, or
+ping uses a 250 ms logical I/O deadline; after that deadline, cancelled overlapped
+I/O is drained by the worker before worker-owned resources are released. That drain
+does not block the Explorer UI thread and is not claimed to have its own proven
+upper bound until the Windows gate runs. Missing, crashed, slow, malformed, or
 oversized host frames result in a status message and the view remains usable; the
 bridge does not retry forever. `run-host.ps1` exposes
 normal, delayed, crash-after-one-request, and invalid-frame substitutes.

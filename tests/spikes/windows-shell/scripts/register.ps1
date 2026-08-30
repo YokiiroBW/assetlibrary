@@ -33,15 +33,11 @@ function Ensure-Key([string] $path) {
   }
 }
 
-function Owned-Registration {
-  $item = Get-ItemProperty -LiteralPath $inproc -ErrorAction SilentlyContinue
-  if (-not $item -or $item.AssetLibraryOwner -ne $owner -or -not $item.'(default)') { return $false }
-  return [IO.Path]::GetFullPath($item.'(default)') -eq $resolvedDll
-}
-
 function Created-KeyCanRollback([string] $path) {
   $item = Get-ItemProperty -LiteralPath $path -ErrorAction SilentlyContinue
   if (-not $item) { return $true }
+  $children = @(Get-ChildItem -LiteralPath $path -ErrorAction SilentlyContinue)
+  if ($children.Count -ne 0) { return $false }
   $hasOwner = $item.AssetLibraryOwner -eq $owner
   $hasExpectedPath = $item.'(default)' -and
     [IO.Path]::GetFullPath($item.'(default)') -eq $resolvedDll
@@ -87,27 +83,24 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'register M0-002 shell extensio
     Set-ItemProperty -LiteralPath $namespace -Name '(default)' -Value 'AssetLibrary M0-002'
     Write-Host "Registered for current user only: $resolvedDll"
   } catch {
-    # Restore values first, then remove only keys created by this invocation and
-    # still proven to belong to this exact owner/path pair.
+    # Restore values first, then remove only keys created by this invocation
+    # that are empty or still carry this exact owner/path pair.
     foreach ($key in $missingValues.Keys) {
       $parts = $key -split '\|', 2
       if ($missingValues[$key]) {
         Remove-ItemProperty -LiteralPath $parts[0] -Name $parts[1] -ErrorAction SilentlyContinue
       } else {
-        Set-ItemProperty -LiteralPath $parts[0] -Name $parts[1] -Value $originalValues[$key] -ErrorAction SilentlyContinue
+        Set-ItemProperty -LiteralPath $parts[0] -Name $parts[1] `
+          -Value $originalValues[$key] -ErrorAction SilentlyContinue
       }
     }
-    $ownedBeforeRollback = Owned-Registration
-    $namespaceAfterRollback = Get-ItemProperty -LiteralPath $namespace -ErrorAction SilentlyContinue
-    $namespaceOwned = $namespaceAfterRollback -and $namespaceAfterRollback.AssetLibraryOwner -eq $owner
     $createdArray = $createdKeys.ToArray()
     [array]::Reverse($createdArray)
     foreach ($path in $createdArray) {
-      $ownedOrPendingInproc = $ownedBeforeRollback -or ($path -eq $inproc)
-      if ((($path -eq $classes) -or ($path -eq $inproc) -or ($path -eq $shellFolder)) -and
-        $ownedOrPendingInproc -and (Created-KeyCanRollback $path)) {
-        Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-      } elseif (($path -eq $namespace) -and $namespaceOwned -and (Created-KeyCanRollback $path)) {
+      # createdKeys contains only keys absent before this invocation. After
+      # tracked values are restored, remove a key only when it has no children
+      # and contains no foreign values (or still has our exact owner/path pair).
+      if (Created-KeyCanRollback $path) {
         Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
       }
     }
