@@ -1,0 +1,35 @@
+Limit  (cost=0.42..197.58 rows=50 width=16) (actual time=0.070..0.353 rows=50 loops=1)
+  Buffers: shared hit=50 read=3 dirtied=49 written=3
+  ->  Index Only Scan using asset_library_path_keyset on asset  (cost=0.42..3490.12 rows=885 width=16) (actual time=0.069..0.349 rows=50 loops=1)
+        Index Cond: ((library_id = '00000000-0000-0000-0000-000000000500'::uuid) AND (asset_id > '00000000-0000-0000-0000-000000000000'::uuid))
+        Heap Fetches: 50
+        Buffers: shared hit=50 read=3 dirtied=49 written=3
+Planning:
+  Buffers: shared hit=143 read=28 dirtied=1 written=28
+Planning Time: 0.623 ms
+Execution Time: 0.371 ms
+Aggregate  (cost=7581.92..7581.93 rows=1 width=8) (actual time=1.868..1.868 rows=1 loops=1)
+  Buffers: shared hit=1 read=150 written=146
+  ->  Bitmap Heap Scan on asset  (cost=660.04..7575.28 rows=2655 width=0) (actual time=1.866..1.866 rows=0 loops=1)
+        Recheck Cond: (searchable @@ '''report'''::tsquery)
+        Buffers: shared hit=1 read=150 written=146
+        ->  Bitmap Index Scan on asset_search_gin  (cost=0.00..659.38 rows=2655 width=0) (actual time=1.865..1.865 rows=0 loops=1)
+              Index Cond: (searchable @@ '''report'''::tsquery)
+              Buffers: shared hit=1 read=150 written=146
+Planning:
+  Buffers: shared hit=10 read=19 written=19
+Planning Time: 0.283 ms
+Execution Time: 1.893 ms
+Aggregate  (cost=1791.22..1791.23 rows=1 width=8) (actual time=349.550..349.552 rows=1 loops=1)
+  Buffers: shared hit=13180 read=3032 dirtied=15401 written=449
+  ->  Bitmap Heap Scan on asset  (cost=1161.89..1790.80 rows=170 width=0) (actual time=75.770..322.842 rows=500000 loops=1)
+        Recheck Cond: (filename ~~* '%report%'::text)
+        Heap Blocks: exact=15616
+        Buffers: shared hit=13180 read=3032 dirtied=15401 written=449
+        ->  Bitmap Index Scan on asset_filename_trgm  (cost=0.00..1161.84 rows=170 width=0) (actual time=72.996..72.996 rows=500000 loops=1)
+              Index Cond: (filename ~~* '%report%'::text)
+              Buffers: shared hit=25 read=571 written=449
+Planning:
+  Buffers: shared hit=6 read=4 written=4
+Planning Time: 0.369 ms
+Execution Time: 349.715 ms
