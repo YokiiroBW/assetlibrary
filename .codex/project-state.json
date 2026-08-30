@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
   "status": "m0_second_wave_in_progress",
-  "next_action": "activate M0-006 file-safety spike while preserving the M0-002, M0-004 and M0-008 external evidence gates",
+  "next_action": "execute and review M0-006 file-safety spike while preserving the M0-002, M0-004 and M0-008 external evidence gates",
   "architecture_contract_status": "draft",
   "implementation_status": "m0_spikes_in_progress",
   "notes": [
@@ -19,6 +19,7 @@
     "M0-004 clean replacement merged as partial at e46cbe9 after 6 behavior tests, two matching cold-publish manifests and repository verification; real Docker and Windows Service execution remain unmet gates.",
     "M0-008 merged as partial at 14e8cc0 and its process-tree correction was merged after 25 Provider tests; hard Linux network/filesystem confinement, Windows isolation and RPC cancel acknowledgement remain unmet gates.",
     "M0-005 merged at deb813b after a fresh PostgreSQL 16.15 source bootstrap, repeated 2/2 integration tests, 500,000-asset query-plan review and repository validation; PostgreSQL alone is sufficient for this Spike, while path-index and production backup/query contracts remain M0-009 decisions.",
+    "M0-006 is active in an isolated worktree from ccee49c; its bounded task packet requires actual Linux same/cross-device crash-recovery evidence and preserves Windows/platform gaps as blockers.",
     "Current host has no Windows executor and cannot access the Docker daemon; environment-specific gates must remain explicit."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"
