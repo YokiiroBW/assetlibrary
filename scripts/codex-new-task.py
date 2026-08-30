@@ -47,15 +47,19 @@ def git_ref_exists(ref: str) -> bool:
 def git_branch_exists(branch: str) -> bool:
     result = subprocess.run(
         ('git', 'show-ref', '--verify', '--quiet', f'refs/heads/{branch}'),
-        cwd=ROOT, check=False,
+        cwd=ROOT,
+        check=False,
     )
     return result.returncode == 0
 
 
 def git_worktree_paths() -> set[Path]:
     result = subprocess.run(
-        ('git', 'worktree', 'list', '--porcelain'), cwd=ROOT,
-        check=True, text=True, capture_output=True,
+        ('git', 'worktree', 'list', '--porcelain'),
+        cwd=ROOT,
+        check=True,
+        text=True,
+        capture_output=True,
     )
     return {
         Path(line.removeprefix('worktree ')).resolve()
@@ -93,16 +97,30 @@ def write_task_files(task_root: Path, args: argparse.Namespace, branch: str, wor
         result_template = json.loads((ROOT / '.codex/handoffs/_template/result.json').read_text(encoding='utf-8'))
         (handoff_dir / 'summary.md').write_text(summary_template.replace('<TASK-ID>', args.task_id), encoding='utf-8')
         (handoff_dir / 'tests.md').write_text(tests_template.replace('<TASK-ID>', args.task_id), encoding='utf-8')
-        result_template.update({'task_id': args.task_id, 'title': args.title,
-                                'milestone': args.milestone, 'owner': args.owner,
-                                'branch': branch, 'worktree': str(worktree),
-                                'handoff_summary': f'.codex/handoffs/{args.task_id}/summary.md'})
-        (handoff_dir / 'result.json').write_text(json.dumps(result_template, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        result_template.update(
+            {
+                'task_id': args.task_id,
+                'title': args.title,
+                'milestone': args.milestone,
+                'owner': args.owner,
+                'branch': branch,
+                'worktree': str(worktree),
+                'handoff_summary': f'.codex/handoffs/{args.task_id}/summary.md',
+            }
+        )
+        (handoff_dir / 'result.json').write_text(
+            json.dumps(result_template, ensure_ascii=False, indent=2) + '\n', encoding='utf-8'
+        )
         task_prompt = TEMPLATE.read_text(encoding='utf-8')
-        replacements = {'<TASK-ID>': args.task_id, '<TITLE>': args.title,
-                        '<MILESTONE>': args.milestone, '<OWNER>': args.owner,
-                        'codex/<task-id>-<slug>': branch,
-                        '../worktrees/<task-id>': str(worktree), '<task-id>': args.task_id}
+        replacements = {
+            '<TASK-ID>': args.task_id,
+            '<TITLE>': args.title,
+            '<MILESTONE>': args.milestone,
+            '<OWNER>': args.owner,
+            'codex/<task-id>-<slug>': branch,
+            '../worktrees/<task-id>': str(worktree),
+            '<task-id>': args.task_id,
+        }
         for old, new in replacements.items():
             task_prompt = task_prompt.replace(old, new)
         task_file.write_text(task_prompt, encoding='utf-8')
@@ -116,12 +134,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='Create an isolated Codex task worktree and handoff skeleton.')
     parser.add_argument('task_id', nargs='?')
     parser.add_argument('title', nargs='?')
-    parser.add_argument('--activate', metavar='TASK_ID', help='Activate an existing planned task from the registry.')
+    parser.add_argument(
+        '--activate', metavar='TASK_ID', help='Activate an existing planned task from the registry.'
+    )
     parser.add_argument('--milestone', default='M0')
     parser.add_argument('--base', default='main')
     parser.add_argument('--owner', default='unassigned')
     parser.add_argument('--worktrees-dir', default='../worktrees')
-    parser.add_argument('--no-worktree', action='store_true', help='Only create registry/task files in the coordinator repository.')
+    parser.add_argument(
+        '--no-worktree', action='store_true',
+        help='Only create registry/task files in the coordinator repository.',
+    )
     args = parser.parse_args()
 
     if bool(args.activate) == bool(args.task_id):
@@ -154,8 +177,10 @@ def main() -> int:
             print(f'Only planned tasks can be activated: {args.task_id}', file=sys.stderr)
             return 3
         by_id = {entry.get('id'): entry for entry in items}
-        unmet = [dep for dep in item.get('depends_on', [])
-                 if dep not in by_id or by_id[dep].get('status') not in {'completed', 'complete', 'done'}]
+        unmet = [
+            dep for dep in item.get('depends_on', [])
+            if dep not in by_id or by_id[dep].get('status') not in {'completed', 'complete', 'done'}
+        ]
         if unmet:
             print(f'Unmet dependencies for {args.task_id}: {", ".join(unmet)}', file=sys.stderr)
             return 3
@@ -167,7 +192,10 @@ def main() -> int:
         return 3
 
     slug = slugify(args.title)
-    branch = (matches[0].get('branch') or f'codex/{args.task_id.lower()}-{slug}') if args.activate else f'codex/{args.task_id.lower()}-{slug}'
+    branch = (
+        (matches[0].get('branch') or f'codex/{args.task_id.lower()}-{slug}')
+        if args.activate else f'codex/{args.task_id.lower()}-{slug}'
+    )
     worktree = ROOT if args.no_worktree else (ROOT / args.worktrees_dir / args.task_id).resolve()
 
     if not args.no_worktree:
@@ -196,18 +224,18 @@ def main() -> int:
         return 5
 
     updated = {
-            'id': args.task_id,
-            'title': args.title,
-            'module': slug,
-            'status': 'ready',
-            'depends_on': [],
-            'owner': args.owner,
-            'branch': branch,
-            'worktree': str(worktree),
-            'task_file': f'.codex/tasks/{args.task_id}.md',
-            'handoff': f'.codex/handoffs/{args.task_id}/summary.md',
-            'thread_deep_link': '',
-        }
+        'id': args.task_id,
+        'title': args.title,
+        'module': slug,
+        'status': 'ready',
+        'depends_on': [],
+        'owner': args.owner,
+        'branch': branch,
+        'worktree': str(worktree),
+        'task_file': f'.codex/tasks/{args.task_id}.md',
+        'handoff': f'.codex/handoffs/{args.task_id}/summary.md',
+        'thread_deep_link': '',
+    }
     if args.activate:
         updated.update({key: item[key] for key in ('depends_on', 'module', 'handoff') if key in item})
         updated['status'] = 'ready'
@@ -219,8 +247,11 @@ def main() -> int:
         payload = json.dumps(registry, ensure_ascii=False, indent=2) + '\n'
         temp_name: str | None = None
         try:
-            with tempfile.NamedTemporaryFile('w', encoding='utf-8', dir=REGISTRY.parent,
-                                             prefix='.task-registry.', suffix='.tmp', delete=False) as temp:
+            with tempfile.NamedTemporaryFile(
+                'w', encoding='utf-8', dir=REGISTRY.parent,
+                prefix='.task-registry.', suffix='.tmp', delete=False,
+            ) as temp:
+                os.chmod(temp.name, REGISTRY.stat().st_mode & 0o7777)
                 temp.write(payload)
                 temp.flush()
                 os.fsync(temp.fileno())
@@ -240,11 +271,15 @@ def main() -> int:
         return 5
 
     prompt = (
-        f'请执行任务 {args.task_id}：{args.title}。先读取 AGENTS.md、docs/22_编码与架构开发原则.md、'
+        f'请执行任务 {args.task_id}：{args.title}。先读取 '
+        'AGENTS.md、docs/22_编码与架构开发原则.md、'
         f'.codex/policies/、.codex/tasks/{args.task_id}.md 和相关需求/ADR；仅在该 worktree 修改；'
         '完成后提交代码、架构/契约测试和含 architecture_review 的标准交接文件。'
     )
-    link = 'codex://new?path=' + urllib.parse.quote(str(worktree), safe='') + '&prompt=' + urllib.parse.quote(prompt, safe='')
+    link = (
+        'codex://new?path=' + urllib.parse.quote(str(worktree), safe='')
+        + '&prompt=' + urllib.parse.quote(prompt, safe='')
+    )
 
     print('Task created:', args.task_id)
     print('Branch:', branch)
