@@ -13,13 +13,16 @@
   和本机 IPC，不包含网络、哈希、媒体解码、Provider 或业务规则。
 - 进程外 `AssetHostStub.exe`，通过 Spike-local named pipe 提供 ping/pong。
   帧有 magic、版本、固定 16 字节头、4 KiB payload 上限和 request id；Shell
-  使用 overlapped I/O，连接、读写均以 250 ms 为上限，超时后取消 I/O 并显示
-  可恢复状态。
-- CMake x64 构建入口；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障
-  模式和可配置 soak 入口。注册带 owner marker、拒绝覆盖其他 DLL，卸载只删
-  自己创建且路径匹配的键。
-- Linux 可运行静态/契约测试，检查包结构、禁依赖、IPC 界限、注册卸载对称性、
-  故障入口和生成/私密产物排除。
+  使用 overlapped I/O，单次 `AskAssetHost` 共享一个 250 ms absolute deadline。
+  超时后调用 `CancelIoEx`，等待取消完成并确认 `GetOverlappedResult` 后才销毁
+  event/`OVERLAPPED`/buffer，随后显示可恢复状态。
+- CMake x64 构建入口（非 Windows 仅配置检查，MSVC/Windows-only 选项受条件
+  保护）；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障模式和 host-cycle
+  helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
+  中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。
+- Linux 可运行静态/契约测试，检查包结构、禁依赖、IPC 界限与取消生命周期、
+  注册卸载对称性、故障入口、枚举 partial-fetch 语义、host-only soak 定位和
+  生成/私密产物排除。
 
 真实 Windows 证据尚未取得，因此本交接不是 M0-002 验收通过。
 
@@ -43,8 +46,10 @@
 - `tests/spikes/windows-shell/scripts/unregister.ps1`
 - `tests/spikes/windows-shell/scripts/run-host.ps1`
 - `tests/spikes/windows-shell/scripts/soak.ps1`
+- `.codex/tasks/M0-002.md`（任务包纳入本次提交，内容未改写）
 - `tests/spikes/windows-shell/test_contracts.py`
 - `docs/spikes/M0-002/README.md`
+- `docs/spikes/M0-002/explorer-soak-protocol.md`
 - `.codex/handoffs/M0-002/summary.md`, `result.json`, `tests.md`
 
 ## 模块边界、依赖方向与复用
@@ -67,7 +72,7 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 
 ## 测试结果
 
-- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（6/6）。
+- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（8/8）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
 - 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
@@ -76,14 +81,15 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 
 ## 架构测试与质量门禁
 
-Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/超时边界、HKCU-only 注册
-对称性、故障模式入口和二进制/日志/凭证产物排除。没有真实 Windows 运行时证据，
+Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/整体 deadline、取消完成顺序、
+HKCU-only 注册回滚/对称性、枚举 partial-fetch、故障模式入口、host-only soak
+定位和二进制/日志/凭证产物排除。没有真实 Windows 运行时证据，
 故障隔离和 Explorer 恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响
 
 Spike 不触碰资产文件、数据库或网络；只读 IPC ping。注册只写当前用户 HKCU，
-owner marker 和路径比较避免覆盖/误删。Shell IPC deadline 为 250 ms、payload
+owner marker 和路径比较避免覆盖/误删。Shell IPC overall deadline 为 250 ms、payload
 上限 4 KiB；没有 50 万资产性能结论。soak 脚本提供 bounded host cycle 入口，
 未执行不得推断稳定性。
 
@@ -95,7 +101,8 @@ owner marker 和路径比较避免覆盖/误删。Shell IPC deadline 为 250 ms�
   后重连；Linux 不能替代这些证据。
 - 当前 PIDL、视图和 host payload 只是技术替身，不可直接演进为生产协议或业务
   实现。
-- `soak.ps1` 是可配置入口，8 小时结果仍为 downstream gate。
+- `soak.ps1` 明确只是 host-cycle helper；人工 Explorer soak protocol 和 8 小时
+  运行证据仍为 downstream gate。
 
 ## 建议合并顺序
 

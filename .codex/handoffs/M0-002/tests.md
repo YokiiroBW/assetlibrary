@@ -9,9 +9,11 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，6/6 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，8/8 |
 | `git diff --check` | 通过 |
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
+| `python3 scripts/validate_handoff.py` | 通过 |
+| `python3 scripts/validate_architecture_baseline.py` | 通过 |
 
 Windows 主机上的精确命令：
 
@@ -30,13 +32,14 @@ Windows 主机上的精确命令：
 ## 架构与契约测试
 
 `test_contracts.py` 检查：包文件完整性；Shell 源码不含网络/数据库/Provider 等
-重型依赖；协议版本、16-byte header、4 KiB payload、250 ms timeout 与 overlapped
-cancel；注册脚本 HKCU-only、owner marker 和注册/卸载对称；host 故障入口；无
-生成二进制、reg/log/pdb 或凭证值。
+重型依赖；协议版本、16-byte header、4 KiB payload、250 ms overall deadline、
+overlapped cancel completion ordering；注册脚本 HKCU-only、owner marker、collision
+guard、rollback 和注册/卸载对称；枚举 partial-fetch；host-only soak 与人工
+Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
 ## 通过
 
-- Python 静态/契约测试 6/6。
+- Python 静态/契约测试 8/8。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
 
@@ -45,16 +48,18 @@ cancel；注册脚本 HKCU-only、owner marker 和注册/卸载对称；host 故
 - Windows build/register/verify/unregister：跳过，当前环境无 Windows 工具链和注册表。
 - Explorer navigation、custom right-side view、host missing/crash/timeout/invalid
   recovery、uninstall Explorer recovery：跳过，必须真实 Windows 11 x64。
-- 8-hour soak：跳过，必须 Windows host；不得将入口存在记为通过。
+- 8-hour Explorer soak：跳过，`soak.ps1` 仅为 host-cycle helper；必须按
+  `docs/spikes/M0-002/explorer-soak-protocol.md` 完成人工 Explorer 证据。
 
 ## 故障注入与恢复验证
 
 仅完成静态入口检查。真实执行需使用 `run-host.ps1` 的 normal/invalid/crash/slow
-模式，并观察 Explorer 不冻结、状态文案可恢复、normal host 可重新连接。
+模式，并观察 Explorer 不冻结、状态文案可恢复、normal host 可重新连接；
+`soak.ps1` 只提供 host-cycle 信号，不替代 Explorer 故障注入。
 
 ## 性能数据
 
-无真实性能数据。协议静态上限为 4 KiB payload 与 250 ms Shell 侧 I/O deadline；
+无真实性能数据。协议静态上限为 4 KiB payload 与 250 ms Shell 侧 overall deadline；
 soak 结果待 Windows 门禁。
 
 ## 尚未覆盖

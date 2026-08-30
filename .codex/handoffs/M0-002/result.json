@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-shell-spike",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
-  "commit": "8daeb4befe33213cbd0113bba84aa16cd9697b84",
+  "commit": "c79dc70fe2a0003a0dd7a42835a75a62f930242b",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
@@ -22,13 +22,15 @@
     "tests/spikes/windows-shell/scripts/soak.ps1",
     "tests/spikes/windows-shell/test_contracts.py",
     "docs/spikes/M0-002/README.md",
+    "docs/spikes/M0-002/explorer-soak-protocol.md",
+    ".codex/tasks/M0-002.md",
     ".codex/handoffs/M0-002/summary.md",
     ".codex/handoffs/M0-002/result.json",
     ".codex/handoffs/M0-002/tests.md"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 6,
+    "passed": 8,
     "failed": 0,
     "skipped": 8,
     "report": "tests.md"
@@ -41,7 +43,7 @@
   "blocked_by": [
     "Windows 11 x64 + Visual Studio 2022 Desktop C++ + Windows 11 SDK + CMake: ./tests/spikes/windows-shell/scripts/build.ps1",
     "真实注册/导航/自定义视图/故障/卸载恢复: ./tests/spikes/windows-shell/scripts/register.ps1 -> verify-registration.ps1 -> run-host.ps1 (normal, invalid, crash, slow) -> unregister.ps1",
-    "20 次 crash/restart 与 8 小时 soak: ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8"
+    "20 次 crash/restart 与 8 小时 Explorer evidence: 按 docs/spikes/M0-002/explorer-soak-protocol.md 操作，同时 ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8 仅作为 host-cycle helper"
   ],
   "recommended_merge_order": 2,
   "handoff_summary": ".codex/handoffs/M0-002/summary.md",
