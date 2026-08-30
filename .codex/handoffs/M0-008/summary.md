@@ -8,7 +8,7 @@
 
 - 在 `contracts/providers/**` 交付 manifest 1.0 与 RPC 1.0 candidate，覆盖 discover、handshake、request、result、error、cancel、health。
 - 固定 4-byte big-endian bounded framing、correlation、opaque input token、artifact token、deadline、资源上限、默认拒网和 `original_write=false`。
-- 在 test-only Python fixture 中执行 supervisor/worker 的超时、取消、崩溃、malformed/oversize frame、stdout/stderr flood、子进程清理、CPU/内存/进程/descriptor limit、restart/backoff/circuit breaker、安全模式和 L0 降级。
+- 在 test-only Python fixture 中执行 supervisor/worker 的超时、supervisor 强制 process-tree cancel、崩溃、malformed/oversize frame、stdout/stderr flood、子进程清理、CPU/内存/进程/descriptor limit、restart/backoff/circuit breaker、安全模式和 L0 降级。
 - 所有 fixture 只使用系统临时目录；suite 后没有存活的 worker 或 child，未产生 tracked 二进制或 Python cache。
 
 ## 关键决策
@@ -17,7 +17,7 @@
 
 ## 修改文件
 
-implementation commit `86d95094b019c9e9c000840207e26e58dd5232c5` 包含：
+implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5` and correction `75da89129cca86bdbaf8f052ab7c7ed32cfa100c` 包含：
 
 - `contracts/providers/README.md`
 - `contracts/providers/provider-manifest.schema.json`
@@ -39,11 +39,11 @@ implementation commit `86d95094b019c9e9c000840207e26e58dd5232c5` 包含：
 
 ## 测试结果
 
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/provider-sandbox -p 'test_*.py' -v`：17 passed，0 failed，0 skipped。
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/provider-sandbox -p 'test_*.py' -v`：20 passed，0 failed，0 skipped。
 
 ## 架构测试与质量门禁
 
-契约 schema JSON parse/reference、positive/negative fixtures、未知字段保留、bounded framing 与全部故障 fixture 已通过。任务范围验证及全局 handoff/架构门禁由协调线程在合并时复跑。
+契约 schema JSON parse/reference、positive/negative fixtures、未知字段保留、bounded framing、响应接受边界与全部故障 fixture 已通过。任务范围验证及全局 handoff/架构门禁由协调线程在合并时复跑。
 
 ## 文件安全、权限与性能影响
 
@@ -53,7 +53,7 @@ Provider boundary 不接受任意 host path；输入为 supervisor token，输�
 
 - Linux hard network/filesystem confinement、cgroup delegation/accounting 和 seccomp 未执行通过，不能声称安全沙箱。
 - Windows Job Object + restricted token/AppContainer 没有实机证据。
-- 生产 supervisor 尚未实现；RPC candidate、restart budget、日志字段和目标平台 overhead 需要 M0-009 冻结/实测。
+- 当前 `cancel()` 是 supervisor 强制 process-tree cancel，没有发送/确认 RPC `cancel` envelope；RPC cancel acknowledgement、restart budget、日志字段和目标平台 overhead 需要 M0-009 冻结/实测。
 
 ## 建议合并顺序
 
