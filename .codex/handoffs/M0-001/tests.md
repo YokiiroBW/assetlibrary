@@ -6,7 +6,7 @@ Linux worktree，Python 3，临时目录 Git 仓库测试。
 
 ## 执行命令
 
-- `python3 -m unittest discover -s tests/repository -p 'test_*.py'`：6 passed
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/repository -p 'test_*.py'`：6 passed，前后均无 `__pycache__`/`.pyc`
 - `python3 scripts/validate_handoff.py`：passed
 - `python3 scripts/validate_architecture_baseline.py`：passed
 - `python3 scripts/verify_repository.py`：passed
