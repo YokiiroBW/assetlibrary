@@ -35,7 +35,7 @@
 `asset_library_path_keyset`，全文
 使用 `asset_search_gin` 且命中 50,000/500,000，trigram 使用 `asset_filename_trgm`
 且精确命中 1 行；同时记录 5 次 warm latency、表/索引大小和 BUFFERS 计划。
-相对路径过滤在当前 500k 数据上实际为 Parallel Seq Scan（约 28.4 ms），未擅自
+相对路径过滤在当前 500k 数据上实际为 Parallel Seq Scan（约 25–29 ms），未擅自
 增加索引，交由 M0-009 决定 path index。
 
 所有 server data/socket/log/cache 位于 `/tmp/m005-pg-*`，测试 teardown 停止服务并

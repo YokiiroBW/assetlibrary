@@ -6,6 +6,7 @@ The FTS assertion is exactly 50,000 rows and the trigram assertion is exactly
 one row. The keyset query uses `(library_id, asset_id)` and has no OFFSET.
 
 Each run writes complete host-specific `EXPLAIN (ANALYZE, BUFFERS)` output,
-index usage, table/index sizes, and five warm FTS timings to ignored
+index usage, table/index sizes, and five warm timings for each of keyset, FTS,
+and trigram to ignored
 `.runtime/sandbox-storage/M0-005/500k-plan.txt`. This tracked file intentionally
 contains no stale timing or misleading all-match/zero-match evidence.
