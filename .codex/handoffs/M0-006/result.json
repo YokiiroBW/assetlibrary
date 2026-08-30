@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-006-clean",
   "branch": "codex/m0-006-file-safety-clean",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006-clean",
-  "commit": "10c0643a433935f2311fd0b926ad31549f0ee6b3",
+  "commit": "0c1dd594d0047550af02defd1ebf84731a95090d",
   "changed_files": [
     ".codex/handoffs/M0-006/result.json",
     ".codex/handoffs/M0-006/summary.md",
@@ -19,7 +19,7 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 31,
+    "passed": 38,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
