@@ -15,7 +15,10 @@ class PostgresSpike(unittest.TestCase):
     def _cleanup(cls):
         server = getattr(cls, 'server', None)
         if server is not None and server.poll() is None:
-            server.terminate(); server.wait(timeout=10)
+            server.terminate()
+            try: server.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                server.kill(); server.wait(timeout=5)
         for name in ('log', 'restart_log'):
             handle = getattr(cls, name, None)
             if handle and not handle.closed: handle.close()
@@ -34,7 +37,7 @@ class PostgresSpike(unittest.TestCase):
         cls.data, cls.sock = cls.work/'data', cls.work/'sock'; cls.data.mkdir(mode=0o700); cls.sock.mkdir(mode=0o700); cls.data.chmod(0o700); cls.sock.chmod(0o700)
         cls.bin = pathlib.Path(os.environ.get('M005_PG_BIN', '/tmp/m005-pg-install/bin'))
         if not (cls.bin/'initdb').exists():
-            out = subprocess.check_output([str(ROOT/'tests/spikes/postgres/bootstrap.sh')], text=True)
+            out = subprocess.check_output(['bash', str(ROOT/'tests/spikes/postgres/bootstrap.sh')], text=True)
             cls.bin = pathlib.Path(out.strip().split('M005_PG_BIN=',1)[1].splitlines()[0])
         run([str(cls.bin/'initdb'), '-D', str(cls.data), '--no-locale', '--encoding=UTF8', '--auth=trust'])
         with (cls.data/'postgresql.conf').open('a') as conf: conf.write(f"listen_addresses=''\nunix_socket_directories='{cls.sock}'\nshared_buffers='128MB'\nfsync=on\n")
@@ -100,6 +103,10 @@ class PostgresSpike(unittest.TestCase):
         self.assertEqual(self.sql(f"SELECT tasks.cancel('{leased_cancel}');").strip(), 't')
         conflict = subprocess.run(self.db + ['-c', f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{uuid.uuid4()}','idem-1','index','{{\"different\":true}}');"], text=True, capture_output=True)
         self.assertNotEqual(conflict.returncode, 0)
+        retry_task = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{retry_task}','idem-1','index','{{}}') ON CONFLICT (idempotency_key) DO NOTHING;")
+        self.assertEqual(self.sql("SELECT count(*) FROM tasks.durable_task WHERE idempotency_key='idem-1';").strip(), '1')
+        self.assertEqual(self.sql("SELECT task_type||':'||payload::text FROM tasks.durable_task WHERE idempotency_key='idem-1';").strip(), 'index:{}')
+        self.assertEqual(self.sql("SELECT task_id FROM tasks.durable_task WHERE idempotency_key='idem-1';").strip(), str(asset))
         fail_id = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload,max_attempts) VALUES ('{fail_id}','fail-key','x','{{}}',1);")
         for _ in range(5):
             claimed_id = self.sql("SELECT task_id FROM tasks.claim_one('crasher',1);").strip()
@@ -129,6 +136,8 @@ class PostgresSpike(unittest.TestCase):
         pubs = [subprocess.Popen(self.db + ['-c', f"SELECT event_id FROM events.claim_one('publisher-{i}',30);"], stdout=subprocess.PIPE, text=True) for i in range(2)]
         pub_results = [p.communicate(timeout=10)[0] for p in pubs]
         self.assertEqual(sum(str(same_ev) in out for out in pub_results), 1)
+        winner = next(i for i, out in enumerate(pub_results) if str(same_ev) in out)
+        self.assertEqual(self.sql(f"SELECT lease_owner FROM events.outbox WHERE event_id='{same_ev}';").strip(), f'publisher-{winner}')
         self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','same','{{}}') ON CONFLICT (event_id) DO NOTHING;")
         self.assertEqual(self.sql(f"SELECT count(*) FROM events.outbox WHERE event_id='{same_ev}';").strip(), '1')
         conflict_event = subprocess.run(self.db + ['-c', f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{same_ev}','{asset}','different','{{}}');"], text=True, capture_output=True)
@@ -165,7 +174,7 @@ class PostgresSpike(unittest.TestCase):
         for _ in range(5):
             for name, query in [("keyset", "SELECT asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50"), ("fts", "SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt')"), ("trigram", "SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'")]:
                 start = time.perf_counter(); self.sql(query); timings[name].append((time.perf_counter()-start)*1000)
-        plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT a.asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
+        plan = self.sql("EXPLAIN (ANALYZE,BUFFERS) SELECT a.asset_id FROM library.asset a JOIN library.permission_scope p USING(library_id) WHERE p.principal_id='perf-reader' AND a.asset_id > '00000000-0000-0000-0000-000000000000' ORDER BY a.asset_id LIMIT 50; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE relative_path LIKE 'batch/42/%'; EXPLAIN (ANALYZE,BUFFERS) SELECT count(*) FROM library.asset WHERE searchable @@ plainto_tsquery('simple','reportx.txt'); EXPLAIN (ANALYZE,BUFFERS) SELECT asset_id FROM library.asset WHERE filename ILIKE '%499990 reportx%'; SELECT pg_size_pretty(pg_table_size('library.asset')),pg_size_pretty(pg_indexes_size('library.asset')); ")
         (RUNTIME/'500k-plan.txt').parent.mkdir(parents=True, exist_ok=True)
         dist = '\n'.join(f"WARM_{name.upper()}_MS=min:{min(vals):.3f},median:{sorted(vals)[len(vals)//2]:.3f},p95:{sorted(vals)[-1]:.3f},max:{max(vals):.3f}" for name, vals in timings.items())
         (RUNTIME/'500k-plan.txt').write_text(plan + '\n' + dist + '\n')
