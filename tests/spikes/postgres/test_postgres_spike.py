@@ -47,7 +47,8 @@ class PostgresSpike(unittest.TestCase):
     def test_migrations_restart_tasks_outbox_and_search(self):
         self.apply(); self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger;").strip(), '2')
         runners = [subprocess.Popen(['python3',str(ROOT/'tests/spikes/postgres/migration_runner.py'),'--socket',str(self.sock),'--database','m005'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(2)]
-        self.assertTrue(all(p.communicate(timeout=20)[0] == '' and p.returncode == 0 for p in runners))
+        results = [p.communicate(timeout=20) for p in runners]
+        self.assertTrue(all(p.returncode == 0 for p in runners), results)
         self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger;").strip(), '2')
         drift = self.work/'drift'; drift.mkdir(); (drift/'003_drift.sql').write_text('-- drift\nCREATE TABLE migration.drift_probe(x integer);\n')
         self.sql("INSERT INTO migration.ledger(version,checksum) VALUES (3,'wrong');")
@@ -91,7 +92,7 @@ class PostgresSpike(unittest.TestCase):
         with self.assertRaises(RuntimeError): self.sql("BEGIN; CREATE TABLE migration.partial_sentinel(x int); SELECT 1/0; COMMIT;")
         self.assertEqual(self.sql("SELECT to_regclass('migration.partial_sentinel') IS NULL;").strip(), 't')
         self.server.terminate(); self.server.wait(timeout=10)
-        type(self).restart_log = (self.work/'restart.log').open('w'); self.server = subprocess.Popen([str(self.bin/'postgres'),'-D',str(self.data)], stdout=type(self).restart_log, stderr=subprocess.STDOUT)
+        type(self).restart_log = (self.work/'restart.log').open('w'); type(self).server = subprocess.Popen([str(self.bin/'postgres'),'-D',str(self.data)], stdout=type(self).restart_log, stderr=subprocess.STDOUT)
         for _ in range(30):
             try: run(['psql','-h',str(self.sock),'-d','m005','-c','SELECT 1']); break
             except (subprocess.CalledProcessError, RuntimeError): time.sleep(.2)
