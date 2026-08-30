@@ -31,7 +31,7 @@ def main() -> int:
     elif mode == "malformed":
         sys.stdout.buffer.write(b"\x00\x00\x00\x04oops")
         sys.stdout.buffer.flush()
-    elif mode in {"bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid"}:
+    elif mode in {"bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid", "artifact_many"}:
         response = {"message_type": "result", "rpc_version": "1.0", "request_id": request_id, "status": "ok", "asset_level": "L1", "original_write": False}
         if mode == "bad_request_id":
             response["request_id"] = "other-request"
@@ -43,8 +43,10 @@ def main() -> int:
             response["original_write"] = True
         elif mode == "artifact_oversize":
             response["artifacts"] = [{"artifact_token": "artifact:test", "size_bytes": 2 * 1024 * 1024, "sha256": "0" * 64}]
-        else:
+        elif mode == "artifact_invalid":
             response["artifacts"] = [{"artifact_token": "../host-path", "size_bytes": 1, "sha256": "not-a-hash"}]
+        else:
+            response["artifacts"] = [{"artifact_token": "artifact:test", "size_bytes": 0, "sha256": "0" * 64} for _ in range(65)]
         send(response)
     elif mode == "response_oversize":
         send({"message_type": "result", "rpc_version": "1.0", "request_id": request_id, "status": "ok", "asset_level": "L1", "original_write": False, "metadata": {"padding": "x" * 1024}})

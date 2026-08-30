@@ -2,7 +2,7 @@
   {"message_type":"discover","rpc_version":"1.0","request_id":"discover-1","supported_api_versions":["1.0"],"future_optional":{"kept":true}},
   {"message_type":"handshake","rpc_version":"1.0","request_id":"handshake-1","provider_id":"fixture.provider","provider_version":"0.1.0","supported_api_versions":["1.0"],"capabilities":["metadata","future.capability"],"permissions":{"network":false,"original_write":false,"input_tokens_only":true},"resource_limits":{"max_request_bytes":65536}},
   {"message_type":"request","rpc_version":"1.0","request_id":"request-1","operation":"metadata","input_tokens":["opaque:test"],"deadline_at":"2026-08-31T00:00:00Z","max_response_bytes":65536},
-  {"message_type":"result","rpc_version":"1.0","request_id":"request-1","status":"ok","metadata":{"fixture":true},"artifacts":[{"artifact_token":"artifact:test","size_bytes":0,"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}]},
+  {"message_type":"result","rpc_version":"1.0","request_id":"request-1","status":"ok","original_write":false,"metadata":{"fixture":true},"artifacts":[{"artifact_token":"artifact:test","size_bytes":0,"sha256":"0000000000000000000000000000000000000000000000000000000000000000"}]},
   {"message_type":"error","rpc_version":"1.0","request_id":"request-1","code":"deadline_exceeded","retryable":true},
   {"message_type":"cancel","rpc_version":"1.0","request_id":"cancel-1","cancel_of":"request-1"},
   {"message_type":"health","rpc_version":"1.0","request_id":"health-1","state":"ready","load":{}}

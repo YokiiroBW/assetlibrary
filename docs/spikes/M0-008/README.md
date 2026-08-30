@@ -16,7 +16,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
   -s tests/spikes/provider-sandbox -p 'test_*.py' -v
 ```
 
-结果：20 tests，全部通过。
+结果：23 tests，全部通过。
 
 代表性观测（单次执行的耗时会因主机负载变化）：
 
@@ -34,9 +34,10 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
 | processes | Linux `RLIMIT_NPROC=8` | worker returns `process_limit`, 0 extra child in this host baseline |
 | restart | 3 failures, exponential delay 10/20/40 ms, circuit open | deterministic unit proof |
 
-supervisor 在 dispatch 前检查 request frame 大小；响应 frame 按 manifest 与 request
-上限的较小值读取，并在接受前检查 correlation/version/type/status、只读标记和
-artifact token/size/hash。输入只允许 opaque supervisor token；结果只允许 metadata、suggestions
+supervisor 在 dispatch 前检查 request message type/version/id、operation、opaque
+input token、deadline 和 request frame 大小；响应 frame 按 manifest 与 request
+上限的较小值读取，并在接受前检查 correlation/version/type/status、只读标记、
+artifact 数量、token/size/hash。`/etc/...` 等 host path 在 spawn 前拒绝；结果只允许 metadata、suggestions
 和 supervisor-owned artifact token。结果不会生成或执行核心物理操作计划。
 
 ## 执行过的隔离探针

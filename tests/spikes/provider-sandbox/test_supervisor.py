@@ -76,7 +76,7 @@ class ProviderSupervisorTests(unittest.TestCase):
                 self.assertEqual(outcome.status, expected)
 
     def test_response_acceptance_checks_correlation_version_type_write_and_artifacts(self) -> None:
-        for mode in ("bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid"):
+        for mode in ("bad_request_id", "bad_version", "bad_message_type", "write_true", "artifact_oversize", "artifact_invalid", "artifact_many"):
             with self.subTest(mode=mode):
                 outcome = self.supervisor().run(mode)
                 self.assertEqual(outcome.status, "protocol_error")
@@ -119,9 +119,32 @@ class ProviderSupervisorTests(unittest.TestCase):
         self.assertTrue(wait_dead(child_pid), f"child survived after parent exit: {child_pid}")
 
     def test_request_limit_is_checked_before_dispatch(self) -> None:
-        outcome = self.supervisor(Limits(max_request_bytes=128)).run(request={"message_type": "request", "rpc_version": "1.0", "request_id": "large", "operation": "metadata", "input_tokens": ["opaque:" + "x" * 1000], "deadline_at": "now", "max_response_bytes": 10})
+        supervisor = self.supervisor(Limits(max_request_bytes=128))
+        outcome = supervisor.run(request={"message_type": "request", "rpc_version": "1.0", "request_id": "large", "operation": "metadata", "input_tokens": ["opaque:" + "x" * 240] * 4, "deadline_at": "now", "max_response_bytes": 10})
         self.assertEqual(outcome.status, "rejected")
-        self.assertEqual(outcome.detail, "request_oversize")
+        self.assertIn("request exceeds", outcome.detail)
+        self.assertIsNone(supervisor.process)
+
+    def test_request_boundary_rejects_bad_shape_and_host_paths_before_spawn(self) -> None:
+        cases = [
+            {"message_type": "health"},
+            {"message_type": "request", "rpc_version": "9.0"},
+            {"message_type": "request", "rpc_version": "1.0", "request_id": "bad/id", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "now", "max_response_bytes": 10},
+            {"message_type": "request", "rpc_version": "1.0", "request_id": "request-1", "operation": "metadata", "input_tokens": ["/etc/passwd"], "deadline_at": "now", "max_response_bytes": 10},
+            {"message_type": "request", "rpc_version": "1.0", "request_id": "request-1", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "now", "max_response_bytes": 0},
+        ]
+        for request in cases:
+            with self.subTest(request=request):
+                supervisor = self.supervisor()
+                outcome = supervisor.run(request=request)
+                self.assertEqual(outcome.status, "rejected")
+                self.assertIsNone(supervisor.process)
+
+    def test_deadline_override_cannot_expand_manifest_and_includes_spawn_time(self) -> None:
+        supervisor = self.supervisor(Limits(request_deadline_ms=100))
+        outcome = supervisor.run("hang", deadline_ms=1000)
+        self.assertEqual(outcome.status, "timeout")
+        self.assertLess(outcome.elapsed_ms, 500)
 
     def test_memory_cpu_process_and_descriptor_limits_have_observable_outcomes(self) -> None:
         memory = self.supervisor(Limits(memory_bytes=64 * 1024 * 1024, request_deadline_ms=1000)).run("memory")

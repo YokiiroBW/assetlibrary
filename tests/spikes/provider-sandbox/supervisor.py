@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import queue
+import re
 import resource
 import signal
 import subprocess
@@ -20,6 +21,9 @@ from typing import Any
 
 from manifest import validate_manifest
 from protocol import ProtocolError, canonical_size, encode_frame, read_frame
+
+REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+OPAQUE_TOKEN_PATTERN = re.compile(r"^(?:opaque|artifact):[A-Za-z0-9._:-]{1,240}$")
 
 
 @dataclass(frozen=True)
@@ -45,9 +49,9 @@ class Outcome:
     elapsed_ms: int = 0
 
 
-def accept_response(request: dict[str, Any], response: dict[str, Any], limits: Limits) -> None:
+def accept_response(request: dict[str, Any], response: dict[str, Any], limits: Limits, allowed_versions: set[str]) -> None:
     """Validate the trust boundary before exposing Provider output to callers."""
-    if response.get("rpc_version") != request.get("rpc_version") or response.get("rpc_version") not in {"1.0"}:
+    if response.get("rpc_version") != request.get("rpc_version") or response.get("rpc_version") not in allowed_versions:
         raise ProtocolError("response rpc_version mismatch")
     if response.get("request_id") != request.get("request_id"):
         raise ProtocolError("response request_id mismatch")
@@ -62,11 +66,13 @@ def accept_response(request: dict[str, Any], response: dict[str, Any], limits: L
     artifacts = response.get("artifacts", [])
     if not isinstance(artifacts, list):
         raise ProtocolError("artifacts must be a list")
+    if len(artifacts) > 64:
+        raise ProtocolError("too many artifacts")
     for artifact in artifacts:
         token = artifact.get("artifact_token") if isinstance(artifact, dict) else None
         size = artifact.get("size_bytes") if isinstance(artifact, dict) else None
         digest = artifact.get("sha256") if isinstance(artifact, dict) else None
-        if (not isinstance(token, str) or not token or len(token) > 256 or "/" in token or "\\" in token
+        if (not isinstance(token, str) or OPAQUE_TOKEN_PATTERN.fullmatch(token) is None
                 or not isinstance(size, int) or isinstance(size, bool) or size < 0 or size > limits.max_artifact_bytes
                 or not isinstance(digest, str) or len(digest) != 64 or any(char not in "0123456789abcdefABCDEF" for char in digest)):
             raise ProtocolError("invalid or oversized artifact descriptor")
@@ -141,6 +147,37 @@ class ProviderSupervisor:
         threading.Thread(target=_read_stderr, args=(process.stderr, self._stderr_count), daemon=True).start()
         return process
 
+    def _validate_request(self, request: dict[str, Any], deadline_ms: int | None) -> tuple[int, int]:
+        if not isinstance(request, dict) or request.get("message_type") != "request":
+            raise ProtocolError("request message_type must be request")
+        if request.get("rpc_version") not in self.manifest["api_versions"]:
+            raise ProtocolError("unsupported request rpc_version")
+        request_id = request.get("request_id")
+        if not isinstance(request_id, str) or REQUEST_ID_PATTERN.fullmatch(request_id) is None:
+            raise ProtocolError("invalid request_id")
+        operation = request.get("operation")
+        if not isinstance(operation, str) or not operation or len(operation) > 128:
+            raise ProtocolError("invalid operation")
+        tokens = request.get("input_tokens")
+        if not isinstance(tokens, list) or len(tokens) > 64 or any(not isinstance(token, str) or OPAQUE_TOKEN_PATTERN.fullmatch(token) is None for token in tokens):
+            raise ProtocolError("input_tokens must be opaque tokens")
+        deadline_at = request.get("deadline_at")
+        if not isinstance(deadline_at, str) or not deadline_at or len(deadline_at) > 64:
+            raise ProtocolError("invalid deadline_at")
+        max_response = request.get("max_response_bytes")
+        if not isinstance(max_response, int) or isinstance(max_response, bool) or max_response <= 0:
+            raise ProtocolError("invalid request max_response_bytes")
+        try:
+            size = canonical_size(request)
+        except (TypeError, ValueError) as exc:
+            raise ProtocolError("request is not JSON encodable") from exc
+        if size > self.manifest["resource_limits"]["max_request_bytes"]:
+            raise ProtocolError("request exceeds max_request_bytes")
+        manifest_deadline = self.manifest["resource_limits"]["request_deadline_ms"]
+        if deadline_ms is not None and (not isinstance(deadline_ms, int) or isinstance(deadline_ms, bool) or deadline_ms <= 0):
+            raise ProtocolError("invalid deadline override")
+        return min(max_response, self.manifest["resource_limits"]["max_response_bytes"]), min(deadline_ms or manifest_deadline, manifest_deadline)
+
     def _terminate_tree(self, reason: str) -> None:
         process = self._process
         if process is None:
@@ -190,18 +227,14 @@ class ProviderSupervisor:
 
     def run(self, mode: str = "happy", request: dict[str, Any] | None = None, deadline_ms: int | None = None) -> Outcome:
         request = request or {"message_type": "request", "rpc_version": "1.0", "request_id": "req-1", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "monotonic", "max_response_bytes": self.manifest["resource_limits"]["max_response_bytes"]}
+        try:
+            response_limit, deadline_limit_ms = self._validate_request(request, deadline_ms)
+        except ProtocolError as exc:
+            return Outcome("rejected", str(exc))
         max_request = self.manifest["resource_limits"]["max_request_bytes"]
-        if canonical_size(request) > max_request:
-            return Outcome("rejected", "request_oversize")
-        process = self._spawn(mode)
         started = time.monotonic()
+        process = self._spawn(mode)
         responses: queue.Queue[dict[str, Any] | BaseException] = queue.Queue(maxsize=1)
-
-        request_max_response = request.get("max_response_bytes")
-        if not isinstance(request_max_response, int) or isinstance(request_max_response, bool) or request_max_response <= 0:
-            self._terminate_tree("invalid_request_limit")
-            return Outcome("rejected", "invalid_request_max_response")
-        response_limit = min(self.manifest["resource_limits"]["max_response_bytes"], request_max_response)
 
         def read_response() -> None:
             try:
@@ -216,9 +249,12 @@ class ProviderSupervisor:
         except (BrokenPipeError, OSError) as exc:
             self._terminate_tree("write_failure")
             return Outcome("crashed", str(exc), returncode=process.returncode)
-        timeout = (deadline_ms if deadline_ms is not None else self.manifest["resource_limits"]["request_deadline_ms"]) / 1000
+        remaining = started + deadline_limit_ms / 1000 - time.monotonic()
+        if remaining <= 0:
+            self._terminate_tree("deadline")
+            return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         try:
-            value = responses.get(timeout=timeout)
+            value = responses.get(timeout=remaining)
         except queue.Empty:
             self._terminate_tree("deadline")
             self._close_pipes(process)
@@ -235,7 +271,7 @@ class ProviderSupervisor:
             self._close_pipes(process)
             return Outcome(status, str(value), stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=elapsed)
         try:
-            accept_response(request, value, self._limits())
+            accept_response(request, value, self._limits(), set(self.manifest["api_versions"]))
         except ProtocolError as exc:
             self._terminate_tree("response_rejected")
             self._close_pipes(process)
