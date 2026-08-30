@@ -12,13 +12,13 @@ Linux x86-64，Python 3.12，uid 1000。所有运行目录为系统临时目录�
 
 `git diff --check`
 
-`git diff --name-only main...HEAD` 与 handoff `result.json.changed_files` 的 exact set comparison：预期 19 个文件，结果相等。
+`git diff --name-only 842b9e0d86a659154bc7e9315c8537687a9fb1ad...HEAD` 与 handoff `result.json.changed_files` 的任务级 exact set comparison：预期 19 个文件，结果相等；当前主线已合并原版 M0-008，故 `git diff --name-only main...HEAD` 仅包含本次 correction 的 7 个文件。
 
 `ps -u "$(id -un)" -o pid,ppid,pgid,stat,cmd | grep -E 'worker_fixture|time.sleep\\(30\\)' | grep -v grep || true`
 
 ## 架构与契约测试
 
-24 个 unittest 全部通过：复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、request write backpressure/deadline、request/response acceptance、safe mode。
+25 个 unittest 全部通过：复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、request write backpressure/deadline、request/response acceptance、safe mode，以及 group-drain failure 的 Outcome 可观察性。
 
 ## 通过
 
@@ -37,7 +37,7 @@ Linux x86-64，Python 3.12，uid 1000。所有运行目录为系统临时目录�
 
 功能测试无失败、无跳过。能力探针结果不是测试失败，而是明确 blocker：`unshare -n -- /bin/true` returncode 1（Operation not permitted）；`bwrap --unshare-net --ro-bind / / /bin/true` returncode 1（Failed RTM_NEWADDR: Operation not permitted）；`systemd-run --user --scope --quiet /bin/true` returncode 0（仅证明 user scope 可启动，未证明 resource accounting）；`/sys/fs/cgroup` writable 为 false；Windows executor 不可用/未执行。
 
-本次 bounded correction 的回归根因是 parent 先退出时旧实现只在一次性 group kill 后返回，未确认 child 已从捕获 PGID 消失。修复后 supervisor 在 TERM/KILL 后以 `/proc` PGID 成员为观测，最多 200ms 重复直接 KILL 并确认空组；排空超时会进入可观察的 `group_drain_timeout` detail。20/20 parent-exit 轮均未触发该超时且无 live child。
+本次 bounded correction 的回归根因是 parent 先退出时旧实现只在一次性 group kill 后返回，未确认 child 已从捕获 PGID 消失。修复后 supervisor 在 TERM/KILL 后以 `/proc` PGID 成员为观测，最多 200ms 重复直接 KILL 并确认空组；排空超时会在 timeout、crashed、protocol_error、write failure 和 response cleanup 等清理终止路径进入可观察的 `group_drain_timeout` detail，新增 monkeypatch 负例验证该边界。20/20 parent-exit 轮均未触发该超时且无 live child。
 
 ## 故障注入与恢复验证
 

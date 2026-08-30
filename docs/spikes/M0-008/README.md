@@ -16,7 +16,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
   -s tests/spikes/provider-sandbox -p 'test_*.py' -v
 ```
 
-结果：24 tests，全部通过。
+结果：25 tests，全部通过。
 
 代表性观测（单次执行的耗时会因主机负载变化）：
 
@@ -45,7 +45,7 @@ artifact 数量、token/size/hash。`/etc/...` 等 host path 在 spawn 前拒绝
 再在有界 200ms 窗口内重复观察 `/proc` 的 PGID 成员并直接补发 KILL，确认组为空后
 才返回。此前仅在 `wait()` 超时分支做一次 group kill，parent 先退出时可能在 child
 被重新托管前返回；该竞态由 parent-exit fixture（同时记录 child PID/PGID）和排空断言覆盖。
-若排空窗口耗尽，timeout detail 会包含 `group_drain_timeout`，不会把清理失败伪装成普通 timeout。
+若排空窗口耗尽，所有经过清理的终止结果 `Outcome.detail` 都会包含 `group_drain_timeout`，不会把清理失败伪装成普通结果。
 
 ## 执行过的隔离探针
 
