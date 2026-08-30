@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://assetlibrary.local/contracts/assetlink/v1/handshake-response.schema.json",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": [
     "message_type",
     "selected_version",
