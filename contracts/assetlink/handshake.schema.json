@@ -1,1 +1,34 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://assetlibrary.local/contracts/assetlink/v1/handshake.schema.json","title":"AssetLink v1 handshake request","type":"object","additionalProperties":false,"required":["message_type","client","supported_versions","capabilities","endpoint_role"],"properties":{"message_type":{"const":"handshake.request"},"client":{"$ref":"common.schema.json#/$defs/client"},"supported_versions":{"$ref":"common.schema.json#/$defs/version_list"},"capabilities":{"$ref":"common.schema.json#/$defs/capabilities"},"endpoint_role":{"$ref":"common.schema.json#/$defs/endpoint_role"},"request_id":{"$ref":"common.schema.json#/$defs/request_id"}}}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/handshake.schema.json",
+  "title": "AssetLink v1 handshake request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "message_type",
+    "client",
+    "supported_versions",
+    "capabilities",
+    "endpoint_role"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "handshake.request"
+    },
+    "client": {
+      "$ref": "common.schema.json#/$defs/client"
+    },
+    "supported_versions": {
+      "$ref": "common.schema.json#/$defs/version_list"
+    },
+    "capabilities": {
+      "$ref": "common.schema.json#/$defs/capabilities"
+    },
+    "endpoint_role": {
+      "$ref": "common.schema.json#/$defs/endpoint_role"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
+    }
+  }
+}

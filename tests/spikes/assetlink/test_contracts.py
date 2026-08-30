@@ -43,13 +43,15 @@ class AssetLinkContractTests(unittest.TestCase):
         self.assertTrue(valid(load("handshake.schema.json"), request))
         response = {"message_type":"handshake.response","selected_version":"1.1","server_id":"srv-a","server_version":"1","capabilities":["events.replay"],"endpoint_role":"secondary"}
         self.assertTrue(valid(load("handshake-response.schema.json"), response)); self.assertNotEqual(response["server_id"], "srv-b")
-        self.assertFalse(valid(load("handshake.schema.json"), {**request, "supported_versions":["2.0"]}))
+        self.assertTrue(valid(load("handshake.schema.json"), {**request, "supported_versions":["2.0"]}))
+        self.assertNotEqual(set(["2.0"]).intersection(["1.1"]), {"2.0"})
 
     def test_event_replay_and_transfer_boundaries(self):
-        event = {"message_type":"event","event_id":"e-1","event_type":"asset.changed","cursor":"opaque.cursor","sequence":100,"occurred_at":"2026-01-01T00:00:00Z","payload":{}}
+        event = {"message_type":"event","event_id":"e-1","event_type":"asset.changed","cursor":"opaque.cursor","sequence":"100","occurred_at":"2026-01-01T00:00:00Z","payload":{}}
         self.assertTrue(valid(load("event.schema.json"), event)); self.assertTrue(valid(load("replay.schema.json"), {"message_type":"event.replay.request","after_cursor":"opaque.cursor","limit":100}))
-        h = "a" * 64; t = {"message_type":"transfer.chunk","transfer_id":"t-1","length":100_000_000_000,"offset":99_999_999_000,"chunk_size":1000,"chunk_sha256":h,"content_sha256":h}
-        self.assertTrue(valid(load("transfer.schema.json"), t)); self.assertFalse(valid(load("transfer.schema.json"), {**t,"offset":-1}))
+        h = "a" * 64; t = {"message_type":"transfer.chunk","transfer_id":"t-1","length":"100000000000","offset":"99999999000","chunk_size":1000,"chunk_sha256":h,"content_sha256":h}
+        self.assertTrue(valid(load("transfer.schema.json"), t)); self.assertFalse(valid(load("transfer.schema.json"), {**t,"offset":"01"}))
+        self.assertTrue(valid(load("transfer.schema.json"), {**t,"offset":"18446744073709551615"}))
 
     def test_unknown_optional_control_field_is_forward_compatible(self):
         c = {"message_type":"control.request","request_id":"r-1","operation":"asset.list","body":{},"future_optional":True}

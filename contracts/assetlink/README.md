@@ -1,15 +1,32 @@
-# AssetLink Contract Draft
+# AssetLink v1 candidate
 
-首版需定义：
+Normative wire source for official clients. Browser baseline: HTTPS JSON
+(`application/assetlink+json;v=1`) for control and NDJSON events, plus streaming
+`application/octet-stream` for bytes. JSON never contains file bytes.
 
-- 握手、版本与能力协商；
-- 统一错误码；
-- 资源库/目录分页；
-- 搜索游标；
-- 事件游标与断线补齐；
-- 预览Range与授权；
-- 分块上传、transfer ID、幂等和断点；
-- 长任务 task ID；
-- 主备端点同一server ID验证。
+## Transport map
 
-最终协议可能使用Protobuf/JSON双编码或其他浏览器兼容方案，需M0 Spike决定。
+| Flow | Method/path | Media/headers | Schema | Limits and recovery |
+|---|---|---|---|---|
+| Handshake | POST `/assetlink/v1/handshake` | JSON, Content-Type/Accept | handshake, handshake-response | 1 MB; negotiate highest intersecting version |
+| Control | POST `/assetlink/v1/control` | JSON, X-Request-Id, Idempotency-Key | control, error | 30 s default; retry only when retryable |
+| Cancel | POST `/assetlink/v1/control/cancel` | JSON, request ID | control | idempotent; cancelled terminal |
+| Events/heartbeat | GET `/assetlink/v1/events` | NDJSON, Last-Event-Cursor | event | 30 s heartbeat; reconnect then replay |
+| Replay | POST `/assetlink/v1/events/replay` | JSON | replay | max 1,000; expired cursor requires snapshot |
+| Download | GET `/assetlink/v1/assets/{id}/content` | octet-stream, Range | download-range/result | 64 MiB window; 206 + Content-Range |
+| Upload create | POST `/assetlink/v1/uploads` | JSON, Idempotency-Key | upload-create | canonical uint64 length; retryable |
+| Upload chunk | PUT `/assetlink/v1/uploads/{id}/chunks/{offset}` | octet-stream, chunk hash/size | upload-chunk | max 64 MiB; same hash retry idempotent |
+| Upload status | GET `/assetlink/v1/uploads/{id}` | JSON | upload-status | ranges support crash resume |
+| Upload complete | POST `/assetlink/v1/uploads/{id}/complete` | JSON, Idempotency-Key | upload-complete | reread, readable, verified and final hash required |
+| Upload cancel | DELETE `/assetlink/v1/uploads/{id}` | JSON | upload-cancel | idempotent; source preserved |
+
+Every envelope accepts unknown optional fields. IDs/cursors are opaque strings.
+Version offers allow multiple major/minor strings; only disjoint majors fail
+with `unsupported_version`. Unknown capabilities, client kinds, endpoint roles
+and error codes are preserved as strings by SDKs.
+
+All sizes, offsets, sequences and ranges are canonical decimal strings in
+`0..18446744073709551615` (no leading zero), preventing TypeScript precision
+loss. .NET uses checked `ulong`, TypeScript `bigint`/decimal string, and Kotlin
+checked `ULong`/`Long`. Business rules, auth, storage and state machines remain
+in the core.

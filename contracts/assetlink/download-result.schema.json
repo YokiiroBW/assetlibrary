@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/download-result.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "length",
+    "start",
+    "end",
+    "content_sha256",
+    "readable",
+    "verified"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "download.result"
+    },
+    "length": {
+      "$ref": "common.schema.json#/$defs/uint64"
+    },
+    "start": {
+      "$ref": "common.schema.json#/$defs/uint64"
+    },
+    "end": {
+      "$ref": "common.schema.json#/$defs/uint64"
+    },
+    "content_sha256": {
+      "$ref": "common.schema.json#/$defs/sha256"
+    },
+    "readable": {
+      "type": "boolean"
+    },
+    "verified": {
+      "type": "boolean"
+    }
+  }
+}

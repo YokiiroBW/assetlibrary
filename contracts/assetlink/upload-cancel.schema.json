@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-cancel.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "transfer_id",
+    "request_id"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "upload.cancel"
+    },
+    "transfer_id": {
+      "$ref": "common.schema.json#/$defs/opaque_id"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
+    }
+  }
+}

@@ -1,1 +1,27 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://assetlibrary.local/contracts/assetlink/v1/replay.schema.json","type":"object","additionalProperties":false,"required":["message_type","after_cursor","limit"],"properties":{"message_type":{"const":"event.replay.request"},"after_cursor":{"$ref":"common.schema.json#/$defs/cursor"},"limit":{"type":"integer","minimum":1,"maximum":1000},"request_id":{"$ref":"common.schema.json#/$defs/request_id"}}}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/replay.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "message_type",
+    "after_cursor",
+    "limit"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "event.replay.request"
+    },
+    "after_cursor": {
+      "$ref": "common.schema.json#/$defs/cursor"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
+    }
+  }
+}

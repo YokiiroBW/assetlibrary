@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-status.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "transfer_id",
+    "length",
+    "received_ranges"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "upload.status"
+    },
+    "transfer_id": {
+      "$ref": "common.schema.json#/$defs/opaque_id"
+    },
+    "length": {
+      "$ref": "common.schema.json#/$defs/uint64"
+    },
+    "received_ranges": {
+      "type": "array"
+    }
+  }
+}
