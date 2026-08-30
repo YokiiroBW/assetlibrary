@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS library.physical_library (
   library_id uuid PRIMARY KEY, display_name text NOT NULL, root_marker text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS library.permission_scope (
+  library_id uuid NOT NULL REFERENCES library.physical_library(library_id),
+  principal_id text NOT NULL,
+  access_level text NOT NULL CHECK (access_level IN ('none','read','write','organize','admin')),
+  PRIMARY KEY (library_id, principal_id)
+);
 CREATE TABLE IF NOT EXISTS library.asset (
   asset_id uuid PRIMARY KEY, library_id uuid NOT NULL REFERENCES library.physical_library(library_id),
   relative_path text NOT NULL, filename text NOT NULL, size_bytes bigint NOT NULL CHECK (size_bytes >= 0),
@@ -43,8 +49,12 @@ WITH c AS (SELECT event_id FROM events.outbox WHERE published_at IS NULL AND (le
 UPDATE events.outbox o SET publish_attempts=publish_attempts+1,last_error='claimed by '||publisher,lease_owner=publisher,lease_until=clock_timestamp()+make_interval(secs=>lease_seconds)
 FROM c WHERE o.event_id=c.event_id RETURNING o.event_id,o.payload
 $$;
-CREATE OR REPLACE FUNCTION events.mark_published(p_event uuid)
-RETURNS boolean LANGUAGE sql AS $$ UPDATE events.outbox SET published_at=clock_timestamp(),last_error=NULL,lease_owner=NULL,lease_until=NULL WHERE event_id=p_event AND published_at IS NULL AND lease_owner IS NOT NULL RETURNING true $$;
+CREATE OR REPLACE FUNCTION events.mark_published(p_event uuid, publisher text)
+RETURNS boolean LANGUAGE plpgsql AS $$ BEGIN
+  UPDATE events.outbox SET published_at=clock_timestamp(),last_error=NULL,lease_owner=NULL,lease_until=NULL
+    WHERE event_id=p_event AND published_at IS NULL AND lease_owner=publisher;
+  RETURN FOUND;
+END $$;
 CREATE OR REPLACE FUNCTION tasks.claim_one(worker text, lease_seconds integer DEFAULT 30)
 RETURNS TABLE(task_id uuid, payload jsonb, lease_until timestamptz) LANGUAGE plpgsql AS $$
 BEGIN

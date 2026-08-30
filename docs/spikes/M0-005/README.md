@@ -28,12 +28,12 @@
 
 命令：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/postgres -p 'test_*.py' -v`
 
-结果：2 tests OK；首次迁移、重复应用、失败迁移回滚、错误 owner heartbeat、过期
-reclaim、取消/幂等插入、服务重启后资产持久化均通过。加载 500,000 条合成资产约
-45.3 秒（本机特定）。EXPLAIN 计划见 `500k-plan.txt`：keyset 使用
-`asset_library_path_keyset`，全文使用 `asset_search_gin`，`ILIKE` 使用
-`asset_filename_trgm`；示例执行时间约 0.56 ms / 3.14 ms / 325.54 ms，受缓存和主机
-负载影响。
+结果：2 tests OK；首次迁移、并发 runner 序列化、重复应用、checksum drift、失败迁移
+回滚、错误 owner heartbeat、过期 reclaim、取消/幂等插入、outbox owner/retry、权限
+正负例及服务重启后资产持久化均通过。加载 500,000 条合成资产约 45 秒（本机特定）。
+每次运行动态写入 ignored evidence：keyset 使用 `asset_library_path_keyset`，全文
+使用 `asset_search_gin` 且命中 50,000/500,000，trigram 使用 `asset_filename_trgm`
+且精确命中 1 行；同时记录 5 次 warm latency、表/索引大小和 BUFFERS 计划。
 
 所有 server data/socket/log/cache 位于 `/tmp/m005-pg-*`，测试 teardown 停止服务并
 删除目录；源码/构建目录也位于 `/tmp`。没有访问外部 5432 或写入真实资产。
