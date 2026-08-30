@@ -6,7 +6,7 @@
 
 ## 实现提交
 
-发行输入最后提交：`316f2c7e3bbb2fc1900e761d592225b697931e1b`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
+发行输入最后提交：`b5d19cebafdb536a61b33917715419528e7f10e1`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
 
 ## 完成内容
 

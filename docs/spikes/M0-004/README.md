@@ -18,12 +18,12 @@
 
 配置契约 `m0-004/v1` 仅为 Spike-local：`SPIKE_DATA_PATH` 必填且可写；`SPIKE_PORT` 可选，范围 1024–65535，默认 5080；`SPIKE_BIND_HOST` 默认 127.0.0.1，容器设置为 0.0.0.0。`/healthz` 和 `/readyz` 均返回契约版本和状态；SIGTERM 触发 bounded ASP.NET Core shutdown。日志为 JSON 结构化格式，不写入资产路径或秘密。
 
-## clean artifact 证据（issuance commit `316f2c7e3bbb2fc1900e761d592225b697931e1b`）
+## clean artifact 证据（issuance commit `b5d19cebafdb536a61b33917715419528e7f10e1`）
 
 | target | bytes | SHA-256 |
 |---|---:|---|
 | linux-x64 `ServerPackagingSpike` | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
-| win-x64 `ServerPackagingSpike.exe` | 162,816 | `36010158ee59c7c0e5c39eb9dd46ccec59d52e45139aee97a3913dc65b48d76c` |
+| win-x64 `ServerPackagingSpike.exe` | 162,816 | `c5f45531cbe7766689110e1ca4eb8ce8ce5c4d5ed4f65a828b8559ab2ab8a125` |
 
 ## 已知环境门禁
 
