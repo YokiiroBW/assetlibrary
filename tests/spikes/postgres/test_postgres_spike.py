@@ -50,11 +50,9 @@ class PostgresSpike(unittest.TestCase):
         results = [p.communicate(timeout=20) for p in runners]
         self.assertTrue(all(p.returncode == 0 for p in runners), results)
         self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger;").strip(), '2')
-        drift = self.work/'drift'; drift.mkdir(); (drift/'003_drift.sql').write_text('-- drift\nCREATE TABLE migration.drift_probe(x integer);\n')
-        self.sql("INSERT INTO migration.ledger(version,checksum) VALUES (3,'wrong');")
+        drift = self.work/'drift'; drift.mkdir(); (drift/'003_drift.sql').write_text('-- failing migration\nCREATE TABLE migration.partial_probe(x integer); SELECT 1/0;\n')
         bad = subprocess.run(['python3',str(ROOT/'tests/spikes/postgres/migration_runner.py'),'--socket',str(self.sock),'--database','m005','--migration-dir',str(drift)], text=True, capture_output=True)
-        self.assertNotEqual(bad.returncode, 0); self.assertIn('checksum drift', bad.stderr)
-        self.assertEqual(self.sql("SELECT to_regclass('migration.drift_probe') IS NULL;").strip(), 't')
+        self.assertNotEqual(bad.returncode, 0); self.assertEqual(self.sql("SELECT to_regclass('migration.partial_probe') IS NULL;").strip(), 't'); self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger WHERE version=3;").strip(), '0')
         lib, asset = uuid.uuid4(), uuid.uuid4()
         self.sql(f"INSERT INTO library.physical_library VALUES ('{lib}','Synthetic','root-marker'); INSERT INTO library.asset(asset_id,library_id,relative_path,filename,size_bytes,sha256) VALUES ('{asset}','{lib}','2026/a.txt','alpha-report.txt',12,decode(repeat('ab',32),'hex')); INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{asset}','idem-1','index','{{}}') ON CONFLICT (idempotency_key) DO NOTHING; INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{uuid.uuid4()}','{asset}','asset.indexed','{{}}');")
         # Atomic state + event is one transaction; duplicate request is harmless.
@@ -73,6 +71,12 @@ class PostgresSpike(unittest.TestCase):
         self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload) VALUES ('{cancel_id}','cancel-key','x','{{}}');")
         self.assertEqual(self.sql(f"SELECT tasks.cancel('{cancel_id}');").strip(), 't')
         self.assertEqual(self.sql(f"SELECT state FROM tasks.durable_task WHERE task_id='{cancel_id}';").strip(), 'cancelled')
+        fail_id = uuid.uuid4(); self.sql(f"INSERT INTO tasks.durable_task(task_id,idempotency_key,task_type,payload,max_attempts) VALUES ('{fail_id}','fail-key','x','{{}}',1);")
+        for _ in range(5):
+            claimed_id = self.sql("SELECT task_id FROM tasks.claim_one('crasher',1);").strip()
+            if str(fail_id) in claimed_id: break
+            if claimed_id: self.sql(f"UPDATE tasks.durable_task SET state='succeeded',lease_owner=NULL,lease_until=NULL WHERE task_id='{claimed_id}';")
+        time.sleep(1.2); self.sql("SELECT tasks.reclaim_expired();"); self.assertEqual(self.sql(f"SELECT state FROM tasks.durable_task WHERE task_id='{fail_id}';").strip(), 'failed')
         ev = uuid.uuid4()
         self.sql(f"INSERT INTO events.outbox(event_id,aggregate_id,event_type,payload) VALUES ('{ev}','{asset}','test','{{}}');")
         claimed = ''
