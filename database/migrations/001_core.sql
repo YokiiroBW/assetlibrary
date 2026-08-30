@@ -35,6 +35,14 @@ CREATE TABLE IF NOT EXISTS events.outbox (
   last_error text
 );
 CREATE INDEX IF NOT EXISTS outbox_unpublished ON events.outbox(occurred_at) WHERE published_at IS NULL;
+CREATE OR REPLACE FUNCTION events.claim_one(publisher text, lease_seconds integer DEFAULT 30)
+RETURNS TABLE(event_id uuid, payload jsonb) LANGUAGE sql AS $$
+WITH c AS (SELECT event_id FROM events.outbox WHERE published_at IS NULL ORDER BY occurred_at FOR UPDATE SKIP LOCKED LIMIT 1)
+UPDATE events.outbox o SET publish_attempts=publish_attempts+1,last_error='claimed by '||publisher
+FROM c WHERE o.event_id=c.event_id RETURNING o.event_id,o.payload
+$$;
+CREATE OR REPLACE FUNCTION events.mark_published(p_event uuid)
+RETURNS boolean LANGUAGE sql AS $$ UPDATE events.outbox SET published_at=clock_timestamp(),last_error=NULL WHERE event_id=p_event AND published_at IS NULL RETURNING true $$;
 CREATE OR REPLACE FUNCTION tasks.claim_one(worker text, lease_seconds integer DEFAULT 30)
 RETURNS TABLE(task_id uuid, payload jsonb, lease_until timestamptz) LANGUAGE plpgsql AS $$
 BEGIN

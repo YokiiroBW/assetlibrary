@@ -16,6 +16,9 @@ class PostgresSpike(unittest.TestCase):
         cls.work = pathlib.Path(tempfile.mkdtemp(prefix='m005-pg-'))
         cls.data, cls.sock = cls.work/'data', cls.work/'sock'; cls.data.mkdir(mode=0o700); cls.sock.mkdir(mode=0o700); cls.data.chmod(0o700); cls.sock.chmod(0o700)
         cls.bin = pathlib.Path(os.environ.get('M005_PG_BIN', '/tmp/m005-pg-install/bin'))
+        if not (cls.bin/'initdb').exists():
+            out = subprocess.check_output([str(ROOT/'tests/spikes/postgres/bootstrap.sh')], text=True)
+            cls.bin = pathlib.Path(out.strip().split('M005_PG_BIN=',1)[1].splitlines()[0])
         run([str(cls.bin/'initdb'), '-D', str(cls.data), '--no-locale', '--encoding=UTF8', '--auth=trust'])
         (cls.data/'postgresql.conf').open('a').write(f"listen_addresses=''\nunix_socket_directories='{cls.sock}'\nshared_buffers='128MB'\nfsync=on\n")
         cls.server = subprocess.Popen([str(cls.bin/'postgres'),'-D',str(cls.data)], stdout=(cls.work/'server.log').open('w'), stderr=subprocess.STDOUT)
@@ -38,6 +41,7 @@ class PostgresSpike(unittest.TestCase):
     @classmethod
     def apply(cls):
         # One advisory lock and one transaction per migration makes ownership serialized.
+        cls.sql("SELECT pg_advisory_lock(778005);")
         for p in sorted(MIGRATIONS.glob('*.sql')):
             body = p.read_text(); checksum = hashlib.sha256(body.encode()).hexdigest()
             try:
@@ -49,6 +53,7 @@ class PostgresSpike(unittest.TestCase):
                 continue
             wrapped = f"BEGIN; SELECT pg_advisory_xact_lock(778005);\n{body}\nINSERT INTO migration.ledger(version,checksum) VALUES ({int(p.name[:3])},'{checksum}'); COMMIT;"
             cls.sql(wrapped)
+        cls.sql("SELECT pg_advisory_unlock(778005);")
 
     def test_migrations_restart_tasks_outbox_and_search(self):
         self.apply(); self.assertEqual(self.sql("SELECT count(*) FROM migration.ledger;").strip(), '2')

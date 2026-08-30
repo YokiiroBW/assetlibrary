@@ -1,6 +1,6 @@
 {
   "task_id": "M0-005",
-  "status": "ready_for_review",
+  "status": "in-progress",
   "commit": "63569b4e52e52bb29614c4c7905d031efa92c059",
   "branch": "codex/m0-005-postgres-domain-spike",
   "changed_files": ["database/migrations/001_core.sql", "database/migrations/002_ledger.sql", "tests/spikes/postgres/test_postgres_spike.py", "docs/spikes/M0-005/README.md", "docs/spikes/M0-005/500k-plan.txt"],
