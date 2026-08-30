@@ -1,7 +1,7 @@
 # M0-005 handoff
 
 status: ready_for_review
-implementation_commit: `314f02a81a3c293688bb60e983b8bae2eba729b4`
+implementation_commit: `3523645319d38006dccc78eede655ff8e879a221`
 handoff_commit: recorded by the commit containing this file
 branch: `codex/m0-005-postgres-domain-spike`
 
