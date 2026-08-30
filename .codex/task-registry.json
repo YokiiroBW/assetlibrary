@@ -32,7 +32,7 @@
       "id": "M0-003",
       "title": "AssetLink 控制/事件/传输协议契约验证",
       "module": "assetlink-contract",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "M0-001"
       ],
