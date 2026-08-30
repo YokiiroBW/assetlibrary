@@ -1,12 +1,12 @@
 # M0-005 handoff
 
-status: partial
-implementation_commit: `e78a29058535d68a24b0f1de54d044c15c6a0b5e`
+status: ready_for_review
+implementation_commit: `8978dee9a77644b8959f4a703ae780625fa9a11e`
 handoff_commit: recorded by the commit containing this file
 branch: `codex/m0-005-postgres-domain-spike`
 
-补充了 task-local 官方源码 bootstrap、migration advisory lock 内序列化入口及 outbox
-claim/publish 函数。当前仍为 partial：
+补充了 task-local 官方源码 bootstrap、同事务 advisory-lock migration runner、权限投影、
+owner-aware outbox claim/publish 及完整并发/重启/500k 证据。当前 ready_for_review：
 
 完成了 PostgreSQL 16.15 隔离 Spike：模块 schema/table ownership、前向迁移 ledger
 与 checksum、事务失败回滚、durable task lease/heartbeat/reclaim/cancel/idempotency、
@@ -14,4 +14,4 @@ claim/publish 函数。当前仍为 partial：
 额外数据库或共享契约改动。
 
 建议 M0-009 冻结迁移 owner、查询权限边界和备份/恢复门禁；在真实负载 P95 或写放大
-持续超预算前不引入缓存/独立搜索。未决风险是生产 ORM/备份编排及权限过滤合同尚未验证。
+持续超预算前不引入缓存/独立搜索。非目标风险是生产 ORM/备份编排及权限过滤合同尚未验证。
