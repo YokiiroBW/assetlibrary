@@ -78,7 +78,7 @@
       "id": "M0-006",
       "title": "文件操作崩溃恢复、强哈希与垃圾桶验证",
       "module": "file-safety-spike",
-      "status": "in_progress",
+      "status": "partial",
       "depends_on": [
         "M0-001",
         "M0-005"
