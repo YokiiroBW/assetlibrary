@@ -17,7 +17,7 @@
       "id": "M0-002",
       "title": "Windows Explorer 自定义命名空间与右侧视图技术验证",
       "module": "windows-shell-spike",
-      "status": "in_progress",
+      "status": "partial",
       "depends_on": [
         "M0-001"
       ],
