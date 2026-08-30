@@ -1,0 +1,51 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-006",
+  "title": "文件操作崩溃恢复、强哈希与垃圾桶验证",
+  "milestone": "M0",
+  "status": "partial",
+  "owner": "codex-agent-m0-006-clean",
+  "branch": "codex/m0-006-file-safety-clean",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006-clean",
+  "commit": "7caf70c4a6d9af3e95018e56714ae99330314705",
+  "changed_files": [
+    ".codex/handoffs/M0-006/result.json",
+    ".codex/handoffs/M0-006/summary.md",
+    ".codex/handoffs/M0-006/tests.md",
+    ".codex/tasks/M0-006.md",
+    "docs/spikes/M0-006/README.md",
+    "tests/spikes/file-safety/file_safety.py",
+    "tests/spikes/file-safety/test_file_safety.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Windows atomic no-overwrite/fsync mapping has no executor evidence",
+    "1/20/100 GiB release-size gates were not run; only logical 100 GiB boundary was asserted",
+    "Linux non-cooperative namespace mutation policy (exclusive-lock/ACL/kernel containment) requires M0-009 freeze"
+  ],
+  "blocked_by": [
+    "Windows executor unavailable for candidate primitive matrix",
+    "M0-009 must freeze policy for non-cooperative Linux namespace mutation"
+  ],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/M0-006/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "file-safety-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["M0-007 performance.BYTES_100_GIB import"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": ["validate_handoff.py", "validate_architecture_baseline.py", "verify_repository.py"],
+    "technical_debt": ["M0-009 must freeze Linux capability probes, Windows mapping, fsync policy, and release-size gates"]
+  }
+}
