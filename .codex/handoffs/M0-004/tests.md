@@ -1,0 +1,31 @@
+# M0-004 测试记录（clean replacement）
+
+## 执行环境
+
+Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap；SDK 10.0.111，ASP.NET Core/.NET runtime pack 10.0.11；Docker CLI 26.1.4，无 daemon 权限；无 Windows/PowerShell。
+
+## 命令与结果
+
+- `M0_004_DOTNET_DIR=/tmp/m0-004-dotnet-10.0.111 bash tests/spikes/server-packaging/bootstrap.sh` — 通过；clean provenance、restore、linux-x64/win-x64 publish。
+- `M0_004_DOTNET_DIR=/tmp/m0-004-dotnet-10.0.111 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/server-packaging -p 'test_*.py' -v` — 6 passed。
+- `docker compose -f tests/spikes/server-packaging/docker-compose.yml config` — 通过。
+- `git diff --check` — 通过。
+
+## Artifact matrix
+
+发行输入最后提交：`b5d19cebafdb536a61b33917715419528e7f10e1`；协调器在关闭 MSBuild/C# build servers 后连续两次 cold publish 的完整 `files.sha256` 一致；aggregate digest：`c0f434d0556eadac727ce1601afece3b9e907ef3be7a8b2769e6eb141a5a7ff2`。以下 hash 是该 Linux 构建环境的本机观测，不是跨主机 bit-for-bit 保证；身份由 commit 与完整清单共同证明。
+
+| target | exact bytes | SHA-256 |
+|---|---:|---|
+| linux-x64 apphost | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
+| win-x64 apphost | 162,816 | `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9` |
+
+完整目录 manifest 为 runtime 内 `file-sizes.txt` + `files.sha256`；测试重新计算 aggregate digest，不信任 source-commit 文件本身，并连续两次清理 obj/bin/artifact 后比较完整清单。
+
+## 已覆盖
+
+启动、`/healthz`、SIGTERM bounded shutdown、restart health、occupied port（有界超时）、缺少配置、invalid port/bind host、只读 data path、Docker env 下 bind/probe 定义、manifest/provenance、日志不含 repository ContentRoot、Windows/systemd 定义对称性。
+
+## Skipped / external gates
+
+本机 uid 1000，read-only path 未 skip；root 环境会显式 skip。Windows：无 host，未执行 service cycle。Docker：`docker version` 精确失败为 `permission denied ... /var/run/docker.sock`，未执行 build/run/health。

@@ -1,0 +1,13 @@
+services:
+  server-packaging-spike:
+    build: .
+    ports: ["5080:8080"]
+    environment:
+      SPIKE_DATA_PATH: /var/lib/assetlibrary-spike
+    volumes:
+      - spike-data:/var/lib/assetlibrary-spike
+    read_only: true
+    tmpfs: /tmp
+    security_opt: [no-new-privileges:true]
+volumes:
+  spike-data:

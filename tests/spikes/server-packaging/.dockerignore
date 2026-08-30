@@ -1,0 +1,8 @@
+.git
+.runtime
+bin
+obj
+publish
+src/bin
+src/obj
+*.log

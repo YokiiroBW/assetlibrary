@@ -1,0 +1,16 @@
+[Unit]
+Description=AssetLibrary M0-004 server packaging spike
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/assetlibrary-m0-004/ServerPackagingSpike
+Environment=SPIKE_DATA_PATH=/var/lib/assetlibrary-m0-004
+Environment=SPIKE_PORT=5080
+Environment=SPIKE_BIND_HOST=127.0.0.1
+Restart=on-failure
+TimeoutStopSec=5
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target

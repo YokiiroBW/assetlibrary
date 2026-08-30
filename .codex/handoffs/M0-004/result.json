@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "M0-004",
+  "title": "跨平台服务端 Windows/Linux/Docker 发行验证",
+  "milestone": "M0",
+  "status": "partial",
+  "owner": "codex-agent-m0-004",
+  "branch": "codex/m0-004-server-packaging-clean",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-004",
+  "commit": "b5d19cebafdb536a61b33917715419528e7f10e1",
+  "changed_files": [".codex/tasks/M0-004.md", "tests/spikes/server-packaging/.dockerignore", "tests/spikes/server-packaging/Dockerfile", "tests/spikes/server-packaging/docker-compose.yml", "tests/spikes/server-packaging/manifest.json", "tests/spikes/server-packaging/bootstrap.sh", "tests/spikes/server-packaging/src/Program.cs", "tests/spikes/server-packaging/src/ServerPackagingSpike.csproj", "tests/spikes/server-packaging/test_spike.py", "tests/spikes/server-packaging/scripts/windows-service.ps1", "tests/spikes/server-packaging/systemd/assetlibrary-m0-004-spike.service", "docs/spikes/M0-004/README.md", ".codex/handoffs/M0-004/summary.md", ".codex/handoffs/M0-004/tests.md", ".codex/handoffs/M0-004/result.json"],
+  "changed_contracts": [],
+  "tests": {"passed": 6, "failed": 0, "skipped": 0, "report": "tests.md"},
+  "risks": ["Windows host unavailable for service cycle", "Docker daemon permission denied for build/run/health"],
+  "blocked_by": ["External Windows x64 host", "Docker daemon access"],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/M0-004/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "server-packaging-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["ASP.NET Core hosting lifecycle", "JSON console logging"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": ["C#/.NET 10 + ASP.NET Core current LTS candidate"],
+    "new_major_dependencies": ["Microsoft.Extensions.Hosting.WindowsServices 10.0.11 (official Microsoft package; candidate only)"],
+    "contract_changes": [],
+    "architecture_tests": ["manifest/source single-project assertion", "full artifact manifest and aggregate digest recomputation", "git diff --check"],
+    "technical_debt": ["Complete real Windows Service and Docker daemon gates before M0-009 freeze"]
+  }
+}
