@@ -17,7 +17,7 @@ echo "$sha256  $tarball" | sha256sum -c -
 if [[ ! -x "$base/install/bin/initdb" ]]; then
   if [[ -e "$base/build/postgresql-16.15" ]]; then rm -rf -- "$base/build/postgresql-16.15"; fi
   tar -xf "$tarball" -C "$base/build"
-  cd "$base/build/postgresql-16.15"; ./configure --prefix="$base/install" --without-readline --without-zlib
+  cd "$base/build/postgresql-16.15"; bash ./configure --prefix="$base/install" --without-readline --without-zlib
   make -j"${M005_BUILD_JOBS:-2}"; make install
   (cd contrib/pg_trgm && make -j"${M005_BUILD_JOBS:-2}" && make install)
 fi
