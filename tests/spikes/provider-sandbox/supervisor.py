@@ -118,6 +118,7 @@ class ProviderSupervisor:
         self._process: subprocess.Popen[bytes] | None = None
         self._pgid: int | None = None
         self._stderr_count = [0]
+        self._writer_thread: threading.Thread | None = None
 
     @property
     def process(self) -> subprocess.Popen[bytes] | None:
@@ -225,6 +226,10 @@ class ProviderSupervisor:
                 except OSError:
                     pass
 
+    def _join_writer(self) -> None:
+        if self._writer_thread is not None:
+            self._writer_thread.join(timeout=0.2)
+
     def run(self, mode: str = "happy", request: dict[str, Any] | None = None, deadline_ms: int | None = None) -> Outcome:
         request = request or {"message_type": "request", "rpc_version": "1.0", "request_id": "req-1", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "monotonic", "max_response_bytes": self.manifest["resource_limits"]["max_response_bytes"]}
         try:
@@ -232,6 +237,10 @@ class ProviderSupervisor:
         except ProtocolError as exc:
             return Outcome("rejected", str(exc))
         max_request = self.manifest["resource_limits"]["max_request_bytes"]
+        try:
+            frame = encode_frame(request, max_request)
+        except ProtocolError as exc:
+            return Outcome("rejected", str(exc))
         started = time.monotonic()
         process = self._spawn(mode)
         responses: queue.Queue[dict[str, Any] | BaseException] = queue.Queue(maxsize=1)
@@ -243,15 +252,37 @@ class ProviderSupervisor:
                 responses.put(exc)
 
         threading.Thread(target=read_response, daemon=True).start()
-        try:
-            process.stdin.write(encode_frame(request, max_request))
-            process.stdin.flush()
-        except (BrokenPipeError, OSError) as exc:
-            self._terminate_tree("write_failure")
-            return Outcome("crashed", str(exc), returncode=process.returncode)
+        writes: queue.Queue[BaseException | None] = queue.Queue(maxsize=1)
+
+        def write_request() -> None:
+            try:
+                process.stdin.write(frame)
+                process.stdin.flush()
+                writes.put(None)
+            except BaseException as exc:
+                writes.put(exc)
+
+        self._writer_thread = threading.Thread(target=write_request, daemon=True)
+        self._writer_thread.start()
         remaining = started + deadline_limit_ms / 1000 - time.monotonic()
         if remaining <= 0:
             self._terminate_tree("deadline")
+            self._join_writer()
+            return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+        try:
+            write_result = writes.get(timeout=remaining)
+        except queue.Empty:
+            self._terminate_tree("write_deadline")
+            self._join_writer()
+            return Outcome("timeout", "absolute_deadline_write", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
+        if isinstance(write_result, BaseException):
+            self._terminate_tree("write_failure")
+            self._join_writer()
+            return Outcome("crashed", str(write_result), returncode=process.returncode)
+        remaining = started + deadline_limit_ms / 1000 - time.monotonic()
+        if remaining <= 0:
+            self._terminate_tree("deadline")
+            self._join_writer()
             return Outcome("timeout", "absolute_deadline", stderr_bytes=self._stderr_count[0], returncode=process.returncode, elapsed_ms=round((time.monotonic() - started) * 1000))
         try:
             value = responses.get(timeout=remaining)
@@ -264,6 +295,7 @@ class ProviderSupervisor:
                 process.stdin.close()
             except OSError:
                 pass
+            self._join_writer()
         elapsed = round((time.monotonic() - started) * 1000)
         if isinstance(value, BaseException):
             self._terminate_tree("protocol")

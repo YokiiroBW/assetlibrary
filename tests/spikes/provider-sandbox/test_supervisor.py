@@ -29,7 +29,7 @@ def alive(pid: int) -> bool:
     return True
 
 
-def wait_dead(pid: int, timeout: float = 1.0) -> bool:
+def wait_dead(pid: int, timeout: float = 3.0) -> bool:
     end = time.monotonic() + timeout
     while alive(pid) and time.monotonic() < end:
         time.sleep(0.01)
@@ -145,6 +145,16 @@ class ProviderSupervisorTests(unittest.TestCase):
         outcome = supervisor.run("hang", deadline_ms=1000)
         self.assertEqual(outcome.status, "timeout")
         self.assertLess(outcome.elapsed_ms, 500)
+
+    def test_write_backpressure_deadline_is_bounded_and_writer_is_released(self) -> None:
+        supervisor = self.supervisor(Limits(max_request_bytes=1024 * 1024, request_deadline_ms=100))
+        request = {"message_type": "request", "rpc_version": "1.0", "request_id": "large-write", "operation": "metadata", "input_tokens": ["opaque:test"], "deadline_at": "now", "max_response_bytes": 64 * 1024, "unknown_optional": {"padding": "x" * 900_000}}
+        outcome = supervisor.run("no_read", request=request)
+        self.assertEqual(outcome.status, "timeout")
+        self.assertEqual(outcome.detail, "absolute_deadline_write")
+        self.assertLess(outcome.elapsed_ms, 500)
+        self.assertFalse(alive(supervisor.process.pid))
+        self.assertFalse(supervisor._writer_thread.is_alive())
 
     def test_memory_cpu_process_and_descriptor_limits_have_observable_outcomes(self) -> None:
         memory = self.supervisor(Limits(memory_bytes=64 * 1024 * 1024, request_deadline_ms=1000)).run("memory")

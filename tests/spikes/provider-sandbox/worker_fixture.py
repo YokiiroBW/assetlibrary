@@ -17,6 +17,9 @@ def send(value: dict[str, object]) -> None:
 
 def main() -> int:
     mode = sys.argv[1] if len(sys.argv) > 1 else "happy"
+    if mode == "no_read":
+        # Deliberately hold stdin closed to exercise supervisor write backpressure.
+        time.sleep(30)
     request = read_frame(sys.stdin.buffer, 64 * 1024)
     request_id = request.get("request_id", "unknown")
     if mode == "happy":

@@ -16,7 +16,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
   -s tests/spikes/provider-sandbox -p 'test_*.py' -v
 ```
 
-结果：23 tests，全部通过。
+结果：24 tests，全部通过。
 
 代表性观测（单次执行的耗时会因主机负载变化）：
 
@@ -27,6 +27,7 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
 | crash | worker `os._exit(23)` | `crashed`, return code `23` |
 | malformed / oversize / stdout flood | bounded frame reader rejects before payload allocation | `protocol_error` |
 | stderr flood | bounded drain (8 KiB retained) | deadline still fired; no pipe deadlock |
+| no_read + 900 KiB unknown optional padding | pre-encoded frame + writer thread + same absolute deadline | write backpressure timeout bounded; writer released and process tree reaped |
 | descendant | worker spawns one bounded `sleep`, same process group；另测 parent 先退出 | timeout/EOF 后 pid probe 显示 child 不存活 |
 | memory | Linux `RLIMIT_AS=64 MiB` | worker returns `memory_limit` |
 | CPU | Linux `RLIMIT_CPU=1 s` | return code `-24` (`SIGXCPU`) |
