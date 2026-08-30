@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/replay-result.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "request_id",
+    "events",
+    "next_cursor",
+    "gap"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "event.replay.result"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "event.schema.json"
+      }
+    },
+    "next_cursor": {
+      "$ref": "common.schema.json#/$defs/cursor"
+    },
+    "gap": {
+      "type": "boolean"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
+    }
+  }
+}

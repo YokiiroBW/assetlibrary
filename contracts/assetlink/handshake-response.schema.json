@@ -1,24 +1,28 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assetlibrary.local/contracts/assetlink/v1/handshake.schema.json",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/handshake-response.schema.json",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "message_type",
-    "client",
-    "supported_versions",
+    "selected_version",
+    "server_id",
+    "server_version",
     "capabilities",
     "endpoint_role"
   ],
   "properties": {
     "message_type": {
-      "const": "handshake.request"
+      "const": "handshake.response"
     },
-    "client": {
-      "$ref": "common.schema.json#/$defs/client"
+    "selected_version": {
+      "$ref": "common.schema.json#/$defs/version"
     },
-    "supported_versions": {
-      "$ref": "common.schema.json#/$defs/version_list"
+    "server_id": {
+      "$ref": "common.schema.json#/$defs/server_id"
+    },
+    "server_version": {
+      "type": "string"
     },
     "capabilities": {
       "$ref": "common.schema.json#/$defs/capabilities"

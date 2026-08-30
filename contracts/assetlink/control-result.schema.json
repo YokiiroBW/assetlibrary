@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/control-result.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "request_id",
+    "ok",
+    "body"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "control.result"
+    },
+    "request_id": {
+      "$ref": "common.schema.json#/$defs/request_id"
+    },
+    "ok": {
+      "const": true
+    },
+    "body": {
+      "type": "object"
+    }
+  }
+}

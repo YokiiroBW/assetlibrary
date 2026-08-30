@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/event.schema.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "message_type",
+    "event_id",
+    "event_type",
+    "cursor",
+    "sequence",
+    "occurred_at",
+    "payload"
+  ],
+  "properties": {
+    "message_type": {
+      "const": "event"
+    },
+    "event_id": {
+      "$ref": "common.schema.json#/$defs/opaque_id"
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "cursor": {
+      "$ref": "common.schema.json#/$defs/cursor"
+    },
+    "sequence": {
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
+    },
+    "occurred_at": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

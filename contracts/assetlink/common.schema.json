@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/common.schema.json",
+  "$defs": {
+    "uint64_decimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 20,
+      "format": "uint64-decimal",
+      "description": "Canonical unsigned 64-bit decimal; parser MUST check <= 18446744073709551615"
+    },
+    "opaque_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "request_id": {
+      "$ref": "#/$defs/opaque_id"
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*\\.[0-9]+$"
+    },
+    "version_list": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/version"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9._-]{0,63}$"
+      }
+    },
+    "endpoint_role": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]{0,31}$",
+      "description": "Known values primary/secondary; future values preserved"
+    },
+    "client": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "kind",
+        "version"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$",
+          "description": "Known kinds are web/windows-client/windows-host/android/browser-extension"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "device_id": {
+          "$ref": "#/$defs/opaque_id"
+        }
+      }
+    },
+    "server_id": {
+      "$ref": "#/$defs/opaque_id"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "byte_range": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/uint64_decimal"
+        },
+        "end": {
+          "$ref": "#/$defs/uint64_decimal"
+        }
+      }
+    }
+  }
+}

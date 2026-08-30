@@ -1,0 +1,7 @@
+{
+  "protocol_version": "not-a-version",
+  "client": {},
+  "server_id": "server",
+  "capabilities": [],
+  "endpoint_role": "unknown"
+}

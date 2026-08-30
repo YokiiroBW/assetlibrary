@@ -1,0 +1,1 @@
+{"message_type":"handshake.response","selected_version":"1.0","server_id":"s","server_version":"1","capabilities":["events.replay"],"endpoint_role":"secondary"}
