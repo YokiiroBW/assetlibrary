@@ -23,9 +23,11 @@ handoff validator、architecture baseline validator、repository validator、dif
 
 ## 通过
 
-16 passed / 0 failed / 0 skipped。包含 9 个 cross-device durable/physical crash boundary
-hooks、1 个 same-device subprocess commit gap、replacement physical gap、lock O_EXCL
-concurrency/expiry、16MiB multi-chunk bounded move、trash restore/delete。
+21 passed / 0 failed / 0 skipped。包含 cross-device durable/physical crash boundaries
+（含 metadata-only source/replacement、physical trash gap）、1 个 same-device subprocess
+commit gap、replacement recovery、lock O_EXCL concurrency/expiry、16MiB multi-chunk
+bounded move、trash restore/delete、symlink/path tamper、unknown-state 和 operation-id
+拒绝。
 
 ## 失败 / 跳过
 

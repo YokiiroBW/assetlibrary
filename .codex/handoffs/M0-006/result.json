@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-006-clean",
   "branch": "codex/m0-006-file-safety-clean",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-006-clean",
-  "commit": "c75ab69",
+  "commit": "c3db4665b29a47ddd277e9f2966987dfc3bf4703",
   "changed_files": [
     "tests/spikes/file-safety/file_safety.py",
     "tests/spikes/file-safety/test_file_safety.py",
@@ -18,7 +18,7 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 16,
+    "passed": 21,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"

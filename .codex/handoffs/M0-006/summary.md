@@ -4,7 +4,7 @@
 
 `partial`
 
-实现 commit：`c75ab69`；metadata commit 在本文件提交后回填。
+实现 commits：`c75ab69`、`c3db4665b29a47ddd277e9f2966987dfc3bf4703`；metadata commit 在本文件提交后回填。
 
 ## 完成内容
 
@@ -27,7 +27,7 @@ trash/hash 判断，不信 COMPLETE。
 ## 修改文件
 
 `tests/spikes/file-safety/file_safety.py`、`tests/spikes/file-safety/test_file_safety.py`、
-`docs/spikes/M0-006/README.md`、本目录三个 handoff 文件。
+`.codex/tasks/M0-006.md`、`docs/spikes/M0-006/README.md`、本目录三个 handoff 文件。
 
 ## 模块边界、依赖方向与复用
 
@@ -44,7 +44,7 @@ trash/hash 判断，不信 COMPLETE。
 
 ## 测试结果
 
-16 passed, 0 failed, 0 skipped。命令：
+21 passed, 0 failed, 0 skipped。命令：
 `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v`。
 另执行三项 validators、`git diff --check`（结果写入 tests.md）。
 
@@ -59,6 +59,12 @@ trash/hash 判断，不信 COMPLETE。
 `m006-*` temp；symlink/absolute/..、保护/权限/空间/cancel、mutation、corrupt target、
 collision、restore/replace/delete、lock concurrency/reclaim 均有测试。16MiB 实际 move：
 16,777,216 bytes，1MiB buffer，elapsed 0.310058s，tracemalloc peak 3,171,064 bytes。
+
+本轮补充：recovery lock 由 operation-bound inspect callback 授权回收；inspect 从已验证
+relative path 派生所有 source/target/stage/trash 与 metadata，拒绝 journal 路径篡改、
+未知 state、op_id traversal 和 metadata symlink。source/replacement metadata-only 与
+physical-trash gap 均验证后恢复，所有 recovery return/exception 由 owner-aware finally
+释放锁。
 
 Linux same-device/cross-device/fsync/noreplace 均 executed；Windows 无 executor，Windows
 候选原语与 1/20/100GiB release-size 仍为外部门禁，未宣称通过。
