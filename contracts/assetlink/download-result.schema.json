@@ -17,22 +17,22 @@
       "const": "download.result"
     },
     "length": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "start": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "end": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "content_sha256": {
       "$ref": "common.schema.json#/$defs/sha256"
     },
     "readable": {
-      "type": "boolean"
+      "const": true
     },
     "verified": {
-      "type": "boolean"
+      "const": true
     }
   }
 }

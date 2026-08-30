@@ -17,10 +17,10 @@
       "$ref": "common.schema.json#/$defs/opaque_id"
     },
     "start": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "end": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     }
   }
 }

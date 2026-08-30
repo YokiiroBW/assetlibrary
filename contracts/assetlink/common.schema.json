@@ -2,11 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://assetlibrary.local/contracts/assetlink/v1/common.schema.json",
   "$defs": {
+    "uint64_decimal": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 20,
+      "description": "Canonical unsigned 64-bit decimal; parser MUST check <= 18446744073709551615"
+    },
     "opaque_id": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 256,
-      "pattern": "^[A-Za-z0-9._~-]+$"
+      "maxLength": 256
     },
     "request_id": {
       "$ref": "#/$defs/opaque_id"
@@ -38,7 +43,8 @@
     },
     "endpoint_role": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9._-]{0,31}$"
+      "pattern": "^[a-z][a-z0-9._-]{0,31}$",
+      "description": "Known values primary/secondary; future values preserved"
     },
     "client": {
       "type": "object",
@@ -50,7 +56,8 @@
       "properties": {
         "kind": {
           "type": "string",
-          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          "pattern": "^[a-z][a-z0-9-]{0,63}$",
+          "description": "Known kinds are web/windows-client/windows-host/android/browser-extension"
         },
         "version": {
           "type": "string",
@@ -64,14 +71,25 @@
     "server_id": {
       "$ref": "#/$defs/opaque_id"
     },
-    "uint64": {
-      "type": "string",
-      "pattern": "^(0|[1-9][0-9]*)$",
-      "maxLength": 20
-    },
     "sha256": {
       "type": "string",
       "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "byte_range": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/uint64_decimal"
+        },
+        "end": {
+          "$ref": "#/$defs/uint64_decimal"
+        }
+      }
     }
   }
 }

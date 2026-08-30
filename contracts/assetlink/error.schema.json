@@ -4,10 +4,14 @@
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "error",
-    "request_id"
+    "message_type",
+    "request_id",
+    "error"
   ],
   "properties": {
+    "message_type": {
+      "const": "error"
+    },
     "request_id": {
       "$ref": "common.schema.json#/$defs/request_id"
     },
@@ -21,28 +25,12 @@
       ],
       "properties": {
         "code": {
-          "enum": [
-            "invalid_request",
-            "unsupported_version",
-            "unsupported_capability",
-            "unauthorized",
-            "forbidden",
-            "not_found",
-            "conflict",
-            "idempotency_conflict",
-            "cursor_expired",
-            "range_not_satisfiable",
-            "transfer_incomplete",
-            "integrity_mismatch",
-            "cancelled",
-            "timeout",
-            "server_unavailable",
-            "internal"
-          ]
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._-]{0,63}$",
+          "description": "Known codes are open-ended; future codes preserved"
         },
         "message": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "retryable": {
           "type": "boolean"

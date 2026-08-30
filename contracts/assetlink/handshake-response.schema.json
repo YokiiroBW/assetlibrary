@@ -22,8 +22,7 @@
       "$ref": "common.schema.json#/$defs/server_id"
     },
     "server_version": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "capabilities": {
       "$ref": "common.schema.json#/$defs/capabilities"

@@ -20,18 +20,16 @@
       "$ref": "common.schema.json#/$defs/opaque_id"
     },
     "event_type": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9._-]{0,95}$"
+      "type": "string"
     },
     "cursor": {
       "$ref": "common.schema.json#/$defs/cursor"
     },
     "sequence": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "occurred_at": {
-      "type": "string",
-      "format": "date-time"
+      "type": "string"
     },
     "payload": {
       "type": "object"

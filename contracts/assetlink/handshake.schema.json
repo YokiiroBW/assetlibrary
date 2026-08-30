@@ -1,9 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://assetlibrary.local/contracts/assetlink/v1/handshake.schema.json",
-  "title": "AssetLink v1 handshake request",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "required": [
     "message_type",
     "client",

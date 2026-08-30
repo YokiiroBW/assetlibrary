@@ -1,29 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-create.schema.json",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-cancel-result.schema.json",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "message_type",
     "request_id",
-    "length",
-    "content_sha256"
+    "transfer_id",
+    "cancelled"
   ],
   "properties": {
     "message_type": {
-      "const": "upload.create"
+      "const": "upload.cancel.result"
     },
     "request_id": {
       "$ref": "common.schema.json#/$defs/request_id"
     },
-    "length": {
-      "$ref": "common.schema.json#/$defs/uint64_decimal"
-    },
-    "content_sha256": {
-      "$ref": "common.schema.json#/$defs/sha256"
-    },
-    "idempotency_key": {
+    "transfer_id": {
       "$ref": "common.schema.json#/$defs/opaque_id"
+    },
+    "cancelled": {
+      "const": true
     }
   }
 }

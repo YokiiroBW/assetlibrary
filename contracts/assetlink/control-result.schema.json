@@ -1,22 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-cancel.schema.json",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/control-result.schema.json",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "message_type",
     "request_id",
-    "transfer_id"
+    "ok",
+    "body"
   ],
   "properties": {
     "message_type": {
-      "const": "upload.cancel"
+      "const": "control.result"
     },
     "request_id": {
       "$ref": "common.schema.json#/$defs/request_id"
     },
-    "transfer_id": {
-      "$ref": "common.schema.json#/$defs/opaque_id"
+    "ok": {
+      "const": true
+    },
+    "body": {
+      "type": "object"
     }
   }
 }

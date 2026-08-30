@@ -17,10 +17,13 @@
       "$ref": "common.schema.json#/$defs/opaque_id"
     },
     "length": {
-      "$ref": "common.schema.json#/$defs/uint64"
+      "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
     "received_ranges": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/byte_range"
+      }
     }
   }
 }

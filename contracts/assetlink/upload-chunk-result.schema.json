@@ -1,18 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-chunk.schema.json",
+  "$id": "https://assetlibrary.local/contracts/assetlink/v1/upload-chunk-result.schema.json",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "message_type",
     "transfer_id",
     "offset",
-    "chunk_size",
-    "chunk_sha256"
+    "accepted",
+    "duplicate"
   ],
   "properties": {
     "message_type": {
-      "const": "upload.chunk"
+      "const": "upload.chunk.result"
     },
     "transfer_id": {
       "$ref": "common.schema.json#/$defs/opaque_id"
@@ -20,13 +20,11 @@
     "offset": {
       "$ref": "common.schema.json#/$defs/uint64_decimal"
     },
-    "chunk_size": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 67108864
+    "accepted": {
+      "type": "boolean"
     },
-    "chunk_sha256": {
-      "$ref": "common.schema.json#/$defs/sha256"
+    "duplicate": {
+      "type": "boolean"
     }
   }
 }

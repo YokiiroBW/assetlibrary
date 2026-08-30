@@ -17,8 +17,7 @@
       "$ref": "common.schema.json#/$defs/request_id"
     },
     "operation": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9._-]{0,95}$"
+      "type": "string"
     },
     "body": {
       "type": "object"

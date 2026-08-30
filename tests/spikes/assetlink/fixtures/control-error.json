@@ -1,0 +1,1 @@
+{"message_type":"error","request_id":"r","error":{"code":"cursor_expired","message":"resync","retryable":false,"details":{"action":"full-resync"}}}

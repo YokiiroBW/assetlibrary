@@ -6,9 +6,6 @@
   "required": [
     "message_type",
     "transfer_id",
-    "verified",
-    "readable",
-    "length",
     "content_sha256"
   ],
   "properties": {
@@ -17,15 +14,6 @@
     },
     "transfer_id": {
       "$ref": "common.schema.json#/$defs/opaque_id"
-    },
-    "verified": {
-      "const": true
-    },
-    "readable": {
-      "const": true
-    },
-    "length": {
-      "$ref": "common.schema.json#/$defs/uint64"
     },
     "content_sha256": {
       "$ref": "common.schema.json#/$defs/sha256"
