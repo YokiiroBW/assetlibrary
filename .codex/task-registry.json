@@ -47,7 +47,7 @@
       "id": "M0-004",
       "title": "跨平台服务端 Windows/Linux/Docker 发行验证",
       "module": "server-packaging-spike",
-      "status": "ready",
+      "status": "in_progress",
       "depends_on": [
         "M0-001"
       ],
