@@ -188,10 +188,23 @@ def _rename_noreplace(source: Path, target: Path, *, source_root: Path | None = 
             os.close(fd)
             raise
 
+    def verify_pinned(fd: int, anchor: Path | None) -> None:
+        if anchor is None:
+            return
+        try:
+            actual = Path(os.readlink(f"/proc/self/fd/{fd}")).resolve()
+            expected = anchor.resolve()
+        except OSError as exc:
+            raise UnsupportedPrimitive("cannot verify pinned directory containment") from exc
+        if actual != expected and expected not in actual.parents:
+            raise Failure("pinned directory escaped configured root")
+
     source_fd = target_fd = -1
     try:
         source_fd = open_pinned(source.parent, source_root)
         target_fd = open_pinned(target.parent, target_root)
+        verify_pinned(source_fd, source_root)
+        verify_pinned(target_fd, target_root)
         result = fn(source_fd, os.fsencode(source.name), target_fd, os.fsencode(target.name), 1)
         if result != 0:
             code = ctypes.get_errno()
@@ -708,6 +721,9 @@ class FileSafety:
         expected = data["source_identity"]
         source_trash = physical["source_trash"]
         replacement_trash = physical["replacement_trash"]
+        if data.get("replacement_required") and not data.get("replacement_identity"):
+            journal.write(State.MANUAL, conflict="replacement preflight identity missing")
+            return journal.read()
         if data["state"] == State.CANCELLED.value:
             source_ok = False
             if source.is_file():
@@ -732,7 +748,8 @@ class FileSafety:
             return digest == expected["sha256"] and size == expected["size"]
 
         def valid_trash(path: Path, role: str, original_relative: str,
-                        reason: str | None = None) -> bool:
+                        reason: str | None = None,
+                        expected_identity: dict | None = None) -> bool:
             metadata = path.with_suffix(path.suffix + ".json")
             if path.is_symlink() or metadata.is_symlink() or not path.is_file() or not metadata.is_file():
                 return False
@@ -745,12 +762,16 @@ class FileSafety:
                         and record.get("trash_relative_path") == str(path.relative_to(root))
                         and record.get("original_relative_path") == original_relative
                         and (reason is None or record.get("reason") == reason)
+                        and (expected_identity is None
+                             or record.get("sha256") == expected_identity.get("sha256")
+                             and record.get("size") == expected_identity.get("size"))
                         and hash_file(path, progress=progress) == (record.get("sha256"), record.get("size")))
             except (OSError, ValueError, KeyError):
                 return False
 
         if data.get("operation_kind") == "delete":
-            if source_trash.exists() and not valid_trash(source_trash, "source", data["source_relative"], "delete"):
+            if source_trash.exists() and not valid_trash(source_trash, "source", data["source_relative"],
+                                                         "delete", data["source_identity"]):
                 journal.write(State.MANUAL, conflict="delete trash metadata/hash invalid")
                 return journal.read()
             if source.exists() and source_trash.exists():
@@ -770,10 +791,12 @@ class FileSafety:
             journal.write(State.COMPLETE)
             return journal.read()
 
-        if source_trash.exists() and not valid_trash(source_trash, "source", data["source_relative"]):
+        if source_trash.exists() and not valid_trash(source_trash, "source", data["source_relative"],
+                                                     expected_identity=data["source_identity"]):
             journal.write(State.MANUAL, conflict="source trash metadata/hash invalid")
             return journal.read()
-        if replacement_trash.exists() and not valid_trash(replacement_trash, "replacement", data["target_relative"], "replacement"):
+        if replacement_trash.exists() and not valid_trash(replacement_trash, "replacement", data["target_relative"],
+                                                          "replacement", data.get("replacement_identity")):
             journal.write(State.MANUAL, conflict="replacement trash metadata/hash invalid")
             return journal.read()
         # A replacement crash can leave durable replacement metadata while the
@@ -900,7 +923,8 @@ class FileSafety:
             elif data.get("replacement_required") and not valid_trash(replacement_trash, "replacement", data["target_relative"], "replacement"):
                 journal.write(State.MANUAL, conflict="replacement trash metadata/hash invalid")
             elif data.get("same_device") or (final.get("source_trash")
-                                               and valid_trash(Path(final["source_trash"]), "source", data["source_relative"])):
+                                               and valid_trash(Path(final["source_trash"]), "source", data["source_relative"],
+                                                               expected_identity=data["source_identity"])):
                 journal.write(State.COMPLETE)
             else:
                 journal.write(State.MANUAL, conflict="source trash missing")

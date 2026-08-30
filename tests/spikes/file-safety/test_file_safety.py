@@ -139,7 +139,7 @@ class StateAndPaths(Fixture):
         source = source_parent / "source"
         source.write_bytes(b"payload")
         nested = base / "target" / "nested"
-        moved_nested = base / "target" / "nested-pinned"
+        moved_nested = external / "nested-relocated"
         original_open = os.open
         swapped = False
 
@@ -151,13 +151,21 @@ class StateAndPaths(Fixture):
                 swapped = True
             return original_open(path, flags, mode, dir_fd=dir_fd)
 
-        with mock.patch.object(file_safety_module.os, "open", side_effect=swap_before_deep):
-            file_safety_module._rename_noreplace(source, target_parent / "dest")
-        self.assertTrue(swapped)
-        self.assertEqual((external / "dest").read_bytes(), b"must-not-touch")
-        self.assertTrue((moved_nested / "deep" / "dest").exists())
-        nested.unlink()
-        moved_nested.rename(nested)
+        try:
+            with mock.patch.object(file_safety_module.os, "open", side_effect=swap_before_deep):
+                with self.assertRaises(Failure):
+                    file_safety_module._rename_noreplace(
+                        source, target_parent / "dest", source_root=base / "source",
+                        target_root=base / "target")
+            self.assertTrue(swapped)
+            self.assertEqual((external / "dest").read_bytes(), b"must-not-touch")
+            self.assertFalse((moved_nested / "deep" / "dest").exists())
+            self.assertEqual(source.read_bytes(), b"payload")
+        finally:
+            if nested.is_symlink():
+                nested.unlink()
+            if moved_nested.exists():
+                moved_nested.rename(nested)
 
     def test_protection_permission_space_and_cancel_are_fail_closed(self):
         self.write()
