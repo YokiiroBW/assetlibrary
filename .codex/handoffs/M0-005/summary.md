@@ -1,7 +1,7 @@
 # M0-005 handoff
 
 status: partial
-implementation_commit: `63569b4e52e52bb29614c4c7905d031efa92c059`
+implementation_commit: `e78a29058535d68a24b0f1de54d044c15c6a0b5e`
 handoff_commit: recorded by the commit containing this file
 branch: `codex/m0-005-postgres-domain-spike`
 
