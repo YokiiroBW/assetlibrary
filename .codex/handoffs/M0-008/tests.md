@@ -10,16 +10,19 @@ Linux x86-64，Python 3.12，uid 1000。所有运行目录为系统临时目录�
 
 `git diff --check`
 
+`git diff --name-only main...HEAD` 与 handoff `result.json.changed_files` 的 exact set comparison：预期 19 个文件，结果相等。
+
 `ps -u "$(id -un)" -o pid,ppid,pgid,stat,cmd | grep -E 'worker_fixture|time.sleep\\(30\\)' | grep -v grep || true`
 
 ## 架构与契约测试
 
-23 个 unittest 全部通过：复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、request/response acceptance、safe mode。
+24 个 unittest 全部通过：复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、request write backpressure/deadline、request/response acceptance、safe mode。
 
 ## 通过
 
 - happy response、request correlation 和 L0-safe result；
 - deadline、supervisor 强制 process-tree cancel、TERM/KILL escalation 与 process-group reap；RPC `cancel` envelope 未发送/确认；
+- frame 在 spawn 前编码，writer thread 与 response reader 共用 `started + manifest deadline`；`no_read` + 合法 900 KiB unknown-optional padding 写回压测试通过，writer 已解除且无残留；
 - crash、malformed、oversized frame、stdout/stderr flood；
 - descendant PID probe；
 - RLIMIT_AS、RLIMIT_CPU、RLIMIT_NPROC、RLIMIT_NOFILE；
