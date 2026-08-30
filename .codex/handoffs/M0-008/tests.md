@@ -14,7 +14,7 @@ Linux x86-64，Python 3.12，uid 1000。所有运行目录为系统临时目录�
 
 ## 架构与契约测试
 
-20 个 unittest 全部通过：manifest schema parse、RPC envelope catalog、required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、response acceptance、safe mode。
+23 个 unittest 全部通过：复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；required correlation、unknown optional preservation、API negotiation fail-closed、original-write/network policy、bounded frame encode/decode、request/response acceptance、safe mode。
 
 ## 通过
 

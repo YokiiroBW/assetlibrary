@@ -17,7 +17,7 @@
 
 ## 修改文件
 
-implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5` and correction `75da89129cca86bdbaf8f052ab7c7ed32cfa100c` 包含：
+implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5`, `75da89129cca86bdbaf8f052ab7c7ed32cfa100c`, and final correction `852ebb1f7b4d1f692a1f87086648a6ebfbb909de` 包含：
 
 - `contracts/providers/README.md`
 - `contracts/providers/provider-manifest.schema.json`
@@ -35,15 +35,15 @@ implementation commits `86d95094b019c9e9c000840207e26e58dd5232c5` and correction
 
 ## 共享契约或数据库变化
 
-仅变更 `contracts/providers/**`（本任务唯一契约所有者）；无数据库迁移、无其他共享契约变化。Provider candidate 尚未成为 production API，须由 M0-009 冻结。
+仅变更 `contracts/providers/**`（本任务唯一契约所有者）；无数据库迁移、无其他共享契约变化。Provider candidate 尚未成为 production API，须由 M0-009 冻结。RPC schema validation 复用了只读 AssetLink `SchemaStore`，未新增依赖或复制 validator。
 
 ## 测试结果
 
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/provider-sandbox -p 'test_*.py' -v`：20 passed，0 failed，0 skipped。
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/provider-sandbox -p 'test_*.py' -v`：23 passed，0 failed，0 skipped。
 
 ## 架构测试与质量门禁
 
-契约 schema JSON parse/reference、positive/negative fixtures、未知字段保留、bounded framing、响应接受边界与全部故障 fixture 已通过。任务范围验证及全局 handoff/架构门禁由协调线程在合并时复跑。
+复用只读 AssetLink `SchemaStore` 对 manifest 和七类 RPC envelope 做 schema parse/reference/positive/negative validation；未知字段保留、bounded framing、请求/响应接受边界与全部故障 fixture 已通过。任务范围验证及全局 handoff/架构门禁由协调线程在合并时复跑。
 
 ## 文件安全、权限与性能影响
 
