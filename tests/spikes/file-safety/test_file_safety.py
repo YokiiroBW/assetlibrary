@@ -173,10 +173,17 @@ class StateAndPaths(Fixture):
         trash = Path(result["source_trash"])
         metadata = Path(str(trash) + ".json")
         metadata.unlink()
-        metadata.symlink_to(Path(tempfile.mktemp(prefix="m006-external-meta-")))
+        metadata.symlink_to(self.root / "external-meta-target")
         with self.assertRaises(Failure):
             self.engine.restore(trash)
         metadata.unlink()
+        forged = self.root / "m006-external-forged"
+        forged.mkdir()
+        payload = forged / "payload"
+        payload.write_bytes(b"forged")
+        (forged / "payload.json").write_text(json.dumps({"schema_version": "m0-006.trash.v1"}))
+        with self.assertRaises(Failure):
+            self.engine.restore(payload)
 
     def test_unknown_journal_state_is_rejected(self):
         self.write("unknown", b"state")
@@ -277,7 +284,40 @@ e=FileSafety(Path(sys.argv[2]),Path(sys.argv[3]),Path(sys.argv[4]));print(e.reco
             self.assertEqual(result.stdout.strip(), "complete")
         old = self.target / ".m006-trash" / op / "replacement-item.json"
         self.assertTrue(old.exists())
+        old_payload = old.with_suffix("")
+        old_metadata = json.loads(old.read_text())
+        self.assertEqual(hash_file(old_payload), (old_metadata["sha256"], old_metadata["size"]))
+        source_trash = self.source / ".m006-trash" / op / "source-incoming"
+        self.assertEqual(hash_file(source_trash), (hashlib.sha256(b"new-content").hexdigest(), len(b"new-content")))
+        self.assertFalse((self.target / ".m006-stage" / op / "payload").exists())
+        self.assertFalse((self.runtime / "operations" / op / "lock").exists())
         self.assertEqual((self.target / "item").read_bytes(), b"new-content")
+
+    def test_same_device_replacement_metadata_only_gap(self):
+        self.write("incoming-same", b"new-same")
+        (self.source / "item-same").write_bytes(b"old-same")
+        script = """import sys,os;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]))
+def h(name,extra):
+ if name=='before_replacement_physical_trash':os._exit(77)
+e.hooks=h
+try:e.move('incoming-same','item-same',op_id='same-replacement-gap',replace=True)
+except Exception:os._exit(78)
+"""
+        child = subprocess.run([sys.executable,"-c",script,str(HERE),str(self.source),str(self.runtime)], capture_output=True)
+        self.assertEqual(child.returncode, 77)
+        recover = """import sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;from file_safety import FileSafety
+e=FileSafety(Path(sys.argv[2]),Path(sys.argv[2]),Path(sys.argv[3]));print(e.recover('same-replacement-gap',owner='worker-1')['state'])
+"""
+        for _ in range(2):
+            result = subprocess.run([sys.executable,"-c",recover,str(HERE),str(self.source),str(self.runtime)],capture_output=True,text=True,check=True)
+            self.assertEqual(result.stdout.strip(), "complete")
+        old = self.source / ".m006-trash" / "same-replacement-gap" / "replacement-item-same"
+        self.assertEqual(hash_file(old), (hashlib.sha256(b"old-same").hexdigest(), len(b"old-same")))
+        self.assertEqual((self.source / "item-same").read_bytes(), b"new-same")
+        self.assertFalse((self.source / "incoming-same").exists())
+        self.assertFalse((self.runtime / "operations" / "same-replacement-gap" / "lock").exists())
+        self.assertFalse((self.source / ".m006-stage" / "same-replacement-gap").exists())
 
     def test_replacement_metadata_only_gap_verifies_old_target(self):
         self.use_actual_cross_devices()

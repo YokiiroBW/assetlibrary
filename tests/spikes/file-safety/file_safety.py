@@ -552,7 +552,7 @@ class FileSafety:
         # old target is still present. Verify that metadata against the old
         # target before moving it; do not classify the differing old content as
         # a target conflict when an explicit replacement is in flight.
-        if (target.exists() and data.get("replace") and stage.exists()
+        if (target.exists() and data.get("replace")
                 and matching(source) and not replacement_trash.exists()):
             metadata = replacement_trash.with_suffix(replacement_trash.suffix + ".json")
             if not metadata.is_file():
@@ -645,13 +645,43 @@ class FileSafety:
     def restore(self, trash_path: str | Path, *, target: str | None = None) -> str:
         trash = Path(trash_path)
         metadata = trash.with_suffix(trash.suffix + ".json")
-        if trash.is_symlink() or metadata.is_symlink():
-            raise Failure("trash payload or metadata is a symlink")
+        roots = (self.source_root / ".m006-trash", self.target_root / ".m006-trash")
+        candidates = []
+        for root in roots:
+            try:
+                relative_payload = trash.relative_to(root)
+            except ValueError:
+                continue
+            cursor = root
+            for part in relative_payload.parts:
+                cursor = cursor / part
+                if cursor.is_symlink():
+                    raise Failure("trash path contains symlink")
+            resolved = trash.resolve(strict=False)
+            if resolved != root and root not in resolved.parents:
+                raise Failure("trash path escapes configured trash root")
+            candidates.append(root)
+        if len(candidates) != 1:
+            raise Failure("trash payload is outside configured task-local trash")
+        if metadata.is_symlink():
+            raise Failure("trash metadata is a symlink")
         record = json.loads(metadata.read_text(encoding="utf-8"))
         if record.get("schema_version") != TRASH_SCHEMA:
             raise Failure("unknown trash metadata schema")
+        role = record.get("root_role")
+        root = self.source_root if role == "source" else self.target_root if role == "replacement" else None
+        if root is None or candidates[0] != root / ".m006-trash":
+            raise Failure("trash root role mismatch")
+        relative_payload = trash.relative_to(root / ".m006-trash")
+        if len(relative_payload.parts) < 2:
+            raise Failure("invalid trash relative path")
+        operation_id = relative_payload.parts[0]
+        _validate_op_id(operation_id)
+        expected_relative = str(trash.relative_to(root))
+        if (record.get("operation_id") != operation_id
+                or record.get("trash_relative_path") != expected_relative):
+            raise Failure("trash metadata path or operation mismatch")
         relative = target or record["original_relative_path"]
-        root = self.source_root if record.get("root_role") == "source" else self.target_root
         destination = self._path(root, relative)
         if trash.exists() and trash.stat().st_dev != destination.parent.stat().st_dev:
             raise UnsupportedPrimitive("cross-device restore requires staged restore adapter")
@@ -696,9 +726,3 @@ class FileSafety:
             return journal.read()
         finally:
             lock.release()
-
-
-def cleanup_tree(path: Path) -> None:
-    """Only for owned test fixtures; callers must pass an exact task path."""
-    if path.exists():
-        shutil.rmtree(path)
