@@ -6,7 +6,7 @@
 
 ## 实现提交
 
-发行输入最后提交：`06dc8cf0a3e0f4df76b56a2e7b8537e21153885d`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
+发行输入最后提交：`316f2c7e3bbb2fc1900e761d592225b697931e1b`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
 
 ## 完成内容
 
@@ -22,7 +22,7 @@
 
 ## 测试结果
 
-空 runtime 目录后执行 bootstrap；restore、Linux/Windows RID publish、6/6 Python unittest、Docker Compose 静态 config 和 `git diff --check` 通过。artifact source commit 为 clean implementation commit；完整每文件 size/SHA256 和 aggregate digest 已在 runtime artifact 清单中记录。
+空 runtime 目录后执行 bootstrap，并连续两次清理 obj/bin/artifact cold publish；两次完整 files.sha256 一致。restore、Linux/Windows RID publish、6/6 Python unittest、Docker Compose 静态 config 和 `git diff --check` 通过。artifact source commit 为发行输入最后提交；完整每文件 size/SHA256 和 aggregate digest 已在 runtime artifact 清单中记录。
 
 ## 外部门禁与风险
 

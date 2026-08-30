@@ -13,14 +13,14 @@ Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap�
 
 ## Artifact matrix
 
-发行输入最后提交：`06dc8cf0a3e0f4df76b56a2e7b8537e21153885d`；aggregate digest：`2d7527b1a165e9b496ce2a30a1a851a7cfb39ed79326bfa1ad8ea08f4e6a2c6f`。
+发行输入最后提交：`316f2c7e3bbb2fc1900e761d592225b697931e1b`；连续两次 cold publish 的完整 `files.sha256` 一致；aggregate digest：`81acaf0c1c3b759ad7ac603597ad029055fb9b201043baaa4d848b87de066f99`。
 
 | target | exact bytes | SHA-256 |
 |---|---:|---|
 | linux-x64 apphost | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
-| win-x64 apphost | 162,816 | `5e2a17eb6011c2fee1d30760ac7a014898b18d5a6dd7c6f8d0b6b58c2b9361ff` |
+| win-x64 apphost | 162,816 | `36010158ee59c7c0e5c39eb9dd46ccec59d52e45139aee97a3913dc65b48d76c` |
 
-完整目录 manifest 为 runtime 内 `file-sizes.txt` + `files.sha256`；测试重新计算 aggregate digest，不信任 source-commit 文件本身。
+完整目录 manifest 为 runtime 内 `file-sizes.txt` + `files.sha256`；测试重新计算 aggregate digest，不信任 source-commit 文件本身，并连续两次清理 obj/bin/artifact 后比较完整清单。
 
 ## 已覆盖
 

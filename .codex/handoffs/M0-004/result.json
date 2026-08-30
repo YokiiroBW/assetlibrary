@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-004",
   "branch": "codex/m0-004-server-packaging-clean",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-004",
-  "commit": "06dc8cf0a3e0f4df76b56a2e7b8537e21153885d",
+  "commit": "316f2c7e3bbb2fc1900e761d592225b697931e1b",
   "changed_files": [".codex/tasks/M0-004.md", "tests/spikes/server-packaging/.dockerignore", "tests/spikes/server-packaging/Dockerfile", "tests/spikes/server-packaging/docker-compose.yml", "tests/spikes/server-packaging/manifest.json", "tests/spikes/server-packaging/bootstrap.sh", "tests/spikes/server-packaging/src/Program.cs", "tests/spikes/server-packaging/src/ServerPackagingSpike.csproj", "tests/spikes/server-packaging/test_spike.py", "tests/spikes/server-packaging/scripts/windows-service.ps1", "tests/spikes/server-packaging/systemd/assetlibrary-m0-004-spike.service", "docs/spikes/M0-004/README.md", ".codex/handoffs/M0-004/summary.md", ".codex/handoffs/M0-004/tests.md", ".codex/handoffs/M0-004/result.json"],
   "changed_contracts": [],
   "tests": {"passed": 6, "failed": 0, "skipped": 0, "report": "tests.md"},
