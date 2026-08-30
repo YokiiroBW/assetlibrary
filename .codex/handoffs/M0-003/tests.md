@@ -2,35 +2,41 @@
 
 ## 执行环境
 
-Linux，Python 3 标准库，AssetLink worktree。
+Linux x86-64，Python 3 标准库，`codex/m0-003-assetlink-contract` 独立 worktree。
 
-## 执行命令
+## 执行命令与结果
 
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/assetlink -p 'test_*.py' -v`
+| 命令 | 结果 |
+|---|---|
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/assetlink -p 'test_*.py' -v` | 21/21 通过 |
+| `python3 scripts/verify_repository.py` | 通过 |
+| `python3 scripts/validate_handoff.py` | 通过 |
+| `python3 scripts/validate_architecture_baseline.py` | 通过 |
+| `git diff --check c73b347...ef22cd349b1bae4670bed7dbf2b0ae29bb85e1bd` | 通过 |
 
-## 架构与契约测试
+## 架构与契约验证
 
-## 通过
+- 20 个消息信封 schema 均有有效固定夹具；公共 schema 与全部信封声明
+  Draft 2020-12 和唯一稳定 `$id`。
+- 所有 26 个夹具均被分类并解析；相对和 internal `$ref` 递归解析通过。
+- 允许路径、模块边界、handoff schema、仓库 JSON 与架构基线通过。
+- 实现提交是当前分支祖先，`result.commit` 与实际实现提交一致。
 
-5/5 tests passed。所有 schemas/fixtures 可由 Python `json` 解析，Draft 2020-12 声明和 v1 `$id` 唯一性通过。
+## 兼容性与失败/恢复路径
 
-## 失败 / 跳过
+通过固定夹具和语义 oracle 验证：旧/新次版本 offer、无交集失败、未知字段、
+未知能力、同 `server_id` failover、断线 replay、cursor-expired snapshot 重建、
+gap/乱序拒绝、retry hint、100 GB/uint64 边界、负/非 canonical offset、64 MiB
+chunk 上限、重复 chunk 与 hash 冲突、received ranges、Range 边界，以及完成后的
+长度/强哈希/可读性证据。原始不完整 handshake 夹具会被当前 schema 拒绝。
 
-## 故障注入与恢复验证
+## 性能与文件安全
 
-固定夹具验证 cursor replay、cursor-expired rebuild 语义、幂等字段、重复分块边界和失败 hash/negative offset。
+测试只处理小型 JSON 元数据，不读写资产文件。候选协议限定流式字节传输和
+64 MiB 单块/Range；本任务不建立吞吐或延迟基线。
 
-## 性能数据
+## 未执行的外部门禁
 
-## 尚未覆盖
-
-## 完整命令清单
-
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/assetlink -p 'test_*.py' -v` — 14 passed。
-`python3 scripts/verify_repository.py` — passed。
-`python3 scripts/validate_handoff.py` — passed。
-`python3 scripts/validate_architecture_baseline.py` — passed。
-`git diff --check` — passed。JSON/ref/dialect/$id checks are test_01 and test_14;
-allowed-path and cache-residue checks passed; no generated cache remains.
-
-真实 HTTP/2、浏览器运行时和跨进程断电注入待后续实现 Spike；本任务明确不实现网络或存储业务。
+真实 Chromium/HTTP 流、HTTP/2 与代理行为、网络中断、跨进程崩溃、持久存储
+恢复和三端生成 SDK 尚未执行。本任务无生产客户端/服务端，因此这些是后续
+实现门禁而不是自动化测试跳过项。
