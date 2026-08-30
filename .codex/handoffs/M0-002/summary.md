@@ -1,0 +1,125 @@
+# M0-002 交接摘要
+
+## 完成状态
+
+`partial`
+
+## 完成内容
+
+已交付可审查的 Windows Shell Spike 包：
+
+- C++17/Windows SDK C++/WinRT base + COM `IShellFolder`、`IPersistFolder`（保存
+  初始化 PIDL 的 clone 生命周期）、单项 PIDL 枚举器、
+  COM class factory 与 custom `IShellView` 最小桥接；Shell 只创建视图、导航
+  和本机 IPC，不包含网络、哈希、媒体解码、Provider 或业务规则。
+- 进程外 `AssetHostStub.exe`，通过 Spike-local named pipe 提供 ping/pong。
+  帧有 magic、版本、固定 16 字节头、4 KiB payload 上限和 request id；Shell
+  使用 overlapped I/O，单次 `AskAssetHost` 共享一个 250 ms 逻辑 I/O deadline。
+  Explorer view activation 只启动 worker 即返回；worker 在超时后调用 `CancelIoEx`，
+  等待取消完成并确认 `GetOverlappedResult` 后才销毁 event/`OVERLAPPED`/buffer，
+  随后通过 window message 更新可恢复状态。取消排空是 worker cleanup，不延长
+  Explorer 调用线程的返回路径；其自身上限仍须 Windows 门禁验证。
+- CMake x64 构建入口（非 Windows 仅配置检查，MSVC/Windows-only 选项受条件
+  保护）；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障模式和 host-cycle
+  helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
+  中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。
+- Linux 可运行静态/契约测试，检查包结构、禁依赖、IPC 界限与取消生命周期、
+  注册卸载对称性、故障入口、枚举 partial-fetch 语义、host-only soak 定位和
+  生成/私密产物排除。
+
+真实 Windows 证据尚未取得，因此本交接不是 M0-002 验收通过。
+
+## 关键决策
+
+- IPC 明确为 Spike-local，未使用或修改 AssetLink。
+- 进程内视图只显示桥接状态；重型视图与所有网络/解析能力留在进程外。
+- 采用 HKCU-only、可逆、带所有权标记的注册策略，不做系统级安装和静默覆盖。
+- C++/WinRT + COM + 进程外 Host 仅保留为 M0-009 候选；本 Spike 不冻结正式架构。
+
+## 修改文件
+
+- `tests/spikes/windows-shell/CMakeLists.txt`
+- `tests/spikes/windows-shell/README.md`
+- `tests/spikes/windows-shell/src/AssetShellProtocol.h`
+- `tests/spikes/windows-shell/src/AssetShellExtension.cpp`
+- `tests/spikes/windows-shell/src/AssetHostStub.cpp`
+- `tests/spikes/windows-shell/scripts/build.ps1`
+- `tests/spikes/windows-shell/scripts/register.ps1`
+- `tests/spikes/windows-shell/scripts/verify-registration.ps1`
+- `tests/spikes/windows-shell/scripts/unregister.ps1`
+- `tests/spikes/windows-shell/scripts/run-host.ps1`
+- `tests/spikes/windows-shell/scripts/soak.ps1`
+- `.codex/tasks/M0-002.md`（任务包纳入本次提交，内容未改写）
+- `tests/spikes/windows-shell/test_contracts.py`
+- `docs/spikes/M0-002/README.md`
+- `docs/spikes/M0-002/explorer-soak-protocol.md`
+- `.codex/handoffs/M0-002/summary.md`, `result.json`, `tests.md`
+
+## 模块边界、依赖方向与复用
+
+模块为 `windows-shell-spike`，owner 为 `codex-agent-m0-002`。依赖方向为
+Explorer bridge → spike-local IPC port → test AssetHost；没有反向依赖、跨模块
+写入或生产模块引用。复用了 Windows SDK 的 COM/Shell ABI；没有复制服务端业务
+用例，也没有修改共享契约。
+
+## 新语言、框架或重大依赖
+
+仅在 Spike 内使用任务包允许的 C++17 + Windows SDK Shell/COM ABI，并包含
+Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网络库、媒体
+库或额外服务；正式语言/框架选择仍待 M0-009。
+
+## 共享契约或数据库变化
+
+无。`AssetShellProtocol.h` 是版本化 Spike-local IPC，不是 AssetLink；无数据库
+迁移。
+
+## 测试结果
+
+- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（13/13）。
+- 通过：`git diff --check`。
+- 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
+- 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
+  Explorer navigation/custom view、host missing/crash/timeout/invalid recovery、
+  crash/restart 20-cycle 和 8-hour soak。
+
+## 架构测试与质量门禁
+
+Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadline、取消完成顺序、
+异步 view activation、`IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
+新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
+host-only soak 定位和生成/私密产物排除。没有真实 Windows 运行时证据，
+故障隔离和 Explorer 恢复门禁保持 unmet。
+
+## 文件安全、权限与性能影响
+
+Spike 不触碰资产文件、数据库或网络；只读 IPC ping。注册只写当前用户 HKCU，
+owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell IPC 逻辑尝试预算为
+250 ms、payload 上限 4 KiB；取消排空在 worker 上执行且未证明独立上限。没有
+50 万资产性能结论。soak 脚本提供 bounded host cycle 入口，未执行不得推断稳定性。
+
+## 技术债、已知问题与风险
+
+- 必须在 Windows 11 x64 真实环境验证 COM activation、Explorer namespace
+  显示、custom IShellView 生命周期及右侧视图尺寸/重建行为。
+- 必须真实验证 host 缺失、崩溃、超时、无效/超长 frame 不冻结 Explorer，及恢复
+  后重连；Linux 不能替代这些证据。
+- 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
+- 当前 PIDL、视图和 host payload 只是技术替身，不可直接演进为生产协议或业务
+  实现。
+- `soak.ps1` 明确只是 host-cycle helper；人工 Explorer soak protocol 和 8 小时
+  运行证据仍为 downstream gate。
+
+## 建议合并顺序
+
+建议在 M0-009 汇总窗口中合并本 Spike，再依据真实 Windows 证据决定是否冻结
+Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell` 实现。
+
+## 下一步
+
+在隔离 Windows 11 x64 主机按 `docs/spikes/M0-002/README.md` 执行完整验证协议，
+保存构建/注册/导航/故障/卸载/Explorer 恢复及 soak 证据；若任一边界失败，先
+提交 M0-009 决策问题，不扩展本 Spike 范围。
+
+## Codex 线程链接（可选）
+
+仅作为导航，不是唯一交接依据。
