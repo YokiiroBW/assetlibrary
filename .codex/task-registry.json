@@ -62,7 +62,7 @@
       "id": "M0-005",
       "title": "PostgreSQL 领域模型、持久任务与迁移策略验证",
       "module": "postgres-domain-spike",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "M0-001",
         "M0-003"
@@ -84,7 +84,7 @@
         "M0-005"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-006-file-safety-spike",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-006/summary.md",
       "thread_deep_link": ""
