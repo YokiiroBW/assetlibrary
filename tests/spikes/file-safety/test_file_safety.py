@@ -12,6 +12,9 @@ import tracemalloc
 import unittest
 from pathlib import Path
 
+if os.name == "nt":
+    raise unittest.SkipTest("Linux renameat2/fcntl adapter; see Windows candidate probe")
+
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parents[2] / "packages" / "test-support"))
