@@ -1,113 +1,94 @@
-# M0-006 交接摘要
+# M0-006 Windows 外部门禁交接摘要
 
 ## 完成状态
 
 `partial`
 
-实现 commit：`7caf70c4a6d9af3e95018e56714ae99330314705`；本摘要与其余 handoff 文档随 metadata commit 提交。
+Windows implementation/evidence commit：
+`c14cfc1cd9217c8a1e7c610af77fd66ad4f0ab5c`；本摘要、`result.json` 与 `tests.md`
+随第二个 metadata commit 提交。既有 Linux implementation
+`7caf70c4a6d9af3e95018e56714ae99330314705` 的 40-test 证据保持不变。
 
-## 完成内容
+## Windows 执行环境与边界
 
-交付 `tests/spikes/file-safety/file_safety.py` test-only 状态机/真实 Linux adapter 与
-`test_file_safety.py` 验收矩阵。状态为 preflight → staged → verified →
-target_committed → source_trashed → complete，并显式 cancelled/conflict/manual_attention。
-journal 使用 temp+file fsync+atomic replace+directory fsync；恢复按物理 source/stage/target/
-trash/hash 判断，不信 COMPLETE。
+- Windows 11 x64 build `26100`，bundled Python `3.12.13`。
+- 任务 worktree、所有小型 fixture 均在本机固定 NTFS；初始基线
+  `0faa07cc2518952f78d2fb029e777974c89df74c`，分支
+  `codex/m0-006-windows-evidence`。
+- 证据时间 `2026-08-31T02:27:30Z`。未记录卷标、卷序列号、用户名或本机绝对路径。
+- destructive fixture 只在 ignored task root
+  `.runtime/sandbox-storage/M0-006/windows-probe-*`；未访问 NAS、真实资产、用户文件、
+  系统级设置或全局权限。
 
-## 关键决策
+## 已执行并通过的 Windows candidate
 
-- same-device 直接 `renameat2(RENAME_NOREPLACE)`；cross-device 固定 target-root
-  `.m006-stage/<op>/payload`，bounded copy/hash/fsync/noreplace/reopen hash 后才移 source
-  到 source-root `.m006-trash`。
-- trash 使用 deterministic role path（`source-*`/`replacement-*`），metadata 先 durable
-  写入，并记录 schema、operation、root_role、reason、original relative path、size/hash。
-- O_CREAT|O_EXCL lock 带 operation/owner heartbeat/expiry；expired reclaim 由 engine
-  先 inspect 物理候选后进行。
+- `SetFileInformationByHandle(FileRenameInfo)` 的单次 no-replace 调用；
+  `ReplaceIfExists=FALSE`，调用前没有 target existence pre-check。预置 target 时返回
+  `ERROR_ALREADY_EXISTS (183)`，source/target 完整 SHA-256 与 bytes 均保持不变。
+- 50 轮、100 个独立 contender 进程：50 success、50 collision、0 overwrite，
+  每轮恰好一个 winner，loser source 保留。
+- 102,404 bytes 经 `CreateFileW(FILE_FLAG_WRITE_THROUGH)` + `WriteFile` +
+  `FlushFileBuffers(file)` + close，随后新进程 reopen/full SHA-256；digest：
+  `375b3dc0cc7f3190dc408652de29648432c1f2ac50ad7cf6d0886070ce0ee0fd`。
+- 本机 directory handle 以 `GENERIC_WRITE | FILE_FLAG_BACKUP_SEMANTICS |
+  FILE_FLAG_WRITE_THROUGH` 打开后，`FlushFileBuffers(directory)` 返回 success；这里只记录
+  API 执行事实，不把它提升为断电时 namespace ordering 的保证。
+- 两个真实子进程分别在 `after_stage_flush`、`after_target_rename` 调用 `os._exit(77)`；
+  每个边界后由两个全新进程恢复，4/4 recovery 均重新检查 stage/target、reopen/full
+  SHA-256 后 `complete`，第二次恢复幂等。payload digest：
+  `d1062ac277eca76bb0d41ab94c3ad3efab510c6db4a57bfd680558b37b1c3dfe`、
+  `ce04b5ba2d47a9ae25e096d469f43a7d802b2073b36e7e0f334a5ba337c7442b`。
+- recovery 遇到不同 hash 的既有 target 时返回 `conflict`，stage 与 target 均保留。
 
-## 修改文件
+Windows target discovery：`6 passed / 0 failed / 1 skipped`。唯一 skip 是原有
+Linux-only `fcntl`/`renameat2` module；它在 Windows 明确跳过，没有把 Linux case 伪装成
+Windows 通过。详细命令与结果见 `tests.md`。
 
-`tests/spikes/file-safety/file_safety.py`、`tests/spikes/file-safety/test_file_safety.py`、
-`.codex/tasks/M0-006.md`、`docs/spikes/M0-006/README.md`、本目录三个 handoff 文件。
+## 执行事实与官方语义保证的区分
 
-## 模块边界、依赖方向与复用
+Microsoft
+[`FILE_RENAME_INFO`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_rename_info)
+明确说明 `ReplaceIfExists=FALSE` 且 target 已存在时返回错误；documented no-overwrite、
+本机碰撞和并发 candidate 均已通过。
 
-模块：`file-safety-spike`；仅测试夹具/adapter，无生产入口。只读复用 M0-007
-`performance.BYTES_100_GIB`，未复制通用 helper；无跨模块写入。
+Microsoft
+[`FlushFileBuffers`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers)
+与
+[`CreateFile`](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
+支持本次 file/write-through/flush mapping。当前证据证明 API 返回成功、process crash 后
+可恢复、target 可独立重开并强哈希一致；它不证明任意突然断电、控制器 cache、NTFS
+recovery 下 rename 的完整原子性或 directory-entry 持久排序。没有执行强制掉电试验，
+因此 formal power-loss atomicity/durability 仍为 blocker。
 
-## 新语言、框架或重大依赖
+## 未完成门禁与所需用户输入
 
-无；Python 3.12 标准库，Linux libc/kernel `renameat2` 仅通过 ctypes capability probe。
+- 1/20/100 GiB 没有运行，也没有使用 sparse/logical file 冒充实际 bytes。
+- 运行前需要用户明确给出空的、任务独占、本机固定 NTFS sandbox。必须拒绝 NAS、真实
+  资产根、源码目录、非空目录与 reparse/symlink/junction；逐档验证 canonical boundary、
+  free space、实际 bytes、流式 SHA-256、清理后再进入下一档。
+- 同卷同时保留 source 与 staged/target 时建议最大档至少 `2 × fixture + 10%`，即
+  100 GiB 档约 220 GiB 可用空间。若验证真实跨卷，则需两个用户明确指定的空固定 NTFS
+  sandbox，volume identity 不同，source/target 各至少 `fixture + 10%`。
+- Linux 非协作 namespace mutation 的 exclusive-lock/ACL/kernel policy 仍需 M0-009 冻结。
 
-## 共享契约或数据库变化
+因此任务必须保持 `partial`，不能启动 M0-009 的完成宣称。
 
-无生产 contract、migration、依赖锁或 ADR 变化。journal/trash schema 仅 Spike-local。
+## 修改、架构与复用
 
-## 测试结果
+新增 Windows-only test probe 与 unittest，Windows 上显式跳过 Linux-only module，并更新
+Spike/交接证据。没有修改生产目录、公共接口、共享契约、migration、ADR、任务包、项目
+状态、Vault 或 M0-009；没有新增语言、框架、依赖或二进制。
 
-40 passed, 0 failed, 0 skipped。命令：
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v`。
-另执行三项 validators、`git diff --check`（结果写入 tests.md）。
+Windows test probe 复用既有 M0-006 的 physical-facts-first、strong-hash、conflict、
+idempotent recovery 语义。由于现有 adapter 在 import 时绑定 Linux `fcntl`/`renameat2`，
+Windows API mapping 保持独立 test-only；没有抽成第二套生产文件系统层。
 
-## 架构测试与质量门禁
+## 清理与建议
 
-执行 handoff、architecture baseline、repository validators；变更仅在允许路径。
-`architecture_review` 与 diff 一致：无共享契约、数据库、生产模块或新运行时。
+所有 100 contender、2 crash child、4 recovery child 均已退出；每个
+`windows-probe-*` fixture 在 test teardown 删除。最终 task runtime 递归检查为 0 个文件/
+子目录；未提交原始日志、fixture、注册表导出、二进制或私密路径。
 
-## 文件安全、权限与性能影响
-
-所有 destructive fixture 位于 exact `.runtime/sandbox-storage/M0-006/` 或 owned
-`m006-*` temp；symlink/absolute/..、保护/权限/空间/cancel、mutation、corrupt target、
-collision、restore/replace/delete、lock concurrency/reclaim 均有测试。16MiB 实际 move：
-16,777,216 bytes，1MiB buffer，elapsed 0.585626s，tracemalloc peak 3,181,357 bytes（测试输出直接记录）。
-
-本轮补充：recovery lock 由 operation-bound inspect callback 授权回收；inspect 从已验证
-relative path 派生所有 source/target/stage/trash 与 metadata，拒绝 journal 路径篡改、
-未知 state、op_id traversal 和 metadata symlink。source/replacement metadata-only 与
-physical-trash gap 均验证后恢复，所有 recovery return/exception 由 owner-aware finally
-释放锁。
-
-最终 correction 补充同卷 replacement metadata-only subprocess crash/recovery；restore 先
-证明 payload 位于 configured task-local trash、逐组件无 symlink，再读取 metadata/hash 并
-校验 root_role、operation_id、trash_relative_path；删除了任意递归清理 helper。
-
-本轮最终修正固定目录 fd 上的 rename 后 fsync；取消替换保留旧 target；恢复与 trash
-cleanup 均从 configured roots 派生路径；trash metadata 额外校验 role、原始相对路径和
-delete reason；长拷贝/hash/trash 使用按 TTL 节流 heartbeat，第二 owner 在超过初始 TTL
-后仍被活跃 owner 拒绝；恢复阶段 source/target 在 source-trash 前再次 full-hash。
-
-本轮竞态修正：rename 从配置 root 逐组件 O_NOFOLLOW 并保留 pinned dirfd，且在 syscall 前
-验证 dirfd 仍位于 root；replace 将旧 target 完整 identity 与 required 状态以同一预检观察
-持久化并在 commit/trash 前复核；trash 后及 recovery trash 后再次验证 target；lock 以
-guard、generation、token 做 owner-aware 条件更新/删除；replacement metadata-only recovery
-完整校验 schema、operation_id、root_role、reason、路径、size/hash 和预检 identity。
-
-最终并发回归补充：target 在 source physical-trash 完成但 journal 更新前被修改时进入
-conflict，source trash 保留且按 metadata/hash 验证；同 owner 第二实例在未过期时不能
-claim/heartbeat/release/recover，过期后必须经物理 inspect/reconcile 获得新 generation/token，
-旧实例不能更新或删除新锁。pinned rename 在 syscall 后复核 containment，越界时通过 pinned
-reverse noreplace 回滚；该原语没有原子 beneath-root 条件，Linux 非协作 namespace mutation
-仍需 M0-009 的 exclusive-lock/ACL/kernel policy 冻结。
-
-Linux same-device/cross-device/fsync/noreplace 均 executed；Windows 无 executor，Windows
-候选原语与 1/20/100GiB release-size 仍为外部门禁，未宣称通过。
-
-## 技术债、已知问题与风险
-
-- `renameat2` 与目录 fsync 能力必须在 M0-009 CI 每次 probe；不支持时 destructive commit
-  fail closed。
-- Windows atomic no-overwrite、fsync 与 restore mapping 尚无执行证据。
-- 真实 1/20/100GiB 压测未运行；仅逻辑 100GiB boundary。
-- Linux 非协作 namespace mutation 的独占锁/ACL/kernel containment policy 尚待 M0-009 冻结；
-  当前 Spike 仅对可协作交错提供 pinned-fd post-check 与 fail-closed rollback 证据。
-
-## 建议合并顺序
-
-先审查 implementation commit，再审查 handoff metadata commit；协调器决定是否合并。
-
-## 下一步
-
-M0-009 冻结平台原语 probe、Windows gate、fsync policy 与 release-size/performance CI。
-
-## Codex 线程链接（可选）
-
-仅作为导航，不是唯一交接依据。
+建议 M0-009 冻结 Windows no-replace capability probe、文件/namespace flush policy、
+正式 power-loss fault-lab gate 与 1/20/100 GiB 执行分层。在这些 blocker 关闭前不得把本次
+candidate 写成跨 Windows/NTFS 的完整持久性保证。

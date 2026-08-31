@@ -1,66 +1,72 @@
-# M0-006 测试记录
+# M0-006 Windows 测试记录
 
 ## 执行环境
 
-Linux x86-64，Python 3.12 stdlib；NAS `st_dev=147`，`/tmp` `st_dev=2050`。
+- Windows 11 x64 build `26100`
+- bundled Python `3.12.13`
+- fixed local NTFS task worktree/sandbox（绝对路径未记录）
+- base commit `0faa07cc2518952f78d2fb029e777974c89df74c`
+- evidence timestamp `2026-08-31T02:27:30Z`
 
-## 执行命令
+## 目标测试
 
-`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v`
+PowerShell：
 
-`python3 scripts/validate_handoff.py`
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = '1'
+<bundled-python-3.12> -m unittest discover -s tests/spikes/file-safety -p 'test_*.py' -v
+```
 
-`python3 scripts/validate_architecture_baseline.py`
+最终结果：`6 passed / 0 failed / 1 skipped`，elapsed `3.929s`。
 
-`python3 scripts/verify_repository.py`
+唯一 skip：`test_file_safety` 是既有 Linux-only `fcntl` +
+`renameat2(RENAME_NOREPLACE)` adapter；Windows 明确跳过。其既有 Linux 证据仍为
+`40 passed / 0 failed / 0 skipped`，本轮没有在 Windows 重跑或伪装这些平台 case。
 
-`git diff --check`
+## Windows candidate 结果
 
-## 架构与契约测试
+| 证据 | 结果 |
+| --- | --- |
+| fixed local NTFS + sandbox boundary | pass |
+| single `SetFileInformationByHandle(FileRenameInfo)` no-replace collision | pass；Win32 `183` |
+| two-process contention | pass；50 rounds / 100 contenders / 50 success / 50 collision / 0 overwrite |
+| file write-through + `FlushFileBuffers(file)` | pass；102,404 bytes |
+| new-process reopen/full SHA-256 | pass；`375b3dc0cc7f3190dc408652de29648432c1f2ac50ad7cf6d0886070ce0ee0fd` |
+| `FlushFileBuffers(directory)` executed call | returned success；formal rename power-loss ordering not inferred |
+| subprocess crash after stage flush | exit 77；two new recovery processes complete/idempotent |
+| subprocess crash after physical target rename | exit 77；two new recovery processes complete/idempotent |
+| different-hash recovery collision | conflict；stage + target preserved |
 
-handoff validator、architecture baseline validator、repository validator、diff check：pass。
-无 contract/migration 变更。
+Crash fixture digest：
 
-## 通过
+- `after_stage_flush`：`d1062ac277eca76bb0d41ab94c3ad3efab510c6db4a57bfd680558b37b1c3dfe`
+- `after_target_rename`：`ce04b5ba2d47a9ae25e096d469f43a7d802b2073b36e7e0f334a5ba337c7442b`
 
-40 passed / 0 failed / 0 skipped。包含 cross-device durable/physical crash boundaries
-（含 metadata-only source/replacement、physical trash gap）、same-device subprocess commit
-与 replacement gap、lock O_EXCL concurrency/expiry、16MiB multi-chunk
-bounded move、trash restore/delete、symlink/path tamper、unknown-state 和 operation-id
-拒绝，以及 configured-trash containment/metadata consistency。
+## Repository / architecture 门禁
 
-## 失败 / 跳过
+```powershell
+<bundled-python-3.12> scripts/validate_handoff.py
+<bundled-python-3.12> scripts/validate_architecture_baseline.py
+<bundled-python-3.12> scripts/verify_repository.py
+git diff --check
+```
 
-无测试失败或跳过。Windows executor 缺失和 1/20/100GiB release-size 是明确外部 blockers，
-不是测试 skip。
+- handoff validation：pass
+- architecture baseline：pass
+- repository verification：pass
+- `git diff --check`：pass
+- changed-path audit：仅 M0-006 允许目录
+- contract/migration/production/public API changes：none
 
-## 故障注入与恢复验证
+## 未执行与 blocker
 
-每个 crash child returncode=77；每点由两个新 supervisor recovery 进程执行并最终 complete，
-source absent，deterministic source trash+metadata valid，stage/lock absent。target hash
-full reopen 校验；冲突/损坏路径保留 source 并返回 conflict/manual。
+- 1/20/100 GiB：not run；缺少用户明确指定的空 fixed-NTFS sandbox 与对应容量确认。
+- sudden power loss/controller-cache/NTFS replay：not run；process crash 不能替代 power loss。
+- directory-handle flush 返回成功是 executed fact，不构成公开 formal durability guarantee。
+- Linux 非协作 namespace mutation policy：仍由 M0-009 冻结。
 
-新增回归：cancelled replace 保留旧 target 且 recovery 不移动；journal stage 被篡改为
-外部路径时 cleanup 不删除外部文件；recovery source 在 target commit 后被修改时不入
-trash；source physical-trash 完成但 journal 更新前 target 被修改时进入 conflict；慢拷贝在
-超过初始 lease TTL 后由第二 owner 尝试 recovery 仍被 unexpired lease 拒绝。
+## 清理证明
 
-本轮还覆盖 pinned 祖先目录换链、replace 预检出现/identity 变化、trash 后 target 变化、
-recovery 同步变化、非法 replacement metadata 零物理写入，以及旧 owner 对新 generation
-的 heartbeat/release 交错保护；同 owner 第二实例在 expiry 前所有 claim/heartbeat/release/
-recover 均失败且锁字节不变，expiry 后经 inspect/reconcile 才轮换 generation/token。
-
-`_rename_noreplace` 的 pinned dirfd post-syscall containment 回归证明祖先交换后的
-external relocated tree 不产生 payload，源文件 bytes 恢复、configured target 不存在；
-这是 fail-closed reverse noreplace rollback 证据，不宣称 `renameat2` 具备原子 beneath-root
-条件。Linux 非协作 namespace mutation policy 仍 blocked_by M0-009。
-
-## 性能数据
-
-最大实际 fixture 16,777,216 bytes；chunk 1,048,576 bytes；独立测量 elapsed 0.585626s，
-`tracemalloc` peak 3,181,357 bytes（测试输出直接记录）。逻辑 `BYTES_100_GIB=107374182400`，未物化大文件。
-
-## 尚未覆盖
-
-Windows atomic/flush 执行证据、真实 1/20/100GiB release-size gate、M0-009 CI freeze（含
-Linux 非协作 namespace mutation policy）。
+每个 fixture root 由 `tearDown` 在已验证的 task sandbox 内删除；所有 contender/crash/
+recovery subprocess 均已 wait/退出。最终 `.runtime/sandbox-storage/M0-006/` 递归检查为
+`0` 个文件或子目录；无 `__pycache__`、大文件、原始日志或存活 probe child。
