@@ -26,8 +26,14 @@
 - Linux 可运行静态/契约测试，检查包结构、禁依赖、IPC 界限与取消生命周期、
   注册卸载对称性、故障入口、枚举 partial-fetch 语义、host-only soak 定位和
   生成/私密产物排除。
+- Windows 继续验证前先收紧 Explorer 边界：F5 通过统一入口异步重试，同一视图
+  最多保留一个在途 ping；每次 ping 使用单调 token，销毁或重建视图后会忽略旧
+  worker 的迟到结果；detached worker 标记为 `noexcept` 并兜住 C++ 异常，异常只
+  转换为可恢复的 unavailable 状态，不越过 Explorer DLL 边界。
 
-真实 Windows 证据尚未取得，因此本交接不是 M0-002 验收通过。
+已在 Windows 11 企业版 LTSC x64（10.0.26100）完成环境和工具链预检，并重新运行
+13/13 静态/契约测试；当前没有 MSVC、MSBuild 或 Windows SDK，故仍未构建、注册或
+加载 Shell DLL。真实 Explorer 运行证据尚未取得，因此本交接不是 M0-002 验收通过。
 
 ## 关键决策
 
@@ -78,6 +84,12 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 - 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（13/13）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
+- 通过：Windows 11 上使用 Python 3.12.13 重跑静态/契约测试（13/13）；任务本地
+  CMake 4.4.3 可用。
+- 通过：Visual Studio 2022 Build Tools 官方 bootstrapper Authenticode 签名为
+  `Valid`，签名者为 Microsoft Corporation，SHA-256 为
+  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；仅保存于
+  ignored task sandbox，尚未执行安装。
 - 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
   Explorer navigation/custom view、host missing/crash/timeout/invalid recovery、
   crash/restart 20-cycle 和 8-hour soak。
@@ -85,7 +97,8 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 ## 架构测试与质量门禁
 
 Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadline、取消完成顺序、
-异步 view activation、`IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
+异步 view activation、单在途 ping、迟到结果 token 丢弃、worker 异常边界、
+`IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
 新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
 host-only soak 定位和生成/私密产物排除。没有真实 Windows 运行时证据，
 故障隔离和 Explorer 恢复门禁保持 unmet。
@@ -104,6 +117,8 @@ owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell I
 - 必须真实验证 host 缺失、崩溃、超时、无效/超长 frame 不冻结 Explorer，及恢复
   后重连；Linux 不能替代这些证据。
 - 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
+- Windows 主机已具备 CMake，但 MSVC/Windows SDK 尚未安装；安装必须使用已校验的
+  VS 2022 最小组件清单并禁用自动重启，且不得与其他本地重负载验证并行。
 - 当前 PIDL、视图和 host payload 只是技术替身，不可直接演进为生产协议或业务
   实现。
 - `soak.ps1` 明确只是 host-cycle helper；人工 Explorer soak protocol 和 8 小时
@@ -116,7 +131,8 @@ Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell
 
 ## 下一步
 
-在隔离 Windows 11 x64 主机按 `docs/spikes/M0-002/README.md` 执行完整验证协议，
+在当前 Windows 11 x64 主机安装 VS 2022 最小 C++/Windows 11 SDK 工具链后，按
+`docs/spikes/M0-002/README.md` 执行完整验证协议，
 保存构建/注册/导航/故障/卸载/Explorer 恢复及 soak 证据；若任一边界失败，先
 提交 M0-009 决策问题，不扩展本 Spike 范围。
 

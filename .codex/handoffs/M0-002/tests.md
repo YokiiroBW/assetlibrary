@@ -2,8 +2,15 @@
 
 ## 执行环境
 
-- Linux x86-64 协调环境，Python 3.x，Git，CMake 可用。
-- 无 Windows 11、MSVC/Visual Studio、Windows SDK、Explorer 或 HKCU 注册表。
+- 原始证据：Linux x86-64 协调环境，Python 3.x、Git、CMake 可用；无 Windows
+  运行时证据。
+- 当前补充环境：Windows 11 企业版 LTSC x64 10.0.26100、PowerShell 7.6.4、
+  Python 3.12.13、任务本地 CMake 4.4.3。
+- 当前没有 MSVC、MSBuild、Visual Studio Installer 或 Windows SDK；未构建、注册
+  或加载 Shell DLL。
+- 已下载但未执行 Visual Studio 2022 Build Tools 官方 bootstrapper。Authenticode
+  状态 `Valid`，签名者 Microsoft Corporation，SHA-256
+  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`。
 
 ## 执行命令
 
@@ -14,6 +21,8 @@
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
 | `python3 scripts/validate_handoff.py` | 通过 |
 | `python3 scripts/validate_architecture_baseline.py` | 通过 |
+| Windows：`python.exe -B -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -q` | 通过，13/13 |
+| Windows：`Get-AuthenticodeSignature` + `Get-FileHash -Algorithm SHA256` | Microsoft 签名有效；hash 如上；bootstrapper 未执行 |
 
 Windows 主机上的精确命令：
 
@@ -34,7 +43,8 @@ Windows 主机上的精确命令：
 `test_contracts.py` 检查：包文件完整性；Shell 源码不含网络/数据库/Provider 等
 重型依赖；协议版本、16-byte header、4 KiB payload、250 ms 逻辑 I/O deadline、
 overlapped cancel completion ordering、async view activation；`IPersistFolder` 实际
-方法/PIDL clone/lifetime 与 factory lifetime；注册脚本 HKCU-only、owner marker、
+方法/PIDL clone/lifetime 与 factory lifetime；单在途 ping、迟到结果 token 丢弃、
+detached worker exception containment；注册脚本 HKCU-only、owner marker、
 collision guard、新键/旧值 rollback 和注册/卸载对称；枚举 partial-fetch/skip；
 host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
@@ -46,7 +56,8 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 
 ## 失败 / 跳过
 
-- Windows build/register/verify/unregister：跳过，当前环境无 Windows 工具链和注册表。
+- Windows build/register/verify/unregister：跳过；当前有真实 Windows 11 和注册表，
+  但没有 MSVC/Windows SDK，且没有执行任何注册表写入。
 - Explorer navigation、custom right-side view、host missing/crash/timeout/invalid
   recovery、uninstall Explorer recovery：跳过，必须真实 Windows 11 x64。
 - 8-hour Explorer soak：跳过，`soak.ps1` 仅为 host-cycle helper；必须按

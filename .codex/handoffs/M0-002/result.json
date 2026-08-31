@@ -5,9 +5,9 @@
   "milestone": "M0",
   "status": "partial",
   "owner": "codex-agent-m0-002",
-  "branch": "codex/m0-002-windows-shell-spike",
-  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
-  "commit": "dd8e3536ed6f1bf11593052317ade2def085a74a",
+  "branch": "codex/m0-002-windows-evidence",
+  "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/M0-002-windows-evidence",
+  "commit": "1e6c1915d951accc952836f5185d0e95d7b4bc14",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
@@ -38,11 +38,12 @@
   "risks": [
     "真实 Windows 11 x64 COM/Explorer 生命周期与故障隔离尚未验证。",
     "取消后的 overlapped I/O 排空不阻塞 Explorer UI，但其独立时长上限尚未在 Windows 证明。",
+    "当前 Windows 11 主机没有 MSVC/Windows SDK；已准备并校验 VS 2022 最小安装入口，但尚未执行。",
     "8 小时 soak 尚未执行；当前无稳定性结论。",
     "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
   ],
   "blocked_by": [
-    "Windows 11 x64 + Visual Studio 2022 Desktop C++ + Windows 11 SDK + CMake: ./tests/spikes/windows-shell/scripts/build.ps1",
+    "Windows 11 x64 已可用；仍需安装 Visual Studio 2022 Desktop C++ + Windows 11 SDK，再运行 ./tests/spikes/windows-shell/scripts/build.ps1",
     "真实注册/导航/自定义视图/故障/卸载恢复: ./tests/spikes/windows-shell/scripts/register.ps1 -> verify-registration.ps1 -> run-host.ps1 (normal, invalid, crash, slow) -> unregister.ps1",
     "20 次 crash/restart 与 8 小时 Explorer evidence: 按 docs/spikes/M0-002/explorer-soak-protocol.md 操作，同时 ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8 仅作为 host-cycle helper"
   ],
@@ -68,7 +69,8 @@
     "contract_changes": [],
     "architecture_tests": [
       "test_contracts.py forbidden-dependency and package-boundary checks",
-      "test_contracts.py version/length/timeout and HKCU registration symmetry checks"
+      "test_contracts.py version/length/timeout and HKCU registration symmetry checks",
+      "test_contracts.py single-flight refresh, stale-result token and detached-worker exception-boundary checks"
     ],
     "technical_debt": [
       "Real Windows evidence and 8-hour soak required before any architecture freeze",
