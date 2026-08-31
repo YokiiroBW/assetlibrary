@@ -37,6 +37,7 @@ def wait_dead(pid: int, timeout: float = 3.0) -> bool:
     return not alive(pid)
 
 
+@unittest.skipUnless(os.name == "posix", "POSIX supervisor evidence is executed on Linux")
 class ProviderSupervisorTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="m0-008-provider-")

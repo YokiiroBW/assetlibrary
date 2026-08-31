@@ -1,6 +1,7 @@
 """Executed host capability probes; a manifest flag is never treated as proof."""
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -31,4 +32,24 @@ def linux_isolation_evidence() -> dict[str, Any]:
 
 
 def windows_candidate_evidence() -> dict[str, Any]:
-    return {"executed": False, "available": shutil.which("powershell") is not None, "reason": "No Windows host or PowerShell executor in M0-008 environment"}
+    if os.name != "nt":
+        return {
+            "executed": False,
+            "available": shutil.which("powershell") is not None,
+            "reason": "Windows host unavailable",
+        }
+    from windows_isolation_probe import collect_windows_isolation_evidence
+
+    return collect_windows_isolation_evidence()
+
+
+def main() -> int:
+    evidence = windows_candidate_evidence() if os.name == "nt" else linux_isolation_evidence()
+    print(json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True))
+    if os.name == "nt":
+        return 0 if evidence.get("job_object_all_passed") and evidence.get("restricted_token_candidate_executed") else 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
