@@ -5,24 +5,32 @@
 - 原始证据：Linux x86-64 协调环境，Python 3.x、Git、CMake 可用；无 Windows
   运行时证据。
 - 当前补充环境：Windows 11 企业版 LTSC x64 10.0.26100、PowerShell 7.6.4、
-  Python 3.12.13、任务本地 CMake 4.4.3。
-- 当前没有 MSVC、MSBuild、Visual Studio Installer 或 Windows SDK；未构建、注册
-  或加载 Shell DLL。
-- 已下载但未执行 Visual Studio 2022 Build Tools 官方 bootstrapper。Authenticode
-  状态 `Valid`，签名者 Microsoft Corporation，SHA-256
-  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`。
+  Codex 隔离 Python、Visual Studio 2022 Build Tools 17.14.39、MSVC
+  19.44.35228、MSBuild 17.14.51、VS CMake 3.31.6-msvc6、Windows SDK
+  10.0.26100.0。
+- Visual Studio Build Tools 官方 bootstrapper Authenticode 状态 `Valid`，签名者
+  Microsoft Corporation，SHA-256
+  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；最小组件
+  安装退出码 0、`RebootRequired=false`。系统 pending rename 仅含 bootstrapper JSON
+  和 3 个临时文件的下次重启删除项，不含 Codex 或工具链二进制替换。
+- 已完成未注册状态下的 Release x64 构建和隔离运行探针；未写 HKCU，未让
+  Explorer 加载 Shell DLL。
 
 ## 执行命令
 
 | 命令 | 结果 |
 | --- | --- |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，13/13 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，14/14 |
 | `git diff --check` | 通过 |
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
 | `python3 scripts/validate_handoff.py` | 通过 |
 | `python3 scripts/validate_architecture_baseline.py` | 通过 |
-| Windows：`python.exe -B -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -q` | 通过，13/13 |
-| Windows：`Get-AuthenticodeSignature` + `Get-FileHash -Algorithm SHA256` | Microsoft 签名有效；hash 如上；bootstrapper 未执行 |
+| Windows：`scripts/build.ps1 -Configuration Release` | 通过；MSVC Release x64 DLL 和 host 均生成 |
+| Windows：`dumpbin /exports`、`dumpbin /headers` | 通过；x64，恰有 `DllCanUnloadNow`、`DllGetClassObject` 两个未修饰导出 |
+| Windows：隔离 named-pipe client + `AssetHostStub.exe --once` | 通过 normal、invalid、crash-after=1、delay-ms=1000 四种情形 |
+| Windows：隔离 P/Invoke COM export probe | 通过；factory 创建/释放、可卸载和错误 CLSID 返回码均正确 |
+| Windows：Codex bundled Python `-m unittest discover ... -v` | 通过，14/14 |
+| Windows：`Get-AuthenticodeSignature` + `Get-FileHash -Algorithm SHA256` | installer 签名有效；DLL/host 为预期未签名本地 Spike 构建，hash 已记录 |
 
 Windows 主机上的精确命令：
 
@@ -48,16 +56,27 @@ detached worker exception containment；注册脚本 HKCU-only、owner marker、
 collision guard、新键/旧值 rollback 和注册/卸载对称；枚举 partial-fetch/skip；
 host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log/pdb 或凭证值。
 
+Windows 构建产物：
+
+- `AssetShellExtension.dll`：28672 bytes，SHA-256
+  `8901A430A5A2DA31E0E0A3BAC328DC45CB0A81EBB1E6EF68A42932C089E058DA`。
+- `AssetHostStub.exe`：28672 bytes，SHA-256
+  `439FDDD6F61A1A9A13CF321B31C1079139D405F58CEB32A810275C3A756C7889`。
+- 生成目录已从源码包移入 Git ignored 的
+  `.runtime/sandbox-storage/M0-002/windows-build-20260901/`，可恢复且未提交。
+
 ## 通过
 
-- Python 静态/契约测试 13/13。
+- Python 静态/契约测试 14/14。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
+- Windows Release x64 build、PE/export 检查、独立 host 故障替身和隔离 COM factory
+  探针。
 
 ## 失败 / 跳过
 
-- Windows build/register/verify/unregister：跳过；当前有真实 Windows 11 和注册表，
-  但没有 MSVC/Windows SDK，且没有执行任何注册表写入。
+- HKCU register/verify/unregister：跳过；工具链和构建产物已验证，但为保护当前
+  Codex/Explorer 会话，没有执行任何注册表写入。
 - Explorer navigation、custom right-side view、host missing/crash/timeout/invalid
   recovery、uninstall Explorer recovery：跳过，必须真实 Windows 11 x64。
 - 8-hour Explorer soak：跳过，`soak.ps1` 仅为 host-cycle helper；必须按
@@ -65,17 +84,20 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 
 ## 故障注入与恢复验证
 
-仅完成静态入口检查。真实执行需使用 `run-host.ps1` 的 normal/invalid/crash/slow
-模式，并观察 Explorer 不冻结、状态文案可恢复、normal host 可重新连接；
+独立 host 层已真实执行 normal、invalid、crash、slow：normal 返回
+`asset-host-ready`；invalid 发出 magic=0、payload=4097 的畸形头；crash 在首个请求后
+以 17 退出；slow 在 300 ms 内无响应并约 1000 ms 后 pong。该证据不等于 Explorer
+恢复验证；仍需观察 Explorer 不冻结、状态文案可恢复、normal host 可重新连接。
 `soak.ps1` 只提供 host-cycle 信号，不替代 Explorer 故障注入。
 
 ## 性能数据
 
-无真实性能数据。协议静态上限为 4 KiB payload，逻辑 I/O 尝试预算为 250 ms；
-deadline 后的取消排空在 worker 执行且尚无时长上限证据。soak 结果待 Windows 门禁。
+仅有 host slow guard 数据：1000 ms 延迟替身在 300 ms 内未响应；这未测量 Shell
+worker 的 250 ms deadline 或取消排空。协议静态上限为 4 KiB payload；取消排空
+仍无时长上限证据，soak 结果待 Windows 门禁。
 
 ## 尚未覆盖
 
-真实 COM activation、Windows 11 x64 MSVC build、namespace registration、Explorer
-view lifetime、failure isolation、uninstall cleanup、20-cycle crash/restart、8-hour
-soak，以及任何生产规模性能结论。
+注册后的 COM activation、namespace registration、Explorer view lifetime、Shell
+worker deadline/cancel、Explorer failure isolation、uninstall cleanup、20-cycle
+crash/restart、8-hour soak，以及任何生产规模性能结论。

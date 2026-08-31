@@ -23,6 +23,9 @@
   保护）；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障模式和 host-cycle
   helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
   中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。
+- Windows 实际构建后修正 SDK 常量和 COM 导出 ABI：使用 SDK 的 `STDAPI` 声明与
+  模块定义文件导出 `DllGetClassObject`/`DllCanUnloadNow`；构建脚本现在会检查
+  CMake 配置和编译的真实退出码，不再把失败误报为成功。
 - Linux 可运行静态/契约测试，检查包结构、禁依赖、IPC 界限与取消生命周期、
   注册卸载对称性、故障入口、枚举 partial-fetch 语义、host-only soak 定位和
   生成/私密产物排除。
@@ -31,9 +34,12 @@
   worker 的迟到结果；detached worker 标记为 `noexcept` 并兜住 C++ 异常，异常只
   转换为可恢复的 unavailable 状态，不越过 Explorer DLL 边界。
 
-已在 Windows 11 企业版 LTSC x64（10.0.26100）完成环境和工具链预检，并重新运行
-13/13 静态/契约测试；当前没有 MSVC、MSBuild 或 Windows SDK，故仍未构建、注册或
-加载 Shell DLL。真实 Explorer 运行证据尚未取得，因此本交接不是 M0-002 验收通过。
+已在 Windows 11 企业版 LTSC x64（10.0.26100）安装并核验 Visual Studio 2022
+Build Tools 17.14.39、MSVC 19.44.35228、MSBuild 17.14.51、CMake
+3.31.6-msvc6 与 Windows SDK 10.0.26100.0。Release x64 DLL/host 真实构建、导出表、
+四种独立 host 协议情形和隔离 COM factory 探针均通过，静态/契约测试为 14/14。
+没有写注册表，也没有让 Explorer 加载 DLL；真实 Explorer 运行证据尚未取得，
+因此本交接不是 M0-002 验收通过。
 
 ## 关键决策
 
@@ -48,6 +54,7 @@
 - `tests/spikes/windows-shell/README.md`
 - `tests/spikes/windows-shell/src/AssetShellProtocol.h`
 - `tests/spikes/windows-shell/src/AssetShellExtension.cpp`
+- `tests/spikes/windows-shell/src/AssetShellExtension.def`
 - `tests/spikes/windows-shell/src/AssetHostStub.cpp`
 - `tests/spikes/windows-shell/scripts/build.ps1`
 - `tests/spikes/windows-shell/scripts/register.ps1`
@@ -71,8 +78,9 @@ Explorer bridge → spike-local IPC port → test AssetHost；没有反向依赖
 ## 新语言、框架或重大依赖
 
 仅在 Spike 内使用任务包允许的 C++17 + Windows SDK Shell/COM ABI，并包含
-Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网络库、媒体
-库或额外服务；正式语言/框架选择仍待 M0-009。
+Windows SDK 提供的 C++/WinRT `winrt/base.h`。Windows 主机新增 VS 2022 Build
+Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网络库、媒体库或
+额外服务，正式语言/框架选择仍待 M0-009。
 
 ## 共享契约或数据库变化
 
@@ -81,18 +89,26 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 
 ## 测试结果
 
-- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（13/13）。
+- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（14/14）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
-- 通过：Windows 11 上使用 Python 3.12.13 重跑静态/契约测试（13/13）；任务本地
-  CMake 4.4.3 可用。
+- 通过：Windows 11 Release x64 CMake/MSVC 构建；`dumpbin` 确认 DLL 仅导出未修饰的
+  `DllCanUnloadNow` 与 `DllGetClassObject`，PE machine 为 x64。
+- 通过：独立 named-pipe host 的 normal、invalid、crash-after-one-request 和
+  1000 ms slow 模式；slow 模式在 300 ms guard window 内无响应，随后正常 pong。
+- 通过：隔离 PowerShell 进程直接调用 DLL；factory 创建/释放、前后
+  `DllCanUnloadNow == S_OK`，错误 CLSID 返回 `CLASS_E_CLASSNOTAVAILABLE`。
+- 通过：Windows 11 上使用 Codex 隔离 Python 重跑静态/契约测试（14/14）。
 - 通过：Visual Studio 2022 Build Tools 官方 bootstrapper Authenticode 签名为
   `Valid`，签名者为 Microsoft Corporation，SHA-256 为
-  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；仅保存于
-  ignored task sandbox，尚未执行安装。
-- 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
-  Explorer navigation/custom view、host missing/crash/timeout/invalid recovery、
-  crash/restart 20-cycle 和 8-hour soak。
+  `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；安装退出码
+  为 0、无需重启。DLL SHA-256 为
+  `8901A430A5A2DA31E0E0A3BAC328DC45CB0A81EBB1E6EF68A42932C089E058DA`，host 为
+  `439FDDD6F61A1A9A13CF321B31C1079139D405F58CEB32A810275C3A756C7889`；Spike 产物
+  未签名，已移入 ignored task sandbox，未提交。
+- 未执行：HKCU register/verify/unregister、Explorer navigation/custom view、
+  Explorer 内 host missing/crash/timeout/invalid recovery、crash/restart 20-cycle
+  和 8-hour soak。
 
 ## 架构测试与质量门禁
 
@@ -100,8 +116,9 @@ Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadlin
 异步 view activation、单在途 ping、迟到结果 token 丢弃、worker 异常边界、
 `IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
 新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
-host-only soak 定位和生成/私密产物排除。没有真实 Windows 运行时证据，
-故障隔离和 Explorer 恢复门禁保持 unmet。
+SDK 常量/导出 ABI、构建退出码、host-only soak 定位和生成/私密产物排除。
+已有 Windows 离线运行证据，但没有 Explorer 进程内证据，故 Explorer 故障隔离
+和恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响
 
@@ -114,11 +131,10 @@ owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell I
 
 - 必须在 Windows 11 x64 真实环境验证 COM activation、Explorer namespace
   显示、custom IShellView 生命周期及右侧视图尺寸/重建行为。
-- 必须真实验证 host 缺失、崩溃、超时、无效/超长 frame 不冻结 Explorer，及恢复
-  后重连；Linux 不能替代这些证据。
+- 独立 host 的正常、崩溃、慢响应和无效 frame 已验证；仍必须在 Explorer 内验证
+  这些情形不会冻结 UI，并验证恢复后重连。
 - 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
-- Windows 主机已具备 CMake，但 MSVC/Windows SDK 尚未安装；安装必须使用已校验的
-  VS 2022 最小组件清单并禁用自动重启，且不得与其他本地重负载验证并行。
+- Spike DLL/host 为本地未签名构建，只能用于受控验证，不能作为分发产物。
 - 当前 PIDL、视图和 host payload 只是技术替身，不可直接演进为生产协议或业务
   实现。
 - `soak.ps1` 明确只是 host-cycle helper；人工 Explorer soak protocol 和 8 小时
@@ -131,10 +147,10 @@ Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell
 
 ## 下一步
 
-在当前 Windows 11 x64 主机安装 VS 2022 最小 C++/Windows 11 SDK 工具链后，按
-`docs/spikes/M0-002/README.md` 执行完整验证协议，
-保存构建/注册/导航/故障/卸载/Explorer 恢复及 soak 证据；若任一边界失败，先
-提交 M0-009 决策问题，不扩展本 Spike 范围。
+保持当前未注册安全检查点，下一阶段按 `docs/spikes/M0-002/README.md` 分步执行
+HKCU 注册/验证、单次 Explorer 导航、故障恢复和卸载；每个阶段都先确认 Codex
+状态和注册表所有权，并保留立即卸载回滚路径。最后再单独安排 20-cycle 与 8 小时
+soak；若任一边界失败，先提交 M0-009 决策问题，不扩展本 Spike 范围。
 
 ## Codex 线程链接（可选）
 

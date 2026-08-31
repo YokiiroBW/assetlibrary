@@ -7,12 +7,13 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-evidence",
   "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/M0-002-windows-evidence",
-  "commit": "1e6c1915d951accc952836f5185d0e95d7b4bc14",
+  "commit": "2628565f550dc06d7e15b9d3f1e970f944b317f3",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
     "tests/spikes/windows-shell/src/AssetShellProtocol.h",
     "tests/spikes/windows-shell/src/AssetShellExtension.cpp",
+    "tests/spikes/windows-shell/src/AssetShellExtension.def",
     "tests/spikes/windows-shell/src/AssetHostStub.cpp",
     "tests/spikes/windows-shell/scripts/build.ps1",
     "tests/spikes/windows-shell/scripts/register.ps1",
@@ -30,21 +31,21 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 13,
+    "passed": 14,
     "failed": 0,
-    "skipped": 8,
+    "skipped": 7,
     "report": "tests.md"
   },
   "risks": [
-    "真实 Windows 11 x64 COM/Explorer 生命周期与故障隔离尚未验证。",
+    "Windows x64 离线构建和隔离 COM factory 已验证，但注册后的 COM/Explorer 生命周期与故障隔离尚未验证。",
     "取消后的 overlapped I/O 排空不阻塞 Explorer UI，但其独立时长上限尚未在 Windows 证明。",
-    "当前 Windows 11 主机没有 MSVC/Windows SDK；已准备并校验 VS 2022 最小安装入口，但尚未执行。",
+    "本地 Spike DLL/host 未签名，只能用于受控验证，不能作为分发产物。",
     "8 小时 soak 尚未执行；当前无稳定性结论。",
     "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
   ],
   "blocked_by": [
-    "Windows 11 x64 已可用；仍需安装 Visual Studio 2022 Desktop C++ + Windows 11 SDK，再运行 ./tests/spikes/windows-shell/scripts/build.ps1",
-    "真实注册/导航/自定义视图/故障/卸载恢复: ./tests/spikes/windows-shell/scripts/register.ps1 -> verify-registration.ps1 -> run-host.ps1 (normal, invalid, crash, slow) -> unregister.ps1",
+    "真实注册/导航/自定义视图/故障/卸载恢复仍待分阶段执行: ./tests/spikes/windows-shell/scripts/register.ps1 -> verify-registration.ps1 -> run-host.ps1 (normal, invalid, crash, slow) -> unregister.ps1",
+    "Explorer 内的 250 ms deadline、取消排空、状态恢复与 normal host 重连仍需观察和计时",
     "20 次 crash/restart 与 8 小时 Explorer evidence: 按 docs/spikes/M0-002/explorer-soak-protocol.md 操作，同时 ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8 仅作为 host-cycle helper"
   ],
   "recommended_merge_order": 2,
@@ -64,13 +65,15 @@
       "C++17 + Windows SDK C++/WinRT/COM, limited to this Spike per task package"
     ],
     "new_major_dependencies": [
-      "None; no third-party runtime or library"
+      "Validation-only Visual Studio 2022 Build Tools 17.14.39 and Windows SDK 10.0.26100; no third-party runtime or library"
     ],
     "contract_changes": [],
     "architecture_tests": [
       "test_contracts.py forbidden-dependency and package-boundary checks",
       "test_contracts.py version/length/timeout and HKCU registration symmetry checks",
-      "test_contracts.py single-flight refresh, stale-result token and detached-worker exception-boundary checks"
+      "test_contracts.py single-flight refresh, stale-result token and detached-worker exception-boundary checks",
+      "test_contracts.py Windows SDK constant, COM export ABI and build exit-code checks",
+      "Windows Release x64 build, export-table inspection, isolated host protocol modes and COM factory probe"
     ],
     "technical_debt": [
       "Real Windows evidence and 8-hour soak required before any architecture freeze",
