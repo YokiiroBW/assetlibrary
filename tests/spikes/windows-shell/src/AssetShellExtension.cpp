@@ -7,12 +7,12 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cstdint>
 #include <cwchar>
 #include <cstring>
 #include <memory>
 #include <new>
 #include <string>
-#include <system_error>
 #include <thread>
 
 namespace {
@@ -29,12 +29,14 @@ using assetlibrary::m0002::kVersion;
 constexpr GUID kClsid = {0x9d52b2f8, 0x9ef4, 0x4f4c, {0x9c, 0x1a, 0x52, 0x9f, 0x66, 0x5f, 0x0a, 0x02}};
 std::atomic_ulong g_object_count{0};
 std::atomic_ulong g_server_lock_count{0};
+std::atomic_uintptr_t g_ping_token{0};
 HMODULE g_module = nullptr;
 constexpr UINT WM_ASSET_HOST_RESULT = WM_APP + 42;
 
 struct HostPingState {
-  explicit HostPingState(HWND target) : window(target) {}
+  HostPingState(HWND target, UINT_PTR request_token) : window(target), token(request_token) {}
   HWND window;
+  UINT_PTR token;
 };
 
 ULONGLONG RemainingBudget(ULONGLONG deadline) {
@@ -118,21 +120,32 @@ bool AskAssetHost() {
   return ok;
 }
 
-void StartAssetHostPing(HWND window) {
+void StartAssetHostPing(HWND window, UINT_PTR token) noexcept {
   // The Shell UI thread only starts this worker and returns. The worker owns its
   // state until the logical transaction finishes and any cancelled I/O drains.
-  auto state = std::make_shared<HostPingState>(window);
-  ++g_object_count; // Keep the DLL loaded while detached worker code is executing.
   try {
-    std::thread([state]() {
-      const bool ready = AskAssetHost();
-      PostMessageW(state->window, WM_ASSET_HOST_RESULT, ready ? 1 : 0, 0);
+    auto state = std::make_shared<HostPingState>(window, token);
+    ++g_object_count; // Keep the DLL loaded while detached worker code is executing.
+    try {
+      std::thread([state]() noexcept {
+        bool ready = false;
+        try {
+          ready = AskAssetHost();
+        } catch (...) {
+          // No C++ exception may cross a detached worker boundary inside explorer.exe.
+        }
+        PostMessageW(state->window, WM_ASSET_HOST_RESULT, ready ? 1 : 0,
+                     static_cast<LPARAM>(state->token));
+        --g_object_count;
+      }).detach();
+      return;
+    } catch (...) {
       --g_object_count;
-    }).detach();
-  } catch (const std::system_error&) {
-    --g_object_count;
-    PostMessageW(window, WM_ASSET_HOST_RESULT, 0, 0);
+    }
+  } catch (...) {
+    // Allocation failure is reported through the same recoverable UI state.
   }
+  PostMessageW(window, WM_ASSET_HOST_RESULT, 0, static_cast<LPARAM>(token));
 }
 
 class AssetShellView final : public IShellView {
@@ -169,7 +182,10 @@ class AssetShellView final : public IShellView {
   HRESULT STDMETHODCALLTYPE EnableModeless(BOOL) override { return S_OK; }
   HRESULT STDMETHODCALLTYPE UIActivate(UINT) override { return S_OK; }
   HRESULT STDMETHODCALLTYPE Refresh() override {
-    if (window_) InvalidateRect(window_, nullptr, TRUE);
+    if (window_) {
+      BeginAssetHostPing();
+      InvalidateRect(window_, nullptr, TRUE);
+    }
     return S_OK;
   }
   HRESULT STDMETHODCALLTYPE CreateViewWindow(IShellView*, LPCFOLDERSETTINGS settings,
@@ -192,12 +208,13 @@ class AssetShellView final : public IShellView {
                               browser_window_, nullptr, klass.hInstance, this);
     if (!window_) return HRESULT_FROM_WIN32(GetLastError());
     *window = window_;
-    SetStatusText(L"AssetHost connecting...");
-    StartAssetHostPing(window_);
+    BeginAssetHostPing();
     return S_OK;
   }
   HRESULT STDMETHODCALLTYPE DestroyViewWindow() override {
     if (window_) {
+      host_ping_in_flight_ = false;
+      host_ping_token_ = 0;
       DestroyWindow(window_);
       window_ = nullptr;
     }
@@ -214,6 +231,8 @@ class AssetShellView final : public IShellView {
   HRESULT STDMETHODCALLTYPE GetItemObject(UINT, REFIID, void**) override { return E_NOINTERFACE; }
 
  private:
+  enum class HostState { connecting, connected, unavailable };
+
   static LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     AssetShellView* view = reinterpret_cast<AssetShellView*>(GetWindowLongPtrW(window, GWLP_USERDATA));
     if (message == WM_NCCREATE) {
@@ -222,6 +241,9 @@ class AssetShellView final : public IShellView {
       SetWindowLongPtrW(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(view));
     }
     if (message == WM_ASSET_HOST_RESULT && view) {
+      if (static_cast<UINT_PTR>(lparam) != view->host_ping_token_) return 0;
+      view->host_ping_in_flight_ = false;
+      view->host_state_ = wparam != 0 ? HostState::connected : HostState::unavailable;
       view->SetStatusText(wparam != 0
           ? L"AssetHost connected"
           : L"AssetHost unavailable; retry from the independent client");
@@ -231,10 +253,18 @@ class AssetShellView final : public IShellView {
     if (message == WM_PAINT) {
       PAINTSTRUCT paint{};
       HDC dc = BeginPaint(window, &paint);
-      const wchar_t* text = L"AssetLibrary M0-002\nShell bridge active; heavy view remains out of process.";
+      const wchar_t* host_status = L"AssetHost connecting...";
+      if (view && view->host_state_ == HostState::connected) {
+        host_status = L"AssetHost connected";
+      } else if (view && view->host_state_ == HostState::unavailable) {
+        host_status = L"AssetHost unavailable; press F5 to retry";
+      }
+      const std::wstring text =
+          L"AssetLibrary M0-002\nShell bridge active; heavy view remains out of process.\n\n" +
+          std::wstring(host_status);
       RECT client{};
       GetClientRect(window, &client);
-      DrawTextW(dc, text, -1, &client, DT_LEFT | DT_TOP | DT_NOPREFIX);
+      DrawTextW(dc, text.c_str(), -1, &client, DT_LEFT | DT_TOP | DT_NOPREFIX);
       EndPaint(window, &paint);
       return 0;
     }
@@ -245,11 +275,24 @@ class AssetShellView final : public IShellView {
     if (browser_) browser_->SetStatusTextSB(text);
   }
 
+  void BeginAssetHostPing() {
+    if (!window_ || host_ping_in_flight_) return;
+    host_ping_in_flight_ = true;
+    host_ping_token_ = static_cast<UINT_PTR>(
+        g_ping_token.fetch_add(1, std::memory_order_relaxed) + 1);
+    host_state_ = HostState::connecting;
+    SetStatusText(L"AssetHost connecting...");
+    StartAssetHostPing(window_, host_ping_token_);
+  }
+
   std::atomic_ulong ref_count_;
   IShellBrowser* browser_;
   HWND browser_window_ = nullptr;
   HWND window_;
   FOLDERSETTINGS settings_{};
+  HostState host_state_ = HostState::connecting;
+  bool host_ping_in_flight_ = false;
+  UINT_PTR host_ping_token_ = 0;
 };
 
 class OneItemEnumerator final : public IEnumIDList {

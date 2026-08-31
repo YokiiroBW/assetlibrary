@@ -24,7 +24,11 @@ class PackageContractTests(unittest.TestCase):
             "scripts/run-host.ps1",
             "scripts/soak.ps1",
         }
-        actual = {str(path.relative_to(ROOT)) for path in ROOT.rglob("*") if path.is_file()}
+        actual = {
+            path.relative_to(ROOT).as_posix()
+            for path in ROOT.rglob("*")
+            if path.is_file()
+        }
         self.assertTrue(expected <= actual)
 
     def test_spike_does_not_reference_forbidden_shell_dependencies(self):
@@ -70,12 +74,26 @@ class PackageContractTests(unittest.TestCase):
 
     def test_explorer_view_activation_is_async_and_factory_is_counted(self):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
-        self.assertIn("StartAssetHostPing(window_)", shell)
+        self.assertIn("StartAssetHostPing(HWND window, UINT_PTR token) noexcept", shell)
         self.assertIn("std::thread([state]()", shell)
         self.assertIn("PostMessageW(state->window", shell)
         view_body = shell[shell.index("CreateViewWindow("):shell.index("DestroyViewWindow()")]
         self.assertNotIn("AskAssetHost()", view_body)
         self.assertNotIn("WaitForSingleObject", view_body)
+        refresh_body = shell[shell.index("Refresh() override"):shell.index("CreateViewWindow(")]
+        self.assertIn("BeginAssetHostPing()", refresh_body)
+        self.assertNotIn("AskAssetHost()", refresh_body)
+        self.assertNotIn("WaitForSingleObject", refresh_body)
+        ping_body = shell[shell.index("void BeginAssetHostPing()") :]
+        self.assertIn("if (!window_ || host_ping_in_flight_) return", ping_body)
+        self.assertIn("StartAssetHostPing(window_, host_ping_token_)", ping_body)
+        self.assertIn("static_cast<UINT_PTR>(lparam) != view->host_ping_token_", shell)
+        worker_body = shell[shell.index("void StartAssetHostPing("):shell.index("class AssetShellView")]
+        self.assertIn("noexcept", worker_body)
+        self.assertIn("catch (...)", worker_body)
+        self.assertIn("enum class HostState", shell)
+        self.assertIn('L"AssetHost connected"', shell)
+        self.assertIn('L"AssetHost unavailable; press F5 to retry"', shell)
         worker_at = shell.index("std::thread([state]()")
         ask_at = shell.index("AskAssetHost();", worker_at)
         self.assertGreater(ask_at, worker_at)
@@ -85,7 +103,8 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("g_server_lock_count", shell)
         self.assertIn("g_object_count == 0 && g_server_lock_count == 0", shell)
         self.assertIn("++g_object_count; // Keep the DLL loaded", shell)
-        self.assertIn("--g_object_count;\n    }).detach();", shell)
+        thread_body = worker_body[worker_body.index("std::thread"):worker_body.index("}).detach();")]
+        self.assertIn("--g_object_count;", thread_body)
 
     def test_registration_is_hkcu_only_and_symmetric(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
