@@ -13,14 +13,15 @@
   `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；最小组件
   安装退出码 0、`RebootRequired=false`。系统 pending rename 仅含 bootstrapper JSON
   和 3 个临时文件的下次重启删除项，不含 Codex 或工具链二进制替换。
-- 已完成未注册状态下的 Release x64 构建和隔离运行探针；未写 HKCU，未让
-  Explorer 加载 Shell DLL。
+- 本机 `EnableLUA=0`，当前进程为 High Mandatory Level。已完成 Release x64 构建、
+  隔离运行探针及看门狗保护的 HKCU register/verify/unregister；Explorer 从未加载
+  Shell DLL，所有注册项、Host 和看门狗均已清理。
 
 ## 执行命令
 
 | 命令 | 结果 |
 | --- | --- |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，14/14 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，15/15 |
 | `git diff --check` | 通过 |
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
 | `python3 scripts/validate_handoff.py` | 通过 |
@@ -29,10 +30,18 @@
 | Windows：`dumpbin /exports`、`dumpbin /headers` | 通过；x64，恰有 `DllCanUnloadNow`、`DllGetClassObject` 两个未修饰导出 |
 | Windows：隔离 named-pipe client + `AssetHostStub.exe --once` | 通过 normal、invalid、crash-after=1、delay-ms=1000 四种情形 |
 | Windows：隔离 P/Invoke COM export probe | 通过；factory 创建/释放、可卸载和错误 CLSID 返回码均正确 |
-| Windows：Codex bundled Python `-m unittest discover ... -v` | 通过，14/14 |
+| Windows：看门狗保护的 `register.ps1 -> verify-registration.ps1 -> unregister.ps1` | 通过；所有者/路径正确，卸载后无 CLSID/namespace 残留 |
+| Windows：注册式 `CoCreateInstance` | 通过；创建并释放 IUnknown，引用归零 |
+| Windows：`SHParseDisplayName` + `SHBindToObject(IID_IShellFolder)` | parse 通过；bind 返回 `0x80040154`，与 UAC-disabled 高权限进程忽略 per-user COM 一致 |
+| Windows：Explorer 地址/官方启动入口 | 未进入视图；Explorer 未加载 DLL、无崩溃事件，普通导航正常 |
+| Windows：UAC-disabled 注册预检 | 通过；在任何写入前拒绝，CLSID/namespace 均不存在 |
+| Windows：Codex bundled Python `-m unittest discover ... -v` | 通过，15/15 |
 | Windows：`Get-AuthenticodeSignature` + `Get-FileHash -Algorithm SHA256` | installer 签名有效；DLL/host 为预期未签名本地 Spike 构建，hash 已记录 |
 
 Windows 主机上的精确命令：
+
+以下命令要求 `EnableLUA=1`；当前主机会由 `register.ps1` 在写入前拒绝。不得改用
+HKLM 绕过该门禁。
 
 ```powershell
 ./tests/spikes/windows-shell/scripts/build.ps1
@@ -59,26 +68,28 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 Windows 构建产物：
 
 - `AssetShellExtension.dll`：28672 bytes，SHA-256
-  `8901A430A5A2DA31E0E0A3BAC328DC45CB0A81EBB1E6EF68A42932C089E058DA`。
+  `176F59EBCD3966B531893F749C0D265277B8A00AD4CC53A9817BB739BCC12D0D`。
 - `AssetHostStub.exe`：28672 bytes，SHA-256
-  `439FDDD6F61A1A9A13CF321B31C1079139D405F58CEB32A810275C3A756C7889`。
+  `9531C66646D29EC685C28577AC31CD072FCD2290B17D61901DBEE852BCB16D28`。
 - 生成目录已从源码包移入 Git ignored 的
-  `.runtime/sandbox-storage/M0-002/windows-build-20260901/`，可恢复且未提交。
+  `.runtime/sandbox-storage/M0-002/windows-build-20260901-uac-blocked/`，可恢复且未提交。
 
 ## 通过
 
-- Python 静态/契约测试 14/14。
+- Python 静态/契约测试 15/15。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
 - Windows Release x64 build、PE/export 检查、独立 host 故障替身和隔离 COM factory
   探针。
+- HKCU register/verify/unregister 回滚、注册式 COM activation、UAC-disabled 零写入
+  拒绝，以及 Explorer 未加载 DLL/无崩溃/普通导航恢复检查。
 
 ## 失败 / 跳过
 
-- HKCU register/verify/unregister：跳过；工具链和构建产物已验证，但为保护当前
-  Codex/Explorer 会话，没有执行任何注册表写入。
-- Explorer navigation、custom right-side view、host missing/crash/timeout/invalid
-  recovery、uninstall Explorer recovery：跳过，必须真实 Windows 11 x64。
+- Explorer custom right-side view 未激活：当前主机 `EnableLUA=0`，Shell bind 对
+  HKCU CLSID 返回 `REGDB_E_CLASSNOTREG`。注册/验证/卸载本身已执行并完整回滚。
+- Explorer 内 host missing/crash/timeout/invalid recovery：跳过，必须在
+  `EnableLUA=1` 的 Windows 11 x64 主机执行。
 - 8-hour Explorer soak：跳过，`soak.ps1` 仅为 host-cycle helper；必须按
   `docs/spikes/M0-002/explorer-soak-protocol.md` 完成人工 Explorer 证据。
 
@@ -98,6 +109,5 @@ worker 的 250 ms deadline 或取消排空。协议静态上限为 4 KiB payload
 
 ## 尚未覆盖
 
-注册后的 COM activation、namespace registration、Explorer view lifetime、Shell
-worker deadline/cancel、Explorer failure isolation、uninstall cleanup、20-cycle
-crash/restart、8-hour soak，以及任何生产规模性能结论。
+UAC-enabled Explorer view activation/lifetime、Shell worker deadline/cancel、Explorer
+failure isolation、20-cycle crash/restart、8-hour soak，以及任何生产规模性能结论。
