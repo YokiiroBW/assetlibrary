@@ -1,31 +1,72 @@
 {
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "M0-008",
-  "title": "官方 Provider 隔离进程与资源限制验证",
+  "title": "官方 Provider 隔离进程与资源限制验证（Windows 外部门禁）",
   "milestone": "M0",
   "status": "partial",
-  "owner": "codex-agent-m0-008",
-  "branch": "codex/m0-008-provider-sandbox-spike",
-  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-008",
-  "commit": "0e8a5280f1c8b8afdc6ce2a87f12aafef484ecf1",
-  "changed_files": [".codex/handoffs/M0-008/result.json", ".codex/handoffs/M0-008/summary.md", ".codex/handoffs/M0-008/tests.md", ".codex/tasks/M0-008.md", "contracts/providers/README.md", "contracts/providers/provider-manifest.schema.json", "contracts/providers/provider-rpc.schema.json", "docs/spikes/M0-008/README.md", "tests/spikes/provider-sandbox/fixtures/manifest-invalid-write.json", "tests/spikes/provider-sandbox/fixtures/manifest-valid.json", "tests/spikes/provider-sandbox/fixtures/messages.json", "tests/spikes/provider-sandbox/isolation_probe.py", "tests/spikes/provider-sandbox/manifest.py", "tests/spikes/provider-sandbox/protocol.py", "tests/spikes/provider-sandbox/supervisor.py", "tests/spikes/provider-sandbox/test_contracts.py", "tests/spikes/provider-sandbox/test_isolation.py", "tests/spikes/provider-sandbox/test_supervisor.py", "tests/spikes/provider-sandbox/worker_fixture.py"],
-  "changed_contracts": ["contracts/providers/provider-manifest.schema.json", "contracts/providers/provider-rpc.schema.json"],
-  "tests": {"passed": 25, "failed": 0, "skipped": 0, "report": "tests.md"},
-  "risks": ["Linux unshare/bwrap network namespace enforcement failed with Operation not permitted; hard network denial is unproven.", "Filesystem read-only input, writable-temp confinement, cgroup resource/accounting and seccomp are unproven.", "Windows Job Object and restricted-token/AppContainer enforcement has no executed evidence.", "Candidate RPC/limits/restart semantics require M0-009 production-host validation and freeze.", "RPC cancel envelope is present in the contract but this supervisor only performs forced process-tree cancellation; no cancel acknowledgement was executed."],
-  "blocked_by": ["No executed resource/accounting enforcement evidence from the successful systemd user scope; cgroup root is not writable and namespace launcher is not permitted", "No Windows x64 executor in this environment"],
+  "owner": "codex-agent-m0-008-windows-evidence",
+  "branch": "codex/m0-008-windows-evidence",
+  "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/M0-008-windows-evidence",
+  "commit": "68fe9aea9e43e828d073f6ae193405b775fd787f",
+  "changed_files": [
+    ".codex/handoffs/M0-008/result.json",
+    ".codex/handoffs/M0-008/summary.md",
+    ".codex/handoffs/M0-008/tests.md",
+    "docs/spikes/M0-008/README.md",
+    "tests/spikes/provider-sandbox/isolation_probe.py",
+    "tests/spikes/provider-sandbox/supervisor.py",
+    "tests/spikes/provider-sandbox/test_isolation.py",
+    "tests/spikes/provider-sandbox/test_supervisor.py",
+    "tests/spikes/provider-sandbox/windows_isolation_probe.py",
+    "tests/spikes/provider-sandbox/windows_worker_fixture.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 18,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Restricted Token privilege reduction is executed, but same-user file ACLs and loopback network remain reachable; Windows filesystem/network confinement is unproven.",
+    "A 500 ms Job process user-time limit terminated the busy worker with STATUS_QUOTA_EXCEEDED, but periodic enforcement took 4140 ms wall time in the recorded run and cannot replace an absolute request deadline.",
+    "Linux delegated cgroup/accounting, namespace/seccomp, read-only input and writable-temp hard confinement have no new evidence.",
+    "Provider RPC cancel envelope acknowledgement remains unexecuted; forced process-tree termination is not protocol acknowledgement.",
+    "Production Worker integration and 500k-asset scheduling/overhead remain out of scope."
+  ],
+  "blocked_by": [
+    "Execute and validate an AppContainer/Win32 app isolation or equivalent Windows capability/ACL/network profile; the current Restricted Token probe reports filesystem_confinement_proven=false and network_denial_proven=false.",
+    "Execute Linux hard confinement on a release-like host with delegated cgroup accounting plus approved namespace/seccomp/sandbox enforcement.",
+    "Execute Provider RPC cancel envelope delivery and acknowledgement while preserving bounded Job/process-tree fallback."
+  ],
   "recommended_merge_order": 8,
-  "handoff_summary": "summary.md",
+  "handoff_summary": ".codex/handoffs/M0-008/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
     "module": "provider-sandbox-spike",
     "dependency_direction_ok": true,
-    "reused_existing_logic": ["Evolved the existing contracts/providers/provider-manifest.schema.json boundary", "Used only versioned Provider contract concepts; no production supervisor import", "Reused read-only tests/spikes/assetlink/schema_support.py SchemaStore for Provider schema validation"],
+    "reused_existing_logic": [
+      "Existing Provider manifest/RPC candidate contract and framing tests, unchanged",
+      "Existing test-only isolation probe entry point",
+      "Windows Job Object, token and process APIs from the operating system"
+    ],
     "duplicated_logic": [],
     "cross_module_access": [],
-    "new_language_or_framework": ["Python 3 standard library in test-only supervisor/worker/probe fixtures"],
+    "new_language_or_framework": [],
     "new_major_dependencies": [],
-    "contract_changes": ["Versioned Provider manifest 1.0 candidate", "Versioned Provider RPC 1.0 candidate"],
-    "architecture_tests": ["Provider contract tests and Linux process/fault/isolation probe suite: 25 passed, including group-drain failure observability; parent-exit descendant cleanup 20/20 passed with child PGID equal to captured PGID and bounded group drain confirmed; task baseline 842b9e0d86a659154bc7e9315c8537687a9fb1ad...HEAD changed_files exact set is 19; current main...HEAD correction delta is 7 after the original M0-008 merge"],
-    "technical_debt": ["M0-009 must execute and select Linux cgroup/namespace/seccomp or approved launcher enforcement", "M0-009 must execute Windows Job Object plus restricted-token/AppContainer evidence", "M0-009 must decide RPC cancel acknowledgement semantics", "Production Worker integration and 500k-asset overhead remain out of scope", "Group drain is bounded and observable but only evidenced on this Linux host; Windows process-tree cleanup remains unexecuted"]
+    "contract_changes": [],
+    "architecture_tests": [
+      "Windows provider-sandbox target suite: 30 discovered, 12 passed, 18 platform-skipped, 0 failed",
+      "Windows Job Object active-process, process-memory, process-user-time, kill-on-close and descendant-membership probes",
+      "Restricted Token privilege/file/loopback capability probe with explicit non-confinement assertions",
+      "validate_handoff.py, validate_architecture_baseline.py, verify_repository.py and git diff --check"
+    ],
+    "technical_debt": [
+      "M0-009 must select and execute Windows AppContainer/Win32 app isolation or an equivalent file/network profile",
+      "M0-009 must preserve Linux hard-confinement blockers until executed on a release-like host",
+      "M0-009 must decide and execute RPC cancel acknowledgement semantics",
+      "Job process-time limits are periodic enforcement and must not replace absolute RPC deadlines",
+      "Production Worker integration and 500k-asset overhead remain unverified"
+    ]
   }
 }
