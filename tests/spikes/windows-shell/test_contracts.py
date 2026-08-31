@@ -16,6 +16,7 @@ class PackageContractTests(unittest.TestCase):
             "README.md",
             "src/AssetShellProtocol.h",
             "src/AssetShellExtension.cpp",
+            "src/AssetShellExtension.def",
             "src/AssetHostStub.cpp",
             "scripts/build.ps1",
             "scripts/register.ps1",
@@ -71,6 +72,21 @@ class PackageContractTests(unittest.TestCase):
             self.assertIn(method, shell)
         for ipersist_file_method in ("IsDirty() override", "SaveCompleted(", "GetCurFile("):
             self.assertNotIn(ipersist_file_method, shell)
+
+    def test_windows_build_entrypoint_and_exports_match_sdk_contracts(self):
+        shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")
+        exports = (SRC / "AssetShellExtension.def").read_text(encoding="utf-8")
+        build = (SCRIPTS / "build.ps1").read_text(encoding="utf-8")
+        self.assertIn("SHGDN_FORPARSING", shell)
+        self.assertNotIn("SHGDNF_FORPARSING", shell)
+        self.assertIn("STDAPI DllGetClassObject", shell)
+        self.assertIn("STDAPI DllCanUnloadNow", shell)
+        self.assertNotIn("__declspec(dllexport)", shell)
+        self.assertIn("DllGetClassObject PRIVATE", exports)
+        self.assertIn("DllCanUnloadNow PRIVATE", exports)
+        self.assertEqual(2, build.count("if ($LASTEXITCODE -ne 0)"))
+        self.assertIn("CMake configure failed", build)
+        self.assertIn("CMake build failed", build)
 
     def test_explorer_view_activation_is_async_and_factory_is_counted(self):
         shell = (SRC / "AssetShellExtension.cpp").read_text(encoding="utf-8")

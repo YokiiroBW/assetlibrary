@@ -11,6 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(AssetShellExtension SHARED
   src/AssetShellExtension.cpp
+  src/AssetShellExtension.def
 )
 target_compile_definitions(AssetShellExtension PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX WINRT_LEAN_AND_MEAN)
 if(MSVC)

@@ -407,7 +407,7 @@ class AssetShellFolder final : public IShellFolder, public IPersistFolder {
   }
   HRESULT STDMETHODCALLTYPE GetDisplayNameOf(PCUITEMID_CHILD, SHGDNF flags, STRRET* name) override {
     if (!name) return E_POINTER; name->uType = STRRET_WSTR;
-    const wchar_t* value = (flags & SHGDNF_FORPARSING) ? L"AssetHost" : L"AssetHost (M0-002)";
+    const wchar_t* value = (flags & SHGDN_FORPARSING) ? L"AssetHost" : L"AssetHost (M0-002)";
     const size_t bytes = (wcslen(value) + 1) * sizeof(wchar_t);
     name->pOleStr = static_cast<LPOLESTR>(CoTaskMemAlloc(bytes));
     if (!name->pOleStr) return E_OUTOFMEMORY; memcpy(name->pOleStr, value, bytes); return S_OK;
@@ -469,7 +469,7 @@ class ClassFactory final : public IClassFactory {
 };
 } // namespace
 
-extern "C" HRESULT __declspec(dllexport) DllGetClassObject(REFCLSID clsid, REFIID iid, void** object) {
+STDAPI DllGetClassObject(REFCLSID clsid, REFIID iid, LPVOID* object) {
   if (!object) return E_POINTER; *object = nullptr;
   if (clsid != kClsid) return CLASS_E_CLASSNOTAVAILABLE;
   auto* factory = new (std::nothrow) ClassFactory();
@@ -479,7 +479,7 @@ extern "C" HRESULT __declspec(dllexport) DllGetClassObject(REFCLSID clsid, REFII
   return result;
 }
 
-extern "C" HRESULT __declspec(dllexport) DllCanUnloadNow() {
+STDAPI DllCanUnloadNow(void) {
   return g_object_count == 0 && g_server_lock_count == 0 ? S_OK : S_FALSE;
 }
 
