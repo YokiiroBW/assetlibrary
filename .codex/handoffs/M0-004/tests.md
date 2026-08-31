@@ -9,7 +9,7 @@
 | 命令/检查 | 结果 |
 |---|---|
 | `pwsh -NoProfile -File tests/spikes/server-packaging/bootstrap.ps1` | 通过；固定 SDK restore，linux-x64/win-x64 self-contained publish，source commit 与完整 manifest 生成 |
-| `PYTHONDONTWRITEBYTECODE=1 <bundled-python> -m unittest discover -s tests/spikes/server-packaging -p 'test_*.py' -v` | 8 passed，0 failed，0 skipped；测试内部连续两次 cold publish 的 `files.sha256` 完全相同 |
+| `PYTHONDONTWRITEBYTECODE=1 <bundled-python> -m unittest discover -s tests/spikes/server-packaging -p 'test_*.py' -v` | 9 passed，0 failed，0 skipped；测试先从干净提交发布行为产物，再执行三个独立 PowerShell cold bootstrap，完整 `files.sha256` 完全相同 |
 | `pwsh -File tests/spikes/server-packaging/scripts/windows-service.ps1 -Action preflight` | 通过；EXE 存在，service/owner registration/data 不存在；只读检查 |
 | `pwsh -File tests/spikes/server-packaging/scripts/windows-service.ps1 -Action verify-absent` | 通过；service=false、registry=false、data=false |
 | PowerShell parser（`bootstrap.ps1`、`windows-service.ps1`）与 Python compile | 通过；compile residue 仅在被 Git 忽略的 `__pycache__`，最终无跟踪变更 |
@@ -18,15 +18,21 @@
 | `python scripts/verify_repository.py` | 通过 |
 | `git diff --check` | 通过 |
 
-8 项 Spike 测试覆盖：single-source manifest；win-x64 环境变量启动；`/healthz`、`/readyz` 与内置 probe；Ctrl+Break cancellation/0 exit；同端口 restart；occupied port；缺少配置；非法 port/bind host；不可用 data target；Windows Service command-line config；完整 artifact provenance；Service adapter direct EXE/owner guard/残留定义。
+9 项 Spike 测试覆盖：single-source manifest；产物 `AssemblyInformationalVersion` 绑定 issuance commit；win-x64 环境变量启动；`/healthz`、`/readyz` 与内置 probe；Ctrl+Break cancellation/0 exit；同端口 restart；occupied port；缺少配置；非法 port/bind host；不可用 data target；Windows Service command-line config；三个独立 cold bootstrap 的完整 artifact provenance；Service adapter direct EXE/owner guard/残留定义。
+
+## Provenance 回归与修正
+
+独立审查复跑在旧实现下得到 aggregate `5249f5eb846cbfe578e2d74f74b5867fa3ecb5b57e6e23a4572f5ef795f70fce`、win apphost `85ce9946dcda17f4f443d87f9817acd6155a05ede2675fae0a91dcbf1bde2ab8`，与首次 handoff 的 `0a7b...` / `76d8...` 不一致，而旧测试仍通过。诊断读取产物 ProductVersion 为 `0.1.0-spike+5481ed7...`：.NET SDK 嵌入了当前 metadata `HEAD`，但旧 `source-commit.txt` 仍写前一 issuance commit `2b814b4...`。这证明旧测试只覆盖同一 `HEAD` 内连续运行，provenance 定义不闭合。
+
+correction implementation 显式传入 `SourceRevisionId`、CI/deterministic/PathMap 属性，使用 RID 独立 `obj/bin`、`UseSharedCompilation=false`、`--disable-build-servers`，并在每轮前后关闭 build servers。测试的三个 bootstrap 各自启动独立 PowerShell、清空受边界保护的 `obj/bin/artifact`，同时比较完整 manifest；另由 `--build-info` 检查产物内 informational version。提交本 handoff metadata 使仓库 `HEAD` 再次前进后，复跑仍得到相同 issuance commit、informational version 与 hashes。
 
 ## Artifact provenance
 
-- 实现提交与 runtime `source-commit.txt`：`2b814b4d466a716be3c0552e285cf4bbbf2bad6e`，精确相等。
-- 完整 `files.sha256` aggregate：`0a7b216c3379e4a938546aaff0165d4e671bbffe18f473195269a17c7cbc2fd9`。
+- correction implementation、runtime `source-commit.txt` 与产物 informational version：`25594025fbdb54903f311271147f86e1b43cc1f0`，精确一致；`repository-head.txt` 在 metadata commit 后不同于该值，产物仍固定到 issuance commit。
+- 完整 `files.sha256` aggregate：`7df4c0d8c839da1df443b3738fd0cba23209d09dfd20fbd888a5ef0cd8422906`。
 - linux-x64 apphost：78,256 bytes，SHA-256 `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3`。
-- win-x64 apphost：162,816 bytes，SHA-256 `76d876243a6c488c8058283bb052c93fa5bc522ec68bd15ef701346c5506b6a3`。
-- linux-x64：335 files / 109,700,001 total bytes；win-x64：338 files / 110,355,240 total bytes。
+- win-x64 apphost：162,816 bytes，SHA-256 `55f4cbed1b4502ebd87485d51148655a0af5aa8ce223295567e685ef5a0ae51e`。
+- linux-x64：335 files / 109,701,025 total bytes；win-x64：338 files / 110,356,264 total bytes。
 - 旧 Linux 主机发布的 win-x64 apphost SHA-256 为 `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9`；跨主机 hash 不同，未宣称跨主机 bit-for-bit 可重现。
 
 ## 明确未执行
