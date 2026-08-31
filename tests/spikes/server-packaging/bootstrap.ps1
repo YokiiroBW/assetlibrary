@@ -31,11 +31,24 @@ $env:DOTNET_CLI_HOME = Join-Path $Runtime 'dotnet-home'
 $env:NUGET_PACKAGES = Join-Path $Runtime 'nuget'
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 $env:DOTNET_NOLOGO = '1'
+$env:MSBUILDDISABLENODEREUSE = '1'
 Write-Output "SDK: $(& $Dotnet --version)"
 
 $Dirty = & git -C $Repo status --porcelain --untracked-files=all
 if ($LASTEXITCODE -ne 0) { throw 'git status failed' }
 if ($Dirty) { throw 'working tree must be clean before provenance build' }
+
+& git -C $Repo diff --quiet -- tests/spikes/server-packaging .codex/tasks/M0-004.md
+if ($LASTEXITCODE -ne 0) { throw 'uncommitted issuance inputs' }
+$SourceCommit = (& git -C $Repo log -1 --format=%H -- tests/spikes/server-packaging .codex/tasks/M0-004.md).Trim()
+if ($LASTEXITCODE -ne 0 -or !$SourceCommit) { throw 'failed to resolve source commit' }
+$RepositoryHead = (& git -C $Repo rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or !$RepositoryHead) { throw 'failed to resolve repository HEAD' }
+
+function Stop-BuildServers {
+    & $Dotnet build-server shutdown
+    if ($LASTEXITCODE -ne 0) { throw "dotnet build-server shutdown failed ($LASTEXITCODE)" }
+}
 
 $RuntimePrefix = [IO.Path]::GetFullPath($Runtime).TrimEnd('\') + '\'
 foreach ($Path in @($Obj, $Bin, $Artifact)) {
@@ -48,22 +61,34 @@ foreach ($Path in @($Obj, $Bin, $Artifact)) {
     }
 }
 
-& $Dotnet restore $Project --packages $env:NUGET_PACKAGES "-p:BaseIntermediateOutputPath=$Obj\" "-p:OutputPath=$Bin\"
-if ($LASTEXITCODE -ne 0) { throw "dotnet restore failed ($LASTEXITCODE)" }
+$BuildProperties = @(
+    '-p:ContinuousIntegrationBuild=true',
+    '-p:Deterministic=true',
+    '-p:DeterministicSourcePaths=true',
+    '-p:IncludeSourceRevisionInInformationalVersion=true',
+    '-p:UseSharedCompilation=false',
+    "-p:SourceRevisionId=$SourceCommit",
+    "-p:PathMap=$Repo=/_/src"
+)
 
-& git -C $Repo diff --quiet -- tests/spikes/server-packaging .codex/tasks/M0-004.md
-if ($LASTEXITCODE -ne 0) { throw 'uncommitted issuance inputs' }
-$SourceCommit = (& git -C $Repo log -1 --format=%H -- tests/spikes/server-packaging .codex/tasks/M0-004.md).Trim()
-if ($LASTEXITCODE -ne 0 -or !$SourceCommit) { throw 'failed to resolve source commit' }
-
-foreach ($Rid in @('linux-x64', 'win-x64')) {
-    $Output = Join-Path $Artifact $Rid
-    & $Dotnet publish $Project -c Release -r $Rid --self-contained true -p:DebugType=None -p:DebugSymbols=false "-p:BaseIntermediateOutputPath=$Obj\" "-p:OutputPath=$Bin\" -o $Output
-    if ($LASTEXITCODE -ne 0) { throw "dotnet publish $Rid failed ($LASTEXITCODE)" }
+Stop-BuildServers
+try {
+    foreach ($Rid in @('linux-x64', 'win-x64')) {
+        $RidObj = Join-Path $Obj $Rid
+        $RidBin = Join-Path $Bin $Rid
+        $Output = Join-Path $Artifact $Rid
+        & $Dotnet restore $Project -r $Rid --packages $env:NUGET_PACKAGES --disable-build-servers @BuildProperties "-p:BaseIntermediateOutputPath=$RidObj\" "-p:OutputPath=$RidBin\"
+        if ($LASTEXITCODE -ne 0) { throw "dotnet restore $Rid failed ($LASTEXITCODE)" }
+        & $Dotnet publish $Project -c Release -r $Rid --self-contained true --no-restore --disable-build-servers -p:DebugType=None -p:DebugSymbols=false @BuildProperties "-p:BaseIntermediateOutputPath=$RidObj\" "-p:OutputPath=$RidBin\" -o $Output
+        if ($LASTEXITCODE -ne 0) { throw "dotnet publish $Rid failed ($LASTEXITCODE)" }
+    }
+} finally {
+    Stop-BuildServers
 }
 
 $Utf8NoBom = [Text.UTF8Encoding]::new($false)
 [IO.File]::WriteAllText((Join-Path $Artifact 'source-commit.txt'), "$SourceCommit`n", $Utf8NoBom)
+[IO.File]::WriteAllText((Join-Path $Artifact 'repository-head.txt'), "$RepositoryHead`n", $Utf8NoBom)
 $Files = Get-ChildItem -LiteralPath (Join-Path $Artifact 'linux-x64'), (Join-Path $Artifact 'win-x64') -File -Recurse |
     Sort-Object FullName
 $SizeLines = [Collections.Generic.List[string]]::new()

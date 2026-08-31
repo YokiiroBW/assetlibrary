@@ -45,8 +45,7 @@ def graceful_stop(process):
 class SpikeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if not BIN.exists():
-            run_bootstrap()
+        run_bootstrap()
         global RUN_BIN
         run_dir = pathlib.Path(tempfile.mkdtemp(prefix="m0-004-run-"))
         shutil.copytree(PUBLISH, run_dir, dirs_exist_ok=True)
@@ -65,6 +64,12 @@ class SpikeTests(unittest.TestCase):
         m = json.loads((ROOT / "manifest.json").read_text())
         self.assertEqual(m["contract"], "m0-004/v1")
         self.assertEqual(m["source"], "src/ServerPackagingSpike.csproj")
+
+    def test_build_info_is_pinned_to_issuance_commit(self):
+        info = json.loads(subprocess.check_output([str(RUN_BIN), "--build-info"], text=True))
+        source_commit = (REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip()
+        self.assertEqual(info["contract"], "m0-004/v1")
+        self.assertTrue(info["informational_version"].endswith(f"+{source_commit}"))
 
     def test_missing_configuration(self):
         p = subprocess.run([str(RUN_BIN)], env=run_env({"SPIKE_DATA_PATH": ""}), capture_output=True, text=True, timeout=5)
@@ -167,13 +172,24 @@ class SpikeTests(unittest.TestCase):
         self.assertTrue((ROOT / "scripts/windows-service.ps1").exists())
         self.assertTrue((REPO / ".runtime/sandbox-storage/M0-004/artifact/win-x64/ServerPackagingSpike.exe").exists())
         files = REPO / ".runtime/sandbox-storage/M0-004/artifact/files.sha256"
-        run_bootstrap(stdout=subprocess.DEVNULL)
         expected = subprocess.check_output(["git", "log", "-1", "--format=%H", "--", "tests/spikes/server-packaging", ".codex/tasks/M0-004.md"], cwd=REPO, text=True).strip()
-        self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip(), expected)
-        self.assertEqual((REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip(), hashlib.sha256(files.read_bytes()).hexdigest())
-        first = files.read_bytes()
-        run_bootstrap(stdout=subprocess.DEVNULL)
-        self.assertEqual(first, files.read_bytes(), "cold publish is not reproducible")
+        snapshots = []
+        for run_number in range(1, 4):
+            run_bootstrap(stdout=subprocess.DEVNULL)
+            source = (REPO / ".runtime/sandbox-storage/M0-004/artifact/source-commit.txt").read_text().strip()
+            aggregate = (REPO / ".runtime/sandbox-storage/M0-004/artifact/aggregate-sha256.txt").read_text().strip()
+            manifest = files.read_bytes()
+            self.assertEqual(source, expected)
+            self.assertEqual(aggregate, hashlib.sha256(manifest).hexdigest())
+            snapshots.append((aggregate, manifest))
+            self.assertEqual(snapshots[0], snapshots[-1], f"independent cold publish {run_number} differs")
+
+        bootstrap = (ROOT / "bootstrap.ps1").read_text()
+        self.assertIn("build-server shutdown", bootstrap)
+        self.assertIn("--disable-build-servers", bootstrap)
+        self.assertIn("ContinuousIntegrationBuild=true", bootstrap)
+        self.assertIn("SourceRevisionId=$SourceCommit", bootstrap)
+        self.assertIn("UseSharedCompilation=false", bootstrap)
 
     def test_windows_service_adapter_is_direct_and_guarded(self):
         script = (ROOT / "scripts/windows-service.ps1").read_text()

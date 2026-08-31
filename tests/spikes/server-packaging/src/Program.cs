@@ -1,4 +1,8 @@
+using System.Reflection;
 using System.Text.Json;
+
+if (args.Contains("--build-info", StringComparer.Ordinal))
+    return BuildInfo();
 
 if (args.Contains("--health-probe", StringComparer.Ordinal))
     return await HealthProbe();
@@ -45,6 +49,15 @@ static int Fail(string code, string message)
     Console.Error.WriteLine(JsonSerializer.Serialize(new { level = "error", code, message }));
     Environment.Exit(78);
     return 0;
+}
+
+static int BuildInfo()
+{
+    var version = Assembly.GetEntryAssembly()?
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+        .InformationalVersion;
+    Console.WriteLine(JsonSerializer.Serialize(new { contract = "m0-004/v1", informational_version = version }));
+    return string.IsNullOrWhiteSpace(version) ? 1 : 0;
 }
 
 static async Task<int> HealthProbe()
