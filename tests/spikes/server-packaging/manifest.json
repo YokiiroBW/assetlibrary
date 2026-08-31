@@ -3,7 +3,7 @@
   "source": "src/ServerPackagingSpike.csproj",
   "targets": ["linux-x64", "win-x64", "docker"],
   "linux": {"command": "./ServerPackagingSpike", "service": "systemd"},
-  "windows": {"command": "ServerPackagingSpike.exe", "service": "scripts/windows-service.ps1", "service_name": "AssetLibrary-M0-004-Spike"},
+  "windows": {"command": "ServerPackagingSpike.exe", "bootstrap": "bootstrap.ps1", "service": "scripts/windows-service.ps1", "service_name": "AssetLibrary-M0-004-Spike", "service_account": "LocalService"},
   "docker": {"definition": "Dockerfile", "compose": "docker-compose.yml", "user": "non-root"},
-  "configuration": {"SPIKE_DATA_PATH": "required writable directory", "SPIKE_PORT": "1024-65535, default 5080", "SPIKE_BIND_HOST": "optional, default 127.0.0.1; Docker sets 0.0.0.0", "SPIKE_PROBE_HOST": "optional, default 127.0.0.1; health probe always loopback by default"}
+  "configuration": {"SPIKE_DATA_PATH": "required writable directory; command-line override supported for the Windows service adapter", "SPIKE_PORT": "1024-65535, default 5080", "SPIKE_BIND_HOST": "optional, default 127.0.0.1; Docker sets 0.0.0.0", "SPIKE_PROBE_HOST": "optional, default 127.0.0.1; health probe always loopback by default"}
 }

@@ -4,14 +4,14 @@ if (args.Contains("--health-probe", StringComparer.Ordinal))
     return await HealthProbe();
 
 var builder = WebApplication.CreateBuilder(args);
-var dataPath = Environment.GetEnvironmentVariable("SPIKE_DATA_PATH");
+var dataPath = builder.Configuration["SPIKE_DATA_PATH"];
 if (string.IsNullOrWhiteSpace(dataPath))
     return Fail("missing_configuration", "SPIKE_DATA_PATH is required");
 
-var portText = Environment.GetEnvironmentVariable("SPIKE_PORT") ?? "5080";
+var portText = builder.Configuration["SPIKE_PORT"] ?? "5080";
 if (!int.TryParse(portText, out var port) || port is < 1024 or > 65535)
     return Fail("invalid_configuration", "SPIKE_PORT must be between 1024 and 65535");
-var bindHost = Environment.GetEnvironmentVariable("SPIKE_BIND_HOST") ?? "127.0.0.1";
+var bindHost = builder.Configuration["SPIKE_BIND_HOST"] ?? "127.0.0.1";
 if (string.IsNullOrWhiteSpace(bindHost) || bindHost.Any(char.IsWhiteSpace))
     return Fail("invalid_configuration", "SPIKE_BIND_HOST must be a host name or address");
 
