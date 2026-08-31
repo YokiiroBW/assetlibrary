@@ -11,6 +11,25 @@ $namespace = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\N
 $owner = 'AssetLibrary.M0-002'
 $resolvedDll = (Resolve-Path $DllPath).Path
 
+# With UAC disabled, administrator processes ignore per-user COM registration.
+# Explorer therefore cannot bind an HKCU-only namespace extension on that host.
+$uacPolicyKey = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey(
+  'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System', $false)
+$enableLua = 1
+if ($uacPolicyKey) {
+  try {
+    $configuredEnableLua = $uacPolicyKey.GetValue('EnableLUA', 1)
+    if ($null -ne $configuredEnableLua) { $enableLua = [int] $configuredEnableLua }
+  } finally {
+    $uacPolicyKey.Dispose()
+  }
+}
+if ($enableLua -eq 0) {
+  throw ('M0-002 requires UAC (EnableLUA=1) for HKCU COM activation. ' +
+    'This host has EnableLUA=0; refusing per-user registration because ' +
+    'Explorer cannot bind the class. Do not switch this Spike to HKLM.')
+}
+
 $createdKeys = [System.Collections.Generic.List[string]]::new()
 $originalValues = @{}
 $missingValues = @{}

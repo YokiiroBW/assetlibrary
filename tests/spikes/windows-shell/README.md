@@ -25,7 +25,7 @@ by the repository and must not be committed.
 ./scripts/register.ps1
 ./scripts/verify-registration.ps1
 ./scripts/run-host.ps1 -Mode normal
-# Restart Explorer, open the registered Desktop namespace, and select AssetHost.
+# Launch Explorer.exe /e,::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}, then select AssetHost.
 ./scripts/run-host.ps1 -Mode invalid
 ./scripts/run-host.ps1 -Mode crash -Once
 ./scripts/run-host.ps1 -Mode slow -Once

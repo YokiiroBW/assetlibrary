@@ -163,6 +163,14 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("# Restore values first", register)
         self.assertIn("$children.Count -ne 0", register)
 
+    def test_registration_refuses_uac_disabled_hkcu_com_host(self):
+        register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
+        self.assertIn("Registry]::LocalMachine.OpenSubKey", register)
+        self.assertIn("EnableLUA=1", register)
+        self.assertIn("refusing per-user registration", register)
+        self.assertIn("Do not switch this Spike to HKLM", register)
+        self.assertLess(register.index("EnableLUA"), register.index("Set-ItemProperty"))
+
     def test_existing_values_are_restored_and_new_values_removed(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
         self.assertIn("$originalValues", register)
@@ -195,7 +203,9 @@ class PackageContractTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("host-cycle helper", soak)
         self.assertNotIn("shell:::{", soak)
-        self.assertIn("shell:::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}", protocol)
+        self.assertIn("Explorer.exe /e,::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}", protocol)
+        self.assertNotIn("shell:::{", protocol)
+        self.assertIn("EnableLUA=1", protocol)
         self.assertIn("Explorer soak evidence", protocol)
 
     def test_no_generated_or_private_artifacts_are_packaged(self):

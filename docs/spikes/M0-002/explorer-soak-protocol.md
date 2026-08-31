@@ -8,6 +8,9 @@ save the evidence outside the repository or in an approved test-results store.
 ## Preconditions
 
 - Windows 11 x64, Visual Studio 2022 Desktop C++, Windows 11 SDK and CMake.
+- UAC enabled (`EnableLUA=1`). The HKCU-only registration script refuses a host
+  with UAC disabled because an administrator Explorer cannot bind per-user COM
+  classes in that state. Do not substitute an HKLM registration for this Spike.
 - A clean current-user registration produced by `register.ps1`.
 - Explorer restart available for the recovery checkpoints.
 
@@ -16,8 +19,10 @@ save the evidence outside the repository or in an approved test-results store.
 1. Build and register with `build.ps1`, `register.ps1`, and
    `verify-registration.ps1`.
 2. Start `run-host.ps1 -Mode normal` in a separate PowerShell window.
-3. Open `shell:::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}` and enter
-   `AssetHost (M0-002)`. Record view activation time and the connected status.
+3. Launch `%SystemRoot%\Explorer.exe /e,::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}`
+   as documented by Microsoft for namespace extensions; do not type the CLSID
+   into Explorer's address bar. Enter `AssetHost (M0-002)`, then record view
+   activation time and the connected status.
 4. Repeat at least 20 times: stop/restart the host, open or refresh the custom
    view, and confirm Explorer remains responsive and returns to connected state.
 5. Repeat with `-Mode crash -Once`, `-Mode slow -Once`, and
