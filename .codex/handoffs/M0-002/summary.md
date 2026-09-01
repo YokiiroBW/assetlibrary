@@ -22,7 +22,9 @@
 - CMake x64 构建入口（非 Windows 仅配置检查，MSVC/Windows-only 选项受条件
   保护）；PowerShell 当前用户 HKCU 注册、验证、卸载、host 故障模式和 host-cycle
   helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
-  中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。
+  中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。注册与卸载完成后
+  均调用 `SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, ...)`，对称刷新 Explorer
+  关联缓存。
 - Windows 实际构建后修正 SDK 常量和 COM 导出 ABI：使用 SDK 的 `STDAPI` 声明与
   模块定义文件导出 `DllGetClassObject`/`DllCanUnloadNow`；构建脚本现在会检查
   CMake 配置和编译的真实退出码，不再把失败误报为成功。
@@ -37,13 +39,22 @@
 已在 Windows 11 企业版 LTSC x64（10.0.26100）安装并核验 Visual Studio 2022
 Build Tools 17.14.39、MSVC 19.44.35228、MSBuild 17.14.51、CMake
 3.31.6-msvc6 与 Windows SDK 10.0.26100.0。Release x64 DLL/host 真实构建、导出表、
-四种独立 host 协议情形和隔离 COM factory 探针均通过，静态/契约测试为 15/15。
-在独立自动卸载看门狗保护下完成 HKCU register/verify/unregister 循环且无残留；
-直接注册式 `CoCreateInstance` 成功，但 Shell 的 `SHBindToObject(IID_IShellFolder)`
-返回 `0x80040154 (REGDB_E_CLASSNOTREG)`。本机 `EnableLUA=0` 且进程为 High
-Integrity，符合微软记录的“高权限进程忽略 per-user COM”限制。Explorer 始终未
-加载 DLL、无崩溃事件且普通导航恢复正常。注册脚本现会在该环境写入前明确拒绝；
-真实 Explorer 视图证据仍未取得，因此本交接不是 M0-002 验收通过。
+四种独立 host 协议情形和隔离 COM factory 探针均通过，静态/契约测试为 16/16。
+启用 UAC 并重启后，`EnableLUA=1`、`FilterAdministratorToken=1`，Codex 与主
+Explorer 均为 Medium Integrity。在独立自动卸载看门狗保护下完成多轮 HKCU
+register/verify/unregister 且无残留；注册式 `CoCreateInstance`、
+`SHParseDisplayName`、`SHBindToObject(IID_IShellFolder)`、`IPersistFolder`、
+`EnumObjects`、`CreateViewObject`、`SHCreateItemFromParsingName` 和
+`IShellItem.BindToHandler` 均返回 `S_OK`。隔离原生 `IShellBrowser` 探针进一步让
+`CreateViewWindow` 返回 `S_OK` 并实际创建 view window。
+
+真实 Explorer 仍未取得 custom view 证据：微软文档列出的
+`Explorer.exe /e,::{CLSID}` 与 `Explorer.exe ::{CLSID}` 两种入口均显示“没有与之
+关联的应用”，`shell:desktop` 中也不枚举 `AssetLibrary M0-002` junction；测试 DLL
+未被观察到加载。期间无 `Application Error`/WER 崩溃事件，主 Explorer 保持响应。
+按用户 Approved 列表的诊断试验没有改变结果并已完整回滚。因此 UAC/high-integrity
+阻断已排除，剩余问题收敛到 Windows 11 26100 上真实 Explorer 的按用户 namespace
+注册、枚举或部署兼容路径；本交接仍不是 M0-002 验收通过。
 
 ## 关键决策
 
@@ -93,7 +104,7 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
 
 ## 测试结果
 
-- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（15/15）。
+- 通过：Codex bundled Python 执行 `python -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（16/16）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
 - 通过：Windows 11 Release x64 CMake/MSVC 构建；`dumpbin` 确认 DLL 仅导出未修饰的
@@ -102,13 +113,16 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
   1000 ms slow 模式；slow 模式在 300 ms guard window 内无响应，随后正常 pong。
 - 通过：隔离 PowerShell 进程直接调用 DLL；factory 创建/释放、前后
   `DllCanUnloadNow == S_OK`，错误 CLSID 返回 `CLASS_E_CLASSNOTAVAILABLE`。
-- 通过：Windows 11 上使用 Codex 隔离 Python 重跑静态/契约测试（15/15）；新增
-  UAC-disabled HKCU COM 拒绝门禁。
+- 通过：Windows 11 上使用 Codex 隔离 Python 重跑静态/契约测试（16/16）；包含
+  UAC-disabled HKCU COM 拒绝门禁和注册/卸载后的 Shell cache 对称刷新检查。
 - 通过：自动卸载看门狗保护下的 HKCU register/verify/unregister 与直接注册式
   `CoCreateInstance`；每轮卸载后 CLSID/namespace 均无残留。
-- 阻断证据：`SHParseDisplayName` 成功，但 `SHBindToObject(IID_IShellFolder)` 返回
-  `REGDB_E_CLASSNOTREG`；本机 `EnableLUA=0`/High Integrity。Explorer 未加载测试
-  DLL、无 `Application Error`/WER 事件，普通 `C:\Windows` 导航仍响应。
+- 通过：UAC-enabled Medium Integrity 子进程中的完整 Shell contract 探针和原生
+  hidden `IShellBrowser` view 探针；bind、folder/item 接口、`CreateViewObject`、
+  `CreateViewWindow` 均为 `S_OK`，view window 已创建。
+- 阻断证据：真实 Explorer 的两种官方 CLSID 入口均显示无关联应用，Desktop
+  junction 不被枚举，且未观察到 DLL 加载；无 `Application Error`/WER 事件，普通
+  Explorer 导航仍响应。
 - 通过：Visual Studio 2022 Build Tools 官方 bootstrapper Authenticode 签名为
   `Valid`，签名者为 Microsoft Corporation，SHA-256 为
   `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；安装退出码
@@ -116,8 +130,8 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
   `176F59EBCD3966B531893F749C0D265277B8A00AD4CC53A9817BB739BCC12D0D`，host 为
   `9531C66646D29EC685C28577AC31CD072FCD2290B17D61901DBEE852BCB16D28`；Spike 产物
   未签名，已移入 ignored task sandbox，未提交。
-- 未执行：UAC-enabled 主机上的 Explorer custom view、Explorer 内 host
-  missing/crash/timeout/invalid recovery、crash/restart 20-cycle 和 8-hour soak。
+- 未完成：真实 Explorer custom view、Explorer 内 host missing/crash/timeout/invalid
+  recovery、crash/restart 20-cycle 和 8-hour soak。
 
 ## 架构测试与质量门禁
 
@@ -125,10 +139,10 @@ Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadlin
 异步 view activation、单在途 ping、迟到结果 token 丢弃、worker 异常边界、
 `IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
 新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
-SDK 常量/导出 ABI、构建退出码、UAC-disabled HKCU COM 拒绝、官方 Explorer
-启动形式、host-only soak 定位和生成/私密产物排除。已有 Windows 离线与可逆
-注册证据，但没有 Explorer 进程内证据，故 Explorer 故障隔离和恢复门禁保持
-unmet。
+SDK 常量/导出 ABI、构建退出码、UAC-disabled HKCU COM 拒绝、Shell association
+cache 刷新、官方 Explorer 启动形式、host-only soak 定位和生成/私密产物排除。
+已有 Windows 可逆注册、隔离 Shell bind 和 view-window 创建证据，但没有 Explorer
+进程内加载证据，故 Explorer 故障隔离和恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响
 
@@ -139,9 +153,9 @@ owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell I
 
 ## 技术债、已知问题与风险
 
-- 当前主机 UAC 被关闭；根据微软 COM 限制，高权限 Explorer 忽略 HKCU per-user
-  COM。项目禁止改用 HKLM，因此必须在 `EnableLUA=1` 的 Windows 11 x64 主机验证
-  Explorer namespace、custom IShellView 生命周期及右侧视图尺寸/重建行为。
+- UAC/high-integrity 阻断已经排除；Windows 11 26100 的真实 Explorer 仍不枚举或
+  启动该 HKCU Desktop junction。必须在 M0-009 决定受支持的注册/安装模型后，才可
+  继续验证 custom IShellView 生命周期及右侧视图尺寸/重建行为；不得擅自改用 HKLM。
 - 独立 host 的正常、崩溃、慢响应和无效 frame 已验证；仍必须在 Explorer 内验证
   这些情形不会冻结 UI，并验证恢复后重连。
 - 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
@@ -158,11 +172,11 @@ Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell
 
 ## 下一步
 
-保持当前未注册安全检查点，不修改本机 UAC、安全策略或 HKLM。下一阶段必须迁移到
-`EnableLUA=1` 的 Windows 11 x64 验证主机，按
-`docs/spikes/M0-002/explorer-soak-protocol.md` 使用微软官方
-`Explorer.exe /e,::{CLSID}` 入口分步执行视图、故障恢复和卸载，再单独安排
-20-cycle 与 8 小时 soak；若无法提供该主机，提交 M0-009 决策问题。
+保持当前未注册安全检查点，不再盲目重试 Explorer，也不修改 HKLM。下一阶段先在
+M0-009 提交 Windows 11 26100 的 namespace 注册/部署兼容决策问题，确认仍满足
+HKCU-only 和 Explorer 进程内轻量边界的受支持方案；方案确定后再按
+`docs/spikes/M0-002/explorer-soak-protocol.md` 分步执行真实视图、故障恢复、
+20-cycle 与 8 小时 soak。
 
 ## Codex 线程链接（可选）
 

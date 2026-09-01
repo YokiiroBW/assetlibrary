@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-evidence",
   "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/M0-002-windows-evidence",
-  "commit": "e359a660d8404109bffba511ed64fe5881933f8c",
+  "commit": "8a557ff0bd7c7ff41aba9e1b92d7ad0d5f7edd12",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
@@ -31,22 +31,22 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 15,
+    "passed": 16,
     "failed": 0,
     "skipped": 6,
     "report": "tests.md"
   },
   "risks": [
-    "当前 Windows 主机 EnableLUA=0 且进程为 High Integrity；Shell bind 忽略 HKCU per-user COM，因此 Explorer 视图无法在该环境验证。",
-    "HKCU 注册/验证/卸载与直接 COM activation 已验证，但 Explorer 从未加载测试 DLL，视图生命周期与故障隔离仍未验证。",
+    "UAC/high-integrity 阻断已排除；Windows 11 26100 的真实 Explorer 仍不枚举或启动 HKCU Desktop junction，受支持的注册/部署兼容路径尚未确定。",
+    "HKCU 注册/验证/卸载、直接 COM activation、完整 Shell bind 和隔离 view window 创建均已验证，但真实 Explorer 未观察到加载测试 DLL，视图生命周期与故障隔离仍未验证。",
     "取消后的 overlapped I/O 排空不阻塞 Explorer UI，但其独立时长上限尚未在 Windows 证明。",
     "本地 Spike DLL/host 未签名，只能用于受控验证，不能作为分发产物。",
     "8 小时 soak 尚未执行；当前无稳定性结论。",
     "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
   ],
   "blocked_by": [
-    "需要 EnableLUA=1 的 Windows 11 x64 验证主机；项目禁止用 HKLM 系统级注册绕过当前主机的 per-user COM 限制",
-    "在兼容主机按 Explorer.exe /e,::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02} 执行真实视图/故障/卸载恢复",
+    "M0-009 需决定 Windows 11 26100 上受支持且满足 HKCU-only 边界的 Explorer namespace 注册/部署模型；未经批准不得改用 HKLM",
+    "按决策后的兼容入口执行真实 Explorer 视图、故障注入和卸载恢复；当前两种官方 CLSID 入口均在加载测试 DLL 前失败",
     "Explorer 内的 250 ms deadline、取消排空、状态恢复与 normal host 重连仍需观察和计时",
     "20 次 crash/restart 与 8 小时 Explorer evidence: 按 docs/spikes/M0-002/explorer-soak-protocol.md 操作，同时 ./tests/spikes/windows-shell/scripts/soak.ps1 -Hours 8 仅作为 host-cycle helper"
   ],
@@ -72,15 +72,16 @@
     "contract_changes": [],
     "architecture_tests": [
       "test_contracts.py forbidden-dependency and package-boundary checks",
-      "test_contracts.py version/length/timeout and HKCU registration symmetry checks",
+      "test_contracts.py version/length/timeout, HKCU registration symmetry and Shell association-cache refresh checks",
       "test_contracts.py single-flight refresh, stale-result token and detached-worker exception-boundary checks",
       "test_contracts.py Windows SDK constant, COM export ABI and build exit-code checks",
       "test_contracts.py UAC-disabled zero-write refusal and official Explorer namespace launch checks",
       "Windows Release x64 build, export-table inspection, isolated host protocol modes and COM factory probe",
-      "Watchdog-protected HKCU register/verify/unregister, registered CoCreateInstance, SHParseDisplayName/SHBindToObject diagnostics and Explorer recovery check"
+      "Watchdog-protected HKCU register/verify/unregister, registered CoCreateInstance and complete Shell folder/item contract probe",
+      "Native hidden IShellBrowser probe through CreateViewObject/CreateViewWindow, plus real Explorer launch/enumeration and recovery diagnostics"
     ],
     "technical_debt": [
-      "UAC-enabled Explorer evidence and 8-hour soak required before any architecture freeze",
+      "A Windows 11 26100-compatible real Explorer registration/deployment decision, process evidence and 8-hour soak are required before any architecture freeze",
       "Spike-local PIDL/IPC must not become a production contract"
     ]
   }
