@@ -1,24 +1,35 @@
-# M0-004 测试记录（Windows Service guardrails correction）
+# M0-004 测试记录（clean replacement）
 
 ## 执行环境
 
-Linux x86-64，Python 3.12；无 Windows/PowerShell。未触发 dotnet、Docker 或既有 publish 测试。
+Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap；SDK 10.0.111，ASP.NET Core/.NET runtime pack 10.0.11；Docker CLI 26.1.4，无 daemon 权限；无 Windows/PowerShell。
 
 ## 命令与结果
 
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests/spikes/server-packaging/test_windows_service_contract.py -v` — 8 passed。
+- `M0_004_DOTNET_DIR=/tmp/m0-004-dotnet-10.0.111 bash tests/spikes/server-packaging/bootstrap.sh` — 通过；clean provenance、restore、linux-x64/win-x64 publish。
+- `M0_004_DOTNET_DIR=/tmp/m0-004-dotnet-10.0.111 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/server-packaging -p 'test_*.py' -v` — 6 passed。
+- `docker compose -f tests/spikes/server-packaging/docker-compose.yml config` — 通过。
 - `git diff --check` — 通过。
 
-## 覆盖范围
+## Artifact matrix
 
-静态验证固定服务/端口/wrapper install 预检；created-this-run cleanup 守卫；owner marker、binPath 和 LocalService readback；start/stop/uninstall ownership gate；有界停止/删除等待与最终服务缺失确认；不解析本地化 `sc.exe` 输出。
+发行输入最后提交：`b5d19cebafdb536a61b33917715419528e7f10e1`；协调器在关闭 MSBuild/C# build servers 后连续两次 cold publish 的完整 `files.sha256` 一致；aggregate digest：`c0f434d0556eadac727ce1601afece3b9e907ef3be7a8b2769e6eb141a5a7ff2`。以下 hash 是该 Linux 构建环境的本机观测，不是跨主机 bit-for-bit 保证；身份由 commit 与完整清单共同证明。
 
-## 未执行
+| target | exact bytes | SHA-256 |
+|---|---:|---|
+| linux-x64 apphost | 78,256 | `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3` |
+| win-x64 apphost | 162,816 | `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9` |
 
-真实 Windows Service 周期（install/start/health/stop/uninstall）未执行，原因是当前环境无 Windows/PowerShell。LocalService 访问用户 TEMP/仓库 artifact、SCM 状态转换以及实际 cmd wrapper 行为仍为外部风险。
+完整目录 manifest 为 runtime 内 `file-sizes.txt` + `files.sha256`；测试重新计算 aggregate digest，不信任 source-commit 文件本身，并连续两次清理 obj/bin/artifact 后比较完整清单。
 
-## 2026-09-02 correction 追加
+## 已覆盖
 
-clean replacement 的既有验证仍有效：bootstrap restore 与 linux-x64/win-x64 publish、两次 cold publish manifest 比较、Linux 行为测试 6/6、Compose 静态 config 和 `git diff --check` 已通过；Docker build/run/health 因 daemon `permission denied ... /var/run/docker.sock` 未执行；Windows Service 周期因无 Windows/PowerShell 未执行。其 artifact source commit、完整清单和 hash 证据保留在原 handoff 记录中。
+启动、`/healthz`、SIGTERM bounded shutdown、restart health、occupied port（有界超时）、缺少配置、invalid port/bind host、只读 data path、Docker env 下 bind/probe 定义、manifest/provenance、日志不含 repository ContentRoot、Windows/systemd 定义对称性。
 
-本次独立测试新增覆盖：PowerShell 条件括号、wrapper 原文与 marker 双重比较、服务账户统一 readback、失败 cleanup 保留被引用文件、Data 目录仅空目录删除，以及 service 不存在时双缺失/双精确归属/部分残留三态。
+## Skipped / external gates
+
+本机 uid 1000，read-only path 未 skip；root 环境会显式 skip。Windows：无 host，未执行 service cycle。Docker：`docker version` 精确失败为 `permission denied ... /var/run/docker.sock`，未执行 build/run/health。
+
+## 2026-09-02 correction
+
+新增独立 `test_windows_service_contract.py`，只读脚本文本，不导入或触发 `test_spike.py`；8/8 通过。新增覆盖括号化 Test-Path 预检、wrapper 原文与 marker 双重比较、服务账户统一 readback、created-this-run 清理、服务仍存在时保留文件、Data 空目录限制、service 不存在时残留三态，以及 stop/delete 有界等待与最终 readback。未执行 Windows/PowerShell、dotnet、Docker 或重型 publish。

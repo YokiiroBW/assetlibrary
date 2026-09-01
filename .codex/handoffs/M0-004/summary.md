@@ -1,4 +1,4 @@
-# M0-004 交接摘要（Windows Service guardrails correction）
+# M0-004 交接摘要（clean replacement）
 
 ## 完成状态
 
@@ -6,30 +6,34 @@
 
 ## 实现提交
 
-本 correction 从 `0faa07cc2518952f78d2fb029e777974c89df74c` 开始；实现提交与 handoff metadata 提交分开记录。
+发行输入最后提交：`b5d19cebafdb536a61b33917715419528e7f10e1`；clean branch 包含多个连续源码/测试修订提交，最后另有 handoff metadata 提交。
 
 ## 完成内容
 
-`windows-service.ps1` 现在在 install 前检查固定服务名、TEMP wrapper/owner marker 与 5080 监听端口；既有或无法证明归属的对象一律拒绝。服务操作通过 `Win32_Service` 对象 readback 比对 binPath、wrapper marker 与 LocalService 账户，不解析本地化 `sc.exe` 输出。catch/finally 只清理本次调用成功创建的对象；stop/delete 使用 15 秒有界等待并最终 readback。服务不存在时 uninstall 只删除内容精确匹配的 owner marker 对应 wrapper。
+同一 ASP.NET Core Spike 源码定义 Linux、Windows x64 和 Docker/Compose；监听地址与 health probe 解耦（容器监听 `0.0.0.0`，probe 默认 loopback）；提供 Windows Service PowerShell/sc.exe adapter 与 systemd unit。SDK/runtime 候选固定为 SDK 10.0.111、ASP.NET Core/.NET runtime 10.0.11。生成物、缓存、日志和 hash 均位于 `.runtime/sandbox-storage/M0-004`，未进入 Git。
 
-新增 `test_windows_service_contract.py`，只读脚本文本，完全不导入或触发既有 publish 测试。
+## 修改文件
+
+`.codex/tasks/M0-004.md`；`tests/spikes/server-packaging/.dockerignore`、`Dockerfile`、`docker-compose.yml`、`manifest.json`、`bootstrap.sh`、`src/Program.cs`、`src/ServerPackagingSpike.csproj`、`test_spike.py`、`scripts/windows-service.ps1`、`systemd/assetlibrary-m0-004-spike.service`；`docs/spikes/M0-004/README.md`；本目录三个 handoff 文件。
+
+## 架构与依赖
+
+模块为 `server-packaging-spike`，无跨模块访问；复用 ASP.NET Core hosting 生命周期。主语言/框架为既定 C#/.NET 10 + ASP.NET Core 候选；唯一新增候选依赖为官方 `Microsoft.Extensions.Hosting.WindowsServices` 10.0.11，用于 Windows Service 生命周期。未变更共享契约、数据库或生产实现。
 
 ## 测试结果
 
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests/spikes/server-packaging/test_windows_service_contract.py -v` — 8 passed。
-- `git diff --check` — 通过。
-- 未运行 dotnet、Docker、既有 `test_spike.py` 或任何构建/发布。
+空 runtime 目录后执行 bootstrap，并连续两次清理 obj/bin/artifact cold publish；两次完整 files.sha256 一致。restore、Linux/Windows RID publish、6/6 Python unittest、Docker Compose 静态 config 和 `git diff --check` 通过。artifact source commit 为发行输入最后提交；完整每文件 size/SHA256 和 aggregate digest 已在 runtime artifact 清单中记录。
+
+最终样例 hash 是该 Linux 构建环境关闭 MSBuild/C# build servers 后的本机观测，不作跨主机 bit-for-bit 保证；artifact 身份由 commit 与完整清单共同证明。
 
 ## 外部门禁与风险
 
-真实 Windows x64 上的 service install/start/health/stop/uninstall 周期仍未执行；当前 Linux 执行机没有 Windows/PowerShell。LocalService 访问用户 TEMP 与仓库 artifact 的实际权限、服务控制器状态转换和 wrapper cmd 行为仍需实机验证。Docker 与原 M0-004 其他 partial 门禁保持不变。
+Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Windows/PowerShell。Docker build/run/health 未执行：Docker CLI 26.1.4 存在但 daemon 报 `permission denied ... /var/run/docker.sock`。因此不能宣称 Windows/Docker 门禁通过，必须保持 partial。
 
-## 架构影响
+## 建议
 
-仅修改 server-packaging test adapter 与独立静态契约测试；未修改生产目录、共享契约、任务登记、项目状态、Vault、Docker 定义或新增依赖。保留单脚本 PowerShell/sc.exe adapter 形态。
+协调器只合并 clean branch 的连续源码/测试提交及最后的 handoff metadata；在真实 Windows 和 Docker daemon 环境补做外部门禁后，M0-009 再评估是否冻结服务端候选。旧 `codex/m0-004-server-packaging` 分支含历史错误 publish 产物，不应合并。
 
-## 2026-09-02 correction 追加
+## 2026-09-02 correction
 
-本次 correction 保留 clean replacement 的既有证据：发行输入提交 `b5d19cebafdb536a61b33917715419528e7f10e1`；SDK 10.0.111/.NET 10.0.11；Linux health、优雅停止、重启、缺失配置、端口占用和只读数据路径已通过；两次 cold publish manifest 一致；Docker Compose 静态 config 通过；Docker daemon 与 Windows 主机门禁仍未执行。既有 artifact 观测为 linux-x64 78,256 bytes / `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3`、win-x64 162,816 bytes / `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9`。
-
-本 correction 仅增加 Windows Service 防覆盖、归属和清理边界；状态仍为 `partial`，不得据此升级 Windows/Docker 外部门禁。
+本次 correction 收紧 Windows Service adapter 的固定服务、TEMP wrapper、owner marker 和 5080 端口预检；所有服务 mutation 前均通过 `Win32_Service` binPath、wrapper 原文与 marker、LocalService 账户 readback。失败清理仅处理本次创建且已确认不再被服务引用的对象，Data 只删除任务路径下的空目录；service 不存在时对 wrapper/marker 的双缺失、双精确归属和部分/未知残留分别处理。新增独立静态契约测试 8/8 通过。Windows 实机仍未执行，handoff 保持 `partial`。
