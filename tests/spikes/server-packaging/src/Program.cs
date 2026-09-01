@@ -1,17 +1,19 @@
 using System.Text.Json;
 
+Dictionary<string, string> options;
+try { options = ReadOptions(args); }
+catch (ArgumentException ex) { return Fail("invalid_configuration", ex.Message); }
 if (args.Contains("--health-probe", StringComparer.Ordinal))
-    return await HealthProbe();
+    return await HealthProbe(options);
 
 var builder = WebApplication.CreateBuilder(args);
-var dataPath = Environment.GetEnvironmentVariable("SPIKE_DATA_PATH");
+var dataPath = OptionOrEnvironment(options, "--spike-data-path", "SPIKE_DATA_PATH");
 if (string.IsNullOrWhiteSpace(dataPath))
     return Fail("missing_configuration", "SPIKE_DATA_PATH is required");
-
-var portText = Environment.GetEnvironmentVariable("SPIKE_PORT") ?? "5080";
+var portText = OptionOrEnvironment(options, "--spike-port", "SPIKE_PORT") ?? "5080";
 if (!int.TryParse(portText, out var port) || port is < 1024 or > 65535)
     return Fail("invalid_configuration", "SPIKE_PORT must be between 1024 and 65535");
-var bindHost = Environment.GetEnvironmentVariable("SPIKE_BIND_HOST") ?? "127.0.0.1";
+var bindHost = OptionOrEnvironment(options, "--spike-bind-host", "SPIKE_BIND_HOST") ?? "127.0.0.1";
 if (string.IsNullOrWhiteSpace(bindHost) || bindHost.Any(char.IsWhiteSpace))
     return Fail("invalid_configuration", "SPIKE_BIND_HOST must be a host name or address");
 
@@ -40,23 +42,48 @@ app.Lifetime.ApplicationStopping.Register(() => app.Logger.LogInformation("spike
 await app.RunAsync();
 return 0;
 
+static Dictionary<string, string> ReadOptions(string[] args)
+{
+    var options = new Dictionary<string, string>(StringComparer.Ordinal);
+    for (var i = 0; i < args.Length; i++)
+    {
+        if (args[i] is not ("--spike-data-path" or "--spike-port" or "--spike-bind-host" or "--spike-probe-host"))
+            continue;
+        if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
+            throw new ArgumentException($"missing value for {args[i]}");
+        if (!options.TryAdd(args[i], args[++i]))
+            throw new ArgumentException($"duplicate option {args[i]}");
+    }
+    return options;
+}
+
+static string? OptionOrEnvironment(IReadOnlyDictionary<string, string> options, string option, string variable)
+    => options.TryGetValue(option, out var value) ? value : Environment.GetEnvironmentVariable(variable);
+
 static int Fail(string code, string message)
 {
     Console.Error.WriteLine(JsonSerializer.Serialize(new { level = "error", code, message }));
-    Environment.Exit(78);
-    return 0;
+    return 78;
 }
 
-static async Task<int> HealthProbe()
+static async Task<int> HealthProbe(IReadOnlyDictionary<string, string> options)
 {
-    var host = Environment.GetEnvironmentVariable("SPIKE_PROBE_HOST") ?? "127.0.0.1";
-    var port = Environment.GetEnvironmentVariable("SPIKE_PORT") ?? "5080";
+    var host = OptionOrEnvironment(options, "--spike-probe-host", "SPIKE_PROBE_HOST") ?? "127.0.0.1";
+    var port = OptionOrEnvironment(options, "--spike-port", "SPIKE_PORT") ?? "5080";
     using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
     try
     {
-        using var response = await client.GetAsync($"http://{host}:{port}/healthz");
-        return response.IsSuccessStatusCode ? 0 : 1;
+        if (!int.TryParse(port, out var parsedPort) || parsedPort is < 1 or > 65535 || string.IsNullOrWhiteSpace(host) || host.Any(char.IsWhiteSpace))
+            return 1;
+        using var response = await client.GetAsync($"http://{host}:{parsedPort}/healthz");
+        if (!response.IsSuccessStatusCode)
+            return 1;
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStreamAsync());
+        var root = document.RootElement;
+        return root.TryGetProperty("status", out var status) && status.GetString() == "ok" &&
+               root.TryGetProperty("contract", out var contract) && contract.GetString() == "m0-004/v1" ? 0 : 1;
     }
     catch (HttpRequestException) { return 1; }
     catch (TaskCanceledException) { return 1; }
+    catch (JsonException) { return 1; }
 }

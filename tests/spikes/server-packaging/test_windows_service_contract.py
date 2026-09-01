@@ -16,45 +16,45 @@ class WindowsServiceContractTests(unittest.TestCase):
         for required in (
             "Get-CimInstance -ClassName Win32_Service",
             'throw "service already exists: $Name"',
-            "service wrapper already exists; refusing to overwrite",
+            "staging root already exists; refusing to overwrite",
             "Get-NetTCPConnection -State Listen -LocalPort",
             "Assert-PortAvailable 5080",
         ):
             self.assertIn(required, self.source)
-        self.assertIn("(Test-Path -LiteralPath $Wrapper -PathType Leaf) -or (Test-Path -LiteralPath $Marker -PathType Leaf)", self.source)
+        self.assertIn("$StageRoot", self.source)
+        self.assertIn("$BinPath = '\"' + $StageExe", self.source)
+        self.assertNotIn(".cmd", self.source)
 
     def test_cleanup_is_guarded_by_created_this_run_flags(self):
-        self.assertIn("$wrapperCreated = $false", self.source)
-        self.assertIn("$markerCreated = $false", self.source)
-        self.assertIn("$serviceCreated = $false", self.source)
-        self.assertRegex(self.source, r"\$serviceCreated = \$true[\s\S]*?if \(\$serviceCreated -and")
-        self.assertRegex(self.source, r"\$wrapperCreated = \$true[\s\S]*?if \(\$wrapperCreated\)")
+        self.assertIn("$stagingCreated = $false", self.source)
+        self.assertIn("$stagingCreated = $true", self.source)
+        self.assertIn("$installError = $_", self.source)
+        self.assertRegex(self.source, r"\$stagingCreated[\s\S]*?Remove-OwnedStaging")
         self.assertNotIn("catch {}; throw", self.source)
 
     def test_ownership_uses_marker_and_service_binpath_readback(self):
-        self.assertIn("function Test-OwnedWrapper", self.source)
-        self.assertIn("Get-Content -LiteralPath $Marker -Raw", self.source)
-        self.assertIn("$WrapperText", self.source)
-        self.assertIn("-NoNewline -Value $WrapperText", self.source)
-        self.assertIn("-and (Get-Content -LiteralPath $Wrapper -Raw) -eq $WrapperText", self.source)
+        self.assertIn("function Get-Marker", self.source)
+        self.assertIn("ConvertFrom-Json", self.source)
+        self.assertIn("$marker.bin_path", self.source)
         self.assertIn("$service.PathName", self.source)
         self.assertIn("Assert-OwnedService", self.source)
-        self.assertIn("service account is not LocalService", self.source)
+        self.assertIn("service account is not exact LocalService", self.source)
+        self.assertIn("[Guid]::NewGuid()", self.source)
+        self.assertIn("sc.exe", self.source)
+        self.assertIn("description", self.source)
 
     def test_cleanup_retains_referenced_files_and_only_removes_empty_data(self):
         self.assertIn("$installError = $_", self.source)
-        self.assertIn("install cleanup incomplete; service still exists, wrapper and marker were retained", self.source)
+        self.assertIn("install cleanup incomplete; service remains and staging was retained", self.source)
         self.assertIn("throw $installError", self.source)
-        self.assertIn("install cleanup incomplete; service still exists, wrapper and marker were retained", self.source)
-        self.assertIn("function Remove-OwnedDataIfEmpty", self.source)
+        self.assertIn("function Remove-EmptyOwnedData", self.source)
         self.assertIn("Get-ChildItem -LiteralPath $Data -Force", self.source)
-        self.assertNotIn("Remove-Item -Recurse", self.source)
-        self.assertIn("$dataCreated", self.source)
+        self.assertIn("Remove-Item -LiteralPath $StageApp -Recurse -Force", self.source)
 
-    def test_absent_service_requires_both_owned_files_or_both_missing(self):
-        self.assertIn("if (!$wrapperExists -and !$markerExists)", self.source)
-        self.assertIn("if (!$wrapperExists -or !$markerExists -or !(Test-OwnedWrapper))", self.source)
-        self.assertIn("service absent but wrapper ownership state is partial or unknown", self.source)
+    def test_absent_service_requires_root_marker_ownership(self):
+        self.assertIn("if (!(Test-Path -LiteralPath $StageRoot))", self.source)
+        self.assertIn("[void](Get-Marker)", self.source)
+        self.assertIn("refusing to remove unknown staging", self.source)
 
     def test_start_stop_uninstall_prove_ownership_before_mutation(self):
         for action in ("$Action -eq 'start'", "$Action -eq 'stop'"):
@@ -72,6 +72,18 @@ class WindowsServiceContractTests(unittest.TestCase):
         self.assertIn("AddSeconds($TimeoutSeconds)", self.source)
         self.assertIn("if (!(Wait-ServiceState 'Stopped'))", self.source)
         self.assertIn("if (!(Wait-ServiceAbsent))", self.source)
+        self.assertIn("[Diagnostics.Stopwatch]::StartNew()", self.source)
+
+    def test_cli_probe_acl_mutex_and_health_pid_listener_contract(self):
+        self.assertIn('"--spike-data-path"', self.source)
+        self.assertIn('"--spike-port"', self.source)
+        self.assertIn('"--spike-bind-host"', self.source)
+        self.assertIn("--health-probe --spike-port 5080 --spike-probe-host 127.0.0.1", self.source)
+        self.assertIn("IsSuccessStatusCode", (SCRIPT.parent / "src" / "Program.cs").read_text(encoding="utf-8"))
+        self.assertIn('status.GetString() == "ok"', (SCRIPT.parent / "src" / "Program.cs").read_text(encoding="utf-8"))
+        self.assertIn("*S-1-5-19", self.source)
+        self.assertIn("Global\\AssetLibrary-M0-004-Spike", self.source)
+        self.assertIn("OwningProcess -eq $service.ProcessId", self.source)
 
     def test_no_localized_sc_output_is_parsed(self):
         self.assertNotRegex(self.source, r"sc\.exe[^\n]*\|\s*(Select-String|findstr|find)")
