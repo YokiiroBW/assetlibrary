@@ -50,6 +50,9 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 - `git diff --check`：通过。
 - 未运行 CMake/build、20 次 crash/restart、8 小时 soak、大数据或大文件测试。
 
+复核小修同步验证了 `MaxIterations` 允许上限 12000，以及 cleanup 的
+`WaitForExit(5000)` false 分支会抛错终止 helper。
+
 ## 失败 / 跳过
 
 - Windows build/register/verify/unregister：跳过，当前环境无 Windows 工具链和注册表。

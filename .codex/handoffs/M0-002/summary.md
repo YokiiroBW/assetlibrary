@@ -12,6 +12,10 @@
 最多等待 5 秒、释放进程对象；在 deadline 前触达 MaxIterations 会明确失败，
 不会误报 8 小时通过。此次修订不改变 Windows blockers，状态仍为 `partial`。
 
+复核小修将 `MaxIterations` 上限收紧为 12000（覆盖 96 小时/30 秒约 11520
+轮）；若 Host 在强制停止后 5 秒仍未退出，helper 会明确抛错并终止，不会继续
+下一轮或报告完成。
+
 ## 完成内容
 
 已交付可审查的 Windows Shell Spike 包：
