@@ -9,7 +9,7 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，13/13 |
+| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v` | 通过，14/14 |
 | `git diff --check` | 通过 |
 | `cmake -S tests/spikes/windows-shell -B /tmp/m0-002-cmake-configure-unix -G 'Unix Makefiles'` | 通过配置；警告为 Windows-only，非 Windows 构建 |
 | `python3 scripts/validate_handoff.py` | 通过 |
@@ -40,9 +40,18 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 
 ## 通过
 
-- Python 静态/契约测试 13/13。
+- Python 静态/契约测试 14/14（含 build/soak 资源护栏静态断言）。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
+
+2026-09-02 低资源修订实际执行：
+
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`：通过，14/14。
+- `git diff --check`：通过。
+- 未运行 CMake/build、20 次 crash/restart、8 小时 soak、大数据或大文件测试。
+
+复核小修的静态断言包含 `MaxIterations` 允许上限 12000，以及 cleanup 的
+`WaitForExit(5000)` false 分支抛错终止 helper；未执行 PowerShell 分支或 helper。
 
 ## 失败 / 跳过
 

@@ -1,12 +1,14 @@
 [CmdletBinding()]
 param(
   [ValidateSet('Debug', 'Release')]
-  [string] $Configuration = 'Release'
+  [string] $Configuration = 'Release',
+  [ValidateRange(1, 8)]
+  [int] $Parallel = 2
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $build = Join-Path $root 'build'
 
 cmake -S $root -B $build -A x64
-cmake --build $build --config $Configuration --parallel
+cmake --build $build --config $Configuration --parallel $Parallel
 Write-Host "Built $Configuration x64 binaries under $build\bin"
