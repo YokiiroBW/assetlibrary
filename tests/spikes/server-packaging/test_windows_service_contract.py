@@ -42,7 +42,10 @@ class WindowsServiceContractTests(unittest.TestCase):
         self.assertIn("service account is not LocalService", self.source)
 
     def test_cleanup_retains_referenced_files_and_only_removes_empty_data(self):
-        self.assertIn("install cleanup failed; service still exists, wrapper and marker were retained", self.source)
+        self.assertIn("$installError = $_", self.source)
+        self.assertIn("install cleanup incomplete; service still exists, wrapper and marker were retained", self.source)
+        self.assertIn("throw $installError", self.source)
+        self.assertIn("install cleanup incomplete; service still exists, wrapper and marker were retained", self.source)
         self.assertIn("function Remove-OwnedDataIfEmpty", self.source)
         self.assertIn("Get-ChildItem -LiteralPath $Data -Force", self.source)
         self.assertNotIn("Remove-Item -Recurse", self.source)
@@ -60,7 +63,7 @@ class WindowsServiceContractTests(unittest.TestCase):
             block = self.source[start:] if end < 0 else self.source[start:end]
             self.assertIn("Assert-OwnedService", block)
         uninstall = self.source[self.source.index("$Action -eq 'uninstall'"):]
-        self.assertIn("[void](Assert-OwnedService)", uninstall)
+        self.assertIn("$service = Assert-OwnedService", uninstall)
         self.assertIn("!(Test-OwnedWrapper)", uninstall)
 
     def test_stop_delete_and_final_readback_are_bounded(self):
