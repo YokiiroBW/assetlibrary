@@ -163,6 +163,24 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("shell:::{9D52B2F8-9EF4-4F4C-9C1A-529F665F0A02}", protocol)
         self.assertIn("Explorer soak evidence", protocol)
 
+    def test_build_and_soak_resource_guardrails_are_bounded(self):
+        build = (SCRIPTS / "build.ps1").read_text(encoding="utf-8")
+        soak = (SCRIPTS / "soak.ps1").read_text(encoding="utf-8")
+        self.assertRegex(build, r"\[ValidateRange\(1, 8\)\]\s*\[int\] \$Parallel = 2")
+        self.assertIn("--parallel $Parallel", build)
+        self.assertRegex(soak, r"\[ValidateRange\(1, 300\)\]\s*\[int\] \$IntervalSeconds = 30")
+        self.assertRegex(soak, r"\[ValidateRange\(1, 100000\)\]\s*\[int\] \$MaxIterations = 1000")
+        self.assertIn("while ((Get-Date) -lt $deadline -and $iteration -lt $MaxIterations)", soak)
+        self.assertIn("$process = Start-Process", soak)
+        self.assertIn("try {", soak)
+        self.assertIn("finally {", soak)
+        self.assertIn("Stop-Process -Id $process.Id -Force", soak)
+        self.assertIn("$process.WaitForExit(5000)", soak)
+        self.assertIn("$process.Dispose()", soak)
+        self.assertIn("$iteration -ge $MaxIterations", soak)
+        self.assertIn("8-hour soak is incomplete", soak)
+        self.assertEqual(1, soak.count("$process = Start-Process"))
+
     def test_no_generated_or_private_artifacts_are_packaged(self):
         names = {path.name for path in ROOT.rglob("*") if path.is_file()}
         self.assertFalse({"AssetShellExtension.dll", "AssetHostStub.exe"} & names)

@@ -26,10 +26,16 @@ save the evidence outside the repository or in an approved test-results store.
    normal UI scheduling), without an Explorer hang or process crash; restart normal
    host and confirm recovery. The Explorer view activation thread must return
    without waiting for this cleanup.
-6. Run `soak.ps1 -Hours 8` in parallel as the host-cycle signal, while keeping
+6. Run `soak.ps1 -Hours 8 -IntervalSeconds 30 -MaxIterations 1000` in parallel as the host-cycle signal, while keeping
    the manual Explorer view open and periodically recording bounded response,
    memory, and recovery observations. This combined operator run is the only
    candidate for the 8-hour Explorer gate.
+
+The helper defaults to a 30-second interval and 1000 maximum iterations (the
+8-hour default requires about 960 cycles). It keeps at most one host process per
+cycle, stops it, waits up to five seconds for exit, and disposes the process
+handle in `finally`. Reaching `MaxIterations` before the deadline is an explicit
+incomplete-run failure, not a passing soak result.
 7. Unregister with `unregister.ps1`, restart Explorer, and confirm the namespace
    disappears and ordinary Explorer navigation remains functional.
 
