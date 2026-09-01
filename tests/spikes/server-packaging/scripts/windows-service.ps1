@@ -103,8 +103,9 @@ function Install-Service {
     Invoke-Sc @('create',$Name,'binPath=',$BinPath,'start=','demand','obj=','NT AUTHORITY\LocalService')
     $serviceCreated = $true
     Invoke-Sc @('description',$Name,$description)
-    [void](Assert-OwnedService)
-    @{ action='install'; name=$Name; state='Stopped'; binPath=$BinPath; startName='NT AUTHORITY\LocalService'; absent=$false } | ConvertTo-Json -Compress
+    $service = Assert-OwnedService
+    if ($service.State -ne 'Stopped') { throw 'service did not remain Stopped after install' }
+    @{ action='install'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress
   } catch {
     $installError = $_
     if ($stagingCreated) {
@@ -135,8 +136,8 @@ try {
   if (!$mutex.WaitOne(30000)) { throw 'operation mutex timeout' }
   $mutexHeld = $true
   if ($Action -eq 'install') { Install-Service; exit 0 }
-  if ($Action -eq 'start') { $service = Assert-OwnedService; Invoke-Sc @('start',$Name); if (!(Wait-ServiceState 'Running')) { throw 'service did not reach Running state' }; $service = Assert-OwnedService; @{ action='start'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
-  if ($Action -eq 'stop') { $service = Assert-OwnedService; if ($service.State -ne 'Stopped') { Invoke-Sc @('stop',$Name); if (!(Wait-ServiceState 'Stopped')) { throw 'service did not reach Stopped state' } }; $service = Assert-OwnedService; @{ action='stop'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
+  if ($Action -eq 'start') { $service = Assert-OwnedService; Invoke-Sc @('start',$Name); if (!(Wait-ServiceState 'Running')) { throw 'service did not reach Running state' }; $service = Assert-OwnedService; if ($service.State -ne 'Running') { throw 'service readback is not Running' }; @{ action='start'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
+  if ($Action -eq 'stop') { $service = Assert-OwnedService; if ($service.State -ne 'Stopped') { Invoke-Sc @('stop',$Name); if (!(Wait-ServiceState 'Stopped')) { throw 'service did not reach Stopped state' } }; $service = Assert-OwnedService; if ($service.State -ne 'Stopped') { throw 'service readback is not Stopped' }; @{ action='stop'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
   if ($Action -eq 'health') { Invoke-Health; exit 0 }
   if ($Action -eq 'uninstall') {
     $service = Get-ServiceObject

@@ -90,6 +90,9 @@ class WindowsServiceContractTests(unittest.TestCase):
         self.assertIn("*S-1-5-19", self.source)
         self.assertIn("Global\\AssetLibrary-M0-004-Spike", self.source)
         self.assertIn("OwningProcess -eq $service.ProcessId", self.source)
+        self.assertIn("service readback is not Running", self.source)
+        self.assertIn("service readback is not Stopped", self.source)
+        self.assertIn("service did not remain Stopped after install", self.source)
 
     def test_no_localized_sc_output_is_parsed(self):
         self.assertNotRegex(self.source, r"sc\.exe[^\n]*\|\s*(Select-String|findstr|find)")
