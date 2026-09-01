@@ -171,6 +171,24 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("Do not switch this Spike to HKLM", register)
         self.assertLess(register.index("EnableLUA"), register.index("Set-ItemProperty"))
 
+    def test_registration_refreshes_shell_cache_symmetrically(self):
+        register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
+        unregister = (SCRIPTS / "unregister.ps1").read_text(encoding="utf-8")
+        for script in (register, unregister):
+            self.assertIn("Notify-ShellAssociationChanged", script)
+            self.assertIn("SHChangeNotify", script)
+            self.assertIn("0x08000000", script)
+            self.assertIn("SHCNE_ASSOCCHANGED", script)
+            self.assertIn("SHCNF_IDLIST", script)
+        self.assertLess(
+            register.index("Set-ItemProperty -LiteralPath $namespace -Name '(default)'"),
+            register.rindex("Notify-ShellAssociationChanged"),
+        )
+        self.assertLess(
+            unregister.index("Remove-Item -LiteralPath $classes"),
+            unregister.rindex("Notify-ShellAssociationChanged"),
+        )
+
     def test_existing_values_are_restored_and_new_values_removed(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")
         self.assertIn("$originalValues", register)

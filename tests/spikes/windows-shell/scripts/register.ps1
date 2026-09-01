@@ -34,6 +34,19 @@ $createdKeys = [System.Collections.Generic.List[string]]::new()
 $originalValues = @{}
 $missingValues = @{}
 
+function Notify-ShellAssociationChanged {
+  if (-not ('AssetLibraryM0002.ShellChangeNotifier' -as [type])) {
+    Add-Type -Namespace AssetLibraryM0002 -Name ShellChangeNotifier -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("shell32.dll")]
+public static extern void SHChangeNotify(
+  uint eventId, uint flags, System.IntPtr item1, System.IntPtr item2);
+'@
+  }
+  # SHCNE_ASSOCCHANGED with SHCNF_IDLIST refreshes Explorer's association cache.
+  [AssetLibraryM0002.ShellChangeNotifier]::SHChangeNotify(
+    0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
+}
+
 function Track-Value([string] $path, [string] $name) {
   $key = "$path|$name"
   $missingValues[$key] = $true
@@ -100,6 +113,7 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'register M0-002 shell extensio
     Ensure-Key $namespace
     Set-ItemProperty -LiteralPath $namespace -Name AssetLibraryOwner -Value $owner
     Set-ItemProperty -LiteralPath $namespace -Name '(default)' -Value 'AssetLibrary M0-002'
+    Notify-ShellAssociationChanged
     Write-Host "Registered for current user only: $resolvedDll"
   } catch {
     # Restore values first, then remove only keys created by this invocation

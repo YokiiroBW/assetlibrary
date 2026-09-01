@@ -28,6 +28,20 @@ $inprocOwned = $inprocExists -and
 $namespaceOwned = $namespaceExists -and
   $namespaceRegistration.AssetLibraryOwner -eq 'AssetLibrary.M0-002' -and
   $namespaceRegistration.'(default)' -eq 'AssetLibrary M0-002'
+
+function Notify-ShellAssociationChanged {
+  if (-not ('AssetLibraryM0002.ShellChangeNotifier' -as [type])) {
+    Add-Type -Namespace AssetLibraryM0002 -Name ShellChangeNotifier -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("shell32.dll")]
+public static extern void SHChangeNotify(
+  uint eventId, uint flags, System.IntPtr item1, System.IntPtr item2);
+'@
+  }
+  # SHCNE_ASSOCCHANGED with SHCNF_IDLIST refreshes Explorer's association cache.
+  [AssetLibraryM0002.ShellChangeNotifier]::SHChangeNotify(
+    0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
+}
+
 if (($classExists -or $inprocExists -or $shellFolderExists) -and -not $classOwned) {
   throw 'Refusing to remove a CLSID tree without the expected root owner/name.'
 }
@@ -56,5 +70,6 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'unregister M0-002 shell extens
   if ($classOwned) {
     Remove-Item -LiteralPath $classes -Recurse -Force
   }
+  Notify-ShellAssociationChanged
   Write-Host 'Removed M0-002 HKCU registration. Restart Explorer to confirm recovery.'
 }
