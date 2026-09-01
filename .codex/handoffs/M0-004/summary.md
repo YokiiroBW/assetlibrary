@@ -16,7 +16,7 @@
 
 ## 测试结果
 
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests/spikes/server-packaging/test_windows_service_contract.py -v` — 6 passed。
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests/spikes/server-packaging/test_windows_service_contract.py -v` — 8 passed。
 - `git diff --check` — 通过。
 - 未运行 dotnet、Docker、既有 `test_spike.py` 或任何构建/发布。
 
@@ -27,3 +27,9 @@
 ## 架构影响
 
 仅修改 server-packaging test adapter 与独立静态契约测试；未修改生产目录、共享契约、任务登记、项目状态、Vault、Docker 定义或新增依赖。保留单脚本 PowerShell/sc.exe adapter 形态。
+
+## 2026-09-02 correction 追加
+
+本次 correction 保留 clean replacement 的既有证据：发行输入提交 `b5d19cebafdb536a61b33917715419528e7f10e1`；SDK 10.0.111/.NET 10.0.11；Linux health、优雅停止、重启、缺失配置、端口占用和只读数据路径已通过；两次 cold publish manifest 一致；Docker Compose 静态 config 通过；Docker daemon 与 Windows 主机门禁仍未执行。既有 artifact 观测为 linux-x64 78,256 bytes / `a2e5c0a1d967b573721b94663d67a4e9fcca4483c8c461c54c2cf9d2a48586f3`、win-x64 162,816 bytes / `25587fad799168cd11efeeed3e00c4508e6abcfe78269174f49831c85961f2d9`。
+
+本 correction 仅增加 Windows Service 防覆盖、归属和清理边界；状态仍为 `partial`，不得据此升级 Windows/Docker 外部门禁。
