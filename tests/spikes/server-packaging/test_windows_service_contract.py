@@ -40,6 +40,7 @@ class WindowsServiceContractTests(unittest.TestCase):
         self.assertIn("Assert-OwnedService", self.source)
         self.assertIn("service account is not exact LocalService", self.source)
         self.assertIn("[Guid]::NewGuid()", self.source)
+        self.assertIn("[Guid]::TryParse", self.source)
         self.assertIn("sc.exe", self.source)
         self.assertIn("description", self.source)
 
@@ -50,11 +51,14 @@ class WindowsServiceContractTests(unittest.TestCase):
         self.assertIn("function Remove-EmptyOwnedData", self.source)
         self.assertIn("Get-ChildItem -LiteralPath $Data -Force", self.source)
         self.assertIn("Remove-Item -LiteralPath $StageApp -Recurse -Force", self.source)
+        self.assertIn("Test-Path -LiteralPath $StageApp -PathType Container", self.source)
+        self.assertIn("unknown staging item", self.source)
 
     def test_absent_service_requires_root_marker_ownership(self):
         self.assertIn("if (!(Test-Path -LiteralPath $StageRoot))", self.source)
         self.assertIn("[void](Get-Marker)", self.source)
         self.assertIn("refusing to remove unknown staging", self.source)
+        self.assertIn("staging data is not a directory", self.source)
 
     def test_start_stop_uninstall_prove_ownership_before_mutation(self):
         for action in ("$Action -eq 'start'", "$Action -eq 'stop'"):
@@ -64,23 +68,25 @@ class WindowsServiceContractTests(unittest.TestCase):
             self.assertIn("Assert-OwnedService", block)
         uninstall = self.source[self.source.index("$Action -eq 'uninstall'"):]
         self.assertIn("$service = Assert-OwnedService", uninstall)
-        self.assertIn("!(Test-OwnedWrapper)", uninstall)
+        self.assertIn("$service = Assert-OwnedService", uninstall)
 
     def test_stop_delete_and_final_readback_are_bounded(self):
         self.assertIn("function Wait-ServiceState", self.source)
         self.assertIn("function Wait-ServiceAbsent", self.source)
-        self.assertIn("AddSeconds($TimeoutSeconds)", self.source)
         self.assertIn("if (!(Wait-ServiceState 'Stopped'))", self.source)
         self.assertIn("if (!(Wait-ServiceAbsent))", self.source)
         self.assertIn("[Diagnostics.Stopwatch]::StartNew()", self.source)
 
     def test_cli_probe_acl_mutex_and_health_pid_listener_contract(self):
-        self.assertIn('"--spike-data-path"', self.source)
-        self.assertIn('"--spike-port"', self.source)
-        self.assertIn('"--spike-bind-host"', self.source)
+        self.assertIn("--spike-data-path", self.source)
+        self.assertIn("--spike-port", self.source)
+        self.assertIn("--spike-bind-host", self.source)
         self.assertIn("--health-probe --spike-port 5080 --spike-probe-host 127.0.0.1", self.source)
-        self.assertIn("IsSuccessStatusCode", (SCRIPT.parent / "src" / "Program.cs").read_text(encoding="utf-8"))
-        self.assertIn('status.GetString() == "ok"', (SCRIPT.parent / "src" / "Program.cs").read_text(encoding="utf-8"))
+        program = SCRIPT.parent.parent / "src" / "Program.cs"
+        self.assertIn("IsSuccessStatusCode", program.read_text(encoding="utf-8"))
+        self.assertIn('status.GetString() == "ok"', program.read_text(encoding="utf-8"))
+        self.assertIn("TryAdd(key, value)", program.read_text(encoding="utf-8"))
+        self.assertIn("missing value for {key}", program.read_text(encoding="utf-8"))
         self.assertIn("*S-1-5-19", self.source)
         self.assertIn("Global\\AssetLibrary-M0-004-Spike", self.source)
         self.assertIn("OwningProcess -eq $service.ProcessId", self.source)

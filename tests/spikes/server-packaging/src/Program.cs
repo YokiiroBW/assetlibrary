@@ -47,12 +47,14 @@ static Dictionary<string, string> ReadOptions(string[] args)
     var options = new Dictionary<string, string>(StringComparer.Ordinal);
     for (var i = 0; i < args.Length; i++)
     {
-        if (args[i] is not ("--spike-data-path" or "--spike-port" or "--spike-bind-host" or "--spike-probe-host"))
+        var key = args[i];
+        if (key is not ("--spike-data-path" or "--spike-port" or "--spike-bind-host" or "--spike-probe-host"))
             continue;
         if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
-            throw new ArgumentException($"missing value for {args[i]}");
-        if (!options.TryAdd(args[i], args[++i]))
-            throw new ArgumentException($"duplicate option {args[i]}");
+            throw new ArgumentException($"missing value for {key}");
+        var value = args[++i];
+        if (!options.TryAdd(key, value))
+            throw new ArgumentException($"duplicate option {key}");
     }
     return options;
 }
@@ -86,4 +88,5 @@ static async Task<int> HealthProbe(IReadOnlyDictionary<string, string> options)
     catch (HttpRequestException) { return 1; }
     catch (TaskCanceledException) { return 1; }
     catch (JsonException) { return 1; }
+    catch (UriFormatException) { return 1; }
 }

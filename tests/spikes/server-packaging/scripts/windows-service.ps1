@@ -21,7 +21,8 @@ function Get-ServiceObject { Get-CimInstance -ClassName Win32_Service -Filter "N
 function Get-Marker {
   if (!(Test-Path -LiteralPath $Marker -PathType Leaf)) { throw 'owner marker is missing' }
   $value = Get-Content -LiteralPath $Marker -Raw | ConvertFrom-Json
-  if ($value.owner -ne $Owner -or [string]::IsNullOrWhiteSpace($value.install_id)) { throw 'owner marker is invalid' }
+  $parsed = [Guid]::Empty
+  if ($value.owner -ne $Owner -or ![Guid]::TryParse($value.install_id, [ref]$parsed)) { throw 'owner marker is invalid' }
   if ($value.bin_path -ne $BinPath -or $value.data_path -ne $Data) { throw 'owner marker paths do not match canonical staging' }
   return $value
 }
@@ -67,7 +68,14 @@ function Remove-OwnedStaging {
   $marker = Get-Marker
   if ($null -ne (Get-ServiceObject)) { throw 'refusing to remove staging while service exists' }
   if ($marker.bin_path -ne $BinPath -or $marker.data_path -ne $Data) { throw 'refusing to remove unknown staging' }
-  Remove-Item -LiteralPath $StageApp -Recurse -Force
+  $top = @(Get-ChildItem -LiteralPath $StageRoot -Force)
+  if ($top.Name | Where-Object { $_ -notin @('app','data','owner.json') }) { throw 'refusing to remove unknown staging item' }
+  if (Test-Path -LiteralPath $StageApp) {
+    if (!(Test-Path -LiteralPath $StageApp -PathType Container)) { throw 'staging app is not a directory' }
+    if (!(Test-Path -LiteralPath $StageExe -PathType Leaf)) { throw 'staged executable is missing' }
+    Remove-Item -LiteralPath $StageApp -Recurse -Force
+  }
+  if ((Test-Path -LiteralPath $Data) -and !(Test-Path -LiteralPath $Data -PathType Container)) { throw 'staging data is not a directory' }
   Remove-EmptyOwnedData
   if (!(Test-Path -LiteralPath $Data)) { Remove-Item -LiteralPath $Marker -Force }
   if ((Test-Path -LiteralPath $StageRoot) -and @(Get-ChildItem -LiteralPath $StageRoot -Force).Count -eq 0) { Remove-Item -LiteralPath $StageRoot -Force }
@@ -87,7 +95,9 @@ function Install-Service {
     $markerValue = [ordered]@{ owner = $Owner; install_id = $installId; bin_path = $BinPath; data_path = $Data }
     $markerValue | ConvertTo-Json -Compress | Set-Content -LiteralPath $Marker -Encoding UTF8 -NoNewline
     Get-ChildItem -LiteralPath $ArtifactDir -Force | Copy-Item -Destination $StageApp -Recurse -Force
+    if (!(Test-Path -LiteralPath $StageExe -PathType Leaf)) { throw 'staged executable is missing' }
     New-Item -ItemType Directory -Path $Data -Force | Out-Null
+    Invoke-Icacls $StageRoot '(OI)(CI)(RX)'
     Invoke-Icacls $StageApp '(OI)(CI)(RX)'
     Invoke-Icacls $Data '(OI)(CI)(M)'
     Invoke-Sc @('create',$Name,'binPath=',$BinPath,'start=','demand','obj=','NT AUTHORITY\LocalService')
@@ -125,8 +135,8 @@ try {
   if (!$mutex.WaitOne(30000)) { throw 'operation mutex timeout' }
   $mutexHeld = $true
   if ($Action -eq 'install') { Install-Service; exit 0 }
-  if ($Action -eq 'start') { $service = Assert-OwnedService; Invoke-Sc @('start',$Name); $service = Assert-OwnedService; if (!(Wait-ServiceState 'Running')) { throw 'service did not reach Running state' }; @{ action='start'; name=$Name; state='Running'; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
-  if ($Action -eq 'stop') { $service = Assert-OwnedService; if ($service.State -ne 'Stopped') { $service = Assert-OwnedService; Invoke-Sc @('stop',$Name); $service = Assert-OwnedService; if (!(Wait-ServiceState 'Stopped')) { throw 'service did not reach Stopped state' } }; @{ action='stop'; name=$Name; state='Stopped'; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
+  if ($Action -eq 'start') { $service = Assert-OwnedService; Invoke-Sc @('start',$Name); if (!(Wait-ServiceState 'Running')) { throw 'service did not reach Running state' }; $service = Assert-OwnedService; @{ action='start'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
+  if ($Action -eq 'stop') { $service = Assert-OwnedService; if ($service.State -ne 'Stopped') { Invoke-Sc @('stop',$Name); if (!(Wait-ServiceState 'Stopped')) { throw 'service did not reach Stopped state' } }; $service = Assert-OwnedService; @{ action='stop'; name=$Name; state=$service.State; binPath=$service.PathName; startName=$service.StartName; processId=[int]$service.ProcessId; absent=$false } | ConvertTo-Json -Compress; exit 0 }
   if ($Action -eq 'health') { Invoke-Health; exit 0 }
   if ($Action -eq 'uninstall') {
     $service = Get-ServiceObject
