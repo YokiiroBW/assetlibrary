@@ -40,9 +40,15 @@ host-only soak 与人工 Explorer protocol 分工；无生成二进制、reg/log
 
 ## 通过
 
-- Python 静态/契约测试 13/13。
+- Python 静态/契约测试 14/14（含 build/soak 资源护栏静态断言）。
 - Git whitespace check。
 - Linux CMake configure 入口解析。
+
+2026-09-02 低资源修订实际执行：
+
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`：通过，14/14。
+- `git diff --check`：通过。
+- 未运行 CMake/build、20 次 crash/restart、8 小时 soak、大数据或大文件测试。
 
 ## 失败 / 跳过
 

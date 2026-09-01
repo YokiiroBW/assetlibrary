@@ -5,32 +5,22 @@
   "milestone": "M0",
   "status": "partial",
   "owner": "codex-agent-m0-002",
-  "branch": "codex/m0-002-windows-shell-spike",
-  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002",
-  "commit": "dd8e3536ed6f1bf11593052317ade2def085a74a",
+  "branch": "codex/m0-002-gate-guardrails",
+  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002-gate-guardrails",
+  "commit": "ebf70ddc2e44b699510cd6b676f78901c4d566a1",
   "changed_files": [
-    "tests/spikes/windows-shell/CMakeLists.txt",
-    "tests/spikes/windows-shell/README.md",
-    "tests/spikes/windows-shell/src/AssetShellProtocol.h",
-    "tests/spikes/windows-shell/src/AssetShellExtension.cpp",
-    "tests/spikes/windows-shell/src/AssetHostStub.cpp",
     "tests/spikes/windows-shell/scripts/build.ps1",
-    "tests/spikes/windows-shell/scripts/register.ps1",
-    "tests/spikes/windows-shell/scripts/verify-registration.ps1",
-    "tests/spikes/windows-shell/scripts/unregister.ps1",
-    "tests/spikes/windows-shell/scripts/run-host.ps1",
     "tests/spikes/windows-shell/scripts/soak.ps1",
     "tests/spikes/windows-shell/test_contracts.py",
     "docs/spikes/M0-002/README.md",
     "docs/spikes/M0-002/explorer-soak-protocol.md",
-    ".codex/tasks/M0-002.md",
     ".codex/handoffs/M0-002/summary.md",
     ".codex/handoffs/M0-002/result.json",
     ".codex/handoffs/M0-002/tests.md"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 13,
+    "passed": 14,
     "failed": 0,
     "skipped": 8,
     "report": "tests.md"
@@ -68,7 +58,8 @@
     "contract_changes": [],
     "architecture_tests": [
       "test_contracts.py forbidden-dependency and package-boundary checks",
-      "test_contracts.py version/length/timeout and HKCU registration symmetry checks"
+      "test_contracts.py version/length/timeout and HKCU registration symmetry checks",
+      "test_contracts.py build/soak resource-boundary and cleanup checks"
     ],
     "technical_debt": [
       "Real Windows evidence and 8-hour soak required before any architecture freeze",

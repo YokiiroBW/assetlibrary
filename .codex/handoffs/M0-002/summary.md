@@ -4,6 +4,14 @@
 
 `partial`
 
+## 2026-09-02 低资源护栏修订
+
+在 `0faa07c` 基线上的低资源修订已完成：build 入口新增默认 2、范围 1–8
+的有界并行参数；soak 入口为间隔和最大轮数增加 ValidateRange，默认 1000
+轮以覆盖 8 小时/30 秒约 960 轮。每轮最多启动一个 Host，并在 finally 中停止、
+最多等待 5 秒、释放进程对象；在 deadline 前触达 MaxIterations 会明确失败，
+不会误报 8 小时通过。此次修订不改变 Windows blockers，状态仍为 `partial`。
+
 ## 完成内容
 
 已交付可审查的 Windows Shell Spike 包：
@@ -75,19 +83,24 @@ Windows SDK 提供的 C++/WinRT `winrt/base.h`。没有第三方运行时、网�
 
 ## 测试结果
 
-- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（13/13）。
+- 通过：`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/spikes/windows-shell -p 'test_*.py' -v`（14/14）。
 - 通过：`git diff --check`。
 - 通过：Linux CMake configure（Unix Makefiles，仅确认入口可解析；不是 Windows 构建证据）。
 - 未执行：Windows 11 x64 CMake/MSVC build、HKCU register/verify/unregister、
   Explorer navigation/custom view、host missing/crash/timeout/invalid recovery、
   crash/restart 20-cycle 和 8-hour soak。
 
+本次低资源修订仅执行上述 Python 静态/契约 suite 与 diff 检查；未运行 CMake/build、
+20 次循环、8 小时 soak、大数据或大文件测试。
+
 ## 架构测试与质量门禁
 
 Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadline、取消完成顺序、
 异步 view activation、`IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
 新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
-host-only soak 定位和生成/私密产物排除。没有真实 Windows 运行时证据，
+host-only soak 定位和生成/私密产物排除；新增资源护栏契约检查 build 默认并行度、
+soak interval/max 限制、单一进程、finally 清理、WaitForExit(5000)、Dispose 及
+未完成 soak 的明确失败语义。没有真实 Windows 运行时证据，
 故障隔离和 Explorer 恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响
