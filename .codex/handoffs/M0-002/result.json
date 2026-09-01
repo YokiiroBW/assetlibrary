@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-gate-guardrails",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-002-gate-guardrails",
-  "commit": "410556834b8206ee2b7c9f6bdc608bbf85efee56",
+  "commit": "7474f052d9ff7460ca708a1bdb090d333d178a6c",
   "changed_files": [
     "tests/spikes/windows-shell/scripts/build.ps1",
     "tests/spikes/windows-shell/scripts/soak.ps1",
