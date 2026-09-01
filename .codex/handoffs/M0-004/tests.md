@@ -32,4 +32,8 @@ Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap�
 
 ## 2026-09-02 correction
 
-新增独立 `test_windows_service_contract.py`，只读脚本文本，不导入或触发 `test_spike.py`；8/8 通过。新增覆盖括号化 Test-Path 预检、wrapper 原文与 marker 双重比较、服务账户统一 readback、created-this-run 清理、服务仍存在时保留文件、Data 空目录限制、service 不存在时残留三态，以及 stop/delete 有界等待与最终 readback。未执行 Windows/PowerShell、dotnet、Docker 或重型 publish。
+新增独立 `test_windows_service_contract.py`，只读脚本文本，不导入或触发 `test_spike.py`；9/9 通过。新增覆盖括号化 Test-Path 预检、wrapper 原文与 marker 双重比较、服务账户统一 readback、created-this-run 清理、服务仍存在时保留文件、Data 空目录限制、service 不存在时残留三态，以及 stop/delete 有界等待与最终 readback。未执行 Windows/PowerShell、dotnet、Docker 或重型 publish。
+
+## 2026-09-02 direct-executable correction
+
+当前源码契约检查覆盖 direct EXE binPath/no `.cmd`、CLI 映射与 probe JSON 校验、系统临时 staging、SID ACL、完整 LocalService、mutex、GUID/Description marker 所有权、PID/listener health、Stopwatch bounded wait、未知路径无递归删除。测试仅为独立静态测试；未重新 publish/build，历史 artifact/hash 不代表当前源码。

@@ -36,4 +36,8 @@ Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Wind
 
 ## 2026-09-02 correction
 
-本次 correction 收紧 Windows Service adapter 的固定服务、TEMP wrapper、owner marker 和 5080 端口预检；所有服务 mutation 前均通过 `Win32_Service` binPath、wrapper 原文与 marker、LocalService 账户 readback。失败清理仅处理本次创建且已确认不再被服务引用的对象，Data 只删除任务路径下的空目录；service 不存在时对 wrapper/marker 的双缺失、双精确归属和部分/未知残留分别处理。新增独立静态契约测试 8/8 通过。Windows 实机仍未执行，handoff 保持 `partial`。
+本次 correction 收紧 Windows Service adapter 的固定服务、TEMP wrapper、owner marker 和 5080 端口预检；所有服务 mutation 前均通过 `Win32_Service` binPath、wrapper 原文与 marker、LocalService 账户 readback。失败清理仅处理本次创建且已确认不再被服务引用的对象，Data 只删除任务路径下的空目录；service 不存在时对 wrapper/marker 的双缺失、双精确归属和部分/未知残留分别处理。新增独立静态契约测试 9/9 通过。Windows 实机仍未执行，handoff 保持 `partial`。
+
+## 2026-09-02 direct-executable correction
+
+当前 correction 将完整 win-x64 artifact staging 到系统临时目录并让 SCM 直接执行 staged EXE；新增 CLI 配置映射、LocalService SID ACL、命名 mutex、随机 install ID/Description marker、PID/listener health readback 与 JSON evidence。当前源码尚未重新 publish/build；原 `b5d19cebafdb536a61b33917715419528e7f10e1` artifact/hash 仍仅代表历史 clean replacement，Windows 外部门禁前必须用当前源码重新发行。状态保持 `partial`。

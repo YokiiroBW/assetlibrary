@@ -34,3 +34,7 @@ Docker 门禁命令（需可访问 daemon）：`docker build -f tests/spikes/ser
 ## 规模与安全边界
 
 Spike 不触碰真实资产目录；可写数据只进入测试临时目录或容器 named volume。自包含发布约 106–107 MiB，发布阶段为 O(number of copied runtime files)，运行时健康路径为 O(1)；生产 50 万资产的索引、数据库、缓存和 Worker 性能不在本 Spike 范围内。
+
+## 2026-09-02 Windows Service correction
+
+Windows adapter 现将完整 win-x64 artifact staging 到系统临时目录，SCM 直接执行 staged EXE 与 Spike-local 参数；LocalService 使用完整账户名并以 SID ACL 读取 app、修改 data。服务操作以命名 mutex 串行，并以随机 install ID、marker、binPath、data path、Description、账户和状态 readback 证明归属。health 入口核对运行进程与 5080 listener 后要求 probe 返回 2xx 且 JSON `status=ok`、`contract=m0-004/v1`。本 correction 未重新 publish/build；旧 artifact/hash 仅为历史 clean replacement 证据，外部门禁前必须使用当前源码重新发行。Windows/Docker 仍未验证，handoff 保持 partial。
