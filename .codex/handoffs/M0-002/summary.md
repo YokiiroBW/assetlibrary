@@ -16,6 +16,11 @@
 轮）；若 Host 在强制停止后 5 秒仍未退出，helper 会明确抛错并终止，不会继续
 下一轮或报告完成。
 
+后续复核补充了已有 `AssetHostStub` 进程的 fail-closed 预检，并要求人工协议在
+启动 helper 前停止持续 normal Host。soak 以单调 Stopwatch 作为时长门禁，记录每轮
+实际耗时，使用默认 60 秒的有界调度容差检测间隔异常；只有完成有效 cleanup 后才
+增加轮次，非零提前退出会失败。Windows/system sleep 不属于有效 soak 证据。
+
 ## 完成内容
 
 已交付可审查的 Windows Shell Spike 包：
