@@ -4,9 +4,9 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "M0",
   "status": "m0_external_gates_blocked",
-  "next_action": "obtain the external M0-002, M0-004, M0-006 and M0-008 evidence before activating M0-009",
+  "next_action": "rebuild the current M0-004 correction with bounded resources, then obtain the external M0-002, M0-004, M0-006 and M0-008 evidence before activating M0-009",
   "architecture_contract_status": "draft",
-  "implementation_status": "m0_local_spikes_integrated_external_gates_pending",
+  "implementation_status": "m0_guardrails_integrated_current_m0_004_source_unpublished_external_gates_pending",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -20,7 +20,9 @@
     "M0-008 merged as partial at 14e8cc0 and its process-tree correction was merged after 25 Provider tests; hard Linux network/filesystem confinement, Windows isolation and RPC cancel acknowledgement remain unmet gates.",
     "M0-005 merged at deb813b after a fresh PostgreSQL 16.15 source bootstrap, repeated 2/2 integration tests, 500,000-asset query-plan review and repository validation; PostgreSQL alone is sufficient for this Spike, while path-index and production backup/query contracts remain M0-009 decisions.",
     "M0-006 clean replacement implementation 7caf70c and metadata 45a9a43 passed 40/40 tests, independent review and post-merge repository verification, then merged at a592fd7. Linux same/cross-device crash recovery, strong hashing, replacement/trash semantics and lease fencing are proven for the bounded Spike; Windows primitives, 1/20/100 GiB runs and the non-cooperative Linux namespace-mutation policy remain explicit gates.",
-    "Current host has no Windows executor and cannot access the Docker daemon; environment-specific gates must remain explicit."
+    "Current host has no Windows executor and cannot access the Docker daemon; environment-specific gates must remain explicit.",
+    "M0-002 bounded build/soak guardrails implementation 7474f05 merged at 73f9894 after independent review and 14/14 resource-capped static tests; real Windows, Explorer and 8-hour evidence remain unmet.",
+    "M0-004 direct-EXE Windows Service correction cb0b467 merged at 1735094 after independent review and 9/9 resource-capped static tests. It stages into the Windows system temp area, uses LocalService ACL and ownership readback, and preserves partial status; the current correction source still requires build/publish plus real Windows and Docker evidence."
   ],
   "architecture_quality_gate": "M0-009 required before V0.1"
 }
