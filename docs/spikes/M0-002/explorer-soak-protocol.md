@@ -10,6 +10,8 @@ save the evidence outside the repository or in an approved test-results store.
 - Windows 11 x64, Visual Studio 2022 Desktop C++, Windows 11 SDK and CMake.
 - A clean current-user registration produced by `register.ps1`.
 - Explorer restart available for the recovery checkpoints.
+- Disable Windows/system sleep for the duration of the run; sleep/wake gaps are
+  not valid soak evidence.
 
 ## Manual procedure
 
@@ -26,7 +28,9 @@ save the evidence outside the repository or in an approved test-results store.
    normal UI scheduling), without an Explorer hang or process crash; restart normal
    host and confirm recovery. The Explorer view activation thread must return
    without waiting for this cleanup.
-6. Run `soak.ps1 -Hours 8 -IntervalSeconds 30 -MaxIterations 1000` in parallel as the host-cycle signal, while keeping
+6. Stop the continuous normal Host from step 2 and confirm no
+   `AssetHostStub` process remains before starting the helper. Run
+   `soak.ps1 -Hours 8 -IntervalSeconds 30 -MaxIterations 1000` as the host-cycle signal, while keeping
    the manual Explorer view open and periodically recording bounded response,
    memory, and recovery observations. This combined operator run is the only
    candidate for the 8-hour Explorer gate.

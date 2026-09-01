@@ -170,7 +170,16 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("--parallel $Parallel", build)
         self.assertRegex(soak, r"\[ValidateRange\(1, 300\)\]\s*\[int\] \$IntervalSeconds = 30")
         self.assertRegex(soak, r"\[ValidateRange\(1, 12000\)\]\s*\[int\] \$MaxIterations = 1000")
-        self.assertIn("while ((Get-Date) -lt $deadline -and $iteration -lt $MaxIterations)", soak)
+        self.assertRegex(soak, r"\[ValidateRange\(1, 300\)\]\s*\[int\] \$SchedulingGapSeconds = 60")
+        self.assertIn("[Diagnostics.Stopwatch]::StartNew()", soak)
+        self.assertIn("$stopwatch.Elapsed", soak)
+        self.assertIn("Get-Process -Name 'AssetHostStub'", soak)
+        self.assertIn("refuses to start while an AssetHostStub process already exists", soak)
+        self.assertIn("$observedInterval.TotalSeconds -gt ($IntervalSeconds + $SchedulingGapSeconds)", soak)
+        self.assertIn("$controlledStop = $true", soak)
+        self.assertIn("$exitCode = $process.ExitCode", soak)
+        self.assertIn("host exited early with code", soak)
+        self.assertIn("while ($stopwatch.Elapsed -lt $runDuration -and $iteration -lt $MaxIterations)", soak)
         self.assertIn("$process = Start-Process", soak)
         self.assertIn("try {", soak)
         self.assertIn("finally {", soak)
@@ -182,6 +191,8 @@ class PackageContractTests(unittest.TestCase):
         self.assertIn("$iteration -ge $MaxIterations", soak)
         self.assertIn("8-hour soak is incomplete", soak)
         self.assertEqual(1, soak.count("$process = Start-Process"))
+        self.assertEqual(1, soak.count("$iteration++"))
+        self.assertGreater(soak.index("$iteration++"), soak.index("$process.Dispose()"))
 
     def test_no_generated_or_private_artifacts_are_packaged(self):
         names = {path.name for path in ROOT.rglob("*") if path.is_file()}
