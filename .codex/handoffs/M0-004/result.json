@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-004",
   "branch": "codex/m0-004-gate-guardrails",
   "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-004-gate-guardrails",
-  "commit": "c58242cc003902a53e804b003d133bab571b8a68",
+  "commit": "cb0b467a858154b85cf464527a097dedb475f18f",
   "changed_files": ["tests/spikes/server-packaging/scripts/windows-service.ps1", "tests/spikes/server-packaging/src/Program.cs", "tests/spikes/server-packaging/test_windows_service_contract.py", "docs/spikes/M0-004/README.md", ".codex/handoffs/M0-004/summary.md", ".codex/handoffs/M0-004/tests.md", ".codex/handoffs/M0-004/result.json"],
   "changed_contracts": [],
   "tests": {"passed": 9, "failed": 0, "skipped": 0, "report": "tests.md"},
