@@ -24,7 +24,7 @@
 
 空 runtime 目录后执行 bootstrap，并连续两次清理 obj/bin/artifact cold publish；两次完整 files.sha256 一致。restore、Linux/Windows RID publish、6/6 Python unittest、Docker Compose 静态 config 和 `git diff --check` 通过。artifact source commit 为发行输入最后提交；完整每文件 size/SHA256 和 aggregate digest 已在 runtime artifact 清单中记录。
 
-最终样例 hash 是该 Linux 构建环境关闭 MSBuild/C# build servers 后的本机观测，不作跨主机 bit-for-bit 保证；artifact 身份由 commit 与完整清单共同证明。
+最终样例 hash 是该 Linux 构建环境关闭 MSBuild/C# build servers 后的本机观测，不作跨主机 bit-for-bit 保证；artifact 身份由发行输入 commit 与完整清单共同证明。
 
 ## 外部门禁与风险
 
@@ -34,9 +34,9 @@ Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Wind
 
 协调器只合并 clean branch 的连续源码/测试提交及最后的 handoff metadata；在真实 Windows 和 Docker daemon 环境补做外部门禁后，M0-009 再评估是否冻结服务端候选。旧 `codex/m0-004-server-packaging` 分支含历史错误 publish 产物，不应合并。
 
-## 2026-09-02 correction
+## 2026-09-02 intermediate correction（已被替代）
 
-本次 correction 收紧 Windows Service adapter 的固定服务、TEMP wrapper、owner marker 和 5080 端口预检；所有服务 mutation 前均通过 `Win32_Service` binPath、wrapper 原文与 marker、LocalService 账户 readback。失败清理仅处理本次创建且已确认不再被服务引用的对象，Data 只删除任务路径下的空目录；service 不存在时对 wrapper/marker 的双缺失、双精确归属和部分/未知残留分别处理。新增独立静态契约测试 9/9 通过。Windows 实机仍未执行，handoff 保持 `partial`。
+首轮 correction 曾以 TEMP wrapper 收紧服务 mutation 与清理所有权；后续独立复核确认 `.cmd` 不能作为 SCM 所需的服务 EXE，因此该中间方案已被下一节的 direct-executable correction 完全替代，不是当前执行说明或 Windows 证据。
 
 ## 2026-09-02 direct-executable correction
 

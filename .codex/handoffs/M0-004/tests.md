@@ -30,9 +30,9 @@ Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap�
 
 本机 uid 1000，read-only path 未 skip；root 环境会显式 skip。Windows：无 host，未执行 service cycle。Docker：`docker version` 精确失败为 `permission denied ... /var/run/docker.sock`，未执行 build/run/health。
 
-## 2026-09-02 correction
+## 2026-09-02 intermediate correction（已被替代）
 
-新增独立 `test_windows_service_contract.py`，只读脚本文本，不导入或触发 `test_spike.py`；9/9 通过。新增覆盖括号化 Test-Path 预检、wrapper 原文与 marker 双重比较、服务账户统一 readback、created-this-run 清理、服务仍存在时保留文件、Data 空目录限制、service 不存在时残留三态，以及 stop/delete 有界等待与最终 readback。未执行 Windows/PowerShell、dotnet、Docker 或重型 publish。
+首轮 wrapper 静态检查随后因 SCM 服务生命周期不可行而被否决；其结果不作为当前门禁证据。当前有效检查仅以下一节 direct-executable correction 的 9/9 结果为准。
 
 ## 2026-09-02 direct-executable correction
 
