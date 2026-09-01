@@ -33,3 +33,11 @@ Windows x64 EXE/Service install-start-health-stop-uninstall 未执行：无 Wind
 ## 建议
 
 协调器只合并 clean branch 的连续源码/测试提交及最后的 handoff metadata；在真实 Windows 和 Docker daemon 环境补做外部门禁后，M0-009 再评估是否冻结服务端候选。旧 `codex/m0-004-server-packaging` 分支含历史错误 publish 产物，不应合并。
+
+## 2026-09-02 intermediate correction（已被替代）
+
+首轮 correction 曾以 TEMP wrapper 收紧服务 mutation 与清理所有权；后续独立复核确认 `.cmd` 不能作为 SCM 所需的服务 EXE，因此该中间方案已被下一节的 direct-executable correction 完全替代，不是当前执行说明或 Windows 证据。
+
+## 2026-09-02 direct-executable correction
+
+当前 correction 将完整 win-x64 artifact staging 到系统临时目录并让 SCM 直接执行 staged EXE；新增 CLI 配置映射、LocalService SID ACL、命名 mutex、随机 install ID/Description marker、PID/listener health readback 与 JSON evidence。当前源码尚未重新 publish/build；原 `b5d19cebafdb536a61b33917715419528e7f10e1` artifact/hash 仍仅代表历史 clean replacement，Windows 外部门禁前必须用当前源码重新发行。状态保持 `partial`。

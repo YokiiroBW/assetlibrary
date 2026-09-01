@@ -29,3 +29,11 @@ Linux x86-64，Python 3.12；从空 `.runtime/sandbox-storage/M0-004` bootstrap�
 ## Skipped / external gates
 
 本机 uid 1000，read-only path 未 skip；root 环境会显式 skip。Windows：无 host，未执行 service cycle。Docker：`docker version` 精确失败为 `permission denied ... /var/run/docker.sock`，未执行 build/run/health。
+
+## 2026-09-02 intermediate correction（已被替代）
+
+首轮 wrapper 静态检查随后因 SCM 服务生命周期不可行而被否决；其结果不作为当前门禁证据。当前有效检查仅以下一节 direct-executable correction 的 9/9 结果为准。
+
+## 2026-09-02 direct-executable correction
+
+当前源码契约检查覆盖 direct EXE binPath/no `.cmd`、CLI 映射与 probe JSON 校验、系统临时 staging、SID ACL、完整 LocalService、mutex、GUID/Description marker 所有权、PID/listener health、Stopwatch bounded wait、未知路径无递归删除。测试仅为独立静态测试；未重新 publish/build，历史 artifact/hash 不代表当前源码。
