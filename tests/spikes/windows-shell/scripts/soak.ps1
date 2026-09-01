@@ -4,7 +4,7 @@ param(
   [int] $Hours = 8,
   [ValidateRange(1, 300)]
   [int] $IntervalSeconds = 30,
-  [ValidateRange(1, 100000)]
+  [ValidateRange(1, 12000)]
   [int] $MaxIterations = 1000
 )
 # This is intentionally a host-cycle helper, not an Explorer soak. The manual
@@ -27,7 +27,9 @@ while ((Get-Date) -lt $deadline -and $iteration -lt $MaxIterations) {
     if ($null -ne $process) {
       try {
         if (-not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
-        [void]$process.WaitForExit(5000)
+        if (-not $process.WaitForExit(5000)) {
+          throw "M0-002 host process $($process.Id) did not exit within the 5-second cleanup bound."
+        }
       }
       finally {
         $process.Dispose()

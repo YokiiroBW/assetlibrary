@@ -32,10 +32,13 @@ save the evidence outside the repository or in an approved test-results store.
    candidate for the 8-hour Explorer gate.
 
 The helper defaults to a 30-second interval and 1000 maximum iterations (the
-8-hour default requires about 960 cycles). It keeps at most one host process per
-cycle, stops it, waits up to five seconds for exit, and disposes the process
-handle in `finally`. Reaching `MaxIterations` before the deadline is an explicit
-incomplete-run failure, not a passing soak result.
+8-hour default requires about 960 cycles); the maximum accepted value is 12000
+(about 11520 cycles for 96 hours). It keeps at most one host process per cycle,
+stops it, waits up to five seconds for exit, and disposes the process handle in
+`finally`. If the process remains alive after five seconds, the helper throws and
+terminates; it cannot continue to another cycle or report completion. Reaching
+`MaxIterations` before the deadline is an explicit incomplete-run failure, not a
+passing soak result.
 7. Unregister with `unregister.ps1`, restart Explorer, and confirm the namespace
    disappears and ordinary Explorer navigation remains functional.
 
