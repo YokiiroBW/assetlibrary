@@ -180,6 +180,10 @@ class PackageContractTests(unittest.TestCase):
             self.assertIn("0x08000000", script)
             self.assertIn("SHCNE_ASSOCCHANGED", script)
             self.assertIn("SHCNF_IDLIST", script)
+            self.assertIn("BoundedShellChangeNotifier", script)
+            self.assertIn("thread.IsBackground = true", script)
+            self.assertIn("thread.Join(timeoutMilliseconds)", script)
+            self.assertIn("NotifyWithTimeout(3000)", script)
         self.assertLess(
             register.index("Set-ItemProperty -LiteralPath $namespace -Name '(default)'"),
             register.rindex("Notify-ShellAssociationChanged"),
@@ -188,6 +192,8 @@ class PackageContractTests(unittest.TestCase):
             unregister.index("Remove-Item -LiteralPath $classes"),
             unregister.rindex("Notify-ShellAssociationChanged"),
         )
+        self.assertIn("Notify-ShellAssociationChanged -Required $false", unregister)
+        self.assertIn("Registry cleanup is already complete", unregister)
 
     def test_existing_values_are_restored_and_new_values_removed(self):
         register = (SCRIPTS / "register.ps1").read_text(encoding="utf-8")

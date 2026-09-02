@@ -29,17 +29,45 @@ $namespaceOwned = $namespaceExists -and
   $namespaceRegistration.AssetLibraryOwner -eq 'AssetLibrary.M0-002' -and
   $namespaceRegistration.'(default)' -eq 'AssetLibrary M0-002'
 
-function Notify-ShellAssociationChanged {
-  if (-not ('AssetLibraryM0002.ShellChangeNotifier' -as [type])) {
-    Add-Type -Namespace AssetLibraryM0002 -Name ShellChangeNotifier -MemberDefinition @'
-[System.Runtime.InteropServices.DllImport("shell32.dll")]
-public static extern void SHChangeNotify(
-  uint eventId, uint flags, System.IntPtr item1, System.IntPtr item2);
+function Notify-ShellAssociationChanged([bool] $Required = $true) {
+  if (-not ('AssetLibraryM0002.BoundedShellChangeNotifier' -as [type])) {
+    Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+
+namespace AssetLibraryM0002
+{
+    public static class BoundedShellChangeNotifier
+    {
+        [DllImport("shell32.dll")]
+        private static extern void SHChangeNotify(
+            uint eventId, uint flags, IntPtr item1, IntPtr item2);
+
+        public static bool NotifyWithTimeout(int timeoutMilliseconds)
+        {
+            Thread thread = new Thread(delegate()
+            {
+                SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);
+            });
+            thread.IsBackground = true;
+            thread.Name = "AssetLibrary M0-002 bounded shell notification";
+            thread.Start();
+            return thread.Join(timeoutMilliseconds);
+        }
+    }
+}
 '@
   }
   # SHCNE_ASSOCCHANGED with SHCNF_IDLIST refreshes Explorer's association cache.
-  [AssetLibraryM0002.ShellChangeNotifier]::SHChangeNotify(
-    0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
+  # An Explorer window can indefinitely delay the synchronous broadcast, so the
+  # native call runs on a background thread and the script waits at most 3 s.
+  $completed = [AssetLibraryM0002.BoundedShellChangeNotifier]::NotifyWithTimeout(3000)
+  if (-not $completed) {
+    $message = 'Shell association notification exceeded 3 seconds.'
+    if ($Required) { throw $message }
+    Write-Warning "$message Registry cleanup is already complete; sign out to refresh Explorer."
+  }
 }
 
 if (($classExists -or $inprocExists -or $shellFolderExists) -and -not $classOwned) {
@@ -70,6 +98,8 @@ if ($PSCmdlet.ShouldProcess("HKCU CLSID $clsid", 'unregister M0-002 shell extens
   if ($classOwned) {
     Remove-Item -LiteralPath $classes -Recurse -Force
   }
-  Notify-ShellAssociationChanged
+  # Registry removal is authoritative. A delayed Explorer cache broadcast must
+  # never keep cleanup or the user's terminal session alive indefinitely.
+  Notify-ShellAssociationChanged -Required $false
   Write-Host 'Removed M0-002 HKCU registration. Restart Explorer to confirm recovery.'
 }

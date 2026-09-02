@@ -13,6 +13,8 @@ save the evidence outside the repository or in an approved test-results store.
   classes in that state. Do not substitute an HKLM registration for this Spike.
 - A clean current-user registration produced by `register.ps1`.
 - Explorer restart available for the recovery checkpoints.
+- Use the checked-in scripts with the 3-second bounded background
+  `SHChangeNotify`; do not substitute an older synchronous-notification copy.
 
 ## Manual procedure
 
@@ -35,13 +37,17 @@ save the evidence outside the repository or in an approved test-results store.
    the manual Explorer view open and periodically recording bounded response,
    memory, and recovery observations. This combined operator run is the only
    candidate for the 8-hour Explorer gate.
-7. Unregister with `unregister.ps1`, restart Explorer, and confirm the namespace
+7. Keep the custom view open and unregister with `unregister.ps1`. The script
+   must exit instead of waiting indefinitely: a delayed cache notification may
+   produce the documented 3-second warning, but the owner-checked registry state
+   must already be clean. Then restart Explorer and confirm the namespace
    disappears and ordinary Explorer navigation remains functional.
 
 ## Evidence checklist
 
 Record Windows build, SDK/MSVC/CMake versions, DLL/EXE hashes, start/end times,
 host mode, iteration counts, Explorer responsiveness, failure-to-recovery times,
-process crashes, and registration/unregistration results. Do not record user
+process crashes, bounded-notification outcome, and registration/unregistration
+results. Do not record user
 paths, credentials, asset names, or private file contents. A missing, failed, or
 partial item remains an unmet M0-002 gate.

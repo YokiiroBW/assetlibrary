@@ -36,6 +36,12 @@ by the repository and must not be committed.
 Registration is limited to `HKCU`, refuses to replace a different DLL, and uses
 an owner marker so unregistration cannot remove another product's CLSID. Restart
 Explorer after unregistering to verify that the shell returns to its normal state.
+The final `SHChangeNotify` cache refresh runs on a background thread with a
+3-second join limit. A registration-side timeout is treated as failure and rolls
+the registration back; after an owner-checked unregistration has already removed
+the keys, a timeout produces a warning and the script exits so an Explorer window
+cannot keep the cleanup process alive indefinitely. Sign out once to refresh the
+shell if that warning appears.
 
 ## Failure modes
 

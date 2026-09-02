@@ -24,7 +24,8 @@
   helper。注册带 owner marker、检查 namespace collision、拒绝覆盖其他 DLL；注册
   中途失败会恢复原值并仅回滚本次创建且仍匹配 owner/path 的键。注册与卸载完成后
   均调用 `SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, ...)`，对称刷新 Explorer
-  关联缓存。
+  关联缓存；原生调用放在后台线程，脚本最多等待 3 秒。注册侧超时会触发原有回滚，
+  卸载侧超时只警告并退出，因为 owner-guarded 注册表删除已经完成。
 - Windows 实际构建后修正 SDK 常量和 COM 导出 ABI：使用 SDK 的 `STDAPI` 声明与
   模块定义文件导出 `DllGetClassObject`/`DllCanUnloadNow`；构建脚本现在会检查
   CMake 配置和编译的真实退出码，不再把失败误报为成功。
@@ -48,13 +49,28 @@ register/verify/unregister 且无残留；注册式 `CoCreateInstance`、
 `IShellItem.BindToHandler` 均返回 `S_OK`。隔离原生 `IShellBrowser` 探针进一步让
 `CreateViewWindow` 返回 `S_OK` 并实际创建 view window。
 
-真实 Explorer 仍未取得 custom view 证据：微软文档列出的
+另在独立 Windows 11 虚拟机、专用标准用户、只读测试包权限和自动卸载看门狗下，
+以微软 `shell32.dll` 控制组验证了 HKCU namespace 入口。控制组成功注册，真实
+Explorer 打开了 `AssetLibrary Microsoft Shell32 Control`，并显示测试临时目录中的
+标记文件。这排除了“该 Windows/标准用户完全不支持 HKCU namespace”的宽泛假设，
+但控制组不是自定义 DLL 或 custom `IShellView`。
+
+控制组首次在 Explorer 窗口仍打开时清理，owner-guarded 注册表删除已经完成，但
+清理进程停在最终同步 Shell 通知；只读 WSH 复核显示 class、namespace 和
+HideDesktopIcons 值均不存在，注销测试用户后终端恢复。该故障没有损坏系统或留下
+测试注册项。改为 3 秒有界后台通知后，自检与“不打开 Explorer 的注册后立即清理”
+回归均通过且无超时警告；修复后的 live-window 清理同场景仍待一次小范围复测。
+为这唯一一轮复测已启用 round-3 arm 和 120 秒自动清理看门狗；旧的手工注册与
+无窗口回归启动器已退役，只会显示提示而不修改状态。
+
+原始 Spike 的真实 Explorer 仍未取得 custom view 证据：微软文档列出的
 `Explorer.exe /e,::{CLSID}` 与 `Explorer.exe ::{CLSID}` 两种入口均显示“没有与之
 关联的应用”，`shell:desktop` 中也不枚举 `AssetLibrary M0-002` junction；测试 DLL
 未被观察到加载。期间无 `Application Error`/WER 崩溃事件，主 Explorer 保持响应。
 按用户 Approved 列表的诊断试验没有改变结果并已完整回滚。因此 UAC/high-integrity
-阻断已排除，剩余问题收敛到 Windows 11 26100 上真实 Explorer 的按用户 namespace
-注册、枚举或部署兼容路径；本交接仍不是 M0-002 验收通过。
+阻断已排除，且控制组证明 HKCU namespace 入口可用；剩余问题进一步收敛到原始
+自定义 COM 的注册形态、Explorer 发现路径或部署兼容性。本交接仍不是 M0-002
+验收通过。
 
 ## 关键决策
 
@@ -114,7 +130,7 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
 - 通过：隔离 PowerShell 进程直接调用 DLL；factory 创建/释放、前后
   `DllCanUnloadNow == S_OK`，错误 CLSID 返回 `CLASS_E_CLASSNOTAVAILABLE`。
 - 通过：Windows 11 上使用 Codex 隔离 Python 重跑静态/契约测试（16/16）；包含
-  UAC-disabled HKCU COM 拒绝门禁和注册/卸载后的 Shell cache 对称刷新检查。
+  UAC-disabled HKCU COM 拒绝门禁，以及注册/卸载后的有界 Shell cache 对称刷新检查。
 - 通过：自动卸载看门狗保护下的 HKCU register/verify/unregister 与直接注册式
   `CoCreateInstance`；每轮卸载后 CLSID/namespace 均无残留。
 - 通过：UAC-enabled Medium Integrity 子进程中的完整 Shell contract 探针和原生
@@ -123,6 +139,12 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
 - 阻断证据：真实 Explorer 的两种官方 CLSID 入口均显示无关联应用，Desktop
   junction 不被枚举，且未观察到 DLL 加载；无 `Application Error`/WER 事件，普通
   Explorer 导航仍响应。
+- 通过：隔离 VM 中专用标准用户的安全预检；微软 Shell32 HKCU 控制组被真实
+  Explorer 打开并显示标记文件。
+- 已定位并安全恢复：控制组 live-window 清理的注册表删除成功，旧同步通知阻塞；
+  WSH 只读复核为 clean，注销后会话恢复，无系统损坏或注册表残留。
+- 通过：有界通知修复后的 self-test 和“不打开 Explorer 的注册/立即清理/只读复核”
+  回归；`CONTROL_CLEANED`，class/namespace/hide-desktop 值均不存在且无超时警告。
 - 通过：Visual Studio 2022 Build Tools 官方 bootstrapper Authenticode 签名为
   `Valid`，签名者为 Microsoft Corporation，SHA-256 为
   `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；安装退出码
@@ -140,22 +162,29 @@ Python 测试覆盖包结构、Shell 禁止依赖、版本/长度/逻辑 deadlin
 `IPersistFolder` 的实际接口/PIDL 生命周期、factory lifetime、
 新建及既有 HKCU 注册回滚/对称性、枚举 partial-fetch/skip、故障模式入口、
 SDK 常量/导出 ABI、构建退出码、UAC-disabled HKCU COM 拒绝、Shell association
-cache 刷新、官方 Explorer 启动形式、host-only soak 定位和生成/私密产物排除。
+cache 刷新的后台线程、3 秒 join 上限与卸载后 best-effort 语义、官方 Explorer
+启动形式、host-only soak 定位和生成/私密产物排除。
 已有 Windows 可逆注册、隔离 Shell bind 和 view-window 创建证据，但没有 Explorer
 进程内加载证据，故 Explorer 故障隔离和恢复门禁保持 unmet。
 
 ## 文件安全、权限与性能影响
 
 Spike 不触碰资产文件、数据库或网络；只读 IPC ping。注册只写当前用户 HKCU，
-owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell IPC 逻辑尝试预算为
-250 ms、payload 上限 4 KiB；取消排空在 worker 上执行且未证明独立上限。没有
-50 万资产性能结论。soak 脚本提供 bounded host cycle 入口，未执行不得推断稳定性。
+owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell 关联通知最多阻塞脚本
+3 秒；卸载以注册表删除为权威状态，通知超时不会让清理进程永久存活。Shell IPC
+逻辑尝试预算为 250 ms、payload 上限 4 KiB；取消排空在 worker 上执行且未证明
+独立上限。没有 50 万资产性能结论。soak 脚本提供 bounded host cycle 入口，未执行
+不得推断稳定性。
 
 ## 技术债、已知问题与风险
 
-- UAC/high-integrity 阻断已经排除；Windows 11 26100 的真实 Explorer 仍不枚举或
-  启动该 HKCU Desktop junction。必须在 M0-009 决定受支持的注册/安装模型后，才可
-  继续验证 custom IShellView 生命周期及右侧视图尺寸/重建行为；不得擅自改用 HKLM。
+- UAC/high-integrity 阻断已经排除，微软 Shell32 控制组也证明 HKCU namespace 可被
+  同一类标准用户 Explorer 发现；原始自定义 DLL 仍不被枚举或加载。必须在 M0-009
+  决定自定义 COM 的受支持注册/安装模型后，才可继续验证 custom IShellView 生命周期
+  及右侧视图尺寸/重建行为；不得擅自改用 HKLM。
+- 有界通知已通过不打开 Explorer 的安全回归，但旧故障发生在控制组窗口打开时；
+  仍需在隔离 VM 复测一次 patched live-window cleanup，确认最坏只出现 3 秒警告并
+  能正常退出。
 - 独立 host 的正常、崩溃、慢响应和无效 frame 已验证；仍必须在 Explorer 内验证
   这些情形不会冻结 UI，并验证恢复后重连。
 - 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
@@ -172,11 +201,12 @@ Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell
 
 ## 下一步
 
-保持当前未注册安全检查点，不再盲目重试 Explorer，也不修改 HKLM。下一阶段先在
-M0-009 提交 Windows 11 26100 的 namespace 注册/部署兼容决策问题，确认仍满足
-HKCU-only 和 Explorer 进程内轻量边界的受支持方案；方案确定后再按
-`docs/spikes/M0-002/explorer-soak-protocol.md` 分步执行真实视图、故障恢复、
-20-cycle 与 8 小时 soak。
+保持当前注册表 clean，不修改 HKLM。隔离 VM 现只为一键 patched live-window
+cleanup 启用 round-3 arm；该入口会注册、打开控制组、等待 20 秒、清理并复核，
+另有 120 秒看门狗。若正常退出或在 3 秒内给出预期 warning，即可关闭“清理脚本
+无限等待”回归，并立即再次轮换 arm。原始 DLL 则由 M0-009 裁决自定义 COM 的
+namespace 注册/部署兼容路径，再按 `docs/spikes/M0-002/explorer-soak-protocol.md`
+分步执行真实视图、故障恢复、20-cycle 与 8 小时 soak。
 
 ## Codex 线程链接（可选）
 
