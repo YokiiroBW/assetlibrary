@@ -169,7 +169,7 @@
       "id": "V01-002",
       "title": "生成 AssetLink .NET、TypeScript 与 Kotlin SDK",
       "module": "assetlink-sdk-generation",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "M0-003",
         "M0-009"
