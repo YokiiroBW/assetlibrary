@@ -1,31 +1,67 @@
 {
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "M0-004",
-  "title": "跨平台服务端 Windows/Linux/Docker 发行验证",
+  "title": "跨平台服务端 Windows/Linux/Docker 发行验证（Windows 外部门禁）",
   "milestone": "M0",
   "status": "partial",
-  "owner": "codex-agent-m0-004",
-  "branch": "codex/m0-004-server-packaging-clean",
-  "worktree": "/mnt/astrbot-documents/Codex-Workspaces/worktrees/M0-004",
-  "commit": "b5d19cebafdb536a61b33917715419528e7f10e1",
-  "changed_files": [".codex/tasks/M0-004.md", "tests/spikes/server-packaging/.dockerignore", "tests/spikes/server-packaging/Dockerfile", "tests/spikes/server-packaging/docker-compose.yml", "tests/spikes/server-packaging/manifest.json", "tests/spikes/server-packaging/bootstrap.sh", "tests/spikes/server-packaging/src/Program.cs", "tests/spikes/server-packaging/src/ServerPackagingSpike.csproj", "tests/spikes/server-packaging/test_spike.py", "tests/spikes/server-packaging/scripts/windows-service.ps1", "tests/spikes/server-packaging/systemd/assetlibrary-m0-004-spike.service", "docs/spikes/M0-004/README.md", ".codex/handoffs/M0-004/summary.md", ".codex/handoffs/M0-004/tests.md", ".codex/handoffs/M0-004/result.json"],
+  "owner": "codex-agent-m0-004-windows-evidence",
+  "branch": "codex/m0-004-windows-evidence",
+  "worktree": "<local-ntfs-worktree>/M0-004-windows-evidence",
+  "commit": "25594025fbdb54903f311271147f86e1b43cc1f0",
+  "changed_files": [
+    ".codex/handoffs/M0-004/result.json",
+    ".codex/handoffs/M0-004/summary.md",
+    ".codex/handoffs/M0-004/tests.md",
+    "docs/spikes/M0-004/README.md",
+    "tests/spikes/server-packaging/bootstrap.ps1",
+    "tests/spikes/server-packaging/manifest.json",
+    "tests/spikes/server-packaging/scripts/windows-service.ps1",
+    "tests/spikes/server-packaging/src/Program.cs",
+    "tests/spikes/server-packaging/test_spike.py"
+  ],
   "changed_contracts": [],
-  "tests": {"passed": 6, "failed": 0, "skipped": 0, "report": "tests.md"},
-  "risks": ["Windows host unavailable for service cycle", "Docker daemon permission denied for build/run/health"],
-  "blocked_by": ["External Windows x64 host", "Docker daemon access"],
+  "tests": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Windows Service install/start/health/stop/uninstall was not executed because explicit approval for administrator SCM/HKLM operations was not received",
+    "Docker CLI, service and engine pipe are absent, so build/run/health and non-root/read-only container boundaries remain unproven",
+    "Cross-host artifacts are not claimed bit-for-bit identical; identity relies on source commit, complete manifest and behavior evidence"
+  ],
+  "blocked_by": [
+    "Explicit user approval for the fixed AssetLibrary-M0-004-Spike administrator service cycle",
+    "A usable Docker CLI and daemon"
+  ],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/M0-004/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
     "module": "server-packaging-spike",
     "dependency_direction_ok": true,
-    "reused_existing_logic": ["ASP.NET Core hosting lifecycle", "JSON console logging"],
+    "reused_existing_logic": [
+      "Existing ASP.NET Core m0-004/v1 host and health behavior",
+      "Microsoft.Extensions.Hosting.WindowsServices 10.0.11 Windows service lifetime",
+      "Existing single-source packaging manifest and task-local runtime boundary",
+      "Existing handoff, architecture and repository validators"
+    ],
     "duplicated_logic": [],
     "cross_module_access": [],
-    "new_language_or_framework": ["C#/.NET 10 + ASP.NET Core current LTS candidate"],
-    "new_major_dependencies": ["Microsoft.Extensions.Hosting.WindowsServices 10.0.11 (official Microsoft package; candidate only)"],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
     "contract_changes": [],
-    "architecture_tests": ["manifest/source single-project assertion", "full artifact manifest and aggregate digest recomputation", "git diff --check"],
-    "technical_debt": ["Complete real Windows Service and Docker daemon gates before M0-009 freeze"]
+    "architecture_tests": [
+      "9 server-packaging Spike tests including Windows process lifecycle, embedded issuance provenance and three independent cold-publish manifests",
+      "scripts/validate_handoff.py",
+      "scripts/validate_architecture_baseline.py",
+      "scripts/verify_repository.py",
+      "git diff --check"
+    ],
+    "technical_debt": [
+      "Complete the approved Windows Service cycle and final owner-guarded residue verification",
+      "Complete Docker build/Compose health/non-root/read-only/down-v evidence on an available daemon before M0-009"
+    ]
   }
 }
