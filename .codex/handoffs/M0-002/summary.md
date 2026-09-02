@@ -59,9 +59,10 @@ Explorer 打开了 `AssetLibrary Microsoft Shell32 Control`，并显示测试临
 清理进程停在最终同步 Shell 通知；只读 WSH 复核显示 class、namespace 和
 HideDesktopIcons 值均不存在，注销测试用户后终端恢复。该故障没有损坏系统或留下
 测试注册项。改为 3 秒有界后台通知后，自检与“不打开 Explorer 的注册后立即清理”
-回归均通过且无超时警告；修复后的 live-window 清理同场景仍待一次小范围复测。
-为这唯一一轮复测已启用 round-3 arm 和 120 秒自动清理看门狗；旧的手工注册与
-无窗口回归启动器已退役，只会显示提示而不修改状态。
+回归均通过。随后保持控制组 Explorer 窗口打开执行同场景复测，清理正常返回并完成
+只读 verify，没有超时警告；class、namespace 与 HideDesktopIcons 值均不存在，
+仅预期的测试用户临时 control folder 保留。round-3 arm 已轮换到不存在的 round-4
+文件，全部注册启动器均已退役且不再修改状态。
 
 原始 Spike 的真实 Explorer 仍未取得 custom view 证据：微软文档列出的
 `Explorer.exe /e,::{CLSID}` 与 `Explorer.exe ::{CLSID}` 两种入口均显示“没有与之
@@ -145,6 +146,9 @@ Tools + Windows SDK 作为验证期构建工具；没有第三方运行时、网
   WSH 只读复核为 clean，注销后会话恢复，无系统损坏或注册表残留。
 - 通过：有界通知修复后的 self-test 和“不打开 Explorer 的注册/立即清理/只读复核”
   回归；`CONTROL_CLEANED`，class/namespace/hide-desktop 值均不存在且无超时警告。
+- 通过：保持控制组 Explorer 窗口打开时的原故障场景回归；120 秒看门狗在位，
+  cleanup 正常返回、verify 为 clean、输出
+  `FINAL_LIVE_WINDOW_CLEANUP_REGRESSION_COMPLETE`，没有通知超时警告。
 - 通过：Visual Studio 2022 Build Tools 官方 bootstrapper Authenticode 签名为
   `Valid`，签名者为 Microsoft Corporation，SHA-256 为
   `2AEAC090A9CFB2C56474AA9A6C5817AD8CFB879539E0ED1AECEC33DE9FC2DC4F`；安装退出码
@@ -182,9 +186,6 @@ owner marker、路径、根键和未知子键检查避免覆盖/误删。Shell �
   同一类标准用户 Explorer 发现；原始自定义 DLL 仍不被枚举或加载。必须在 M0-009
   决定自定义 COM 的受支持注册/安装模型后，才可继续验证 custom IShellView 生命周期
   及右侧视图尺寸/重建行为；不得擅自改用 HKLM。
-- 有界通知已通过不打开 Explorer 的安全回归，但旧故障发生在控制组窗口打开时；
-  仍需在隔离 VM 复测一次 patched live-window cleanup，确认最坏只出现 3 秒警告并
-  能正常退出。
 - 独立 host 的正常、崩溃、慢响应和无效 frame 已验证；仍必须在 Explorer 内验证
   这些情形不会冻结 UI，并验证恢复后重连。
 - 必须测量 deadline 后取消排空是否可靠完成且不造成 DLL/worker 长期滞留。
@@ -201,10 +202,8 @@ Shell 技术候选；不得将本 partial 交接当作生产 `apps/windows-shell
 
 ## 下一步
 
-保持当前注册表 clean，不修改 HKLM。隔离 VM 现只为一键 patched live-window
-cleanup 启用 round-3 arm；该入口会注册、打开控制组、等待 20 秒、清理并复核，
-另有 120 秒看门狗。若正常退出或在 3 秒内给出预期 warning，即可关闭“清理脚本
-无限等待”回归，并立即再次轮换 arm。原始 DLL 则由 M0-009 裁决自定义 COM 的
+保持当前注册表 clean、控制包未 arm 且全部注册入口已退役的安全检查点，不修改
+HKLM。“清理脚本无限等待”回归已经关闭。原始 DLL 仍由 M0-009 裁决自定义 COM 的
 namespace 注册/部署兼容路径，再按 `docs/spikes/M0-002/explorer-soak-protocol.md`
 分步执行真实视图、故障恢复、20-cycle 与 8 小时 soak。
 

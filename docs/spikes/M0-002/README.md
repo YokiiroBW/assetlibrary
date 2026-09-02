@@ -43,8 +43,12 @@ Medium Integrity 下通过。
 Shell 刷新；只读 WSH 复核显示 `ClassPresent=false`、`NamespacePresent=false`、
 `HideDesktopValuePresent=false`，注销该测试用户后终端恢复。由此将卡住边界定位到
 清理后的 Shell 通知，而非注册表删除或系统损坏。改为 3 秒有界后台通知后，
-`register -> immediate cleanup -> read-only verify` 回归完整通过，没有超时警告；
-修复后“保持控制组 Explorer 窗口打开再清理”的同场景复测仍待执行。
+`register -> immediate cleanup -> read-only verify` 回归完整通过。随后保持控制组
+Explorer 窗口打开，执行 `register -> open -> cleanup -> verify` 的原触发场景复测；
+脚本正常输出 `CONTROL_CLEANED` 和
+`FINAL_LIVE_WINDOW_CLEANUP_REGRESSION_COMPLETE`，没有超时警告，最终 class、
+namespace 与 HideDesktopIcons 值均不存在。仍显示的 control folder 只是测试用户
+临时目录，不是注册表残留。复测后注册 arm 已轮换到不存在的 round-4 文件。
 
 ## 剩余 Explorer 验证协议
 

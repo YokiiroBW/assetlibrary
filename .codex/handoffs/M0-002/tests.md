@@ -20,8 +20,8 @@
 - 2026-09-03 补充隔离 Windows 11 虚拟机控制组。使用专用标准用户；预检确认
   `EnableLUA=1`、非提升 token、不是本地 Administrators 成员，测试目录只授予用户
   读取/执行。控制包锁定机器、用户与 SID，注册必须有单次 arm 文件，并由自动清理
-  看门狗兜底。控制注册表状态为 clean；现仅为最终 live-window cleanup 复测启用
-  round-3 arm，旧注册入口已退役，测试完成后必须再次轮换 arm。
+  看门狗兜底。最终 live-window cleanup 通过后，控制注册表状态为 clean，arm 已
+  轮换到不存在的 round-4 文件，全部注册入口均已退役。
 
 ## 执行命令
 
@@ -48,6 +48,7 @@
 | 隔离 VM：首次保持控制组窗口打开后清理 | 部分失败但已安全恢复；受控注册表项先删除，最终同步 Shell 通知未返回，隐藏清理进程 30 秒超时；只读 WSH 状态为 `CLEAN`，注销测试用户后终端恢复 |
 | 隔离 VM：3 秒有界 Shell 通知自检 | 通过；`SELF_TEST_OK`、`ShellNotification=ok`、`RegistrationArmed=false`，没有注册表写入 |
 | 隔离 VM：注册后立即清理回归（不打开 Explorer） | 通过；`CONTROL_REGISTERED`、`CONTROL_CLEANED`、最终 class/namespace/hide-desktop 值均不存在，没有通知超时；仅测试临时目录保留 |
+| 隔离 VM：保持控制组 Explorer 窗口打开时清理 | 通过；注册、真实 Explorer 打开、20 秒观察、cleanup、verify 全部完成，输出 `FINAL_LIVE_WINDOW_CLEANUP_REGRESSION_COMPLETE`；无通知超时，class/namespace/hide-desktop 值均不存在 |
 | Windows：per-user `Shell Extensions\Approved` 诊断 | 未改变 Explorer 行为；策略未启用，试验项已回滚且空键已清理 |
 | Windows：`Get-AuthenticodeSignature` + `Get-FileHash -Algorithm SHA256` | installer 签名有效；DLL/host 为预期未签名本地 Spike 构建，hash 已记录 |
 
@@ -111,7 +112,7 @@ UAC 重启后的隔离探针记录：
   拒绝、完整 Shell contract、隔离 `IShellView` window 创建，以及 Explorer
   无崩溃/普通导航恢复检查。
 - 隔离 VM 的标准用户/UAC/只读目录安全预检、微软 Shell32 控制组的真实 Explorer
-  导航、清理后只读注册表复核，以及有界通知修复后的无窗口注册/立即清理回归。
+  导航、清理后只读注册表复核，以及有界通知修复后的无窗口和 live-window 清理回归。
 
 ## 失败 / 跳过
 
@@ -120,9 +121,6 @@ UAC 重启后的隔离探针记录：
   CLSID 入口也在加载 DLL 前显示无关联应用。注册/验证/卸载已完整回滚。
 - Explorer 内 host missing/crash/timeout/invalid recovery：跳过，需先由 M0-009
   决定 Windows 11 26100 上受支持的真实 Explorer 注册/部署路径。
-- 有界通知修复后的“控制组 Explorer 窗口保持打开时清理”：尚未复测；这是确认
-  原始卡住场景已被 3 秒上限覆盖的下一项小范围门禁。现已准备唯一的一键入口，
-  带 20 秒观察窗口、120 秒自动清理看门狗和事后只读复核；旧入口不再改状态。
 - 8-hour Explorer soak：跳过，`soak.ps1` 仅为 host-cycle helper；必须按
   `docs/spikes/M0-002/explorer-soak-protocol.md` 完成人工 Explorer 证据。
 
@@ -138,7 +136,9 @@ UAC 重启后的隔离探针记录：
 `SHChangeNotify` 未返回 → 清理包装器 30 秒超时 → WSH 只读复核为 clean → 注销后
 终端恢复。由此将阻塞点收敛到最终 Shell 通知；它不是操作系统损坏，也不是注册表
 残留。仓库注册/卸载脚本现使用与 VM 回归相同的后台通知 + 3 秒等待上限。注册侧
-超时会回滚；卸载侧超时只警告，因为删除结果已经完成。
+超时会回滚；卸载侧超时只警告，因为删除结果已经完成。修复后在控制组窗口保持
+打开的同一触发场景中，cleanup 正常返回、verify 为 clean、没有超时 warning，
+因此“清理脚本无限等待”回归关闭。测试完成后已解除 arm。
 
 ## 性能数据
 
@@ -149,5 +149,5 @@ worker 的 250 ms deadline 或取消排空。协议静态上限为 4 KiB payload
 ## 尚未覆盖
 
 原始 DLL 的真实 Explorer view activation/lifetime、Shell worker deadline/cancel、
-Explorer failure isolation、控制组 live-window 清理复测、20-cycle crash/restart、
-8-hour soak，以及任何生产规模性能结论。
+Explorer failure isolation、20-cycle crash/restart、8-hour soak，以及任何生产规模
+性能结论。
