@@ -7,30 +7,96 @@
   "owner": "codex-agent-v01-001",
   "branch": "codex/v01-001-build-foundation",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-001",
-  "commit": "",
-  "changed_files": [],
+  "commit": "c231a3e218714cc5731741ca9f3d4d6d6319288d",
+  "changed_files": [
+    ".codex/handoffs/V01-001/result.json",
+    ".codex/handoffs/V01-001/summary.md",
+    ".codex/handoffs/V01-001/tests.md",
+    ".codex/tasks/V01-001.md",
+    ".editorconfig",
+    ".gitattributes",
+    ".github/workflows/handoff-quality.yml",
+    "AssetLibrary.slnx",
+    "Directory.Build.props",
+    "Directory.Packages.props",
+    "NuGet.config",
+    "eng/CodeMetricsConfig.txt",
+    "eng/README.md",
+    "eng/dotnet-dependency-policy.json",
+    "global.json",
+    "scripts/validate_architecture_baseline.py",
+    "scripts/validate_dotnet_dependencies.py",
+    "scripts/validate_dotnet_source.py",
+    "scripts/verify_repository.py",
+    "services/core-server/AssemblyInfo.cs",
+    "services/core-server/AssetLibrary.CoreServer.csproj",
+    "services/core-server/README.md",
+    "services/core-server/packages.lock.json",
+    "services/worker-supervisor/AssemblyInfo.cs",
+    "services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj",
+    "services/worker-supervisor/README.md",
+    "services/worker-supervisor/packages.lock.json",
+    "tests/architecture/architecture-rules.json",
+    "tests/architecture/ci-tiers.json",
+    "tests/architecture/test_architecture_rules.py",
+    "tests/dotnet/AssetLibrary.Build.Tests/AssetLibrary.Build.Tests.csproj",
+    "tests/dotnet/AssetLibrary.Build.Tests/FoundationAssemblyTests.cs",
+    "tests/dotnet/AssetLibrary.Build.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json",
+    "tests/repository/test_dotnet_foundation.py"
+  ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 34,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": [],
+  "risks": [
+    "The Windows and Ubuntu GitHub Actions matrix is defined but has not yet executed on remote runners; local evidence covers the Windows-equivalent command chain only.",
+    "The lexical duplicate-source and sensitive-log gates are intentionally conservative and will need controlled calibration as production source grows.",
+    "Integration, contract and migration suites do not exist in V01-001 because their production owners are not active; the current MSTest suite proves only the inert build foundation.",
+    "SDK roll-forward is disabled, so servicing updates require an explicit global.json and evidence refresh rather than an automatic upgrade."
+  ],
   "blocked_by": [],
-  "recommended_merge_order": 0,
+  "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V01-001/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "module": "",
-    "dependency_direction_ok": false,
-    "reused_existing_logic": [],
+    "module": "build-foundation",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "M0-004-proven .NET SDK 10.0.111 / runtime 10.0.11 task-local toolchain",
+      "M0-009 validate_handoff.py, validate_architecture_baseline.py, verify_repository.py and CI tier contracts",
+      "NuGet central package management and committed lock-file mechanisms",
+      "Existing V0.1 scoped-start release gate"
+    ],
     "duplicated_logic": [],
     "cross_module_access": [],
-    "new_language_or_framework": [],
-    "new_major_dependencies": [],
-    "contract_changes": [],
-    "architecture_tests": [],
-    "technical_debt": []
+    "new_language_or_framework": [
+      ".NET SDK 10.0.111, runtime 10.0.11, net10.0, C# 14 and ASP.NET Core 10 activate the technology family already approved by ADR-0012"
+    ],
+    "new_major_dependencies": [
+      "Microsoft.AspNetCore.App 10 shared framework reference for the inert Core Server assembly",
+      "Microsoft.NET.Test.Sdk 18.0.0, MSTest.TestAdapter 4.0.1 and MSTest.TestFramework 4.0.1 as test-only dependencies; 15-package locked closure, all MIT"
+    ],
+    "contract_changes": [
+      "Internal CI tier contract activates fail-closed .NET gates on Windows and Ubuntu fast-merge runners",
+      "Architecture baseline requires the root .NET build files, dependency/source gates and per-project lock files"
+    ],
+    "architecture_tests": [
+      "13 positive/negative architecture-rule fixture tests",
+      "19 repository tests including 11 .NET foundation and policy tests",
+      "2 data-driven MSTest assembly-foundation cases",
+      "Real locked-restore NU1004 drift rejection",
+      "NuGet source, SHA-512, license and vulnerability fail-closed fixtures",
+      "Duplicate-source, sensitive-log and CI continue-on-error fail-closed fixtures",
+      "git diff --check and Python cache-residue check"
+    ],
+    "technical_debt": [
+      "Run the new Windows and Ubuntu matrix remotely and retain its first CI evidence.",
+      "Add integration, public-contract and migration suites when their owning production tasks activate those behaviors.",
+      "Replace or calibrate lexical duplicate/log scanning only through reviewed policy changes once real-source evidence justifies it."
+    ]
   }
 }
