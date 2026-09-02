@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_scoped_implementation_authorized",
-  "next_action": "Create V01-001 build foundation, V01-002 AssetLink SDK generation and V01-003 database ownership tasks from docs/23; keep every feature and release target fail-closed until its named gate closes",
+  "status": "v0_1_foundation_tasks_planned",
+  "next_action": "Activate and complete V01-001 build foundation first; V01-002 may proceed independently, while V01-003 remains dependency-blocked until V01-001 completes",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v0_1_scoped_implementation_not_started",
+  "implementation_status": "v0_1_foundation_planning",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -23,7 +23,8 @@
     "Earlier Linux coordination evidence lacked a Windows executor and Docker daemon; later Windows evidence was merged, while Docker and other environment-specific gates remain explicit.",
     "On 2026-09-03, verified Windows evidence branches for M0-002, M0-004, M0-006 and M0-008 were merged into main. Their residual gates and partial statuses remain explicit.",
     "M0-009 was activated on 2026-09-03 with M0-002, M0-004, M0-006 and M0-008 accepted only as partial adjudication inputs; activation did not mark those tasks complete.",
-    "M0-009 implementation 5a0aacea017aee1c2ae31cd68487860ace884e48 and handoff e2039a0d70f8761336f974f3209f6bff52f28365 were fast-forward merged after repository and architecture verification. Scoped V0.1 implementation may start; v0.1-release, production file writes, Provider, Explorer and platform releases remain blocked by tests/architecture/m0-gates.json."
+    "M0-009 implementation 5a0aacea017aee1c2ae31cd68487860ace884e48 and handoff e2039a0d70f8761336f974f3209f6bff52f28365 were fast-forward merged after repository and architecture verification. Scoped V0.1 implementation may start; v0.1-release, production file writes, Provider, Explorer and platform releases remain blocked by tests/architecture/m0-gates.json.",
+    "V01-001, V01-002 and V01-003 were planned from docs/23 with explicit owners and dependency ordering. Planning does not activate product features or close any residual M0 gate."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }

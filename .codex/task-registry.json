@@ -149,6 +149,57 @@
         "M0-008"
       ],
       "partial_dependency_policy": "M0-009 must classify every residual gate as blocking, deferred, or rejected; upstream task statuses remain partial."
+    },
+    {
+      "id": "V01-001",
+      "title": "建立 .NET 10 solution、模块项目与原生 CI 门禁",
+      "module": "build-foundation",
+      "status": "planned",
+      "depends_on": [
+        "M0-009"
+      ],
+      "owner": "codex-agent-v01-001",
+      "branch": "codex/v01-001-build-foundation",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-001.md",
+      "handoff": ".codex/handoffs/V01-001/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-002",
+      "title": "生成 AssetLink .NET、TypeScript 与 Kotlin SDK",
+      "module": "assetlink-sdk-generation",
+      "status": "planned",
+      "depends_on": [
+        "M0-003",
+        "M0-009"
+      ],
+      "owner": "codex-agent-v01-002",
+      "branch": "codex/v01-002-assetlink-sdk-generation",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-002.md",
+      "handoff": ".codex/handoffs/V01-002/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-003",
+      "title": "冻结生产数据库 schema 所有权与迁移底座",
+      "module": "database-migration-foundation",
+      "status": "planned",
+      "depends_on": [
+        "M0-005",
+        "M0-009",
+        "V01-001"
+      ],
+      "owner": "codex-agent-v01-003",
+      "branch": "codex/v01-003-database-ownership",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-003.md",
+      "handoff": ".codex/handoffs/V01-003/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
