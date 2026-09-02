@@ -25,7 +25,23 @@
     "eng/CodeMetricsConfig.txt",
     "eng/dotnet-dependency-policy.json",
     "scripts/validate_dotnet_dependencies.py",
-    "scripts/validate_dotnet_source.py"
+    "scripts/validate_dotnet_source.py",
+    "scripts/generate_assetlink_sdks.py",
+    "scripts/validate_assetlink_sdk_dependencies.py",
+    "scripts/validate_assetlink_sdk_source.py",
+    "eng/assetlink-sdk-dependency-policy.json",
+    "packages/sdk/assetlink/generation-manifest.json",
+    "packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj",
+    "packages/sdk/assetlink/dotnet/packages.lock.json",
+    "packages/sdk/assetlink/typescript/package.json",
+    "packages/sdk/assetlink/typescript/pnpm-lock.yaml",
+    "packages/sdk/assetlink/typescript/tsconfig.json",
+    "packages/sdk/assetlink/kotlin/build.gradle.kts",
+    "packages/sdk/assetlink/kotlin/settings.gradle.kts",
+    "packages/sdk/assetlink/kotlin/gradle.lockfile",
+    "packages/sdk/assetlink/kotlin/gradle/verification-metadata.xml",
+    "packages/sdk/assetlink/kotlin/gradle/wrapper/gradle-wrapper.jar",
+    "packages/sdk/assetlink/kotlin/gradle/wrapper/gradle-wrapper.properties"
   ],
   "layers": [
     "Domain",
@@ -212,7 +228,8 @@
       "framework": ".NET 10",
       "allowed_source_extensions": [".cs"],
       "activation_extensions": [".cs"],
-      "required_manifest_globs": ["*.csproj", "**/*.csproj"]
+      "required_manifest_globs": ["*.csproj", "**/*.csproj"],
+      "required_lockfile_globs": ["packages.lock.json"]
     },
     {
       "root": "packages/sdk/assetlink/typescript",
@@ -230,7 +247,7 @@
       "allowed_source_extensions": [".kt", ".kts"],
       "activation_extensions": [".kt"],
       "required_manifest_globs": ["build.gradle.kts", "**/build.gradle.kts"],
-      "required_lockfile_globs": ["gradle/verification-metadata.xml"]
+      "required_lockfile_globs": ["gradle.lockfile", "gradle/verification-metadata.xml"]
     },
     {
       "root": "packages/test-support",

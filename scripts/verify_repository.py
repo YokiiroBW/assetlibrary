@@ -15,6 +15,9 @@ def main() -> int:
         [sys.executable, str(ROOT / 'scripts/validate_handoff.py')],
         [sys.executable, str(ROOT / 'scripts/validate_architecture_baseline.py')],
         [sys.executable, str(ROOT / 'scripts/validate_dotnet_source.py')],
+        [sys.executable, '-B', str(ROOT / 'scripts/generate_assetlink_sdks.py'), '--check'],
+        [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_source.py')],
+        [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_dependencies.py')],
         [
             sys.executable,
             '-B',

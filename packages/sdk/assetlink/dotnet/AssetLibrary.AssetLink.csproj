@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssetLibrary.AssetLink</AssemblyName>
+    <RootNamespace>AssetLibrary.AssetLink</RootNamespace>
+    <Description>Generated AssetLink wire models and codecs.</Description>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>

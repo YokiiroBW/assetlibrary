@@ -16,7 +16,7 @@ jobs:
           - os: windows-latest
             label: windows
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 20
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       DOTNET_CLI_HOME: ${{ github.workspace }}/.runtime/dotnet-home
@@ -24,11 +24,26 @@ jobs:
       DOTNET_NOLOGO: '1'
       MSBUILDDISABLENODEREUSE: '1'
       NUGET_PACKAGES: ${{ github.workspace }}/.runtime/nuget
+      GRADLE_USER_HOME: ${{ github.workspace }}/.runtime/gradle-home
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.19.0'
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: pnpm
+          cache-dependency-path: packages/sdk/assetlink/typescript/pnpm-lock.yaml
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21.0.12+8'
+      - uses: gradle/actions/setup-gradle@v4
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -36,11 +51,17 @@ jobs:
           cache-dependency-path: |
             services/core-server/packages.lock.json
             services/worker-supervisor/packages.lock.json
+            packages/sdk/assetlink/dotnet/packages.lock.json
+            tests/dotnet/AssetLibrary.AssetLink.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
       - name: Repository verification entry
         run: python scripts/verify_repository.py
       - name: Repository workflow tests
         run: python -m unittest discover -s tests/repository -p test_*.py -v
+      - name: AssetLink generated SDK tests
+        run: python -B -m unittest discover -s tests/sdk -p test_*.py -v
+      - name: AssetLink contract regression tests
+        run: python -B -m unittest discover -s tests/spikes/assetlink -p test_*.py -v
       - name: Verify scoped V0.1 start gate
         run: python tests/architecture/check_release_gates.py --target v0.1-start
       - name: Locked .NET restore
@@ -58,3 +79,25 @@ jobs:
         run: python scripts/validate_dotnet_dependencies.py --solution AssetLibrary.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/dotnet-vulnerabilities.json
       - name: Duplicate source and sensitive-log gate
         run: python scripts/validate_dotnet_source.py
+      - name: Generated SDK drift and source boundary gate
+        run: python -B scripts/generate_assetlink_sdks.py --check
+      - name: AssetLink SDK source policy
+        run: python -B scripts/validate_assetlink_sdk_source.py
+      - name: Frozen TypeScript install
+        run: pnpm --dir packages/sdk/assetlink/typescript install --frozen-lockfile
+      - name: TypeScript lint
+        run: pnpm --dir packages/sdk/assetlink/typescript run lint
+      - name: TypeScript typecheck
+        run: pnpm --dir packages/sdk/assetlink/typescript run typecheck
+      - name: TypeScript build and unit tests
+        run: pnpm --dir packages/sdk/assetlink/typescript run test
+      - name: TypeScript dependency audit
+        run: pnpm --dir packages/sdk/assetlink/typescript audit --audit-level low
+      - name: Kotlin build and SDK tests (Ubuntu)
+        if: matrix.label == 'ubuntu'
+        run: bash packages/sdk/assetlink/kotlin/gradlew -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build
+      - name: Kotlin build and SDK tests (Windows)
+        if: matrix.label == 'windows'
+        run: packages/sdk/assetlink/kotlin/gradlew.bat -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build
+      - name: SDK dependency, integrity, license and size gate
+        run: python -B scripts/validate_assetlink_sdk_dependencies.py --require-build-artifacts

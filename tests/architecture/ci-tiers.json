@@ -5,14 +5,16 @@
       "id": "fast-merge",
       "required_for": ["push", "pull_request", "worktree-review"],
       "runners": ["ubuntu-latest", "windows-latest"],
-      "timeout_minutes": 10,
+      "timeout_minutes": 20,
       "workflow": ".github/workflows/handoff-quality.yml",
-      "cache": "setup-dotnet restores the repository-local NuGet cache from a key derived from every committed packages.lock.json; global.json is enforced separately, and build outputs/runtime state are not cached.",
+      "cache": "setup-dotnet, setup-node and setup-gradle restore only dependency caches keyed by committed NuGet, pnpm and Gradle lock or verification inputs; global.json and exact native tool versions remain enforced, and build outputs/runtime state are not cached.",
       "artifacts": ["job log on failure"],
       "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
       "commands": [
         "python scripts/verify_repository.py",
         "python -m unittest discover -s tests/repository -p test_*.py -v",
+        "python -B -m unittest discover -s tests/sdk -p test_*.py -v",
+        "python -B -m unittest discover -s tests/spikes/assetlink -p test_*.py -v",
         "python tests/architecture/check_release_gates.py --target v0.1-start",
         "dotnet restore AssetLibrary.slnx --locked-mode",
         "dotnet format AssetLibrary.slnx --verify-no-changes --no-restore",
@@ -20,7 +22,17 @@
         "dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore --logger \"console;verbosity=normal\"",
         "dotnet package list --project AssetLibrary.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/dotnet-vulnerabilities.json",
         "python scripts/validate_dotnet_dependencies.py --solution AssetLibrary.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/dotnet-vulnerabilities.json",
-        "python scripts/validate_dotnet_source.py"
+        "python scripts/validate_dotnet_source.py",
+        "python -B scripts/generate_assetlink_sdks.py --check",
+        "python -B scripts/validate_assetlink_sdk_source.py",
+        "pnpm --dir packages/sdk/assetlink/typescript install --frozen-lockfile",
+        "pnpm --dir packages/sdk/assetlink/typescript run lint",
+        "pnpm --dir packages/sdk/assetlink/typescript run typecheck",
+        "pnpm --dir packages/sdk/assetlink/typescript run test",
+        "pnpm --dir packages/sdk/assetlink/typescript audit --audit-level low",
+        "bash packages/sdk/assetlink/kotlin/gradlew -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build",
+        "packages/sdk/assetlink/kotlin/gradlew.bat -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build",
+        "python -B scripts/validate_assetlink_sdk_dependencies.py --require-build-artifacts"
       ],
       "skip_policy": "No skip may satisfy an active architecture, handoff, contract or V0.1-start gate."
     },
@@ -58,8 +70,8 @@
   ],
   "future_native_gate_activation": {
     "dotnet": "Active in V01-001: fixed SDK, locked restore, format, Release build, non-empty MSTest, vulnerability, license, duplicate-code, Roslyn complexity and sensitive-log gates run in fast-merge. Integration, contract and migration suites must join the same solution when their owning production tasks activate them.",
-    "typescript": "When the first production package.json is added, the same change must add frozen-lock install, format, lint, typecheck, unit/browser tests, audit, license, bundle-size and sensitive-log commands on Node.js 24 LTS.",
-    "android": "When the first Android Gradle build is added, the same change must add wrapper verification, lint, unit, selected instrumentation, dependency verification, vulnerability, license and sensitive-log commands.",
+    "typescript": "Active for the generated AssetLink SDK in V01-002: exact Node.js 24 LTS, pnpm and TypeScript versions; frozen install, generator formatting/drift, lint, typecheck, Node unit tests, audit, license, size and sensitive-log gates run in fast-merge. Browser tests remain required when the first browser consumer activates.",
+    "android": "The Kotlin/JVM AssetLink SDK activates fixed Kotlin, JDK and Gradle wrapper, dependency locking and verification, compile, SDK tests, license, size and sensitive-log gates in V01-002. The first Android app build must still add AGP/Compose lint, selected instrumentation and Android-specific vulnerability gates.",
     "cpp": "Production Shell activation remains blocked by M0-002 gates; its first approved build must add MSVC/CMake formatting/static analysis, ABI/export, forbidden-link, dependency vulnerability/license and fault tests.",
     "database": "The first production migration after the M0 candidate must add forward, rollback-or-restore, checksum-drift, ownership and least-privilege tests on PostgreSQL 16.x.",
     "release_labs": "Capacity, sudden-power-loss, administrator SCM, Docker hardening, Provider hard-sandbox and soak commands may be added only after their task names an approved runner, fixed sandbox boundary, cleanup and artifact retention policy."

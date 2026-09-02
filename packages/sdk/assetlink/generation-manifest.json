@@ -1,0 +1,1020 @@
+{
+  "generator": "scripts/generate_assetlink_sdks.py",
+  "generator_version": 1,
+  "contract_root": "contracts/assetlink",
+  "contract_sha256": "6b80d07c807f844de9d414272b87b8d696fe69e7fe12450f76b3e60ffb9c4e09",
+  "schema_count": 21,
+  "message_count": 20,
+  "messages": [
+    {
+      "schema_file": "control-cancel.schema.json",
+      "message_type": "control.cancel",
+      "required": [
+        "message_type",
+        "request_id",
+        "cancel_of"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "control.cancel"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "cancel_of": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "control-result.schema.json",
+      "message_type": "control.result",
+      "required": [
+        "message_type",
+        "request_id",
+        "ok",
+        "body"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "control.result"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "ok": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        },
+        "body": {
+          "required": true,
+          "kind": "object",
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "control.schema.json",
+      "message_type": "control.request",
+      "required": [
+        "message_type",
+        "request_id",
+        "operation",
+        "body"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "control.request"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "operation": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        "body": {
+          "required": true,
+          "kind": "object",
+          "schema": {
+            "type": "object"
+          }
+        },
+        "idempotency_key": {
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "timeout_ms": {
+          "required": false,
+          "kind": "integer",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 86400000
+          }
+        },
+        "cancel_of": {
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "download-range.schema.json",
+      "message_type": "download.range",
+      "required": [
+        "message_type",
+        "asset_id",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "download.range"
+          }
+        },
+        "asset_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "start": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "end": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "download-result.schema.json",
+      "message_type": "download.result",
+      "required": [
+        "message_type",
+        "length",
+        "start",
+        "end",
+        "content_sha256",
+        "readable",
+        "verified"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "download.result"
+          }
+        },
+        "length": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "start": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "end": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "content_sha256": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/sha256"
+          }
+        },
+        "readable": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        },
+        "verified": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "error.schema.json",
+      "message_type": "error",
+      "required": [
+        "message_type",
+        "request_id",
+        "error"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "error"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "error": {
+          "required": true,
+          "kind": "object",
+          "schema": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "code",
+              "message",
+              "retryable"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9._-]{0,63}$",
+                "description": "Known codes are open-ended; future codes preserved"
+              },
+              "message": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "retry_after_ms": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "details": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "event.schema.json",
+      "message_type": "event",
+      "required": [
+        "message_type",
+        "event_id",
+        "event_type",
+        "cursor",
+        "sequence",
+        "occurred_at",
+        "payload"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "event"
+          }
+        },
+        "event_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "event_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        "cursor": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/cursor"
+          }
+        },
+        "sequence": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "occurred_at": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        "payload": {
+          "required": true,
+          "kind": "object",
+          "schema": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "handshake-response.schema.json",
+      "message_type": "handshake.response",
+      "required": [
+        "message_type",
+        "selected_version",
+        "server_id",
+        "server_version",
+        "capabilities",
+        "endpoint_role"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "handshake.response"
+          }
+        },
+        "selected_version": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/version"
+          }
+        },
+        "server_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/server_id"
+          }
+        },
+        "server_version": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "type": "string"
+          }
+        },
+        "capabilities": {
+          "required": true,
+          "kind": "string_array",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/capabilities"
+          }
+        },
+        "endpoint_role": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/endpoint_role"
+          }
+        },
+        "request_id": {
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "handshake.schema.json",
+      "message_type": "handshake.request",
+      "required": [
+        "message_type",
+        "client",
+        "supported_versions",
+        "capabilities",
+        "endpoint_role"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "handshake.request"
+          }
+        },
+        "client": {
+          "required": true,
+          "kind": "object",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/client"
+          }
+        },
+        "supported_versions": {
+          "required": true,
+          "kind": "string_array",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/version_list"
+          }
+        },
+        "capabilities": {
+          "required": true,
+          "kind": "string_array",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/capabilities"
+          }
+        },
+        "endpoint_role": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/endpoint_role"
+          }
+        },
+        "request_id": {
+          "required": false,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "replay-request.schema.json",
+      "message_type": "event.replay.request",
+      "required": [
+        "message_type",
+        "request_id",
+        "after_cursor",
+        "limit"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "event.replay.request"
+          }
+        },
+        "after_cursor": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/cursor"
+          }
+        },
+        "limit": {
+          "required": true,
+          "kind": "integer",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "replay-result.schema.json",
+      "message_type": "event.replay.result",
+      "required": [
+        "message_type",
+        "request_id",
+        "events",
+        "next_cursor",
+        "gap"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "event.replay.result"
+          }
+        },
+        "events": {
+          "required": true,
+          "kind": "object_array",
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "event.schema.json"
+            }
+          }
+        },
+        "next_cursor": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/cursor"
+          }
+        },
+        "gap": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-cancel-result.schema.json",
+      "message_type": "upload.cancel.result",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "cancelled"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.cancel.result"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "cancelled": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-cancel.schema.json",
+      "message_type": "upload.cancel",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.cancel"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-chunk-result.schema.json",
+      "message_type": "upload.chunk.result",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "offset",
+        "accepted",
+        "duplicate"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.chunk.result"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "offset": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "accepted": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        },
+        "duplicate": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-chunk.schema.json",
+      "message_type": "upload.chunk",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "offset",
+        "chunk_size",
+        "chunk_sha256"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.chunk"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "offset": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "chunk_size": {
+          "required": true,
+          "kind": "integer",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67108864
+          }
+        },
+        "chunk_sha256": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/sha256"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-complete-result.schema.json",
+      "message_type": "upload.complete.result",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "verified",
+        "readable",
+        "verified_length",
+        "verified_sha256"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.complete.result"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "verified": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        },
+        "readable": {
+          "required": true,
+          "kind": "boolean",
+          "schema": {
+            "const": true
+          }
+        },
+        "verified_length": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "verified_sha256": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/sha256"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-complete.schema.json",
+      "message_type": "upload.complete",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "content_sha256",
+        "idempotency_key"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.complete"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "content_sha256": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/sha256"
+          }
+        },
+        "idempotency_key": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-create.schema.json",
+      "message_type": "upload.create",
+      "required": [
+        "message_type",
+        "request_id",
+        "length",
+        "content_sha256",
+        "idempotency_key"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.create"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "length": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "content_sha256": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/sha256"
+          }
+        },
+        "idempotency_key": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-created.schema.json",
+      "message_type": "upload.created",
+      "required": [
+        "message_type",
+        "request_id",
+        "transfer_id",
+        "length"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.created"
+          }
+        },
+        "request_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/request_id"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "length": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        }
+      }
+    },
+    {
+      "schema_file": "upload-status.schema.json",
+      "message_type": "upload.status",
+      "required": [
+        "message_type",
+        "transfer_id",
+        "length",
+        "received_ranges"
+      ],
+      "properties": {
+        "message_type": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "const": "upload.status"
+          }
+        },
+        "transfer_id": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/opaque_id"
+          }
+        },
+        "length": {
+          "required": true,
+          "kind": "string",
+          "schema": {
+            "$ref": "common.schema.json#/$defs/uint64_decimal"
+          }
+        },
+        "received_ranges": {
+          "required": true,
+          "kind": "object_array",
+          "schema": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "common.schema.json#/$defs/byte_range"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "generated_files": {
+    "dotnet/.contract-source.sha256": "18a53dca315612e0c0b263e7935eecc81ce217207ef57a79cdd94975320088ea",
+    "dotnet/AssetLink.Generated.cs": "a5860e1622b266abeeef4700d1e893994b8b5e6954c859e550c056ffc10d6ede",
+    "kotlin/.contract-source.sha256": "18a53dca315612e0c0b263e7935eecc81ce217207ef57a79cdd94975320088ea",
+    "kotlin/src/main/kotlin/app/assetlibrary/assetlink/AssetLink.Generated.kt": "4378a406b111fb5a984ff8bded2411d1a639ed5aeba3ec96b48f124a80420772",
+    "typescript/.contract-source.sha256": "18a53dca315612e0c0b263e7935eecc81ce217207ef57a79cdd94975320088ea",
+    "typescript/src/generated.ts": "18c284e42d09b8e673eb7bf6b431a3556c17ff10577a8125f03f146fc78c5e03"
+  }
+}

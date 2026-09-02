@@ -372,7 +372,9 @@ def contract_digest(source_root: Path, root: Path) -> str:
         rel = path.relative_to(source_root).as_posix().encode("utf-8")
         digest.update(len(rel).to_bytes(4, "big"))
         digest.update(rel)
-        content = path.read_bytes()
+        # Contract sources are UTF-8 text. Normalize checkout line endings so a
+        # source stamp generated on Windows remains valid on Ubuntu and vice versa.
+        content = path.read_bytes().replace(b"\r\n", b"\n").replace(b"\r", b"\n")
         digest.update(len(content).to_bytes(8, "big"))
         digest.update(content)
     return digest.hexdigest()

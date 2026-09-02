@@ -3,7 +3,11 @@
     <Project Path="services/core-server/AssetLibrary.CoreServer.csproj" />
     <Project Path="services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj" />
   </Folder>
+  <Folder Name="/packages/">
+    <Project Path="packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/dotnet/AssetLibrary.Build.Tests/AssetLibrary.Build.Tests.csproj" />
+    <Project Path="tests/dotnet/AssetLibrary.AssetLink.Tests/AssetLibrary.AssetLink.Tests.csproj" />
   </Folder>
 </Solution>

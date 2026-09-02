@@ -269,6 +269,21 @@ class ArchitectureRuleTests(unittest.TestCase):
         errors = self.validate(rules).errors
         self.assertTrue(any("consumer is stale" in error for error in errors), errors)
 
+    def test_contract_digest_is_stable_across_lf_and_crlf_checkouts(self) -> None:
+        lf_root = self.root / "lf"
+        crlf_root = self.root / "crlf"
+        lf_contract = lf_root / "contracts/assetlink"
+        crlf_contract = crlf_root / "contracts/assetlink"
+        lf_contract.mkdir(parents=True)
+        crlf_contract.mkdir(parents=True)
+        (lf_contract / "control.schema.json").write_bytes(b'{\n  "type": "object"\n}\n')
+        (crlf_contract / "control.schema.json").write_bytes(b'{\r\n  "type": "object"\r\n}\r\n')
+
+        self.assertEqual(
+            architecture.contract_digest(lf_contract, lf_root),
+            architecture.contract_digest(crlf_contract, crlf_root),
+        )
+
     def gate(self, gate_id: str, index: int, classification: str = "blocking_release_or_later_milestone") -> dict:
         gate = {
             "id": gate_id,

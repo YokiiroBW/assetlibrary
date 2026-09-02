@@ -32,3 +32,29 @@ The generated layer may provide parsing, serialization, cancellation hooks,
 timeouts, and typed success/error envelopes. Authentication, permissions,
 paths, hashes, retry policy decisions, transfer state, storage, and file writes
 remain in the shared application/core implementation.
+
+## Generated packages
+
+Run `python -B scripts/generate_assetlink_sdks.py` from the repository root to
+refresh all targets, or add `--check` to verify committed output without writing.
+The generator consumes every file under `contracts/assetlink`, writes a shared
+shape catalog plus target source, and records byte hashes in
+`generation-manifest.json`. Files carrying an auto-generated header must not be
+edited by hand.
+
+| Target | Public surface | Build boundary |
+|---|---|---|
+| `.NET` | `AssetLinkCodec`, generated message wrappers, `AssetLinkUInt64` | C# 14 / .NET 10; BCL only |
+| `TypeScript` | open generated interfaces, parse/encode/classify helpers, checked `bigint` conversion | TypeScript 6.0.3 / Node.js 24 LTS; no runtime npm dependency |
+| `Kotlin` | generated `JsonObject` wrappers, parse/encode/classify helpers, checked `ULong` conversion | Kotlin 2.3.20 / JDK 21 / kotlinx serialization JSON 1.11.0 |
+
+The parsers intentionally preserve the complete JSON object. They identify the
+wire envelope but do not implement semantic validation, version negotiation,
+authorization, retries, network transport, file access, or transfer state.
+Those decisions remain with the owning application/core modules.
+
+Each target contains `.contract-source.sha256`. Repository architecture checks
+reject a missing or stale stamp, while generator tests reject missing, modified,
+or unexpected generated files. The root `generation-manifest.json` records the
+single normalized schema shape and every target output digest for deterministic
+compatibility inspection; it is generated evidence, not a second contract source.

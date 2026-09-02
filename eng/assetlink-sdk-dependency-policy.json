@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "approved_registries": [
+    "https://registry.npmjs.org/",
+    "https://plugins.gradle.org/",
+    "https://repo.maven.apache.org/maven2/",
+    "https://services.gradle.org/distributions/"
+  ],
+  "dependencies": [
+    {
+      "name": "Node.js",
+      "version": "24.20.0",
+      "scope": "build-and-test-runtime",
+      "license": "MIT",
+      "security_updates": "https://nodejs.org/en/blog/release/"
+    },
+    {
+      "name": "pnpm",
+      "version": "11.19.0",
+      "scope": "package-manager",
+      "license": "MIT",
+      "security_updates": "https://github.com/pnpm/pnpm/security/advisories"
+    },
+    {
+      "name": "typescript",
+      "version": "6.0.3",
+      "scope": "development",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/microsoft/TypeScript/security/advisories"
+    },
+    {
+      "name": "Eclipse Temurin",
+      "version": "21.0.12+8",
+      "scope": "build-and-test-runtime",
+      "license": "GPL-2.0-only WITH Classpath-exception-2.0",
+      "security_updates": "https://adoptium.net/security/"
+    },
+    {
+      "name": "Gradle",
+      "version": "9.3.1",
+      "scope": "build-tool",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/gradle/gradle/security/advisories"
+    },
+    {
+      "name": "Kotlin JVM Gradle plugin",
+      "version": "2.3.20",
+      "scope": "build-tool",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/JetBrains/kotlin/security/advisories"
+    },
+    {
+      "name": "kotlinx-serialization-json",
+      "version": "1.11.0",
+      "scope": "runtime",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/Kotlin/kotlinx.serialization/security/advisories"
+    }
+  ],
+  "allowed_licenses": [
+    "Apache-2.0",
+    "GPL-2.0-only WITH Classpath-exception-2.0",
+    "MIT"
+  ],
+  "gradle_component_license_groups": {
+    "com.google.code.gson": "Apache-2.0",
+    "com.google.errorprone": "Apache-2.0",
+    "io.github.java-diff-utils": "Apache-2.0",
+    "org.jetbrains": "Apache-2.0",
+    "org.jetbrains.kotlin": "Apache-2.0",
+    "org.jetbrains.kotlin.jvm": "Apache-2.0",
+    "org.jetbrains.kotlinx": "Apache-2.0"
+  },
+  "size_budgets_bytes": {
+    "typescript_dist": 131072,
+    "dotnet_release_dll": 262144,
+    "kotlin_release_jar": 262144
+  }
+}

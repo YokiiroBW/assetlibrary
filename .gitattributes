@@ -2,3 +2,6 @@
 *.csproj text eol=lf
 *.props text eol=lf
 *.slnx text eol=lf
+contracts/assetlink/** text eol=lf
+packages/sdk/assetlink/** text eol=lf
+packages/sdk/assetlink/kotlin/gradle/wrapper/gradle-wrapper.jar binary
