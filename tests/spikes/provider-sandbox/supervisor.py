@@ -9,7 +9,6 @@ from __future__ import annotations
 import os
 import queue
 import re
-import resource
 import signal
 import subprocess
 import sys
@@ -21,6 +20,11 @@ from typing import Any
 
 from manifest import validate_manifest
 from protocol import ProtocolError, canonical_size, encode_frame, read_frame
+
+try:
+    import resource
+except ModuleNotFoundError:  # Windows evidence uses the separate Job Object probe.
+    resource = None
 
 REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
 OPAQUE_TOKEN_PATTERN = re.compile(r"^(?:opaque|artifact):[A-Za-z0-9._:-]{1,240}$")
@@ -92,6 +96,8 @@ def default_manifest(limits: Limits | None = None, trust_class: str = "test_only
 
 def _set_limits(limits: Limits, runtime_dir: Path) -> None:
     """Apply the limits available on this Linux host before worker code runs."""
+    if resource is None:
+        raise RuntimeError("POSIX resource limits are unavailable")
     resource.setrlimit(resource.RLIMIT_CPU, (max(1, (limits.cpu_ms + 999) // 1000), max(2, (limits.cpu_ms + 1999) // 1000)))
     resource.setrlimit(resource.RLIMIT_AS, (limits.memory_bytes, limits.memory_bytes))
     resource.setrlimit(resource.RLIMIT_NPROC, (limits.processes, limits.processes))
