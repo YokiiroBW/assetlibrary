@@ -125,7 +125,7 @@
       "id": "M0-009",
       "title": "冻结编码架构原则、语言预算与CI质量门禁",
       "module": "architecture-quality-gate",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "M0-001",
         "M0-002",
@@ -136,11 +136,19 @@
         "M0-007",
         "M0-008"
       ],
-      "owner": "unassigned",
+      "owner": "codex-agent-m0-009",
       "branch": "codex/m0-009-architecture-quality-gate",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\M0-009",
+      "task_file": ".codex/tasks/M0-009.md",
       "handoff": ".codex/handoffs/M0-009/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "accepted_partial_dependencies": [
+        "M0-002",
+        "M0-004",
+        "M0-006",
+        "M0-008"
+      ],
+      "partial_dependency_policy": "M0-009 must classify every residual gate as blocking, deferred, or rejected; upstream task statuses remain partial."
     }
   ]
 }
