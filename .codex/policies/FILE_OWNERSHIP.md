@@ -32,6 +32,18 @@
 
 确需跨边界修改时，先提交变更提案，由主协调线程重新分配所有权。
 
+## V0.1 启动后的共享 owner
+
+- 根 solution、集中版本和构建锁：`build-foundation-owner`；
+- `database/migrations/**` 与 `migration` ledger：`database-migration-owner`；
+- `contracts/assetlink/**`：`assetlink-contract-owner`；
+- `contracts/providers/**`：`provider-contract-owner`；
+- `packages/sdk/assetlink/**`：`sdk-generation-owner`，消费者禁止手改生成代码；
+- 统一错误码、权限和操作计划契约：由主协调线程在创建首个任务前各指定一个 owner；
+- `.codex` 项目状态、任务图、注册表和发布版本：仅主协调线程。
+
+V0.1 任务图和建议合并顺序见 `docs/23_M0架构冻结与质量门禁.md`。同一阶段也不得并行修改以上单一 owner 区域；跨 owner 修改先提交 Contract Change Proposal。
+
 ## M0 首轮任务边界
 
 M0-002、M0-003、M0-004 与 M0-007 可在 M0-001 完成后并行启动：

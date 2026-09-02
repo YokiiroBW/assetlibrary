@@ -3,37 +3,64 @@
   "task_id": "M0-009",
   "title": "冻结编码架构原则、语言预算与CI质量门禁",
   "milestone": "M0",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "codex-agent-m0-009",
   "branch": "codex/m0-009-architecture-quality-gate",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\M0-009",
   "commit": "",
   "changed_files": [
-    ".codex/tasks/M0-009.md",
     ".codex/handoffs/M0-009/summary.md",
     ".codex/handoffs/M0-009/result.json",
-    ".codex/handoffs/M0-009/tests.md"
+    ".codex/handoffs/M0-009/tests.md",
+    ".codex/policies/CODE_QUALITY.md",
+    ".codex/policies/FILE_OWNERSHIP.md",
+    ".codex/policies/LANGUAGE_BUDGET.md",
+    ".codex/policies/MODULE_BOUNDARIES.md",
+    ".github/workflows/handoff-quality.yml",
+    ".github/workflows/platform-quality.yml",
+    ".github/workflows/scheduled-quality.yml",
+    "docs/05_总体架构与技术框架.md",
+    "docs/16_版本路线与验收门禁.md",
+    "docs/19_技术待决策与风险清单.md",
+    "docs/22_编码与架构开发原则.md",
+    "docs/23_M0架构冻结与质量门禁.md",
+    "docs/adr/ADR-0012_语言与框架预算.md",
+    "docs/adr/ADR-0013_架构质量门禁.md",
+    "scripts/validate_architecture_baseline.py",
+    "scripts/verify_repository.py",
+    "tests/architecture/README.md",
+    "tests/architecture/architecture-rules.json",
+    "tests/architecture/check_release_gates.py",
+    "tests/architecture/ci-tiers.json",
+    "tests/architecture/m0-gates.json",
+    "tests/architecture/test_architecture_rules.py"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 8,
+    "passed": 76,
     "failed": 0,
-    "skipped": 0,
+    "skipped": 19,
     "report": "tests.md"
   },
   "risks": [
-    "M0-009 is initialized but its evidence adjudication, architecture freeze and executable CI gates are not implemented.",
-    "M0-002, M0-004, M0-006 and M0-008 remain partial and must not be represented as completed."
+    "M0-002, M0-004, M0-006 and M0-008 remain partial; their 12 residual gates block named feature or release targets and must not be represented as completed.",
+    "The dependency-free architecture scan is an early boundary gate; native compiler, type, dependency, vulnerability and license gates must activate with each first production manifest.",
+    "The new GitHub workflows have not yet executed on remote runners, and this Windows host has no YAML parser or actionlint for a separate local workflow parse.",
+    "The M0-007 symlink unit fixture cannot execute under the current Windows token (WinError 1314); canonical Linux 6/6 and 500k evidence remains the applicable evidence.",
+    "Web, WinUI and Android technology families are frozen budgets, not executable M0 platform evidence."
   ],
   "blocked_by": [],
-  "recommended_merge_order": 0,
+  "recommended_merge_order": 9,
   "handoff_summary": ".codex/handoffs/M0-009/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
     "module": "architecture-quality-gate",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
-      "Existing task registry, handoff templates and repository validators"
+      "Existing validate_handoff.py and verify_repository.py entry points",
+      "M0-001 through M0-008 immutable handoff evidence and executable Spike tests",
+      "Existing AssetLink and Provider candidate contracts",
+      "Python 3 standard library for deterministic repository gates"
     ],
     "duplicated_logic": [],
     "cross_module_access": [],
@@ -41,13 +68,18 @@
     "new_major_dependencies": [],
     "contract_changes": [],
     "architecture_tests": [
-      "tests.repository.test_codex_new_task",
-      "scripts/validate_handoff.py",
+      "13 positive/negative architecture-rule fixture tests",
+      "Executable M0 blocker coverage and fail-closed target tests",
       "scripts/validate_architecture_baseline.py",
-      "scripts/verify_repository.py"
+      "scripts/verify_repository.py",
+      "tests.repository.test_codex_new_task",
+      "AssetLink, Windows Shell, Windows file-safety and Windows Provider affected safe suites",
+      "git diff --check"
     ],
     "technical_debt": [
-      "Replace this initialization handoff with the completed M0-009 evidence, decisions, tests and commit before review."
+      "Activate native compiler, formatter, static/type, migration, vulnerability, license, complexity and log-scanning gates with each first production build manifest.",
+      "Run the three new workflows on their remote runners and preserve their logs before relying on them for platform or release evidence.",
+      "Close each named release/feature gate only with its required platform evidence; no open gate is waived by this task."
     ]
   }
 }

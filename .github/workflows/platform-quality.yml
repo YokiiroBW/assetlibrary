@@ -1,0 +1,57 @@
+name: Platform quality gates
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'tests/spikes/windows-shell/**'
+      - 'tests/spikes/file-safety/**'
+      - 'tests/spikes/provider-sandbox/**'
+      - '.github/workflows/platform-quality.yml'
+
+jobs:
+  platform:
+    name: platform-${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows
+          - os: ubuntu-latest
+            label: ubuntu
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Create log directory
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force .runtime/ci | Out-Null
+      - name: Windows Shell contract and platform checks
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests/spikes/windows-shell -p test_*.py -v 2>&1 | Tee-Object -FilePath .runtime/ci/windows-shell-${{ matrix.label }}.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: File-safety checks
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests/spikes/file-safety -p test_*.py -v 2>&1 | Tee-Object -FilePath .runtime/ci/file-safety-${{ matrix.label }}.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Provider isolation checks
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests/spikes/provider-sandbox -p test_*.py -v 2>&1 | Tee-Object -FilePath .runtime/ci/provider-sandbox-${{ matrix.label }}.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve platform evidence log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-unittest-${{ matrix.label }}
+          path: .runtime/ci/*.log
+          if-no-files-found: error
+          retention-days: 14

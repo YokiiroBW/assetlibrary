@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "tiers": [
+    {
+      "id": "fast-merge",
+      "required_for": ["push", "pull_request", "worktree-review"],
+      "runners": ["ubuntu-latest"],
+      "timeout_minutes": 10,
+      "workflow": ".github/workflows/handoff-quality.yml",
+      "cache": "No dependency cache while the repository has only standard-library M0 gates; product build activation must use the native lock-keyed cache.",
+      "artifacts": ["job log on failure"],
+      "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
+      "commands": [
+        "python scripts/verify_repository.py",
+        "python -m unittest discover -s tests/repository -p test_*.py -v",
+        "python tests/architecture/check_release_gates.py --target v0.1-start"
+      ],
+      "skip_policy": "No skip may satisfy an active architecture, handoff, contract or V0.1-start gate."
+    },
+    {
+      "id": "platform",
+      "required_for": ["affected-platform-merge", "platform-release"],
+      "runners": ["ubuntu-latest", "windows-latest"],
+      "timeout_minutes": 30,
+      "workflow": ".github/workflows/platform-quality.yml",
+      "cache": "No mutable runtime sandbox is cached; future build caches must be keyed by the committed lock or verification file.",
+      "artifacts": ["platform-unittest-windows", "platform-unittest-ubuntu"],
+      "failure_policy": "A failure blocks the affected platform; a missing required runner or platform skip leaves its release evidence open.",
+      "commands": [
+        "python -m unittest discover -s tests/spikes/windows-shell -p test_*.py -v",
+        "python -m unittest discover -s tests/spikes/file-safety -p test_*.py -v",
+        "python -m unittest discover -s tests/spikes/provider-sandbox -p test_*.py -v"
+      ],
+      "skip_policy": "A platform skip is evidence of a missing gate, never a pass for that platform."
+    },
+    {
+      "id": "scheduled-release",
+      "required_for": ["scheduled-regression", "release-candidate"],
+      "runners": ["ubuntu-latest", "approved-self-hosted-labs"],
+      "timeout_minutes": 600,
+      "workflow": ".github/workflows/scheduled-quality.yml",
+      "cache": "Generated performance manifests and fault state are never restored from cache.",
+      "artifacts": ["performance-summary-500k"],
+      "failure_policy": "Scheduled profile regressions fail the run; an on-demand release-readiness check fails while any target gate is open.",
+      "commands": [
+        "python tests/spikes/performance/profile_500k.py",
+        "python tests/architecture/check_release_gates.py --target v0.1-release"
+      ],
+      "skip_policy": "Missing privileged, capacity, soak or platform evidence blocks the named release target; it is not auto-skipped."
+    }
+  ],
+  "future_native_gate_activation": {
+    "dotnet": "When the first production .sln/.slnx is added, the same change must add locked restore, format, build, unit/integration/contract tests, migration tests, vulnerability, license, duplicate-code, complexity and sensitive-log commands.",
+    "typescript": "When the first production package.json is added, the same change must add frozen-lock install, format, lint, typecheck, unit/browser tests, audit, license, bundle-size and sensitive-log commands on Node.js 24 LTS.",
+    "android": "When the first Android Gradle build is added, the same change must add wrapper verification, lint, unit, selected instrumentation, dependency verification, vulnerability, license and sensitive-log commands.",
+    "cpp": "Production Shell activation remains blocked by M0-002 gates; its first approved build must add MSVC/CMake formatting/static analysis, ABI/export, forbidden-link, dependency vulnerability/license and fault tests.",
+    "database": "The first production migration after the M0 candidate must add forward, rollback-or-restore, checksum-drift, ownership and least-privilege tests on PostgreSQL 16.x.",
+    "release_labs": "Capacity, sudden-power-loss, administrator SCM, Docker hardening, Provider hard-sandbox and soak commands may be added only after their task names an approved runner, fixed sandbox boundary, cleanup and artifact retention policy."
+  }
+}

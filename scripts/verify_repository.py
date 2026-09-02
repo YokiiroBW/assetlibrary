@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Technology-neutral repository checks used before M0-009 freezes CI details."""
+"""Fast, dependency-free repository checks used by the M0-009 merge gate."""
 from __future__ import annotations
 
 import json
@@ -14,6 +14,18 @@ def main() -> int:
     commands = [
         [sys.executable, str(ROOT / 'scripts/validate_handoff.py')],
         [sys.executable, str(ROOT / 'scripts/validate_architecture_baseline.py')],
+        [
+            sys.executable,
+            '-B',
+            '-m',
+            'unittest',
+            'discover',
+            '-s',
+            'tests/architecture',
+            '-p',
+            'test_*.py',
+            '-v',
+        ],
     ]
     for command in commands:
         subprocess.run(command, cwd=ROOT, check=True)
@@ -21,7 +33,7 @@ def main() -> int:
         json.loads(path.read_text(encoding='utf-8'))
     for path in (*((ROOT / 'scripts').glob('*.py')), *((ROOT / 'tests').glob('**/*.py'))):
         ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
-    print('Repository verification passed (technology-neutral M0 skeleton).')
+    print('Repository verification passed (M0-009 fast architecture gate).')
     return 0
 
 if __name__ == '__main__':

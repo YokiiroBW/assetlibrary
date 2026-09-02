@@ -26,6 +26,9 @@
 ## 合并
 
 - 必须填写交接中的 `architecture_review`。
-- 必须通过架构、契约、单元、集成、安全、故障和相关性能测试。
+- 必须通过 `fast-merge`，并按修改范围通过 `platform`；发布候选还必须通过 `scheduled-release` 和对应 release target。
+- 必须通过架构、契约、单元、集成、安全、故障和相关性能测试；平台 skip 是缺证据，不是通过。
 - 新语言、框架、运行时、数据库或重大依赖必须有批准 ADR。
 - “能运行但破坏边界”不得合并。
+
+机器合同位于 `tests/architecture/architecture-rules.json`、`tests/architecture/ci-tiers.json` 和 `tests/architecture/m0-gates.json`。开放 `deferred_fail_closed` 项的功能必须默认关闭，禁止用 `continue-on-error`、空跑或跳过解除发布阻断。

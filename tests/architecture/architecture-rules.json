@@ -1,27 +1,240 @@
 {
-  "version": 1,
+  "version": 2,
+  "enforcement_status": "active",
   "architecture_style": "modular-monolith-ports-adapters-isolated-workers",
+  "full_enforcement_task": "M0-009",
+  "required_files": [
+    "docs/22_编码与架构开发原则.md",
+    "docs/23_M0架构冻结与质量门禁.md",
+    ".codex/policies/CODE_QUALITY.md",
+    ".codex/policies/LANGUAGE_BUDGET.md",
+    ".codex/policies/MODULE_BOUNDARIES.md",
+    ".codex/policies/FILE_OWNERSHIP.md",
+    ".codex/checklists/ARCHITECTURE_REVIEW.md",
+    "tests/architecture/m0-gates.json",
+    "tests/architecture/ci-tiers.json",
+    "docs/adr/ADR-0011_模块化单体与端口适配器.md",
+    "docs/adr/ADR-0012_语言与框架预算.md",
+    "docs/adr/ADR-0013_架构质量门禁.md"
+  ],
   "layers": [
     "Domain",
     "Application",
     "Infrastructure",
+    "Contracts",
     "Adapters"
   ],
-  "allowed_dependency_direction": [
-    "Adapters->Application",
-    "Application->Domain",
-    "Infrastructure->ApplicationPorts"
+  "layer_rules": {
+    "module_root": "services/core-server/Modules",
+    "cross_module_public_layers": [
+      "Contracts",
+      "Public"
+    ],
+    "forbidden_targets_by_source": {
+      "Domain": [
+        "Application",
+        "Infrastructure",
+        "Adapters",
+        "UI"
+      ],
+      "Application": [
+        "Infrastructure",
+        "Adapters",
+        "UI"
+      ]
+    },
+    "forbidden_tokens_by_source": {
+      "Domain": [
+        "microsoft.entityframeworkcore",
+        "npgsql",
+        "system.io",
+        "system.net",
+        "microsoft.ui",
+        "windows.applicationmodel",
+        "android.",
+        "java.io",
+        "node:fs"
+      ],
+      "Application": [
+        "microsoft.entityframeworkcore",
+        "npgsql",
+        "microsoft.ui",
+        "windows.applicationmodel",
+        "android."
+      ]
+    }
+  },
+  "module_owners": [
+    {
+      "module": "GatewayAuth",
+      "owns": "authentication context, library authorization orchestration and public entry policies"
+    },
+    {
+      "module": "LibraryStorage",
+      "owns": "physical library roots, storage availability and library permission state"
+    },
+    {
+      "module": "AssetIdentity",
+      "owns": "asset and folder identity plus observed physical facts"
+    },
+    {
+      "module": "MetadataSidecar",
+      "owns": "confirmed metadata, tags, ratings, sidecars and provenance"
+    },
+    {
+      "module": "ScanReconciliation",
+      "owns": "read-only discovery, external-change observation and identity reconciliation"
+    },
+    {
+      "module": "TransferSync",
+      "owns": "transfer sessions, resumable bytes, synchronization baselines and conflicts"
+    },
+    {
+      "module": "OperationTrash",
+      "owns": "physical operation plans, locks, verification, protection and trash"
+    },
+    {
+      "module": "SearchDedup",
+      "owns": "search projections, exact duplicate evidence and approved read models"
+    },
+    {
+      "module": "PreviewProvider",
+      "owns": "preview requests, derived artifacts and Provider scheduling policy"
+    },
+    {
+      "module": "TaskHealth",
+      "owns": "durable tasks, notifications, health and diagnostics state"
+    },
+    {
+      "module": "BackupUpdate",
+      "owns": "software backup, restore, update and rollback orchestration"
+    }
   ],
-  "forbidden_dependencies": [
-    "Domain->Infrastructure",
-    "Domain->UI",
-    "Domain->Database",
-    "Domain->PlatformSDK",
-    "Client->PostgreSQL",
-    "Provider->PostgreSQL",
-    "Shell->Network",
-    "Shell->Database",
-    "Shell->MediaDecoder"
+  "source_roots": [
+    {
+      "root": "services/core-server",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": "ASP.NET Core 10",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "services/worker-supervisor",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": ".NET Worker/Generic Host 10",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "apps/web",
+      "primary_language": "TypeScript 6",
+      "framework": "React 19.2",
+      "allowed_source_extensions": [".ts", ".tsx"],
+      "activation_extensions": [".ts", ".tsx"],
+      "required_manifest_globs": ["package.json"],
+      "required_lockfile_globs": ["pnpm-lock.yaml", "package-lock.json", "yarn.lock"]
+    },
+    {
+      "root": "apps/browser-extension",
+      "primary_language": "TypeScript 6",
+      "framework": "Chromium Manifest V3",
+      "allowed_source_extensions": [".ts", ".tsx"],
+      "activation_extensions": [".ts", ".tsx"],
+      "required_manifest_globs": ["package.json", "manifest.json"],
+      "required_lockfile_globs": ["pnpm-lock.yaml", "package-lock.json", "yarn.lock"]
+    },
+    {
+      "root": "apps/windows-client",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": "WinUI 3 / Windows App SDK 2 stable",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "apps/windows-shell",
+      "primary_language": "C++17",
+      "framework": "Windows SDK 10.0.26100 COM/C++/WinRT",
+      "allowed_source_extensions": [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".idl"],
+      "activation_extensions": [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".idl"],
+      "required_manifest_globs": ["CMakeLists.txt"]
+    },
+    {
+      "root": "apps/android",
+      "primary_language": "Kotlin 2.3",
+      "framework": "Jetpack Compose stable BOM / AGP 9",
+      "allowed_source_extensions": [".kt", ".kts"],
+      "activation_extensions": [".kt", ".kts"],
+      "required_manifest_globs": ["settings.gradle.kts", "build.gradle.kts", "**/build.gradle.kts"],
+      "required_lockfile_globs": ["gradle/verification-metadata.xml"]
+    },
+    {
+      "root": "gateways/webdav",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": "ASP.NET Core adapter",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "integrations/mcp",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": "ASP.NET Core adapter",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "providers",
+      "primary_language": "C# 14 / .NET 10 LTS",
+      "framework": "isolated Provider process",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "packages/sdk/assetlink/dotnet",
+      "primary_language": "generated C# 14",
+      "framework": ".NET 10",
+      "allowed_source_extensions": [".cs"],
+      "activation_extensions": [".cs"],
+      "required_manifest_globs": ["*.csproj", "**/*.csproj"]
+    },
+    {
+      "root": "packages/sdk/assetlink/typescript",
+      "primary_language": "generated TypeScript 6",
+      "framework": "Node.js 24 LTS build tooling",
+      "allowed_source_extensions": [".ts"],
+      "activation_extensions": [".ts"],
+      "required_manifest_globs": ["package.json"],
+      "required_lockfile_globs": ["pnpm-lock.yaml", "package-lock.json", "yarn.lock"]
+    },
+    {
+      "root": "packages/sdk/assetlink/kotlin",
+      "primary_language": "generated Kotlin 2.3",
+      "framework": "Kotlin/JVM",
+      "allowed_source_extensions": [".kt", ".kts"],
+      "activation_extensions": [".kt"],
+      "required_manifest_globs": ["build.gradle.kts", "**/build.gradle.kts"],
+      "required_lockfile_globs": ["gradle/verification-metadata.xml"]
+    },
+    {
+      "root": "packages/test-support",
+      "primary_language": "Python 3.12+",
+      "framework": "standard-library test support",
+      "allowed_source_extensions": [".py"],
+      "activation_extensions": [".py"]
+    }
+  ],
+  "architecture_scoped_roots": [
+    "apps",
+    "services",
+    "gateways",
+    "integrations",
+    "providers",
+    "packages"
   ],
   "forbidden_unbounded_directories": [
     "common",
@@ -29,6 +242,80 @@
     "utils",
     "helpers"
   ],
-  "language_budget_policy": ".codex/policies/LANGUAGE_BUDGET.md",
-  "full_enforcement_task": "M0-009"
+  "boundary_rules": [
+    {
+      "id": "adapters-must-not-connect-to-postgresql",
+      "roots": ["apps", "gateways", "integrations"],
+      "forbidden_tokens": [
+        "npgsql",
+        "microsoft.entityframeworkcore",
+        "org.postgresql",
+        "jdbc:postgresql",
+        "postgresql://",
+        "@prisma/client",
+        "from \"pg\"",
+        "from 'pg'",
+        "require(\"pg\")",
+        "require('pg')"
+      ]
+    },
+    {
+      "id": "providers-must-not-connect-to-postgresql",
+      "roots": ["providers"],
+      "forbidden_tokens": [
+        "npgsql",
+        "microsoft.entityframeworkcore",
+        "org.postgresql",
+        "jdbc:postgresql",
+        "postgresql://",
+        "@prisma/client",
+        "from \"pg\"",
+        "from 'pg'"
+      ]
+    },
+    {
+      "id": "shell-must-remain-minimal",
+      "roots": ["apps/windows-shell"],
+      "forbidden_tokens": [
+        "winhttp",
+        "wininet",
+        "winsock",
+        "system.net",
+        "curl/",
+        "libav",
+        "ffmpeg",
+        "mediainfo",
+        "sqlite",
+        "npgsql",
+        "entityframeworkcore"
+      ]
+    },
+    {
+      "id": "adapters-must-not-duplicate-core-state-machines",
+      "roots": ["apps", "gateways", "integrations", "providers"],
+      "forbidden_tokens": [
+        "class permissionpolicy",
+        "class transferstatemachine",
+        "class syncstatemachine",
+        "class trashpolicy",
+        "class operationplanexecutor",
+        "class physicalpathpolicy"
+      ]
+    }
+  ],
+  "contract_sync": [
+    {
+      "name": "assetlink",
+      "source_root": "contracts/assetlink",
+      "consumer_roots": [
+        "packages/sdk/assetlink/dotnet",
+        "packages/sdk/assetlink/typescript",
+        "packages/sdk/assetlink/kotlin"
+      ],
+      "stamp_file": ".contract-source.sha256"
+    }
+  ],
+  "m0_gate_ledger": "tests/architecture/m0-gates.json",
+  "ci_tier_contract": "tests/architecture/ci-tiers.json",
+  "language_budget_policy": ".codex/policies/LANGUAGE_BUDGET.md"
 }

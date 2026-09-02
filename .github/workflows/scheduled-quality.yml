@@ -1,0 +1,42 @@
+name: Scheduled and release quality gates
+
+on:
+  schedule:
+    - cron: '17 2 * * 6'
+  workflow_dispatch:
+
+jobs:
+  scheduled-release:
+    name: scheduled-release-500k
+    runs-on: ubuntu-latest
+    timeout-minutes: 600
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run deterministic 500k metadata profile
+        run: python tests/spikes/performance/profile_500k.py
+      - name: Preserve bounded performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-summary-500k
+          path: .runtime/sandbox-storage/M0-007/summary-500k.json
+          if-no-files-found: error
+          retention-days: 30
+
+  release-readiness:
+    name: scheduled-release-v0.1-readiness
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fail closed on unresolved V0.1 release gates
+        run: python tests/architecture/check_release_gates.py --target v0.1-release
