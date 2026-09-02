@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-009",
   "branch": "codex/m0-009-architecture-quality-gate",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\M0-009",
-  "commit": "",
+  "commit": "5a0aacea017aee1c2ae31cd68487860ace884e48",
   "changed_files": [
     ".codex/handoffs/M0-009/summary.md",
     ".codex/handoffs/M0-009/result.json",

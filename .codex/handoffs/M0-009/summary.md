@@ -31,6 +31,8 @@ M0-009 已完成架构、语言预算、所有权和 CI 合同收敛。当前不
 
 完整文件列表见 `result.json.changed_files`。
 
+实现提交：`5a0aacea017aee1c2ae31cd68487860ace884e48`；其后的提交只回填该不可自指的交接元数据。
+
 ## 模块边界、依赖方向与复用
 
 模块：`architecture-quality-gate`，owner 为 `codex-agent-m0-009`。门禁只读取仓库文件，不被产品 Domain 或运行时依赖。强制方向保持 `Adapters/UI/Gateways -> Application -> Domain`，Infrastructure 只实现核心端口。
