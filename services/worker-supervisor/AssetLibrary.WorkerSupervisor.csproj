@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssetLibrary.WorkerSupervisor</AssemblyName>
+    <RootNamespace>AssetLibrary.WorkerSupervisor</RootNamespace>
+    <Description>Build-only foundation for the isolated AssetLibrary worker supervisor.</Description>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/services/">
+    <Project Path="services/core-server/AssetLibrary.CoreServer.csproj" />
+    <Project Path="services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/dotnet/AssetLibrary.Build.Tests/AssetLibrary.Build.Tests.csproj" />
+  </Folder>
+</Solution>

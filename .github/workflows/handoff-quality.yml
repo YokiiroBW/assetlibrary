@@ -6,19 +6,55 @@ on:
 
 jobs:
   fast-merge:
-    name: fast-merge
-    runs-on: ubuntu-latest
+    name: fast-merge-${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: ubuntu
+          - os: windows-latest
+            label: windows
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:
       PYTHONDONTWRITEBYTECODE: '1'
+      DOTNET_CLI_HOME: ${{ github.workspace }}/.runtime/dotnet-home
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      MSBUILDDISABLENODEREUSE: '1'
+      NUGET_PACKAGES: ${{ github.workspace }}/.runtime/nuget
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            services/core-server/packages.lock.json
+            services/worker-supervisor/packages.lock.json
+            tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
       - name: Repository verification entry
         run: python scripts/verify_repository.py
       - name: Repository workflow tests
         run: python -m unittest discover -s tests/repository -p test_*.py -v
       - name: Verify scoped V0.1 start gate
         run: python tests/architecture/check_release_gates.py --target v0.1-start
+      - name: Locked .NET restore
+        run: dotnet restore AssetLibrary.slnx --locked-mode
+      - name: .NET formatting and analyzer gate
+        run: dotnet format AssetLibrary.slnx --verify-no-changes --no-restore
+      - name: .NET Release build
+        run: dotnet build AssetLibrary.slnx --configuration Release --no-restore
+      - name: .NET tests
+        run: dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore --logger "console;verbosity=normal"
+      - name: NuGet vulnerability query
+        shell: bash
+        run: dotnet package list --project AssetLibrary.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/dotnet-vulnerabilities.json
+      - name: NuGet lock and license gate
+        run: python scripts/validate_dotnet_dependencies.py --solution AssetLibrary.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/dotnet-vulnerabilities.json
+      - name: Duplicate source and sensitive-log gate
+        run: python scripts/validate_dotnet_source.py

@@ -1,0 +1,5 @@
+# Fail when inheritance, method complexity, maintainability, or type coupling exceeds these bounds.
+CA1501(Type): 5
+CA1502(Method): 20
+CA1505(Type): 10
+CA1506(Type): 40

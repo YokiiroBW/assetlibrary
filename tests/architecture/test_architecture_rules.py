@@ -387,6 +387,15 @@ class ArchitectureRuleTests(unittest.TestCase):
         errors = self.validate(rules).errors
         self.assertTrue(any("placeholder command" in error for error in errors), errors)
 
+        payload["tiers"][0]["commands"] = ["python check.py"]
+        contract.write_text(json.dumps(payload), encoding="utf-8")
+        self.write(
+            ".github/workflows/fast-merge.yml",
+            "jobs:\n  fast-merge:\n    continue-on-error: true\n    run: python check.py\n",
+        )
+        errors = self.validate(rules).errors
+        self.assertTrue(any("permits a failing gate" in error for error in errors), errors)
+
     def test_release_gate_allows_scoped_start_and_blocks_unresolved_target(self) -> None:
         ledger = {
             "version": 1,

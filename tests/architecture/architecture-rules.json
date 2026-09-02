@@ -15,7 +15,17 @@
     "tests/architecture/ci-tiers.json",
     "docs/adr/ADR-0011_模块化单体与端口适配器.md",
     "docs/adr/ADR-0012_语言与框架预算.md",
-    "docs/adr/ADR-0013_架构质量门禁.md"
+    "docs/adr/ADR-0013_架构质量门禁.md",
+    "AssetLibrary.slnx",
+    ".gitattributes",
+    "global.json",
+    "Directory.Build.props",
+    "Directory.Packages.props",
+    "NuGet.config",
+    "eng/CodeMetricsConfig.txt",
+    "eng/dotnet-dependency-policy.json",
+    "scripts/validate_dotnet_dependencies.py",
+    "scripts/validate_dotnet_source.py"
   ],
   "layers": [
     "Domain",
@@ -117,7 +127,8 @@
       "framework": "ASP.NET Core 10",
       "allowed_source_extensions": [".cs"],
       "activation_extensions": [".cs"],
-      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"],
+      "required_lockfile_globs": ["packages.lock.json", "**/packages.lock.json"]
     },
     {
       "root": "services/worker-supervisor",
@@ -125,7 +136,8 @@
       "framework": ".NET Worker/Generic Host 10",
       "allowed_source_extensions": [".cs"],
       "activation_extensions": [".cs"],
-      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"],
+      "required_lockfile_globs": ["packages.lock.json", "**/packages.lock.json"]
     },
     {
       "root": "apps/web",

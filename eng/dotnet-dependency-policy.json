@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "approved_sources": [
+    "https://api.nuget.org/v3/index.json"
+  ],
+  "allowed_license_expressions": [
+    "MIT"
+  ],
+  "license_file_exceptions": []
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssetLibrary.CoreServer</AssemblyName>
+    <RootNamespace>AssetLibrary.CoreServer</RootNamespace>
+    <Description>Build-only foundation for the AssetLibrary modular core server.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

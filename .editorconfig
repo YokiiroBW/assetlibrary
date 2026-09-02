@@ -19,6 +19,13 @@ indent_size = 2
 indent_style = space
 indent_size = 4
 
+[*.cs]
+dotnet_diagnostic.CA1501.severity = error
+dotnet_diagnostic.CA1502.severity = error
+dotnet_diagnostic.CA1505.severity = error
+dotnet_diagnostic.CA1506.severity = error
+dotnet_diagnostic.CA1509.severity = error
+
 [*.{sh,ps1}]
 indent_style = space
 indent_size = 2

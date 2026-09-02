@@ -4,16 +4,23 @@
     {
       "id": "fast-merge",
       "required_for": ["push", "pull_request", "worktree-review"],
-      "runners": ["ubuntu-latest"],
+      "runners": ["ubuntu-latest", "windows-latest"],
       "timeout_minutes": 10,
       "workflow": ".github/workflows/handoff-quality.yml",
-      "cache": "No dependency cache while the repository has only standard-library M0 gates; product build activation must use the native lock-keyed cache.",
+      "cache": "setup-dotnet restores the repository-local NuGet cache from a key derived from every committed packages.lock.json; global.json is enforced separately, and build outputs/runtime state are not cached.",
       "artifacts": ["job log on failure"],
       "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
       "commands": [
         "python scripts/verify_repository.py",
         "python -m unittest discover -s tests/repository -p test_*.py -v",
-        "python tests/architecture/check_release_gates.py --target v0.1-start"
+        "python tests/architecture/check_release_gates.py --target v0.1-start",
+        "dotnet restore AssetLibrary.slnx --locked-mode",
+        "dotnet format AssetLibrary.slnx --verify-no-changes --no-restore",
+        "dotnet build AssetLibrary.slnx --configuration Release --no-restore",
+        "dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore --logger \"console;verbosity=normal\"",
+        "dotnet package list --project AssetLibrary.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/dotnet-vulnerabilities.json",
+        "python scripts/validate_dotnet_dependencies.py --solution AssetLibrary.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/dotnet-vulnerabilities.json",
+        "python scripts/validate_dotnet_source.py"
       ],
       "skip_policy": "No skip may satisfy an active architecture, handoff, contract or V0.1-start gate."
     },
@@ -50,7 +57,7 @@
     }
   ],
   "future_native_gate_activation": {
-    "dotnet": "When the first production .sln/.slnx is added, the same change must add locked restore, format, build, unit/integration/contract tests, migration tests, vulnerability, license, duplicate-code, complexity and sensitive-log commands.",
+    "dotnet": "Active in V01-001: fixed SDK, locked restore, format, Release build, non-empty MSTest, vulnerability, license, duplicate-code, Roslyn complexity and sensitive-log gates run in fast-merge. Integration, contract and migration suites must join the same solution when their owning production tasks activate them.",
     "typescript": "When the first production package.json is added, the same change must add frozen-lock install, format, lint, typecheck, unit/browser tests, audit, license, bundle-size and sensitive-log commands on Node.js 24 LTS.",
     "android": "When the first Android Gradle build is added, the same change must add wrapper verification, lint, unit, selected instrumentation, dependency verification, vulnerability, license and sensitive-log commands.",
     "cpp": "Production Shell activation remains blocked by M0-002 gates; its first approved build must add MSVC/CMake formatting/static analysis, ABI/export, forbidden-link, dependency vulnerability/license and fault tests.",

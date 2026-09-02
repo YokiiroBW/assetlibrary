@@ -528,6 +528,8 @@ def validate_ci_tiers(root: Path, rules: dict, report: ValidationReport) -> None
             content = workflow.read_text(encoding="utf-8").lower()
             if tier_id not in content:
                 report.errors.append(f"CI workflow does not declare its tier {tier_id}: {workflow_name}")
+            if re.search(r"continue-on-error\s*:\s*true", content):
+                report.errors.append(f"CI workflow permits a failing gate: {workflow_name}")
         if not isinstance(tier.get("timeout_minutes"), int) or tier["timeout_minutes"] <= 0:
             report.errors.append(f"CI tier needs a positive timeout: {tier_id}")
         commands = tier.get("commands")
