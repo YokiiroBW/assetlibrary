@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / '.codex' / 'task-registry.json'
 TEMPLATE = ROOT / '.codex' / 'prompts' / 'SUBTASK_TEMPLATE.md'
 TASK_ID_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$')
+COMPLETE_STATUSES = {'completed', 'complete', 'done'}
+PARTIAL_DEPENDENCY_GATE_MODULE = 'architecture-quality-gate'
 
 
 def slugify(value: str) -> str:
@@ -145,12 +147,21 @@ def main() -> int:
         '--no-worktree', action='store_true',
         help='Only create registry/task files in the coordinator repository.',
     )
+    parser.add_argument(
+        '--accept-partial-dependencies', action='store_true',
+        help=(
+            'Activate only an architecture-quality-gate task with explicit partial inputs; '
+            'records those inputs without changing their status.'
+        ),
+    )
     args = parser.parse_args()
 
     if bool(args.activate) == bool(args.task_id):
         parser.error('provide either TASK_ID TITLE (create) or --activate TASK_ID (activate)')
     if not args.activate and not args.title:
         parser.error('TITLE is required when creating a task')
+    if args.accept_partial_dependencies and not args.activate:
+        parser.error('--accept-partial-dependencies requires --activate')
     if args.activate:
         args.task_id = args.activate
     if not TASK_ID_RE.fullmatch(args.task_id):
@@ -168,6 +179,7 @@ def main() -> int:
     registry = json.loads(REGISTRY.read_text(encoding='utf-8'))
     items = registry.get('tasks', [])
     matches = [item for item in items if item.get('id') == args.task_id]
+    partial_dependencies: list[str] = []
     if args.activate:
         if len(matches) != 1:
             print(f'Planned task ID not found or duplicated: {args.task_id}', file=sys.stderr)
@@ -176,14 +188,36 @@ def main() -> int:
         if item.get('status') != 'planned':
             print(f'Only planned tasks can be activated: {args.task_id}', file=sys.stderr)
             return 3
+        if (
+            args.accept_partial_dependencies
+            and item.get('module') != PARTIAL_DEPENDENCY_GATE_MODULE
+        ):
+            print(
+                '--accept-partial-dependencies is restricted to the architecture quality gate.',
+                file=sys.stderr,
+            )
+            return 3
         by_id = {entry.get('id'): entry for entry in items}
+        accepted_statuses = set(COMPLETE_STATUSES)
+        if args.accept_partial_dependencies:
+            accepted_statuses.add('partial')
         unmet = [
             dep for dep in item.get('depends_on', [])
-            if dep not in by_id or by_id[dep].get('status') not in {'completed', 'complete', 'done'}
+            if dep not in by_id or by_id[dep].get('status') not in accepted_statuses
         ]
         if unmet:
             print(f'Unmet dependencies for {args.task_id}: {", ".join(unmet)}', file=sys.stderr)
             return 3
+        partial_dependencies = [
+            dep for dep in item.get('depends_on', [])
+            if by_id[dep].get('status') == 'partial'
+        ]
+        if partial_dependencies:
+            print(
+                'Architecture gate will adjudicate partial inputs without marking them complete: '
+                + ', '.join(partial_dependencies),
+                file=sys.stderr,
+            )
         args.title = item.get('title', args.task_id)
         args.milestone = item.get('milestone', args.milestone)
         args.owner = args.owner if args.owner != 'unassigned' else item.get('owner', 'unassigned')
@@ -239,6 +273,12 @@ def main() -> int:
     if args.activate:
         updated.update({key: item[key] for key in ('depends_on', 'module', 'handoff') if key in item})
         updated['status'] = 'ready'
+        if partial_dependencies:
+            updated['accepted_partial_dependencies'] = partial_dependencies
+            updated['partial_dependency_policy'] = (
+                'M0-009 must classify every residual gate as blocking, deferred, or rejected; '
+                'upstream task statuses remain partial.'
+            )
         index = items.index(item)
         registry['tasks'][index] = updated
     else:

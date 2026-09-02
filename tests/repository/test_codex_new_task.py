@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,7 +16,7 @@ SCRIPT = ROOT / 'scripts/codex-new-task.py'
 
 class NewTaskTests(unittest.TestCase):
     def run_tool(self, repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(['python3', str(SCRIPT), *args], cwd=repo, text=True,
+        return subprocess.run([sys.executable, str(SCRIPT), *args], cwd=repo, text=True,
                               capture_output=True)
 
     def setup_repo(self):
@@ -44,14 +46,18 @@ class NewTaskTests(unittest.TestCase):
         (repo / 'scripts/codex-new-task.py').write_text(SCRIPT.read_text(encoding='utf-8'), encoding='utf-8')
         (repo / '.gitignore').write_text('', encoding='utf-8')
         subprocess.run(['git', 'add', '.'], cwd=repo, check=True)
-        subprocess.run(['git', 'commit', '-qm', 'base'], cwd=repo, check=True)
+        subprocess.run(
+            ['git', '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+             'commit', '-qm', 'base'],
+            cwd=repo, check=True,
+        )
         return temp, repo
 
     def test_activate_updates_planned_entry_and_creates_worktree(self):
         temp, repo = self.setup_repo()
         self.addCleanup(temp.cleanup)
         result = subprocess.run(
-            ['python3', 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
             cwd=repo, text=True, capture_output=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -63,7 +69,12 @@ class NewTaskTests(unittest.TestCase):
         self.assertEqual(item['handoff'], '.codex/handoffs/M0-002/summary.md')
         self.assertTrue((repo / 'worktrees/M0-002/.codex/tasks/M0-002.md').exists())
         registry_path = repo / '.codex/task-registry.json'
-        self.assertEqual(registry_path.stat().st_mode & 0o777, 0o644)
+        registry_mode = registry_path.stat().st_mode & 0o777
+        if os.name == 'nt':
+            self.assertTrue(registry_mode & 0o200)
+            self.assertEqual(registry_mode & 0o111, 0)
+        else:
+            self.assertEqual(registry_mode, 0o644)
 
     def test_unmet_dependency_and_duplicate_activation_leave_no_worktree(self):
         temp, repo = self.setup_repo()
@@ -72,7 +83,7 @@ class NewTaskTests(unittest.TestCase):
         data['tasks'][0]['status'] = 'ready'
         (repo/'.codex/task-registry.json').write_text(json.dumps(data), encoding='utf-8')
         result = subprocess.run(
-            ['python3', 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
             cwd=repo, text=True, capture_output=True,
         )
         self.assertNotEqual(result.returncode, 0)
@@ -82,7 +93,7 @@ class NewTaskTests(unittest.TestCase):
         temp, repo = self.setup_repo()
         self.addCleanup(temp.cleanup)
         result = subprocess.run(
-            ['python3', 'scripts/codex-new-task.py', 'M0-010', 'A new spike', '--no-worktree'],
+            [sys.executable, 'scripts/codex-new-task.py', 'M0-010', 'A new spike', '--no-worktree'],
             cwd=repo, text=True, capture_output=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -91,16 +102,69 @@ class NewTaskTests(unittest.TestCase):
         temp, repo = self.setup_repo()
         self.addCleanup(temp.cleanup)
         first = subprocess.run(
-            ['python3', 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'worktrees'],
             cwd=repo, text=True, capture_output=True,
         )
         self.assertEqual(first.returncode, 0, first.stderr)
         second = subprocess.run(
-            ['python3', 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'other'],
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-002', '--worktrees-dir', 'other'],
             cwd=repo, text=True, capture_output=True,
         )
         self.assertNotEqual(second.returncode, 0)
         self.assertFalse((repo/'other/M0-002').exists())
+
+    def test_architecture_gate_can_record_explicit_partial_inputs(self):
+        temp, repo = self.setup_repo()
+        self.addCleanup(temp.cleanup)
+        data = json.loads((repo / '.codex/task-registry.json').read_text())
+        data['tasks'].append({
+            'id': 'M0-008', 'title': 'Provider spike', 'module': 'provider-sandbox',
+            'status': 'partial', 'depends_on': ['M0-001'],
+            'handoff': '.codex/handoffs/M0-008/summary.md',
+        })
+        data['tasks'].append({
+            'id': 'M0-009', 'title': 'Architecture gate',
+            'module': 'architecture-quality-gate', 'status': 'planned',
+            'depends_on': ['M0-001', 'M0-008'],
+            'handoff': '.codex/handoffs/M0-009/summary.md',
+        })
+        (repo / '.codex/task-registry.json').write_text(json.dumps(data), encoding='utf-8')
+
+        default_result = subprocess.run(
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-009',
+             '--worktrees-dir', 'worktrees'],
+            cwd=repo, text=True, capture_output=True,
+        )
+        self.assertNotEqual(default_result.returncode, 0)
+        self.assertFalse((repo / 'worktrees/M0-009').exists())
+
+        accepted_result = subprocess.run(
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-009',
+             '--accept-partial-dependencies', '--worktrees-dir', 'worktrees'],
+            cwd=repo, text=True, capture_output=True,
+        )
+        self.assertEqual(accepted_result.returncode, 0, accepted_result.stderr)
+        registry = json.loads((repo / '.codex/task-registry.json').read_text())
+        gate = next(item for item in registry['tasks'] if item['id'] == 'M0-009')
+        provider = next(item for item in registry['tasks'] if item['id'] == 'M0-008')
+        self.assertEqual(gate['accepted_partial_dependencies'], ['M0-008'])
+        self.assertIn('blocking, deferred, or rejected', gate['partial_dependency_policy'])
+        self.assertEqual(provider['status'], 'partial')
+
+    def test_partial_dependency_override_is_restricted_to_architecture_gate(self):
+        temp, repo = self.setup_repo()
+        self.addCleanup(temp.cleanup)
+        data = json.loads((repo / '.codex/task-registry.json').read_text())
+        data['tasks'][0]['status'] = 'partial'
+        (repo / '.codex/task-registry.json').write_text(json.dumps(data), encoding='utf-8')
+        result = subprocess.run(
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'M0-002',
+             '--accept-partial-dependencies', '--worktrees-dir', 'worktrees'],
+            cwd=repo, text=True, capture_output=True,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('restricted to the architecture quality gate', result.stderr)
+        self.assertFalse((repo / 'worktrees/M0-002').exists())
 
     def test_task_file_write_failure_removes_partial_artifacts(self):
         spec = importlib.util.spec_from_file_location('new_task', SCRIPT)
@@ -126,7 +190,7 @@ class NewTaskTests(unittest.TestCase):
         before = {path for path in ROOT.rglob('__pycache__')} | {path for path in ROOT.rglob('*.pyc')}
         self.assertEqual(before, set(), 'repository must start cache-free')
         result = subprocess.run(
-            ['python3', str(ROOT / 'scripts/verify_repository.py')],
+            [sys.executable, str(ROOT / 'scripts/verify_repository.py')],
             cwd=ROOT, text=True, capture_output=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

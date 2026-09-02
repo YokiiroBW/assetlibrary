@@ -137,7 +137,7 @@
         "M0-008"
       ],
       "owner": "unassigned",
-      "branch": "",
+      "branch": "codex/m0-009-architecture-quality-gate",
       "worktree": "",
       "handoff": ".codex/handoffs/M0-009/summary.md",
       "thread_deep_link": ""
