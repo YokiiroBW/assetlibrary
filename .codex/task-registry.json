@@ -169,18 +169,17 @@
       "id": "V01-002",
       "title": "生成 AssetLink .NET、TypeScript 与 Kotlin SDK",
       "module": "assetlink-sdk-generation",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "M0-003",
         "M0-009"
       ],
       "owner": "codex-agent-v01-002",
       "branch": "codex/v01-002-assetlink-sdk-generation",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-002",
       "task_file": ".codex/tasks/V01-002.md",
       "handoff": ".codex/handoffs/V01-002/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     },
     {
       "id": "V01-003",

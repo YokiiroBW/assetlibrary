@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_build_foundation_complete",
-  "next_action": "Activate V01-002 for AssetLink SDK generation; V01-003 is now dependency-unlocked but remains planned until explicitly activated",
+  "status": "v0_1_assetlink_sdk_generation_active",
+  "next_action": "Implement and verify V01-002 in its isolated worktree; keep V01-003 planned until the SDK contract work is stable",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_001_completed",
+  "implementation_status": "v01_002_active",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -26,7 +26,8 @@
     "M0-009 implementation 5a0aacea017aee1c2ae31cd68487860ace884e48 and handoff e2039a0d70f8761336f974f3209f6bff52f28365 were fast-forward merged after repository and architecture verification. Scoped V0.1 implementation may start; v0.1-release, production file writes, Provider, Explorer and platform releases remain blocked by tests/architecture/m0-gates.json.",
     "V01-001, V01-002 and V01-003 were planned from docs/23 with explicit owners and dependency ordering. Planning does not activate product features or close any residual M0 gate.",
     "V01-001 was activated in C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-001 on branch codex/v01-001-build-foundation. It may establish only the .NET 10 build foundation and native CI gates, with no business logic or feature activation.",
-    "V01-001 implementation c231a3e218714cc5731741ca9f3d4d6d6319288d and handoff 3312b06 were fast-forward merged after 34/34 tests, locked restore, format, Release build, vulnerability/license/source gates and final diff review. V01-003 is dependency-unlocked; V0.1 release, production writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger."
+    "V01-001 implementation c231a3e218714cc5731741ca9f3d4d6d6319288d and handoff 3312b06 were fast-forward merged after 34/34 tests, locked restore, format, Release build, vulnerability/license/source gates and final diff review. V01-003 is dependency-unlocked; V0.1 release, production writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger.",
+    "V01-002 was activated in C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-002 on branch codex/v01-002-assetlink-sdk-generation. It owns generated AssetLink SDK outputs and generation/equivalence gates only; the frozen canonical contract remains the source of truth."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
