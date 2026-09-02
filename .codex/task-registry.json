@@ -154,7 +154,7 @@
       "id": "V01-001",
       "title": "建立 .NET 10 solution、模块项目与原生 CI 门禁",
       "module": "build-foundation",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "M0-009"
       ],
