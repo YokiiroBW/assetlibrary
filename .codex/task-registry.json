@@ -125,7 +125,7 @@
       "id": "M0-009",
       "title": "冻结编码架构原则、语言预算与CI质量门禁",
       "module": "architecture-quality-gate",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "M0-001",
         "M0-002",

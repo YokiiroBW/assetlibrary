@@ -2,11 +2,11 @@
   "project": "AssetLibrary",
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
-  "current_milestone": "M0",
-  "status": "m0_009_active",
-  "next_action": "M0-009 must classify every residual M0 gate as blocking, deferred with a fail-closed scope exclusion, or rejected, then freeze the V0.1 architecture and CI contract",
-  "architecture_contract_status": "draft",
-  "implementation_status": "m0_009_architecture_convergence_active",
+  "current_milestone": "V0.1",
+  "status": "v0_1_scoped_implementation_authorized",
+  "next_action": "Create V01-001 build foundation, V01-002 AssetLink SDK generation and V01-003 database ownership tasks from docs/23; keep every feature and release target fail-closed until its named gate closes",
+  "architecture_contract_status": "frozen",
+  "implementation_status": "v0_1_scoped_implementation_not_started",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -20,9 +20,10 @@
     "M0-008 merged as partial at 14e8cc0 and its process-tree correction was merged after 25 Provider tests; hard Linux network/filesystem confinement, Windows isolation and RPC cancel acknowledgement remain unmet gates.",
     "M0-005 merged at deb813b after a fresh PostgreSQL 16.15 source bootstrap, repeated 2/2 integration tests, 500,000-asset query-plan review and repository validation; PostgreSQL alone is sufficient for this Spike, while path-index and production backup/query contracts remain M0-009 decisions.",
     "M0-006 clean replacement implementation 7caf70c and metadata 45a9a43 passed 40/40 tests, independent review and post-merge repository verification, then merged at a592fd7. Linux same/cross-device crash recovery, strong hashing, replacement/trash semantics and lease fencing are proven for the bounded Spike; Windows primitives, 1/20/100 GiB runs and the non-cooperative Linux namespace-mutation policy remain explicit gates.",
-    "Current host has no Windows executor and cannot access the Docker daemon; environment-specific gates must remain explicit.",
+    "Earlier Linux coordination evidence lacked a Windows executor and Docker daemon; later Windows evidence was merged, while Docker and other environment-specific gates remain explicit.",
     "On 2026-09-03, verified Windows evidence branches for M0-002, M0-004, M0-006 and M0-008 were merged into main. Their residual gates and partial statuses remain explicit.",
-    "M0-009 was activated on 2026-09-03 with M0-002, M0-004, M0-006 and M0-008 accepted only as partial adjudication inputs; activation does not mark those tasks complete or authorize V0.1 implementation."
+    "M0-009 was activated on 2026-09-03 with M0-002, M0-004, M0-006 and M0-008 accepted only as partial adjudication inputs; activation did not mark those tasks complete.",
+    "M0-009 implementation 5a0aacea017aee1c2ae31cd68487860ace884e48 and handoff e2039a0d70f8761336f974f3209f6bff52f28365 were fast-forward merged after repository and architecture verification. Scoped V0.1 implementation may start; v0.1-release, production file writes, Provider, Explorer and platform releases remain blocked by tests/architecture/m0-gates.json."
   ],
-  "architecture_quality_gate": "M0-009 required before V0.1"
+  "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
