@@ -7,7 +7,7 @@
   "owner": "codex-agent-m0-002",
   "branch": "codex/m0-002-windows-evidence",
   "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/M0-002-windows-evidence",
-  "commit": "8a557ff0bd7c7ff41aba9e1b92d7ad0d5f7edd12",
+  "commit": "c81667e92dc8dd00bdce32b258b09ef45979f90c",
   "changed_files": [
     "tests/spikes/windows-shell/CMakeLists.txt",
     "tests/spikes/windows-shell/README.md",
