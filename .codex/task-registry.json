@@ -202,17 +202,16 @@
       "id": "V01-004",
       "title": "实现 Library/Asset/Scan 只读核心",
       "module": "library-asset-scan-read-core",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-003"
       ],
       "owner": "codex-agent-v01-004",
       "branch": "codex/v01-004-library-asset-scan-read-core",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-004",
       "task_file": ".codex/tasks/V01-004.md",
       "handoff": ".codex/handoffs/V01-004/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     },
     {
       "id": "V01-005",

@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_read_core_tasks_planned",
-  "next_action": "Activate V01-004 Library/Asset/Scan read-only core first; keep V01-005 planned until migration and root-solution ownership are clear",
+  "status": "v0_1_read_only_core_in_progress",
+  "next_action": "Implement and verify V01-004 in its isolated worktree; keep V01-005 planned and all production file-write and release targets blocked",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_004_v01_005_planned",
+  "implementation_status": "v01_004_active_v01_005_planned",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -31,7 +31,8 @@
     "V01-002 implementation 3c43f3d912f1702e67fc8bafb37d84e3a593f57b and handoff cc33e655938da548a062eb337105e0a811b0b388 were fast-forward merged after 97/97 checks, three native SDK builds, dependency integrity/license/audit/size gates and final diff review. V01-003 remains planned; V0.1 release, production writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger.",
     "V01-003 was activated in C:\\YOKI\\Codex\\worktrees\\V01-003 on branch codex/v01-003-database-ownership. It may own production schema and migration-foundation contracts only; activation does not connect to or modify any production database and does not enable product file writes.",
     "V01-003 implementation ab188be5cf467d1b95c95bbfff8d22cbc9d05dfe and handoff 7c28d13dfc5b77fa43b5a4e1c542ea5d64b9c283 were fast-forward merged after 69/69 unique tests, PostgreSQL 16.15 forward/concurrency/drift/least-privilege/backup/restore evidence, repository and architecture verification, and task-runtime cleanup. V01-004 and V01-005 may now be planned; V0.1 release, production file writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger.",
-    "V01-004 and V01-005 were planned from the frozen V0.1 graph after V01-003 completion. Only V01-004 will be activated first so migration-manifest and root-solution changes remain single-writer; planning does not enable production file writes or release targets."
+    "V01-004 and V01-005 were planned from the frozen V0.1 graph after V01-003 completion. Only V01-004 will be activated first so migration-manifest and root-solution changes remain single-writer; planning does not enable production file writes or release targets.",
+    "V01-004 was activated in C:\\YOKI\\Codex\\worktrees\\V01-004 on branch codex/v01-004-library-asset-scan-read-core. It owns the LibraryStorage, AssetIdentity and ScanReconciliation read-only slice only; activation does not enable production file writes, Explorer integration or release targets."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
