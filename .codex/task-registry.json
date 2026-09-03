@@ -227,6 +227,24 @@
       "task_file": ".codex/tasks/V01-005.md",
       "handoff": ".codex/handoffs/V01-005/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-006",
+      "title": "实现 Web/API 只读浏览闭环",
+      "module": "web-api-read-only-browse",
+      "status": "planned",
+      "depends_on": [
+        "V01-002",
+        "V01-004",
+        "V01-005"
+      ],
+      "owner": "codex-agent-v01-006",
+      "branch": "codex/v01-006-web-api-read-only-browse",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-006.md",
+      "handoff": ".codex/handoffs/V01-006/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
