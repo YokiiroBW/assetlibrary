@@ -185,7 +185,7 @@
       "id": "V01-003",
       "title": "冻结生产数据库 schema 所有权与迁移底座",
       "module": "database-migration-foundation",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "M0-005",
         "M0-009",

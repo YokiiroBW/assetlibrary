@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_database_migration_foundation_active",
-  "next_action": "Implement and verify V01-003 in its isolated worktree without enabling production database access or file writes",
+  "status": "v0_1_database_migration_foundation_complete",
+  "next_action": "Plan and activate V01-004 and V01-005 against the frozen migration foundation while production file writes and release gates remain blocked",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_003_active",
+  "implementation_status": "v01_003_completed",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -29,7 +29,8 @@
     "V01-001 implementation c231a3e218714cc5731741ca9f3d4d6d6319288d and handoff 3312b06 were fast-forward merged after 34/34 tests, locked restore, format, Release build, vulnerability/license/source gates and final diff review. V01-003 is dependency-unlocked; V0.1 release, production writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger.",
     "V01-002 was activated in C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-002 on branch codex/v01-002-assetlink-sdk-generation. It owns generated AssetLink SDK outputs and generation/equivalence gates only; the frozen canonical contract remains the source of truth.",
     "V01-002 implementation 3c43f3d912f1702e67fc8bafb37d84e3a593f57b and handoff cc33e655938da548a062eb337105e0a811b0b388 were fast-forward merged after 97/97 checks, three native SDK builds, dependency integrity/license/audit/size gates and final diff review. V01-003 remains planned; V0.1 release, production writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger.",
-    "V01-003 was activated in C:\\YOKI\\Codex\\worktrees\\V01-003 on branch codex/v01-003-database-ownership. It may own production schema and migration-foundation contracts only; activation does not connect to or modify any production database and does not enable product file writes."
+    "V01-003 was activated in C:\\YOKI\\Codex\\worktrees\\V01-003 on branch codex/v01-003-database-ownership. It may own production schema and migration-foundation contracts only; activation does not connect to or modify any production database and does not enable product file writes.",
+    "V01-003 implementation ab188be5cf467d1b95c95bbfff8d22cbc9d05dfe and handoff 7c28d13dfc5b77fa43b5a4e1c542ea5d64b9c283 were fast-forward merged after 69/69 unique tests, PostgreSQL 16.15 forward/concurrency/drift/least-privilege/backup/restore evidence, repository and architecture verification, and task-runtime cleanup. V01-004 and V01-005 may now be planned; V0.1 release, production file writes, Provider, Explorer and platform releases remain blocked by the existing gate ledger."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
