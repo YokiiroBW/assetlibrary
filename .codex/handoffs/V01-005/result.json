@@ -7,30 +7,101 @@
   "owner": "codex-agent-v01-005",
   "branch": "codex/v01-005-task-health-outbox-core",
   "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-005",
-  "commit": "",
-  "changed_files": [],
+  "commit": "74bf6f213af8bafdb4eaabc36b02ac2b718d2caf",
+  "changed_files": [
+    ".codex/handoffs/V01-005/result.json",
+    ".codex/handoffs/V01-005/summary.md",
+    ".codex/handoffs/V01-005/tests.md",
+    ".codex/tasks/V01-005.md",
+    ".github/workflows/handoff-quality.yml",
+    "AssetLibrary.slnx",
+    "database/migrations/README.md",
+    "database/migrations/production/0006_task_health_core.sql",
+    "database/migrations/production/manifest.json",
+    "services/core-server/Modules/TaskHealth/Application/DurableOutboxService.cs",
+    "services/core-server/Modules/TaskHealth/Application/DurableTaskService.cs",
+    "services/core-server/Modules/TaskHealth/Application/DurableTaskStoreResultValidator.cs",
+    "services/core-server/Modules/TaskHealth/Application/HealthStatusService.cs",
+    "services/core-server/Modules/TaskHealth/Application/OutboxStoreResultValidator.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthExecutionLimits.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthLogger.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthPorts.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthReclaimOperation.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthRequestValidator.cs",
+    "services/core-server/Modules/TaskHealth/Application/TaskHealthStoreResult.cs",
+    "services/core-server/Modules/TaskHealth/Contracts/DurableTaskContracts.cs",
+    "services/core-server/Modules/TaskHealth/Contracts/HealthStatusContracts.cs",
+    "services/core-server/Modules/TaskHealth/Contracts/OutboxContracts.cs",
+    "services/core-server/Modules/TaskHealth/Contracts/TaskHealthValues.cs",
+    "services/core-server/Modules/TaskHealth/Domain/DurableTaskStatePolicy.cs",
+    "services/core-server/Modules/TaskHealth/Domain/HealthStatusPolicy.cs",
+    "services/core-server/Modules/TaskHealth/Domain/OutboxStatePolicy.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/database/test_read_core_migrations.py",
+    "tests/database/test_task_health_migrations.py",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/AssetLibrary.TaskHealth.Tests.csproj",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/DurableTaskServiceTests.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/OutboxAndHealthServiceTests.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/TaskHealthTestDoubles.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/TaskHealthValueAndPolicyTests.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/TestData.cs",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/packages.lock.json"
+  ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 213,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": [],
+  "risks": [
+    "No production PostgreSQL adapter, dependency-injection composition, worker scheduler/supervisor or outbox publisher is included; the contracts and migration are not yet a runnable product flow.",
+    "At-least-once delivery can duplicate a successfully sent event when persistence of the acknowledgement is interrupted; downstream consumers must deduplicate by stable event ID.",
+    "The V01-004 asset-commit versus scan-journal reconciliation path is not wired to TaskHealth/outbox yet and remains a follow-up integration responsibility.",
+    "The 10,000-task and 10,000-event index test does not replace the planned 500,000-item production profile, backlog aging, VACUUM or retention exercise.",
+    "Expired leases are immediately requeued; production backoff, jitter, rate limiting and supervisor lifecycle are intentionally deferred."
+  ],
   "blocked_by": [],
-  "recommended_merge_order": 0,
+  "recommended_merge_order": 5,
   "handoff_summary": ".codex/handoffs/V01-005/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "module": "",
-    "dependency_direction_ok": false,
-    "reused_existing_logic": [],
-    "duplicated_logic": [],
-    "cross_module_access": [],
+    "module": "TaskHealth durable task, health and outbox core",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "V01-003 checksum-pinned forward-only migration manifest, module schema owners/default privileges, backup/restore tooling and task-local PostgreSQL 16.15 integration harness",
+      "V01-004 .NET 10/C# 14 solution conventions, MSTest packages, explicit value objects, application ports, bounded operations and structured logging patterns",
+      "M0-005 verified FOR UPDATE SKIP LOCKED, expired-lease recovery, stable outbox event identity and at-least-once delivery conclusions without promoting the spike schema",
+      "Existing repository verifier, architecture baseline, dependency/source policy and v0.1-start release gate"
+    ],
+    "duplicated_logic": [
+      "Task and outbox state rules are intentionally validated in C# for caller/store feedback and independently enforced in PostgreSQL under row locks for atomic trust-boundary safety; shared reclaim orchestration removes the avoidable same-layer duplication."
+    ],
+    "cross_module_access": [
+      "TaskHealth does not reference another module's Infrastructure or internal entity and exposes only its own Contracts/Application ports.",
+      "Migration 6 creates, reads and writes only task_health objects and has no cross-schema foreign key or write path.",
+      "contracts/** and AssetLink wire contracts are unchanged."
+    ],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
-    "contract_changes": [],
-    "architecture_tests": [],
-    "technical_debt": []
+    "contract_changes": [
+      "Internal C# contracts add durable-task and outbox identities, fenced lease requests/results, cancellation and health scope/state types; no shared wire contract changed.",
+      "Production migration manifest grows contiguously from versions 1-5 to 1-6 with TaskHealth-owned task, outbox and health objects; no applied migration is edited.",
+      "Outbox semantics are frozen as at-least-once with stable event ID consumer idempotency, bounded claims and retained dead-letter records."
+    ],
+    "architecture_tests": [
+      "32 TaskHealth MSTest cases plus the full 90-test .NET solution, locked restore, format, Release build, dependency/source policy and vulnerability report",
+      "34 static database/tool tests and 11 required PostgreSQL 16.15 integration tests, including five TaskHealth behavior/concurrency/capacity/restart cases",
+      "29 repository, 14 architecture, 14 generated-SDK and 21 AssetLink contract/spike tests",
+      "Repository verifier, migration manifest, handoff validator, architecture baseline, v0.1-start release gate, git diff check, cache-residue and task-process checks"
+    ],
+    "technical_debt": [
+      "Implement a production PostgreSQL adapter and composition root without bypassing TaskHealth ports or adding an unfrozen data-access dependency.",
+      "Wire durable reconciliation for V01-004's asset-commit followed by scan-journal failure through a separately owned cross-module orchestration task.",
+      "Implement supervised worker/publisher loops with backoff, jitter, rate limits, graceful shutdown and downstream event-ID deduplication tests.",
+      "Run the scheduled 500,000-item queue, long-backlog, retention, VACUUM, database-space and restart profiles before release."
+    ]
   }
 }
