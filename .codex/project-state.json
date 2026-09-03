@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_web_api_read_only_planned",
-  "next_action": "Activate V01-006 Web/API read-only browsing in an isolated worktree; keep all production file-write, Provider, Explorer and release targets blocked",
+  "status": "v0_1_web_api_read_only_in_progress",
+  "next_action": "Implement and verify V01-006 in its isolated worktree; keep all production file-write, Provider, Explorer and release targets blocked",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_005_completed_v01_006_planned",
+  "implementation_status": "v01_005_completed_v01_006_active",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -36,7 +36,8 @@
     "V01-004 implementation 71cb1494eb25903a9628cf1b076aa7b10b75012f and handoff 1794d7b were fast-forward merged after 172/172 unique automated tests, Kotlin generated-SDK verification, PostgreSQL 16.15 fail-closed integration, repository/architecture/release-gate checks and final diff review. V01-005 is next; production file writes, Provider, Explorer, platform release and v0.1-release remain blocked by the existing gate ledger.",
     "V01-005 was activated in C:\\YOKI\\Codex\\worktrees\\V01-005 on branch codex/v01-005-task-health-outbox-core. It owns TaskHealth task state, leases, cancellation intent and durable outbox only; activation does not enable production file writes, external event delivery, Provider, Explorer or release targets.",
     "V01-005 implementation 74bf6f213af8bafdb4eaabc36b02ac2b718d2caf and handoff 2529132f7e64941b31a9ec77d3b46cab64b81dee were fast-forward merged after 213/213 unique automated tests, PostgreSQL 16.15 concurrency/fencing/restart/least-privilege evidence, repository/architecture/release-gate checks and final diff review. V01-006 Web/API read-only browsing is next; production file writes, external Provider delivery, Explorer, platform release and v0.1-release remain blocked.",
-    "V01-006 was planned from the frozen V0.1 task graph with dependencies V01-002, V01-004 and V01-005. It is restricted to a read-only Gateway/Web loop with permission filtering and bounded pagination; planning does not enable production writes, external Provider delivery, Explorer or release targets."
+    "V01-006 was planned from the frozen V0.1 task graph with dependencies V01-002, V01-004 and V01-005. It is restricted to a read-only Gateway/Web loop with permission filtering and bounded pagination; planning does not enable production writes, external Provider delivery, Explorer or release targets.",
+    "V01-006 was activated in C:\\YOKI\\Codex\\worktrees\\V01-006 on branch codex/v01-006-web-api-read-only-browse. It owns the read-only Gateway/API and apps/web slice only; production writes, direct client database access, Provider delivery, Explorer and release targets remain blocked."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
