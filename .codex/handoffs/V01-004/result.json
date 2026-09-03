@@ -7,30 +7,94 @@
   "owner": "codex-agent-v01-004",
   "branch": "codex/v01-004-library-asset-scan-read-core",
   "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-004",
-  "commit": "",
-  "changed_files": [],
+  "commit": "71cb1494eb25903a9628cf1b076aa7b10b75012f",
+  "changed_files": [
+    ".codex/handoffs/V01-004/result.json",
+    ".codex/handoffs/V01-004/summary.md",
+    ".codex/handoffs/V01-004/tests.md",
+    ".codex/tasks/V01-004.md",
+    "AssetLibrary.slnx",
+    "database/migrations/README.md",
+    "database/migrations/production/0003_library_storage_core.sql",
+    "database/migrations/production/0004_asset_identity_core.sql",
+    "database/migrations/production/0005_scan_reconciliation_core.sql",
+    "database/migrations/production/manifest.json",
+    "services/core-server/Modules/AssetIdentity/Contracts/AssetIdentityContracts.cs",
+    "services/core-server/Modules/LibraryStorage/Application/LibraryRootValidation.cs",
+    "services/core-server/Modules/LibraryStorage/Contracts/LibraryStorageContracts.cs",
+    "services/core-server/Modules/LibraryStorage/Domain/LibraryRootOverlapPolicy.cs",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/SystemLibraryRootProbe.cs",
+    "services/core-server/Modules/ScanReconciliation/Application/InitialReadOnlyScanService.cs",
+    "services/core-server/Modules/ScanReconciliation/Application/InitialScanLogger.cs",
+    "services/core-server/Modules/ScanReconciliation/Application/InitialScanRequestValidator.cs",
+    "services/core-server/Modules/ScanReconciliation/Application/ScanPorts.cs",
+    "services/core-server/Modules/ScanReconciliation/Contracts/InitialScanContracts.cs",
+    "services/core-server/Modules/ScanReconciliation/Domain/DiscoveryModel.cs",
+    "services/core-server/Modules/ScanReconciliation/Infrastructure/SystemReadOnlyFileDiscovery.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/database/test_read_core_migrations.py",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/AssetIdentityAndPolicyTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/InitialReadOnlyScanServiceTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/LibraryStorageTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/RepositorySandbox.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/ScanScenario.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyFileDiscoveryTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/packages.lock.json"
+  ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 172,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": [],
+  "risks": [
+    "AssetIdentity commit and ScanReconciliation terminal journaling are separate module ports; a journal failure after successful commit leaves a complete asset snapshot with a stale running scan until a later durable outbox/reconciliation task repairs it.",
+    "No production PostgreSQL adapter, dependency-injection composition or API endpoint is included; the core contracts and migrations are not yet a runnable product flow.",
+    "Synchronous operating-system metadata calls cannot be forcibly cancelled while a kernel or NAS call is stalled; production still needs isolated workers and health supervision around the application timeout contract.",
+    "The 10,000-entry bounded-batch test is not a substitute for the planned 500,000-asset production profile or real NAS failure/capacity exercise."
+  ],
   "blocked_by": [],
-  "recommended_merge_order": 0,
+  "recommended_merge_order": 4,
   "handoff_summary": ".codex/handoffs/V01-004/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "module": "",
-    "dependency_direction_ok": false,
-    "reused_existing_logic": [],
-    "duplicated_logic": [],
-    "cross_module_access": [],
+    "module": "LibraryStorage / AssetIdentity / ScanReconciliation read-only core",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "V01-003 checksum-pinned forward-only migration manifest, module schema owners/default privileges and task-local PostgreSQL 16.15 integration harness",
+      "Existing .NET 10/C# 14 solution conventions, MSTest packages, centralized package locking and Microsoft.Extensions.Logging abstraction",
+      "M0-009 handoff, architecture baseline, repository verifier, three-tier CI concept and v0.1-start release gate",
+      "Platform file metadata and enumeration APIs behind a read-only Infrastructure port; no alternate filesystem abstraction or write helper"
+    ],
+    "duplicated_logic": [
+      "Library-root overlap is intentionally evaluated in C# for preflight feedback and independently in PostgreSQL under a per-storage-source advisory lock for concurrent enforcement; this is reviewed defense in depth across trust boundaries."
+    ],
+    "cross_module_access": [
+      "ScanReconciliation.Application consumes only LibraryStorage.Contracts and AssetIdentity.Contracts public query/session ports.",
+      "Database migrations create and write only their owning schemas; there are no cross-schema foreign keys or writes."
+    ],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
-    "contract_changes": [],
-    "architecture_tests": [],
-    "technical_debt": []
+    "contract_changes": [
+      "Internal C# contracts add library/storage/root identities, stable entry and normalized path values, asset observation sessions, initial scan results and read-only discovery/journal ports; contracts/** and AssetLink wire formats are unchanged.",
+      "Production database manifest grows contiguously from migrations 1-2 to 1-5 with module-owned LibraryStorage, AssetIdentity and ScanReconciliation objects and no edits to applied migrations.",
+      "Initial scan persistence explicitly distinguishes an empty committed snapshot from an unscanned library and refuses replacement of an existing initial index."
+    ],
+    "architecture_tests": [
+      "43 ReadCore MSTest cases plus the full 58-test .NET solution, locked restore, format, Release build, dependency/source policy and vulnerability audit",
+      "25 static database tests and 6 required PostgreSQL 16.15 integration tests covering overlap, snapshots, abort, mixed-library refusal and least privilege",
+      "29 repository, 14 architecture, 14 generated-SDK and 21 AssetLink contract/spike tests plus 5 TypeScript Node tests and the Kotlin generated-SDK verification task",
+      "Repository verifier, migration manifest, handoff validator, architecture baseline, v0.1-start release gate, git diff check, cache-residue and task-process checks"
+    ],
+    "technical_debt": [
+      "Add durable outbox/reconciliation for an AssetIdentity commit followed by ScanReconciliation journal-finalization failure in V01-005/V01-006.",
+      "Select and implement the production PostgreSQL adapters and composition without bypassing module ports or introducing an unfrozen data-access dependency.",
+      "Run the scheduled 500,000-asset, NAS interruption, permission-change and capacity profiles before release.",
+      "Keep synchronous filesystem metadata work behind supervised isolated workers because cancellation cannot interrupt every stalled OS/NAS call."
+    ]
   }
 }
