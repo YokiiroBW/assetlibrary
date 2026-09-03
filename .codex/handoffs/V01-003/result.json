@@ -3,34 +3,78 @@
   "task_id": "V01-003",
   "title": "冻结生产数据库 schema 所有权与迁移底座",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "codex-agent-v01-003",
   "branch": "codex/v01-003-database-ownership",
   "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-003",
-  "commit": "",
-  "changed_files": [],
+  "commit": "ab188be5cf467d1b95c95bbfff8d22cbc9d05dfe",
+  "changed_files": [
+    ".codex/handoffs/V01-003/result.json",
+    ".codex/handoffs/V01-003/summary.md",
+    ".codex/handoffs/V01-003/tests.md",
+    ".codex/tasks/V01-003.md",
+    ".gitattributes",
+    ".github/workflows/handoff-quality.yml",
+    "database/migrations/README.md",
+    "database/migrations/production/0001_module_schema_ownership.sql",
+    "database/migrations/production/0002_module_privilege_projection.sql",
+    "database/migrations/production/bootstrap.sql",
+    "database/migrations/production/manifest.json",
+    "database/migrations/production/migration_tool.py",
+    "database/migrations/production/roles.sql",
+    "scripts/verify_repository.py",
+    "tests/architecture/architecture-rules.json",
+    "tests/architecture/ci-tiers.json",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/repository/test_database_migration_foundation.py"
+  ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 69,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": ["Implementation and PostgreSQL 16.15 verification are still in progress"],
+  "risks": [
+    "The new Ubuntu PostgreSQL 16.15 GitHub Actions job has not yet executed remotely; local Windows evidence covers the same migration, backup, restore, concurrency, drift and privilege paths.",
+    "The backup role is deliberately NOBYPASSRLS; any future RLS-protected business table needs an explicit full-backup policy and restore test before release.",
+    "Archive SHA-256 detects corruption and mismatch but not provenance; operations must protect archive and metadata together as one trusted backup unit.",
+    "A PostgreSQL patch upgrade requires an explicit manifest, CI image and exact integration-evidence update; cross-major execution remains rejected."
+  ],
   "blocked_by": [],
-  "recommended_merge_order": 0,
+  "recommended_merge_order": 3,
   "handoff_summary": ".codex/handoffs/V01-003/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
     "module": "database-migration-foundation",
-    "dependency_direction_ok": false,
-    "reused_existing_logic": [],
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "M0-005 PostgreSQL 16.15, transactional DDL, advisory-lock, checksum and task-local cluster evidence without promoting its Spike business tables",
+      "M0-009 handoff, architecture baseline, three-tier CI and v0.1-start gates",
+      "PostgreSQL native roles, schemas, default privileges, pg_dump and pg_restore",
+      "Python 3.12 standard library for deterministic connection-free validation and test orchestration"
+    ],
     "duplicated_logic": [],
     "cross_module_access": [],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
-    "contract_changes": [],
-    "architecture_tests": [],
-    "technical_debt": []
+    "contract_changes": [
+      "Internal production database contract adds a checksum-pinned manifest, 26 fixed NOLOGIN roles, 11 module schemas, migration ledger and read-only privilege projection; no business tables",
+      "Internal fast-merge contract adds connection-free database checks on existing runners and one independent Ubuntu PostgreSQL 16.15 service job without adding a fourth CI tier",
+      "Production migration SQL and manifest bytes are fixed to LF for cross-platform SHA-256 stability"
+    ],
+    "architecture_tests": [
+      "21 static database manifest, safety, backup-contract and frozen-Spike tests",
+      "5 PostgreSQL 16.15 integration tests for forward/reapply, concurrency, drift, atomic failure, least privilege, backup, restore and replay",
+      "29 repository tests and 14 architecture-rule tests",
+      "Repository verifier, handoff validator, architecture baseline, v0.1-start release gate, git diff check and Python cache-residue gate"
+    ],
+    "technical_debt": [
+      "Retain the first remote Ubuntu PostgreSQL 16.15 fast-merge evidence after merge.",
+      "Define and prove backup behavior before any future owner enables row-level security.",
+      "Add business tables, data access and workload-specific indexes only in their assigned V01-004/V01-005 ownership tasks.",
+      "Refresh the frozen patch, image and evidence deliberately when PostgreSQL 16 receives a reviewed servicing upgrade."
+    ]
   }
 }
