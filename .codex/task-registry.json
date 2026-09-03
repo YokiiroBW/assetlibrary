@@ -266,7 +266,7 @@
       "id": "V01-008",
       "title": "实现打包与发布证据闭环",
       "module": "packaging-release-evidence",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-001",
         "V01-006",
@@ -274,11 +274,10 @@
       ],
       "owner": "codex-agent-v01-008",
       "branch": "codex/v01-008-packaging-release-evidence",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-008",
       "task_file": ".codex/tasks/V01-008.md",
       "handoff": ".codex/handoffs/V01-008/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     }
   ]
 }
