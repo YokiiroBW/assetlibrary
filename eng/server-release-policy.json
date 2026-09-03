@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "contract": "v01-008/1",
+  "host_project": "services/core-server/Host/AssetLibrary.CoreServer.Host.csproj",
+  "host_assembly": "AssetLibrary.CoreServer.Host",
+  "dotnet_sdk": "10.0.111",
+  "aspnet_runtime": "10.0.11",
+  "windows_service_package": {
+    "name": "Microsoft.Extensions.Hosting.WindowsServices",
+    "version": "10.0.11",
+    "license": "MIT",
+    "security_advisory": "https://github.com/dotnet/aspnetcore/security/advisories"
+  },
+  "artifact_root": ".runtime/sandbox-storage/V01-008",
+  "runtime_identifiers": [
+    "linux-x64",
+    "win-x64"
+  ],
+  "cold_publish_runs": 2,
+  "native_artifacts": {
+    "self_contained": true,
+    "manifest_hash": "SHA-256",
+    "windows_archive": "zip",
+    "linux_archive": "tar.gz"
+  },
+  "host": {
+    "required_environment": "Production",
+    "default_bind_host": "127.0.0.1",
+    "default_port": 5080,
+    "minimum_port": 1024,
+    "health_timeout_seconds": 2,
+    "business_api_ready": false,
+    "production_file_writes_enabled": false
+  },
+  "docker": {
+    "sdk_image": "mcr.microsoft.com/dotnet/sdk:10.0.111",
+    "runtime_image": "mcr.microsoft.com/dotnet/aspnet:10.0.11",
+    "user": "1654:1654",
+    "state_path": "/var/lib/assetlibrary",
+    "container_port": 8080,
+    "root_filesystem_read_only": true,
+    "no_new_privileges": true
+  },
+  "evidence_statuses": [
+    "passed",
+    "blocked_missing_environment",
+    "failed"
+  ],
+  "platform_gate_policy": {
+    "windows_service": "Only an executed elevated SCM lifecycle on an explicitly confirmed isolated Windows target can pass.",
+    "docker": "Only a real daemon build, Compose health/restart and down-with-volumes residue check can pass.",
+    "linux_systemd": "Only an executed lifecycle on an explicitly confirmed isolated systemd host can pass."
+  }
+}

@@ -1,0 +1,27 @@
+name: assetlibrary-v01-008-evidence
+
+services:
+  core-server:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+      args:
+        SOURCE_REVISION: "${ASSETLIBRARY_SOURCE_REVISION:?set ASSETLIBRARY_SOURCE_REVISION to the issuance commit}"
+    image: assetlibrary/core-server:v01-008-evidence
+    user: "1654:1654"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    volumes:
+      - assetlibrary-state:/var/lib/assetlibrary
+    ports:
+      - "127.0.0.1:${ASSETLIBRARY_EVIDENCE_PORT:-5080}:8080"
+    restart: unless-stopped
+
+volumes:
+  assetlibrary-state:
+    name: assetlibrary-v01-008-state

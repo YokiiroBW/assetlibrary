@@ -1,0 +1,42 @@
+[Unit]
+Description=AssetLibrary Core Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=assetlibrary
+Group=assetlibrary
+StateDirectory=assetlibrary
+StateDirectoryMode=0700
+WorkingDirectory=/opt/assetlibrary
+ExecStart=/opt/assetlibrary/AssetLibrary.CoreServer.Host --state-path /var/lib/assetlibrary --environment Production --bind-host 127.0.0.1 --probe-host 127.0.0.1 --port 5080
+Restart=on-failure
+RestartSec=2s
+TimeoutStartSec=30s
+TimeoutStopSec=15s
+KillMode=mixed
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/assetlibrary
+
+[Install]
+WantedBy=multi-user.target

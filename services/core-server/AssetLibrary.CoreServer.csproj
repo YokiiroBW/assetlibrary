@@ -10,4 +10,8 @@
     <PackageReference Include="Npgsql" />
     <ProjectReference Include="..\..\packages\sdk\assetlink\dotnet\AssetLibrary.AssetLink.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Host\**\*.cs" />
+  </ItemGroup>
 </Project>

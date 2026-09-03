@@ -1,0 +1,127 @@
+name: Server release evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'services/core-server/**'
+      - 'infra/docker/**'
+      - 'infra/linux-server/**'
+      - 'infra/windows-server/**'
+      - 'eng/server-release-policy.json'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'global.json'
+      - 'NuGet.config'
+      - 'scripts/build_server_release.py'
+      - 'scripts/validate_server_release.py'
+      - 'tests/release/**'
+      - 'tests/dotnet/AssetLibrary.Packaging.Tests/**'
+      - '.github/workflows/release-evidence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  native-artifacts:
+    name: native-artifacts-${{ matrix.label }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows
+          - os: ubuntu-latest
+            label: linux
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      DOTNET_CLI_HOME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-008/dotnet-home
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: '1'
+      MSBUILDDISABLENODEREUSE: '1'
+      NUGET_PACKAGES: ${{ github.workspace }}/.runtime/sandbox-storage/V01-008/nuget
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            services/core-server/packages.lock.json
+            services/core-server/Host/packages.lock.json
+            packages/sdk/assetlink/dotnet/packages.lock.json
+            tests/dotnet/AssetLibrary.Packaging.Tests/packages.lock.json
+      - name: Validate release definitions
+        run: python -B scripts/validate_server_release.py
+      - name: Locked packaging restore
+        run: dotnet restore tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --locked-mode
+      - name: Packaging format and analyzer gate
+        shell: pwsh
+        run: |
+          dotnet format services/core-server/Host/AssetLibrary.CoreServer.Host.csproj --verify-no-changes --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet format tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --verify-no-changes --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build host and packaging tests
+        run: dotnet build tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --configuration Release --no-restore
+      - name: Host contract tests
+        run: dotnet test tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --configuration Release --no-build --no-restore --logger "console;verbosity=normal"
+      - name: Process and release-tool tests
+        run: python -B -m unittest discover -s tests/release -p test_*.py -v
+        env:
+          ASSETLIBRARY_TEST_DOTNET: dotnet
+      - name: Two cold native publishes
+        run: python -B scripts/build_server_release.py
+      - name: Validate native artifacts and archives
+        run: python -B scripts/validate_server_release.py --require-artifacts
+      - name: Preserve native release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-native-${{ matrix.label }}
+          path: |
+            .runtime/sandbox-storage/V01-008/release-build/archives/**
+            .runtime/sandbox-storage/V01-008/release-build/archives.json
+            .runtime/sandbox-storage/V01-008/release-build/manifest.json
+            .runtime/sandbox-storage/V01-008/release-build/release-metadata.json
+            .runtime/sandbox-storage/V01-008/release-build/aggregate-sha256.txt
+            .runtime/sandbox-storage/V01-008/release-build/build-evidence.json
+            .runtime/sandbox-storage/V01-008/release-build/release-locks/**
+            .runtime/sandbox-storage/V01-008/release-build/release-locks.json
+            .runtime/sandbox-storage/V01-008/release-build/release-locks-aggregate-sha256.txt
+            .runtime/sandbox-storage/V01-008/release-build/cold-runs/*/manifest.json
+            .runtime/sandbox-storage/V01-008/release-build/cold-runs/*/aggregate-sha256.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  docker-daemon:
+    name: docker-real-daemon
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate release definitions
+        run: python -B scripts/validate_server_release.py
+      - name: Execute isolated Docker lifecycle
+        run: python -B tests/release/run_docker_evidence.py --execute
+      - name: Preserve Docker evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-docker-daemon
+          path: .runtime/sandbox-storage/V01-008/docker-evidence/docker-evidence.json
+          if-no-files-found: error
+          retention-days: 14

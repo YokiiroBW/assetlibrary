@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/services/">
     <Project Path="services/core-server/AssetLibrary.CoreServer.csproj" />
+    <Project Path="services/core-server/Host/AssetLibrary.CoreServer.Host.csproj" />
     <Project Path="services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj" />
   </Folder>
   <Folder Name="/packages/">
@@ -8,6 +9,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/dotnet/AssetLibrary.Build.Tests/AssetLibrary.Build.Tests.csproj" />
+    <Project Path="tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj" />
     <Project Path="tests/dotnet/AssetLibrary.AssetLink.Tests/AssetLibrary.AssetLink.Tests.csproj" />
     <Project Path="tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj" />
     <Project Path="tests/dotnet/AssetLibrary.TaskHealth.Tests/AssetLibrary.TaskHealth.Tests.csproj" />

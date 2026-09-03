@@ -2,4 +2,8 @@
 
 模块化业务内核。服务Windows/Linux/Docker发行。包含认证、资源库、资产、元数据、操作、搜索、任务等边界。
 
-V01-001 仅激活 `AssetLibrary.CoreServer.csproj` 的可编译程序集标记与 ASP.NET Core 10 framework reference；没有入口点、网络监听、数据库访问或业务实现。模块代码必须由后续独立 owner 按 `Modules/<Module>/{Domain,Application,Infrastructure,Contracts}` 添加。
+`AssetLibrary.CoreServer.csproj` 保持为无入口点的模块化业务内核。V01-008 在 `Host/` 增加唯一跨平台进程宿主，供 Windows x64、Linux x86-64 和 Docker 共同使用；宿主只暴露 `/healthz`、范围明确的 `/readyz`、`--health-probe` 与 `--build-info`，不包含业务 API、数据库组合或生产文件写入口。
+
+启动宿主必须显式指定 `Production` 环境，并提供已存在、绝对、非根且可写的 state 目录。默认仅监听 `127.0.0.1:5080`；容器发行定义才显式改为 `0.0.0.0:8080`。`--build-info` 的 `source_revision` 只有经发行构建脚本固定后才是可引用的提交；普通开发构建显示 `unissued`。
+
+模块代码由独立 owner 按 `Modules/<Module>/{Domain,Application,Infrastructure,Contracts}` 添加。平台安装、服务管理和发行脚本只允许位于 `infra/**`，不得进入 Domain/Application。

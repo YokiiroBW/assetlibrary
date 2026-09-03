@@ -18,6 +18,7 @@
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
+    <NuGetLockFilePath Condition="'$(AssetLibraryReleaseLockRoot)' != '' and '$(RuntimeIdentifier)' != ''">$(AssetLibraryReleaseLockRoot)/$(MSBuildProjectName).$(RuntimeIdentifier).lock.json</NuGetLockFilePath>
   </PropertyGroup>
 
   <ItemGroup>
