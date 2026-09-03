@@ -232,7 +232,7 @@
       "id": "V01-006",
       "title": "实现 Web/API 只读浏览闭环",
       "module": "web-api-read-only-browse",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-002",
         "V01-004",
