@@ -71,16 +71,67 @@ class MigrationManifestTests(unittest.TestCase):
         self.assertEqual(manifest.postgresql_major, 16)
         self.assertEqual(manifest.verified_patch, "16.15")
         self.assertEqual(len(manifest.modules), 11)
-        self.assertEqual(len(manifest.migrations), 6)
+        self.assertEqual(len(manifest.migrations), 9)
         self.assertEqual(
-            [(item.version, item.module) for item in manifest.migrations],
             [
-                (1, "database-migration-foundation"),
-                (2, "database-migration-foundation"),
-                (3, "LibraryStorage"),
-                (4, "AssetIdentity"),
-                (5, "ScanReconciliation"),
-                (6, "TaskHealth"),
+                (item.version, item.path.name, item.module, item.owner_role)
+                for item in manifest.migrations
+            ],
+            [
+                (
+                    1,
+                    "0001_module_schema_ownership.sql",
+                    "database-migration-foundation",
+                    "assetlibrary_migration_owner",
+                ),
+                (
+                    2,
+                    "0002_module_privilege_projection.sql",
+                    "database-migration-foundation",
+                    "assetlibrary_migration_owner",
+                ),
+                (
+                    3,
+                    "0003_library_storage_core.sql",
+                    "LibraryStorage",
+                    "assetlibrary_library_storage_owner",
+                ),
+                (
+                    4,
+                    "0004_asset_identity_core.sql",
+                    "AssetIdentity",
+                    "assetlibrary_asset_identity_owner",
+                ),
+                (
+                    5,
+                    "0005_scan_reconciliation_core.sql",
+                    "ScanReconciliation",
+                    "assetlibrary_scan_reconciliation_owner",
+                ),
+                (
+                    6,
+                    "0006_task_health_core.sql",
+                    "TaskHealth",
+                    "assetlibrary_task_health_owner",
+                ),
+                (
+                    7,
+                    "0007_library_storage_read_permissions.sql",
+                    "LibraryStorage",
+                    "assetlibrary_library_storage_owner",
+                ),
+                (
+                    8,
+                    "0008_asset_identity_read_projection.sql",
+                    "AssetIdentity",
+                    "assetlibrary_asset_identity_owner",
+                ),
+                (
+                    9,
+                    "0009_gateway_auth_read_api.sql",
+                    "GatewayAuth",
+                    "assetlibrary_gateway_auth_owner",
+                ),
             ],
         )
         self.assertEqual(

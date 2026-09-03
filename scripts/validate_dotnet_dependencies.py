@@ -163,15 +163,17 @@ def locked_packages(projects: list[Path], central: dict[str, str]) -> dict[str, 
             if not has_sha512_content_hash(content_hash):
                 raise ValueError(f"dependency lacks a valid SHA-512 content hash: {package} {resolved}")
             dependency_type = details.get("type")
-            if dependency_type not in {"Direct", "Transitive"}:
+            if dependency_type not in {"Direct", "Transitive", "CentralTransitive"}:
                 raise ValueError(f"dependency has an unsupported lock type: {package}")
             key = package.lower()
             if dependency_type == "Direct":
                 direct.add(key)
+            if dependency_type in {"Direct", "CentralTransitive"}:
                 expected = central.get(key)
                 if expected != resolved:
                     raise ValueError(
-                        f"direct dependency drift: {package} resolves {resolved}, expected {expected}"
+                        f"centrally managed dependency drift: "
+                        f"{package} resolves {resolved}, expected {expected}"
                     )
             prior = packages.get(key)
             current = (package, resolved)

@@ -64,7 +64,7 @@ class PostgreSqlIntegrationTests(unittest.TestCase):
             runtime_parent = Path(
                 os.environ.get(
                     "ASSETLIBRARY_TEST_RUNTIME",
-                    ROOT / ".runtime/sandbox-storage/V01-003",
+                    ROOT / ".runtime/sandbox-storage/V01-006",
                 )
             ).resolve()
             runtime_parent.mkdir(parents=True, exist_ok=True)
@@ -326,7 +326,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         root = Path(
             os.environ.get(
                 "ASSETLIBRARY_TEST_RUNTIME",
-                ROOT / ".runtime/sandbox-storage/V01-003",
+                ROOT / ".runtime/sandbox-storage/V01-006",
             )
         ).resolve()
         path = root / "integration-backups" / f"{label}-{uuid.uuid4().hex}"
@@ -360,6 +360,36 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
             database,
             self.RUNTIME,
             "SET ROLE assetlibrary_task_health_runtime;\n" + statement,
+            check=check,
+        )
+
+    def web_gateway_database(self, label: str) -> str:
+        database = self.fresh_database(label)
+        MIGRATIONS.apply_migrations(
+            self.runner_tools(database),
+            self.manifest,
+            self.backup_directory(label),
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"GRANT assetlibrary_asset_identity_runtime, "
+            f"assetlibrary_gateway_auth_runtime TO {self.RUNTIME} "
+            "WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;",
+        )
+        return database
+
+    def gateway_sql(
+        self,
+        database: str,
+        statement: str,
+        *,
+        check: bool = True,
+    ) -> subprocess.CompletedProcess[str]:
+        return self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_gateway_auth_runtime;\n" + statement,
             check=check,
         )
 
@@ -438,7 +468,7 @@ SELECT task_health.enqueue_outbox_event(
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5, 6])
+        self.assertEqual([row["version"] for row in rows], list(range(1, 10)))
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -482,6 +512,381 @@ SELECT task_health.enqueue_outbox_event(
                 0,
                 denied,
             )
+
+    def test_web_gateway_filters_permissions_pages_and_revocation_in_database(self) -> None:
+        database = self.web_gateway_database("web_gateway")
+        source_id = uuid.uuid4()
+        alpha_library = uuid.uuid4()
+        beta_library = uuid.uuid4()
+        hidden_library = uuid.uuid4()
+        normal_principal = uuid.uuid4()
+        admin_principal = uuid.uuid4()
+        disabled_principal = uuid.uuid4()
+        created_at = "2026-09-04T00:00:00Z"
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+INSERT INTO library_storage.storage_source (
+  storage_source_id, display_name, availability, root_case_sensitive, availability_observed_at
+) VALUES ('{source_id}', 'sandbox', 'online', false, '{created_at}');
+SELECT library_storage.register_library_root(
+  '{alpha_library}', '{source_id}', 'Alpha', 'C:/sandbox/alpha', '{created_at}'
+);
+SELECT library_storage.register_library_root(
+  '{beta_library}', '{source_id}', 'Beta', 'C:/sandbox/beta', '{created_at}'
+);
+SELECT library_storage.register_library_root(
+  '{hidden_library}', '{source_id}', 'Hidden', 'C:/sandbox/hidden', '{created_at}'
+);
+""",
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_gateway_auth_owner;
+INSERT INTO gateway_auth.authenticated_principal (
+  principal_id, subject_key, display_name, is_system_administrator, created_at, disabled_at
+) VALUES
+  ('{normal_principal}', 'oidc:user-1', 'Normal user', false, '{created_at}', NULL),
+  ('{admin_principal}', 'oidc:admin-1', 'System administrator', true, '{created_at}', NULL),
+  ('{disabled_principal}', 'oidc:disabled-1', 'Disabled user', false, '{created_at}', '{created_at}');
+RESET ROLE;
+SET ROLE assetlibrary_library_storage_owner;
+INSERT INTO library_storage.library_permission (
+  library_id, principal_id, access_level, granted_at, updated_at
+) VALUES
+  ('{alpha_library}', '{normal_principal}', 'read_only', '{created_at}', '{created_at}'),
+  ('{beta_library}', '{normal_principal}', 'organize', '{created_at}', '{created_at}'),
+  ('{alpha_library}', '{disabled_principal}', 'read_only', '{created_at}', '{created_at}');
+""",
+        )
+
+        alpha_scan = uuid.uuid4()
+        beta_scan = uuid.uuid4()
+        hidden_scan = uuid.uuid4()
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_asset_identity_runtime;
+INSERT INTO asset_identity.scan_observation_stage (
+  scan_id, entry_id, library_id, normalized_relative_path, kind,
+  content_length, last_write_time_utc, staged_at
+) VALUES
+  ('{alpha_scan}', '{uuid.uuid4()}', '{alpha_library}', 'Alpha.jpg', 'file', 10, '{created_at}', '{created_at}'),
+  ('{alpha_scan}', '{uuid.uuid4()}', '{alpha_library}', 'beta.txt', 'file', 20, '{created_at}', '{created_at}'),
+  ('{alpha_scan}', '{uuid.uuid4()}', '{alpha_library}', 'folder', 'directory', NULL, '{created_at}', '{created_at}'),
+  ('{alpha_scan}', '{uuid.uuid4()}', '{alpha_library}', 'folder/secret-blue.png', 'file', 30, '{created_at}', '{created_at}'),
+  ('{beta_scan}', '{uuid.uuid4()}', '{beta_library}', 'other.txt', 'file', 40, '{created_at}', '{created_at}'),
+  ('{hidden_scan}', '{uuid.uuid4()}', '{hidden_library}', 'hidden-secret.txt', 'file', 50, '{created_at}', '{created_at}');
+SELECT asset_identity.commit_initial_scan('{alpha_scan}', '{alpha_library}', '{created_at}');
+SELECT asset_identity.commit_initial_scan('{beta_scan}', '{beta_library}', '{created_at}');
+SELECT asset_identity.commit_initial_scan('{hidden_scan}', '{hidden_library}', '{created_at}');
+""",
+        )
+
+        normal_libraries = self.gateway_sql(
+            database,
+            "SELECT display_name || ':' || access_level "
+            "FROM gateway_auth.list_authorized_libraries('oidc:user-1', NULL, NULL, 101);",
+        ).stdout.strip().splitlines()
+        self.assertEqual(normal_libraries, ["Alpha:read_only", "Beta:organize"])
+        admin_libraries = self.gateway_sql(
+            database,
+            "SELECT display_name || ':' || access_level "
+            "FROM gateway_auth.list_authorized_libraries('oidc:admin-1', NULL, NULL, 101);",
+        ).stdout.strip().splitlines()
+        self.assertEqual(
+            admin_libraries,
+            [
+                "Alpha:library_administrator",
+                "Beta:library_administrator",
+                "Hidden:library_administrator",
+            ],
+        )
+        for subject in ("oidc:disabled-1", "oidc:unknown"):
+            result = self.gateway_sql(
+                database,
+                "SELECT library_id FROM gateway_auth.list_authorized_libraries("
+                f"'{subject}', NULL, NULL, 101);",
+            ).stdout.strip()
+            self.assertEqual(result, "")
+
+        first_page = self.gateway_sql(
+            database,
+            "SELECT relative_path, sort_name, entry_id "
+            "FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:user-1', '{alpha_library}', '', NULL, NULL, 2);",
+        ).stdout.strip().splitlines()
+        self.assertEqual([row.split("|")[0] for row in first_page], ["Alpha.jpg", "beta.txt"])
+        _, last_sort, last_entry = first_page[-1].split("|")
+        second_page = self.gateway_sql(
+            database,
+            "SELECT relative_path FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:user-1', '{alpha_library}', '', '{last_sort}', '{last_entry}', 2);",
+        ).stdout.strip().splitlines()
+        self.assertEqual(second_page, ["folder"])
+
+        hidden_browse = self.gateway_sql(
+            database,
+            "SELECT relative_path FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:user-1', '{hidden_library}', '', NULL, NULL, 101);",
+        ).stdout.strip()
+        nonexistent_browse = self.gateway_sql(
+            database,
+            "SELECT relative_path FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:user-1', '{uuid.uuid4()}', '', NULL, NULL, 101);",
+        ).stdout.strip()
+        self.assertEqual(hidden_browse, nonexistent_browse)
+        self.assertEqual(hidden_browse, "")
+
+        search = self.gateway_sql(
+            database,
+            "SELECT library_display_name, relative_path, hit_reason "
+            "FROM gateway_auth.search_authorized_entries("
+            "'oidc:user-1', 'secret', NULL, NULL, NULL, 101);",
+        ).stdout.strip().splitlines()
+        self.assertEqual(search, ["Alpha|folder/secret-blue.png|name"])
+        self.assertNotIn("hidden-secret.txt", "\n".join(search))
+
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_library_storage_owner; "
+            "DELETE FROM library_storage.library_permission "
+            f"WHERE library_id = '{alpha_library}' AND principal_id = '{normal_principal}';",
+        )
+        after_revoke = self.gateway_sql(
+            database,
+            "SELECT display_name FROM gateway_auth.list_authorized_libraries("
+            "'oidc:user-1', NULL, NULL, 101);",
+        ).stdout.strip().splitlines()
+        self.assertEqual(after_revoke, ["Beta"])
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT relative_path FROM gateway_auth.search_authorized_entries("
+                "'oidc:user-1', 'secret', NULL, NULL, NULL, 101);",
+            ).stdout.strip(),
+            "",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT relative_path FROM gateway_auth.browse_authorized_entries("
+                f"'oidc:user-1', '{alpha_library}', '', NULL, NULL, 101);",
+            ).stdout.strip(),
+            "",
+        )
+
+        for invalid in (
+            "SELECT * FROM gateway_auth.search_authorized_entries("
+            "'oidc:user-1', NULL, NULL, NULL, NULL, 10);",
+            "SELECT * FROM gateway_auth.list_authorized_libraries("
+            "'oidc:user-1', NULL, NULL, 102);",
+            "SELECT * FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:user-1', '{beta_library}', '', 'orphan', NULL, 10);",
+        ):
+            self.assertNotEqual(
+                self.gateway_sql(database, invalid, check=False).returncode,
+                0,
+                invalid,
+            )
+
+        for denied in (
+            "SELECT * FROM gateway_auth.authenticated_principal;",
+            "SELECT * FROM library_storage.library_permission_read_projection;",
+            "SELECT * FROM asset_identity.entry_read_projection;",
+            "INSERT INTO gateway_auth.authenticated_principal ("
+            "principal_id, subject_key, display_name, created_at) VALUES ("
+            f"'{uuid.uuid4()}', 'oidc:injected', 'Injected', clock_timestamp());",
+        ):
+            self.assertNotEqual(
+                self.gateway_sql(database, denied, check=False).returncode,
+                0,
+                denied,
+            )
+
+    def test_web_gateway_100k_directory_uses_browse_and_search_indexes(self) -> None:
+        database = self.web_gateway_database("web_gateway_scale")
+        source_id = uuid.uuid4()
+        library_id = uuid.uuid4()
+        principal_id = uuid.uuid4()
+        scan_id = uuid.uuid4()
+        created_at = "2026-09-04T00:00:00Z"
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+INSERT INTO library_storage.storage_source (
+  storage_source_id, display_name, availability, root_case_sensitive, availability_observed_at
+) VALUES ('{source_id}', 'scale sandbox', 'online', false, '{created_at}');
+SELECT library_storage.register_library_root(
+  '{library_id}', '{source_id}', 'Scale', 'C:/sandbox/scale', '{created_at}'
+);
+""",
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_gateway_auth_owner;
+INSERT INTO gateway_auth.authenticated_principal (
+  principal_id, subject_key, display_name, created_at
+) VALUES ('{principal_id}', 'oidc:scale-user', 'Scale user', '{created_at}');
+RESET ROLE;
+SET ROLE assetlibrary_library_storage_owner;
+INSERT INTO library_storage.library_permission (
+  library_id, principal_id, access_level, granted_at, updated_at
+) VALUES ('{library_id}', '{principal_id}', 'read_only', '{created_at}', '{created_at}');
+RESET ROLE;
+SET ROLE assetlibrary_asset_identity_owner;
+INSERT INTO asset_identity.filesystem_entry (
+  entry_id, library_id, normalized_relative_path, kind, content_length,
+  last_write_time_utc, first_seen_scan_id, last_seen_scan_id, first_seen_at, last_seen_at
+)
+SELECT
+  md5(item::text || '-v01-006')::uuid,
+  '{library_id}',
+  format('huge/photo_%s.jpg', lpad(item::text, 6, '0')),
+  'file',
+  item,
+  '{created_at}',
+  '{scan_id}',
+  '{scan_id}',
+  '{created_at}',
+  '{created_at}'
+FROM generate_series(1, 100000) AS item;
+ANALYZE asset_identity.filesystem_entry;
+""",
+        )
+
+        browse_plan = self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_asset_identity_owner;
+EXPLAIN (ANALYZE, TIMING OFF)
+SELECT entry_id
+FROM asset_identity.filesystem_entry
+WHERE library_id = '{library_id}'
+  AND state = 'present'
+  AND parent_relative_path = 'huge'
+ORDER BY lower(entry_name), entry_id
+LIMIT 101;
+""",
+        ).stdout
+        self.assertIn("filesystem_entry_browse_index", browse_plan)
+
+        search_plan = self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_asset_identity_owner;
+EXPLAIN (ANALYZE, TIMING OFF)
+SELECT entry_id
+FROM asset_identity.filesystem_entry
+WHERE library_id = '{library_id}'
+  AND state = 'present'
+  AND path_search_document @@ plainto_tsquery('simple'::regconfig, '099999')
+ORDER BY lower(entry_name), library_id, entry_id
+LIMIT 101;
+""",
+        ).stdout
+        self.assertIn("filesystem_entry_path_search_index", search_plan)
+
+        bounded_browse = self.gateway_sql(
+            database,
+            "SELECT count(*) FROM gateway_auth.browse_authorized_entries("
+            f"'oidc:scale-user', '{library_id}', 'huge', NULL, NULL, 101);",
+        ).stdout.strip()
+        self.assertEqual(bounded_browse, "101")
+        bounded_search = self.gateway_sql(
+            database,
+            "SELECT relative_path FROM gateway_auth.search_authorized_entries("
+            "'oidc:scale-user', '099999', NULL, NULL, NULL, 101);",
+        ).stdout.strip()
+        self.assertEqual(bounded_search, "huge/photo_099999.jpg")
+
+    def test_web_gateway_permissions_and_projection_survive_database_restart(self) -> None:
+        if self.external:
+            self.skipTest("restart persistence requires the disposable self-hosted cluster")
+        database = self.web_gateway_database("web_gateway_restart")
+        source_id = uuid.uuid4()
+        library_id = uuid.uuid4()
+        principal_id = uuid.uuid4()
+        scan_id = uuid.uuid4()
+        entry_id = uuid.uuid4()
+        created_at = "2026-09-04T00:00:00Z"
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+INSERT INTO library_storage.storage_source (
+  storage_source_id, display_name, availability, root_case_sensitive, availability_observed_at
+) VALUES ('{source_id}', 'restart sandbox', 'online', false, '{created_at}');
+SELECT library_storage.register_library_root(
+  '{library_id}', '{source_id}', 'Restart', 'C:/sandbox/restart', '{created_at}'
+);
+RESET ROLE;
+SET ROLE assetlibrary_asset_identity_runtime;
+INSERT INTO asset_identity.scan_observation_stage (
+  scan_id, entry_id, library_id, normalized_relative_path, kind,
+  content_length, last_write_time_utc, staged_at
+) VALUES (
+  '{scan_id}', '{entry_id}', '{library_id}', 'persisted.txt', 'file', 7,
+  '{created_at}', '{created_at}'
+);
+SELECT asset_identity.commit_initial_scan('{scan_id}', '{library_id}', '{created_at}');
+""",
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_gateway_auth_owner;
+INSERT INTO gateway_auth.authenticated_principal (
+  principal_id, subject_key, display_name, created_at
+) VALUES ('{principal_id}', 'oidc:restart-user', 'Restart user', '{created_at}');
+RESET ROLE;
+SET ROLE assetlibrary_library_storage_owner;
+INSERT INTO library_storage.library_permission (
+  library_id, principal_id, access_level, granted_at, updated_at
+) VALUES ('{library_id}', '{principal_id}', 'read_only', '{created_at}', '{created_at}');
+""",
+        )
+        assert self.pg_ctl is not None and self.cluster_data is not None
+        self._run(
+            [
+                str(self.pg_ctl),
+                "--pgdata",
+                str(self.cluster_data),
+                "--wait",
+                "--timeout",
+                "30",
+                "--mode",
+                "fast",
+                "restart",
+            ],
+            timeout=45,
+            capture_output=False,
+        )
+
+        persisted = self.gateway_sql(
+            database,
+            "SELECT library_display_name, relative_path FROM "
+            "gateway_auth.search_authorized_entries("
+            "'oidc:restart-user', 'persisted', NULL, NULL, NULL, 101);",
+        ).stdout.strip()
+        self.assertEqual(persisted, "Restart|persisted.txt")
 
     def test_read_core_roots_initial_commit_and_scan_status_are_fail_closed(self) -> None:
         database = self.fresh_database("read_core")
@@ -1331,7 +1736,7 @@ LIMIT 256;
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5, 6])
+        self.assertEqual([row["version"] for row in rows], list(range(1, 10)))
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -1384,7 +1789,7 @@ LIMIT 256;
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "6",
+            "9",
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 

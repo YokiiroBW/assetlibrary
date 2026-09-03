@@ -70,7 +70,7 @@ class DatabaseMigrationFoundationRepositoryTests(unittest.TestCase):
             "image: postgres:16.15-bookworm",
             "ASSETLIBRARY_TEST_POSTGRES_REQUIRED: '1'",
             "ASSETLIBRARY_TEST_POSTGRES_EXTERNAL: '1'",
-            "ASSETLIBRARY_TEST_RUNTIME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-003",
+            "ASSETLIBRARY_TEST_RUNTIME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-006",
             "python -B -m unittest discover -s tests/database -p test_*.py -v",
         ):
             self.assertIn(marker, workflow)

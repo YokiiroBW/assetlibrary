@@ -102,6 +102,14 @@ public enum StorageAvailability
     Offline = 1,
 }
 
+public enum LibraryAccessLevel
+{
+    ReadOnly = 1,
+    ReadWrite = 2,
+    Organize = 3,
+    LibraryAdministrator = 4,
+}
+
 public sealed record LibraryScanTarget(
     LibraryId LibraryId,
     StorageSourceId StorageSourceId,

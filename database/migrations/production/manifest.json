@@ -142,6 +142,30 @@
       "owner_role": "assetlibrary_task_health_owner",
       "path": "0006_task_health_core.sql",
       "sha256": "41eedeef1174c48de01fd6f0c4665411e3043c3b0572fb13bd36a8cf15779aa2"
+    },
+    {
+      "version": 7,
+      "name": "library_storage_read_permissions",
+      "module": "LibraryStorage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "path": "0007_library_storage_read_permissions.sql",
+      "sha256": "000be3c80ffe3a45b907ce5f9755488411aacb40f174bfa722ea1fbcb6f0194d"
+    },
+    {
+      "version": 8,
+      "name": "asset_identity_read_projection",
+      "module": "AssetIdentity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "path": "0008_asset_identity_read_projection.sql",
+      "sha256": "41c3e9c8214963e3b6db77b5e9fff3ea0f5b2b324d94713f36f6505c51f3cb20"
+    },
+    {
+      "version": 9,
+      "name": "gateway_auth_read_api",
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "path": "0009_gateway_auth_read_api.sql",
+      "sha256": "0da9794574a7ad251fb8163463a597cdf0d465a32a64ad5de2b274638d62405e"
     }
   ]
 }

@@ -244,12 +244,65 @@ class DotnetDependencyPolicyTests(unittest.TestCase):
             self.report_path,
         )
 
+    def add_central_transitive_dependency(
+        self,
+        *,
+        declared_version: str = "4.5.6",
+        resolved_version: str = "4.5.6",
+    ) -> None:
+        central_path = self.root / "Directory.Packages.props"
+        central = central_path.read_text(encoding="utf-8")
+        central_path.write_text(
+            central.replace(
+                '  <PackageVersion Include="Example.Package" Version="1.2.3" />',
+                '  <PackageVersion Include="Example.Package" Version="1.2.3" />\n'
+                f'  <PackageVersion Include="Central.Transitive" Version="{declared_version}" />',
+            ),
+            encoding="utf-8",
+        )
+        lock = json.loads(self.lock_path.read_text(encoding="utf-8"))
+        lock["dependencies"]["net10.0"]["Central.Transitive"] = {
+            "type": "CentralTransitive",
+            "resolved": resolved_version,
+            "contentHash": base64.b64encode(b"y" * 64).decode("ascii"),
+        }
+        self.lock_path.write_text(json.dumps(lock), encoding="utf-8")
+        package_root = self.packages_dir / "central.transitive" / resolved_version
+        package_root.mkdir(parents=True)
+        (package_root / "central.transitive.nuspec").write_text(
+            f"""<package><metadata>
+  <id>Central.Transitive</id><version>{resolved_version}</version>
+  <license type=\"expression\">MIT</license>
+</metadata></package>
+""",
+            encoding="utf-8",
+        )
+
     def test_locked_approved_dependency_passes(self) -> None:
         errors, projects, packages = self.validate()
 
         self.assertEqual(errors, [])
         self.assertEqual(projects, 1)
         self.assertEqual(packages, 1)
+
+    def test_central_transitive_dependency_passes_without_becoming_direct(self) -> None:
+        self.add_central_transitive_dependency()
+
+        errors, projects, packages = self.validate()
+
+        self.assertEqual(errors, [])
+        self.assertEqual(projects, 1)
+        self.assertEqual(packages, 2)
+
+    def test_central_transitive_version_drift_fails(self) -> None:
+        self.add_central_transitive_dependency(resolved_version="4.5.7")
+
+        errors, _, _ = self.validate()
+
+        self.assertTrue(
+            any("centrally managed dependency drift" in error for error in errors),
+            errors,
+        )
 
     def test_direct_version_drift_fails(self) -> None:
         lock = json.loads(self.lock_path.read_text(encoding="utf-8"))
@@ -258,7 +311,7 @@ class DotnetDependencyPolicyTests(unittest.TestCase):
 
         errors, _, _ = self.validate()
 
-        self.assertTrue(any("direct dependency drift" in error for error in errors), errors)
+        self.assertTrue(any("centrally managed dependency drift" in error for error in errors), errors)
 
     def test_unapproved_configured_source_fails(self) -> None:
         (self.root / "NuGet.config").write_text(

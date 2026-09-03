@@ -7,3 +7,6 @@ packages/sdk/assetlink/** text eol=lf
 packages/sdk/assetlink/kotlin/gradle/wrapper/gradle-wrapper.jar binary
 database/migrations/production/*.sql text eol=lf
 database/migrations/production/manifest.json text eol=lf
+apps/web/** text eol=lf
+tests/web/** text eol=lf
+eng/web-dependency-policy.json text eol=lf

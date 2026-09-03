@@ -26,8 +26,10 @@ class TaskHealthMigrationTests(unittest.TestCase):
 
     def test_manifest_assigns_the_contiguous_migration_to_task_health(self) -> None:
         manifest = MIGRATIONS.load_manifest()
-        migration = manifest.migrations[-1]
+        task_health = [item for item in manifest.migrations if item.module == "TaskHealth"]
 
+        self.assertEqual(len(task_health), 1)
+        migration = task_health[0]
         self.assertEqual(migration.version, 6)
         self.assertEqual(migration.module, "TaskHealth")
         self.assertEqual(migration.owner_role, "assetlibrary_task_health_owner")

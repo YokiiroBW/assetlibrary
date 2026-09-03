@@ -1,0 +1,36 @@
+{
+  "name": "@assetlibrary/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AssetLibrary authenticated read-only web workspace.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.20.0 <25"
+  },
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "sdk:build": "pnpm --dir ../../packages/sdk/assetlink/typescript run build",
+    "dev": "pnpm run sdk:build && vite",
+    "build": "pnpm run sdk:build && tsc --project tsconfig.json --noEmit --pretty false && vite build",
+    "format": "prettier --write . ../../tests/web",
+    "format:check": "prettier --check . ../../tests/web",
+    "lint": "pnpm run sdk:build && tsc --project tsconfig.json --noEmit --pretty false",
+    "typecheck": "pnpm run sdk:build && tsc --project tsconfig.json --noEmit --pretty false",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "@assetlibrary/assetlink": "link:../../packages/sdk/assetlink/typescript",
+    "@tanstack/react-virtual": "3.14.10",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-react": "6.1.1",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vite": "8.2.2"
+  }
+}

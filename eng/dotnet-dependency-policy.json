@@ -4,7 +4,8 @@
     "https://api.nuget.org/v3/index.json"
   ],
   "allowed_license_expressions": [
-    "MIT"
+    "MIT",
+    "PostgreSQL"
   ],
   "license_file_exceptions": []
 }

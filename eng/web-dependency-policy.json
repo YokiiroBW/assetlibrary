@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "node_version": "24.20.0",
+  "package_manager": "pnpm@11.19.0",
+  "approved_registries": [
+    "https://registry.npmjs.org/",
+    "https://nodejs.org/dist/"
+  ],
+  "manifest": {
+    "dependencies": {
+      "@assetlibrary/assetlink": "link:../../packages/sdk/assetlink/typescript",
+      "@tanstack/react-virtual": "3.14.10",
+      "react": "19.2.8",
+      "react-dom": "19.2.8"
+    },
+    "devDependencies": {
+      "@playwright/test": "1.62.1",
+      "@types/react": "19.2.18",
+      "@types/react-dom": "19.2.5",
+      "@vitejs/plugin-react": "6.1.1",
+      "prettier": "3.9.6",
+      "typescript": "6.0.3",
+      "vite": "8.2.2"
+    }
+  },
+  "direct_dependency_review": [
+    {
+      "name": "Node.js",
+      "version": "24.20.0",
+      "scope": "build-and-test-runtime",
+      "license": "MIT",
+      "security_updates": "https://nodejs.org/en/blog/release/"
+    },
+    {
+      "name": "pnpm",
+      "version": "11.19.0",
+      "scope": "package-manager",
+      "license": "MIT",
+      "security_updates": "https://github.com/pnpm/pnpm/security/advisories"
+    },
+    {
+      "name": "@tanstack/react-virtual",
+      "version": "3.14.10",
+      "scope": "runtime",
+      "license": "MIT",
+      "security_updates": "https://github.com/TanStack/virtual/security/advisories"
+    },
+    {
+      "name": "react",
+      "version": "19.2.8",
+      "scope": "runtime",
+      "license": "MIT",
+      "security_updates": "https://github.com/facebook/react/security/advisories"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.2.8",
+      "scope": "runtime",
+      "license": "MIT",
+      "security_updates": "https://github.com/facebook/react/security/advisories"
+    },
+    {
+      "name": "@playwright/test",
+      "version": "1.62.1",
+      "scope": "browser-test",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/microsoft/playwright/security/advisories"
+    },
+    {
+      "name": "@types/react",
+      "version": "19.2.18",
+      "scope": "development",
+      "license": "MIT",
+      "security_updates": "https://github.com/DefinitelyTyped/DefinitelyTyped/security/advisories"
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "19.2.5",
+      "scope": "development",
+      "license": "MIT",
+      "security_updates": "https://github.com/DefinitelyTyped/DefinitelyTyped/security/advisories"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "version": "6.1.1",
+      "scope": "build",
+      "license": "MIT",
+      "security_updates": "https://github.com/vitejs/vite-plugin-react/security/advisories"
+    },
+    {
+      "name": "prettier",
+      "version": "3.9.6",
+      "scope": "format",
+      "license": "MIT",
+      "security_updates": "https://github.com/prettier/prettier/security/advisories"
+    },
+    {
+      "name": "typescript",
+      "version": "6.0.3",
+      "scope": "development",
+      "license": "Apache-2.0",
+      "security_updates": "https://github.com/microsoft/TypeScript/security/advisories"
+    },
+    {
+      "name": "vite",
+      "version": "8.2.2",
+      "scope": "build-and-dev-server",
+      "license": "MIT",
+      "security_updates": "https://github.com/vitejs/vite/security/advisories"
+    }
+  ],
+  "allowed_licenses": [
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "MPL-2.0"
+  ],
+  "locked_package_license_rules": [
+    { "exact": "@oxc-project/types", "license": "MIT" },
+    { "exact": "@playwright/test", "license": "Apache-2.0" },
+    { "prefix": "@rolldown/binding-", "license": "MIT" },
+    { "exact": "@rolldown/pluginutils", "license": "MIT" },
+    { "exact": "@tanstack/react-virtual", "license": "MIT" },
+    { "exact": "@tanstack/virtual-core", "license": "MIT" },
+    { "prefix": "@types/react", "license": "MIT" },
+    { "exact": "@vitejs/plugin-react", "license": "MIT" },
+    { "exact": "csstype", "license": "MIT" },
+    { "exact": "detect-libc", "license": "Apache-2.0" },
+    { "exact": "fdir", "license": "MIT" },
+    { "exact": "fsevents", "license": "MIT" },
+    { "prefix": "lightningcss", "license": "MPL-2.0" },
+    { "exact": "nanoid", "license": "MIT" },
+    { "exact": "picocolors", "license": "ISC" },
+    { "exact": "picomatch", "license": "MIT" },
+    { "prefix": "playwright", "license": "Apache-2.0" },
+    { "exact": "postcss", "license": "MIT" },
+    { "exact": "prettier", "license": "MIT" },
+    { "prefix": "react", "license": "MIT" },
+    { "exact": "rolldown", "license": "MIT" },
+    { "exact": "scheduler", "license": "MIT" },
+    { "exact": "source-map-js", "license": "BSD-3-Clause" },
+    { "exact": "tinyglobby", "license": "MIT" },
+    { "exact": "typescript", "license": "Apache-2.0" },
+    { "exact": "vite", "license": "MIT" }
+  ],
+  "size_budgets_bytes": {
+    "javascript": 262144,
+    "css": 16384,
+    "javascript_and_css": 286720
+  }
+}

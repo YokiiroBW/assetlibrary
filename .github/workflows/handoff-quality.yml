@@ -25,6 +25,7 @@ jobs:
       MSBUILDDISABLENODEREUSE: '1'
       NUGET_PACKAGES: ${{ github.workspace }}/.runtime/nuget
       GRADLE_USER_HOME: ${{ github.workspace }}/.runtime/gradle-home
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.runtime/playwright
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,7 +39,9 @@ jobs:
         with:
           node-version: '24.20.0'
           cache: pnpm
-          cache-dependency-path: packages/sdk/assetlink/typescript/pnpm-lock.yaml
+          cache-dependency-path: |
+            packages/sdk/assetlink/typescript/pnpm-lock.yaml
+            apps/web/pnpm-lock.yaml
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -56,6 +59,7 @@ jobs:
             tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.ReadCore.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.TaskHealth.Tests/packages.lock.json
+            tests/dotnet/AssetLibrary.WebGateway.Tests/packages.lock.json
       - name: Repository verification entry
         run: python scripts/verify_repository.py
       - name: Repository workflow tests
@@ -64,6 +68,8 @@ jobs:
         run: python -B database/migrations/production/migration_tool.py validate
       - name: Database migration static tests
         run: python -B -m unittest discover -s tests/database -p test_migration_manifest.py -v
+      - name: Web Gateway migration static tests
+        run: python -B -m unittest discover -s tests/database -p test_web_gateway_migrations.py -v
       - name: AssetLink generated SDK tests
         run: python -B -m unittest discover -s tests/sdk -p test_*.py -v
       - name: AssetLink contract regression tests
@@ -99,6 +105,30 @@ jobs:
         run: pnpm --dir packages/sdk/assetlink/typescript run test
       - name: TypeScript dependency audit
         run: pnpm --dir packages/sdk/assetlink/typescript audit --audit-level low
+      - name: Frozen Web install
+        run: pnpm --dir apps/web install --frozen-lockfile
+      - name: Web formatting gate
+        run: pnpm --dir apps/web run format:check
+      - name: Web lint gate
+        run: pnpm --dir apps/web run lint
+      - name: Web typecheck gate
+        run: pnpm --dir apps/web run typecheck
+      - name: Web production build
+        run: pnpm --dir apps/web run build
+      - name: Install Playwright Chromium dependencies (Ubuntu)
+        if: matrix.label == 'ubuntu'
+        run: pnpm --dir apps/web exec playwright install --with-deps chromium
+      - name: Install Playwright Chromium (Windows)
+        if: matrix.label == 'windows'
+        run: pnpm --dir apps/web exec playwright install chromium
+      - name: Web browser regressions
+        run: pnpm --dir apps/web run test:browser
+      - name: Web dependency audit
+        run: pnpm --dir apps/web audit --audit-level low
+      - name: Web dependency, license, integrity and size gate
+        run: python -B scripts/validate_web_dependencies.py --require-build-artifacts
+      - name: Web read-only source boundary gate
+        run: python -B scripts/validate_web_source.py
       - name: Kotlin build and SDK tests (Ubuntu)
         if: matrix.label == 'ubuntu'
         run: bash packages/sdk/assetlink/kotlin/gradlew -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build
@@ -120,7 +150,7 @@ jobs:
       ASSETLIBRARY_TEST_POSTGRES_HOST: 127.0.0.1
       ASSETLIBRARY_TEST_POSTGRES_PORT: '5432'
       ASSETLIBRARY_TEST_POSTGRES_ADMIN: postgres
-      ASSETLIBRARY_TEST_RUNTIME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-003
+      ASSETLIBRARY_TEST_RUNTIME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-006
     services:
       postgres:
         image: postgres:16.15-bookworm

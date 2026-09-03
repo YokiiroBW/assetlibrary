@@ -36,6 +36,8 @@ def main() -> int:
         [sys.executable, '-B', str(ROOT / 'scripts/generate_assetlink_sdks.py'), '--check'],
         [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_source.py')],
         [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_dependencies.py')],
+        [sys.executable, '-B', str(ROOT / 'scripts/validate_web_dependencies.py')],
+        [sys.executable, '-B', str(ROOT / 'scripts/validate_web_source.py')],
         [
             sys.executable,
             '-B',
