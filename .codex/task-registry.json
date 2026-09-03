@@ -217,7 +217,7 @@
       "id": "V01-005",
       "title": "实现 TaskHealth/Outbox 核心",
       "module": "task-health-outbox-core",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-003"
       ],
