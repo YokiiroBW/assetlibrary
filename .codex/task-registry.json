@@ -197,6 +197,38 @@
       "task_file": ".codex/tasks/V01-003.md",
       "handoff": ".codex/handoffs/V01-003/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-004",
+      "title": "实现 Library/Asset/Scan 只读核心",
+      "module": "library-asset-scan-read-core",
+      "status": "planned",
+      "depends_on": [
+        "V01-003"
+      ],
+      "owner": "codex-agent-v01-004",
+      "branch": "codex/v01-004-library-asset-scan-read-core",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-004.md",
+      "handoff": ".codex/handoffs/V01-004/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-005",
+      "title": "实现 TaskHealth/Outbox 核心",
+      "module": "task-health-outbox-core",
+      "status": "planned",
+      "depends_on": [
+        "V01-003"
+      ],
+      "owner": "codex-agent-v01-005",
+      "branch": "codex/v01-005-task-health-outbox-core",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-005.md",
+      "handoff": ".codex/handoffs/V01-005/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
