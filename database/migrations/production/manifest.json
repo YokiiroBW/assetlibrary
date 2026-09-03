@@ -110,6 +110,30 @@
       "owner_role": "assetlibrary_migration_owner",
       "path": "0002_module_privilege_projection.sql",
       "sha256": "e0058b1408aed15b28e2df88dae05cfb388ed87661ca407540823262ebe8b86d"
+    },
+    {
+      "version": 3,
+      "name": "library_storage_core",
+      "module": "LibraryStorage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "path": "0003_library_storage_core.sql",
+      "sha256": "ec7013fd23ed78ffb045199e99c6666d9d72892a30af0d676c94b71ad75ee695"
+    },
+    {
+      "version": 4,
+      "name": "asset_identity_core",
+      "module": "AssetIdentity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "path": "0004_asset_identity_core.sql",
+      "sha256": "82ac74073aa9c5f4d454bbda313cc6e84332c4b00bb9cfd5f084b462d4e55b27"
+    },
+    {
+      "version": 5,
+      "name": "scan_reconciliation_core",
+      "module": "ScanReconciliation",
+      "owner_role": "assetlibrary_scan_reconciliation_owner",
+      "path": "0005_scan_reconciliation_core.sql",
+      "sha256": "ed2f5d333855cf6cf700dc2234e46ab1f32a4b12c46455e439229c458a389f18"
     }
   ]
 }

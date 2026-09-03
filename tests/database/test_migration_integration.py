@@ -378,7 +378,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2])
+        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5])
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -423,6 +423,254 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
                 denied,
             )
 
+    def test_read_core_roots_initial_commit_and_scan_status_are_fail_closed(self) -> None:
+        database = self.fresh_database("read_core")
+        backups = self.backup_directory("read_core")
+        MIGRATIONS.apply_migrations(self.runner_tools(database), self.manifest, backups)
+        self.sql(
+            database,
+            self.admin,
+            (
+                f"GRANT assetlibrary_asset_identity_runtime, "
+                f"assetlibrary_scan_reconciliation_runtime TO {self.RUNTIME} "
+                "WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;"
+            ),
+        )
+
+        source_id = uuid.uuid4()
+        library_id = uuid.uuid4()
+        scan_id = uuid.uuid4()
+        empty_library_id = uuid.uuid4()
+        empty_scan_id = uuid.uuid4()
+        incomplete_scan_id = uuid.uuid4()
+        mixed_scan_id = uuid.uuid4()
+        entry_id = uuid.uuid4()
+        folder_id = uuid.uuid4()
+        created_at = "2026-09-03T12:00:00Z"
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+INSERT INTO library_storage.storage_source (
+  storage_source_id, display_name, availability, root_case_sensitive, availability_observed_at
+) VALUES ('{source_id}', 'sandbox', 'online', false, '{created_at}');
+SELECT library_storage.register_library_root(
+  '{library_id}', '{source_id}', 'photos', 'C:/assets', '{created_at}'
+);
+SELECT library_storage.register_library_root(
+  '{empty_library_id}', '{source_id}', 'empty', 'C:/empty', '{created_at}'
+);
+""",
+        )
+        overlap = self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+SELECT library_storage.register_library_root(
+  '{uuid.uuid4()}', '{source_id}', 'nested', 'c:/ASSETS/nested', '{created_at}'
+);
+""",
+            check=False,
+        )
+        self.assertNotEqual(overlap.returncode, 0)
+        exact_overlap = self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+SELECT library_storage.register_library_root(
+  '{uuid.uuid4()}', '{source_id}', 'same', 'C:/ASSETS', '{created_at}'
+);
+""",
+            check=False,
+        )
+        self.assertNotEqual(exact_overlap.returncode, 0)
+        parent_overlap = self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+SELECT library_storage.register_library_root(
+  '{uuid.uuid4()}', '{source_id}', 'parent', 'C:/', '{created_at}'
+);
+""",
+            check=False,
+        )
+        self.assertNotEqual(parent_overlap.returncode, 0)
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_library_storage_runtime;
+SELECT library_storage.register_library_root(
+  '{uuid.uuid4()}', '{source_id}', 'prefix-lookalike', 'C:/assetshop', '{created_at}'
+);
+""",
+        )
+        root_count = self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_library_storage_runtime; "
+            "SELECT count(*) FROM library_storage.library_root;",
+        ).stdout.strip()
+        self.assertEqual(root_count, "3")
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_asset_identity_runtime;
+INSERT INTO asset_identity.scan_observation_stage (
+  scan_id, entry_id, library_id, normalized_relative_path, kind,
+  content_length, last_write_time_utc, staged_at
+) VALUES
+  ('{scan_id}', '{folder_id}', '{library_id}', 'photos', 'directory', NULL, '{created_at}', '{created_at}'),
+  ('{scan_id}', '{entry_id}', '{library_id}', 'photos/image.jpg', 'file', 12, '{created_at}', '{created_at}');
+""",
+        )
+        committed = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.commit_initial_scan('{scan_id}', '{library_id}', '{created_at}');",
+        ).stdout.strip()
+        self.assertEqual(committed, "2")
+        counts = self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_asset_identity_runtime; "
+            "SELECT (SELECT count(*) FROM asset_identity.filesystem_entry), "
+            "(SELECT count(*) FROM asset_identity.scan_observation_stage), "
+            "(SELECT entry_count FROM asset_identity.library_index_snapshot "
+            f"WHERE library_id = '{library_id}');",
+        ).stdout.strip()
+        self.assertEqual(counts, "2|0|2")
+        repeated = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.commit_initial_scan('{uuid.uuid4()}', '{library_id}', '{created_at}');",
+            check=False,
+        )
+        self.assertNotEqual(repeated.returncode, 0)
+
+        empty_committed = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.commit_initial_scan("
+            f"'{empty_scan_id}', '{empty_library_id}', '{created_at}');",
+        ).stdout.strip()
+        self.assertEqual(empty_committed, "0")
+        empty_snapshot = self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_asset_identity_runtime; "
+            "SELECT entry_count FROM asset_identity.library_index_snapshot "
+            f"WHERE library_id = '{empty_library_id}';",
+        ).stdout.strip()
+        self.assertEqual(empty_snapshot, "0")
+        repeated_empty = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.commit_initial_scan("
+            f"'{uuid.uuid4()}', '{empty_library_id}', '{created_at}');",
+            check=False,
+        )
+        self.assertNotEqual(repeated_empty.returncode, 0)
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_asset_identity_runtime;
+INSERT INTO asset_identity.scan_observation_stage (
+  scan_id, entry_id, library_id, normalized_relative_path, kind,
+  content_length, last_write_time_utc, staged_at
+) VALUES
+  ('{incomplete_scan_id}', '{uuid.uuid4()}', '{library_id}', 'incomplete.bin', 'file', 1, '{created_at}', '{created_at}');
+""",
+        )
+        aborted = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.abort_initial_scan('{incomplete_scan_id}');",
+        ).stdout.strip()
+        self.assertEqual(aborted, "1")
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_asset_identity_runtime;
+INSERT INTO asset_identity.scan_observation_stage (
+  scan_id, entry_id, library_id, normalized_relative_path, kind,
+  content_length, last_write_time_utc, staged_at
+) VALUES
+  ('{mixed_scan_id}', '{uuid.uuid4()}', '{library_id}', 'mixed-a.bin', 'file', 1, '{created_at}', '{created_at}'),
+  ('{mixed_scan_id}', '{uuid.uuid4()}', '{empty_library_id}', 'mixed-b.bin', 'file', 1, '{created_at}', '{created_at}');
+""",
+        )
+        mixed_commit = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.commit_initial_scan("
+            f"'{mixed_scan_id}', '{library_id}', '{created_at}');",
+            check=False,
+        )
+        self.assertNotEqual(mixed_commit.returncode, 0)
+        retained_stage = self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_asset_identity_runtime; "
+            "SELECT count(*) FROM asset_identity.scan_observation_stage "
+            f"WHERE scan_id = '{mixed_scan_id}';",
+        ).stdout.strip()
+        self.assertEqual(retained_stage, "2")
+        mixed_aborted = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"SELECT asset_identity.abort_initial_scan('{mixed_scan_id}');",
+        ).stdout.strip()
+        self.assertEqual(mixed_aborted, "2")
+
+        self.sql(
+            database,
+            self.RUNTIME,
+            f"""
+SET ROLE assetlibrary_scan_reconciliation_runtime;
+INSERT INTO scan_reconciliation.scan_run (
+  scan_id, library_id, scan_kind, status, started_at
+) VALUES ('{scan_id}', '{library_id}', 'initial_read_only', 'running', '{created_at}');
+UPDATE scan_reconciliation.scan_run
+SET status = 'completed', observed_entries = 2, committed_entries = 2, finished_at = '{created_at}'
+WHERE scan_id = '{scan_id}';
+""",
+        )
+        status = self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_scan_reconciliation_runtime; "
+            "SELECT status, observed_entries, committed_entries "
+            "FROM scan_reconciliation.scan_run;",
+        ).stdout.strip()
+        self.assertEqual(status, "completed|2|2")
+
+        cross_schema_write = self.sql(
+            database,
+            self.RUNTIME,
+            f"SET ROLE assetlibrary_asset_identity_runtime; "
+            f"DELETE FROM scan_reconciliation.scan_run WHERE scan_id = '{scan_id}';",
+            check=False,
+        )
+        self.assertNotEqual(cross_schema_write.returncode, 0)
+
     def test_concurrent_apply_is_serialized(self) -> None:
         database = self.fresh_database("concurrent")
         backups = self.backup_directory("concurrent")
@@ -437,7 +685,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2])
+        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5])
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -490,7 +738,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "2",
+            "5",
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 

@@ -2,7 +2,9 @@
 
 `production/manifest.json` is the only production migration entry point. The two SQL files directly under this directory are retained M0-005 Spike evidence and are deliberately not listed by the production manifest.
 
-The production foundation targets PostgreSQL 16.x and is verified against 16.15. It creates no domain tables. It reserves one schema, one NOLOGIN owner role and one NOLOGIN runtime role for each frozen server module, plus a migration ledger and a read-only catalog projection that audits those boundaries.
+The production foundation targets PostgreSQL 16.x and is verified against 16.15. It reserves one schema, one NOLOGIN owner role and one NOLOGIN runtime role for each frozen server module, plus a migration ledger and a read-only catalog projection that audits those boundaries.
+
+V01-004 adds the first module-owned business objects without changing the foundation migrations: `LibraryStorage` stores source availability and non-overlapping physical roots, `AssetIdentity` stores stable entries, explicit empty-library snapshots and bounded initial-scan staging, and `ScanReconciliation` stores completeness-aware scan runs. Each migration executes as its frozen module owner, creates objects only in that module schema, and has no cross-schema foreign key or write path. The initial-scan commit function refuses to replace an existing index; an incomplete scan can only discard its staging rows.
 
 ## Safety model
 
