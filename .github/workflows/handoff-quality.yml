@@ -58,6 +58,10 @@ jobs:
         run: python scripts/verify_repository.py
       - name: Repository workflow tests
         run: python -m unittest discover -s tests/repository -p test_*.py -v
+      - name: Database migration manifest validation
+        run: python -B database/migrations/production/migration_tool.py validate
+      - name: Database migration static tests
+        run: python -B -m unittest discover -s tests/database -p test_migration_manifest.py -v
       - name: AssetLink generated SDK tests
         run: python -B -m unittest discover -s tests/sdk -p test_*.py -v
       - name: AssetLink contract regression tests
@@ -101,3 +105,44 @@ jobs:
         run: packages/sdk/assetlink/kotlin/gradlew.bat -p packages/sdk/assetlink/kotlin --no-daemon --dependency-verification strict build
       - name: SDK dependency, integrity, license and size gate
         run: python -B scripts/validate_assetlink_sdk_dependencies.py --require-build-artifacts
+
+  fast-merge-database:
+    name: fast-merge-database-postgresql-16.15
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      ASSETLIBRARY_TEST_POSTGRES_BIN: /usr/lib/postgresql/16/bin
+      ASSETLIBRARY_TEST_POSTGRES_REQUIRED: '1'
+      ASSETLIBRARY_TEST_POSTGRES_EXTERNAL: '1'
+      ASSETLIBRARY_TEST_POSTGRES_HOST: 127.0.0.1
+      ASSETLIBRARY_TEST_POSTGRES_PORT: '5432'
+      ASSETLIBRARY_TEST_POSTGRES_ADMIN: postgres
+      ASSETLIBRARY_TEST_RUNTIME: ${{ github.workspace }}/.runtime/sandbox-storage/V01-003
+    services:
+      postgres:
+        image: postgres:16.15-bookworm
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install matching PostgreSQL 16 client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client-16
+          test "$(psql --version | sed -E 's/.* ([0-9]+).*/\1/')" = "16"
+      - name: Validate production migration manifest
+        run: python -B database/migrations/production/migration_tool.py validate
+      - name: PostgreSQL migration, ownership, backup and restore tests
+        run: python -B -m unittest discover -s tests/database -p test_*.py -v

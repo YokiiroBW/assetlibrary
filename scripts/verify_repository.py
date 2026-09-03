@@ -2,8 +2,8 @@
 """Fast, dependency-free repository checks used by the M0-009 merge gate."""
 from __future__ import annotations
 
-import json
 import ast
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -15,6 +15,24 @@ def main() -> int:
         [sys.executable, str(ROOT / 'scripts/validate_handoff.py')],
         [sys.executable, str(ROOT / 'scripts/validate_architecture_baseline.py')],
         [sys.executable, str(ROOT / 'scripts/validate_dotnet_source.py')],
+        [
+            sys.executable,
+            '-B',
+            str(ROOT / 'database/migrations/production/migration_tool.py'),
+            'validate',
+        ],
+        [
+            sys.executable,
+            '-B',
+            '-m',
+            'unittest',
+            'discover',
+            '-s',
+            'tests/database',
+            '-p',
+            'test_migration_manifest.py',
+            '-v',
+        ],
         [sys.executable, '-B', str(ROOT / 'scripts/generate_assetlink_sdks.py'), '--check'],
         [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_source.py')],
         [sys.executable, '-B', str(ROOT / 'scripts/validate_assetlink_sdk_dependencies.py')],

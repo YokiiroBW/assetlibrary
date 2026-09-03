@@ -5,3 +5,5 @@
 contracts/assetlink/** text eol=lf
 packages/sdk/assetlink/** text eol=lf
 packages/sdk/assetlink/kotlin/gradle/wrapper/gradle-wrapper.jar binary
+database/migrations/production/*.sql text eol=lf
+database/migrations/production/manifest.json text eol=lf

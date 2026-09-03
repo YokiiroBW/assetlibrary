@@ -1,0 +1,115 @@
+{
+  "format_version": 1,
+  "postgresql": {
+    "major": 16,
+    "verified_patch": "16.15",
+    "supported_until": "2028-11-09",
+    "version_policy": "https://www.postgresql.org/support/versioning/",
+    "windows_binary_page": "https://www.postgresql.org/download/windows/"
+  },
+  "advisory_lock_key": 109551001003,
+  "timeouts_seconds": {
+    "connect": 5,
+    "lock": 10,
+    "statement": 120,
+    "process": 180
+  },
+  "role_provisioning": {
+    "path": "roles.sql",
+    "sha256": "6dba9387d4d0043883da32cebf92d205411e4b4f6bc972b9859051ffc6442554",
+    "migration_owner": "assetlibrary_migration_owner",
+    "migration_executor": "assetlibrary_migration_executor",
+    "backup_reader": "assetlibrary_database_backup",
+    "auditor": "assetlibrary_database_auditor"
+  },
+  "bootstrap": {
+    "path": "bootstrap.sql",
+    "sha256": "3e7ced41cb6481d1fc41003fc05fbd4ea4ec7a73c7a736433a28a3aab56cafef"
+  },
+  "modules": [
+    {
+      "module": "GatewayAuth",
+      "schema": "gateway_auth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "runtime_role": "assetlibrary_gateway_auth_runtime"
+    },
+    {
+      "module": "LibraryStorage",
+      "schema": "library_storage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "runtime_role": "assetlibrary_library_storage_runtime"
+    },
+    {
+      "module": "AssetIdentity",
+      "schema": "asset_identity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "runtime_role": "assetlibrary_asset_identity_runtime"
+    },
+    {
+      "module": "MetadataSidecar",
+      "schema": "metadata_sidecar",
+      "owner_role": "assetlibrary_metadata_sidecar_owner",
+      "runtime_role": "assetlibrary_metadata_sidecar_runtime"
+    },
+    {
+      "module": "ScanReconciliation",
+      "schema": "scan_reconciliation",
+      "owner_role": "assetlibrary_scan_reconciliation_owner",
+      "runtime_role": "assetlibrary_scan_reconciliation_runtime"
+    },
+    {
+      "module": "TransferSync",
+      "schema": "transfer_sync",
+      "owner_role": "assetlibrary_transfer_sync_owner",
+      "runtime_role": "assetlibrary_transfer_sync_runtime"
+    },
+    {
+      "module": "OperationTrash",
+      "schema": "operation_trash",
+      "owner_role": "assetlibrary_operation_trash_owner",
+      "runtime_role": "assetlibrary_operation_trash_runtime"
+    },
+    {
+      "module": "SearchDedup",
+      "schema": "search_dedup",
+      "owner_role": "assetlibrary_search_dedup_owner",
+      "runtime_role": "assetlibrary_search_dedup_runtime"
+    },
+    {
+      "module": "PreviewProvider",
+      "schema": "preview_provider",
+      "owner_role": "assetlibrary_preview_provider_owner",
+      "runtime_role": "assetlibrary_preview_provider_runtime"
+    },
+    {
+      "module": "TaskHealth",
+      "schema": "task_health",
+      "owner_role": "assetlibrary_task_health_owner",
+      "runtime_role": "assetlibrary_task_health_runtime"
+    },
+    {
+      "module": "BackupUpdate",
+      "schema": "backup_update",
+      "owner_role": "assetlibrary_backup_update_owner",
+      "runtime_role": "assetlibrary_backup_update_runtime"
+    }
+  ],
+  "migrations": [
+    {
+      "version": 1,
+      "name": "module_schema_ownership",
+      "module": "database-migration-foundation",
+      "owner_role": "assetlibrary_migration_owner",
+      "path": "0001_module_schema_ownership.sql",
+      "sha256": "9d2fdd07adef72bb41b819e06dcdb84eb871261c21b1269c87680e0937ed7df9"
+    },
+    {
+      "version": 2,
+      "name": "module_privilege_projection",
+      "module": "database-migration-foundation",
+      "owner_role": "assetlibrary_migration_owner",
+      "path": "0002_module_privilege_projection.sql",
+      "sha256": "e0058b1408aed15b28e2df88dae05cfb388ed87661ca407540823262ebe8b86d"
+    }
+  ]
+}
