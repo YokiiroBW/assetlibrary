@@ -244,6 +244,24 @@
       "task_file": ".codex/tasks/V01-006.md",
       "handoff": ".codex/handoffs/V01-006/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-007",
+      "title": "实现 Transfer/Operation 沙箱闭环",
+      "module": "transfer-operation-sandbox",
+      "status": "planned",
+      "depends_on": [
+        "V01-004",
+        "V01-005",
+        "V01-006"
+      ],
+      "owner": "codex-agent-v01-007",
+      "branch": "codex/v01-007-transfer-operation-sandbox",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-007.md",
+      "handoff": ".codex/handoffs/V01-007/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
