@@ -217,17 +217,16 @@
       "id": "V01-005",
       "title": "实现 TaskHealth/Outbox 核心",
       "module": "task-health-outbox-core",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-003"
       ],
       "owner": "codex-agent-v01-005",
       "branch": "codex/v01-005-task-health-outbox-core",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-005",
       "task_file": ".codex/tasks/V01-005.md",
       "handoff": ".codex/handoffs/V01-005/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     }
   ]
 }
