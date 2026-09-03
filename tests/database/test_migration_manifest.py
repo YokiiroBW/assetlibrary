@@ -71,7 +71,7 @@ class MigrationManifestTests(unittest.TestCase):
         self.assertEqual(manifest.postgresql_major, 16)
         self.assertEqual(manifest.verified_patch, "16.15")
         self.assertEqual(len(manifest.modules), 11)
-        self.assertEqual(len(manifest.migrations), 5)
+        self.assertEqual(len(manifest.migrations), 6)
         self.assertEqual(
             [(item.version, item.module) for item in manifest.migrations],
             [
@@ -80,6 +80,7 @@ class MigrationManifestTests(unittest.TestCase):
                 (3, "LibraryStorage"),
                 (4, "AssetIdentity"),
                 (5, "ScanReconciliation"),
+                (6, "TaskHealth"),
             ],
         )
         self.assertEqual(

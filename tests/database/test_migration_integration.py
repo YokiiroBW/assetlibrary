@@ -334,6 +334,66 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         self.addCleanup(shutil.rmtree, path, True)
         return path
 
+    def task_health_database(self, label: str) -> str:
+        database = self.fresh_database(label)
+        MIGRATIONS.apply_migrations(
+            self.runner_tools(database),
+            self.manifest,
+            self.backup_directory(label),
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"GRANT assetlibrary_task_health_runtime TO {self.RUNTIME} "
+            "WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;",
+        )
+        return database
+
+    def task_health_sql(
+        self,
+        database: str,
+        statement: str,
+        *,
+        check: bool = True,
+    ) -> subprocess.CompletedProcess[str]:
+        return self.sql(
+            database,
+            self.RUNTIME,
+            "SET ROLE assetlibrary_task_health_runtime;\n" + statement,
+            check=check,
+        )
+
+    @staticmethod
+    def enqueue_task_statement(
+        task_id: uuid.UUID,
+        idempotency_key: str,
+        *,
+        payload: str = '{"value": 1}',
+        priority: int = 2,
+        max_attempts: int = 3,
+    ) -> str:
+        return f"""
+SELECT task_id, created
+FROM task_health.enqueue_durable_task(
+  '{task_id}', '{idempotency_key}', 'scan.initial', '{payload}'::jsonb,
+  {priority}::smallint, {max_attempts}, clock_timestamp(), clock_timestamp()
+);
+"""
+
+    @staticmethod
+    def enqueue_outbox_statement(
+        event_id: uuid.UUID,
+        *,
+        payload: str = '{"value": 1}',
+        max_attempts: int = 3,
+    ) -> str:
+        return f"""
+SELECT task_health.enqueue_outbox_event(
+  '{event_id}', 'AssetIdentity', 'asset.indexed', NULL, 1, '{payload}'::jsonb,
+  '2026-09-03T01:00:00Z', {max_attempts}, clock_timestamp(), clock_timestamp()
+);
+"""
+
     def staged_manifest(
         self,
         name: str,
@@ -378,7 +438,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5])
+        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5, 6])
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -671,6 +731,592 @@ WHERE scan_id = '{scan_id}';
         )
         self.assertNotEqual(cross_schema_write.returncode, 0)
 
+    def test_task_health_durable_tasks_are_idempotent_fenced_and_cancelable(self) -> None:
+        database = self.task_health_database("th_tasks")
+        original_id = uuid.uuid4()
+        replay_id = uuid.uuid4()
+
+        created = self.task_health_sql(
+            database,
+            self.enqueue_task_statement(original_id, "idempotent-task"),
+        ).stdout.strip()
+        replayed = self.task_health_sql(
+            database,
+            self.enqueue_task_statement(replay_id, "idempotent-task"),
+        ).stdout.strip()
+        self.assertEqual(created, f"{original_id}|t")
+        self.assertEqual(replayed, f"{original_id}|f")
+        conflict = self.task_health_sql(
+            database,
+            self.enqueue_task_statement(
+                uuid.uuid4(),
+                "idempotent-task",
+                payload='{"value": 2}',
+            ),
+            check=False,
+        )
+        self.assertNotEqual(conflict.returncode, 0)
+        self.assertIn("different task request", conflict.stderr)
+
+        low_id = uuid.uuid4()
+        high_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(low_id, "priority-low", priority=5),
+        )
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(high_id, "priority-high", priority=0),
+        )
+        high_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.priority', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(high_lease[0], str(high_id))
+        self.assertEqual(high_lease[4], "1")
+        self.assertEqual(high_lease[5], "3")
+        self.assertEqual(high_lease[7], "1")
+        wrong_token = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.heartbeat_durable_task("
+            f"'{high_id}', 'worker.priority', '{uuid.uuid4()}', {high_lease[7]}, 60);",
+        ).stdout.strip()
+        self.assertEqual(wrong_token, "")
+        wrong_generation = self.task_health_sql(
+            database,
+            "SELECT task_health.finish_durable_task("
+            f"'{high_id}', 'worker.priority', '{high_lease[6]}', 999, 'succeeded');",
+        ).stdout.strip()
+        self.assertEqual(wrong_generation, "")
+        completed = self.task_health_sql(
+            database,
+            "SELECT task_health.finish_durable_task("
+            f"'{high_id}', 'worker.priority', '{high_lease[6]}', {high_lease[7]}, 'succeeded');",
+        ).stdout.strip()
+        self.assertEqual(completed, "succeeded")
+
+        leased = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.cancel', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(leased[0], str(original_id))
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                f"SELECT task_health.request_durable_task_cancellation('{original_id}');",
+            ).stdout.strip(),
+            "requested",
+        )
+        heartbeat = self.task_health_sql(
+            database,
+            "SELECT cancellation_requested FROM task_health.heartbeat_durable_task("
+            f"'{original_id}', 'worker.cancel', '{leased[6]}', {leased[7]}, 60);",
+        ).stdout.strip()
+        self.assertEqual(heartbeat, "t")
+        cancelled = self.task_health_sql(
+            database,
+            "SELECT task_health.finish_durable_task("
+            f"'{original_id}', 'worker.cancel', '{leased[6]}', {leased[7]}, "
+            "'retryable_failure', 'transient.io', 0);",
+        ).stdout.strip()
+        self.assertEqual(cancelled, "cancelled")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                f"SELECT task_health.request_durable_task_cancellation('{low_id}');",
+            ).stdout.strip(),
+            "cancelled",
+        )
+
+        success_race_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(success_race_id, "success-cancel-race", priority=1),
+        )
+        success_race_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.success', 1, 60);",
+        ).stdout.strip().split("|")
+        self.task_health_sql(
+            database,
+            f"SELECT task_health.request_durable_task_cancellation('{success_race_id}');",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.finish_durable_task("
+                f"'{success_race_id}', 'worker.success', '{success_race_lease[6]}', "
+                f"{success_race_lease[7]}, 'succeeded');",
+            ).stdout.strip(),
+            "succeeded",
+        )
+
+        stale_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(stale_id, "stale-worker-task"),
+        )
+        old_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.old', 1, 60);",
+        ).stdout.strip().split("|")
+        self.sql(
+            database,
+            self.admin,
+            "UPDATE task_health.durable_task SET lease_until = clock_timestamp() - interval '1 second' "
+            f"WHERE task_id = '{stale_id}';",
+        )
+        expired_finish = self.task_health_sql(
+            database,
+            "SELECT task_health.finish_durable_task("
+            f"'{stale_id}', 'worker.old', '{old_lease[6]}', {old_lease[7]}, 'succeeded');",
+        ).stdout.strip()
+        self.assertEqual(expired_finish, "")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.reclaim_expired_durable_tasks(10);",
+            ).stdout.strip(),
+            "1",
+        )
+        new_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.new', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(new_lease[0], str(stale_id))
+        self.assertEqual(new_lease[4], "2")
+        self.assertEqual(new_lease[7], "2")
+        self.assertNotEqual(old_lease[6], new_lease[6])
+        stale_finish = self.task_health_sql(
+            database,
+            "SELECT task_health.finish_durable_task("
+            f"'{stale_id}', 'worker.old', '{old_lease[6]}', {old_lease[7]}, 'succeeded');",
+        ).stdout.strip()
+        self.assertEqual(stale_finish, "")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.finish_durable_task("
+                f"'{stale_id}', 'worker.new', '{new_lease[6]}', {new_lease[7]}, 'succeeded');",
+            ).stdout.strip(),
+            "succeeded",
+        )
+
+        retry_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(
+                retry_id,
+                "attempt-limited-task",
+                priority=1,
+                max_attempts=2,
+            ),
+        )
+        first = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.retry', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.finish_durable_task("
+                f"'{retry_id}', 'worker.retry', '{first[6]}', {first[7]}, "
+                "'retryable_failure', 'transient.io', 0);",
+            ).stdout.strip(),
+            "queued",
+        )
+        second = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.retry', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(second[4], "2")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.finish_durable_task("
+                f"'{retry_id}', 'worker.retry', '{second[6]}', {second[7]}, "
+                "'retryable_failure', 'transient.io', 0);",
+            ).stdout.strip(),
+            "failed",
+        )
+
+        cancel_expired_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(cancel_expired_id, "cancel-expired-task", priority=1),
+        )
+        cancel_expired_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.cancel.expired', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(cancel_expired_lease[0], str(cancel_expired_id))
+        self.task_health_sql(
+            database,
+            f"SELECT task_health.request_durable_task_cancellation('{cancel_expired_id}');",
+        )
+        self.sql(
+            database,
+            self.admin,
+            "UPDATE task_health.durable_task SET lease_until = clock_timestamp() - interval '1 second' "
+            f"WHERE task_id = '{cancel_expired_id}';",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.reclaim_expired_durable_tasks(10);",
+            ).stdout.strip(),
+            "1",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                f"SELECT state FROM task_health.durable_task WHERE task_id = '{cancel_expired_id}';",
+            ).stdout.strip(),
+            "cancelled",
+        )
+
+    def test_task_health_concurrent_claims_are_disjoint_and_bounded(self) -> None:
+        database = self.task_health_database("th_claim")
+        task_ids = [uuid.uuid4() for _ in range(20)]
+        enqueue = "\n".join(
+            self.enqueue_task_statement(task_id, f"bulk-task-{index}")
+            for index, task_id in enumerate(task_ids)
+        )
+        self.task_health_sql(database, enqueue)
+
+        def claim(worker: str) -> list[str]:
+            output = self.task_health_sql(
+                database,
+                f"SELECT task_id FROM task_health.claim_durable_tasks('{worker}', 10, 60);",
+            ).stdout
+            return [line for line in output.splitlines() if line]
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            futures = [
+                executor.submit(claim, "worker.concurrent.a"),
+                executor.submit(claim, "worker.concurrent.b"),
+            ]
+            claims = [future.result(timeout=30) for future in futures]
+
+        self.assertEqual([len(rows) for rows in claims], [10, 10])
+        flattened = claims[0] + claims[1]
+        self.assertEqual(len(set(flattened)), 20)
+        self.assertEqual(set(flattened), {str(task_id) for task_id in task_ids})
+        state_counts = self.task_health_sql(
+            database,
+            "SELECT state, count(*) FROM task_health.durable_task GROUP BY state ORDER BY state;",
+        ).stdout.strip()
+        self.assertEqual(state_counts, "leased|20")
+        null_batch = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_durable_tasks('worker.invalid', NULL, 60);",
+            check=False,
+        )
+        self.assertNotEqual(null_batch.returncode, 0)
+
+    def test_task_health_outbox_health_and_least_privilege_contracts(self) -> None:
+        database = self.task_health_database("th_outbox")
+        event_id = uuid.uuid4()
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                self.enqueue_outbox_statement(event_id),
+            ).stdout.strip(),
+            "t",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                self.enqueue_outbox_statement(event_id),
+            ).stdout.strip(),
+            "f",
+        )
+        conflict = self.task_health_sql(
+            database,
+            self.enqueue_outbox_statement(event_id, payload='{"value": 2}'),
+            check=False,
+        )
+        self.assertNotEqual(conflict.returncode, 0)
+        self.assertIn("different outbox event", conflict.stderr)
+
+        first = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_outbox_events('publisher.old', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(first[0], str(event_id))
+        self.assertEqual(first[7], "1")
+        self.assertEqual(first[10], "1")
+        wrong_owner = self.task_health_sql(
+            database,
+            "SELECT task_health.mark_outbox_event_published("
+            f"'{event_id}', 'publisher.wrong', '{first[9]}', {first[10]});",
+        ).stdout.strip()
+        self.assertEqual(wrong_owner, "f")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.release_outbox_event("
+                f"'{event_id}', 'publisher.old', '{first[9]}', {first[10]}, "
+                "'provider.timeout', 0);",
+            ).stdout.strip(),
+            "pending",
+        )
+        second = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_outbox_events('publisher.new', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(second[7], "2")
+        self.assertEqual(second[10], "2")
+        self.assertNotEqual(second[9], first[9])
+        stale_publish = self.task_health_sql(
+            database,
+            "SELECT task_health.mark_outbox_event_published("
+            f"'{event_id}', 'publisher.old', '{first[9]}', {first[10]});",
+        ).stdout.strip()
+        self.assertEqual(stale_publish, "f")
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.mark_outbox_event_published("
+                f"'{event_id}', 'publisher.new', '{second[9]}', {second[10]});",
+            ).stdout.strip(),
+            "t",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                f"SELECT state FROM task_health.outbox_event WHERE event_id = '{event_id}';",
+            ).stdout.strip(),
+            "published",
+        )
+
+        dead_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_outbox_statement(dead_id, max_attempts=2),
+        )
+        for expected_state in ("pending", "dead_lettered"):
+            lease = self.task_health_sql(
+                database,
+                "SELECT * FROM task_health.claim_outbox_events('publisher.retry', 1, 60);",
+            ).stdout.strip().split("|")
+            state = self.task_health_sql(
+                database,
+                "SELECT task_health.release_outbox_event("
+                f"'{dead_id}', 'publisher.retry', '{lease[9]}', {lease[10]}, "
+                "'provider.timeout', 0);",
+            ).stdout.strip()
+            self.assertEqual(state, expected_state)
+
+        expired_event_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_outbox_statement(expired_event_id, max_attempts=1),
+        )
+        expired_event_lease = self.task_health_sql(
+            database,
+            "SELECT * FROM task_health.claim_outbox_events('publisher.expired', 1, 60);",
+        ).stdout.strip().split("|")
+        self.assertEqual(expired_event_lease[0], str(expired_event_id))
+        self.sql(
+            database,
+            self.admin,
+            "UPDATE task_health.outbox_event SET lease_until = clock_timestamp() - interval '1 second' "
+            f"WHERE event_id = '{expired_event_id}';",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.reclaim_expired_outbox_events(10);",
+            ).stdout.strip(),
+            "1",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT state, last_failure_code FROM task_health.outbox_event "
+                f"WHERE event_id = '{expired_event_id}';",
+            ).stdout.strip(),
+            "dead_lettered|lease_expired",
+        )
+
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.write_health_status("
+                "'system', NULL, 'database', 'normal', NULL, "
+                "'2026-09-03T01:00:00Z', '2026-09-03T01:00:01Z');",
+            ).stdout.strip(),
+            "t",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT task_health.write_health_status("
+                "'system', NULL, 'database', 'offline', 'database.offline', "
+                "'2026-09-03T00:59:00Z', '2026-09-03T01:00:02Z');",
+            ).stdout.strip(),
+            "f",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT state, reason_code FROM task_health.health_status "
+                "WHERE scope_kind = 'system' AND component = 'database';",
+            ).stdout.strip(),
+            "normal|",
+        )
+        library_id = uuid.uuid4()
+        asset_id = uuid.uuid4()
+        for scope, resource_id in (("library", library_id), ("asset", asset_id)):
+            self.assertEqual(
+                self.task_health_sql(
+                    database,
+                    "SELECT task_health.write_health_status("
+                    f"'{scope}', '{resource_id}', 'storage', 'offline', 'storage.offline', "
+                    "'2026-09-03T01:00:00Z', '2026-09-03T01:00:01Z');",
+                ).stdout.strip(),
+                "t",
+            )
+        invalid_scope = self.task_health_sql(
+            database,
+            "SELECT task_health.write_health_status("
+            "'library', NULL, 'storage', 'offline', 'storage.offline', "
+            "clock_timestamp(), clock_timestamp());",
+            check=False,
+        )
+        self.assertNotEqual(invalid_scope.returncode, 0)
+
+        for denied in (
+            "UPDATE task_health.durable_task SET priority = 0;",
+            "DELETE FROM task_health.outbox_event;",
+            "INSERT INTO task_health.health_status "
+            "(scope_kind, scope_id, component, state, observed_at, updated_at) "
+            "VALUES ('system', NULL, 'denied', 'normal', clock_timestamp(), clock_timestamp());",
+        ):
+            self.assertNotEqual(
+                self.task_health_sql(database, denied, check=False).returncode,
+                0,
+                denied,
+            )
+
+    def test_task_health_large_queues_use_bounded_indexed_claims(self) -> None:
+        database = self.task_health_database("th_scale")
+        task_count = self.task_health_sql(
+            database,
+            """
+SELECT count(*)
+FROM generate_series(1, 10000) AS batch(item)
+CROSS JOIN LATERAL task_health.enqueue_durable_task(
+  gen_random_uuid(), 'scale-task-' || batch.item, 'scan.initial',
+  jsonb_build_object('item', batch.item), 2::smallint, 3,
+  clock_timestamp(), clock_timestamp()
+) AS queued;
+""",
+        ).stdout.strip()
+        event_count = self.task_health_sql(
+            database,
+            """
+SELECT count(*)
+FROM generate_series(1, 10000) AS batch(item)
+CROSS JOIN LATERAL task_health.enqueue_outbox_event(
+  gen_random_uuid(), 'AssetIdentity', 'asset.indexed', NULL, 1,
+  jsonb_build_object('item', batch.item), clock_timestamp(), 3,
+  clock_timestamp(), clock_timestamp()
+) AS queued;
+""",
+        ).stdout.strip()
+        self.assertEqual(task_count, "10000")
+        self.assertEqual(event_count, "10000")
+
+        task_plan = self.task_health_sql(
+            database,
+            """
+EXPLAIN (COSTS OFF)
+SELECT task_id
+FROM task_health.durable_task
+WHERE state = 'queued'
+  AND cancellation_requested_at IS NULL
+  AND available_at <= clock_timestamp()
+  AND attempts < max_attempts
+ORDER BY priority, available_at, created_at, task_id
+LIMIT 256;
+""",
+        ).stdout
+        outbox_plan = self.task_health_sql(
+            database,
+            """
+EXPLAIN (COSTS OFF)
+SELECT event_id
+FROM task_health.outbox_event
+WHERE state = 'pending'
+  AND available_at <= clock_timestamp()
+  AND publish_attempts < max_publish_attempts
+ORDER BY available_at, occurred_at, event_id
+LIMIT 256;
+""",
+        ).stdout
+        self.assertIn("durable_task_claim_index", task_plan)
+        self.assertIn("outbox_event_claim_index", outbox_plan)
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT count(*) FROM task_health.claim_durable_tasks('worker.scale', 256, 60);",
+            ).stdout.strip(),
+            "256",
+        )
+        self.assertEqual(
+            self.task_health_sql(
+                database,
+                "SELECT count(*) FROM task_health.claim_outbox_events('publisher.scale', 256, 60);",
+            ).stdout.strip(),
+            "256",
+        )
+
+    def test_task_health_rows_survive_a_database_restart(self) -> None:
+        if self.external:
+            self.skipTest("restart persistence requires the disposable self-hosted cluster")
+        database = self.task_health_database("th_restart")
+        task_id = uuid.uuid4()
+        event_id = uuid.uuid4()
+        self.task_health_sql(
+            database,
+            self.enqueue_task_statement(task_id, "restart-task"),
+        )
+        self.task_health_sql(
+            database,
+            self.enqueue_outbox_statement(event_id),
+        )
+        self.task_health_sql(
+            database,
+            "SELECT task_health.write_health_status("
+            "'system', NULL, 'database', 'normal', NULL, "
+            "clock_timestamp(), clock_timestamp());",
+        )
+        assert self.pg_ctl is not None and self.cluster_data is not None
+
+        self._run(
+            [
+                str(self.pg_ctl),
+                "--pgdata", str(self.cluster_data),
+                "--wait",
+                "--timeout", "30",
+                "--mode", "fast",
+                "restart",
+            ],
+            timeout=45,
+            capture_output=False,
+        )
+
+        persisted = self.task_health_sql(
+            database,
+            "SELECT "
+            "(SELECT count(*) FROM task_health.durable_task), "
+            "(SELECT count(*) FROM task_health.outbox_event), "
+            "(SELECT count(*) FROM task_health.health_status);",
+        ).stdout.strip()
+        self.assertEqual(persisted, "1|1|1")
+
     def test_concurrent_apply_is_serialized(self) -> None:
         database = self.fresh_database("concurrent")
         backups = self.backup_directory("concurrent")
@@ -685,7 +1331,7 @@ WHERE scan_id = '{scan_id}';
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5])
+        self.assertEqual([row["version"] for row in rows], [1, 2, 3, 4, 5, 6])
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -738,7 +1384,7 @@ WHERE scan_id = '{scan_id}';
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "5",
+            "6",
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 

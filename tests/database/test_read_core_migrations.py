@@ -20,7 +20,7 @@ SPEC.loader.exec_module(MIGRATIONS)
 class ReadCoreMigrationTests(unittest.TestCase):
     def test_read_core_migrations_are_contiguous_and_module_owned(self) -> None:
         manifest = MIGRATIONS.load_manifest()
-        read_core = manifest.migrations[2:]
+        read_core = manifest.migrations[2:5]
 
         self.assertEqual([item.version for item in read_core], [3, 4, 5])
         self.assertEqual(

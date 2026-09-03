@@ -134,6 +134,14 @@
       "owner_role": "assetlibrary_scan_reconciliation_owner",
       "path": "0005_scan_reconciliation_core.sql",
       "sha256": "ed2f5d333855cf6cf700dc2234e46ab1f32a4b12c46455e439229c458a389f18"
+    },
+    {
+      "version": 6,
+      "name": "task_health_core",
+      "module": "TaskHealth",
+      "owner_role": "assetlibrary_task_health_owner",
+      "path": "0006_task_health_core.sql",
+      "sha256": "41eedeef1174c48de01fd6f0c4665411e3043c3b0572fb13bd36a8cf15779aa2"
     }
   ]
 }

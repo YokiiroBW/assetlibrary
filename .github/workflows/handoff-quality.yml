@@ -54,6 +54,8 @@ jobs:
             packages/sdk/assetlink/dotnet/packages.lock.json
             tests/dotnet/AssetLibrary.AssetLink.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
+            tests/dotnet/AssetLibrary.ReadCore.Tests/packages.lock.json
+            tests/dotnet/AssetLibrary.TaskHealth.Tests/packages.lock.json
       - name: Repository verification entry
         run: python scripts/verify_repository.py
       - name: Repository workflow tests

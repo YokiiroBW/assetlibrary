@@ -6,6 +6,8 @@ The production foundation targets PostgreSQL 16.x and is verified against 16.15.
 
 V01-004 adds the first module-owned business objects without changing the foundation migrations: `LibraryStorage` stores source availability and non-overlapping physical roots, `AssetIdentity` stores stable entries, explicit empty-library snapshots and bounded initial-scan staging, and `ScanReconciliation` stores completeness-aware scan runs. Each migration executes as its frozen module owner, creates objects only in that module schema, and has no cross-schema foreign key or write path. The initial-scan commit function refuses to replace an existing index; an incomplete scan can only discard its staging rows.
 
+V01-005 adds the `TaskHealth` production core in migration 6. It owns bounded durable-task and outbox queues, fenced leases (`owner + token + generation + expiry`), cooperative cancellation, retry/dead-letter state, and monotonic system/library/asset health observations. Runtime callers receive read access plus narrowly scoped `SECURITY DEFINER` functions; direct table mutation remains denied. Outbox delivery is explicitly at-least-once, and the stable event ID is the consumer idempotency key. An identical enqueue replay returns the original record and cannot reschedule it: generated IDs and availability/write timestamps are not identity fields, while task/event type, payload, priority/attempt policy, source, schema version and occurrence time remain conflict-checked as applicable. No network publisher or physical-file operation is part of this migration.
+
 ## Safety model
 
 - `migration_tool.py validate` is the default, connection-free operation.
