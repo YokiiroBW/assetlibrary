@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_transfer_operation_sandbox_in_progress",
-  "next_action": "Implement and verify V01-007 in its isolated worktree; keep production file writes, Provider, Explorer and release targets blocked",
+  "status": "v0_1_transfer_operation_sandbox_complete",
+  "next_action": "Plan and activate V01-008 packaging and release evidence in an isolated worktree; keep production file writes, Provider, Explorer and unresolved release targets blocked",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_006_completed_v01_007_active",
+  "implementation_status": "v01_007_completed_v01_008_unplanned",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -40,7 +40,8 @@
     "V01-006 was activated in C:\\YOKI\\Codex\\worktrees\\V01-006 on branch codex/v01-006-web-api-read-only-browse. It owns the read-only Gateway/API and apps/web slice only; production writes, direct client database access, Provider delivery, Explorer and release targets remain blocked.",
     "V01-006 implementation 7776deccacd283d8618731fbb6cd6c6602496eeb and handoff 364f2d582bd473179c42510f99ab62bf3713598d were fast-forward merged after 248/248 unique automated tests, PostgreSQL 16.15 permission/revocation/restart/100,000-entry index evidence, Web browser regression, repository/architecture/release-gate checks and final diff review. V01-007 Transfer/Operation sandbox implementation is next; production file writes, external Provider delivery, Explorer, platform release and v0.1-release remain blocked.",
     "V01-007 was planned from the frozen V0.1 task sequence after V01-004, V01-005 and V01-006. It is restricted to task-owned sandbox fixtures and simulated ports; M0-006-G1/G2/G3 remain open, so large-file claims, production/NAS writes and non-cooperative Linux writes stay disabled.",
-    "V01-007 was activated in C:\\YOKI\\Codex\\worktrees\\V01-007 on branch codex/v01-007-transfer-operation-sandbox. It owns the TransferSync and OperationTrash sandbox slice only; production/NAS writes, gate closure, Provider, Explorer and release targets remain blocked."
+    "V01-007 was activated in C:\\YOKI\\Codex\\worktrees\\V01-007 on branch codex/v01-007-transfer-operation-sandbox. It owns the TransferSync and OperationTrash sandbox slice only; production/NAS writes, gate closure, Provider, Explorer and release targets remain blocked.",
+    "V01-007 implementation 7fb7de2d65ea9b87117ba6430fc7df496f5ed941 and handoff 6aba5e0ce89801ff283fe388b394dde72e18977f were fast-forward merged after 317/317 unique automated tests, bounded physical-sandbox copy/move/rename/trash/restore, fault recovery, concurrency/fencing, repository/architecture and release-gate verification. V01-008 packaging and release evidence is next; production file writes, Provider, Explorer and every unresolved release target remain blocked."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }

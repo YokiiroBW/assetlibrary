@@ -91,7 +91,7 @@
     "M0-006-G1, M0-006-G2 and M0-006-G3 remain open; their evidence and approvals are mandatory before any production physical-write path can be enabled."
   ],
   "blocked_by": [],
-  "recommended_merge_order": 7,
+  "recommended_merge_order": 6,
   "handoff_summary": ".codex/handoffs/V01-007/summary.md",
   "thread_deep_link": "",
   "architecture_review": {

@@ -249,7 +249,7 @@
       "id": "V01-007",
       "title": "实现 Transfer/Operation 沙箱闭环",
       "module": "transfer-operation-sandbox",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-004",
         "V01-005",
