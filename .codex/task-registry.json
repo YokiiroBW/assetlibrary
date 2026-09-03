@@ -202,7 +202,7 @@
       "id": "V01-004",
       "title": "实现 Library/Asset/Scan 只读核心",
       "module": "library-asset-scan-read-core",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-003"
       ],
