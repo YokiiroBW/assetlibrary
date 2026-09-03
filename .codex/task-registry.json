@@ -185,7 +185,7 @@
       "id": "V01-003",
       "title": "冻结生产数据库 schema 所有权与迁移底座",
       "module": "database-migration-foundation",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "M0-005",
         "M0-009",
@@ -193,11 +193,10 @@
       ],
       "owner": "codex-agent-v01-003",
       "branch": "codex/v01-003-database-ownership",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-003",
       "task_file": ".codex/tasks/V01-003.md",
       "handoff": ".codex/handoffs/V01-003/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     }
   ]
 }
