@@ -352,13 +352,13 @@
       "id": "V01-013",
       "title": "实现隐私保护的生产口令泄露风险适配器",
       "module": "gateway-auth-secret-risk-provider",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-012"
       ],
       "owner": "codex-agent-v01-013",
       "branch": "codex/v01-013-secret-risk-provider",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-013",
       "task_file": ".codex/tasks/V01-013.md",
       "handoff": ".codex/handoffs/V01-013/summary.md",
       "thread_deep_link": "",
