@@ -50,7 +50,7 @@
 - locked restore、format verify、完整 solution Release build 均通过；构建 0 warning / 0 error；repository verifier、server-release validator 和默认 Alpha audit 均退出 0。
 - `v0.1-start` 允许；`--require-ready` 与 `v0.1-release` 仍按合同返回原生退出码 3。
 - 实现提交：`ee8c0305bd0611d8698fcab9602964158d4d5d81`。
-- 交接基线提交：由包含本文件的后续提交固定。
+- 交接基线提交：`4c6d390b8cfa2084b2a5495cd85f837d3914222b`。
 
 ## 架构测试与质量门禁
 

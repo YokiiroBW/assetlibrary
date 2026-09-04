@@ -82,4 +82,4 @@ python -B tests/architecture/check_release_gates.py --target v0.1-release
 ## 提交
 
 - 实现：`ee8c0305bd0611d8698fcab9602964158d4d5d81`
-- 交接基线：由包含本文件的后续提交固定
+- 交接基线：`4c6d390b8cfa2084b2a5495cd85f837d3914222b`
