@@ -28,8 +28,7 @@ public sealed record VerifiedPrimaryIdentity
 
 public sealed class LocalCredentialMaterial : IDisposable
 {
-    private byte[]? salt;
-    private byte[]? digest;
+    private readonly LocalCredentialHashMaterial hashMaterial;
 
     public LocalCredentialMaterial(
         VerifiedPrimaryIdentity identity,
@@ -40,8 +39,44 @@ public sealed class LocalCredentialMaterial : IDisposable
         bool canAttempt)
     {
         Identity = identity ?? throw new ArgumentNullException(nameof(identity));
-        if (identity.Identity.AuthenticationMethod != PrimaryAuthenticationMethod.LocalAccount
-            || !string.Equals(algorithm, LocalSecretHashingPolicy.Algorithm, StringComparison.Ordinal)
+        if (identity.Identity.AuthenticationMethod != PrimaryAuthenticationMethod.LocalAccount)
+        {
+            throw new ArgumentException("Local credential material is invalid.");
+        }
+
+        hashMaterial = new LocalCredentialHashMaterial(algorithm, iterations, salt, digest);
+        CanAttempt = canAttempt;
+    }
+
+    public VerifiedPrimaryIdentity Identity { get; }
+
+    public string Algorithm => hashMaterial.Algorithm;
+
+    public int Iterations => hashMaterial.Iterations;
+
+    public bool CanAttempt { get; }
+
+    internal ReadOnlySpan<byte> Salt => hashMaterial.Salt.Span;
+
+    internal ReadOnlySpan<byte> Digest => hashMaterial.Digest.Span;
+
+    public void Dispose() => hashMaterial.Dispose();
+
+    public override string ToString() => "[redacted]";
+}
+
+internal sealed class LocalCredentialHashMaterial : IDisposable
+{
+    private byte[]? salt;
+    private byte[]? digest;
+
+    public LocalCredentialHashMaterial(
+        string algorithm,
+        int iterations,
+        ReadOnlySpan<byte> salt,
+        ReadOnlySpan<byte> digest)
+    {
+        if (!string.Equals(algorithm, LocalSecretHashingPolicy.Algorithm, StringComparison.Ordinal)
             || iterations is < LocalSecretHashingPolicy.MinimumIterations
                 or > LocalSecretHashingPolicy.MaximumIterations
             || salt.Length is < LocalSecretHashingPolicy.SaltBytes or > 64
@@ -54,22 +89,17 @@ public sealed class LocalCredentialMaterial : IDisposable
         Iterations = iterations;
         this.salt = salt.ToArray();
         this.digest = digest.ToArray();
-        CanAttempt = canAttempt;
     }
-
-    public VerifiedPrimaryIdentity Identity { get; }
 
     public string Algorithm { get; }
 
     public int Iterations { get; }
 
-    public bool CanAttempt { get; }
+    public ReadOnlyMemory<byte> Salt => salt
+        ?? throw new ObjectDisposedException(nameof(LocalCredentialHashMaterial));
 
-    internal ReadOnlySpan<byte> Salt => salt
-        ?? throw new ObjectDisposedException(nameof(LocalCredentialMaterial));
-
-    internal ReadOnlySpan<byte> Digest => digest
-        ?? throw new ObjectDisposedException(nameof(LocalCredentialMaterial));
+    public ReadOnlyMemory<byte> Digest => digest
+        ?? throw new ObjectDisposedException(nameof(LocalCredentialHashMaterial));
 
     public void Dispose()
     {
@@ -85,8 +115,6 @@ public sealed class LocalCredentialMaterial : IDisposable
             CryptographicOperations.ZeroMemory(ownedDigest);
         }
     }
-
-    public override string ToString() => "[redacted]";
 }
 
 public sealed class AuthenticationSecretDigest : IDisposable
