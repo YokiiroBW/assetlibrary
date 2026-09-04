@@ -10,7 +10,10 @@ import socket
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+import urllib.error
+import urllib.request
 import uuid
 from pathlib import Path
 from typing import NoReturn
@@ -173,6 +176,75 @@ class PostgreSqlIntegrationTests(unittest.TestCase):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as candidate:
             candidate.bind(("127.0.0.1", 0))
             return int(candidate.getsockname()[1])
+
+    @classmethod
+    def host_command(cls) -> list[str]:
+        configured_dotnet = os.environ.get("ASSETLIBRARY_TEST_DOTNET")
+        dotnet = configured_dotnet or shutil.which("dotnet")
+        if not dotnet:
+            cls.unavailable("dotnet is required for the CoreServer database runtime test")
+        configured_host = os.environ.get("ASSETLIBRARY_TEST_HOST_DLL")
+        host = Path(configured_host).resolve() if configured_host else (
+            ROOT
+            / "services/core-server/Host/bin/Release/net10.0/AssetLibrary.CoreServer.Host.dll"
+        )
+        if not host.is_file():
+            cls.unavailable(f"CoreServer host build is missing: {host}")
+        return [str(dotnet), str(host)]
+
+    @staticmethod
+    def http_payload(
+        port: int,
+        *,
+        path: str = "/readyz",
+        timeout_seconds: float = 1,
+    ) -> tuple[int, dict[str, object]]:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{port}{path}",
+            headers={"Connection": "close"},
+        )
+        try:
+            with opener.open(request, timeout=timeout_seconds) as response:
+                return response.status, json.loads(response.read())
+        except urllib.error.HTTPError as error:
+            return error.code, json.loads(error.read())
+
+    @classmethod
+    def wait_for_readiness(
+        cls,
+        process: subprocess.Popen[str],
+        port: int,
+        expected_status: int,
+        expected_reason: str | None = None,
+    ) -> dict[str, object]:
+        last_error: Exception | None = None
+        for _ in range(100):
+            if process.poll() is not None:
+                stdout, stderr = process.communicate(timeout=1)
+                raise AssertionError(
+                    f"CoreServer exited before readiness check: {stdout} {stderr}"
+                )
+            try:
+                status, payload = cls.http_payload(port)
+                if status == expected_status and (
+                    expected_reason is None or payload.get("reason") == expected_reason
+                ):
+                    return payload
+            except (OSError, ValueError, urllib.error.URLError) as error:
+                last_error = error
+            time.sleep(0.1)
+        raise AssertionError(f"CoreServer readiness did not converge: {last_error}")
+
+    @staticmethod
+    def stop_host(process: subprocess.Popen[str]) -> tuple[str, str]:
+        if process.poll() is None:
+            process.terminate()
+        try:
+            return process.communicate(timeout=10)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            return process.communicate(timeout=5)
 
     @classmethod
     def _run(
@@ -1939,6 +2011,227 @@ LIMIT 256;
                 self.runner_tools(corrupt_target, staged), staged, corrupt_metadata
             )
         MIGRATIONS.ensure_empty_restore_target(self.runner_tools(corrupt_target, staged))
+
+    def test_core_server_database_readiness_is_live_and_fail_closed(self) -> None:
+        database = self.fresh_database("host_readiness")
+        MIGRATIONS.apply_migrations(
+            self.runner_tools(database),
+            self.manifest,
+            self.backup_directory("host-readiness"),
+        )
+        runtime_parent = Path(
+            os.environ.get(
+                "ASSETLIBRARY_TEST_RUNTIME",
+                ROOT / ".runtime/sandbox-storage/V01-010",
+            )
+        ).resolve()
+        runtime_parent.mkdir(parents=True, exist_ok=True)
+        temporary = tempfile.TemporaryDirectory(
+            prefix="database-runtime-host-",
+            dir=runtime_parent,
+        )
+        self.addCleanup(temporary.cleanup)
+        state = Path(temporary.name) / "state"
+        state.mkdir()
+        port = self._unused_port()
+        secret = "v01-010-integration-secret"
+        connection = (
+            f"Host={self.host};Port={self.port};Database={database};"
+            f"Username={self.AUDITOR};Password={secret}"
+        )
+        environment = self.environment.copy()
+        environment["ASSETLIBRARY_DATABASE_READINESS_CONNECTION"] = connection
+        flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
+        process = subprocess.Popen(
+            [
+                *self.host_command(),
+                "--state-path",
+                str(state),
+                "--environment",
+                "Production",
+                "--bind-host",
+                "127.0.0.1",
+                "--port",
+                str(port),
+            ],
+            cwd=temporary.name,
+            env=environment,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            creationflags=flags,
+        )
+        try:
+            ready = self.wait_for_readiness(process, port, 200)
+            self.assertEqual(ready.get("status"), "ready")
+            self.assertEqual(ready.get("scope"), "host_database")
+            self.assertEqual(ready.get("database_contract"), "v01-010/1")
+            self.assertEqual(ready.get("database_schema_version"), 9)
+            self.assertIs(ready.get("business_api_ready"), False)
+            self.assertIs(ready.get("production_file_writes_enabled"), False)
+            health_status, health = self.http_payload(port, path="/healthz")
+            self.assertEqual(health_status, 200)
+            self.assertEqual(health.get("status"), "ok")
+
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_migration_owner; "
+                "UPDATE migration.ledger SET name = 'runtime_drift' WHERE version = 9;",
+            )
+            self.wait_for_readiness(
+                process,
+                port,
+                503,
+                "database_not_ready",
+            )
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_migration_owner; "
+                "UPDATE migration.ledger SET name = 'gateway_auth_read_api' WHERE version = 9;",
+            )
+            self.wait_for_readiness(process, port, 200)
+
+            locker = subprocess.Popen(
+                [
+                    self.psql_path(),
+                    "--no-psqlrc",
+                    "--set", "ON_ERROR_STOP=1",
+                    "--quiet",
+                    "--host", self.host,
+                    "--port", str(self.port),
+                    "--username", self.admin,
+                    "--dbname", database,
+                    "--no-password",
+                    "--command",
+                    (
+                        "BEGIN; "
+                        "LOCK TABLE migration.ledger IN ACCESS EXCLUSIVE MODE; "
+                        "SELECT pg_sleep(15); "
+                        "ROLLBACK;"
+                    ),
+                ],
+                env=self.environment,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            try:
+                for _ in range(100):
+                    lock_state = self.sql(
+                        database,
+                        self.admin,
+                        """
+SELECT COUNT(*)
+FROM pg_locks
+WHERE relation = 'migration.ledger'::regclass
+  AND mode = 'AccessExclusiveLock'
+  AND granted;
+""",
+                    ).stdout.strip()
+                    if lock_state == "1":
+                        break
+                    if locker.poll() is not None:
+                        locker_stdout, locker_stderr = locker.communicate(timeout=1)
+                        raise AssertionError(
+                            "migration ledger lock process exited early: "
+                            f"{locker_stdout} {locker_stderr}"
+                        )
+                    time.sleep(0.1)
+                else:
+                    raise AssertionError("migration ledger lock was not acquired")
+
+                timeout_started = time.monotonic()
+                timeout_status, timeout_payload = self.http_payload(
+                    port,
+                    timeout_seconds=8,
+                )
+                timeout_elapsed = time.monotonic() - timeout_started
+                self.assertEqual(timeout_status, 503)
+                self.assertEqual(timeout_payload.get("reason"), "database_not_ready")
+                self.assertGreaterEqual(timeout_elapsed, 4)
+                self.assertLess(timeout_elapsed, 8)
+            finally:
+                self.stop_host(locker)
+            self.wait_for_readiness(process, port, 200)
+
+            self.drop_database(database)
+            self.wait_for_readiness(process, port, 503, "database_not_ready")
+        finally:
+            stdout, stderr = self.stop_host(process)
+        self.assertNotIn(secret, stdout)
+        self.assertNotIn(secret, stderr)
+        self.assertNotIn(database, stdout)
+        self.assertNotIn(database, stderr)
+
+        unauthorized = self.fresh_database("host_unauthorized")
+        MIGRATIONS.apply_migrations(
+            self.runner_tools(unauthorized),
+            self.manifest,
+            self.backup_directory("host-unauthorized"),
+        )
+        denied_environment = self.environment.copy()
+        denied_environment["ASSETLIBRARY_DATABASE_READINESS_CONNECTION"] = (
+            f"Host={self.host};Port={self.port};Database={unauthorized};"
+            f"Username={self.RUNTIME};Password={secret}"
+        )
+        denied = subprocess.run(
+            [
+                *self.host_command(),
+                "--state-path",
+                str(state),
+                "--environment",
+                "Production",
+                "--port",
+                str(self._unused_port()),
+            ],
+            cwd=temporary.name,
+            env=denied_environment,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(denied.returncode, 69)
+        self.assertIn("database_permission_denied", denied.stderr)
+        self.assertNotIn(secret, denied.stderr)
+        self.assertNotIn(unauthorized, denied.stderr)
+
+        elevated_environment = self.environment.copy()
+        elevated_environment["ASSETLIBRARY_DATABASE_READINESS_CONNECTION"] = (
+            f"Host={self.host};Port={self.port};Database={unauthorized};"
+            f"Username={self.admin};Password={secret}"
+        )
+        elevated = subprocess.run(
+            [
+                *self.host_command(),
+                "--state-path",
+                str(state),
+                "--environment",
+                "Production",
+                "--port",
+                str(self._unused_port()),
+            ],
+            cwd=temporary.name,
+            env=elevated_environment,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+        self.assertEqual(elevated.returncode, 69)
+        self.assertIn("database_permission_denied", elevated.stderr)
+        self.assertNotIn(secret, elevated.stderr)
+        self.assertNotIn(unauthorized, elevated.stderr)
 
 
 if __name__ == "__main__":

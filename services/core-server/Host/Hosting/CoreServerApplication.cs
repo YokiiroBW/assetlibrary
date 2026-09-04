@@ -12,9 +12,22 @@ internal static class CoreServerApplication
             return (int)CoreServerExitCode.InvalidConfiguration;
         }
 
+        PostgresDatabaseReadinessProbe? database = null;
         try
         {
-            await using var application = CoreServerApplicationFactory.Build(options);
+            if (options.Database is not null)
+            {
+                database = PostgresDatabaseReadinessProbe.Create(options.Database);
+                var readiness = await database.CheckAsync(CancellationToken.None).ConfigureAwait(false);
+                if (!readiness.IsReady)
+                {
+                    await Console.Error.WriteLineAsync(CoreServerHostJson.Error(readiness.PublicCode))
+                        .ConfigureAwait(false);
+                    return (int)CoreServerExitCode.Unavailable;
+                }
+            }
+
+            await using var application = CoreServerApplicationFactory.Build(options, database);
             await application.RunAsync().ConfigureAwait(false);
             return (int)CoreServerExitCode.Success;
         }
@@ -24,6 +37,13 @@ internal static class CoreServerApplication
         {
             await Console.Error.WriteLineAsync(CoreServerHostJson.Error("host_start_failed")).ConfigureAwait(false);
             return (int)CoreServerExitCode.SoftwareError;
+        }
+        finally
+        {
+            if (database is not null)
+            {
+                await database.DisposeAsync().ConfigureAwait(false);
+            }
         }
     }
 }

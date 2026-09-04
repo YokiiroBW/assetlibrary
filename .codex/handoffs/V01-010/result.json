@@ -1,0 +1,88 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-010",
+  "title": "实现生产 PostgreSQL 运行时与迁移就绪检查",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "codex-agent-v01-010",
+  "branch": "codex/v01-010-database-runtime-composition",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-010",
+  "commit": "27e53182452b3b4ad5ed29a4ce236ed90b3e969c",
+  "changed_files": [
+    ".codex/handoffs/V01-010/result.json",
+    ".codex/handoffs/V01-010/summary.md",
+    ".codex/handoffs/V01-010/tests.md",
+    ".codex/tasks/V01-010.md",
+    ".github/workflows/handoff-quality.yml",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
+    "eng/server-release-policy.json",
+    "scripts/build_server_release.py",
+    "scripts/validate_server_release.py",
+    "services/core-server/Host/AssetLibrary.CoreServer.Host.csproj",
+    "services/core-server/Host/Hosting/CoreServerApplication.cs",
+    "services/core-server/Host/Hosting/CoreServerApplicationFactory.cs",
+    "services/core-server/Host/Hosting/CoreServerEndpointPayloads.cs",
+    "services/core-server/Host/Hosting/CoreServerHostOptions.cs",
+    "services/core-server/Host/Hosting/CoreServerReadinessEndpoint.cs",
+    "services/core-server/Host/Hosting/Database/DatabaseMigrationContract.cs",
+    "services/core-server/Host/Hosting/Database/DatabaseMigrationState.cs",
+    "services/core-server/Host/Hosting/Database/DatabaseReadinessOptions.cs",
+    "services/core-server/Host/Hosting/Database/DatabaseReadinessProbe.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/DatabaseReadinessTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/HostOptionsTests.cs"
+  ],
+  "changed_contracts": [
+    "CoreServer database-mode readiness contract v01-010/1 (additive; v01-008/1 host_only remains unchanged)"
+  ],
+  "tests": {
+    "passed": 351,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Database readiness remains explicit opt-in so production-database-composition stays blocked until authenticated read-host integration makes it a required dependency.",
+    "Production authentication, TLS and secret lifecycle, business APIs, migration orchestration, login provisioning and all production file writes remain unimplemented or disabled.",
+    "The real PostgreSQL 16.15 runtime evidence was executed locally on Windows; the updated Linux CI job is source-validated but was not remotely executed in this thread.",
+    "Any production migration changes the embedded manifest trust root and requires a rebuilt, revalidated release artifact."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 9,
+  "handoff_summary": ".codex/handoffs/V01-010/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "CoreServer database runtime composition and migration readiness adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "V01-003 production migration manifest, bootstrap checksum, ledger and assetlibrary_database_auditor remain the only database migration truth.",
+      "V01-008 CoreServer host options, JSON, exit codes, health/readiness endpoints, lifecycle logging and release provenance are extended rather than duplicated.",
+      "The existing centrally locked Npgsql 10.0.3 dependency provides the bounded PostgreSQL data source; no new package was added.",
+      "The existing fast-merge-database CI tier receives the runtime test without a parallel tier or skip path."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "The Host adapter reads only migration.bootstrap_state and migration.ledger after switching to the fixed auditor role; it does not access business schemas or module Infrastructure.",
+      "No Domain/Application project gained database, filesystem, network or platform dependencies.",
+      "No product module writes another module's tables and no production file adapter is composed."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Adds an additive host_database readiness response with internal database contract v01-010/1; the unconfigured v01-008/1 host_only response remains byte-compatible.",
+      "Embeds the existing production migration manifest and adds its complete directory to release provenance; no SQL, manifest, shared wire contract or release gate changed."
+    ],
+    "architecture_tests": [
+      "Complete .NET locked restore, format, zero-warning Release build and 197 tests passed; Packaging has 30 passing tests.",
+      "54 real PostgreSQL 16.15 database tests passed, including live host readiness, drift recovery, bounded lock timeout, disconnect and least-privilege startup rejection.",
+      "54 repository, 14 architecture and 32 release tests passed; repository verifier, source policy, manifest and release-definition validators passed.",
+      "v0.1-start remains allowed while aggregate Alpha readiness and v0.1-release remain fail-closed with all prior blockers intact."
+    ],
+    "technical_debt": [
+      "Freeze and implement the production authentication model before exposing any business endpoint.",
+      "Compose authenticated read-only use cases in the shared Host and make database readiness mandatory before requesting production-database-composition closure.",
+      "Implement TLS, certificate and deployment-secret lifecycle separately; the environment variable here is only the bounded ingestion boundary.",
+      "Keep production writes and every platform release disabled until their existing evidence gates close."
+    ]
+  }
+}
