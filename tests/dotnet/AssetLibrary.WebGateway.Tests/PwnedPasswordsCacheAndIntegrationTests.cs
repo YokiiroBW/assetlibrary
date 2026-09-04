@@ -186,6 +186,33 @@ public sealed class PwnedPasswordsCacheTests
 public sealed class PwnedPasswordsLifecycleIntegrationTests
 {
     [TestMethod]
+    public async Task AllowedProviderResultContinuesToDerivationAndCredentialStorage()
+    {
+        const string secretText = "allowed provider synthetic secret";
+        var handler = new RecordingHttpMessageHandler((_, _) => Task.FromResult(
+            PwnedPasswordsTestData.TextResponse(
+                PwnedPasswordsTestData.ValidResponse(secretText))));
+        using var checker = PwnedPasswordsTestData.Checker(handler);
+        var store = new FakeLocalAccountLifecycleStore();
+        var deriver = new FakeLocalCredentialDeriver();
+        using var secret = new LocalSecret(secretText.AsSpan());
+
+        var result = await Service(store, checker, deriver).ProvisionAsync(
+            AuthenticationTestData.Administrator(),
+            Guid.NewGuid(),
+            new LocalAccountName("managed-user"),
+            new LocalAccountDisplayName("Managed user"),
+            false,
+            secret,
+            CancellationToken.None);
+
+        Assert.AreEqual(LocalAccountLifecycleOutcome.Applied, result.Outcome);
+        Assert.AreEqual(1, handler.Calls);
+        Assert.AreEqual(1, deriver.Calls);
+        Assert.AreEqual(1, store.ProvisionCalls);
+    }
+
+    [TestMethod]
     public async Task CompromisedAndUnavailableProviderResultsNeverReachCredentialStorage()
     {
         const string compromisedText = "known compromised synthetic secret";
