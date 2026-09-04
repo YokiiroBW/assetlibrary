@@ -331,6 +331,22 @@
       "task_file": ".codex/tasks/V01-011.md",
       "handoff": ".codex/handoffs/V01-011/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-012",
+      "title": "实现本地账号生命周期核心与口令风险门禁",
+      "module": "gateway-auth-account-lifecycle",
+      "status": "planned",
+      "depends_on": [
+        "V01-011"
+      ],
+      "owner": "codex-agent-v01-012",
+      "branch": "codex/v01-012-account-lifecycle",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-012.md",
+      "handoff": ".codex/handoffs/V01-012/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
