@@ -5,16 +5,18 @@ using Npgsql;
 namespace AssetLibrary.Modules.GatewayAuth.Infrastructure;
 
 public sealed class PostgresAuthenticationStore
-    : ILocalCredentialStore, IBrowserSessionStore
+    : ILocalCredentialStore, IBrowserSessionStore, ILocalAccountLifecycleStore
 {
     private readonly PostgresLocalCredentialStore credentials;
     private readonly PostgresBrowserSessionStore sessions;
+    private readonly PostgresLocalAccountLifecycleStore lifecycle;
 
     public PostgresAuthenticationStore(NpgsqlDataSource dataSource)
     {
         ArgumentNullException.ThrowIfNull(dataSource);
         credentials = new PostgresLocalCredentialStore(dataSource);
         sessions = new PostgresBrowserSessionStore(dataSource);
+        lifecycle = new PostgresLocalAccountLifecycleStore(dataSource);
     }
 
     public ValueTask<LocalCredentialMaterial?> FindAsync(
@@ -54,4 +56,61 @@ public sealed class PostgresAuthenticationStore
         AuthenticationSecretDigest csrfDigest,
         CancellationToken cancellationToken) =>
         sessions.RevokeAsync(sessionDigest, csrfDigest, cancellationToken);
+
+    ValueTask<LocalAccountLifecycleResult> ILocalAccountLifecycleStore.FindAsync(
+        AuthenticatedIdentity actor,
+        LocalAccountName accountName,
+        CancellationToken cancellationToken) =>
+        lifecycle.FindAsync(actor, accountName, cancellationToken);
+
+    ValueTask<LocalAccountLifecycleResult> ILocalAccountLifecycleStore.ProvisionAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        Guid requestedPrincipalId,
+        LocalAccountName accountName,
+        LocalAccountDisplayName displayName,
+        bool isSystemAdministrator,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken) =>
+        lifecycle.ProvisionAsync(
+            actor,
+            operationId,
+            requestedPrincipalId,
+            accountName,
+            displayName,
+            isSystemAdministrator,
+            credential,
+            cancellationToken);
+
+    ValueTask<LocalAccountLifecycleResult> ILocalAccountLifecycleStore.ReplaceCredentialAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        LocalAccountName accountName,
+        long expectedCredentialVersion,
+        bool enableAccount,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken) =>
+        lifecycle.ReplaceCredentialAsync(
+            actor,
+            operationId,
+            accountName,
+            expectedCredentialVersion,
+            enableAccount,
+            credential,
+            cancellationToken);
+
+    ValueTask<LocalAccountLifecycleResult> ILocalAccountLifecycleStore.SetEnabledAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        LocalAccountName accountName,
+        long expectedPrincipalSessionVersion,
+        bool enabled,
+        CancellationToken cancellationToken) =>
+        lifecycle.SetEnabledAsync(
+            actor,
+            operationId,
+            accountName,
+            expectedPrincipalSessionVersion,
+            enabled,
+            cancellationToken);
 }

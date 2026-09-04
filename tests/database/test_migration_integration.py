@@ -460,6 +460,7 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         *,
         account_name: str = "test-user",
         subject_key: str = "local:test-user",
+        is_system_administrator: bool = False,
     ) -> dict[str, object]:
         principal_id = uuid.uuid4()
         salt = bytes(range(1, 17))
@@ -479,7 +480,8 @@ SET ROLE assetlibrary_gateway_auth_owner;
 INSERT INTO gateway_auth.authenticated_principal (
   principal_id, subject_key, display_name, is_system_administrator, created_at
 ) VALUES (
-  '{principal_id}', '{subject_key}', 'Synthetic test user', false, clock_timestamp()
+  '{principal_id}', '{subject_key}', 'Synthetic test user',
+  {str(is_system_administrator).lower()}, clock_timestamp()
 );
 INSERT INTO gateway_auth.local_account_credential (
   principal_id, account_name, secret_algorithm, secret_iterations,
@@ -593,7 +595,7 @@ SELECT task_health.enqueue_outbox_event(
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 11)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 12)))
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -1201,6 +1203,363 @@ INSERT INTO library_storage.library_permission (
                 invalid,
             )
 
+    def test_local_account_lifecycle_requires_a_database_verified_administrator(self) -> None:
+        database = self.authentication_database("account_lifecycle_authz")
+        regular = self.seed_local_account(database)
+        administrator = self.seed_local_account(
+            database,
+            account_name="admin-one",
+            subject_key="local:admin-one",
+            is_system_administrator=True,
+        )
+
+        unauthorized = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM "
+            "gateway_auth.read_local_account_for_administrator("
+            f"'{regular['principal_id']}', 1, 'test-user');",
+        ).stdout.strip()
+        stale = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM "
+            "gateway_auth.read_local_account_for_administrator("
+            f"'{administrator['principal_id']}', 2, 'test-user');",
+        ).stdout.strip()
+        forged = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM "
+            "gateway_auth.read_local_account_for_administrator("
+            f"'{uuid.uuid4()}', 1, 'test-user');",
+        ).stdout.strip()
+        unauthorized_provision = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM gateway_auth.provision_local_account("
+            f"'{regular['principal_id']}', 1, '{uuid.uuid4()}', '{uuid.uuid4()}', "
+            "'blocked-user', 'Blocked user', false, 'pbkdf2-sha256', 600000, "
+            f"decode('{'ab' * 16}', 'hex'), decode('{'cd' * 32}', 'hex'));",
+        ).stdout.strip()
+        authorized = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, account_name, is_enabled, "
+            "credential_version, principal_session_version FROM "
+            "gateway_auth.read_local_account_for_administrator("
+            f"'{administrator['principal_id']}', 1, 'test-user');",
+        ).stdout.strip()
+
+        self.assertEqual(unauthorized, "unauthorized|f")
+        self.assertEqual(stale, "unauthorized|f")
+        self.assertEqual(forged, "unauthorized|f")
+        self.assertEqual(unauthorized_provision, "unauthorized|f")
+        self.assertEqual(authorized, "applied|f|test-user|t|7|1")
+        self.assertEqual(
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "SELECT count(*) FROM gateway_auth.local_account_lifecycle_operation;",
+            ).stdout.strip(),
+            "0",
+        )
+
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.local_account_credential "
+            "SET disabled_at = clock_timestamp() "
+            f"WHERE principal_id = '{administrator['principal_id']}'; "
+            "UPDATE gateway_auth.authenticated_principal "
+            "SET disabled_at = clock_timestamp() "
+            f"WHERE principal_id = '{administrator['principal_id']}';",
+        )
+        disabled = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM "
+            "gateway_auth.read_local_account_for_administrator("
+            f"'{administrator['principal_id']}', 1, 'test-user');",
+        ).stdout.strip()
+        self.assertEqual(disabled, "unauthorized|f")
+
+        for denied in (
+            "SELECT * FROM gateway_auth.local_account_lifecycle_operation;",
+            "SELECT gateway_auth.local_account_actor_is_authorized("
+            f"'{administrator['principal_id']}', 1);",
+        ):
+            self.assertNotEqual(
+                self.gateway_sql(database, denied, check=False).returncode,
+                0,
+                denied,
+            )
+
+    def test_local_account_lifecycle_is_idempotent_and_invalidates_sessions(self) -> None:
+        database = self.authentication_database("account_lifecycle")
+        administrator = self.seed_local_account(
+            database,
+            account_name="admin-one",
+            subject_key="local:admin-one",
+            is_system_administrator=True,
+        )
+        actor_id = administrator["principal_id"]
+        target_id = uuid.uuid4()
+        provision_id = uuid.uuid4()
+        initial_salt = "11" * 16
+        initial_digest = "22" * 32
+
+        provision = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, account_name, is_enabled, "
+            "credential_version, principal_session_version FROM "
+            "gateway_auth.provision_local_account("
+            f"'{actor_id}', 1, '{provision_id}', '{target_id}', "
+            "'managed-user', 'Managed user', false, 'pbkdf2-sha256', 600000, "
+            f"decode('{initial_salt}', 'hex'), decode('{initial_digest}', 'hex'));",
+        ).stdout.strip()
+        replay = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, principal_id, credential_version, "
+            "principal_session_version FROM gateway_auth.provision_local_account("
+            f"'{actor_id}', 1, '{provision_id}', '{uuid.uuid4()}', "
+            "'managed-user', 'Managed user', false, 'pbkdf2-sha256', 600000, "
+            f"decode('{'33' * 16}', 'hex'), decode('{'44' * 32}', 'hex'));",
+        ).stdout.strip()
+        conflicting_reuse = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed FROM gateway_auth.provision_local_account("
+            f"'{actor_id}', 1, '{provision_id}', '{uuid.uuid4()}', "
+            "'different-user', 'Managed user', false, 'pbkdf2-sha256', 600000, "
+            f"decode('{'33' * 16}', 'hex'), decode('{'44' * 32}', 'hex'));",
+        ).stdout.strip()
+
+        self.assertEqual(provision, "applied|f|managed-user|t|1|1")
+        self.assertEqual(replay, f"applied|t|{target_id}|1|1")
+        self.assertEqual(conflicting_reuse, "operation_conflict|f")
+        self.assertEqual(
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "SELECT encode(secret_digest, 'hex') FROM "
+                "gateway_auth.local_account_credential "
+                "WHERE account_name = 'managed-user';",
+            ).stdout.strip(),
+            initial_digest,
+        )
+
+        duplicate_id = uuid.uuid4()
+        duplicate = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, principal_id FROM "
+            "gateway_auth.provision_local_account("
+            f"'{actor_id}', 1, '{duplicate_id}', '{uuid.uuid4()}', "
+            "'managed-user', 'Replacement display', true, 'pbkdf2-sha256', 600000, "
+            f"decode('{'55' * 16}', 'hex'), decode('{'66' * 32}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(duplicate, f"account_conflict|f|{target_id}")
+        self.assertEqual(
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "SELECT display_name, is_system_administrator FROM "
+                "gateway_auth.authenticated_principal "
+                f"WHERE principal_id = '{target_id}';",
+            ).stdout.strip(),
+            "Managed user|f",
+        )
+
+        session_digest = self.token_digest(0x71)
+        csrf_digest = self.token_digest(0x72)
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT outcome FROM gateway_auth.create_browser_session("
+                f"'{target_id}', 1, 'local', 1, "
+                f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'));",
+            ).stdout.strip(),
+            "created",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT gateway_auth.record_local_sign_in_failure('managed-user', 1);",
+            ).stdout.strip(),
+            "t",
+        )
+
+        replacement_id = uuid.uuid4()
+        replacement_digest = "88" * 32
+        replacement = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, is_enabled, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{replacement_id}', 'managed-user', 1, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'77' * 16}', 'hex'), decode('{replacement_digest}', 'hex'));",
+        ).stdout.strip()
+        replacement_replay = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{replacement_id}', 'managed-user', 1, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'99' * 16}', 'hex'), decode('{'aa' * 32}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(replacement, "applied|f|t|2|2")
+        self.assertEqual(replacement_replay, "applied|t|2|2")
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{session_digest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+        credential_state = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT encode(secret_digest, 'hex'), failed_attempt_count, "
+            "retry_not_before IS NULL FROM gateway_auth.local_account_credential "
+            "WHERE account_name = 'managed-user';",
+        ).stdout.strip()
+        self.assertEqual(credential_state, f"{replacement_digest}|0|t")
+
+        disable_id = uuid.uuid4()
+        disabled = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, principal_session_version FROM "
+            "gateway_auth.set_local_account_enabled("
+            f"'{actor_id}', 1, '{disable_id}', 'managed-user', 2, false);",
+        ).stdout.strip()
+        enable_id = uuid.uuid4()
+        enabled = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, principal_session_version FROM "
+            "gateway_auth.set_local_account_enabled("
+            f"'{actor_id}', 1, '{enable_id}', 'managed-user', 3, true);",
+        ).stdout.strip()
+        self.assertEqual(disabled, "applied|f|3")
+        self.assertEqual(enabled, "applied|t|4")
+
+        recovery_disable_id = uuid.uuid4()
+        recovery_disabled = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, principal_session_version FROM "
+            "gateway_auth.set_local_account_enabled("
+            f"'{actor_id}', 1, '{recovery_disable_id}', 'managed-user', 4, false);",
+        ).stdout.strip()
+        recovery_id = uuid.uuid4()
+        recovery_digest = "bb" * 32
+        recovered = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, is_enabled, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{recovery_id}', 'managed-user', 2, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'ac' * 16}', 'hex'), decode('{recovery_digest}', 'hex'));",
+        ).stdout.strip()
+        recovered_replay = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, is_enabled, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{recovery_id}', 'managed-user', 2, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'ad' * 16}', 'hex'), decode('{'bc' * 32}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(recovery_disabled, "applied|f|5")
+        self.assertEqual(recovered, "applied|f|t|3|6")
+        self.assertEqual(recovered_replay, "applied|t|t|3|6")
+
+        if not self.external:
+            assert self.pg_ctl is not None and self.cluster_data is not None
+            self._run(
+                [
+                    str(self.pg_ctl),
+                    "--pgdata",
+                    str(self.cluster_data),
+                    "--wait",
+                    "--timeout",
+                    "30",
+                    "--mode",
+                    "fast",
+                    "restart",
+                ],
+                timeout=45,
+                capture_output=False,
+            )
+        persisted = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, credential_version, principal_session_version "
+            "FROM gateway_auth.read_local_account_for_administrator("
+            f"'{actor_id}', 1, 'managed-user');",
+        ).stdout.strip()
+        self.assertEqual(persisted, "applied|t|3|6")
+        self.assertEqual(
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "SELECT encode(secret_digest, 'hex') FROM "
+                "gateway_auth.local_account_credential "
+                "WHERE account_name = 'managed-user';",
+            ).stdout.strip(),
+            recovery_digest,
+        )
+
+        audit_shape = self.sql(
+            database,
+            self.admin,
+            "SELECT count(*) FROM information_schema.columns "
+            "WHERE table_schema = 'gateway_auth' "
+            "AND table_name = 'local_account_lifecycle_operation' "
+            "AND column_name ~ '(secret|salt|digest|token|csrf)';",
+        ).stdout.strip()
+        audit_count = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT count(*) FROM gateway_auth.local_account_lifecycle_operation;",
+        ).stdout.strip()
+        self.assertEqual(audit_shape, "0")
+        self.assertEqual(audit_count, "7")
+
+    def test_last_enabled_administrator_is_preserved_under_concurrency(self) -> None:
+        database = self.authentication_database("last_admin")
+        first = self.seed_local_account(
+            database,
+            account_name="admin-one",
+            subject_key="local:admin-one",
+            is_system_administrator=True,
+        )
+        second = self.seed_local_account(
+            database,
+            account_name="admin-two",
+            subject_key="local:admin-two",
+            is_system_administrator=True,
+        )
+
+        def disable(account: dict[str, object]) -> str:
+            return self.gateway_sql(
+                database,
+                "SELECT outcome FROM gateway_auth.set_local_account_enabled("
+                f"'{account['principal_id']}', 1, '{uuid.uuid4()}', "
+                f"'{account['account_name']}', 1, false);",
+            ).stdout.strip()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            results = list(executor.map(disable, (first, second)))
+
+        self.assertEqual(results.count("applied"), 1)
+        self.assertEqual(results.count("last_administrator"), 1)
+        active_administrators = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT count(*) FROM gateway_auth.authenticated_principal "
+            "WHERE is_system_administrator AND disabled_at IS NULL;",
+        ).stdout.strip()
+        self.assertEqual(active_administrators, "1")
+
     def test_local_authentication_failure_is_atomic_under_concurrency(self) -> None:
         database = self.authentication_database("local_auth_concurrency")
         self.seed_local_account(database)
@@ -1409,7 +1768,7 @@ INSERT INTO library_storage.library_permission (
             self.unavailable(f"authentication test build is missing: {test_assembly}")
 
         database = self.authentication_database("dotnet_auth_store")
-        account = self.seed_local_account(database)
+        account = self.seed_local_account(database, is_system_administrator=True)
         environment = self.environment.copy()
         environment["ASSETLIBRARY_TEST_AUTH_CONNECTION"] = (
             f"Host={self.host};Port={self.port};Database={database};"
@@ -2303,7 +2662,7 @@ LIMIT 256;
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 11)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 12)))
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -2356,7 +2715,7 @@ LIMIT 256;
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "10",
+            "11",
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 
@@ -2563,7 +2922,7 @@ LIMIT 256;
             self.assertEqual(ready.get("status"), "ready")
             self.assertEqual(ready.get("scope"), "host_database")
             self.assertEqual(ready.get("database_contract"), "v01-010/1")
-            self.assertEqual(ready.get("database_schema_version"), 10)
+            self.assertEqual(ready.get("database_schema_version"), 11)
             self.assertIs(ready.get("business_api_ready"), False)
             self.assertIs(ready.get("production_file_writes_enabled"), False)
             health_status, health = self.http_payload(port, path="/healthz")

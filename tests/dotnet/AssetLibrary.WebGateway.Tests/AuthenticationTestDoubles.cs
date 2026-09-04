@@ -20,6 +20,30 @@ internal static class AuthenticationTestData
             principalSessionVersion: 3,
             method);
 
+    public static AuthenticatedIdentity Administrator(long principalSessionVersion = 3) =>
+        new(
+            PrincipalId,
+            new AuthenticatedSubject("local:administrator"),
+            "Test administrator",
+            isSystemAdministrator: true,
+            principalSessionVersion,
+            PrimaryAuthenticationMethod.LocalAccount);
+
+    public static LocalAccountState Account(
+        string accountName = "managed-user",
+        bool isSystemAdministrator = false,
+        bool isEnabled = true,
+        long credentialVersion = 1,
+        long principalSessionVersion = 1) =>
+        new(
+            Guid.Parse("9f5fd8a7-1a93-413d-9319-d19bf0e36c72"),
+            new LocalAccountName(accountName),
+            new LocalAccountDisplayName("Managed user"),
+            isSystemAdministrator,
+            isEnabled,
+            credentialVersion,
+            principalSessionVersion);
+
     public static VerifiedPrimaryIdentity Verified(
         PrimaryAuthenticationMethod method = PrimaryAuthenticationMethod.LocalAccount) =>
         new(Identity(method), method == PrimaryAuthenticationMethod.LocalAccount ? 7 : null);
@@ -38,6 +62,145 @@ internal static class AuthenticationTestData
             new DateTimeOffset(2026, 9, 4, 12, 0, 0, TimeSpan.Zero),
             new DateTimeOffset(2026, 9, 4, 12, 30, 0, TimeSpan.Zero),
             new DateTimeOffset(2026, 9, 5, 0, 0, 0, TimeSpan.Zero));
+}
+
+internal sealed class FakeLocalSecretRiskChecker(LocalSecretRisk result)
+    : ILocalSecretRiskChecker
+{
+    public int Calls { get; private set; }
+
+    public Func<CancellationToken, ValueTask<LocalSecretRisk>>? Evaluate { get; set; }
+
+    public ValueTask<LocalSecretRisk> EvaluateAsync(
+        LocalSecret secret,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(secret);
+        cancellationToken.ThrowIfCancellationRequested();
+        Calls++;
+        return Evaluate?.Invoke(cancellationToken) ?? ValueTask.FromResult(result);
+    }
+}
+
+internal sealed class FakeLocalCredentialDeriver : ILocalCredentialDeriver
+{
+    public int Calls { get; private set; }
+
+    public LocalCredentialEnrollmentMaterial? LastMaterial { get; private set; }
+
+    public LocalCredentialEnrollmentMaterial Derive(LocalSecret secret)
+    {
+        ArgumentNullException.ThrowIfNull(secret);
+        Calls++;
+        LastMaterial = new LocalCredentialEnrollmentMaterial(
+            LocalSecretHashingPolicy.Algorithm,
+            LocalSecretHashingPolicy.MinimumIterations,
+            Enumerable.Repeat((byte)0x41, LocalSecretHashingPolicy.SaltBytes).ToArray(),
+            Enumerable.Repeat((byte)0x52, LocalSecretHashingPolicy.DigestBytes).ToArray());
+        return LastMaterial;
+    }
+}
+
+internal sealed class FakeLocalAccountLifecycleStore : ILocalAccountLifecycleStore
+{
+    public LocalAccountLifecycleResult Result { get; set; } =
+        new(LocalAccountLifecycleOutcome.Applied, false, AuthenticationTestData.Account());
+
+    public int FindCalls { get; private set; }
+
+    public int ProvisionCalls { get; private set; }
+
+    public int ReplaceCalls { get; private set; }
+
+    public int SetEnabledCalls { get; private set; }
+
+    public Guid LastOperationId { get; private set; }
+
+    public LocalAccountName LastAccountName { get; private set; }
+
+    public long LastExpectedVersion { get; private set; }
+
+    public bool LastBoolean { get; private set; }
+
+    public Func<CancellationToken, ValueTask<LocalAccountLifecycleResult>>? Execute { get; set; }
+
+    public ValueTask<LocalAccountLifecycleResult> FindAsync(
+        AuthenticatedIdentity actor,
+        LocalAccountName accountName,
+        CancellationToken cancellationToken)
+    {
+        FindCalls++;
+        LastAccountName = accountName;
+        return Complete(cancellationToken);
+    }
+
+    public ValueTask<LocalAccountLifecycleResult> ProvisionAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        Guid requestedPrincipalId,
+        LocalAccountName accountName,
+        LocalAccountDisplayName displayName,
+        bool isSystemAdministrator,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken)
+    {
+        AssertMaterial(credential);
+        Assert.AreNotEqual(Guid.Empty, requestedPrincipalId);
+        Assert.AreEqual("Managed user", displayName.Value);
+        ProvisionCalls++;
+        LastOperationId = operationId;
+        LastAccountName = accountName;
+        LastBoolean = isSystemAdministrator;
+        return Complete(cancellationToken);
+    }
+
+    public ValueTask<LocalAccountLifecycleResult> ReplaceCredentialAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        LocalAccountName accountName,
+        long expectedCredentialVersion,
+        bool enableAccount,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken)
+    {
+        AssertMaterial(credential);
+        ReplaceCalls++;
+        LastOperationId = operationId;
+        LastAccountName = accountName;
+        LastExpectedVersion = expectedCredentialVersion;
+        LastBoolean = enableAccount;
+        return Complete(cancellationToken);
+    }
+
+    public ValueTask<LocalAccountLifecycleResult> SetEnabledAsync(
+        AuthenticatedIdentity actor,
+        Guid operationId,
+        LocalAccountName accountName,
+        long expectedPrincipalSessionVersion,
+        bool enabled,
+        CancellationToken cancellationToken)
+    {
+        SetEnabledCalls++;
+        LastOperationId = operationId;
+        LastAccountName = accountName;
+        LastExpectedVersion = expectedPrincipalSessionVersion;
+        LastBoolean = enabled;
+        return Complete(cancellationToken);
+    }
+
+    private ValueTask<LocalAccountLifecycleResult> Complete(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Execute?.Invoke(cancellationToken) ?? ValueTask.FromResult(Result);
+    }
+
+    private static void AssertMaterial(LocalCredentialEnrollmentMaterial credential)
+    {
+        Assert.AreEqual(LocalSecretHashingPolicy.Algorithm, credential.Algorithm);
+        Assert.AreEqual(LocalSecretHashingPolicy.MinimumIterations, credential.Iterations);
+        Assert.AreEqual(LocalSecretHashingPolicy.SaltBytes, credential.Salt.Length);
+        Assert.AreEqual(LocalSecretHashingPolicy.DigestBytes, credential.Digest.Length);
+    }
 }
 
 internal sealed class FakeLocalCredentialStore : ILocalCredentialStore

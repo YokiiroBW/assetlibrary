@@ -57,6 +57,31 @@ public sealed class PostgresAuthenticationStoreIntegrationTests
         Assert.IsTrue(read.IsAuthenticated);
         Assert.IsTrue(mutation.IsAuthenticated);
         Assert.AreEqual("local:test-user", read.Identity!.Subject.Value);
+
+        var lifecycle = new LocalAccountLifecycleService(
+            store,
+            new FakeLocalSecretRiskChecker(LocalSecretRisk.Allowed),
+            NullLogger<LocalAccountLifecycleService>.Instance);
+        using var managedSecret = new LocalSecret(
+            "V01-012 managed integration account secret".AsSpan());
+        var provisioned = await lifecycle.ProvisionAsync(
+            read.Identity,
+            Guid.NewGuid(),
+            new LocalAccountName("managed-integration"),
+            new LocalAccountDisplayName("Managed integration account"),
+            isSystemAdministrator: false,
+            managedSecret,
+            CancellationToken.None);
+        Assert.AreEqual(LocalAccountLifecycleOutcome.Applied, provisioned.Outcome);
+        Assert.IsNotNull(provisioned.Account);
+        Assert.AreEqual(1, provisioned.Account.CredentialVersion);
+        var found = await lifecycle.FindAsync(
+            read.Identity,
+            new LocalAccountName("managed-integration"),
+            CancellationToken.None);
+        Assert.AreEqual(LocalAccountLifecycleOutcome.Applied, found.Outcome);
+        Assert.AreEqual(provisioned.Account.PrincipalId, found.Account!.PrincipalId);
+
         Assert.IsTrue(await sessions.SignOutAsync(
             issued.SessionToken,
             issued.CsrfToken,
