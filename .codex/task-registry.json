@@ -299,6 +299,23 @@
         "V01-008"
       ],
       "partial_dependency_policy": "V01-009 must keep every unresolved v0.1-release gate blocking and may report release readiness only after all required target evidence passes; upstream task statuses remain partial."
+    },
+    {
+      "id": "V01-010",
+      "title": "实现生产 PostgreSQL 运行时与迁移就绪检查",
+      "module": "database-runtime-composition",
+      "status": "planned",
+      "depends_on": [
+        "V01-003",
+        "V01-009"
+      ],
+      "owner": "codex-agent-v01-010",
+      "branch": "codex/v01-010-database-runtime-composition",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-010.md",
+      "handoff": ".codex/handoffs/V01-010/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
