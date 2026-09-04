@@ -368,7 +368,7 @@
       "id": "V01-014",
       "title": "实现首位管理员引导与带外恢复核心",
       "module": "gateway-auth-admin-bootstrap-recovery",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-012",
         "V01-013"
