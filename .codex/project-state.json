@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_database_runtime_planned_release_blocked",
-  "next_action": "Activate V01-010 to add fail-closed PostgreSQL connectivity and migration-readiness composition without exposing business APIs; keep production authentication, TLS, writes and every blocked release target disabled",
+  "status": "v0_1_database_runtime_active_release_blocked",
+  "next_action": "Implement and verify V01-010 fail-closed PostgreSQL connectivity and exact migration-readiness composition; keep production authentication, business APIs, TLS, writes and every blocked release target disabled",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_planned_release_blocked",
+  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_active_release_blocked",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -48,7 +48,8 @@
     "V01-009 was planned as the frozen sequence-8 release integration gate with V01-006, V01-007 and V01-008 as direct inputs. It may integrate and test only the already approved read-only and sandbox capabilities, enumerate missing Alpha capabilities, and produce a fail-closed release decision; V01-008 remains partial and no open gate may be converted into release readiness without executed evidence.",
     "V01-009 was activated in C:\\YOKI\\Codex\\worktrees\\V01-009 on branch codex/v01-009-alpha-release-integration. Its registry records V01-008 as an accepted partial adjudication input; this exception is restricted to the release-integration gate and leaves V01-008 plus every underlying platform and production-write blocker unchanged.",
     "V01-009 implementation 4300c2d4eceb6104d551264c3f249c95c9f9d68e and handoff 20328a89649346654e2cd69cf65decab1b506a50 were merged at bb9c9ed2895a8dc598da29666c03bbcf1b66503a after fail-closed mutation/output tests, repository and architecture verification, affected cross-stack tests and independent scope review. The V01-009 gate is complete, but its computed V0.1 Alpha decision remains blocked by 15 capabilities, six release targets and the V01-008 partial input; no M0 gate or production write state changed.",
-    "V01-010 was planned as the database-migration owner follow-up after V01-003 and V01-009. It may add production PostgreSQL configuration, bounded connectivity and exact migration-ledger readiness to the shared host, but must not apply migrations, provision login roles, expose business APIs, choose an authentication scheme, log secrets or change any release/write gate."
+    "V01-010 was planned as the database-migration owner follow-up after V01-003 and V01-009. It may add production PostgreSQL configuration, bounded connectivity and exact migration-ledger readiness to the shared host, but must not apply migrations, provision login roles, expose business APIs, choose an authentication scheme, log secrets or change any release/write gate.",
+    "V01-010 was activated in C:\\YOKI\\Codex\\worktrees\\V01-010 on branch codex/v01-010-database-runtime-composition. It owns only production database configuration/readiness composition and task-local evidence; V01-008 remains partial and all authentication, business API, TLS, file-write and release capabilities remain blocked."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated"
 }

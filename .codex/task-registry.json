@@ -304,18 +304,17 @@
       "id": "V01-010",
       "title": "实现生产 PostgreSQL 运行时与迁移就绪检查",
       "module": "database-runtime-composition",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-003",
         "V01-009"
       ],
       "owner": "codex-agent-v01-010",
       "branch": "codex/v01-010-database-runtime-composition",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-010",
       "task_file": ".codex/tasks/V01-010.md",
       "handoff": ".codex/handoffs/V01-010/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     }
   ]
 }
