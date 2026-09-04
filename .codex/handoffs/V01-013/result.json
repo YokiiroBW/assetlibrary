@@ -1,0 +1,80 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-013",
+  "title": "实现隐私保护的生产口令泄露风险适配器",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "codex-agent-v01-013",
+  "branch": "codex/v01-013-secret-risk-provider",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-013",
+  "commit": "ac85f59162c8d781d26b2747962f2ce16684a971",
+  "changed_files": [
+    ".codex/handoffs/V01-013/result.json",
+    ".codex/handoffs/V01-013/summary.md",
+    ".codex/handoffs/V01-013/tests.md",
+    ".codex/tasks/V01-013.md",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsHttpClientFactory.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsPrefixRangeCache.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsRangeParser.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsResponseReader.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsSecretRiskChecker.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsSecretRiskOptions.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PwnedPasswordsCacheAndIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PwnedPasswordsFailureTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PwnedPasswordsProtocolTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PwnedPasswordsTestSupport.cs"
+  ],
+  "changed_contracts": [
+    "Adds an internal GatewayAuth Infrastructure implementation of the existing mandatory ILocalSecretRiskChecker port; no public wire contract, Host route or lifecycle outcome changed.",
+    "Fixes the provider protocol to the HIBP HTTPS range endpoint with five-character SHA-1 prefixes, Add-Padding, strict bounded responses and fail-closed outcomes; no database contract changed."
+  ],
+  "tests": {
+    "passed": 365,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "HIBP availability is an external dependency; after a valid prefix range expires, any provider or parsing failure intentionally blocks credential writes rather than using stale allow data.",
+    "The adapter is component-only and is not composed into the Host; first-administrator bootstrap, out-of-band recovery, TLS, deployment secrets, persistent keys, Cookie/Origin protections and upstream abuse control remain missing.",
+    "Future Host composition must verify outbound HTTP diagnostic redaction so the range path/prefix does not enter logs or high-cardinality telemetry.",
+    "No live HIBP request or GitHub-hosted Linux CI ran in this task; controlled transport tests are not represented as external reachability evidence."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 13,
+  "handoff_summary": ".codex/handoffs/V01-013/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "GatewayAuth secret-risk provider Infrastructure adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Reuses V01-012 ILocalSecretRiskChecker, LocalSecretRisk, LocalSecret and LocalAccountLifecycleService as the mandatory fail-closed path before any credential derivation or store call.",
+      "Reuses the existing LocalSecret lifetime and zeroization boundary; SHA-1 exists only inside the provider query adapter and the PBKDF2-SHA256 credential policy is unchanged.",
+      "Uses .NET 10 BCL HttpClient, SocketsHttpHandler, streams, cryptography, collections and TimeProvider without adding packages, languages, frameworks or services."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "All provider code remains under GatewayAuth Infrastructure and only implements an Application-owned internal port.",
+      "No other module table, schema, internal entity, filesystem path or mutable state is read or written.",
+      "No Host, public contract, generated SDK, migration, database role or dependency lock changed."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Adds a component-only HIBP range adapter behind the existing internal secret-risk port with fixed request, parsing, timeout and cache limits.",
+      "Does not change public APIs, lifecycle outcomes, database contracts or any release/write capability."
+    ],
+    "architecture_tests": [
+      "Locked restore, format verification, zero-warning Release build and all 244 .NET tests passed; WebGateway is 60/60 with 24 provider-specific tests.",
+      "21 connection-free migration manifest, 54 repository, 14 architecture and 32 release tests passed; repository, server-release and Alpha validators passed.",
+      "v0.1-start remains allowed, while Alpha --require-ready and v0.1-release retain native exit code 3 with production authentication and all prior release blockers intact."
+    ],
+    "technical_debt": [
+      "Implement first-administrator bootstrap and out-of-band recovery with deployment authorization, idempotency, rotation and no-secret audit before exposing account management.",
+      "Compose the provider only after outbound HTTP telemetry redaction, TLS, persistent keys, secure cookies, Origin/CSRF and upstream abuse controls are verified end to end.",
+      "Keep business APIs and every production file-write path disabled until their existing integration and durability gates close."
+    ]
+  }
+}
