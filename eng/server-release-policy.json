@@ -17,6 +17,24 @@
     "win-x64"
   ],
   "cold_publish_runs": 2,
+  "issuance_inputs": [
+    ".codex/tasks/V01-008.md",
+    "AssetLibrary.slnx",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "NuGet.config",
+    "global.json",
+    "eng/server-release-policy.json",
+    "eng/CodeMetricsConfig.txt",
+    "infra/docker",
+    "infra/linux-server",
+    "infra/windows-server",
+    "scripts",
+    "tests/release/run_docker_evidence.py",
+    "packages/sdk/assetlink/dotnet",
+    "services/core-server"
+  ],
   "native_artifacts": {
     "self_contained": true,
     "manifest_hash": "SHA-256",

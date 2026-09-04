@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import shutil
@@ -14,7 +15,9 @@ import time
 import unittest
 import urllib.error
 import urllib.request
-from pathlib import Path
+import zipfile
+from pathlib import Path, PurePosixPath
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +95,282 @@ class ReleaseDefinitionTests(unittest.TestCase):
                 (output / BUILDER.OUTPUT_MARKER).read_text(encoding="utf-8"),
                 BUILDER.MARKER_VALUE,
             )
+
+    def test_release_provenance_tracks_targets_rejects_ancestor_imports_and_preserves_metadata_head(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            repository = parent / "repository"
+            (repository / "eng").mkdir(parents=True)
+            issuance_inputs = list(BUILDER.REQUIRED_ISSUANCE_INPUTS)
+            (repository / "Directory.Build.props").write_text("<Project />\n", encoding="utf-8")
+            (repository / "eng/server-release-policy.json").write_text(
+                json.dumps({"issuance_inputs": issuance_inputs}),
+                encoding="utf-8",
+            )
+
+            def git(*arguments: str) -> None:
+                subprocess.run(
+                    ["git", "-C", str(repository), *arguments],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+
+            git("init", "-q", "-b", "main")
+            git("add", ".")
+            git("-c", "user.name=AssetLibrary Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "initial")
+            initial_revision, initial_head = BUILDER.resolve_provenance(repository)
+            initial_digest = BUILDER.issuance_input_tree_sha256(repository, initial_revision)
+            self.assertEqual(initial_revision, initial_head)
+            self.assertRegex(initial_digest, r"^[0-9a-f]{64}$")
+
+            (repository / "Directory.Build.targets").write_text("<Project />\n", encoding="utf-8")
+            with self.assertRaisesRegex(BUILDER.ReleaseBuildError, "issuance inputs must be committed"):
+                BUILDER.resolve_provenance(repository)
+
+            git("add", "Directory.Build.targets")
+            git("-c", "user.name=AssetLibrary Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "targets")
+            target_revision, target_head = BUILDER.resolve_provenance(repository)
+            target_digest = BUILDER.issuance_input_tree_sha256(repository, target_revision)
+            self.assertEqual(target_revision, target_head)
+            self.assertNotEqual(target_revision, initial_revision)
+            self.assertNotEqual(target_digest, initial_digest)
+
+            (repository / "eng/server-release-policy.json").write_text(
+                json.dumps(
+                    {
+                        "issuance_inputs": [
+                            "Directory.Build.props",
+                            "Directory.Build.targets",
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(BUILDER.ReleaseBuildError, "protected release input set"):
+                BUILDER.resolve_provenance(repository)
+            (repository / "eng/server-release-policy.json").write_text(
+                json.dumps({"issuance_inputs": issuance_inputs}),
+                encoding="utf-8",
+            )
+
+            (repository / "metadata.txt").write_text("outside issuance\n", encoding="utf-8")
+            git("add", "metadata.txt")
+            git("-c", "user.name=AssetLibrary Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "metadata")
+            metadata_revision, metadata_head = BUILDER.resolve_provenance(repository)
+            self.assertEqual(metadata_revision, target_revision)
+            self.assertNotEqual(metadata_head, target_revision)
+
+            (parent / "Directory.Build.targets").write_text("<Project />\n", encoding="utf-8")
+            with self.assertRaisesRegex(BUILDER.ReleaseBuildError, "outside the repository"):
+                BUILDER.resolve_provenance(repository)
+
+    def test_release_build_pins_auto_imports_and_rejects_environment_overrides(self) -> None:
+        repository = Path("repository").absolute()
+        properties = BUILDER.build_properties(repository, "a" * 40)
+        self.assertIn(
+            f"-p:DirectoryBuildPropsPath={repository / 'Directory.Build.props'}",
+            properties,
+        )
+        self.assertIn(
+            f"-p:DirectoryBuildTargetsPath={repository / 'Directory.Build.targets'}",
+            properties,
+        )
+        with mock.patch.dict(os.environ, {"DirectoryBuildTargetsPath": "outside.targets"}):
+            with self.assertRaisesRegex(BUILDER.ReleaseBuildError, "external MSBuild import overrides"):
+                BUILDER.dotnet_environment(Path("task"), Path("dotnet"))
+
+    def test_validator_rejects_windows_path_aliases_before_host_path_conversion(self) -> None:
+        unsafe = (
+            r"win-x64/..\..\Windows\win.ini",
+            r"win-x64/\\server\share\payload",
+            r"win-x64/C:\Windows\win.ini",
+            r"win-x64/file.dll:stream",
+            "win-x64/NUL.txt",
+            "win-x64/NUL .txt",
+            "win-x64/COM¹.txt",
+            "win-x64/CONIN$",
+            "win-x64/trailing.",
+            "win-x64/trailing ",
+            "win-x64/control\x01name",
+        )
+        for value in unsafe:
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                VALIDATOR.safe_manifest_relative(value)
+        self.assertEqual(
+            VALIDATOR.safe_manifest_relative("win-x64/AssetLibrary.CoreServer.Host.exe").as_posix(),
+            "win-x64/AssetLibrary.CoreServer.Host.exe",
+        )
+
+    def test_archive_manifest_requires_the_only_allowed_name_before_path_use(self) -> None:
+        revision = "b" * 40
+        expected = f"archives/assetlibrary-core-server-win-x64-{revision[:12]}.zip"
+        runtime, relative = VALIDATOR.expected_archive_relative(
+            {"runtime_identifier": "win-x64", "path": expected},
+            revision,
+        )
+        self.assertEqual(runtime, "win-x64")
+        self.assertEqual(relative.as_posix(), expected)
+        for path in (r"..\outside.zip", r"\\server\share\payload.zip", "archives/other.zip"):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                VALIDATOR.expected_archive_relative(
+                    {"runtime_identifier": "win-x64", "path": path},
+                    revision,
+                )
+
+    def test_validator_opens_manifest_files_once_without_following_links(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "root"
+            nested = root / "nested"
+            nested.mkdir(parents=True)
+            payload = nested / "payload.bin"
+            payload.write_bytes(b"trusted payload")
+
+            with VALIDATOR.open_contained_regular_file(
+                root,
+                PurePosixPath("nested/payload.bin"),
+            ) as (stream, length):
+                self.assertEqual(length, len(b"trusted payload"))
+                self.assertEqual(stream.read(), b"trusted payload")
+
+            with self.assertRaises((OSError, ValueError)):
+                with VALIDATOR.open_contained_regular_file(
+                    root,
+                    PurePosixPath("nested/missing.bin"),
+                ):
+                    pass
+
+            outside = Path(directory) / "outside.bin"
+            outside.write_bytes(b"outside")
+            alias = nested / "alias.bin"
+            try:
+                alias.symlink_to(outside)
+            except OSError:
+                pass
+            else:
+                with self.assertRaises((OSError, ValueError)):
+                    with VALIDATOR.open_contained_regular_file(
+                        root,
+                        PurePosixPath("nested/alias.bin"),
+                    ):
+                        pass
+
+    def test_archive_validation_rejects_declared_member_length_before_streaming(self) -> None:
+        member_name = "assetlibrary-core-server-win-x64/payload.bin"
+        archive_stream = io.BytesIO()
+        with zipfile.ZipFile(archive_stream, mode="w") as archive:
+            archive.writestr(member_name, b"abc")
+        errors: list[str] = []
+
+        VALIDATOR.verify_archive(
+            archive_stream,
+            "assetlibrary-core-server-win-x64-revision.zip",
+            "win-x64",
+            {member_name: (hashlib.sha256(b"abc").hexdigest(), 2)},
+            errors,
+        )
+
+        self.assertEqual(errors, [f"archive content length mismatch: {member_name}"])
+
+    def test_runtime_tree_aggregate_covers_every_file_in_ordinal_path_order(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            publish = Path(directory)
+            runtime = publish / "win-x64"
+            runtime.mkdir()
+            (runtime / "z.dll").write_bytes(b"z")
+            (runtime / "a.exe").write_bytes(b"alpha")
+            manifest = BUILDER.create_file_manifest(publish, ["win-x64"])
+            records = []
+            for name in ("a.exe", "z.dll"):
+                path = runtime / name
+                records.append(
+                    f"{hashlib.sha256(path.read_bytes()).hexdigest()}\t{path.stat().st_size}\t{name}\n"
+                )
+            expected = hashlib.sha256("".join(records).encode("utf-8")).hexdigest()
+            self.assertEqual(manifest["runtime_aggregate_sha256"], {"win-x64": expected})
+
+    def test_runtime_evidence_binding_covers_revision_rid_and_tree_digest(self) -> None:
+        revision = "a" * 40
+        tree_digest = "b" * 64
+        expected = BUILDER.runtime_evidence_binding_sha256(
+            revision,
+            "win-x64",
+            tree_digest,
+        )
+        self.assertEqual(
+            expected,
+            VALIDATOR.runtime_evidence_binding_sha256(revision, "win-x64", tree_digest),
+        )
+        self.assertNotEqual(
+            expected,
+            BUILDER.runtime_evidence_binding_sha256("c" * 40, "win-x64", tree_digest),
+        )
+        self.assertNotEqual(
+            expected,
+            BUILDER.runtime_evidence_binding_sha256(revision, "linux-x64", tree_digest),
+        )
+
+    def test_source_snapshot_materializes_the_selected_commit_not_live_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            parent = Path(directory)
+            repository = parent / "repository"
+            (repository / "eng").mkdir(parents=True)
+            (repository / "Directory.Build.props").write_text("<Project />\n", encoding="utf-8")
+            (repository / "eng/server-release-policy.json").write_text(
+                json.dumps({"issuance_inputs": list(BUILDER.REQUIRED_ISSUANCE_INPUTS)}),
+                encoding="utf-8",
+            )
+            subprocess.run(
+                ["git", "-C", str(repository), "init", "-q", "-b", "main"],
+                check=True,
+                timeout=10,
+            )
+            subprocess.run(
+                ["git", "-C", str(repository), "add", "."],
+                check=True,
+                timeout=10,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(repository),
+                    "-c",
+                    "user.name=AssetLibrary Test",
+                    "-c",
+                    "user.email=test@example.invalid",
+                    "commit",
+                    "-qm",
+                    "snapshot",
+                ],
+                check=True,
+                timeout=10,
+            )
+            revision = subprocess.run(
+                ["git", "-C", str(repository), "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            ).stdout.strip()
+            (repository / "Directory.Build.props").write_text(
+                "<Project><Target Name='LiveMutation' /></Project>\n",
+                encoding="utf-8",
+            )
+            snapshot_root = parent / "snapshot"
+            source_root = BUILDER.create_source_snapshot(repository, revision, snapshot_root)
+            self.assertEqual(
+                (source_root / "Directory.Build.props").read_text(encoding="utf-8"),
+                "<Project />\n",
+            )
+            BUILDER.remove_source_snapshot(snapshot_root)
+            self.assertFalse(snapshot_root.exists())
+
+            failed_snapshot = parent / "failed-snapshot"
+            with self.assertRaises(BUILDER.ReleaseBuildError):
+                BUILDER.create_source_snapshot(repository, "f" * 40, failed_snapshot)
+            self.assertFalse(failed_snapshot.exists())
 
     def test_archive_member_names_reject_traversal_and_absolute_paths(self) -> None:
         for value in ("../escape", "a/../../escape", "/absolute", "./relative"):

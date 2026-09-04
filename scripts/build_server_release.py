@@ -2,6 +2,11 @@
 """Build deterministic V01-008 native server artifacts inside the task sandbox."""
 from __future__ import annotations
 
+import sys
+
+if not sys.flags.isolated:
+    raise SystemExit("release tooling must run with Python isolated mode (-I)")
+
 import argparse
 import gzip
 import hashlib
@@ -11,7 +16,6 @@ import platform
 import shutil
 import stat
 import subprocess
-import sys
 import tarfile
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -23,10 +27,18 @@ POLICY_PATH = ROOT / "eng" / "server-release-policy.json"
 TASK_MARKER = ".assetlibrary-v01-008-task-root"
 OUTPUT_MARKER = ".assetlibrary-v01-008-release-output"
 MARKER_VALUE = "AssetLibrary/V01-008/release-output/v1\n"
-ISSUANCE_INPUTS = (
+SOURCE_SNAPSHOT_MARKER = ".assetlibrary-v01-008-source-snapshot"
+SOURCE_SNAPSHOT_MARKER_VALUE = "AssetLibrary/V01-008/source-snapshot/v1\n"
+RUNTIME_EVIDENCE_BINDING_CONTEXT = "AssetLibrary/V01-008/runtime-evidence-binding/v1"
+REQUIRED_MSBUILD_AUTO_IMPORTS = {
+    "Directory.Build.props",
+    "Directory.Build.targets",
+}
+REQUIRED_ISSUANCE_INPUTS = (
     ".codex/tasks/V01-008.md",
     "AssetLibrary.slnx",
     "Directory.Build.props",
+    "Directory.Build.targets",
     "Directory.Packages.props",
     "NuGet.config",
     "global.json",
@@ -35,11 +47,25 @@ ISSUANCE_INPUTS = (
     "infra/docker",
     "infra/linux-server",
     "infra/windows-server",
-    "scripts/build_server_release.py",
-    "scripts/validate_server_release.py",
+    "scripts",
+    "tests/release/run_docker_evidence.py",
     "packages/sdk/assetlink/dotnet",
     "services/core-server",
 )
+MSBUILD_IMPORT_OVERRIDE_ENVIRONMENT = {
+    "customaftermicrosoftcommonprops",
+    "customaftermicrosoftcommontargets",
+    "custombeforemicrosoftcommonprops",
+    "custombeforemicrosoftcommontargets",
+    "directorybuildpropspath",
+    "directorybuildtargetspath",
+    "importdirectorybuildprops",
+    "importdirectorybuildtargets",
+    "msbuildextensionspath",
+    "msbuildsdkspath",
+    "msbuilduserextensionspath",
+    "msbuild_exe_path",
+}
 BASE_LOCKS = {
     "AssetLibrary.AssetLink": "packages/sdk/assetlink/dotnet/packages.lock.json",
     "AssetLibrary.CoreServer": "services/core-server/packages.lock.json",
@@ -63,6 +89,20 @@ def canonical_json_bytes(value: Any) -> bytes:
     return (json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n").encode(
         "utf-8"
     )
+
+
+def runtime_evidence_binding_sha256(
+    source_revision: str,
+    runtime_identifier: str,
+    runtime_tree_sha256: str,
+) -> str:
+    payload = (
+        f"{RUNTIME_EVIDENCE_BINDING_CONTEXT}\n"
+        f"{source_revision}\n"
+        f"{runtime_identifier}\n"
+        f"{runtime_tree_sha256}\n"
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -168,20 +208,41 @@ def iter_artifact_files(root: Path) -> Iterable[tuple[Path, PurePosixPath]]:
 
 def create_file_manifest(publish_root: Path, runtime_identifiers: Iterable[str]) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
+    runtime_records: dict[str, list[tuple[bytes, str]]] = {}
     for runtime_identifier in runtime_identifiers:
         artifact = publish_root / runtime_identifier
         if not artifact.is_dir():
             raise ReleaseBuildError(f"missing publish directory for {runtime_identifier}")
+        records: list[tuple[bytes, str]] = []
         for path, relative in iter_artifact_files(artifact):
+            length = path.stat().st_size
+            digest = sha256_file(path)
             entries.append(
                 {
                     "path": f"{runtime_identifier}/{relative.as_posix()}",
-                    "length": path.stat().st_size,
-                    "sha256": sha256_file(path),
+                    "length": length,
+                    "sha256": digest,
                 }
             )
+            relative_name = relative.as_posix()
+            records.append(
+                (
+                    relative_name.encode("utf-8"),
+                    f"{digest}\t{length}\t{relative_name}\n",
+                )
+            )
+        runtime_records[runtime_identifier] = records
     entries.sort(key=lambda item: item["path"])
-    return {"files": entries}
+    runtime_aggregates = {
+        runtime_identifier: hashlib.sha256(
+            "".join(record for _, record in sorted(records)).encode("utf-8")
+        ).hexdigest()
+        for runtime_identifier, records in runtime_records.items()
+    }
+    return {
+        "files": entries,
+        "runtime_aggregate_sha256": runtime_aggregates,
+    }
 
 
 def deterministic_zip(source: Path, destination: Path, prefix: str) -> None:
@@ -239,6 +300,83 @@ def run_checked(
         raise ReleaseBuildError(f"command failed: {Path(arguments[0]).name} {arguments[1]}") from exception
 
 
+def create_source_snapshot(repository: Path, source_revision: str, snapshot_root: Path) -> Path:
+    if snapshot_root.exists():
+        raise ReleaseBuildError("source snapshot path must not already exist")
+    snapshot_root.mkdir(parents=True)
+    (snapshot_root / SOURCE_SNAPSHOT_MARKER).write_text(
+        SOURCE_SNAPSHOT_MARKER_VALUE,
+        encoding="utf-8",
+        newline="\n",
+    )
+    archive_path = snapshot_root / "source.tar"
+    source_root = snapshot_root / "tree"
+    source_root.mkdir()
+    try:
+        run_checked(
+            [
+                "git",
+                "-C",
+                str(repository),
+                "archive",
+                "--format=tar",
+                f"--output={archive_path}",
+                source_revision,
+            ],
+            cwd=repository,
+            environment=os.environ.copy(),
+        )
+        with tarfile.open(archive_path, mode="r:") as archive:
+            for member in archive.getmembers():
+                name = member.name
+                if (
+                    not name
+                    or "\\" in name
+                    or any(ord(character) < 32 or ord(character) == 127 for character in name)
+                ):
+                    raise ReleaseBuildError("Git snapshot contains an unsafe path")
+                relative = PurePosixPath(name)
+                if (
+                    relative.is_absolute()
+                    or relative.as_posix() != name
+                    or any(part in ("", ".", "..") or ":" in part for part in name.split("/"))
+                ):
+                    raise ReleaseBuildError("Git snapshot contains an unsafe path")
+                destination = source_root.joinpath(*relative.parts)
+                assert_strict_descendant(source_root, destination)
+                if member.isdir():
+                    destination.mkdir(parents=True, exist_ok=True)
+                    continue
+                if not member.isfile():
+                    raise ReleaseBuildError("Git snapshot may contain only regular files and directories")
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                source = archive.extractfile(member)
+                if source is None:
+                    raise ReleaseBuildError("Git snapshot file could not be read")
+                with source, destination.open("xb") as target:
+                    shutil.copyfileobj(source, target, length=1024 * 1024)
+                destination.chmod(0o755 if member.mode & 0o111 else 0o644)
+        assert_msbuild_auto_import_boundary(source_root, reject_ancestor_targets=False)
+    except ReleaseBuildError:
+        remove_source_snapshot(snapshot_root)
+        raise
+    except (OSError, tarfile.TarError) as exception:
+        remove_source_snapshot(snapshot_root)
+        raise ReleaseBuildError("Git source snapshot could not be materialized") from exception
+    finally:
+        if archive_path.exists():
+            archive_path.unlink()
+    return source_root
+
+
+def remove_source_snapshot(snapshot_root: Path) -> None:
+    marker = snapshot_root / SOURCE_SNAPSHOT_MARKER
+    if not marker.is_file() or marker.read_text(encoding="utf-8") != SOURCE_SNAPSHOT_MARKER_VALUE:
+        raise ReleaseBuildError("refusing to remove an unowned source snapshot")
+    assert_no_link_descendants(snapshot_root)
+    shutil.rmtree(snapshot_root)
+
+
 def git_output(repository: Path, *arguments: str) -> str:
     result = run_checked(
         ["git", "-C", str(repository), *arguments],
@@ -249,14 +387,71 @@ def git_output(repository: Path, *arguments: str) -> str:
     return result.stdout.strip()
 
 
+def load_issuance_inputs(repository: Path) -> tuple[str, ...]:
+    try:
+        policy = json.loads((repository / "eng/server-release-policy.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exception:
+        raise ReleaseBuildError("release policy could not provide issuance inputs") from exception
+    values = policy.get("issuance_inputs")
+    if not isinstance(values, list) or not values:
+        raise ReleaseBuildError("release policy must define issuance_inputs")
+    inputs: list[str] = []
+    for value in values:
+        if not isinstance(value, str) or "\\" in value:
+            raise ReleaseBuildError("issuance inputs must use canonical repository-relative paths")
+        relative = PurePosixPath(value)
+        if (
+            relative.is_absolute()
+            or not relative.parts
+            or relative.as_posix() != value
+            or any(part in ("", ".", "..") for part in value.split("/"))
+        ):
+            raise ReleaseBuildError("issuance inputs must use canonical repository-relative paths")
+        inputs.append(value)
+    if len(inputs) != len(set(inputs)):
+        raise ReleaseBuildError("issuance inputs must not contain duplicates")
+    if not REQUIRED_MSBUILD_AUTO_IMPORTS.issubset(inputs):
+        raise ReleaseBuildError("issuance inputs must cover both Directory.Build auto-imports")
+    if tuple(inputs) != REQUIRED_ISSUANCE_INPUTS:
+        raise ReleaseBuildError("issuance inputs must match the protected release input set")
+    return tuple(inputs)
+
+
+def assert_msbuild_auto_import_boundary(
+    repository: Path,
+    *,
+    reject_ancestor_targets: bool = True,
+) -> None:
+    repository = repository.resolve(strict=True)
+    props = repository / "Directory.Build.props"
+    targets = repository / "Directory.Build.targets"
+    if not props.is_file() or is_link_or_reparse(props):
+        raise ReleaseBuildError("repository-owned Directory.Build.props is required and may not be a link")
+    if targets.exists() and (not targets.is_file() or is_link_or_reparse(targets)):
+        raise ReleaseBuildError("repository-owned Directory.Build.targets must be a regular file")
+
+    if not reject_ancestor_targets:
+        return
+    current = repository.parent
+    while True:
+        candidate = current / "Directory.Build.targets"
+        if candidate.exists() or is_link_or_reparse(candidate):
+            raise ReleaseBuildError("Directory.Build.targets outside the repository is forbidden")
+        if current.parent == current:
+            break
+        current = current.parent
+
+
 def resolve_provenance(repository: Path) -> tuple[str, str]:
+    issuance_inputs = load_issuance_inputs(repository)
+    assert_msbuild_auto_import_boundary(repository)
     dirty = git_output(
         repository,
         "status",
         "--porcelain=v1",
         "--untracked-files=all",
         "--",
-        *ISSUANCE_INPUTS,
+        *issuance_inputs,
     )
     if dirty:
         raise ReleaseBuildError("all issuance inputs must be committed before a release build")
@@ -266,16 +461,51 @@ def resolve_provenance(repository: Path) -> tuple[str, str]:
         "-1",
         "--format=%H",
         "--",
-        *ISSUANCE_INPUTS,
+        *issuance_inputs,
     )
     repository_head = git_output(repository, "rev-parse", "HEAD")
     if len(source_revision) != 40 or len(repository_head) != 40:
         raise ReleaseBuildError("could not resolve full Git provenance")
+    drift = git_output(
+        repository,
+        "diff",
+        "--name-only",
+        source_revision,
+        "--",
+        *issuance_inputs,
+    )
+    if drift:
+        raise ReleaseBuildError("issuance inputs differ from the selected source revision")
     return source_revision, repository_head
+
+
+def issuance_input_tree_sha256(repository: Path, source_revision: str) -> str:
+    issuance_inputs = load_issuance_inputs(repository)
+    tree = git_output(
+        repository,
+        "ls-tree",
+        "-r",
+        "--full-tree",
+        source_revision,
+        "--",
+        *issuance_inputs,
+    )
+    if not tree:
+        raise ReleaseBuildError("issuance input tree is empty")
+    return hashlib.sha256((tree + "\n").encode("utf-8")).hexdigest()
 
 
 def dotnet_environment(task_root: Path, dotnet: Path) -> dict[str, str]:
     environment = os.environ.copy()
+    overrides = sorted(
+        name
+        for name in environment
+        if name.casefold() in MSBUILD_IMPORT_OVERRIDE_ENVIRONMENT and environment[name]
+    )
+    if overrides:
+        raise ReleaseBuildError(
+            "external MSBuild import overrides are forbidden: " + ", ".join(overrides)
+        )
     environment.update(
         {
             "CI": "true",
@@ -321,6 +551,8 @@ def build_properties(repository: Path, source_revision: str) -> list[str]:
         "-p:UseSharedCompilation=false",
         f"-p:SourceRevisionId={source_revision}",
         f"-p:AssetLibrarySourceRevision={source_revision}",
+        f"-p:DirectoryBuildPropsPath={repository / 'Directory.Build.props'}",
+        f"-p:DirectoryBuildTargetsPath={repository / 'Directory.Build.targets'}",
         f"-p:PathMap={repository}=/_/src",
     ]
 
@@ -364,6 +596,7 @@ def prepare_release_locks(
     dotnet: Path,
     environment: dict[str, str],
     project: Path,
+    repository: Path,
     output_root: Path,
     runtime_identifiers: list[str],
     source_revision: str,
@@ -371,7 +604,7 @@ def prepare_release_locks(
     lock_root = output_root / "release-locks"
     lock_root.mkdir()
     base_hashes = {
-        name: sha256_file(ROOT / relative)
+        name: sha256_file(repository / relative)
         for name, relative in BASE_LOCKS.items()
     }
     neutral_artifacts = output_root / "lock-bootstrap" / "neutral"
@@ -386,9 +619,9 @@ def prepare_release_locks(
             "--artifacts-path",
             str(neutral_artifacts),
             "--disable-build-servers",
-            *build_properties(ROOT, source_revision),
+            *build_properties(repository, source_revision),
         ],
-        cwd=ROOT,
+        cwd=repository,
         environment=environment,
     )
 
@@ -396,7 +629,7 @@ def prepare_release_locks(
     for runtime_identifier in runtime_identifiers:
         for project_name, relative in BASE_LOCKS.items():
             shutil.copy2(
-                ROOT / relative,
+                repository / relative,
                 lock_root / release_lock_name(project_name, runtime_identifier),
             )
         run_checked(
@@ -413,14 +646,14 @@ def prepare_release_locks(
                 f"-p:RuntimeIdentifier={runtime_identifier}",
                 "-p:SelfContained=true",
                 f"-p:AssetLibraryReleaseLockRoot={lock_root}",
-                *build_properties(ROOT, source_revision),
+                *build_properties(repository, source_revision),
             ],
-            cwd=ROOT,
+            cwd=repository,
             environment=environment,
         )
         for project_name, relative in BASE_LOCKS.items():
             lock_path = lock_root / release_lock_name(project_name, runtime_identifier)
-            validate_release_lock(lock_path, ROOT / relative, runtime_identifier)
+            validate_release_lock(lock_path, repository / relative, runtime_identifier)
             entries.append(
                 {
                     "path": lock_path.relative_to(output_root).as_posix(),
@@ -431,7 +664,7 @@ def prepare_release_locks(
                 }
             )
     for project_name, relative in BASE_LOCKS.items():
-        if sha256_file(ROOT / relative) != base_hashes[project_name]:
+        if sha256_file(repository / relative) != base_hashes[project_name]:
             raise ReleaseBuildError("release lock bootstrap modified a committed project lock")
     expected_lock_names = {
         release_lock_name(project_name, runtime_identifier)
@@ -465,9 +698,11 @@ def build_cold_run(
     dotnet: Path,
     environment: dict[str, str],
     project: Path,
+    repository: Path,
     run_root: Path,
     runtime_identifiers: list[str],
     source_revision: str,
+    issuance_input_tree_digest: str,
     release_lock_root: Path,
     release_lock_aggregate: str,
 ) -> dict[str, Any]:
@@ -479,7 +714,7 @@ def build_cold_run(
         for path in run_lock_root.iterdir()
         if path.is_file()
     }
-    properties = build_properties(ROOT, source_revision)
+    properties = build_properties(repository, source_revision)
     shutdown_build_servers(dotnet, environment)
     try:
         for runtime_identifier in runtime_identifiers:
@@ -500,7 +735,7 @@ def build_cold_run(
                 f"-p:AssetLibraryReleaseLockRoot={run_lock_root}",
                 *properties,
             ]
-            run_checked(restore, cwd=ROOT, environment=environment)
+            run_checked(restore, cwd=repository, environment=environment)
             publish = [
                 str(dotnet),
                 "publish",
@@ -521,7 +756,7 @@ def build_cold_run(
                 f"-p:AssetLibraryReleaseLockRoot={run_lock_root}",
                 *properties,
             ]
-            run_checked(publish, cwd=ROOT, environment=environment)
+            run_checked(publish, cwd=repository, environment=environment)
     finally:
         shutdown_build_servers(dotnet, environment)
 
@@ -538,9 +773,18 @@ def build_cold_run(
         {
             "contract": "v01-008/1",
             "source_revision": source_revision,
+            "issuance_input_tree_sha256": issuance_input_tree_digest,
             "release_lock_aggregate_sha256": release_lock_aggregate,
         }
     )
+    manifest["runtime_evidence_binding_sha256"] = {
+        runtime_identifier: runtime_evidence_binding_sha256(
+            source_revision,
+            runtime_identifier,
+            manifest["runtime_aggregate_sha256"][runtime_identifier],
+        )
+        for runtime_identifier in runtime_identifiers
+    }
     write_json(run_root / "manifest.json", manifest)
     aggregate = hashlib.sha256(canonical_json_bytes(manifest)).hexdigest()
     (run_root / "aggregate-sha256.txt").write_text(aggregate + "\n", encoding="utf-8", newline="\n")
@@ -588,6 +832,7 @@ def promote_artifacts(
     runtime_identifiers: list[str],
     source_revision: str,
     repository_head: str,
+    issuance_input_tree_digest: str,
     policy: dict[str, Any],
     environment: dict[str, str],
     release_lock_aggregate: str,
@@ -607,8 +852,11 @@ def promote_artifacts(
     metadata = {
         "contract": policy["contract"],
         "source_revision": source_revision,
+        "issuance_input_tree_sha256": issuance_input_tree_digest,
         "host_project": policy["host_project"],
         "runtime_identifiers": runtime_identifiers,
+        "runtime_aggregate_sha256": manifest["runtime_aggregate_sha256"],
+        "runtime_evidence_binding_sha256": manifest["runtime_evidence_binding_sha256"],
         "self_contained": True,
         "configuration": "Release",
         "dotnet_sdk": policy["dotnet_sdk"],
@@ -638,6 +886,7 @@ def promote_artifacts(
     archive_manifest = {
         "contract": policy["contract"],
         "source_revision": source_revision,
+        "issuance_input_tree_sha256": issuance_input_tree_digest,
         "artifact_aggregate_sha256": run["aggregate_sha256"],
         "release_lock_aggregate_sha256": release_lock_aggregate,
         "archives": archive_entries,
@@ -659,10 +908,13 @@ def promote_artifacts(
         "target": "native_artifacts",
         "source_revision": source_revision,
         "repository_head_at_build": repository_head,
+        "issuance_input_tree_sha256": issuance_input_tree_digest,
         "cold_publish_runs": policy["cold_publish_runs"],
         "aggregate_sha256": run["aggregate_sha256"],
         "release_lock_aggregate_sha256": release_lock_aggregate,
         "file_count": len(manifest["files"]),
+        "runtime_aggregate_sha256": manifest["runtime_aggregate_sha256"],
+        "runtime_evidence_binding_sha256": manifest["runtime_evidence_binding_sha256"],
         "build_info": build_info,
         "platform_evidence": {
             "windows_service": "blocked_missing_environment",
@@ -690,53 +942,68 @@ def main() -> int:
         output_root = output_root.absolute()
         assert_strict_descendant(task_root, output_root)
         source_revision, repository_head = resolve_provenance(ROOT)
-        dotnet, environment = resolve_dotnet(arguments.dotnet, policy["dotnet_sdk"], task_root)
+        issuance_input_tree_digest = issuance_input_tree_sha256(ROOT, source_revision)
         reset_owned_output(task_root, output_root)
-
-        runtime_identifiers = list(policy["runtime_identifiers"])
-        shutdown_build_servers(dotnet, environment)
+        snapshot_root = output_root / "source-snapshot"
+        source_root = create_source_snapshot(ROOT, source_revision, snapshot_root)
         try:
-            release_lock_root, release_lock_manifest = prepare_release_locks(
-                dotnet=dotnet,
-                environment=environment,
-                project=ROOT / policy["host_project"],
-                output_root=output_root,
-                runtime_identifiers=runtime_identifiers,
-                source_revision=source_revision,
+            snapshot_policy = json.loads(
+                (source_root / "eng/server-release-policy.json").read_text(encoding="utf-8")
             )
-        finally:
+            if snapshot_policy != policy:
+                raise ReleaseBuildError("live release policy differs from the Git source snapshot")
+            policy = snapshot_policy
+            dotnet, environment = resolve_dotnet(arguments.dotnet, policy["dotnet_sdk"], task_root)
+            runtime_identifiers = list(policy["runtime_identifiers"])
             shutdown_build_servers(dotnet, environment)
-        runs: list[dict[str, Any]] = []
-        for index in range(policy["cold_publish_runs"]):
-            run_root = output_root / "cold-runs" / f"run-{index + 1}"
-            run_root.mkdir(parents=True)
-            runs.append(
-                build_cold_run(
+            try:
+                release_lock_root, release_lock_manifest = prepare_release_locks(
                     dotnet=dotnet,
                     environment=environment,
-                    project=ROOT / policy["host_project"],
-                    run_root=run_root,
+                    project=source_root / policy["host_project"],
+                    repository=source_root,
+                    output_root=output_root,
                     runtime_identifiers=runtime_identifiers,
                     source_revision=source_revision,
-                    release_lock_root=release_lock_root,
-                    release_lock_aggregate=release_lock_manifest["aggregate_sha256"],
                 )
-            )
-        if any(run["manifest"] != runs[0]["manifest"] for run in runs[1:]):
-            raise ReleaseBuildError("independent cold-publish manifests differ")
-        if any(run["aggregate_sha256"] != runs[0]["aggregate_sha256"] for run in runs[1:]):
-            raise ReleaseBuildError("independent cold-publish aggregate digests differ")
+            finally:
+                shutdown_build_servers(dotnet, environment)
+            runs: list[dict[str, Any]] = []
+            for index in range(policy["cold_publish_runs"]):
+                run_root = output_root / "cold-runs" / f"run-{index + 1}"
+                run_root.mkdir(parents=True)
+                runs.append(
+                    build_cold_run(
+                        dotnet=dotnet,
+                        environment=environment,
+                        project=source_root / policy["host_project"],
+                        repository=source_root,
+                        run_root=run_root,
+                        runtime_identifiers=runtime_identifiers,
+                        source_revision=source_revision,
+                        issuance_input_tree_digest=issuance_input_tree_digest,
+                        release_lock_root=release_lock_root,
+                        release_lock_aggregate=release_lock_manifest["aggregate_sha256"],
+                    )
+                )
+            if any(run["manifest"] != runs[0]["manifest"] for run in runs[1:]):
+                raise ReleaseBuildError("independent cold-publish manifests differ")
+            if any(run["aggregate_sha256"] != runs[0]["aggregate_sha256"] for run in runs[1:]):
+                raise ReleaseBuildError("independent cold-publish aggregate digests differ")
 
-        evidence = promote_artifacts(
-            output_root,
-            runs[0],
-            runtime_identifiers,
-            source_revision,
-            repository_head,
-            policy,
-            environment,
-            release_lock_manifest["aggregate_sha256"],
-        )
+            evidence = promote_artifacts(
+                output_root,
+                runs[0],
+                runtime_identifiers,
+                source_revision,
+                repository_head,
+                issuance_input_tree_digest,
+                policy,
+                environment,
+                release_lock_manifest["aggregate_sha256"],
+            )
+        finally:
+            remove_source_snapshot(snapshot_root)
         print(json.dumps(evidence, ensure_ascii=True, sort_keys=True))
         return 0
     except (KeyError, OSError, ReleaseBuildError, json.JSONDecodeError) as exception:

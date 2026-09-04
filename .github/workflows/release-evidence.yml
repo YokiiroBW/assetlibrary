@@ -10,11 +10,11 @@ on:
       - 'infra/windows-server/**'
       - 'eng/server-release-policy.json'
       - 'Directory.Build.props'
+      - 'Directory.Build.targets'
       - 'Directory.Packages.props'
       - 'global.json'
       - 'NuGet.config'
-      - 'scripts/build_server_release.py'
-      - 'scripts/validate_server_release.py'
+      - 'scripts/**'
       - 'tests/release/**'
       - 'tests/dotnet/AssetLibrary.Packaging.Tests/**'
       - '.github/workflows/release-evidence.yml'
@@ -59,7 +59,7 @@ jobs:
             packages/sdk/assetlink/dotnet/packages.lock.json
             tests/dotnet/AssetLibrary.Packaging.Tests/packages.lock.json
       - name: Validate release definitions
-        run: python -B scripts/validate_server_release.py
+        run: python -I -B scripts/validate_server_release.py
       - name: Locked packaging restore
         run: dotnet restore tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --locked-mode
       - name: Packaging format and analyzer gate
@@ -74,13 +74,13 @@ jobs:
       - name: Host contract tests
         run: dotnet test tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj --configuration Release --no-build --no-restore --logger "console;verbosity=normal"
       - name: Process and release-tool tests
-        run: python -B -m unittest discover -s tests/release -p test_*.py -v
+        run: python -I -B -m unittest discover -s tests/release -p test_*.py -v
         env:
           ASSETLIBRARY_TEST_DOTNET: dotnet
       - name: Two cold native publishes
-        run: python -B scripts/build_server_release.py
+        run: python -I -B scripts/build_server_release.py
       - name: Validate native artifacts and archives
-        run: python -B scripts/validate_server_release.py --require-artifacts
+        run: python -I -B scripts/validate_server_release.py --require-artifacts
       - name: Preserve native release evidence
         uses: actions/upload-artifact@v4
         with:
@@ -114,9 +114,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Validate release definitions
-        run: python -B scripts/validate_server_release.py
+        run: python -I -B scripts/validate_server_release.py
       - name: Execute isolated Docker lifecycle
-        run: python -B tests/release/run_docker_evidence.py --execute
+        run: python -I -B tests/release/run_docker_evidence.py --execute
       - name: Preserve Docker evidence
         if: always()
         uses: actions/upload-artifact@v4

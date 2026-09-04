@@ -2,7 +2,7 @@
 
 构建前必须把 `ASSETLIBRARY_SOURCE_REVISION` 设置为 40 位 issuance commit；Compose 使用必填展开，缺失时会在创建任何容器前失败。构建上下文通过 `Dockerfile.dockerignore` 排除 Git、任务运行时、环境文件和编译缓存。
 
-V01-008 使用仓库根作为构建上下文，从唯一的
+V01-008 先验证干净发行输入并从选定 issuance commit 创建 Git 快照，再以该快照根作为构建上下文，从唯一的
 `services/core-server/Host/AssetLibrary.CoreServer.Host.csproj` 构建宿主。最终镜像：
 
 - 固定 .NET SDK `10.0.111` 与 ASP.NET Runtime `10.0.11`；
@@ -20,5 +20,5 @@ V01-008 使用仓库根作为构建上下文，从唯一的
 闭环并得到零残留证据后，协调器才可审查 M0-004-G2。
 
 默认运行 evidence 工具只会报告 daemon/授权状态，不创建资源。隔离 runner 上的真实周期必须
-显式运行 `python -B tests/release/run_docker_evidence.py --execute`；工具会选择临时 loopback 端口，
+显式运行 `python -I -B tests/release/run_docker_evidence.py --execute`；工具会选择临时 loopback 端口，
 拒绝同名既有资源，并在结束时核对容器、网络、volume 和测试镜像数量全部为零。

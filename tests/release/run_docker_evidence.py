@@ -2,13 +2,17 @@
 """Run the explicit V01-008 Docker lifecycle on an isolated real daemon."""
 from __future__ import annotations
 
+import sys
+
+if not sys.flags.isolated:
+    raise SystemExit("release tooling must run with Python isolated mode (-I)")
+
 import argparse
 import json
 import os
 import shutil
 import socket
 import subprocess
-import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -65,14 +69,18 @@ def docker_available(docker: str, environment: dict[str, str]) -> bool:
     return result.returncode == 0 and bool(result.stdout.strip())
 
 
-def compose_command(docker: str, *arguments: str) -> list[str]:
+def compose_command(
+    docker: str,
+    *arguments: str,
+    compose_file: Path = COMPOSE_FILE,
+) -> list[str]:
     return [
         docker,
         "compose",
         "--project-name",
         PROJECT_NAME,
         "--file",
-        str(COMPOSE_FILE),
+        str(compose_file),
         *arguments,
     ]
 
@@ -201,11 +209,9 @@ def main() -> int:
     task_root = release.initialize_task_root(ROOT, policy["artifact_root"])
     output_root = (arguments.output_root or task_root / "docker-evidence").absolute()
     release.reset_owned_output(task_root, output_root)
-    source_revision = arguments.source_revision
-    if source_revision is None:
-        source_revision, _ = release.resolve_provenance(ROOT)
-    if len(source_revision) != 40 or any(character not in "0123456789abcdef" for character in source_revision.lower()):
-        raise DockerEvidenceError("source revision must be a full hexadecimal Git commit")
+    source_revision, _ = release.resolve_provenance(ROOT)
+    if arguments.source_revision is not None and arguments.source_revision != source_revision:
+        raise DockerEvidenceError("explicit source revision does not match clean-tree provenance")
     environment["ASSETLIBRARY_SOURCE_REVISION"] = source_revision
     environment["ASSETLIBRARY_EVIDENCE_PORT"] = str(free_loopback_port())
 
@@ -222,16 +228,47 @@ def main() -> int:
         print(json.dumps(payload, sort_keys=True))
         return 1
 
+    snapshot_root = output_root / "source-snapshot"
+    source_root = release.create_source_snapshot(ROOT, source_revision, snapshot_root)
+    compose_file = source_root / "infra/docker/compose.yaml"
+    environment["ASSETLIBRARY_BUILD_CONTEXT"] = str(source_root)
     started = time.monotonic()
     created = False
     failure: str | None = None
     observations: dict[str, Any] = {}
     try:
-        run(compose_command(docker, "build", "--no-cache", "--pull"), environment=environment, timeout=1200)
-        run(compose_command(docker, "up", "--detach", "--wait", "--wait-timeout", "90"), environment=environment)
+        run(
+            compose_command(
+                docker,
+                "build",
+                "--no-cache",
+                "--pull",
+                compose_file=compose_file,
+            ),
+            environment=environment,
+            timeout=1200,
+        )
+        run(
+            compose_command(
+                docker,
+                "up",
+                "--detach",
+                "--wait",
+                "--wait-timeout",
+                "90",
+                compose_file=compose_file,
+            ),
+            environment=environment,
+        )
         created = True
         container = run(
-            compose_command(docker, "ps", "--quiet", "core-server"),
+            compose_command(
+                docker,
+                "ps",
+                "--quiet",
+                "core-server",
+                compose_file=compose_file,
+            ),
             environment=environment,
         ).stdout.strip()
         if not container:
@@ -270,7 +307,15 @@ def main() -> int:
         if build_info.get("contract") != CONTRACT or build_info.get("source_revision") != source_revision:
             raise DockerEvidenceError("container build-info provenance mismatch")
 
-        run(compose_command(docker, "restart", "core-server"), environment=environment)
+        run(
+            compose_command(
+                docker,
+                "restart",
+                "core-server",
+                compose_file=compose_file,
+            ),
+            environment=environment,
+        )
         wait_healthy(docker, container, environment)
         observations = {
             "identity": "1654:1654",
@@ -296,12 +341,17 @@ def main() -> int:
                         "all",
                         "--timeout",
                         "20",
+                        compose_file=compose_file,
                     ),
                     environment=environment,
                     timeout=180,
                 )
             except DockerEvidenceError as exception:
                 failure = failure or str(exception)
+        try:
+            release.remove_source_snapshot(snapshot_root)
+        except release.ReleaseBuildError as exception:
+            failure = failure or str(exception)
 
     after = residue(docker, environment)
     if not zero_residue(after):

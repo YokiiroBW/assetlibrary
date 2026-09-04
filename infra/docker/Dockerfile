@@ -5,12 +5,16 @@ COPY . ./
 RUN test "${#SOURCE_REVISION}" -eq 40 \
     && dotnet restore services/core-server/Host/AssetLibrary.CoreServer.Host.csproj \
       --locked-mode \
+      -p:DirectoryBuildPropsPath=/src/Directory.Build.props \
+      -p:DirectoryBuildTargetsPath=/src/Directory.Build.targets \
     && dotnet publish services/core-server/Host/AssetLibrary.CoreServer.Host.csproj \
       --configuration Release --self-contained false --no-restore \
       -p:ContinuousIntegrationBuild=true \
       -p:Deterministic=true -p:DeterministicSourcePaths=true \
       -p:SourceRevisionId="$SOURCE_REVISION" \
       -p:AssetLibrarySourceRevision="$SOURCE_REVISION" \
+      -p:DirectoryBuildPropsPath=/src/Directory.Build.props \
+      -p:DirectoryBuildTargetsPath=/src/Directory.Build.targets \
       -p:PathMap=/src=/_/src \
       -p:UseSharedCompilation=false \
       -p:DebugType=None -p:DebugSymbols=false \

@@ -3,7 +3,7 @@ name: assetlibrary-v01-008-evidence
 services:
   core-server:
     build:
-      context: ../..
+      context: "${ASSETLIBRARY_BUILD_CONTEXT:?set ASSETLIBRARY_BUILD_CONTEXT to the immutable Git snapshot}"
       dockerfile: infra/docker/Dockerfile
       args:
         SOURCE_REVISION: "${ASSETLIBRARY_SOURCE_REVISION:?set ASSETLIBRARY_SOURCE_REVISION to the issuance commit}"

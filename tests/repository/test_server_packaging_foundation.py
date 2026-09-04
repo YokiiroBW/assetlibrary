@@ -57,13 +57,14 @@ class ServerPackagingFoundationTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/release-evidence.yml").read_text(encoding="utf-8")
 
         for command in (
-            "scripts/validate_server_release.py",
-            "scripts/build_server_release.py",
-            "tests/release/run_docker_evidence.py --execute",
-            "scripts/validate_server_release.py --require-artifacts",
+            "python -I -B scripts/validate_server_release.py",
+            "python -I -B scripts/build_server_release.py",
+            "python -I -B tests/release/run_docker_evidence.py --execute",
+            "python -I -B scripts/validate_server_release.py --require-artifacts",
             "actions/upload-artifact@v4",
             "windows-latest",
             "ubuntu-latest",
+            "'Directory.Build.targets'",
         ):
             self.assertIn(command, workflow)
         self.assertNotRegex(workflow.lower(), r"continue-on-error\s*:\s*true")
@@ -95,14 +96,45 @@ class ServerPackagingFoundationTests(unittest.TestCase):
         windows = (ROOT / "infra/windows-server/service-evidence.ps1").read_text(encoding="utf-8")
         linux = (ROOT / "infra/linux-server/systemd-evidence.sh").read_text(encoding="utf-8")
         docker = (ROOT / "tests/release/run_docker_evidence.py").read_text(encoding="utf-8")
+        validator = (ROOT / "scripts/validate_server_release.py").read_text(encoding="utf-8")
 
         self.assertIn("[string]$Action = 'preflight'", windows)
         self.assertIn("[switch]$ApproveSystemChanges", windows)
         self.assertIn("AssetLibraryEvidenceOwner", windows)
+        self.assertIn("ExpectedArtifactTreeSha256", windows)
+        self.assertIn("ExpectedRuntimeEvidenceBindingSha256", windows)
+        self.assertIn("Get-ArtifactTreeSha256", windows)
+        self.assertIn("New-ProtectedDirectory", windows)
+        self.assertIn("DirectorySecurity", windows)
+        self.assertIn("NativeMethods]::CreateDirectory", windows)
+        self.assertIn("New-SecureStaging", windows)
+        self.assertIn("AssetLibrary-V01-008-Evidence", windows)
+        self.assertIn("HttpClientHandler", windows)
+        self.assertNotIn("& $Executable --build-info", windows)
+        self.assertNotIn("& $Executable --health-probe", windows)
         self.assertIn('action="${1:-preflight}"', linux)
         self.assertIn("ASSETLIBRARY_APPROVE_SYSTEM_CHANGES", linux)
+        self.assertIn("ASSETLIBRARY_EXPECTED_ARTIFACT_TREE_SHA256", linux)
+        self.assertIn("ASSETLIBRARY_EXPECTED_RUNTIME_EVIDENCE_BINDING_SHA256", linux)
+        self.assertIn("artifact_tree_sha256", linux)
+        self.assertIn("create_secure_staging", linux)
+        self.assertIn("evidence identity and primary group must both be non-root", linux)
+        self.assertIn("curl --fail", linux)
+        self.assertNotIn('"$artifact" --build-info', linux)
+        self.assertNotIn('"$artifact" --health-probe', linux)
         self.assertIn("--execute", docker)
         self.assertIn("explicit_execution_not_requested", docker)
+        self.assertIn("release.resolve_provenance(ROOT)", docker)
+        self.assertIn("release.create_source_snapshot", docker)
+        self.assertIn("explicit source revision does not match clean-tree provenance", docker)
+        self.assertIn("open_contained_regular_file", validator)
+        self.assertIn("tempfile.TemporaryFile", validator)
+        self.assertNotIn("safe_manifest_path", validator)
+
+        policy = json.loads((ROOT / "eng/server-release-policy.json").read_text(encoding="utf-8"))
+        self.assertIn("Directory.Build.targets", policy["issuance_inputs"])
+        self.assertIn("tests/release/run_docker_evidence.py", policy["issuance_inputs"])
+        self.assertIn("scripts", policy["issuance_inputs"])
 
     def test_release_and_production_write_gates_remain_open(self) -> None:
         ledger = json.loads((ROOT / "tests/architecture/m0-gates.json").read_text(encoding="utf-8"))
