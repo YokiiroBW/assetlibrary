@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_account_lifecycle_planned_auth_host_blocked_release_blocked",
-  "next_action": "Activate V01-012 to implement administrator-authorized account lifecycle, fail-closed secret-risk screening, atomic session invalidation and no-secret audit; keep bootstrap, external login, business APIs, production writes and every blocked release target disabled",
+  "status": "v0_1_account_lifecycle_active_auth_host_blocked_release_blocked",
+  "next_action": "Implement and verify V01-012 administrator-authorized account lifecycle, fail-closed secret-risk screening, atomic session invalidation and no-secret audit; keep bootstrap, external login, business APIs, production writes and every blocked release target disabled",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_completed_v01_011_completed_v01_012_planned_release_blocked",
+  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_completed_v01_011_completed_v01_012_active_release_blocked",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -54,7 +54,8 @@
     "The user approved local accounts with secure server-side sessions and a reserved OIDC adapter boundary. V01-011 was planned as the GatewayAuth owner follow-up after V01-006 and V01-010; it may add only module-owned credential/session state and authentication services, and must not expose login over the current HTTP-only host or enable business/file-write/release capabilities.",
     "V01-011 was activated in C:\\YOKI\\Codex\\worktrees\\V01-011 on branch codex/v01-011-local-auth-runtime. It has exclusive coordinator-approved ownership of one append-only GatewayAuth migration and related manifest update for this task; production account provisioning, HTTP login, TLS, business APIs and release capabilities remain blocked.",
     "V01-011 implementation 5d8d47c36f061fcd03c704ed5cdb36950d6ce723 and handoff c5bc549b6838b13aec8be742ebadbd805951a8f9 were merged at 8c80191f335b8dbed9b20bba974e35592d2bdf99 after 369/369 unique automated tests, real PostgreSQL 16.15 local-login/session/CSRF/revocation/restart/concurrency evidence, repository/architecture/release verification and task-sandbox cleanup. The local authentication component is complete, but production authentication remains blocked on controlled account provisioning/recovery, HTTPS cookie/Origin, persistent key/deployment secret, upstream abuse control and authenticated Host composition; no business, file-write or release gate changed.",
-    "V01-012 was planned as the GatewayAuth owner follow-up after V01-011. It may add only administrator-authorized account lifecycle services, a mandatory fail-closed common/breached-secret screening port, no-secret audit/idempotency state and one append-only GatewayAuth migration; bootstrap, HTTP/CLI endpoints, TLS, deployment secrets, business APIs, writes and release capabilities remain blocked."
+    "V01-012 was planned as the GatewayAuth owner follow-up after V01-011. It may add only administrator-authorized account lifecycle services, a mandatory fail-closed common/breached-secret screening port, no-secret audit/idempotency state and one append-only GatewayAuth migration; bootstrap, HTTP/CLI endpoints, TLS, deployment secrets, business APIs, writes and release capabilities remain blocked.",
+    "V01-012 was activated in C:\\YOKI\\Codex\\worktrees\\V01-012 on branch codex/v01-012-account-lifecycle. It has exclusive coordinator-approved ownership of append-only GatewayAuth migration 11 and its manifest update; fixed roles, existing migrations, Host entry points and every release or production-write gate remain unchanged."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated"
 }
