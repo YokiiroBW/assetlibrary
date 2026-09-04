@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_database_runtime_component_completed_auth_decision_required_release_blocked",
-  "next_action": "Freeze the production authentication choice and plan its owner-scoped runtime task before authenticated read-host integration; keep database composition, business APIs, TLS, writes and every blocked release target disabled",
+  "status": "v0_1_local_auth_runtime_planned_release_blocked",
+  "next_action": "Activate V01-011 to implement the local-account authentication core and server-side secure-session store with a reserved OIDC adapter boundary; keep HTTP login, business APIs, TLS, writes and every blocked release target disabled",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_completed_release_blocked",
+  "implementation_status": "v01_008_partial_v01_009_completed_v01_010_completed_v01_011_planned_release_blocked",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -50,7 +50,8 @@
     "V01-009 implementation 4300c2d4eceb6104d551264c3f249c95c9f9d68e and handoff 20328a89649346654e2cd69cf65decab1b506a50 were merged at bb9c9ed2895a8dc598da29666c03bbcf1b66503a after fail-closed mutation/output tests, repository and architecture verification, affected cross-stack tests and independent scope review. The V01-009 gate is complete, but its computed V0.1 Alpha decision remains blocked by 15 capabilities, six release targets and the V01-008 partial input; no M0 gate or production write state changed.",
     "V01-010 was planned as the database-migration owner follow-up after V01-003 and V01-009. It may add production PostgreSQL configuration, bounded connectivity and exact migration-ledger readiness to the shared host, but must not apply migrations, provision login roles, expose business APIs, choose an authentication scheme, log secrets or change any release/write gate.",
     "V01-010 was activated in C:\\YOKI\\Codex\\worktrees\\V01-010 on branch codex/v01-010-database-runtime-composition. It owns only production database configuration/readiness composition and task-local evidence; V01-008 remains partial and all authentication, business API, TLS, file-write and release capabilities remain blocked.",
-    "V01-010 implementation 27e53182452b3b4ad5ed29a4ce236ed90b3e969c and handoff 12530541c25a2cabd79f283553855493e7af9320 were merged at 68901da397d945a1b47b4bb3f99b6eb78bf75dd2 after 351/351 unique automated tests, real PostgreSQL 16.15 startup/live readiness, drift recovery, bounded lock timeout, disconnect and least-privilege rejection evidence, repository/architecture/release verification and zero task-runtime residue. The runtime component is complete, but database mode remains opt-in and production-database-composition, authentication, business APIs, TLS, file writes, V01-008 and every release target remain blocked."
+    "V01-010 implementation 27e53182452b3b4ad5ed29a4ce236ed90b3e969c and handoff 12530541c25a2cabd79f283553855493e7af9320 were merged at 68901da397d945a1b47b4bb3f99b6eb78bf75dd2 after 351/351 unique automated tests, real PostgreSQL 16.15 startup/live readiness, drift recovery, bounded lock timeout, disconnect and least-privilege rejection evidence, repository/architecture/release verification and zero task-runtime residue. The runtime component is complete, but database mode remains opt-in and production-database-composition, authentication, business APIs, TLS, file writes, V01-008 and every release target remain blocked.",
+    "The user approved local accounts with secure server-side sessions and a reserved OIDC adapter boundary. V01-011 was planned as the GatewayAuth owner follow-up after V01-006 and V01-010; it may add only module-owned credential/session state and authentication services, and must not expose login over the current HTTP-only host or enable business/file-write/release capabilities."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated"
 }
