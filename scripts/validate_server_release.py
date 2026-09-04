@@ -52,6 +52,7 @@ REQUIRED_ISSUANCE_INPUTS = (
     "Directory.Packages.props",
     "NuGet.config",
     "global.json",
+    "database/migrations/production",
     "eng/server-release-policy.json",
     "eng/CodeMetricsConfig.txt",
     "infra/docker",

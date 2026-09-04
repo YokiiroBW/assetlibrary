@@ -16,4 +16,9 @@
   <ItemGroup>
     <AssemblyMetadata Include="AssetLibrary.SourceRevision" Value="$(AssetLibrarySourceRevision)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../../../database/migrations/production/manifest.json"
+                      LogicalName="AssetLibrary.Database.Migrations.Manifest" />
+  </ItemGroup>
 </Project>

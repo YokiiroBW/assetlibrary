@@ -5,7 +5,9 @@ namespace AssetLibrary.CoreServer.Hosting;
 
 internal static class CoreServerApplicationFactory
 {
-    public static WebApplication Build(CoreServerHostOptions options)
+    public static WebApplication Build(
+        CoreServerHostOptions options,
+        IDatabaseReadinessProbe? database = null)
     {
         ArgumentNullException.ThrowIfNull(options);
         var builder = CoreServerWebApplicationBuilder.Create(options.EnvironmentName);
@@ -20,7 +22,7 @@ internal static class CoreServerApplicationFactory
 
         var application = builder.Build();
         application.MapGet("/healthz", CoreServerEndpointPayloads.Health);
-        application.MapGet("/readyz", CoreServerEndpointPayloads.Ready);
+        CoreServerReadinessEndpoint.Map(application, database);
         CoreServerHostLogging.RegisterLifecycle(application, options.Port);
         return application;
     }

@@ -171,6 +171,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            **/packages.lock.json
       - name: Install matching PostgreSQL 16 client tools
         run: |
           sudo apt-get update
@@ -178,5 +184,9 @@ jobs:
           test "$(psql --version | sed -E 's/.* ([0-9]+).*/\1/')" = "16"
       - name: Validate production migration manifest
         run: python -B database/migrations/production/migration_tool.py validate
+      - name: Build database-aware CoreServer host
+        run: |
+          dotnet restore services/core-server/Host/AssetLibrary.CoreServer.Host.csproj --locked-mode
+          dotnet build services/core-server/Host/AssetLibrary.CoreServer.Host.csproj --configuration Release --no-restore
       - name: PostgreSQL migration, ownership, backup and restore tests
         run: python -B -m unittest discover -s tests/database -p test_*.py -v

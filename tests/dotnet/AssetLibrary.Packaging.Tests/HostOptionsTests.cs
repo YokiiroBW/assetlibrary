@@ -1,5 +1,6 @@
 using System.Net;
 using AssetLibrary.CoreServer.Hosting;
+using Npgsql;
 
 namespace AssetLibrary.Packaging.Tests;
 
@@ -118,6 +119,75 @@ public sealed class HostOptionsTests
         Assert.AreEqual("invalid_environment", development.ErrorCode);
         Assert.IsTrue(production.IsValid);
         Assert.AreEqual("Production", production.Options!.EnvironmentName);
+    }
+
+    [TestMethod]
+    public void DatabaseReadinessConnectionIsEnvironmentOnlyAndRedacted()
+    {
+        using var state = TemporaryDirectory.Create();
+        const string password = "v01-010-secret-value";
+        var environment = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ASSETLIBRARY_STATE_PATH"] = state.Path,
+            ["ASSETLIBRARY_ENVIRONMENT"] = "Production",
+            [DatabaseReadinessOptions.EnvironmentName] =
+                $"Host=127.0.0.1;Database=assetlibrary;Username=runtime;Password={password};"
+                + "Timeout=300;Command Timeout=300;Maximum Pool Size=100;"
+                + "Include Error Detail=true;Multiplexing=true;No Reset On Close=true;Enlist=true",
+        };
+
+        var result = CoreServerHostOptions.Parse([], key => environment.GetValueOrDefault(key));
+
+        Assert.IsTrue(result.IsValid);
+        Assert.IsNotNull(result.Options!.Database);
+        Assert.AreEqual("[redacted]", result.Options.Database.Connection.ToString());
+        Assert.DoesNotContain(password, result.Options.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain("assetlibrary", result.Options.Database.ToString(), StringComparison.OrdinalIgnoreCase);
+        var bounded = new NpgsqlConnectionStringBuilder(result.Options.Database.Connection.Reveal());
+        Assert.AreEqual(DatabaseReadinessOptions.TimeoutSeconds, bounded.Timeout);
+        Assert.AreEqual(DatabaseReadinessOptions.TimeoutSeconds, bounded.CommandTimeout);
+        Assert.AreEqual(DatabaseReadinessOptions.MaximumPoolSize, bounded.MaxPoolSize);
+        Assert.IsFalse(bounded.IncludeErrorDetail);
+        Assert.IsFalse(bounded.Multiplexing);
+        Assert.IsFalse(bounded.NoResetOnClose);
+        Assert.IsFalse(bounded.Enlist);
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("Host=127.0.0.1;Database=assetlibrary")]
+    [DataRow("Host=127.0.0.1;Username=runtime")]
+    [DataRow("Database=assetlibrary;Username=runtime")]
+    [DataRow("Host=127.0.0.1;Database=assetlibrary;Username=runtime;Options=-c statement_timeout=0")]
+    public void InvalidDatabaseReadinessConfigurationFailsClosed(string connection)
+    {
+        using var state = TemporaryDirectory.Create();
+        var environment = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["ASSETLIBRARY_STATE_PATH"] = state.Path,
+            ["ASSETLIBRARY_ENVIRONMENT"] = "Production",
+            [DatabaseReadinessOptions.EnvironmentName] = connection,
+        };
+
+        var result = CoreServerHostOptions.Parse([], key => environment.GetValueOrDefault(key));
+
+        Assert.IsFalse(result.IsValid);
+        Assert.AreEqual("invalid_database_configuration", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public void NonRunCommandsDoNotReadDatabaseSecrets()
+    {
+        static string? Environment(string key) =>
+            key == DatabaseReadinessOptions.EnvironmentName ? "not-a-connection" : null;
+
+        var buildInfo = CoreServerHostOptions.Parse(["--build-info"], Environment);
+        var healthProbe = CoreServerHostOptions.Parse(["--health-probe"], Environment);
+
+        Assert.IsTrue(buildInfo.IsValid);
+        Assert.IsTrue(healthProbe.IsValid);
+        Assert.IsNull(buildInfo.Options!.Database);
+        Assert.IsNull(healthProbe.Options!.Database);
     }
 }
 

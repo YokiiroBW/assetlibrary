@@ -9,7 +9,8 @@ internal sealed record CoreServerHostOptions(
     string EnvironmentName,
     IPAddress BindAddress,
     IPAddress ProbeAddress,
-    int Port)
+    int Port,
+    DatabaseReadinessOptions? Database = null)
 {
     public const int DefaultPort = 5080;
     public const int MinimumPort = 1024;
@@ -108,13 +109,22 @@ internal sealed record CoreServerHostOptions(
             return CoreServerHostOptionsResult.Invalid(runConfiguration.ErrorCode);
         }
 
+        var database = command == CoreServerHostCommand.Run
+            ? DatabaseReadinessOptions.Parse(environment(DatabaseReadinessOptions.EnvironmentName))
+            : DatabaseReadinessOptionsResult.Disabled();
+        if (!database.IsValid)
+        {
+            return CoreServerHostOptionsResult.Invalid(database.ErrorCode);
+        }
+
         return CoreServerHostOptionsResult.Valid(new CoreServerHostOptions(
             command,
             runConfiguration.StatePath,
             runConfiguration.EnvironmentName,
             bindResult.Address!,
             probeResult.Address!,
-            portResult.Port));
+            portResult.Port,
+            database.Options));
     }
 
     private static RunConfigurationParseResult ParseRunConfiguration(
