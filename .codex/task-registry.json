@@ -352,7 +352,7 @@
       "id": "V01-013",
       "title": "实现隐私保护的生产口令泄露风险适配器",
       "module": "gateway-auth-secret-risk-provider",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-012"
       ],
