@@ -55,7 +55,7 @@
 - 最后管理员并发、operation 重放/冲突、账号冲突不覆盖、退避清理、会话撤销、恢复重启持久化和无 secret 审计均通过。
 - `v0.1-start` 允许；默认 Alpha 审计退出 0 且 decision 为 blocked；`--require-ready` 与 `v0.1-release` 均按合同返回 3。
 - 实现提交：`849a8ab8d7e5d05629ec401db4dc77c142f27e56`；最终恢复/重启测试提交：`250b49a38fc02d1d708eafe16775b0a1ad9e5282`。
-- 交接基线提交：在本交接三件套首次完整提交后记录。
+- 交接基线提交：`7b813a2f0b70dc97b4d5fbd977cddef5df73542d`。
 
 ## 文件安全与运行残留
 

@@ -97,4 +97,4 @@ python -B tests/architecture/check_release_gates.py --target v0.1-release
 
 - 核心实现：`849a8ab8d7e5d05629ec401db4dc77c142f27e56`
 - 最终恢复/重启证据：`250b49a38fc02d1d708eafe16775b0a1ad9e5282`
-- 交接基线：在交接三件套首次完整提交后记录
+- 交接基线：`7b813a2f0b70dc97b4d5fbd977cddef5df73542d`
