@@ -283,7 +283,7 @@
       "id": "V01-009",
       "title": "集成 V0.1 Alpha 候选并执行 release gate",
       "module": "release-integration-gate",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-006",
         "V01-007",

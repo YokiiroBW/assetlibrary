@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_alpha_release_integration_in_progress",
-  "next_action": "Implement and verify V01-009 in its isolated worktree as a fail-closed Alpha integration gate; do not claim release readiness while any required capability or v0.1-release gate remains unresolved",
+  "status": "v0_1_alpha_gate_implemented_release_blocked",
+  "next_action": "Plan owner-scoped follow-up tasks beginning with production authentication, PostgreSQL runtime and read-only business-host composition; keep production writes and every blocked release target disabled until their implementation and environment evidence pass",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_008_partial_v01_009_active",
+  "implementation_status": "v01_008_partial_v01_009_completed_release_blocked",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -46,7 +46,8 @@
     "V01-008 was activated in C:\\YOKI\\Codex\\worktrees\\V01-008 on branch codex/v01-008-packaging-release-evidence. It may build a minimal shared production host and distribution evidence, but cannot enable production file writes, invent Docker/SCM/Linux results, modify business contracts or declare any platform release without the corresponding executed gate evidence.",
     "V01-008 implementation and security hardening commit 81eb838136b9826c9ed6e0ac9e1ae9fdb42cfd49 plus handoff delivery 9a6492ab053427cb7b116187e44e18741c3fd8e9 were merged after 360/360 unique automated tests, two deterministic cold publishes, independent artifact validation and a native win-x64 process smoke. The task remains partial because approved Windows SCM, real Docker daemon and Linux systemd cycles are still blocked_missing_environment; no release or production-write gate changed.",
     "V01-009 was planned as the frozen sequence-8 release integration gate with V01-006, V01-007 and V01-008 as direct inputs. It may integrate and test only the already approved read-only and sandbox capabilities, enumerate missing Alpha capabilities, and produce a fail-closed release decision; V01-008 remains partial and no open gate may be converted into release readiness without executed evidence.",
-    "V01-009 was activated in C:\\YOKI\\Codex\\worktrees\\V01-009 on branch codex/v01-009-alpha-release-integration. Its registry records V01-008 as an accepted partial adjudication input; this exception is restricted to the release-integration gate and leaves V01-008 plus every underlying platform and production-write blocker unchanged."
+    "V01-009 was activated in C:\\YOKI\\Codex\\worktrees\\V01-009 on branch codex/v01-009-alpha-release-integration. Its registry records V01-008 as an accepted partial adjudication input; this exception is restricted to the release-integration gate and leaves V01-008 plus every underlying platform and production-write blocker unchanged.",
+    "V01-009 implementation 4300c2d4eceb6104d551264c3f249c95c9f9d68e and handoff 20328a89649346654e2cd69cf65decab1b506a50 were merged at bb9c9ed2895a8dc598da29666c03bbcf1b66503a after fail-closed mutation/output tests, repository and architecture verification, affected cross-stack tests and independent scope review. The V01-009 gate is complete, but its computed V0.1 Alpha decision remains blocked by 15 capabilities, six release targets and the V01-008 partial input; no M0 gate or production write state changed."
   ],
-  "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
+  "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated"
 }
