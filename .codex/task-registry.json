@@ -336,7 +336,7 @@
       "id": "V01-012",
       "title": "实现本地账号生命周期核心与口令风险门禁",
       "module": "gateway-auth-account-lifecycle",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-011"
       ],
