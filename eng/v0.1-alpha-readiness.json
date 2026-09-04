@@ -1,0 +1,366 @@
+{
+  "version": 1,
+  "contract": "v01-009/1",
+  "declared_decision": "blocked",
+  "accepted_partial_inputs": [
+    "V01-008"
+  ],
+  "output": {
+    "root": ".runtime/sandbox-storage/V01-009",
+    "marker": ".assetlibrary-v01-009-output",
+    "marker_value": "AssetLibrary/V01-009/alpha-readiness/v1\n"
+  },
+  "task_inputs": [
+    {
+      "id": "V01-001",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-001/result.json"
+    },
+    {
+      "id": "V01-002",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-002/result.json"
+    },
+    {
+      "id": "V01-003",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-003/result.json"
+    },
+    {
+      "id": "V01-004",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-004/result.json"
+    },
+    {
+      "id": "V01-005",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-005/result.json"
+    },
+    {
+      "id": "V01-006",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-006/result.json"
+    },
+    {
+      "id": "V01-007",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-007/result.json"
+    },
+    {
+      "id": "V01-008",
+      "registry_status": "partial",
+      "handoff_status": "partial",
+      "acceptance": "adjudication_only",
+      "result": ".codex/handoffs/V01-008/result.json"
+    }
+  ],
+  "release_targets": [
+    "v0.1-release",
+    "windows-server-release",
+    "linux-server-release",
+    "docker-release",
+    "large-file-release",
+    "production-file-writes"
+  ],
+  "capabilities": [
+    {
+      "id": "build-and-dependency-foundation",
+      "status": "passed",
+      "source_task": "V01-001",
+      "release_target": null,
+      "owner": "build-foundation-owner",
+      "follow_up_task": null,
+      "evidence": [
+        ".codex/handoffs/V01-001/result.json",
+        "global.json"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "assetlink-generated-sdks",
+      "status": "passed",
+      "source_task": "V01-002",
+      "release_target": null,
+      "owner": "sdk-generation-owner",
+      "follow_up_task": null,
+      "evidence": [
+        ".codex/handoffs/V01-002/result.json",
+        "contracts/assetlink/handshake.schema.json"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "postgres-migration-foundation",
+      "status": "passed",
+      "source_task": "V01-003",
+      "release_target": null,
+      "owner": "database-migration-owner",
+      "follow_up_task": null,
+      "evidence": [
+        ".codex/handoffs/V01-003/result.json",
+        "database/migrations/production/manifest.json"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "library-asset-scan-read-core",
+      "status": "passed",
+      "source_task": "V01-004",
+      "release_target": null,
+      "owner": "library-asset-scan-owner",
+      "follow_up_task": null,
+      "evidence": [
+        ".codex/handoffs/V01-004/result.json"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "task-health-outbox-core",
+      "status": "passed",
+      "source_task": "V01-005",
+      "release_target": null,
+      "owner": "task-health-owner",
+      "follow_up_task": null,
+      "evidence": [
+        ".codex/handoffs/V01-005/result.json"
+      ],
+      "blockers": []
+    },
+    {
+      "id": "read-only-permission-gateway-web",
+      "status": "component_only",
+      "source_task": "V01-006",
+      "release_target": null,
+      "owner": "web-gateway-owner",
+      "follow_up_task": "V01-AUTH-RUNTIME-INTEGRATION",
+      "evidence": [
+        ".codex/handoffs/V01-006/result.json"
+      ],
+      "blockers": [
+        "The verified adapter and Web consumer are not connected to a production identity provider, Npgsql data source or executable business host."
+      ]
+    },
+    {
+      "id": "transfer-operation-sandbox",
+      "status": "deferred_fail_closed",
+      "source_task": "V01-007",
+      "release_target": "production-file-writes",
+      "owner": "transfer-operation-owner",
+      "follow_up_task": "V01-WRITE-DURABILITY-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-007/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "Only task-owned sandbox adapters exist; production physical writes remain disabled by M0-006-G2."
+      ]
+    },
+    {
+      "id": "single-core-native-packaging",
+      "status": "component_only",
+      "source_task": "V01-008",
+      "release_target": null,
+      "owner": "server-packaging-owner",
+      "follow_up_task": "V01-PLATFORM-RELEASE-GATES",
+      "evidence": [
+        ".codex/handoffs/V01-008/result.json",
+        "eng/server-release-policy.json"
+      ],
+      "blockers": [
+        "Native artifacts and the host process are verified, but the owning task remains partial until all required target lifecycle evidence is executed."
+      ]
+    },
+    {
+      "id": "production-authentication",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "gateway-auth-owner",
+      "follow_up_task": "V01-AUTH-RUNTIME",
+      "evidence": [
+        ".codex/handoffs/V01-006/result.json",
+        ".codex/handoffs/V01-008/result.json"
+      ],
+      "blockers": [
+        "No production login, credential validation, session issuance or identity-provider composition is implemented."
+      ]
+    },
+    {
+      "id": "production-database-composition",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "database-migration-owner",
+      "follow_up_task": "V01-DATABASE-RUNTIME",
+      "evidence": [
+        ".codex/handoffs/V01-003/result.json",
+        ".codex/handoffs/V01-008/result.json"
+      ],
+      "blockers": [
+        "The production host does not configure PostgreSQL connectivity, migration-state verification or startup readiness."
+      ]
+    },
+    {
+      "id": "host-business-api",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "web-gateway-owner",
+      "follow_up_task": "V01-READ-HOST-INTEGRATION",
+      "evidence": [
+        "eng/server-release-policy.json",
+        ".codex/handoffs/V01-008/result.json"
+      ],
+      "blockers": [
+        "The released host explicitly reports business_api_ready=false and maps host health endpoints only."
+      ]
+    },
+    {
+      "id": "tls-and-secret-management",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "server-packaging-owner",
+      "follow_up_task": "V01-TLS-SECRETS",
+      "evidence": [
+        ".codex/handoffs/V01-008/result.json",
+        "docs/13_权限分享安全通知与WebDAV.md"
+      ],
+      "blockers": [
+        "TLS termination, certificate lifecycle, persistent Data Protection keys and separated deployment secrets are not integrated."
+      ]
+    },
+    {
+      "id": "metadata-tags-ratings-colors",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "metadata-sidecar-owner",
+      "follow_up_task": "V01-METADATA-CORE",
+      "evidence": [
+        "docs/02_已确认需求基线.md"
+      ],
+      "blockers": [
+        "The V0.1 shared tag, rating and color write model and audited use cases have not been implemented."
+      ]
+    },
+    {
+      "id": "exact-dedup",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "search-dedup-owner",
+      "follow_up_task": "V01-DEDUP-CORE",
+      "evidence": [
+        "docs/02_已确认需求基线.md"
+      ],
+      "blockers": [
+        "No production strong-hash exact-duplicate evidence model or permission-filtered query is implemented."
+      ]
+    },
+    {
+      "id": "software-backup-restore",
+      "status": "blocked_missing_implementation",
+      "source_task": null,
+      "release_target": null,
+      "owner": "backup-update-owner",
+      "follow_up_task": "V01-BACKUP-RESTORE",
+      "evidence": [
+        "docs/15_性能任务健康容量备份与更新.md",
+        ".codex/handoffs/V01-003/result.json"
+      ],
+      "blockers": [
+        "Migration preflight backup evidence does not yet provide the product-level configuration, logical-state restore and upgrade rollback workflow."
+      ]
+    },
+    {
+      "id": "production-file-operations",
+      "status": "deferred_fail_closed",
+      "source_task": "V01-007",
+      "release_target": "production-file-writes",
+      "owner": "operation-trash-owner",
+      "follow_up_task": "V01-WRITE-DURABILITY-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-007/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "No production durable filesystem adapter, operation/session store, audit composition or approved durability evidence exists."
+      ]
+    },
+    {
+      "id": "scale-and-fault-release-evidence",
+      "status": "blocked_missing_environment",
+      "source_task": "V01-007",
+      "release_target": "large-file-release",
+      "owner": "test-performance-owner",
+      "follow_up_task": "V01-LARGE-FILE-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-007/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "Release-like 1, 20 and 100 GiB real-byte runs plus the remaining durability and capacity evidence have not executed."
+      ]
+    },
+    {
+      "id": "windows-service-runtime-evidence",
+      "status": "blocked_missing_environment",
+      "source_task": "V01-008",
+      "release_target": "windows-server-release",
+      "owner": "server-packaging-owner",
+      "follow_up_task": "V01-WINDOWS-SERVICE-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-008/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "The approved Windows SCM install, LocalService health, stop, uninstall and zero-residue cycle is not yet recorded."
+      ]
+    },
+    {
+      "id": "linux-systemd-runtime-evidence",
+      "status": "blocked_missing_environment",
+      "source_task": "V01-008",
+      "release_target": "linux-server-release",
+      "owner": "server-packaging-owner",
+      "follow_up_task": "V01-LINUX-NAMESPACE-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-008/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "No approved Linux root/systemd lifecycle and non-cooperative namespace containment evidence is recorded."
+      ]
+    },
+    {
+      "id": "docker-runtime-evidence",
+      "status": "blocked_missing_environment",
+      "source_task": "V01-008",
+      "release_target": "docker-release",
+      "owner": "server-packaging-owner",
+      "follow_up_task": "V01-DOCKER-GATE",
+      "evidence": [
+        ".codex/handoffs/V01-008/result.json",
+        "tests/architecture/m0-gates.json"
+      ],
+      "blockers": [
+        "No real daemon build, health, restart, hardening and down-with-volumes zero-residue evidence is recorded."
+      ]
+    }
+  ]
+}

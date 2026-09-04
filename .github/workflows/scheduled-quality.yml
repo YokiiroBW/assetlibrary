@@ -38,5 +38,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Fail closed on unresolved V0.1 release gates
-        run: python tests/architecture/check_release_gates.py --target v0.1-release
+      - name: Require complete V0.1 Alpha release evidence
+        run: python -I -B scripts/validate_v0_1_alpha.py --require-ready
