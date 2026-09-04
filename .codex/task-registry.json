@@ -266,7 +266,7 @@
       "id": "V01-008",
       "title": "实现打包与发布证据闭环",
       "module": "packaging-release-evidence",
-      "status": "ready",
+      "status": "partial",
       "depends_on": [
         "V01-001",
         "V01-006",

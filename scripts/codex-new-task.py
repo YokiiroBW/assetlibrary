@@ -16,7 +16,17 @@ REGISTRY = ROOT / '.codex' / 'task-registry.json'
 TEMPLATE = ROOT / '.codex' / 'prompts' / 'SUBTASK_TEMPLATE.md'
 TASK_ID_RE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$')
 COMPLETE_STATUSES = {'completed', 'complete', 'done'}
-PARTIAL_DEPENDENCY_GATE_MODULE = 'architecture-quality-gate'
+PARTIAL_DEPENDENCY_GATE_POLICIES = {
+    'architecture-quality-gate': (
+        'M0-009 must classify every residual gate as blocking, deferred, or rejected; '
+        'upstream task statuses remain partial.'
+    ),
+    'release-integration-gate': (
+        'V01-009 must keep every unresolved v0.1-release gate blocking and may report '
+        'release readiness only after all required target evidence passes; upstream task '
+        'statuses remain partial.'
+    ),
+}
 
 
 def slugify(value: str) -> str:
@@ -190,10 +200,11 @@ def main() -> int:
             return 3
         if (
             args.accept_partial_dependencies
-            and item.get('module') != PARTIAL_DEPENDENCY_GATE_MODULE
+            and item.get('module') not in PARTIAL_DEPENDENCY_GATE_POLICIES
         ):
             print(
-                '--accept-partial-dependencies is restricted to the architecture quality gate.',
+                '--accept-partial-dependencies is restricted to the architecture quality gate '
+                'or release integration gate.',
                 file=sys.stderr,
             )
             return 3
@@ -214,7 +225,7 @@ def main() -> int:
         ]
         if partial_dependencies:
             print(
-                'Architecture gate will adjudicate partial inputs without marking them complete: '
+                'Gate will adjudicate partial inputs without marking them complete: '
                 + ', '.join(partial_dependencies),
                 file=sys.stderr,
             )
@@ -275,10 +286,7 @@ def main() -> int:
         updated['status'] = 'ready'
         if partial_dependencies:
             updated['accepted_partial_dependencies'] = partial_dependencies
-            updated['partial_dependency_policy'] = (
-                'M0-009 must classify every residual gate as blocking, deferred, or rejected; '
-                'upstream task statuses remain partial.'
-            )
+            updated['partial_dependency_policy'] = PARTIAL_DEPENDENCY_GATE_POLICIES[item['module']]
         index = items.index(item)
         registry['tasks'][index] = updated
     else:

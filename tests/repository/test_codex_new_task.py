@@ -151,6 +151,37 @@ class NewTaskTests(unittest.TestCase):
         self.assertIn('blocking, deferred, or rejected', gate['partial_dependency_policy'])
         self.assertEqual(provider['status'], 'partial')
 
+    def test_release_integration_gate_can_record_partial_packaging_input(self):
+        temp, repo = self.setup_repo()
+        self.addCleanup(temp.cleanup)
+        data = json.loads((repo / '.codex/task-registry.json').read_text())
+        data['tasks'].append({
+            'id': 'V01-008', 'title': 'Packaging evidence',
+            'module': 'packaging-release-evidence', 'status': 'partial',
+            'depends_on': ['M0-001'],
+            'handoff': '.codex/handoffs/V01-008/summary.md',
+        })
+        data['tasks'].append({
+            'id': 'V01-009', 'title': 'Alpha release integration',
+            'module': 'release-integration-gate', 'status': 'planned',
+            'depends_on': ['V01-008'],
+            'handoff': '.codex/handoffs/V01-009/summary.md',
+        })
+        (repo / '.codex/task-registry.json').write_text(json.dumps(data), encoding='utf-8')
+
+        result = subprocess.run(
+            [sys.executable, 'scripts/codex-new-task.py', '--activate', 'V01-009',
+             '--accept-partial-dependencies', '--worktrees-dir', 'worktrees'],
+            cwd=repo, text=True, capture_output=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        registry = json.loads((repo / '.codex/task-registry.json').read_text())
+        gate = next(item for item in registry['tasks'] if item['id'] == 'V01-009')
+        packaging = next(item for item in registry['tasks'] if item['id'] == 'V01-008')
+        self.assertEqual(gate['accepted_partial_dependencies'], ['V01-008'])
+        self.assertIn('v0.1-release gate blocking', gate['partial_dependency_policy'])
+        self.assertEqual(packaging['status'], 'partial')
+
     def test_partial_dependency_override_is_restricted_to_architecture_gate(self):
         temp, repo = self.setup_repo()
         self.addCleanup(temp.cleanup)
