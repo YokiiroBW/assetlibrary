@@ -320,18 +320,17 @@
       "id": "V01-011",
       "title": "实现本地账号认证核心与安全会话存储",
       "module": "gateway-auth-local-runtime",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-006",
         "V01-010"
       ],
       "owner": "codex-agent-v01-011",
       "branch": "codex/v01-011-local-auth-runtime",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-011",
       "task_file": ".codex/tasks/V01-011.md",
       "handoff": ".codex/handoffs/V01-011/summary.md",
-      "thread_deep_link": "",
-      "milestone": "V0.1"
+      "thread_deep_link": ""
     }
   ]
 }
