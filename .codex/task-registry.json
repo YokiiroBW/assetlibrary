@@ -278,6 +278,24 @@
       "task_file": ".codex/tasks/V01-008.md",
       "handoff": ".codex/handoffs/V01-008/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-009",
+      "title": "集成 V0.1 Alpha 候选并执行 release gate",
+      "module": "release-integration-gate",
+      "status": "planned",
+      "depends_on": [
+        "V01-006",
+        "V01-007",
+        "V01-008"
+      ],
+      "owner": "codex-agent-v01-009",
+      "branch": "codex/v01-009-alpha-release-integration",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-009.md",
+      "handoff": ".codex/handoffs/V01-009/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }

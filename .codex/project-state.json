@@ -3,10 +3,10 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_packaging_release_evidence_partial",
-  "next_action": "Plan and activate V01-009 Alpha release integration as a fail-closed convergence gate; keep V01-008 partial and every unresolved platform, production-write and v0.1-release gate open",
+  "status": "v0_1_alpha_release_integration_planned",
+  "next_action": "Activate V01-009 Alpha release integration with V01-008 accepted only as a partial adjudication input; keep every unresolved platform, production-write and v0.1-release gate open",
   "architecture_contract_status": "frozen",
-  "implementation_status": "v01_008_partial_v01_009_unplanned",
+  "implementation_status": "v01_008_partial_v01_009_planned",
   "notes": [
     "Windows standalone client precedes deep Explorer integration.",
     "All destructive tests must use isolated sandbox storage.",
@@ -44,7 +44,8 @@
     "V01-007 implementation 7fb7de2d65ea9b87117ba6430fc7df496f5ed941 and handoff 6aba5e0ce89801ff283fe388b394dde72e18977f were fast-forward merged after 317/317 unique automated tests, bounded physical-sandbox copy/move/rename/trash/restore, fault recovery, concurrency/fencing, repository/architecture and release-gate verification. V01-008 packaging and release evidence is next; production file writes, Provider, Explorer and every unresolved release target remain blocked.",
     "V01-008 was planned from frozen sequence 7 after V01-006 and V01-007. It owns production host packaging, infra definitions and release-evidence automation only; M0-004 evidence is a partial controlled input, and no Windows Service, Docker, Linux, production-write or v0.1-release gate may close without executed target-environment evidence and residue checks.",
     "V01-008 was activated in C:\\YOKI\\Codex\\worktrees\\V01-008 on branch codex/v01-008-packaging-release-evidence. It may build a minimal shared production host and distribution evidence, but cannot enable production file writes, invent Docker/SCM/Linux results, modify business contracts or declare any platform release without the corresponding executed gate evidence.",
-    "V01-008 implementation and security hardening commit 81eb838136b9826c9ed6e0ac9e1ae9fdb42cfd49 plus handoff delivery 9a6492ab053427cb7b116187e44e18741c3fd8e9 were merged after 360/360 unique automated tests, two deterministic cold publishes, independent artifact validation and a native win-x64 process smoke. The task remains partial because approved Windows SCM, real Docker daemon and Linux systemd cycles are still blocked_missing_environment; no release or production-write gate changed."
+    "V01-008 implementation and security hardening commit 81eb838136b9826c9ed6e0ac9e1ae9fdb42cfd49 plus handoff delivery 9a6492ab053427cb7b116187e44e18741c3fd8e9 were merged after 360/360 unique automated tests, two deterministic cold publishes, independent artifact validation and a native win-x64 process smoke. The task remains partial because approved Windows SCM, real Docker daemon and Linux systemd cycles are still blocked_missing_environment; no release or production-write gate changed.",
+    "V01-009 was planned as the frozen sequence-8 release integration gate with V01-006, V01-007 and V01-008 as direct inputs. It may integrate and test only the already approved read-only and sandbox capabilities, enumerate missing Alpha capabilities, and produce a fail-closed release decision; V01-008 remains partial and no open gate may be converted into release readiness without executed evidence."
   ],
   "architecture_quality_gate": "M0-009 completed; fast-merge is mandatory and feature/release targets remain independently gated"
 }
