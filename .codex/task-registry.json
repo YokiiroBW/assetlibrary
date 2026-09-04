@@ -320,7 +320,7 @@
       "id": "V01-011",
       "title": "实现本地账号认证核心与安全会话存储",
       "module": "gateway-auth-local-runtime",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-006",
         "V01-010"
