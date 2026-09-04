@@ -53,6 +53,7 @@ python -I -B tests/architecture/check_release_gates.py --target v0.1-release
 - 两次独立 cold publish 均从 `81eb838...` 的 Git source snapshot 构建；679 文件清单一致。
 - 独立 `validate_server_release.py --require-artifacts` 返回 `errors=[]`，复核 manifest、locks、archives、source/issuance/runtime binding 全部一致。
 - 最终 win-x64 EXE：`health={status:ok, contract:v01-008/1}`；`ready={status:ready, contract:v01-008/1, scope:host_only, business_api_ready:false, production_file_writes_enabled:false}`；独立 probe exit 0；停止后 listener 可重绑、state residue count 0。
+- Windows VM 测试包已复制到 `\\Yokiceshi\HANA\V01-008-81eb838`：本地/共享端均为 356 个文件、112,356,303 bytes；从共享端读取后的只读完整性预检显示 boundary、artifact tree hash 与 runtime binding 全部匹配，系统残留仍为 false/0。该检查不冒充 VM SCM cycle。
 - Gate：`v0.1-start=0`；其余五个未满足目标均按设计 `exit=3`，没有被误记为通过。
 
 ## 发行证据

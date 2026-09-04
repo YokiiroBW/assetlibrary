@@ -89,5 +89,5 @@
 ## 建议合并与下一步
 
 - V0.1 建议合并顺序 `7`；本任务实现与交接可合入 `main`，但不得因此关闭平台 release gate。
-- 将基于 `81eb838...` 的 Windows 测试包放入 `\\Yokiceshi\HANA` 的新目录，避免覆盖之前 M0-002 文件；在快照可回滚的 `YOKICESHI` VM 内由 `AssetLibraryTest`/管理员按 README 分别执行 preflight 与批准的 SCM cycle。
+- 基于 `81eb838...` 的 Windows 测试包已放入 `\\Yokiceshi\HANA\V01-008-81eb838`，未覆盖之前的 M0-002 文件；复制后从共享端复核 356 个文件、112,356,303 bytes，artifact tree 与 runtime binding 均匹配。下一步在快照可回滚的 `YOKICESHI` VM 内由 `AssetLibraryTest`/管理员按 `TEST-INSTRUCTIONS.md` 分别执行 preflight 与批准的 SCM cycle。
 - 之后在真实 Docker daemon 和批准 Linux systemd runner 分别执行 evidence cycle，由协调线程独立复核零残留结果。
