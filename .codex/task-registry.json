@@ -347,6 +347,22 @@
       "handoff": ".codex/handoffs/V01-012/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "V01-013",
+      "title": "实现隐私保护的生产口令泄露风险适配器",
+      "module": "gateway-auth-secret-risk-provider",
+      "status": "planned",
+      "depends_on": [
+        "V01-012"
+      ],
+      "owner": "codex-agent-v01-013",
+      "branch": "codex/v01-013-secret-risk-provider",
+      "worktree": "",
+      "task_file": ".codex/tasks/V01-013.md",
+      "handoff": ".codex/handoffs/V01-013/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
