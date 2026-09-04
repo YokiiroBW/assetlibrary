@@ -1,0 +1,88 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-014",
+  "title": "实现首位管理员引导与带外恢复核心",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "codex-agent-v01-014",
+  "branch": "codex/v01-014-admin-bootstrap-recovery",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-014",
+  "commit": "ee8c0305bd0611d8698fcab9602964158d4d5d81",
+  "changed_files": [
+    ".codex/handoffs/V01-014/result.json",
+    ".codex/handoffs/V01-014/summary.md",
+    ".codex/handoffs/V01-014/tests.md",
+    ".codex/tasks/V01-014.md",
+    "database/migrations/production/0012_gateway_auth_admin_bootstrap_recovery.sql",
+    "database/migrations/production/manifest.json",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorBootstrapRecoveryLog.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorBootstrapRecoveryPorts.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorBootstrapRecoveryService.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/AdministratorBootstrapRecoveryContracts.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAdministratorBootstrapRecoveryStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAuthenticationParameters.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAuthenticationStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresLocalAccountLifecycleStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresLocalAccountStateReader.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/DatabaseReadinessTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/AdministratorBootstrapRecoveryTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/AuthenticationTestDoubles.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PostgresAdministratorBootstrapRecoveryStoreIntegrationTests.cs"
+  ],
+  "changed_contracts": [
+    "Adds internal GatewayAuth administrator bootstrap/recovery action, outcome, result, proof, verifier and store contracts; no public wire API, SDK or Host route is added.",
+    "Adds production migration 12 with one no-secret idempotency table, one owner-only request matching helper, and two runtime-executable SECURITY DEFINER mutations.",
+    "Advances the exact production database readiness contract from migration 11 to migration 12 while preserving PostgreSQL 16.15 and the existing role graph."
+  ],
+  "tests": {
+    "passed": 424,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "This is component-only: no real out-of-band authorization verifier, deployment secret lifecycle, operator entry point or Host composition exists, so it must not be exposed as a deployable recovery channel.",
+    "Future composition still requires TLS, persistent keys, secure Cookie/Origin/CSRF behavior, operator identity, upstream abuse control and end-to-end negative tests.",
+    "The global advisory lock intentionally serializes low-frequency emergency administrator mutations; it must not be reused for bulk account management.",
+    "GitHub-hosted Linux CI did not run; local evidence is Windows with .NET 10.0.111 and PostgreSQL 16.15."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 14,
+  "handoff_summary": ".codex/handoffs/V01-014/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "GatewayAuth administrator bootstrap and out-of-band recovery core",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Reuses V01-012 LocalSecret, enrollment length policy, ILocalSecretRiskChecker, ILocalCredentialDeriver, PBKDF2 enrollment material and account state contracts.",
+      "Reuses PostgresAuthenticationExecutor, the GatewayAuth runtime role, local principal/credential/session tables and credential/session version invalidation semantics.",
+      "Extracts same-module PostgreSQL parameter and account-state readers so lifecycle and administrator stores share the existing representation without cross-module helpers."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "All new production code remains inside GatewayAuth; Infrastructure implements Application-owned ports and Application depends only on GatewayAuth contracts.",
+      "Migration 12 creates and mutates only gateway_auth-owned objects and does not access asset files, other module tables or mutable globals outside the approved advisory lock.",
+      "No Host, public API, generated SDK, dependency lock, filesystem adapter or other module internal implementation changed."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Introduces an internal authorization binding and fail-closed outcome model for administrator bootstrap/recovery.",
+      "Introduces migration 12 with dual-ID replay protection, transaction-time authorization expiry and database-owned administrator fact checks.",
+      "Keeps production authentication, business API, database composition, file writes and all release targets blocked."
+    ],
+    "architecture_tests": [
+      "Locked restore, format verification, zero-warning Release build and all 257 .NET tests passed; WebGateway is 73/73.",
+      "All 67 database, 54 repository, 14 architecture and 32 release tests passed, including real PostgreSQL 16.15 concurrency, restart, least privilege and C# adapter round trip.",
+      "Repository, server-release and Alpha validators passed; v0.1-start is allowed while Alpha --require-ready and v0.1-release retain native exit code 3."
+    ],
+    "technical_debt": [
+      "Implement a real rotatable and auditable out-of-band verifier plus deployment secret lifecycle before creating any operator entry point.",
+      "Compose GatewayAuth with PostgreSQL and an authenticated read-only Host only after TLS, persistent keys, Cookie/Origin/CSRF and abuse controls are verified.",
+      "Keep every production file-write and release target disabled until its existing durability and platform evidence gates close."
+    ]
+  }
+}
