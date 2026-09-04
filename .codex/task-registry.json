@@ -304,7 +304,7 @@
       "id": "V01-010",
       "title": "实现生产 PostgreSQL 运行时与迁移就绪检查",
       "module": "database-runtime-composition",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [
         "V01-003",
         "V01-009"
