@@ -283,7 +283,7 @@
       "id": "V01-009",
       "title": "集成 V0.1 Alpha 候选并执行 release gate",
       "module": "release-integration-gate",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-006",
         "V01-007",
@@ -291,11 +291,14 @@
       ],
       "owner": "codex-agent-v01-009",
       "branch": "codex/v01-009-alpha-release-integration",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-009",
       "task_file": ".codex/tasks/V01-009.md",
       "handoff": ".codex/handoffs/V01-009/summary.md",
       "thread_deep_link": "",
-      "milestone": "V0.1"
+      "accepted_partial_dependencies": [
+        "V01-008"
+      ],
+      "partial_dependency_policy": "V01-009 must keep every unresolved v0.1-release gate blocking and may report release readiness only after all required target evidence passes; upstream task statuses remain partial."
     }
   ]
 }
