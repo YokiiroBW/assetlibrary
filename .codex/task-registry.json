@@ -368,14 +368,14 @@
       "id": "V01-014",
       "title": "实现首位管理员引导与带外恢复核心",
       "module": "gateway-auth-admin-bootstrap-recovery",
-      "status": "planned",
+      "status": "ready",
       "depends_on": [
         "V01-012",
         "V01-013"
       ],
       "owner": "codex-agent-v01-014",
       "branch": "codex/v01-014-admin-bootstrap-recovery",
-      "worktree": "",
+      "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-014",
       "task_file": ".codex/tasks/V01-014.md",
       "handoff": ".codex/handoffs/V01-014/summary.md",
       "thread_deep_link": "",
