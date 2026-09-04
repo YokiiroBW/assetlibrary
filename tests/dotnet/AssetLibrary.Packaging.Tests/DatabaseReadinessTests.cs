@@ -14,10 +14,10 @@ public sealed class DatabaseReadinessTests
 
         Assert.AreEqual(16, contract.PostgreSqlMajor);
         Assert.AreEqual("assetlibrary_database_auditor", contract.AuditorRole);
-        Assert.AreEqual(9, contract.LatestVersion);
-        Assert.HasCount(9, contract.Migrations);
+        Assert.AreEqual(10, contract.LatestVersion);
+        Assert.HasCount(10, contract.Migrations);
         CollectionAssert.AreEqual(
-            Enumerable.Range(1, 9).ToArray(),
+            Enumerable.Range(1, 10).ToArray(),
             contract.Migrations.Select(migration => migration.Version).ToArray());
     }
 
@@ -42,14 +42,14 @@ public sealed class DatabaseReadinessTests
         var ready = DatabaseMigrationStateValidator.Validate(contract, exact);
         var pending = DatabaseMigrationStateValidator.Validate(
             contract,
-            exact with { Migrations = exact.Migrations.Take(8).ToArray() });
+            exact with { Migrations = exact.Migrations.Take(9).ToArray() });
         var extra = DatabaseMigrationStateValidator.Validate(
             contract,
             exact with
             {
                 Migrations = [
                     .. exact.Migrations,
-                    new AppliedDatabaseMigration(10, "unexpected", "unexpected", "assetlibrary_bad_owner", new('a', 64)),
+                    new AppliedDatabaseMigration(11, "unexpected", "unexpected", "assetlibrary_bad_owner", new('a', 64)),
                 ],
             });
         var drift = DatabaseMigrationStateValidator.Validate(
@@ -61,7 +61,7 @@ public sealed class DatabaseReadinessTests
             });
 
         Assert.IsTrue(ready.IsReady);
-        Assert.AreEqual(9, ready.SchemaVersion);
+        Assert.AreEqual(10, ready.SchemaVersion);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationNotCurrent, pending.Status);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationNotCurrent, extra.Status);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationDrift, drift.Status);
@@ -91,7 +91,7 @@ public sealed class DatabaseReadinessTests
     [TestMethod]
     public void DatabaseReadinessPayloadNeverClaimsBusinessOrWriteReadiness()
     {
-        var ready = CoreServerEndpointPayloads.Database(DatabaseReadinessResult.Ready(9));
+        var ready = CoreServerEndpointPayloads.Database(DatabaseReadinessResult.Ready(10));
         var unavailable = CoreServerEndpointPayloads.Database(
             DatabaseReadinessResult.NotReady(DatabaseReadinessStatus.Unavailable));
         var readyJson = CoreServerHostJson.Serialize(ready);

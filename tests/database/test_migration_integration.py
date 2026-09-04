@@ -451,6 +451,55 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
         )
         return database
 
+    def authentication_database(self, label: str) -> str:
+        return self.web_gateway_database(label)
+
+    def seed_local_account(
+        self,
+        database: str,
+        *,
+        account_name: str = "test-user",
+        subject_key: str = "local:test-user",
+    ) -> dict[str, object]:
+        principal_id = uuid.uuid4()
+        salt = bytes(range(1, 17))
+        test_secret = "V01-011 synthetic sign in secret"
+        digest = hashlib.pbkdf2_hmac(
+            "sha256",
+            test_secret.encode("utf-8"),
+            salt,
+            600_000,
+            dklen=32,
+        )
+        self.sql(
+            database,
+            self.admin,
+            f"""
+SET ROLE assetlibrary_gateway_auth_owner;
+INSERT INTO gateway_auth.authenticated_principal (
+  principal_id, subject_key, display_name, is_system_administrator, created_at
+) VALUES (
+  '{principal_id}', '{subject_key}', 'Synthetic test user', false, clock_timestamp()
+);
+INSERT INTO gateway_auth.local_account_credential (
+  principal_id, account_name, secret_algorithm, secret_iterations,
+  secret_salt, secret_digest, credential_version, created_at, changed_at
+) VALUES (
+  '{principal_id}', '{account_name}', 'pbkdf2-sha256', 600000,
+  decode('{salt.hex()}', 'hex'), decode('{digest.hex()}', 'hex'), 7,
+  clock_timestamp(), clock_timestamp()
+);
+""",
+        )
+        return {
+            "principal_id": principal_id,
+            "account_name": account_name,
+            "subject_key": subject_key,
+            "test_secret": test_secret,
+            "salt": salt,
+            "digest": digest,
+        }
+
     def gateway_sql(
         self,
         database: str,
@@ -464,6 +513,10 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
             "SET ROLE assetlibrary_gateway_auth_runtime;\n" + statement,
             check=check,
         )
+
+    @staticmethod
+    def token_digest(value: int) -> str:
+        return hashlib.sha256(bytes([value]) * 32).hexdigest()
 
     @staticmethod
     def enqueue_task_statement(
@@ -540,7 +593,7 @@ SELECT task_health.enqueue_outbox_event(
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 10)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 11)))
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -959,6 +1012,448 @@ INSERT INTO library_storage.library_permission (
             "'oidc:restart-user', 'persisted', NULL, NULL, NULL, 101);",
         ).stdout.strip()
         self.assertEqual(persisted, "Restart|persisted.txt")
+
+    def test_local_authentication_session_lifecycle_and_least_privilege(self) -> None:
+        database = self.authentication_database("local_auth")
+        account = self.seed_local_account(database)
+        principal_id = account["principal_id"]
+        session_digest = self.token_digest(0x31)
+        csrf_digest = self.token_digest(0x42)
+        wrong_csrf_digest = self.token_digest(0x43)
+
+        material = self.gateway_sql(
+            database,
+            "SELECT subject_key, secret_algorithm, secret_iterations, "
+            "octet_length(secret_salt), octet_length(secret_digest), "
+            "credential_version, can_attempt "
+            "FROM gateway_auth.read_local_sign_in_material('test-user');",
+        ).stdout.strip()
+        self.assertEqual(
+            material,
+            "local:test-user|pbkdf2-sha256|600000|16|32|7|t",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.read_local_sign_in_material('unknown-user');",
+            ).stdout.strip(),
+            "0",
+        )
+
+        for denied in (
+            "SELECT * FROM gateway_auth.local_account_credential;",
+            "SELECT * FROM gateway_auth.browser_session;",
+            "UPDATE gateway_auth.authenticated_principal SET session_version = 2;",
+            "INSERT INTO gateway_auth.browser_session (session_digest) VALUES (decode('00', 'hex'));",
+        ):
+            self.assertNotEqual(
+                self.gateway_sql(database, denied, check=False).returncode,
+                0,
+                denied,
+            )
+
+        first_failure = self.gateway_sql(
+            database,
+            "SELECT gateway_auth.record_local_sign_in_failure('test-user', 7);",
+        ).stdout.strip()
+        immediate_failure = self.gateway_sql(
+            database,
+            "SELECT gateway_auth.record_local_sign_in_failure('test-user', 7);",
+        ).stdout.strip()
+        self.assertEqual(first_failure, "t")
+        self.assertEqual(immediate_failure, "f")
+        throttled = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT failed_attempt_count, retry_not_before > clock_timestamp() "
+            "FROM gateway_auth.local_account_credential WHERE account_name = 'test-user';",
+        ).stdout.strip()
+        self.assertEqual(throttled, "1|t")
+        self.assertTrue(
+            self.gateway_sql(
+                database,
+                "SELECT can_attempt FROM gateway_auth.read_local_sign_in_material('test-user');",
+            ).stdout.strip()
+            == "f"
+        )
+
+        for _ in range(10):
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "UPDATE gateway_auth.local_account_credential "
+                "SET retry_not_before = clock_timestamp() - interval '1 second' "
+                "WHERE account_name = 'test-user';",
+            )
+            self.assertEqual(
+                self.gateway_sql(
+                    database,
+                    "SELECT gateway_auth.record_local_sign_in_failure('test-user', 7);",
+                ).stdout.strip(),
+                "t",
+            )
+        bounded_backoff = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT failed_attempt_count, "
+            "extract(epoch FROM (retry_not_before - clock_timestamp())) BETWEEN 298 AND 301 "
+            "FROM gateway_auth.local_account_credential WHERE account_name = 'test-user';",
+        ).stdout.strip()
+        self.assertEqual(bounded_backoff, "11|t")
+
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.local_account_credential "
+            "SET retry_not_before = clock_timestamp() - interval '1 second' "
+            "WHERE account_name = 'test-user';",
+        )
+        created = self.gateway_sql(
+            database,
+            "SELECT outcome, "
+            "round(extract(epoch FROM (idle_expires_at - issued_at))), "
+            "round(extract(epoch FROM (absolute_expires_at - issued_at))) "
+            "FROM gateway_auth.create_browser_session("
+            f"'{principal_id}', 1, 'local', 7, "
+            f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(created, "created|1800|43200")
+
+        stored = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT encode(session_digest, 'hex'), encode(csrf_digest, 'hex'), "
+            "authentication_method, principal_session_version, local_credential_version "
+            "FROM gateway_auth.browser_session;",
+        ).stdout.strip()
+        self.assertEqual(stored, f"{session_digest}|{csrf_digest}|local|1|7")
+        self.assertNotIn((bytes([0x31]) * 32).hex(), stored)
+        self.assertNotIn((bytes([0x42]) * 32).hex(), stored)
+        reset = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT failed_attempt_count, retry_not_before IS NULL "
+            "FROM gateway_auth.local_account_credential WHERE account_name = 'test-user';",
+        ).stdout.strip()
+        self.assertEqual(reset, "0|t")
+
+        read_identity = self.gateway_sql(
+            database,
+            "SELECT subject_key, authentication_method "
+            "FROM gateway_auth.authenticate_browser_session("
+            f"decode('{session_digest}', 'hex'), NULL, false);",
+        ).stdout.strip()
+        self.assertEqual(read_identity, "local:test-user|local")
+        wrong_csrf = self.gateway_sql(
+            database,
+            "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+            f"decode('{session_digest}', 'hex'), decode('{wrong_csrf_digest}', 'hex'), true);",
+        ).stdout.strip()
+        correct_csrf = self.gateway_sql(
+            database,
+            "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+            f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'), true);",
+        ).stdout.strip()
+        self.assertEqual(wrong_csrf, "0")
+        self.assertEqual(correct_csrf, "1")
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT gateway_auth.revoke_browser_session("
+                f"decode('{session_digest}', 'hex'), decode('{wrong_csrf_digest}', 'hex'));",
+            ).stdout.strip(),
+            "f",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT gateway_auth.revoke_browser_session("
+                f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'));",
+            ).stdout.strip(),
+            "t",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{session_digest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+
+        for invalid in (
+            "SELECT * FROM gateway_auth.read_local_sign_in_material('../invalid');",
+            "SELECT gateway_auth.record_local_sign_in_failure('test-user', 0);",
+            "SELECT * FROM gateway_auth.create_browser_session("
+            f"'{principal_id}', 1, 'local', NULL, decode('{session_digest}', 'hex'), "
+            f"decode('{csrf_digest}', 'hex'));",
+            "SELECT * FROM gateway_auth.authenticate_browser_session(decode('00', 'hex'), NULL, false);",
+        ):
+            self.assertNotEqual(
+                self.gateway_sql(database, invalid, check=False).returncode,
+                0,
+                invalid,
+            )
+
+    def test_local_authentication_failure_is_atomic_under_concurrency(self) -> None:
+        database = self.authentication_database("local_auth_concurrency")
+        self.seed_local_account(database)
+
+        def record_failure() -> str:
+            return self.gateway_sql(
+                database,
+                "SELECT gateway_auth.record_local_sign_in_failure('test-user', 7);",
+            ).stdout.strip()
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+            results = list(executor.map(lambda _: record_failure(), range(8)))
+
+        self.assertEqual(results.count("t"), 1)
+        self.assertEqual(results.count("f"), 7)
+        state = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT failed_attempt_count, retry_not_before > clock_timestamp() "
+            "FROM gateway_auth.local_account_credential WHERE account_name = 'test-user';",
+        ).stdout.strip()
+        self.assertEqual(state, "1|t")
+
+    def test_browser_sessions_are_bounded_and_invalidated_by_owner_state(self) -> None:
+        database = self.authentication_database("session_bound")
+        account = self.seed_local_account(database)
+        principal_id = account["principal_id"]
+
+        for value in range(1, 22):
+            session_digest = self.token_digest(value)
+            csrf_digest = self.token_digest(value + 40)
+            outcome = self.gateway_sql(
+                database,
+                "SELECT outcome FROM gateway_auth.create_browser_session("
+                f"'{principal_id}', 1, 'local', 7, "
+                f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'));",
+            ).stdout.strip()
+            self.assertEqual(outcome, "created")
+
+        count = self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "SELECT count(*) FROM gateway_auth.browser_session "
+            f"WHERE principal_id = '{principal_id}';",
+        ).stdout.strip()
+        self.assertEqual(count, "20")
+        oldest = self.token_digest(1)
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{oldest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+
+        newest = self.token_digest(21)
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{newest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "1",
+        )
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.local_account_credential SET credential_version = 8 "
+            f"WHERE principal_id = '{principal_id}';",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{newest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.authenticated_principal SET session_version = 2 "
+            f"WHERE principal_id = '{principal_id}';",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{newest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+
+        oidc_digest = self.token_digest(90)
+        oidc_csrf = self.token_digest(91)
+        oidc_created = self.gateway_sql(
+            database,
+            "SELECT outcome FROM gateway_auth.create_browser_session("
+            f"'{principal_id}', 2, 'oidc', NULL, "
+            f"decode('{oidc_digest}', 'hex'), decode('{oidc_csrf}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(oidc_created, "created")
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.authenticated_principal SET disabled_at = clock_timestamp() "
+            f"WHERE principal_id = '{principal_id}';",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{oidc_digest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.read_local_sign_in_material('test-user');",
+            ).stdout.strip(),
+            "0",
+        )
+
+    def test_browser_session_persists_restart_and_expires_fail_closed(self) -> None:
+        if self.external:
+            self.skipTest("restart persistence requires the disposable self-hosted cluster")
+        database = self.authentication_database("session_restart")
+        account = self.seed_local_account(database)
+        principal_id = account["principal_id"]
+        session_digest = self.token_digest(101)
+        csrf_digest = self.token_digest(102)
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT outcome FROM gateway_auth.create_browser_session("
+                f"'{principal_id}', 1, 'local', 7, "
+                f"decode('{session_digest}', 'hex'), decode('{csrf_digest}', 'hex'));",
+            ).stdout.strip(),
+            "created",
+        )
+
+        assert self.pg_ctl is not None and self.cluster_data is not None
+        self._run(
+            [
+                str(self.pg_ctl),
+                "--pgdata",
+                str(self.cluster_data),
+                "--wait",
+                "--timeout",
+                "30",
+                "--mode",
+                "fast",
+                "restart",
+            ],
+            timeout=45,
+            capture_output=False,
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT subject_key FROM gateway_auth.authenticate_browser_session("
+                f"decode('{session_digest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "local:test-user",
+        )
+
+        self.sql(
+            database,
+            self.admin,
+            "SET ROLE assetlibrary_gateway_auth_owner; "
+            "UPDATE gateway_auth.browser_session SET "
+            "issued_at = clock_timestamp() - interval '1 hour', "
+            "last_seen_at = clock_timestamp() - interval '31 minutes', "
+            "idle_expires_at = clock_timestamp() - interval '1 minute', "
+            "absolute_expires_at = clock_timestamp() + interval '1 hour' "
+            f"WHERE session_digest = decode('{session_digest}', 'hex');",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.authenticate_browser_session("
+                f"decode('{session_digest}', 'hex'), NULL, false);",
+            ).stdout.strip(),
+            "0",
+        )
+
+    def test_dotnet_postgres_authentication_store_round_trip(self) -> None:
+        configured_dotnet = os.environ.get("ASSETLIBRARY_TEST_DOTNET")
+        dotnet = configured_dotnet or shutil.which("dotnet")
+        if not dotnet:
+            self.unavailable("dotnet is required for the authentication store test")
+
+        test_assembly = (
+            ROOT
+            / "tests/dotnet/AssetLibrary.WebGateway.Tests/"
+            "bin/Release/net10.0/AssetLibrary.WebGateway.Tests.dll"
+        )
+        if not test_assembly.is_file():
+            self.unavailable(f"authentication test build is missing: {test_assembly}")
+
+        database = self.authentication_database("dotnet_auth_store")
+        account = self.seed_local_account(database)
+        environment = self.environment.copy()
+        environment["ASSETLIBRARY_TEST_AUTH_CONNECTION"] = (
+            f"Host={self.host};Port={self.port};Database={database};"
+            f"Username={self.RUNTIME};Pooling=false;Timeout=5;Command Timeout=5;"
+            "SSL Mode=Disable"
+        )
+        environment["ASSETLIBRARY_TEST_AUTH_SECRET"] = str(account["test_secret"])
+        environment["DOTNET_NOLOGO"] = "1"
+        result = subprocess.run(
+            [
+                str(dotnet),
+                "test",
+                str(
+                    ROOT
+                    / "tests/dotnet/AssetLibrary.WebGateway.Tests/"
+                    "AssetLibrary.WebGateway.Tests.csproj"
+                ),
+                "--configuration",
+                "Release",
+                "--no-build",
+                "--no-restore",
+                "--filter",
+                (
+                    "FullyQualifiedName=AssetLibrary.WebGateway.Tests."
+                    "PostgresAuthenticationStoreIntegrationTests."
+                    "PostgresStoreCompletesLocalSignInCsrfAndRevocationRoundTrip"
+                ),
+                "--logger",
+                "console;verbosity=minimal",
+            ],
+            cwd=ROOT,
+            env=environment,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+            timeout=120,
+            check=False,
+        )
+        self.assertEqual(
+            result.returncode,
+            0,
+            result.stderr or result.stdout,
+        )
 
     def test_read_core_roots_initial_commit_and_scan_status_are_fail_closed(self) -> None:
         database = self.fresh_database("read_core")
@@ -1808,7 +2303,7 @@ LIMIT 256;
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 10)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 11)))
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -1861,7 +2356,7 @@ LIMIT 256;
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "9",
+            "10",
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 
@@ -2068,7 +2563,7 @@ LIMIT 256;
             self.assertEqual(ready.get("status"), "ready")
             self.assertEqual(ready.get("scope"), "host_database")
             self.assertEqual(ready.get("database_contract"), "v01-010/1")
-            self.assertEqual(ready.get("database_schema_version"), 9)
+            self.assertEqual(ready.get("database_schema_version"), 10)
             self.assertIs(ready.get("business_api_ready"), False)
             self.assertIs(ready.get("production_file_writes_enabled"), False)
             health_status, health = self.http_payload(port, path="/healthz")
