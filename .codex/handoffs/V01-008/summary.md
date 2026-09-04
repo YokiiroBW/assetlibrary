@@ -45,7 +45,7 @@
 - release-lock aggregate SHA-256：`73a5aa88f3be7d06c7704ebb7cf2bfdb4116973f0b59dd8a270e84de1100e442`
 - Linux archive：`assetlibrary-core-server-linux-x64-81eb838136b9.tar.gz`，48,219,608 bytes，SHA-256 `0e88179a4e5ac107e6719c6d9e255f13f64482a1f123e31842c96ac243c4b414`。
 - Windows archive：`assetlibrary-core-server-win-x64-81eb838136b9.zip`，49,127,994 bytes，SHA-256 `d117bf500ec869686049e4936fa585597ba3b7a0f0ce50f7e1875a24e388c5da`。
-- runtime evidence binding：Linux `d0eab2932902aa454bb03e3de6779a4a15e0f54d74105fe3185f999d796d2340b`；Windows `d2b216383051f7e706aa1cdd7295dbaec0f5665d5d84a460613531989bb6937f4`。
+- runtime evidence binding：Linux `d0eab2932902aa454b03e3de6779a4a15e0f54d74105fe3185f999d796d2340b`；Windows `d2b216383051f7e706a1cdd7295dbaec0f5665d5d84a460613531989bb6937f4`。
 - 所有二进制、缓存和运行日志仅位于 `.runtime/sandbox-storage/V01-008/release-build/**`，未提交到 Git。
 
 ## 平台证据状态
