@@ -1,0 +1,94 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-011",
+  "title": "实现本地账号认证核心与安全会话存储",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "codex-agent-v01-011",
+  "branch": "codex/v01-011-local-auth-runtime",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-011",
+  "commit": "5d8d47c36f061fcd03c704ed5cdb36950d6ce723",
+  "changed_files": [
+    ".codex/handoffs/V01-011/result.json",
+    ".codex/handoffs/V01-011/summary.md",
+    ".codex/handoffs/V01-011/tests.md",
+    ".codex/tasks/V01-011.md",
+    ".github/workflows/handoff-quality.yml",
+    "database/migrations/production/0010_gateway_auth_local_sessions.sql",
+    "database/migrations/production/manifest.json",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
+    "services/core-server/Modules/GatewayAuth/Application/AuthenticationLog.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AuthenticationPorts.cs",
+    "services/core-server/Modules/GatewayAuth/Application/BrowserSessionIssuer.cs",
+    "services/core-server/Modules/GatewayAuth/Application/BrowserSessionService.cs",
+    "services/core-server/Modules/GatewayAuth/Application/LocalAuthenticationService.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/AuthenticationSecrets.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/LocalAuthenticationContracts.cs",
+    "services/core-server/Modules/GatewayAuth/Domain/LocalSecretVerifier.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAuthenticationExecutor.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAuthenticationStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresBrowserSessionStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresLocalCredentialStore.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/DatabaseReadinessTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/AuthenticationTestDoubles.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/LocalAuthenticationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PostgresAuthenticationStoreIntegrationTests.cs"
+  ],
+  "changed_contracts": [
+    "Adds the internal GatewayAuth local-primary-identity and opaque browser-session port contract; no public wire contract or HTTP route changed.",
+    "Adds production migration 10 for GatewayAuth local credential and browser session state, advancing the exact embedded migration readiness contract from 9 to 10."
+  ],
+  "tests": {
+    "passed": 369,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "The component intentionally has no production account provisioning, password change/recovery or breached-secret screening entry point; exposing a direct database seeding path would bypass the approved enrollment policy.",
+    "The current Host remains HTTP-only and has no login route. HTTPS, __Host- cookie attributes, Origin enforcement, upstream request/concurrency limiting and deployment secret lifecycle must be completed before any external authentication endpoint is enabled.",
+    "OIDC is only a verified-primary-identity adapter boundary; discovery, callback validation, nonce/state/PKCE and provider configuration are not implemented.",
+    "The updated Linux PostgreSQL 16.15 CI definition was source-tested locally but GitHub-hosted CI was not executed in this thread."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 10,
+  "handoff_summary": ".codex/handoffs/V01-011/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "GatewayAuth local authentication core, secure browser session application services and PostgreSQL adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Reuses GatewayAuth AuthenticatedSubject and authenticated_principal as the only identity and administrator fact source.",
+      "Reuses the V01-003 production migration manifest, fixed owner/runtime roles, SECURITY DEFINER pattern, backup-before-apply and PostgreSQL 16.15 verification.",
+      "Reuses the centrally locked Npgsql 10.0.3 dependency and existing CoreServer modular-monolith assembly; no new package or host was added.",
+      "Extends the existing fast-merge-database job so the same PostgreSQL service exercises the C# authentication store instead of creating a parallel CI tier."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "All new persistent objects and functions remain inside gateway_auth and are owned by assetlibrary_gateway_auth_owner.",
+      "The runtime role has no direct table access and can execute only the bounded GatewayAuth functions granted by migration 10.",
+      "Domain and Application contain no Npgsql, ASP.NET, filesystem, network or operating-system dependency; Infrastructure implements the two application ports."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Adds internal local credential verification, verified primary identity and opaque session/CSRF contracts without changing contracts/** or generated SDKs.",
+      "Adds append-only migration 10; migrations 1 through 9, roles.sql and bootstrap.sql remain unchanged.",
+      "Advances CoreServer database readiness expectations to the exact ten-migration ledger while preserving fail-closed pending, extra and drift outcomes."
+    ],
+    "architecture_tests": [
+      "Locked restore, format/analyzer verification, zero-warning Release build and all 210 .NET tests passed; GatewayAuth WebGateway suite is 26/26.",
+      "All 59 database tests passed against a real disposable PostgreSQL 16.15 server; the final expanded backoff-cap path also passed in a focused rerun.",
+      "54 repository, 14 architecture and 32 release tests passed; migration, .NET source and Alpha integration validators passed.",
+      "v0.1-start remains allowed, while Alpha --require-ready and v0.1-release retain exit code 3 with production authentication and all prior release blockers intact."
+    ],
+    "technical_debt": [
+      "Implement an owner-only production account provisioning and recovery flow with common/breached-secret screening, audit and session-version rotation.",
+      "Compose the component into the shared Host only after TLS, persistent key, secure cookie, Origin/CSRF and upstream abuse-control boundaries are implemented.",
+      "Implement and separately validate an OIDC primary-identity adapter if deployment requirements need it; local authentication remains independently functional.",
+      "Keep business APIs and every production file-write path disabled until their existing integration and durability gates close."
+    ]
+  }
+}

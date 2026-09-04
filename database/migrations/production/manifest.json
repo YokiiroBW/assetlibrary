@@ -166,6 +166,14 @@
       "owner_role": "assetlibrary_gateway_auth_owner",
       "path": "0009_gateway_auth_read_api.sql",
       "sha256": "0da9794574a7ad251fb8163463a597cdf0d465a32a64ad5de2b274638d62405e"
+    },
+    {
+      "version": 10,
+      "name": "gateway_auth_local_sessions",
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "path": "0010_gateway_auth_local_sessions.sql",
+      "sha256": "58925ecae3cefd2826da3d0d7004ba7984b601d34bc0cb270fdfd50655283a58"
     }
   ]
 }
