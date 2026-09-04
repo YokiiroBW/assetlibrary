@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using AssetLibrary.Modules.GatewayAuth.Application;
 using AssetLibrary.Modules.GatewayAuth.Contracts;
 using Npgsql;
-using NpgsqlTypes;
 
 namespace AssetLibrary.Modules.GatewayAuth.Infrastructure;
 
@@ -39,7 +38,7 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
             command =>
             {
                 AddActor(command, actor);
-                AddText(command, accountName.Value);
+                PostgresAuthenticationParameters.AddText(command, accountName.Value);
             },
             readOnly: true,
             cancellationToken);
@@ -59,11 +58,11 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
             command =>
             {
                 AddActor(command, actor);
-                AddUuid(command, operationId);
-                AddUuid(command, requestedPrincipalId);
-                AddText(command, accountName.Value);
-                AddText(command, displayName.Value);
-                AddBoolean(command, isSystemAdministrator);
+                PostgresAuthenticationParameters.AddUuid(command, operationId);
+                PostgresAuthenticationParameters.AddUuid(command, requestedPrincipalId);
+                PostgresAuthenticationParameters.AddText(command, accountName.Value);
+                PostgresAuthenticationParameters.AddText(command, displayName.Value);
+                PostgresAuthenticationParameters.AddBoolean(command, isSystemAdministrator);
             },
             cancellationToken);
 
@@ -81,10 +80,10 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
             command =>
             {
                 AddActor(command, actor);
-                AddUuid(command, operationId);
-                AddText(command, accountName.Value);
-                AddBigint(command, expectedCredentialVersion);
-                AddBoolean(command, enableAccount);
+                PostgresAuthenticationParameters.AddUuid(command, operationId);
+                PostgresAuthenticationParameters.AddText(command, accountName.Value);
+                PostgresAuthenticationParameters.AddBigint(command, expectedCredentialVersion);
+                PostgresAuthenticationParameters.AddBoolean(command, enableAccount);
             },
             cancellationToken);
 
@@ -100,10 +99,12 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
             command =>
             {
                 AddActor(command, actor);
-                AddUuid(command, operationId);
-                AddText(command, accountName.Value);
-                AddBigint(command, expectedPrincipalSessionVersion);
-                AddBoolean(command, enabled);
+                PostgresAuthenticationParameters.AddUuid(command, operationId);
+                PostgresAuthenticationParameters.AddText(command, accountName.Value);
+                PostgresAuthenticationParameters.AddBigint(
+                    command,
+                    expectedPrincipalSessionVersion);
+                PostgresAuthenticationParameters.AddBoolean(command, enabled);
             },
             readOnly: false,
             cancellationToken);
@@ -123,10 +124,10 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
                 command =>
                 {
                     addRequestParameters(command);
-                    AddText(command, credential.Algorithm);
-                    AddInteger(command, credential.Iterations);
-                    AddBytes(command, salt);
-                    AddBytes(command, digest);
+                    PostgresAuthenticationParameters.AddText(command, credential.Algorithm);
+                    PostgresAuthenticationParameters.AddInteger(command, credential.Iterations);
+                    PostgresAuthenticationParameters.AddBytes(command, salt);
+                    PostgresAuthenticationParameters.AddBytes(command, digest);
                 },
                 readOnly: false,
                 cancellationToken).ConfigureAwait(false);
@@ -178,46 +179,13 @@ internal sealed class PostgresLocalAccountLifecycleStore(NpgsqlDataSource dataSo
             _ => throw new InvalidOperationException(
                 "The local account lifecycle store returned an unknown outcome."),
         };
-        LocalAccountState? account = null;
-        if (!reader.IsDBNull(2))
-        {
-            account = new LocalAccountState(
-                reader.GetGuid(2),
-                new LocalAccountName(reader.GetString(3)),
-                new LocalAccountDisplayName(reader.GetString(4)),
-                reader.GetBoolean(5),
-                reader.GetBoolean(6),
-                reader.GetInt64(7),
-                reader.GetInt64(8));
-        }
-
+        var account = PostgresLocalAccountStateReader.Read(reader, 2);
         return new LocalAccountLifecycleResult(outcome, reader.GetBoolean(1), account);
     }
 
     private static void AddActor(NpgsqlCommand command, AuthenticatedIdentity actor)
     {
-        AddUuid(command, actor.PrincipalId);
-        AddBigint(command, actor.PrincipalSessionVersion);
+        PostgresAuthenticationParameters.AddUuid(command, actor.PrincipalId);
+        PostgresAuthenticationParameters.AddBigint(command, actor.PrincipalSessionVersion);
     }
-
-    private static void AddUuid(NpgsqlCommand command, Guid value) =>
-        Add(command, NpgsqlDbType.Uuid, value);
-
-    private static void AddText(NpgsqlCommand command, string value) =>
-        Add(command, NpgsqlDbType.Text, value);
-
-    private static void AddBoolean(NpgsqlCommand command, bool value) =>
-        Add(command, NpgsqlDbType.Boolean, value);
-
-    private static void AddInteger(NpgsqlCommand command, int value) =>
-        Add(command, NpgsqlDbType.Integer, value);
-
-    private static void AddBigint(NpgsqlCommand command, long value) =>
-        Add(command, NpgsqlDbType.Bigint, value);
-
-    private static void AddBytes(NpgsqlCommand command, byte[] value) =>
-        Add(command, NpgsqlDbType.Bytea, value);
-
-    private static void Add(NpgsqlCommand command, NpgsqlDbType type, object value) =>
-        command.Parameters.Add(new NpgsqlParameter { NpgsqlDbType = type, Value = value });
 }

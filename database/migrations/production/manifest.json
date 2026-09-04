@@ -182,6 +182,14 @@
       "owner_role": "assetlibrary_gateway_auth_owner",
       "path": "0011_gateway_auth_account_lifecycle.sql",
       "sha256": "2a4e6356f4d0d80cb03117ad7aeafd9618dc182909a4a6d62631c188a62fa06c"
+    },
+    {
+      "version": 12,
+      "name": "gateway_auth_admin_bootstrap_recovery",
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "path": "0012_gateway_auth_admin_bootstrap_recovery.sql",
+      "sha256": "3df76214f5b1424dce1422987612a97ba8c81801b9bb758760c0cab5a3dd6ec3"
     }
   ]
 }

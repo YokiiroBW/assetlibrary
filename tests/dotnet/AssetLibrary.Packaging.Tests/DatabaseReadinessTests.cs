@@ -14,10 +14,10 @@ public sealed class DatabaseReadinessTests
 
         Assert.AreEqual(16, contract.PostgreSqlMajor);
         Assert.AreEqual("assetlibrary_database_auditor", contract.AuditorRole);
-        Assert.AreEqual(11, contract.LatestVersion);
-        Assert.HasCount(11, contract.Migrations);
+        Assert.AreEqual(12, contract.LatestVersion);
+        Assert.HasCount(12, contract.Migrations);
         CollectionAssert.AreEqual(
-            Enumerable.Range(1, 11).ToArray(),
+            Enumerable.Range(1, 12).ToArray(),
             contract.Migrations.Select(migration => migration.Version).ToArray());
     }
 
@@ -49,7 +49,7 @@ public sealed class DatabaseReadinessTests
             {
                 Migrations = [
                     .. exact.Migrations,
-                    new AppliedDatabaseMigration(11, "unexpected", "unexpected", "assetlibrary_bad_owner", new('a', 64)),
+                    new AppliedDatabaseMigration(13, "unexpected", "unexpected", "assetlibrary_bad_owner", new('a', 64)),
                 ],
             });
         var drift = DatabaseMigrationStateValidator.Validate(
@@ -61,7 +61,7 @@ public sealed class DatabaseReadinessTests
             });
 
         Assert.IsTrue(ready.IsReady);
-        Assert.AreEqual(11, ready.SchemaVersion);
+        Assert.AreEqual(12, ready.SchemaVersion);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationNotCurrent, pending.Status);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationNotCurrent, extra.Status);
         Assert.AreEqual(DatabaseReadinessStatus.MigrationDrift, drift.Status);
