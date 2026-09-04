@@ -1,0 +1,84 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-009",
+  "title": "集成 V0.1 Alpha 候选并执行 release gate",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "codex-agent-v01-009",
+  "branch": "codex/v01-009-alpha-release-integration",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-009",
+  "commit": "4300c2d4eceb6104d551264c3f249c95c9f9d68e",
+  "changed_files": [
+    ".codex/handoffs/V01-009/result.json",
+    ".codex/handoffs/V01-009/summary.md",
+    ".codex/handoffs/V01-009/tests.md",
+    ".codex/tasks/V01-009.md",
+    ".github/workflows/handoff-quality.yml",
+    ".github/workflows/scheduled-quality.yml",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
+    "eng/v0.1-alpha-readiness.json",
+    "scripts/validate_v0_1_alpha.py",
+    "scripts/verify_repository.py",
+    "tests/architecture/ci-tiers.json",
+    "tests/release/test_v0_1_alpha_readiness.py",
+    "tests/repository/test_v0_1_alpha_foundation.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 365,
+    "failed": 0,
+    "skipped": 1,
+    "report": "tests.md"
+  },
+  "risks": [
+    "V0.1 Alpha remains blocked by 15 non-passed capabilities, six blocked release targets and the V01-008 partial input; completing V01-009 does not authorize release.",
+    "Production authentication, PostgreSQL runtime composition, business APIs, TLS/secrets, metadata, exact deduplication and product-level backup/restore are not implemented or integrated.",
+    "Production physical writes remain disabled; the V01-007 task-owned sandbox is not production durability evidence and M0-006-G2 remains open.",
+    "Windows SCM, Docker daemon, Linux systemd/root and release-like large-file evidence require approved external environments and remain unexecuted here.",
+    "The current Windows runner cannot execute the Ubuntu-only 500k profile or create symlinks under the non-elevated token; PostgreSQL integration also lacks its dedicated local environment."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 8,
+  "handoff_summary": ".codex/handoffs/V01-009/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Repository-only V0.1 Alpha release integration and evidence gate",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "tests/architecture/m0-gates.json and check_release_gates.py remain the only release-target allow/deny algorithm; V01-009 invokes the checker in bounded isolated subprocesses.",
+      "Existing task registry and handoff results provide task state, while eng/server-release-policy.json provides the V01-008 host readiness flags.",
+      "Existing fast-merge and scheduled-release workflows plus ci-tiers.json are extended without creating a parallel CI tier.",
+      "V01-001 through V01-008 public handoff evidence is read without reaching into module Infrastructure or business tables."
+    ],
+    "duplicated_logic": [
+      "Capability identifiers, expected current classifications and evidence paths are intentionally pinned in the validator as a fail-closed anti-forgery contract; release-target decisions themselves are not duplicated.",
+      "Path containment and reparse checks are repeated at repository-evidence and output-write trust boundaries because each boundary accepts different inputs."
+    ],
+    "cross_module_access": [
+      "The implementation lives only in repository/release tooling and reads source-controlled policies and public handoffs; it adds no product runtime reference.",
+      "No service, app, provider, gateway, integration, migration, generated SDK or shared wire contract implementation changed.",
+      "Production file writes, authentication bypasses, anonymous business APIs and alternate databases remain absent and fail closed.",
+      "All optional report writes are confined to the V01-009 runtime sandbox and never inspect asset contents."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Adds the internal repository release-audit policy contract v01-009/1; it does not change a product wire or database contract.",
+      "Fast-merge now audits policy consistency, while the manual scheduled release job requires the aggregate readiness decision."
+    ],
+    "architecture_tests": [
+      "13 Alpha validator tests cover mutation, task/status drift, gate failure, timeout, duplicate JSON keys, evidence containment, output ownership and Windows path aliases.",
+      "5 repository tests bind the machine policy to fast-merge, scheduled-release, open M0 gates, host fail-closed flags and readiness documentation.",
+      "Final repository verifier passed with 14 architecture tests and the existing handoff, migration, SDK, Web and source policies.",
+      "Affected full verification includes 185 .NET, 54 repository, 32 release Python, 39 local database, 14 SDK Python, 21 AssetLink and 6 Chromium tests plus TypeScript and Kotlin SDK builds.",
+      "v0.1-start returned 0; v0.1-release and aggregate --require-ready each returned the expected 3."
+    ],
+    "technical_debt": [
+      "Implement production authentication, database runtime and read-only business host composition as separate owner-scoped tasks before claiming an end-to-end Alpha.",
+      "Complete TLS/secrets, metadata, exact deduplication and product-level backup/restore with their own contracts and evidence.",
+      "Keep production writes disabled until the durable adapter, database journal, audit, conflict, capacity, strong-hash and trash evidence closes M0-006-G2.",
+      "Run and independently review the large-file, Windows SCM, Docker daemon and Linux systemd/root gates in approved isolated environments, then formally adjudicate V01-008.",
+      "Run the PostgreSQL 16.15 and Ubuntu 500k scheduled profiles in their declared CI environments before any release candidate decision."
+    ]
+  }
+}

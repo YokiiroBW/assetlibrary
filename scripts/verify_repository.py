@@ -14,6 +14,7 @@ def main() -> int:
     commands = [
         [sys.executable, str(ROOT / 'scripts/validate_handoff.py')],
         [sys.executable, str(ROOT / 'scripts/validate_architecture_baseline.py')],
+        [sys.executable, '-I', '-B', str(ROOT / 'scripts/validate_v0_1_alpha.py')],
         [sys.executable, str(ROOT / 'scripts/validate_dotnet_source.py')],
         [
             sys.executable,
