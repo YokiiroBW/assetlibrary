@@ -1441,6 +1441,71 @@ INSERT INTO library_storage.library_permission (
         self.assertEqual(disabled, "applied|f|3")
         self.assertEqual(enabled, "applied|t|4")
 
+        recovery_disable_id = uuid.uuid4()
+        recovery_disabled = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, principal_session_version FROM "
+            "gateway_auth.set_local_account_enabled("
+            f"'{actor_id}', 1, '{recovery_disable_id}', 'managed-user', 4, false);",
+        ).stdout.strip()
+        recovery_id = uuid.uuid4()
+        recovery_digest = "bb" * 32
+        recovered = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, is_enabled, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{recovery_id}', 'managed-user', 2, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'ac' * 16}', 'hex'), decode('{recovery_digest}', 'hex'));",
+        ).stdout.strip()
+        recovered_replay = self.gateway_sql(
+            database,
+            "SELECT outcome, was_replayed, is_enabled, credential_version, "
+            "principal_session_version FROM gateway_auth.replace_local_account_credential("
+            f"'{actor_id}', 1, '{recovery_id}', 'managed-user', 2, true, "
+            "'pbkdf2-sha256', 600000, "
+            f"decode('{'ad' * 16}', 'hex'), decode('{'bc' * 32}', 'hex'));",
+        ).stdout.strip()
+        self.assertEqual(recovery_disabled, "applied|f|5")
+        self.assertEqual(recovered, "applied|f|t|3|6")
+        self.assertEqual(recovered_replay, "applied|t|t|3|6")
+
+        if not self.external:
+            assert self.pg_ctl is not None and self.cluster_data is not None
+            self._run(
+                [
+                    str(self.pg_ctl),
+                    "--pgdata",
+                    str(self.cluster_data),
+                    "--wait",
+                    "--timeout",
+                    "30",
+                    "--mode",
+                    "fast",
+                    "restart",
+                ],
+                timeout=45,
+                capture_output=False,
+            )
+        persisted = self.gateway_sql(
+            database,
+            "SELECT outcome, is_enabled, credential_version, principal_session_version "
+            "FROM gateway_auth.read_local_account_for_administrator("
+            f"'{actor_id}', 1, 'managed-user');",
+        ).stdout.strip()
+        self.assertEqual(persisted, "applied|t|3|6")
+        self.assertEqual(
+            self.sql(
+                database,
+                self.admin,
+                "SET ROLE assetlibrary_gateway_auth_owner; "
+                "SELECT encode(secret_digest, 'hex') FROM "
+                "gateway_auth.local_account_credential "
+                "WHERE account_name = 'managed-user';",
+            ).stdout.strip(),
+            recovery_digest,
+        )
+
         audit_shape = self.sql(
             database,
             self.admin,
@@ -1456,7 +1521,7 @@ INSERT INTO library_storage.library_permission (
             "SELECT count(*) FROM gateway_auth.local_account_lifecycle_operation;",
         ).stdout.strip()
         self.assertEqual(audit_shape, "0")
-        self.assertEqual(audit_count, "5")
+        self.assertEqual(audit_count, "7")
 
     def test_last_enabled_administrator_is_preserved_under_concurrency(self) -> None:
         database = self.authentication_database("last_admin")
