@@ -35,7 +35,7 @@
 - `v0.1-start` 允许；默认 Alpha 审计退出 0 且 decision 保持 blocked；`--require-ready` 与 `v0.1-release` 均按合同返回原生退出码 3。
 - 必测 Provider 路径全部使用受控 `HttpMessageHandler` 和内存流；未向 HIBP 或任何真实互联网服务执行 live 查询。
 - 核心实现提交：`6078c39f3d76acb790a74b57891adc95ac25c88b`；允许路径生命周期补强提交：`ac85f59162c8d781d26b2747962f2ce16684a971`。
-- 交接基线提交：`HANDOFF_BASELINE_PENDING`。
+- 交接基线提交：`8bf3a76c1b739a4af11dad225741b39e4b5665ba`。
 
 ## 文件安全、权限与运行残留
 

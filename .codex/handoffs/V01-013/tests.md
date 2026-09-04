@@ -84,4 +84,4 @@ python -B tests/architecture/check_release_gates.py --target v0.1-release
 
 - 核心实现：`6078c39f3d76acb790a74b57891adc95ac25c88b`
 - 允许路径生命周期测试补强：`ac85f59162c8d781d26b2747962f2ce16684a971`
-- 交接基线：`HANDOFF_BASELINE_PENDING`
+- 交接基线：`8bf3a76c1b739a4af11dad225741b39e4b5665ba`
