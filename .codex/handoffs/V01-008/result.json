@@ -1,0 +1,132 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-008",
+  "title": "实现打包与发布证据闭环",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "codex-agent-v01-008",
+  "branch": "codex/v01-008-packaging-release-evidence",
+  "worktree": "C:\\YOKI\\Codex\\worktrees\\V01-008",
+  "commit": "81eb838136b9826c9ed6e0ac9e1ae9fdb42cfd49",
+  "changed_files": [
+    ".codex/handoffs/V01-008/result.json",
+    ".codex/handoffs/V01-008/summary.md",
+    ".codex/handoffs/V01-008/tests.md",
+    ".codex/tasks/V01-008.md",
+    ".github/workflows/release-evidence.yml",
+    "AssetLibrary.slnx",
+    "Directory.Build.props",
+    "Directory.Packages.props",
+    "eng/server-release-policy.json",
+    "infra/docker/Dockerfile",
+    "infra/docker/Dockerfile.dockerignore",
+    "infra/docker/README.md",
+    "infra/docker/compose.yaml",
+    "infra/linux-server/README.md",
+    "infra/linux-server/assetlibrary-core-server.service",
+    "infra/linux-server/systemd-evidence.sh",
+    "infra/windows-server/README.md",
+    "infra/windows-server/service-evidence.ps1",
+    "scripts/build_server_release.py",
+    "scripts/validate_server_release.py",
+    "services/core-server/AssetLibrary.CoreServer.csproj",
+    "services/core-server/Host/AssemblyInfo.cs",
+    "services/core-server/Host/AssetLibrary.CoreServer.Host.csproj",
+    "services/core-server/Host/Hosting/CoreServerApplication.cs",
+    "services/core-server/Host/Hosting/CoreServerApplicationFactory.cs",
+    "services/core-server/Host/Hosting/CoreServerBuildInfo.cs",
+    "services/core-server/Host/Hosting/CoreServerCommandDispatcher.cs",
+    "services/core-server/Host/Hosting/CoreServerEndpointPayloads.cs",
+    "services/core-server/Host/Hosting/CoreServerExitCode.cs",
+    "services/core-server/Host/Hosting/CoreServerHealthProbe.cs",
+    "services/core-server/Host/Hosting/CoreServerHost.cs",
+    "services/core-server/Host/Hosting/CoreServerHostCommand.cs",
+    "services/core-server/Host/Hosting/CoreServerHostJson.cs",
+    "services/core-server/Host/Hosting/CoreServerHostLog.cs",
+    "services/core-server/Host/Hosting/CoreServerHostLogging.cs",
+    "services/core-server/Host/Hosting/CoreServerHostOptions.cs",
+    "services/core-server/Host/Hosting/CoreServerHttpJson.cs",
+    "services/core-server/Host/Hosting/CoreServerStateBoundary.cs",
+    "services/core-server/Host/Hosting/CoreServerWebApplicationBuilder.cs",
+    "services/core-server/Host/Program.cs",
+    "services/core-server/Host/packages.lock.json",
+    "services/core-server/README.md",
+    "tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/HealthProbeTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/HostContractTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/HostOptionsTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/packages.lock.json",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/packages.lock.json",
+    "tests/dotnet/AssetLibrary.TaskHealth.Tests/packages.lock.json",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/packages.lock.json",
+    "tests/release/run_docker_evidence.py",
+    "tests/release/test_server_release.py",
+    "tests/repository/test_server_packaging_foundation.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 360,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Real Windows SCM, Docker daemon and Linux systemd lifecycle evidence has not been executed; the security-hardened orchestration, static policy checks and native Windows process smoke cannot close those platform gates.",
+    "Windows Administrator-owned staging/LocalService execution and Linux root-owned staging/non-root systemd execution are covered by static and unit regressions but still require runtime proof on isolated target machines.",
+    "The host exposes only host-level health, readiness and build information; authentication, database runtime composition, business APIs, TLS/secrets, upgrades, rollback and a production installer remain V01-009 or later work.",
+    "Docker non-root/read-only/restart/down-v behavior and Linux systemd hardening/cleanup remain unproven on their real target runtimes.",
+    "Production physical writes remain disabled and M0-006-G1/G2/G3 remain open; these artifacts must not be presented as a releasable Alpha."
+  ],
+  "blocked_by": [
+    "windows_service: blocked_missing_environment because the current Codex session is non-elevated and system changes are forbidden; an approved snapshot-capable Windows VM SCM cycle is required.",
+    "docker: blocked_missing_environment because no usable Docker CLI/daemon exists on the current runner; a real daemon cycle is required.",
+    "linux_systemd: blocked_missing_environment because no approved Linux systemd/root runner is available; a real unit lifecycle is required."
+  ],
+  "recommended_merge_order": 7,
+  "handoff_summary": ".codex/handoffs/V01-008/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Single cross-platform CoreServer host adapter plus Windows, Linux and Docker release evidence tooling",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "The existing AssetLibrary.CoreServer assembly remains the only business core; the new host only composes its public boundary.",
+      "M0-004 configuration validation, loopback health probe, fixed source revision, deterministic cold publish, owner marker and zero-residue evidence patterns.",
+      "V01-001 .NET 10 central package, locked restore, analyzer, vulnerability, license and source-policy toolchain.",
+      "Existing V01-006/V01-007 public contracts are left unchanged and no production-write adapter is composed.",
+      "The release builder reuses Git archive snapshots, exact issuance-input policy and complete artifact-tree digests instead of creating a parallel provenance mechanism."
+    ],
+    "duplicated_logic": [
+      "Configuration, health payload, manifest, archive and provenance invariants are intentionally revalidated at process, packaging, privileged-orchestration and independent-validator trust boundaries; no business rule is duplicated."
+    ],
+    "cross_module_access": [
+      "AssetLibrary.CoreServer.Host references the public AssetLibrary.CoreServer project only and does not access module Infrastructure, tables or internal entities.",
+      "Windows Service, systemd and Docker differences remain in Host lifecycle and infra release definitions; the business assembly and host project are shared.",
+      "Contracts, migrations, generated SDKs, GatewayAuth, LibraryStorage, AssetIdentity, ScanReconciliation, TaskHealth, TransferSync and OperationTrash implementations are unchanged.",
+      "Production file writes, Provider loading, Explorer integration and network business APIs are absent from the release composition."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [
+      "Microsoft.Extensions.Hosting.WindowsServices 10.0.11 (MIT), used only by the host adapter for Windows SCM lifecycle integration; Microsoft.Extensions dependency abstractions are centrally aligned at 10.0.11."
+    ],
+    "contract_changes": [
+      "Adds the host/release evidence contract v01-008/1 for health, host-only readiness, build information, artifact manifests and platform evidence states.",
+      "No shared wire schema, database migration, AssetLink contract, generated SDK or unified error-code contract changed."
+    ],
+    "architecture_tests": [
+      "18 targeted Packaging MSTest cases and the complete 185-test .NET solution with locked restore, format, Release build, dependency/source policy and vulnerability report.",
+      "19 release tests plus two commit-snapshot cold publishes, complete manifest/archive validation and a final native win-x64 process lifecycle smoke.",
+      "Security regressions cover isolated Python, exact MSBuild inputs, ancestor/import override rejection, secure Windows/Linux staging, non-privileged HTTP health polling, no-follow handles, Windows path aliases and archive snapshot parsing.",
+      "53 database tests including 14 PostgreSQL 16.15 integration cases, 48 repository tests and 14 architecture tests.",
+      "14 SDK Python and 21 AssetLink contract/spike tests, TypeScript SDK 5/5, Kotlin/JVM build and six Chromium Web regressions.",
+      "v0.1-start allow gate and expected windows-server-release/docker-release/linux-server-release/production-file-writes/v0.1-release deny gates."
+    ],
+    "technical_debt": [
+      "Run and independently review the Windows SCM cycle on YOKICESHI, the Docker cycle on a real daemon and the systemd cycle on an approved Linux runner before changing platform gate state.",
+      "V01-009 must integrate authentication, PostgreSQL runtime/migrations, business APIs, TLS/secrets and upgrade/rollback without splitting the business core.",
+      "Design production installer, signing/SBOM/provenance publication and release rollback only in separately scoped release work.",
+      "Keep production physical writes disabled until M0-006-G1/G2/G3 evidence and approvals are complete."
+    ]
+  }
+}
