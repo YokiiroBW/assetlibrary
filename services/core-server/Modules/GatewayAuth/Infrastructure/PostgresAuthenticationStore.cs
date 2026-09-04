@@ -5,11 +5,15 @@ using Npgsql;
 namespace AssetLibrary.Modules.GatewayAuth.Infrastructure;
 
 public sealed class PostgresAuthenticationStore
-    : ILocalCredentialStore, IBrowserSessionStore, ILocalAccountLifecycleStore
+    : ILocalCredentialStore,
+      IBrowserSessionStore,
+      ILocalAccountLifecycleStore,
+      IAdministratorBootstrapRecoveryStore
 {
     private readonly PostgresLocalCredentialStore credentials;
     private readonly PostgresBrowserSessionStore sessions;
     private readonly PostgresLocalAccountLifecycleStore lifecycle;
+    private readonly PostgresAdministratorBootstrapRecoveryStore administratorRecovery;
 
     public PostgresAuthenticationStore(NpgsqlDataSource dataSource)
     {
@@ -17,6 +21,7 @@ public sealed class PostgresAuthenticationStore
         credentials = new PostgresLocalCredentialStore(dataSource);
         sessions = new PostgresBrowserSessionStore(dataSource);
         lifecycle = new PostgresLocalAccountLifecycleStore(dataSource);
+        administratorRecovery = new PostgresAdministratorBootstrapRecoveryStore(dataSource);
     }
 
     public ValueTask<LocalCredentialMaterial?> FindAsync(
@@ -112,5 +117,31 @@ public sealed class PostgresAuthenticationStore
             accountName,
             expectedPrincipalSessionVersion,
             enabled,
+            cancellationToken);
+
+    ValueTask<AdministratorBootstrapRecoveryResult>
+        IAdministratorBootstrapRecoveryStore.BootstrapAsync(
+            VerifiedOutOfBandAuthorization authorization,
+            Guid requestedPrincipalId,
+            LocalAccountDisplayName displayName,
+            LocalCredentialEnrollmentMaterial credential,
+            CancellationToken cancellationToken) =>
+        administratorRecovery.BootstrapAsync(
+            authorization,
+            requestedPrincipalId,
+            displayName,
+            credential,
+            cancellationToken);
+
+    ValueTask<AdministratorBootstrapRecoveryResult>
+        IAdministratorBootstrapRecoveryStore.RecoverAsync(
+            VerifiedOutOfBandAuthorization authorization,
+            long expectedCredentialVersion,
+            LocalCredentialEnrollmentMaterial credential,
+            CancellationToken cancellationToken) =>
+        administratorRecovery.RecoverAsync(
+            authorization,
+            expectedCredentialVersion,
+            credential,
             cancellationToken);
 }

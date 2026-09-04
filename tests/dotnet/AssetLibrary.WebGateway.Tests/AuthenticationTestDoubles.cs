@@ -88,16 +88,126 @@ internal sealed class FakeLocalCredentialDeriver : ILocalCredentialDeriver
 
     public LocalCredentialEnrollmentMaterial? LastMaterial { get; private set; }
 
+    public Action? OnDerive { get; set; }
+
     public LocalCredentialEnrollmentMaterial Derive(LocalSecret secret)
     {
         ArgumentNullException.ThrowIfNull(secret);
         Calls++;
+        OnDerive?.Invoke();
         LastMaterial = new LocalCredentialEnrollmentMaterial(
             LocalSecretHashingPolicy.Algorithm,
             LocalSecretHashingPolicy.MinimumIterations,
             Enumerable.Repeat((byte)0x41, LocalSecretHashingPolicy.SaltBytes).ToArray(),
             Enumerable.Repeat((byte)0x52, LocalSecretHashingPolicy.DigestBytes).ToArray());
         return LastMaterial;
+    }
+}
+
+internal sealed class FakeOutOfBandAuthorizationVerifier : IOutOfBandAuthorizationVerifier
+{
+    public int Calls { get; private set; }
+
+    public OutOfBandAuthorizationRequest? LastRequest { get; private set; }
+
+    public int ObservedProofLength { get; private set; }
+
+    public Func<OutOfBandAuthorizationRequest, CancellationToken,
+        ValueTask<OutOfBandAuthorizationVerificationResult>>? Verify
+    { get; set; }
+
+    public ValueTask<OutOfBandAuthorizationVerificationResult> VerifyAsync(
+        OutOfBandAuthorizationRequest request,
+        OutOfBandAuthorizationProof proof,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Calls++;
+        LastRequest = request;
+        ObservedProofLength = proof.Value.Length;
+        return Verify?.Invoke(request, cancellationToken)
+            ?? ValueTask.FromResult(OutOfBandAuthorizationVerificationResult.Verified(
+                new VerifiedOutOfBandAuthorization(
+                    Guid.NewGuid(),
+                    request.Action,
+                    request.OperationId,
+                    request.TargetAccountName,
+                    request.ExpiresAt)));
+    }
+}
+
+internal sealed class FakeAdministratorBootstrapRecoveryStore
+    : IAdministratorBootstrapRecoveryStore
+{
+    public AdministratorBootstrapRecoveryResult Result { get; set; } =
+        new(
+            AdministratorBootstrapRecoveryOutcome.Applied,
+            wasReplayed: false,
+            AuthenticationTestData.Account(
+                accountName: "bootstrap-admin",
+                isSystemAdministrator: true));
+
+    public int BootstrapCalls { get; private set; }
+
+    public int RecoverCalls { get; private set; }
+
+    public VerifiedOutOfBandAuthorization? LastAuthorization { get; private set; }
+
+    public Guid LastRequestedPrincipalId { get; private set; }
+
+    public LocalAccountDisplayName LastDisplayName { get; private set; }
+
+    public long LastExpectedCredentialVersion { get; private set; }
+
+    public LocalCredentialEnrollmentMaterial? LastMaterial { get; private set; }
+
+    public Func<CancellationToken,
+        ValueTask<AdministratorBootstrapRecoveryResult>>? Execute
+    { get; set; }
+
+    public ValueTask<AdministratorBootstrapRecoveryResult> BootstrapAsync(
+        VerifiedOutOfBandAuthorization authorization,
+        Guid requestedPrincipalId,
+        LocalAccountDisplayName displayName,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken)
+    {
+        BootstrapCalls++;
+        LastAuthorization = authorization;
+        LastRequestedPrincipalId = requestedPrincipalId;
+        LastDisplayName = displayName;
+        LastMaterial = credential;
+        AssertAdministratorMaterial(credential);
+        return Complete(cancellationToken);
+    }
+
+    public ValueTask<AdministratorBootstrapRecoveryResult> RecoverAsync(
+        VerifiedOutOfBandAuthorization authorization,
+        long expectedCredentialVersion,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken)
+    {
+        RecoverCalls++;
+        LastAuthorization = authorization;
+        LastExpectedCredentialVersion = expectedCredentialVersion;
+        LastMaterial = credential;
+        AssertAdministratorMaterial(credential);
+        return Complete(cancellationToken);
+    }
+
+    private ValueTask<AdministratorBootstrapRecoveryResult> Complete(
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Execute?.Invoke(cancellationToken) ?? ValueTask.FromResult(Result);
+    }
+
+    private static void AssertAdministratorMaterial(LocalCredentialEnrollmentMaterial credential)
+    {
+        Assert.AreEqual(LocalSecretHashingPolicy.Algorithm, credential.Algorithm);
+        Assert.AreEqual(LocalSecretHashingPolicy.MinimumIterations, credential.Iterations);
+        Assert.AreEqual(LocalSecretHashingPolicy.SaltBytes, credential.Salt.Length);
+        Assert.AreEqual(LocalSecretHashingPolicy.DigestBytes, credential.Digest.Length);
     }
 }
 
