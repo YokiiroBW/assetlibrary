@@ -4,18 +4,22 @@ using System.Text.Json;
 if (args.Contains("--build-info", StringComparer.Ordinal))
     return BuildInfo();
 
+Dictionary<string, string> options;
+try { options = ReadOptions(args); }
+catch (ArgumentException ex) { return Fail("invalid_configuration", ex.Message); }
+
 if (args.Contains("--health-probe", StringComparer.Ordinal))
-    return await HealthProbe();
+    return await HealthProbe(options);
 
 var builder = WebApplication.CreateBuilder(args);
-var dataPath = builder.Configuration["SPIKE_DATA_PATH"];
+var dataPath = OptionOrConfiguration(options, "SPIKE_DATA_PATH", builder.Configuration);
 if (string.IsNullOrWhiteSpace(dataPath))
     return Fail("missing_configuration", "SPIKE_DATA_PATH is required");
 
-var portText = builder.Configuration["SPIKE_PORT"] ?? "5080";
+var portText = OptionOrConfiguration(options, "SPIKE_PORT", builder.Configuration) ?? "5080";
 if (!int.TryParse(portText, out var port) || port is < 1024 or > 65535)
     return Fail("invalid_configuration", "SPIKE_PORT must be between 1024 and 65535");
-var bindHost = builder.Configuration["SPIKE_BIND_HOST"] ?? "127.0.0.1";
+var bindHost = OptionOrConfiguration(options, "SPIKE_BIND_HOST", builder.Configuration) ?? "127.0.0.1";
 if (string.IsNullOrWhiteSpace(bindHost) || bindHost.Any(char.IsWhiteSpace))
     return Fail("invalid_configuration", "SPIKE_BIND_HOST must be a host name or address");
 
@@ -47,9 +51,30 @@ return 0;
 static int Fail(string code, string message)
 {
     Console.Error.WriteLine(JsonSerializer.Serialize(new { level = "error", code, message }));
-    Environment.Exit(78);
-    return 0;
+    return 78;
 }
+
+static Dictionary<string, string> ReadOptions(string[] arguments)
+{
+    var values = new Dictionary<string, string>(StringComparer.Ordinal);
+    for (var index = 0; index < arguments.Length; index++)
+    {
+        var argument = arguments[index];
+        if (!argument.StartsWith("--", StringComparison.Ordinal)) continue;
+        // The original Windows evidence and NAS guardrail branch used different
+        // spellings of the same test-local settings. Normalize before validation.
+        var key = argument[2..].Replace('-', '_').ToUpperInvariant();
+        if (key is not ("SPIKE_DATA_PATH" or "SPIKE_PORT" or "SPIKE_BIND_HOST" or "SPIKE_PROBE_HOST")) continue;
+        if (index + 1 >= arguments.Length || arguments[index + 1].StartsWith("--", StringComparison.Ordinal))
+            throw new ArgumentException($"missing value for {key}");
+        if (!values.TryAdd(key, arguments[++index]))
+            throw new ArgumentException($"duplicate option {key}");
+    }
+    return values;
+}
+
+static string? OptionOrConfiguration(IReadOnlyDictionary<string, string> options, string key, IConfiguration configuration)
+    => options.TryGetValue(key, out var value) ? value : configuration[key];
 
 static int BuildInfo()
 {
@@ -60,16 +85,38 @@ static int BuildInfo()
     return string.IsNullOrWhiteSpace(version) ? 1 : 0;
 }
 
-static async Task<int> HealthProbe()
+static async Task<int> HealthProbe(IReadOnlyDictionary<string, string> options)
 {
-    var host = Environment.GetEnvironmentVariable("SPIKE_PROBE_HOST") ?? "127.0.0.1";
-    var port = Environment.GetEnvironmentVariable("SPIKE_PORT") ?? "5080";
-    using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+    var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+    var host = OptionOrConfiguration(options, "SPIKE_PROBE_HOST", configuration) ?? "127.0.0.1";
+    var port = OptionOrConfiguration(options, "SPIKE_PORT", configuration) ?? "5080";
+    using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+    using var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
     try
     {
-        using var response = await client.GetAsync($"http://{host}:{port}/healthz");
-        return response.IsSuccessStatusCode ? 0 : 1;
+        if (!int.TryParse(port, out var parsedPort) || parsedPort is < 1 or > 65535 || string.IsNullOrWhiteSpace(host) || host.Any(char.IsWhiteSpace))
+            return 1;
+        using var response = await client.GetAsync($"http://{host}:{parsedPort}/healthz", HttpCompletionOption.ResponseHeadersRead, deadline.Token);
+        if (!response.IsSuccessStatusCode) return 1;
+        using var stream = await response.Content.ReadAsStreamAsync(deadline.Token);
+        var buffer = new byte[4097];
+        var total = 0;
+        while (total < buffer.Length)
+        {
+            var count = await stream.ReadAsync(buffer.AsMemory(total), deadline.Token);
+            if (count == 0) break;
+            total += count;
+        }
+        if (total == buffer.Length) return 1;
+        using var document = JsonDocument.Parse(buffer.AsMemory(0, total), new JsonDocumentOptions { MaxDepth = 8 });
+        var root = document.RootElement;
+        return root.ValueKind == JsonValueKind.Object &&
+               root.TryGetProperty("status", out var status) && status.ValueKind == JsonValueKind.String && status.GetString() == "ok" &&
+               root.TryGetProperty("contract", out var contract) && contract.ValueKind == JsonValueKind.String && contract.GetString() == "m0-004/v1" ? 0 : 1;
     }
     catch (HttpRequestException) { return 1; }
-    catch (TaskCanceledException) { return 1; }
+    catch (OperationCanceledException) { return 1; }
+    catch (IOException) { return 1; }
+    catch (JsonException) { return 1; }
+    catch (UriFormatException) { return 1; }
 }

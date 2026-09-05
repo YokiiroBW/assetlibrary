@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "ALIGN-004",
+  "title": "windows-service-guard-reconciliation",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "server-packaging-owner",
+  "branch": "codex/align-004-windows-service-guard-reconciliation",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-004",
+  "commit": "3d1a20364c5ea15ebc96ff09474ea60e1d1d73cd",
+  "changed_files": [
+    ".codex/tasks/ALIGN-004.md",
+    ".codex/handoffs/ALIGN-004/summary.md",
+    ".codex/handoffs/ALIGN-004/result.json",
+    ".codex/handoffs/ALIGN-004/tests.md",
+    "tests/spikes/server-packaging/scripts/windows-service.ps1",
+    "tests/spikes/server-packaging/src/Program.cs",
+    "tests/spikes/server-packaging/test_windows_service_contract.py",
+    "tests/spikes/server-packaging/test_spike.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Real Windows Service and Docker lifecycles remain unexecuted and blocked."
+  ],
+  "blocked_by": [
+    "Native process and provenance verification pending implementation commit."
+  ],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/ALIGN-004/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "server-packaging-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing ASP.NET Core host and WindowsServices lifetime",
+      "M0-004 deterministic bootstrap and build-info provenance",
+      "Spike-local m0-004/v1 health contract",
+      "Existing Python/PowerShell test tooling"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "9 service adapter static and executable mock/sandbox regressions passed"
+    ],
+    "technical_debt": [
+      "M0-004-G1 Windows Service and M0-004-G2 Docker release evidence remain open."
+    ]
+  }
+}
