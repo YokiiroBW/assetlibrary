@@ -380,6 +380,55 @@
       "handoff": ".codex/handoffs/V01-014/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "ALIGN-001",
+      "title": "repository-architecture-alignment",
+      "module": "repository-architecture-alignment",
+      "status": "in_progress",
+      "depends_on": [
+        "M0-009",
+        "V01-014"
+      ],
+      "owner": "architecture-coordinator",
+      "branch": "codex/align-001-repository-architecture-alignment",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-001",
+      "task_file": ".codex/tasks/ALIGN-001.md",
+      "handoff": ".codex/handoffs/ALIGN-001/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "ALIGN-002",
+      "title": "scan-physical-boundary",
+      "module": "scan-physical-boundary",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-004"
+      ],
+      "owner": "library-asset-scan-owner",
+      "branch": "codex/align-002-scan-physical-boundary",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-002",
+      "task_file": ".codex/tasks/ALIGN-002.md",
+      "handoff": ".codex/handoffs/ALIGN-002/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "ALIGN-003",
+      "title": "web-request-deadline",
+      "module": "web-request-deadline",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-006"
+      ],
+      "owner": "web-gateway-owner",
+      "branch": "codex/align-003-web-request-deadline",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-003",
+      "task_file": ".codex/tasks/ALIGN-003.md",
+      "handoff": ".codex/handoffs/ALIGN-003/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
