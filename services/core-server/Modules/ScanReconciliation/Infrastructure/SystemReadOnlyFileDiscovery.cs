@@ -32,10 +32,18 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
         while (pendingDirectories.TryPop(out var directory))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            ValidatePhysicalDirectory(directory, cancellationToken);
             using var children = OpenDirectory(directory);
-            while (MoveNext(children, out var child))
+            while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                // A consumer may suspend enumeration after each yield while an ancestor is replaced.
+                ValidatePhysicalDirectory(directory, cancellationToken);
+                if (!MoveNext(children, out var child))
+                {
+                    break;
+                }
+
                 var entry = ReadEntry(root, child);
                 if (!DefaultDiscoveryPolicy.ShouldInclude(entry))
                 {
@@ -54,6 +62,40 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
                     await Task.Yield();
                 }
             }
+        }
+    }
+
+    private static void ValidatePhysicalDirectory(string directory, CancellationToken cancellationToken)
+    {
+        var ancestor = new DirectoryInfo(directory);
+        while (ancestor is not null)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            FileAttributes attributes;
+            try
+            {
+                attributes = File.GetAttributes(ancestor.FullName);
+            }
+            catch (UnauthorizedAccessException exception)
+            {
+                throw new FileDiscoveryException("directory_access_denied", exception);
+            }
+            catch (IOException exception)
+            {
+                throw new FileDiscoveryException("directory_metadata_failed", exception);
+            }
+
+            if ((attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                throw new FileDiscoveryException("directory_reparse_point");
+            }
+
+            if ((attributes & FileAttributes.Directory) == 0)
+            {
+                throw new FileDiscoveryException("directory_unavailable");
+            }
+
+            ancestor = ancestor.Parent;
         }
     }
 

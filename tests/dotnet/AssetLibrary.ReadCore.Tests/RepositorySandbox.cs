@@ -4,6 +4,7 @@ namespace AssetLibrary.ReadCore.Tests;
 
 internal sealed class RepositorySandbox : IDisposable
 {
+    private readonly HashSet<string> directoryLinks = new(StringComparer.Ordinal);
     private static readonly string TaskSandboxRoot = Path.Combine(
         FindRepositoryRoot(),
         ".runtime",
@@ -19,6 +20,16 @@ internal sealed class RepositorySandbox : IDisposable
     }
 
     public string Root { get; }
+
+    public void RegisterDirectoryLink(string link)
+    {
+        if (!Path.GetFullPath(link).StartsWith($"{Path.GetFullPath(Root)}{Path.DirectorySeparatorChar}", PathComparison))
+        {
+            throw new InvalidOperationException("A test link must be inside its sandbox.");
+        }
+
+        directoryLinks.Add(link);
+    }
 
     public string CaptureStrongSnapshot()
     {
@@ -54,6 +65,16 @@ internal sealed class RepositorySandbox : IDisposable
 
         if (Directory.Exists(resolvedRoot))
         {
+            foreach (var link in directoryLinks)
+            {
+                if ((File.GetAttributes(link) & FileAttributes.ReparsePoint) == 0)
+                {
+                    throw new InvalidOperationException("A registered test link changed before cleanup.");
+                }
+
+                Directory.Delete(link);
+            }
+
             Directory.Delete(resolvedRoot, recursive: true);
         }
 
