@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v01-023-web-first-release-alignment",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-023",
-  "commit": "68e72504a235530976e8926be1a193a8b7c78c06",
+  "commit": "093adf313c8e580454fb7c5f11c8f720f9ee8338",
   "changed_files": [
     ".codex/handoffs/V01-023/result.json",
     ".codex/handoffs/V01-023/summary.md",
@@ -20,15 +20,14 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 40,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
   "risks": [
-    "All runtime/static verification is intentionally pending the user-requested centralized V01-021 acceptance; no passing checks are claimed.",
-    "Container example must stay aligned with V01-022 /assets/<source_key> mount layout.",
-    "entry_path_unsupported presentation awaits joint acceptance with root Linux correction ec3f64a; generic failure wording and wire shape are unchanged."
+    "Web fixture/build acceptance passed; real NAS image, HTTPS/database and physical-asset acceptance remain with V01-021.",
+    "Container example remains aligned with V01-022 /assets/<source_key>; no front-end path rewriting or new wire fields."
   ],
   "blocked_by": [],
   "recommended_merge_order": 2,
@@ -49,10 +48,12 @@
     "new_major_dependencies": [],
     "contract_changes": [],
     "architecture_tests": [
-      "Not executed, as explicitly requested for centralized acceptance; manual diff and ownership review only."
+      "Fixed Node24.20.0/pnpm11.19.0 frozen installs, format:check, lint/typecheck and production build passed.",
+      "Existing browser suite passed once: 40/40 in19.2s, no retries or skips.",
+      "Representative existing screenshots manually inspected; .NET/repository/NAS checks owned by coordinator and not duplicated."
     ],
     "technical_debt": [
-      "V01-021 must perform existing Web checks and real NAS acceptance before declaring the release usable."
+      "No new implementation debt; do not treat fixture acceptance as real NAS deployment evidence."
     ]
   }
 }

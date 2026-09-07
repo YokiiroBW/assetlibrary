@@ -2,7 +2,7 @@
 
 ## 状态
 
-实现已提交，ready_for_review，等待V01-021集中验收。分支codex/v01-023-web-first-release-alignment；初始实现bc3d151，最新呈现修正68e72504a235530976e8926be1a193a8b7c78c06。已合入冻结ced5751，读取任务包、ADR0014/0015、docs12并实际查看assets/visuals/10_web_admin_asset_browser.png。
+实现及Web统一验收完成，ready_for_review，NAS整体结论仍由V01-021裁决。分支codex/v01-023-web-first-release-alignment；实现bc3d151、68e7250；受验HEAD093adf313c8e580454fb7c5f11c8f720f9ee8338，已合根858dcf3。此前读取任务包、ADR0014/0015、docs12并实际查看assets/visuals/10_web_admin_asset_browser.png。
 
 ## 差距与变更
 
@@ -13,7 +13,7 @@
 - 首次扫描完成提示说明当前是索引快照，刷新不会重新扫描目录。
 - Web README同步NAS/Windows语义和V01-021验收归属。
 - 既有登记测试改用photos源和容器路径，并检查关联帮助/快照提示；既有失败重试用例继续使用Windows盘符。未增加测试数量或快照。
-- 根Linux修正ec3f64a对字面反斜杠名称返回entry_path_unsupported。失败状态仅对此码说明名称限制、首次索引未提交及检查后重试；其他失败提示原样保留。既有失败/重试case增加对应文案及重试按钮可用断言，不增加测试数量。按根指令没有合入该产品修正或运行检查。
+- 根Linux修正ec3f64a对字面反斜杠名称返回entry_path_unsupported。失败状态仅对此码说明名称限制、首次索引未提交及检查后重试；其他失败提示原样保留。既有失败/重试case增加对应文案及重试按钮可用断言，不增加测试数量。统一验收阶段已随858dcf3合入相关根代码。
 
 ## 复用、影响与边界
 
@@ -23,6 +23,8 @@
 
 ## 验收状态
 
-按用户“集中实现、最后统一验收”的明确要求，本任务没有运行测试、formatter、lint、typecheck、构建或截图检查；不声明通过。仅完成源码/设计图阅读、与部署owner对齐、人工diff审查和Git提交。待根统一安排既有40项浏览器、格式/类型/构建及真实NAS容器/浏览器验收。
+实施期间按用户要求未运行检查；根启动统一验收后，固定Node24.20.0/pnpm11.19.0下Web和SDK frozen install、format:check、lint、typecheck、build全部通过，现有浏览器40/40一次通过，19.2秒，无失败/重试/跳过。没有源码修正。已查看登记桌面、窄屏空目录和窄屏暗色离线/快照截图；日志、截图和产物hash见tests.md。
+
+上述为Web fixture/构建证据，不替代根负责的.NET、仓库静态及真实NAS容器/浏览器闭环；本任务未重复这些检查，也不宣布NAS完成。
 
 建议顺序：冻结ADR → V01-022部署与本提交 → V01-021统一验收。若挂载映射后续变化，登记例子和说明需随协调器一起调整；当前未发现需扩展功能的理由。
