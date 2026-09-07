@@ -25,3 +25,5 @@ M0-004-G2的真实Docker两条退出条件满足，单独关闭；Alpha政策将
 扫描仍为O(N)逐条枚举与分批持久化，浏览/搜索复用既有分页与索引，无新全表加载或新查询模型；50万资产性能门禁仍需后续专用证据。
 
 正式部署目录为 `/volume2/homes/agent/assetlibrary/V01-021/live`，移出两个资产根；26个配置/交付文件复制后逐一hash核验，旧自有部署目录已移除。更新Compose管理路径并重建两容器后原会话和两库保留、健康通过。9个自有样例核验hash/mtime后回收，避免非法名称验收夹具阻断文档全库扫描。
+
+代码与验收政策交付commit为 `9a45b41f4fc2b80209cf09ab317536045f2ef41d`。本地与NAS main已fast-forward到此commit，tree均为 `0d8adb772e3330d4d6e643feedad04358a179877`；45个工作区全部Git clean、无HEAD登记错配。随后仅追加本交接元数据并再次同步；原始逐工作区读回保留于ignored `.runtime/V01-021/workspace-readback.json`。未修复/裁剪旧worktree指针、未重写历史或删除已被拒绝清理的旧残留。
