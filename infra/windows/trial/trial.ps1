@@ -288,8 +288,13 @@ function Start-Trial {
     $process = $null
     try {
         $configuration = Join-Path $script:State 'trial.json'
-        $process = Start-Process -FilePath $script:HostExecutable -ArgumentList @('--read-only-trial',('"' + $configuration + '"')) -WindowStyle Hidden -PassThru -WorkingDirectory $script:Package -Environment @{ ASPNETCORE_ENVIRONMENT='Production'; DOTNET_ENVIRONMENT='Production' } -RedirectStandardOutput (Join-Path $script:State 'logs/host.stdout.log') -RedirectStandardError (Join-Path $script:State 'logs/host.stderr.log')
-        Write-PrivateJson (Join-Path $script:State 'host-process.json') @{ pid=$process.Id; image=$script:HostExecutable; created_ticks=$process.StartTime.ToUniversalTime().Ticks }
+        $launched = Invoke-PrivateProcess $script:Owner.python @('-I','-B',(Join-Path $script:Package 'trial_process.py'),'--state',$script:State)
+        if ($launched.exit_code -ne 0) { throw 'trial_host_start_failed' }
+        $identity = $launched.output | ConvertFrom-Json -AsHashtable -DateKind String
+        $process = Get-Process -Id $identity.pid
+        $created = [DateTime]::FromFileTimeUtc($identity.created).Ticks
+        if ($process.Path -ne $script:HostExecutable -or $process.Path -ne $identity.image -or $process.StartTime.ToUniversalTime().Ticks -ne $created) { throw 'trial_host_process_owner_mismatch' }
+        Write-PrivateJson (Join-Path $script:State 'host-process.json') @{ pid=$process.Id; image=$script:HostExecutable; created_ticks=$created }
         $watch = [Diagnostics.Stopwatch]::StartNew()
         do {
             if ($process.HasExited) { throw 'trial_host_start_failed' }
@@ -307,11 +312,23 @@ function Start-Trial {
 
 function Stop-Trial {
     $process = Get-OwnedHost
+    $mode = 'already_stopped'
     if ($process) {
-        try { $process.Kill($true); if (!$process.WaitForExit(10000)) { throw 'trial_host_stop_timeout' } } finally { $process.Dispose() }
+        try {
+            $originalId = $process.Id
+            $originalStart = $process.StartTime.ToUniversalTime().Ticks
+            $null = Invoke-PrivateProcess $script:HostExecutable @('--trial-stop',(Join-Path $script:State 'trial.json')) '' 10
+            $mode = 'graceful'
+            if (!$process.WaitForExit(45000)) {
+                $verified = Get-OwnedHost
+                if (!$verified -or $verified.Id -ne $originalId -or $verified.StartTime.ToUniversalTime().Ticks -ne $originalStart) { throw 'trial_host_process_owner_mismatch' }
+                try { $verified.Kill($true); if (!$verified.WaitForExit(10000)) { throw 'trial_host_stop_timeout' } } finally { $verified.Dispose() }
+                $mode = 'forced'
+            }
+        } finally { $process.Dispose() }
     }
     $null = Invoke-Database 'stop'
-    return @{ status='stopped'; persistent_state='preserved' }
+    return @{ status='stopped'; shutdown=$mode; persistent_state='preserved'; certificate_cleanup=$(if ($mode -eq 'forced') {'not_confirmed'} else {'normal_exit_or_already_stopped'}) }
 }
 
 function Invoke-Operator {

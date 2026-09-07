@@ -95,7 +95,9 @@ class TrialPackageTests(unittest.TestCase):
         source = script.read_text(encoding="utf-8")
         for forbidden in ("New-Service", "Register-ScheduledTask", "Import-Certificate", "New-NetFirewallRule", "New-SelfSignedCertificate"):
             self.assertNotIn(forbidden, source)
-        self.assertIn("-WindowStyle Hidden", source)
+        launcher = (ROOT / "infra/windows/trial/trial_process.py").read_text(encoding="utf-8")
+        self.assertIn("subprocess.SW_HIDE", launcher)
+        self.assertIn("close_fds=True", launcher)
 
     @unittest.skipUnless(os.name == "nt", "Windows private-directory preflight")
     def test_runtime_preflight_preserves_foreign_state_and_rejects_tampering(self):
@@ -157,6 +159,7 @@ class TrialNativeDatabaseTests(unittest.TestCase):
             package.mkdir()
             shutil.copytree(ROOT / "database/migrations/production", package / "migrations")
             shutil.copy2(ROOT / "infra/windows/trial/trial_database.py", package)
+            shutil.copy2(ROOT / "infra/windows/trial/trial_process.py", package)
             state = root / "state"
             command = "$s=[Security.Principal.WindowsIdentity]::GetCurrent().User;$a=[Security.AccessControl.DirectorySecurity]::new();$a.SetOwner($s);$a.SetAccessRuleProtection($true,$false);$a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow'));[IO.FileSystemAclExtensions]::Create([IO.DirectoryInfo]::new($Target),$a)"
             created = powershell_script(pwsh, command, state)
@@ -254,11 +257,23 @@ class TrialNativePackageTests(unittest.TestCase):
             settings.write_text(json.dumps({"public_origin": origin, "storage_sources": [{
                 "source_key": "sandbox", "display_name": "2026-09-07T00:00:00Z", "allowed_root": str(assets),
             }]}), encoding="utf-8")
-            def run(action, *arguments, input_text=None, success=True):
+            def run(action, *arguments, input_text=None, success=True, allow_unavailable=False):
                 result = subprocess.run([pwsh, "-NoProfile", "-File", str(script), "-Action", action, "-StatePath", str(state), *arguments], input=input_text, capture_output=True, text=True, encoding="utf-8", timeout=150)
                 transcript.append(result.stdout + result.stderr)
+                response = json.loads(result.stdout.splitlines()[-1])
+                if allow_unavailable and response.get("reason") == "service_unavailable" and result.returncode != 0:
+                    return response
                 self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
-                return json.loads(result.stdout.splitlines()[-1])
+                return response
+            def perform_operator(arguments, secret):
+                for attempt in range(3):
+                    # This exercises the documented logical retry after a real transient risk-service failure.
+                    # Only the first recovery call creates an identity; retry IDs/expiry/password stay unchanged.
+                    retry_arguments = arguments if attempt == 0 else tuple(value for value in arguments if value != "-NewAttempt")
+                    response = run("operator", *retry_arguments, input_text=secret, allow_unavailable=True)
+                    if response.get("outcome") == "applied":
+                        return response
+                self.fail("real administrator risk dependency stayed unavailable after three identical logical attempts")
             initialize = ("-SettingsFile", str(settings), "-Python", sys.executable, "-PostgresBin", pg_bin, "-DatabasePort", str(database_port))
             initialized = run("initialize", *initialize)
             self.assertEqual(initialized["status"], "initialized")
@@ -268,10 +283,10 @@ class TrialNativePackageTests(unittest.TestCase):
             password = secrets.token_urlsafe(40)
             operator = ("-OperatorAction", "bootstrap", "-AccountName", "trialadministrator", "-DisplayName", "Trial administrator", "-PasswordFromStdin")
             try:
-                self.assertEqual(run("operator", *operator, input_text=password)["outcome"], "applied")
+                self.assertEqual(perform_operator(operator, password)["outcome"], "applied")
                 attempt_before = (state / "operator-attempt.json").read_bytes()
                 self.assertFalse(password in attempt_before.decode(), "operator attempt persisted a password")
-                replay = run("operator", *operator, input_text=password)
+                replay = perform_operator(operator, password)
                 self.assertTrue(replay["was_replayed"])
                 self.assertEqual((state / "operator-attempt.json").read_bytes(), attempt_before)
                 self.assertEqual(run("start")["status"], "running")
@@ -305,7 +320,7 @@ class TrialNativePackageTests(unittest.TestCase):
                 previous_password = password
                 password = secrets.token_urlsafe(40)
                 recovery = ("-OperatorAction", "recover", "-AccountName", "trialadministrator", "-NewAttempt", "-PasswordFromStdin")
-                self.assertEqual(run("operator", *recovery, input_text=password)["outcome"], "applied")
+                self.assertEqual(perform_operator(recovery, password)["outcome"], "applied")
                 login()
                 index = package / "web/index.html"
                 original_index = index.read_bytes()

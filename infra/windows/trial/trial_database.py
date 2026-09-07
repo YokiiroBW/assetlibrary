@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import argparse
 import contextlib
-import ctypes
-from ctypes import wintypes
 import importlib.util
 import io
 import json
@@ -51,31 +49,11 @@ def write_json(path: Path, payload: dict) -> None:
     os.replace(temporary, path)
 
 
-def process_identity(pid: int) -> dict | None:
-    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
-    kernel.OpenProcess.restype = wintypes.HANDLE
-    handle = kernel.OpenProcess(0x1000, False, pid)
-    if not handle:
-        if ctypes.get_last_error() == 87:
-            return None
-        raise TrialDatabaseError("database_process_identity_unavailable")
-    try:
-        image = ctypes.create_unicode_buffer(32768)
-        size = wintypes.DWORD(len(image))
-        kernel.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
-        if not kernel.QueryFullProcessImageNameW(handle, 0, image, ctypes.byref(size)):
-            raise TrialDatabaseError("database_process_image_unavailable")
-        times = [wintypes.FILETIME() for _ in range(4)]
-        kernel.GetProcessTimes.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
-        if not kernel.GetProcessTimes(handle, *(ctypes.byref(value) for value in times)):
-            raise TrialDatabaseError("database_process_start_unavailable")
-        created = (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
-        return {"pid": pid, "image": str(Path(image.value)), "created": created}
-    finally:
-        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-        kernel.CloseHandle(handle)
-
+PROCESS_SPEC = importlib.util.spec_from_file_location("trial_process_identity", Path(__file__).resolve().parent / "trial_process.py")
+assert PROCESS_SPEC and PROCESS_SPEC.loader
+PROCESS = importlib.util.module_from_spec(PROCESS_SPEC)
+PROCESS_SPEC.loader.exec_module(PROCESS)
+process_identity = PROCESS.process_identity
 
 class TrialDatabase:
     def __init__(self, state: Path, package: Path):
