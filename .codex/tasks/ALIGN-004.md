@@ -19,11 +19,14 @@ Read AGENTS.md, .codex/START_HERE.md, docs/01, docs/02, docs/05, docs/16, docs/1
 
 - tests/spikes/server-packaging/scripts/windows-service.ps1
 - tests/spikes/server-packaging/src/Program.cs
+- tests/spikes/server-packaging/src/ServerPackagingSpike.csproj (coordinator-approved compatibility fix: reuse the root package pin and isolate generated lock state)
 - tests/spikes/server-packaging/test_windows_service_contract.py
 - tests/spikes/server-packaging/test_spike.py
 - This task package and .codex/handoffs/ALIGN-004/**.
 
 All other paths, old M0 handoffs, project state, contracts, dependencies, versions, production modules, migrations and release-gate state are read-only. The coordinator owns history integration and global workspace alignment.
+
+The coordinator approved the Spike project compatibility fix after NU1008 exposed its duplicate package version under the current central package policy. Root dependency versions and production gates remain read-only.
 
 ## Architecture and reuse
 
