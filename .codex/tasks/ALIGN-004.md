@@ -6,6 +6,8 @@
 - Branch: `codex/align-004-windows-service-guard-reconciliation`
 - Worktree: `C:\YOKI\Codex\AssetLibrary-worktrees\ALIGN-004`
 - Base: `c1df723`
+- Status: implementation and bounded verification complete; ready for coordinator integration review
+- Implementation commit: `e6074f265f7de023512b79ffcf15ee1d31fec5ac`
 
 ## Objective
 
@@ -51,3 +53,11 @@ Module: server-packaging-spike. Reuse its ASP.NET Core host, WindowsServices lif
 - git diff --check
 
 Bootstrap requires a clean committed worktree for provenance. Commit implementation before native verification, then commit verification metadata separately.
+
+## Completion evidence — 2026-09-07
+
+The implementation contains the reconciled service guardrails, both CLI spellings, bounded contract-checked probes, the central-package compatibility fix and analyzer-compliant host responsibilities. No root dependency or release gate changed.
+
+The 9 service adapter regressions and 11 native process/provenance tests passed (20 unique tests, no failures or skips). The native suite included three independent cold publishes for both runtime identifiers. Read-only preflight and verify-absent confirmed no service, registry or system-temp staging residue. Final commands, provenance, compatibility limits and architecture review are recorded in `.codex/handoffs/ALIGN-004/`.
+
+Only the coordinator updates the task registry and integrates this branch. The Windows Service lifecycle and Docker release gates remain open; this bounded reconciliation does not complete M0-004 or a release.
