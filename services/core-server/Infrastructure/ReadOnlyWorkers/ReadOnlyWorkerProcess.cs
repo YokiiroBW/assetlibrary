@@ -13,6 +13,7 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
         WorkerRequest request,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        using var job = OperatingSystem.IsWindows() ? WindowsWorkerJob.Create() : null;
         using var process = new Process { StartInfo = CreateStartInfo(mode) };
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (!process.Start())
@@ -23,6 +24,12 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
         var stderr = DrainErrorsAsync(process.StandardError, lifetime.Token);
         try
         {
+            if (OperatingSystem.IsWindows())
+            {
+                // The child cannot start filesystem work before assignment succeeds and stdin is sent.
+                job!.Assign(process.SafeHandle);
+            }
+
             var line = JsonSerializer.Serialize(request, ReadOnlyWorkerJsonContext.Default.WorkerRequest);
             if (Encoding.UTF8.GetByteCount(line) > ReadOnlyWorkerProtocol.RequestLimit)
             {

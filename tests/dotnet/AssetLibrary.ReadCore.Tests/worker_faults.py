@@ -11,7 +11,13 @@ if fault == "never_read":
     time.sleep(60)
     raise SystemExit(0)
 
-sys.stdin.buffer.read(16 * 1024 + 1)
+request_bytes = sys.stdin.buffer.read(16 * 1024 + 1)
+if fault == "block_after_request":
+    request = json.loads(request_bytes)
+    assert request["version"] == 1 and request["canonicalRoot"]
+    Path(pid_file + ".ready").write_text("request_received", encoding="ascii")
+    time.sleep(120)
+    raise SystemExit(0)
 if fault == "nonzero":
     raise SystemExit(7)
 if fault == "oversized":
