@@ -7,16 +7,16 @@
 - `python -I -B -m unittest discover -s tests/release -p test_read_only_trial_package.py -v`的8个方法按稳定修改范围执行：包来源/输出拒绝/manifest/PS解析/真实预检5项；真实PG1项；完整原生包流程1项；启动记录发布失败回滚1项。
 - 原生环境：`ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN`=PostgreSQL16.15 bin，`ASSETLIBRARY_TEST_TRIAL_REQUIRED=1`；完整包/回滚再设置`ASSETLIBRARY_TEST_TRIAL_PACKAGE`和`ASSETLIBRARY_TEST_TRIAL_PACKAGE_REQUIRED=1`。工具为仓库精确.NET10.0.111、Node24.20.0、pnpm11.19.0、Python3.12+、PowerShell7.6.5（入口要求7.5+）。
 - 完整原生流程对build-04/source339275b通过，123.429s：真实bootstrap/replay、HTTPS页面/管理员登录、双启动拒绝、伪造停止generation/nonce拒绝、伪造PID开始时间拒绝、正常stop和控制文件清理、重启登录、recover新口令后登录、包篡改拒绝、源hash/mtime不变、日志无口令及stop_nonce。真实风险源失败时最多3次同ID/expiry/password重试，仍失败则test fail，无fake risk/TLS bypass。
-- 新启动回滚对最终包source035f2da通过，21.482s：在Host启动后实际阻止host-process.json发布，确认只对已验证进程请求停止、没有强杀、无残留运行Host/PG或pending文件。启动被取消时可保守返回exited/not_confirmed；正常运行后的请求返回graceful。未重跑未改变的外网风险整轮。
+- 新启动回滚对代码版本包source035f2da通过，21.482s：在Host启动后实际阻止host-process.json发布，确认只对已验证进程请求停止、没有强杀、无残留运行Host/PG或pending文件。启动被取消时可保守返回exited/not_confirmed；正常运行后的请求返回graceful。未重跑未改变的外网风险整轮。
 - `.NET restore/build`使用locked mode；新Host文件targeted format通过，最终Host及Core构建均0warning/0error。早期CA1506已按记录/文件/监视职责拆成同文件3个具体类，未抑制分析器。
 - `ASSETLIBRARY_TEST_DOTNET=<pinned dotnet> python -I -B tests/dotnet/AssetLibrary.ReadCore.Tests/test_worker_lifetime.py -v`：1通过，2.785s。先按真实入口构建当前Release Core。该test只TerminateProcess自己父进程，不依赖finally，确认Windows Job关闭终止已接收请求且阻塞的子进程。
 - `scripts/validate_architecture_baseline.py`、`scripts/validate_handoff.py`、`scripts/generate_assetlink_sdks.py --check`执行通过；最终handoff完成后再检查文档/边界有效性。原Alpha/平台发布门禁保持blocked。
 
 ## 最终产物实测
 
-`python -I -B scripts/build_read_only_trial.py --dotnet <pinned dotnet> --node <Node24.20.0> --pnpm <pnpm11.19.0 pnpm.cjs> --nuget-packages <existing cache> --output-root .runtime/sandbox-storage/V01-019/delivery-final`从干净commit035f2dafccb6b41fef986151230396797b5cbada构建。源码tree23a2095f567fef85f01e30c38c6d87cdb77b8ffa。
+`python -I -B scripts/build_read_only_trial.py --dotnet <pinned dotnet> --node <Node24.20.0> --pnpm <pnpm11.19.0 pnpm.cjs> --nuget-packages <existing cache> --output-root .runtime/sandbox-storage/V01-019/delivery-rsa-doc`从干净commit864da3b2bfeca614b2654eb380ef6074d826b6c4构建。源码tree4cbfffc99e714466f20b6e3b44e2c836f188cb92。
 
-最终smoke通过：372文件的长度/SHA-256、ZIP精确文件集合及流式SHA-256、18迁移私密初始化、跨进程解密/轮换operator key、start/ready、重复start拒绝、graceful stop/restart、合成源字节/mtime不变、自己的临时状态清理。记录在`delivery-final/native-final-smoke.json`；ZIP与manifest校验值见summary.md。
+最终smoke通过：372文件的长度/SHA-256、ZIP精确文件集合及流式SHA-256、18迁移私密初始化、跨进程解密/轮换operator key、start/ready、重复start拒绝、graceful stop/restart、合成源字节/mtime不变、自己的临时状态清理。记录在`delivery-rsa-doc/native-final-smoke.json`；ZIP与manifest校验值见summary.md。
 
 ## Crypto正常/强制退出观察
 
@@ -40,3 +40,5 @@
 7. 独立Get-Process对象的退出码不作为已接受停止请求的额外成功门槛；只有请求已接受且原进程已退出才报告graceful，强制终止仍明确forced。
 
 没有关闭任何安全检查、修改信任库/SCM/防火墙、重置已有数据库、移动真实资产、清理历史worktree，或绕过先前审批拒绝的目录清理。
+
+最终文档补齐新TLS及历史DP解密证书必须含RSA≥2048私钥，明确ECDSA-only不支持。合入Root的c5d2a6c CI字面修复后，从864da3b重建delivery-rsa-doc；372文件/精确ZIP校验、初始化/轮换/启动/正常停止/重启smoke再次通过。产品代码及联网流程未变化，未重复风险源整轮。最终handoff/架构有效性在这个元数据版本通过。

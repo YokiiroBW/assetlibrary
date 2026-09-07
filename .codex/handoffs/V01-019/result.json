@@ -7,7 +7,7 @@
   "owner": "server-packaging-owner",
   "branch": "codex/v01-019-windows-read-only-trial-package",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-019",
-  "commit": "035f2dafccb6b41fef986151230396797b5cbada",
+  "commit": "864da3b2bfeca614b2654eb380ef6074d826b6c4",
   "changed_files": [
     ".codex/tasks/V01-019.md",
     ".codex/handoffs/V01-019/summary.md",
@@ -70,11 +70,11 @@
     ]
   },
   "artifact": {
-    "archive_sha256": "41d8b187fab173fd91e2a2bddebb2990ea8406e597588988fcd8034cb6810714",
-    "manifest_sha256": "e6122a47541d02c9b1b010c3c09b45cf80838c14869ee9df94a0609532daf30a",
-    "bytes": 49716129,
-    "source_commit": "035f2dafccb6b41fef986151230396797b5cbada",
-    "source_tree": "23a2095f567fef85f01e30c38c6d87cdb77b8ffa",
-    "archive": ".runtime/sandbox-storage/V01-019/delivery-final/assetlibrary-read-only-trial-win-x64.zip"
+    "archive": ".runtime/sandbox-storage/V01-019/delivery-rsa-doc/assetlibrary-read-only-trial-win-x64.zip",
+    "archive_sha256": "13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360",
+    "bytes": 49716196,
+    "manifest_sha256": "b2f4d12d3e2e5e6519debd67b9e76e18ab7910849c7a46e2680034cd0db419dd",
+    "source_commit": "864da3b2bfeca614b2654eb380ef6074d826b6c4",
+    "source_tree": "4cbfffc99e714466f20b6e3b44e2c836f188cb92"
   }
 }
