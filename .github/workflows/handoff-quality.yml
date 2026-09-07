@@ -86,6 +86,12 @@ jobs:
         run: dotnet build AssetLibrary.slnx --configuration Release --no-restore
       - name: .NET tests
         run: dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore --logger "console;verbosity=normal"
+      - name: Windows parent-death worker containment
+        if: matrix.label == 'windows'
+        shell: pwsh
+        run: |
+          $env:ASSETLIBRARY_TEST_DOTNET = (Get-Command dotnet).Source
+          python -B -m unittest discover -s tests/dotnet/AssetLibrary.ReadCore.Tests -p test_worker_lifetime.py -v
       - name: NuGet vulnerability query
         shell: bash
         run: dotnet package list --project AssetLibrary.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/dotnet-vulnerabilities.json
@@ -190,3 +196,33 @@ jobs:
           dotnet build AssetLibrary.slnx --configuration Release --no-restore
       - name: PostgreSQL migration, ownership, backup and restore tests
         run: python -B -m unittest discover -s tests/database -p test_*.py -v
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.19.0'
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.20.0'
+          cache: pnpm
+          cache-dependency-path: |
+            packages/sdk/assetlink/typescript/pnpm-lock.yaml
+            apps/web/pnpm-lock.yaml
+      - name: Build the real trial Web consumer
+        run: |
+          pnpm --dir packages/sdk/assetlink/typescript install --frozen-lockfile
+          pnpm --dir apps/web install --frozen-lockfile
+          pnpm --dir apps/web run build
+          pnpm --dir apps/web exec playwright install --with-deps chromium
+      - name: Real HTTPS PostgreSQL worker and browser trial
+        run: >-
+          python -I -B tests/integration/read-only-trial/run_e2e.py --execute --postgres-external
+          --dotnet "$(command -v dotnet)" --postgres-bin /usr/lib/postgresql/16/bin
+          --node "$(command -v node)" --web-root apps/web/dist
+          --playwright-module apps/web/node_modules/@playwright/test/index.mjs
+          --evidence .runtime/real-trial-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: read-only-trial-e2e
+          path: .runtime/real-trial-evidence
+          if-no-files-found: ignore

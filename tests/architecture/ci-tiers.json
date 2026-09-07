@@ -8,7 +8,7 @@
       "timeout_minutes": 20,
       "workflow": ".github/workflows/handoff-quality.yml",
       "cache": "setup-dotnet, setup-node and setup-gradle restore only dependency caches keyed by committed NuGet, pnpm and Gradle lock or verification inputs; global.json and exact native tool versions remain enforced, and build outputs/runtime state are not cached.",
-      "artifacts": ["job log on failure"],
+      "artifacts": ["job log on failure", "read-only-trial-e2e"],
       "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
       "commands": [
         "python scripts/verify_repository.py",
@@ -18,6 +18,8 @@
         "python -B -m unittest discover -s tests/database -p test_migration_manifest.py -v",
         "python -B -m unittest discover -s tests/database -p test_web_gateway_migrations.py -v",
         "python -B -m unittest discover -s tests/database -p test_*.py -v",
+        "python -I -B tests/integration/read-only-trial/run_e2e.py --execute --postgres-external --dotnet \"$(command -v dotnet)\" --postgres-bin /usr/lib/postgresql/16/bin --node \"$(command -v node)\" --web-root apps/web/dist --playwright-module apps/web/node_modules/@playwright/test/index.mjs --evidence .runtime/real-trial-evidence",
+        "python -B -m unittest discover -s tests/dotnet/AssetLibrary.ReadCore.Tests -p test_worker_lifetime.py -v",
         "python -B -m unittest discover -s tests/sdk -p test_*.py -v",
         "python -B -m unittest discover -s tests/spikes/assetlink -p test_*.py -v",
         "python tests/architecture/check_release_gates.py --target v0.1-start",

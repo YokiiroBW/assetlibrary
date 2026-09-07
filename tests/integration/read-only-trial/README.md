@@ -16,6 +16,8 @@ python -I -B tests/integration/read-only-trial/run_e2e.py --execute `
 
 Playwright版本来自Web锁文件（本轮1.62.1）；需要事先安装匹配的Chromium。入口不下载浏览器。未传--execute返回77并明确not_executed；缺少必需工具、迁移失败、测试未实际执行或清理失败均失败关闭。
 
+CI使用已隔离的PostgreSQL16.15服务时加 `--postgres-external`，连接从既有 `ASSETLIBRARY_TEST_POSTGRES_HOST/PORT/ADMIN` 读取。测试数据库及六个唯一LOGIN均由本次创建并清理；不得将该选项指向用户生产数据库实例。
+
 每次运行分配新的证据子目录，保存run.json、runner.log、TRX、两个阶段的浏览器JSON、1440px桌面与390px暗色截图、acceptance.json。只有实际聚合测试通过且自身数据库/临时目录清理后才标记resource_cleanup=verified。不会保存含密码的网络trace或浏览器storage state。
 
 ## 实际覆盖
