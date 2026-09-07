@@ -1,0 +1,71 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-022",
+  "title": "nas-docker-deployment",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "server-packaging-owner",
+  "branch": "codex/v01-022-nas-docker-deployment",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-022",
+  "commit": "e676f09c1d5618488b01d36fed9c38ed03d82e83",
+  "changed_files": [
+    ".codex/tasks/V01-022.md",
+    ".codex/handoffs/V01-022/summary.md",
+    ".codex/handoffs/V01-022/result.json",
+    ".codex/handoffs/V01-022/tests.md",
+    "infra/docker/README.md",
+    "infra/docker/nas/Dockerfile",
+    "infra/docker/nas/Dockerfile.dockerignore",
+    "infra/docker/nas/entrypoint.sh",
+    "infra/docker/nas/compose.yaml",
+    "infra/docker/nas/bootstrap.py",
+    "infra/docker/nas/nasctl.sh",
+    "infra/docker/nas/settings.example.json",
+    "infra/docker/nas/README.md",
+    "scripts/build_nas_deployment.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "report": "tests.md",
+    "execution_status": "not_executed_per_user_instruction",
+    "skipped": 0,
+    "passed": 0,
+    "failed": 0
+  },
+  "risks": [
+    "Image availability and one-shot Python/PG/OpenSSL compatibility have not been executed",
+    "Actual NAS TLS/non-root/readonly/persistence/first bootstrap acceptance is pending",
+    "No full Alpha/platform release gate has been changed"
+  ],
+  "blocked_by": [
+    "Root-controlled unified build/test/NAS acceptance is deliberately pending"
+  ],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V01-022/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "new_language_or_framework": [],
+    "architecture_tests": [
+      "Not executed during implementation, per user instruction; root will run existing gates during unified acceptance"
+    ],
+    "new_major_dependencies": [],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Deployment-only LOGIN configuration and fixed role grants; application tables are owned and migrated by the original migration tool"
+    ],
+    "dependency_direction_ok": true,
+    "module": "NAS Docker deployment adapter",
+    "technical_debt": [
+      "Real image and NAS lifecycle evidence remains pending and is not treated as passed"
+    ],
+    "reused_existing_logic": [
+      "Existing Host/Trial configuration and CLI including health transport",
+      "Existing out-of-band administrator and risk policies",
+      "migration_tool provisioning/backup/forward migrations",
+      "build_server_release immutable source/path/hash primitives"
+    ],
+    "contract_changes": [
+      "ADR0015-approved container mount convention /assets/<source_key> and one-shot deployment layout; no AssetLink/Host/SQL changes"
+    ]
+  }
+}

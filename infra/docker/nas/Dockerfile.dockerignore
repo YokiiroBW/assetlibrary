@@ -1,0 +1,10 @@
+.git
+.runtime
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/build
+**/__pycache__
+**/.env
+**/*.user

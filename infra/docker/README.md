@@ -22,3 +22,5 @@ V01-008 先验证干净发行输入并从选定 issuance commit 创建 Git 快�
 默认运行 evidence 工具只会报告 daemon/授权状态，不创建资源。隔离 runner 上的真实周期必须
 显式运行 `python -I -B tests/release/run_docker_evidence.py --execute`；工具会选择临时 loopback 端口，
 拒绝同名既有资源，并在结束时核对容器、网络、volume 和测试镜像数量全部为零。
+
+NAS与第一版Web部署另见[nas/README.md](nas/README.md)。该入口沿用同一Host并组合PostgreSQL、同源Web和一次性部署工具；本页的V01-008诊断Compose及证据合同保持不变。NAS真实验收状态由V01-021协调，不从静态文件或构建成功推断。

@@ -1,0 +1,12 @@
+{
+  "deployment_name": "assetlibrary-nas",
+  "public_origin": "https://nas.example.local:5443",
+  "bind_address": "192.168.1.100",
+  "storage_sources": [
+    {
+      "source_key": "photos",
+      "display_name": "照片目录",
+      "host_path": "/volume1/CHANGE-TO-YOUR-ASSET-DIRECTORY"
+    }
+  ]
+}
