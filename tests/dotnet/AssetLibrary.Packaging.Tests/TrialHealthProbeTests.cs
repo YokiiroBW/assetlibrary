@@ -1,4 +1,3 @@
-using System.Text.Json;
 using AssetLibrary.CoreServer.Hosting.Trial;
 using AssetLibrary.IntegrationTestSupport;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +23,7 @@ public sealed class TrialHealthProbeTests
             TlsCertificateFile = files.CertificateFile,
             TlsCertificatePasswordFile = files.PasswordFile,
         };
-        WriteConfiguration(fixture, configuration);
+        fixture.WriteConfiguration(configuration);
 
         using var certificate = await TrialCertificate.LoadAsync(configuration, CancellationToken.None);
         var builder = WebApplication.CreateSlimBuilder();
@@ -55,7 +54,7 @@ public sealed class TrialHealthProbeTests
         returnedIdentity = configuration.DeploymentId;
         using var alternate = TrialTestTls.CreateSelfSigned("nas-probe.invalid");
         var alternateFiles = TrialCertificateTestSupport.WriteCertificate(fixture, alternate, "other-server");
-        WriteConfiguration(fixture, configuration with
+        fixture.WriteConfiguration(configuration with
         {
             TlsCertificateFile = alternateFiles.CertificateFile,
             TlsCertificatePasswordFile = alternateFiles.PasswordFile,
@@ -63,10 +62,4 @@ public sealed class TrialHealthProbeTests
         Assert.AreEqual(69, await TrialHealthProbe.RunAsync(fixture.ConfigurationPath));
     }
 
-    private static void WriteConfiguration(TrialConfigurationFixture fixture, TrialConfiguration configuration)
-    {
-        File.WriteAllText(fixture.ConfigurationPath, JsonSerializer.Serialize(configuration,
-            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower }));
-        TrialConfigurationFixture.MakePrivateFile(fixture.ConfigurationPath);
-    }
 }

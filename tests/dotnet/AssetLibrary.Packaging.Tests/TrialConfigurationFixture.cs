@@ -52,13 +52,18 @@ internal sealed class TrialConfigurationFixture : IDisposable
             }],
         };
         ConfigurationPath = Path.Combine(state, "trial.json");
-        File.WriteAllText(ConfigurationPath, JsonSerializer.Serialize(Configuration, SerializerOptions));
-        MakePrivateFile(ConfigurationPath);
+        WriteConfiguration(Configuration);
     }
 
     public TrialConfiguration Configuration { get; }
     public string ConfigurationPath { get; }
     public string AssetPath { get; }
+
+    public void WriteConfiguration(TrialConfiguration configuration)
+    {
+        File.WriteAllText(ConfigurationPath, JsonSerializer.Serialize(configuration, SerializerOptions));
+        MakePrivateFile(ConfigurationPath);
+    }
 
     public static void MakePrivateFile(string path)
     {
