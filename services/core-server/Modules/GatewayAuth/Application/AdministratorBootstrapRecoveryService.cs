@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using AssetLibrary.Modules.GatewayAuth.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,12 +14,14 @@ internal sealed class AdministratorBootstrapRecoveryService
     private readonly TimeProvider timeProvider;
     private readonly TimeSpan operationTimeout;
     private readonly ILogger<AdministratorBootstrapRecoveryService> logger;
+    private readonly AdministratorRecoveryMutation? recoveryPreparation;
 
     public AdministratorBootstrapRecoveryService(
         IAdministratorBootstrapRecoveryStore store,
         IOutOfBandAuthorizationVerifier authorizationVerifier,
         ILocalSecretRiskChecker riskChecker,
-        ILogger<AdministratorBootstrapRecoveryService>? logger = null)
+        ILogger<AdministratorBootstrapRecoveryService>? logger = null,
+        AdministratorRecoveryMutation? recoveryPreparation = null)
         : this(
             store,
             authorizationVerifier,
@@ -28,7 +29,8 @@ internal sealed class AdministratorBootstrapRecoveryService
             new Pbkdf2LocalCredentialDeriver(),
             TimeProvider.System,
             MaximumOperationTimeout,
-            logger ?? NullLogger<AdministratorBootstrapRecoveryService>.Instance)
+            logger ?? NullLogger<AdministratorBootstrapRecoveryService>.Instance,
+            recoveryPreparation)
     {
     }
 
@@ -39,7 +41,8 @@ internal sealed class AdministratorBootstrapRecoveryService
         ILocalCredentialDeriver credentialDeriver,
         TimeProvider timeProvider,
         TimeSpan operationTimeout,
-        ILogger<AdministratorBootstrapRecoveryService> logger)
+        ILogger<AdministratorBootstrapRecoveryService> logger,
+        AdministratorRecoveryMutation? recoveryPreparation = null)
     {
         this.store = store ?? throw new ArgumentNullException(nameof(store));
         this.authorizationVerifier = authorizationVerifier
@@ -55,6 +58,7 @@ internal sealed class AdministratorBootstrapRecoveryService
 
         this.operationTimeout = operationTimeout;
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this.recoveryPreparation = recoveryPreparation;
     }
 
     public ValueTask<AdministratorBootstrapRecoveryResult> BootstrapFirstAdministratorAsync(
@@ -122,6 +126,36 @@ internal sealed class AdministratorBootstrapRecoveryService
             cancellationToken);
     }
 
+    public ValueTask<AdministratorBootstrapRecoveryResult> RecoverAdministratorAsync(
+        Guid operationId,
+        LocalAccountName accountName,
+        DateTimeOffset authorizationExpiresAt,
+        OutOfBandAuthorizationProof proof,
+        LocalSecret newSecret,
+        CancellationToken cancellationToken)
+    {
+        ValidateMutation(operationId, proof, newSecret);
+        var request = new OutOfBandAuthorizationRequest(
+            AdministratorBootstrapRecoveryAction.RecoverAdministrator,
+            operationId,
+            accountName,
+            authorizationExpiresAt);
+        return ExecuteAsync(
+            "recover_administrator",
+            request,
+            proof,
+            newSecret,
+            RecoverWithCurrentVersionAsync,
+            cancellationToken);
+    }
+
+    private ValueTask<AdministratorBootstrapRecoveryResult> RecoverWithCurrentVersionAsync(
+        VerifiedOutOfBandAuthorization authorization,
+        LocalCredentialEnrollmentMaterial credential,
+        CancellationToken cancellationToken) =>
+        recoveryPreparation?.ExecuteAsync(authorization, credential, cancellationToken)
+        ?? ValueTask.FromResult(DependencyUnavailable());
+
     private async ValueTask<AdministratorBootstrapRecoveryResult> ExecuteAsync(
         string action,
         OutOfBandAuthorizationRequest request,
@@ -131,7 +165,7 @@ internal sealed class AdministratorBootstrapRecoveryService
             CancellationToken, ValueTask<AdministratorBootstrapRecoveryResult>> mutation,
         CancellationToken cancellationToken)
     {
-        var started = Stopwatch.GetTimestamp();
+        var started = TimeProvider.System.GetTimestamp();
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(operationTimeout);
         try
@@ -246,34 +280,10 @@ internal sealed class AdministratorBootstrapRecoveryService
     private AdministratorBootstrapRecoveryResult Complete(
         string action,
         AdministratorBootstrapRecoveryResult result,
-        long started)
-    {
-        var elapsedMilliseconds =
-            (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            AdministratorBootstrapRecoveryLog.Completed(
-                logger,
-                action,
-                (int)result.Outcome,
-                elapsedMilliseconds);
-        }
+        long started) => AdministratorBootstrapRecoveryLog.CompleteResult(logger, action, result, started);
 
-        return result;
-    }
-
-    private void LogDependencyFailure(string action, long started)
-    {
-        var elapsedMilliseconds =
-            (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
-        if (logger.IsEnabled(LogLevel.Warning))
-        {
-            AdministratorBootstrapRecoveryLog.DependencyFailed(
-                logger,
-                action,
-                elapsedMilliseconds);
-        }
-    }
+    private void LogDependencyFailure(string action, long started) =>
+        AdministratorBootstrapRecoveryLog.FailedAfter(logger, action, started);
 
     private static AdministratorBootstrapRecoveryResult AuthorizationRejected() =>
         AdministratorBootstrapRecoveryResult.Rejected(

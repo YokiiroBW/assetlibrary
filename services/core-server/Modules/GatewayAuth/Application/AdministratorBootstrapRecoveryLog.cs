@@ -1,9 +1,31 @@
+using AssetLibrary.Modules.GatewayAuth.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace AssetLibrary.Modules.GatewayAuth.Application;
 
 internal static partial class AdministratorBootstrapRecoveryLog
 {
+    public static AdministratorBootstrapRecoveryResult CompleteResult(
+        ILogger logger, string action, AdministratorBootstrapRecoveryResult result, long started)
+    {
+        var elapsed = (long)TimeProvider.System.GetElapsedTime(started).TotalMilliseconds;
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            Completed(logger, action, (int)result.Outcome, elapsed);
+        }
+
+        return result;
+    }
+
+    public static void FailedAfter(ILogger logger, string action, long started)
+    {
+        var elapsed = (long)TimeProvider.System.GetElapsedTime(started).TotalMilliseconds;
+        if (logger.IsEnabled(LogLevel.Warning))
+        {
+            DependencyFailed(logger, action, elapsed);
+        }
+    }
+
     [LoggerMessage(
         EventId = 2120,
         Level = LogLevel.Information,
