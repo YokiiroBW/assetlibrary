@@ -8,8 +8,8 @@ WORKDIR /src
 RUN npm install --global pnpm@11.19.0
 COPY apps/web/ ./apps/web/
 COPY packages/sdk/assetlink/typescript/ ./packages/sdk/assetlink/typescript/
-RUN pnpm --dir packages/sdk/assetlink/typescript install --frozen-lockfile --ignore-scripts \
-    && pnpm --dir apps/web install --frozen-lockfile --ignore-scripts \
+RUN pnpm --dir packages/sdk/assetlink/typescript install --frozen-lockfile --ignore-scripts --network-concurrency=2 --fetch-retries=4 --fetch-retry-maxtimeout=60000 \
+    && pnpm --dir apps/web install --frozen-lockfile --ignore-scripts --network-concurrency=2 --fetch-retries=4 --fetch-retry-maxtimeout=60000 \
     && pnpm --dir apps/web run build
 
 FROM ${DEBIAN_IMAGE} AS native-base
