@@ -102,3 +102,15 @@ public interface IAssetObservationSession : IAsyncDisposable
 
     ValueTask AbortAsync(CancellationToken cancellationToken);
 }
+
+public sealed record InitialIndexSnapshot(Guid ScanId, int EntryCount, DateTimeOffset ObservedAt);
+
+public interface IAssetIndexSnapshotQuery
+{
+    ValueTask<InitialIndexSnapshot?> FindAsync(LibraryId libraryId, CancellationToken cancellationToken);
+}
+
+public interface IInitialScanStageMaintenance
+{
+    ValueTask AbortAsync(Guid scanId, LibraryId libraryId, CancellationToken cancellationToken);
+}

@@ -29,8 +29,20 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
                 throw new ReadOnlyWorkerException("worker_request_limit");
             }
 
-            await process.StandardInput.WriteLineAsync(line.AsMemory(), lifetime.Token).ConfigureAwait(false);
-            process.StandardInput.Close();
+            using (var startup = CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token))
+            {
+                startup.CancelAfter(options.ProbeTimeout);
+                try
+                {
+                    await process.StandardInput.WriteLineAsync(line.AsMemory(), startup.Token).ConfigureAwait(false);
+                    await process.StandardInput.FlushAsync(startup.Token).ConfigureAwait(false);
+                    process.StandardInput.Close();
+                }
+                catch (OperationCanceledException) when (!lifetime.IsCancellationRequested)
+                {
+                    throw new ReadOnlyWorkerException("worker_startup_timed_out");
+                }
+            }
             var reader = new BoundedNdjsonReader(process.StandardOutput, ReadOnlyWorkerProtocol.FrameLimit);
             while (true)
             {
@@ -79,7 +91,14 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
             await lifetime.CancelAsync().ConfigureAwait(false);
             if (!process.HasExited)
             {
-                process.Kill(entireProcessTree: true);
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException) when (process.HasExited)
+                {
+                    // The process can finish between the exit check and termination.
+                }
                 using var termination = new CancellationTokenSource(options.TerminationTimeout);
                 await process.WaitForExitAsync(termination.Token).ConfigureAwait(false);
             }
