@@ -25,3 +25,5 @@ Owner server-packaging-owner；分支codex/v01-022-nas-docker-deployment；工�
 候选风险：官方base tag/digest解析及Python3.13跨同Debian层的依赖闭包待真实构建；PG entrypoint与只读root/tmpfs/SCRAM配置待实际启动；用户证书信任必须手动，PKI半完成拒绝覆盖；NAS主机路径需根验证真实/非链接且非Docker状态；最终通用发布门禁仍由根裁决。
 
 建议先合此候选及根8270475，再统一验收与收口证据。不要把0已执行测试理解成通过；本子任务没有触碰远程其他容器、NAS既有资源、真实资产或Windows交付。
+
+可审查实现commit：e676f09c1d5618488b01d36fed9c38ed03d82e83（主候选4c96349加双斜杠根拒绝）。根要求的环境优先级封闭、挂载表精确重生成比对、host_path双斜杠根拒绝均包含。工作区Git clean；仍未运行构建/测试，等待唯一统一验收阶段。
