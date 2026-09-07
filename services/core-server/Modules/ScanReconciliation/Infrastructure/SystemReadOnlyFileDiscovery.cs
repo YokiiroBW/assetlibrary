@@ -176,7 +176,7 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
         {
             throw new FileDiscoveryException("entry_access_denied", exception);
         }
-        catch (IOException exception)
+        catch (IOException exception) when (exception is not FileDiscoveryException)
         {
             throw new FileDiscoveryException("entry_metadata_failed", exception);
         }
