@@ -101,9 +101,9 @@ class V01AlphaFoundationTests(unittest.TestCase):
             (ROOT / "tests/architecture/m0-gates.json").read_text(encoding="utf-8")
         )
         statuses = {gate["id"]: gate["status"] for gate in ledger["gates"]}
+        self.assertEqual(statuses["M0-004-G2"], "closed")
         for gate_id in (
             "M0-004-G1",
-            "M0-004-G2",
             "M0-006-G1",
             "M0-006-G2",
             "M0-006-G3",

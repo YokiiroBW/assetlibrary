@@ -1,0 +1,259 @@
+{
+  "format_version": 1,
+  "status": "passed",
+  "date": "2026-09-07",
+  "source_revision": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
+  "source_tree": "85abae49a6c3746bae874f84bf54dbd306aa93ad",
+  "build_evidence": "../V01-022/build-evidence.json",
+  "environment": {
+    "kernel": "Linux 5.10.55+ x86_64 GNU/Linux",
+    "docker": "24.0.2",
+    "compose": "2.20.1-6047-g6817716",
+    "capabilities": {
+      "cpu_cfs_quota": false,
+      "cpu_cfs_period": false,
+      "cpu_shares": true,
+      "memory_limit": true,
+      "pids_limit": false
+    }
+  },
+  "origin": "https://192.168.31.210:5443",
+  "acceptance_browser": {
+    "status": "passed",
+    "phase": "initial",
+    "library_id": "9dd1e81d-2127-412f-aadd-2edf99626726",
+    "browser_version": "151.0.7922.34"
+  },
+  "api_and_restart": {
+    "status": "passed",
+    "checks": [
+      "anonymous session rejection",
+      "Origin and CSRF rejection",
+      "completed first snapshot refuses rescan",
+      "POSIX root alias rejected",
+      "unsupported filename aborts snapshot with zero committed entries",
+      "same authenticated cookie survives actual NAS stop/start",
+      "index survives restart"
+    ],
+    "library_id": "9dd1e81d-2127-412f-aadd-2edf99626726",
+    "unsupported_library_id": "eeaaee77-be05-4f2c-8bf0-bc3a8918d283"
+  },
+  "recovery": {
+    "status": "passed",
+    "operator": "recover",
+    "old_session_status": 401,
+    "new_login_status": 200,
+    "tls": "standard image CA roots; transparent temporary CONNECT relay; no validation bypass"
+  },
+  "hardening": {
+    "status": "passed",
+    "project": "assetlibrary-v01-021-acceptance",
+    "containers": {
+      "core": {
+        "image_id": "sha256:085c7fe51c68bf7a4528d9e44f2629fd2b0a3e5c6eb7f8482eb2a3434dac477d",
+        "user": "1654:1654",
+        "read_only_root": true,
+        "cap_drop": [
+          "ALL"
+        ],
+        "security_options": [
+          "no-new-privileges:true"
+        ],
+        "group_add": [
+          "101"
+        ],
+        "memory_limit": 1073741824,
+        "cpu_shares": 1024,
+        "mounts": [
+          {
+            "Type": "bind",
+            "Source": "/volume1/Documents",
+            "Destination": "/assets/documents",
+            "RW": false
+          },
+          {
+            "Type": "bind",
+            "Source": "/volume1/Pictures",
+            "Destination": "/assets/pictures",
+            "RW": false
+          },
+          {
+            "Type": "volume",
+            "Source": "/volume2/@docker/volumes/assetlibrary-v01-021-acceptance-core-state/_data",
+            "Destination": "/var/lib/assetlibrary",
+            "RW": true
+          }
+        ],
+        "port_bindings": {
+          "5443/tcp": [
+            {
+              "HostIp": "192.168.31.210",
+              "HostPort": "5443"
+            }
+          ]
+        },
+        "health": "healthy"
+      },
+      "postgres": {
+        "image_id": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+        "user": "999:999",
+        "read_only_root": true,
+        "cap_drop": [
+          "ALL"
+        ],
+        "security_options": [
+          "no-new-privileges:true"
+        ],
+        "group_add": null,
+        "memory_limit": 1073741824,
+        "cpu_shares": 512,
+        "mounts": [
+          {
+            "Type": "volume",
+            "Source": "/volume2/@docker/volumes/assetlibrary-v01-021-acceptance-postgres-tls/_data",
+            "Destination": "/run/postgresql-tls",
+            "RW": false
+          },
+          {
+            "Type": "volume",
+            "Source": "/volume2/@docker/volumes/assetlibrary-v01-021-acceptance-postgres-data/_data",
+            "Destination": "/var/lib/postgresql/data",
+            "RW": true
+          }
+        ],
+        "port_bindings": {},
+        "health": "healthy"
+      }
+    },
+    "asset_write_attempt": "EROFS; no file created",
+    "root_write_attempt": "EROFS; no file created",
+    "private_state_write": "passed; own probe removed",
+    "fixture_files_unchanged": 9
+  },
+  "cleanup": {
+    "status": "passed",
+    "project": "assetlibrary-v01-021-acceptance",
+    "deployment_id": "b3a7413e-9b73-49bc-b174-baeb630f6312",
+    "removed_volumes": [
+      "assetlibrary-v01-021-acceptance-core-state",
+      "assetlibrary-v01-021-acceptance-postgres-data",
+      "assetlibrary-v01-021-acceptance-postgres-tls",
+      "assetlibrary-v01-021-acceptance-setup-state"
+    ],
+    "remaining_owned_resources": {
+      "containers": [],
+      "networks": [],
+      "volumes": []
+    },
+    "live_project_not_touched": true,
+    "asset_fixture_unchanged_before_removal": true,
+    "asset_fixture_removed": true
+  },
+  "live_containers": [
+    {
+      "name": "assetlibrary-nas-core-1",
+      "image_id": "sha256:085c7fe51c68bf7a4528d9e44f2629fd2b0a3e5c6eb7f8482eb2a3434dac477d",
+      "health": "healthy",
+      "user": "1654:1654",
+      "asset_mounts": [
+        {
+          "source": "/volume1/Documents",
+          "target": "/assets/documents",
+          "read_only": true
+        },
+        {
+          "source": "/volume1/Pictures",
+          "target": "/assets/pictures",
+          "read_only": true
+        }
+      ],
+      "ports": {
+        "5443/tcp": [
+          {
+            "HostIp": "192.168.31.210",
+            "HostPort": "5443"
+          }
+        ]
+      }
+    },
+    {
+      "name": "assetlibrary-nas-postgres-1",
+      "image_id": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+      "health": "healthy",
+      "user": "999:999",
+      "asset_mounts": [],
+      "ports": {}
+    }
+  ],
+  "live_browser": {
+    "status": "passed",
+    "browser_version": "151.0.7922.34",
+    "libraries": [
+      "pictures",
+      "documents"
+    ],
+    "scans_started": 0,
+    "desktop": "1440x900",
+    "mobile": "390x844"
+  },
+  "live_libraries": [
+    {
+      "source_key": "pictures",
+      "name": "图片",
+      "library_id": "6dd9b706-6686-4fde-82c8-1f8e6335a2f7",
+      "scan": "not_started"
+    },
+    {
+      "source_key": "documents",
+      "name": "文档",
+      "library_id": "972f8818-23bc-46d5-9e42-36a0d0264769",
+      "scan": "not_started"
+    }
+  ],
+  "certificate": {
+    "spki": "ISFcNetu3MS3UnqJkE0zUjayvkqSZKfiEE24Ei5k9fg=",
+    "metadata": "SHA256 Fingerprint=96:B0:BB:7A:59:3D:59:48:27:18:18:4E:C8:EC:5D:B9:59:30:B0:32:54:2B:E5:41:DB:9A:28:87:F9:BB:83:C1\nnotBefore=Sep  7 15:22:36 2026 GMT\nnotAfter=Dec  6 15:22:36 2026 GMT\nsubject=CN = AssetLibrary NAS HTTPS\n"
+  },
+  "temporary_relay_stopped": true,
+  "login_and_listing_after_relay_stopped": "passed",
+  "full_personal_library_scan_started": false,
+  "fixture_hash_size_mtime_unchanged": true,
+  "known_limits": [
+    "First committed snapshot only; no preview, raw download, generic rescan or asset writes.",
+    "Manual HTTPS trust and renewal; 90-day initial certificate.",
+    "NAS direct risk-provider connectivity remains unreliable; initialization/recovery requires a working outbound route.",
+    "NAS kernel supports memory limits and CPU shares, not CFS or PID hard caps.",
+    "No large-scale, power-loss, Windows SCM, Linux systemd or full Alpha claim."
+  ],
+  "deployment_directory": "/volume2/homes/agent/assetlibrary/V01-021/live",
+  "deployment_relocation": {
+    "status": "passed",
+    "deployment_directory": "/volume2/homes/agent/assetlibrary/V01-021/live",
+    "outside_asset_roots": true,
+    "configuration_files_hash_verified": 26,
+    "old_deployment_directory_removed": true,
+    "compose_metadata_updated": true,
+    "same_authenticated_cookie_survives_container_recreation": true,
+    "libraries_retained": 2,
+    "containers": [
+      {
+        "name": "assetlibrary-nas-core-1",
+        "id": "23d05a678aecb6340a4fc2e640190914527efd0921f5f59cf8895854c7abd40c",
+        "image": "sha256:085c7fe51c68bf7a4528d9e44f2629fd2b0a3e5c6eb7f8482eb2a3434dac477d",
+        "health": "healthy",
+        "compose_workdir": "/volume2/homes/agent/assetlibrary/V01-021/live"
+      },
+      {
+        "name": "assetlibrary-nas-postgres-1",
+        "id": "611a8ade95d83e0d769c80911d55350aa96aede7b29d887ddc7de48255498e61",
+        "image": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+        "health": "healthy",
+        "compose_workdir": "/volume2/homes/agent/assetlibrary/V01-021/live"
+      }
+    ]
+  },
+  "owned_fixture_cleanup": {
+    "fixture_removed": true,
+    "verified_owned_files": 9
+  }
+}

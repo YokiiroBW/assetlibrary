@@ -17,11 +17,11 @@
 - .NET 核心、18 条生产迁移、可部署的 HTTPS Web 只读试用、认证、沙箱文件操作与 Windows/Linux/Docker 共用宿主；
 - 强制编码/架构原则、语言预算和已激活的原生 CI 门禁。
 
-当前已完成 **首个 Windows x64 Web 只读试用集成**：登录、管理员初始化/恢复、登记真实物理目录、首次扫描、进度/取消/失败重试、浏览和名称/路径搜索。运行包使用显式试用入口；默认健康宿主行为兼容。开始使用见 [只读试用交付与启动说明](docs/releases/READ_ONLY_TRIAL.md)。
+当前已完成 **NAS Docker 服务端与第一版 Web**，并保留 Windows x64 只读试用：登录、管理员初始化/恢复、登记真实物理目录、首次扫描、进度/取消/失败重试、浏览和名称/路径搜索。运行包使用显式试用入口；默认健康宿主行为兼容。NAS 使用入口见 [NAS Web 交付说明](docs/releases/NAS_READ_ONLY_WEB.md)，Windows 入口见 [只读试用说明](docs/releases/READ_ONLY_TRIAL.md)。
 
-完整 V0.1 Alpha 仍不可发布。V01-008 平台发行证据保持 partial；预览、增量/通用重扫、资产写入、Windows 独立客户端、Android、浏览器扩展及生产 Explorer 集成仍待完成。试用包目前仅支持本机浏览器连接，可读取运行账户有权访问的 NAS 目录。
+完整 V0.1 Alpha 仍不可发布。V01-008 平台发行证据保持 partial；预览、增量/通用重扫、资产写入、Windows 独立客户端、Android、浏览器扩展及生产 Explorer 集成仍待完成。NAS Web 已完成局域网浏览器验收；图片与文档已只读登记，首次扫描由用户手动启动。Windows 包保持本机浏览器边界。
 
-当前事实以 [项目状态](.codex/project-state.json)、[只读试用验收](.codex/handoffs/V01-015/summary.md)、[Alpha 就绪记录](docs/releases/V0.1_ALPHA_READINESS.md) 和 [代码与架构对齐审查](docs/audits/2026-09-05-alignment.md) 为准。v2.1 DOCX、`DELIVERY_REPORT.md` 和 `SHA256SUMS.txt` 是原始交接快照，不代表当前代码状态。
+当前事实以 [项目状态](.codex/project-state.json)、[NAS 集成验收](.codex/handoffs/V01-021/summary.md)、[Alpha 就绪记录](docs/releases/V0.1_ALPHA_READINESS.md) 和 [代码与架构对齐审查](docs/audits/2026-09-05-alignment.md) 为准。v2.1 DOCX、`DELIVERY_REPORT.md` 和 `SHA256SUMS.txt` 是原始交接快照，不代表当前代码状态。
 
 ## 先从这里开始
 

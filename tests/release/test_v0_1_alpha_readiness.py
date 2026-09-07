@@ -60,11 +60,11 @@ class AlphaReadinessTests(unittest.TestCase):
         self.assertEqual(
             report["capability_counts"],
             {
-                "blocked_missing_environment": 4,
+                "blocked_missing_environment": 3,
                 "blocked_missing_implementation": 3,
                 "component_only": 6,
                 "deferred_fail_closed": 2,
-                "passed": 5,
+                "passed": 6,
             },
         )
         blocker_ids = {(item["kind"], item["id"]) for item in report["blockers"]}
@@ -95,9 +95,11 @@ class AlphaReadinessTests(unittest.TestCase):
         self.assertEqual(required.returncode, VALIDATOR.RELEASE_BLOCKED_EXIT, required.stderr)
         self.assertIn("capability:production-authentication", required.stdout)
         self.assertIn(
-            "release_target:v0.1-release gates=M0-004-G2,M0-006-G1,M0-006-G2",
+            "release_target:v0.1-release gates=M0-006-G1,M0-006-G2",
             required.stdout,
         )
+        self.assertNotIn("capability:docker-runtime-evidence", required.stdout)
+        self.assertNotIn("release_target:docker-release", required.stdout)
         self.assertEqual(default.stderr, "")
         self.assertEqual(required.stderr, "")
 

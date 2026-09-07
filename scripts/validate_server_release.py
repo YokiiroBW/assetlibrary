@@ -30,7 +30,6 @@ OUTPUT_MARKER = ".assetlibrary-v01-008-release-output"
 MARKER_VALUE = "AssetLibrary/V01-008/release-output/v1\n"
 REQUIRED_OPEN_GATES = {
     "M0-004-G1",
-    "M0-004-G2",
     "M0-006-G1",
     "M0-006-G2",
     "M0-006-G3",

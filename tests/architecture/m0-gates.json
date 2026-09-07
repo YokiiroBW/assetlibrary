@@ -90,13 +90,14 @@
       "source_task": "M0-004",
       "source_blocker_index": 1,
       "classification": "blocking_release_or_later_milestone",
-      "status": "open",
-      "decision": "The shared .NET host is accepted for implementation; Docker/Compose release claims require real daemon evidence.",
+      "status": "closed",
+      "decision": "V01-021 proves the NAS read-only Docker build, health/restart, non-root/read-only boundaries and owned container/network/volume cleanup. Other Alpha and physical-write gates remain independent.",
       "blocked_targets": ["docker-release", "v0.1-release"],
       "owner": "server-packaging-owner",
       "follow_up_task": "V01-DOCKER-GATE",
       "target_milestone": "V0.1 release",
       "enforced_by": ["python tests/architecture/check_release_gates.py --target docker-release", "python tests/architecture/check_release_gates.py --target v0.1-release"],
+      "closure_evidence": [".codex/handoffs/V01-021/nas-deployment-evidence.json", ".codex/handoffs/V01-022/build-evidence.json"],
       "exit_criteria": ["Image build and Compose health pass on a usable daemon.", "Non-root, read-only root filesystem, writable data boundary and down-with-volume cleanup are observed."]
     },
     {

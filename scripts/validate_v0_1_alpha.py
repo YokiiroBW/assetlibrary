@@ -112,6 +112,7 @@ TASK_RULES = {
     "V01-018": TaskRule("completed", "ready_for_review", "required"),
     "V01-019": TaskRule("completed", "ready_for_review", "required"),
     "V01-020": TaskRule("completed", "ready_for_review", "required"),
+    "V01-021": TaskRule("completed", "ready_for_review", "required"),
 }
 
 RELEASE_TARGETS = (
@@ -238,11 +239,11 @@ CAPABILITY_RULES = {
         "V01-LINUX-NAMESPACE-GATE",
     ),
     "docker-runtime-evidence": CapabilityRule(
-        "blocked_missing_environment",
-        "V01-008",
+        "passed",
+        "V01-021",
         "docker-release",
         "server-packaging-owner",
-        "V01-DOCKER-GATE",
+        None,
     ),
 }
 
@@ -274,21 +275,25 @@ CAPABILITY_EVIDENCE = {
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-016/result.json",
         ".codex/handoffs/V01-020/result.json",
+        ".codex/handoffs/V01-021/result.json",
     ),
     "production-database-composition": (
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-017/result.json",
         ".codex/handoffs/V01-020/result.json",
+        ".codex/handoffs/V01-021/result.json",
     ),
     "host-business-api": (
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-018/result.json",
         "eng/server-release-policy.json",
+        ".codex/handoffs/V01-021/result.json",
     ),
     "tls-and-secret-management": (
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-019/result.json",
         "docs/13_权限分享安全通知与WebDAV.md",
+        ".codex/handoffs/V01-021/result.json",
     ),
     "metadata-tags-ratings-colors": ("docs/02_已确认需求基线.md",),
     "exact-dedup": ("docs/02_已确认需求基线.md",),
@@ -313,7 +318,8 @@ CAPABILITY_EVIDENCE = {
         "tests/architecture/m0-gates.json",
     ),
     "docker-runtime-evidence": (
-        ".codex/handoffs/V01-008/result.json",
+        ".codex/handoffs/V01-021/result.json",
+        ".codex/handoffs/V01-021/nas-deployment-evidence.json",
         "tests/architecture/m0-gates.json",
     ),
 }

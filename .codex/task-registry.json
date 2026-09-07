@@ -555,7 +555,7 @@
       "id": "V01-021",
       "title": "nas-docker-web-milestone",
       "module": "nas-docker-web-milestone",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-015",
         "V01-022",
@@ -573,7 +573,7 @@
       "id": "V01-022",
       "title": "nas-docker-deployment",
       "module": "nas-docker-deployment",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-015"
       ],
@@ -589,7 +589,7 @@
       "id": "V01-023",
       "title": "web-first-release-alignment",
       "module": "web-first-release-alignment",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-018"
       ],

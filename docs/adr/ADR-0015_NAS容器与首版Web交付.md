@@ -1,6 +1,6 @@
 # ADR-0015 — NAS 容器与第一版 Web 交付
 
-状态：Accepted for implementation，2026-09-07。用户要求按既有架构与设计完成NAS服务端和第一版Web，集中实现后统一验收。Owner V01-021；部署V01-022，Web V01-023。
+状态：Accepted / implemented and NAS-validated，2026-09-07。用户要求按既有架构与设计完成NAS服务端和第一版Web，集中实现后统一验收。Owner V01-021；部署V01-022，Web V01-023。
 
 ## 交付边界
 
@@ -32,3 +32,11 @@ Docker门禁仅在相应真实生命周期证据满足后由协调器裁决，�
 ## 实测网络预算裁决
 
 NAS真实初始化中，既有2秒口令风险网络预算会在收到完整padded响应前截止；同一固定非秘密prefix的合法响应约100KiB，经可用出站通道超过2秒。将风险请求上限/默认值调整为4秒，仍受现有5秒整体管理员/账号操作截止约束。此处更新ADR0014的2秒实现参数，不更改TLS、固定provider origin、padding、256KiB/5000行、缓存、取消或失败关闭条件；不影响已有账号的离线登录/浏览。必要出站代理仅作用于本应用/一次性operator，不改NAS全局网络。
+
+## NAS 实测适配与交付裁决
+
+目标 Synology 内核支持内存限制与 CPU shares，不支持 CFS/PID 硬限。Core1024、PG512、setup256 是相对 CPU 权重；不声称 CPU 百分比/PID 硬隔离。固定 UID1654 的 Core 可通过 deployment.env 中受校验的可选数字读取组访问现有共享 ACL，默认1654，本 NAS 实测101；仍只挂载两个用户允许的只读资产目录，无 root 扫描、宿主 ACL 修改或 Docker socket。
+
+隔离 Worker 保持环境清理及同一宿主入口；运行镜像在 /etc/dotnet/install_location_x64 注册 /opt/dotnet，避免依赖未继承环境定位运行时。Core 和一次性 operator 镜像均安装发行版标准 CA roots，保留远端 TLS 校验；实际初始化/恢复使用过的临时 CONNECT 出站辅助已停止，普通登录/浏览不依赖它。
+
+V01-021 的真实 NAS 浏览器、重启、恢复、只读边界和自有验收项目回收证据满足 M0-004-G2 两条退出条件，协调器仅关闭该 Docker 环境门禁。正式图片/文档资源库已登记、未自动扫描；完整 Alpha、容量、生产写入和其他平台门禁不因此关闭。

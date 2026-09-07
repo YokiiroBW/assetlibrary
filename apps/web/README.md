@@ -15,7 +15,7 @@ CSRF 只在当前会话内存中保存；认证失效、换账号及拒权会清
 
 生产构建产物位于 `apps/web/dist`，由同一 HTTPS 试用 Host 托管。Vite 入口用于开发及
 隔离浏览器 fixture，不提供产品中的认证绕过或任意 API 地址设置。正式试用部署与真实
-HTTPS/PostgreSQL 端到端验收见 V01-015；NAS 容器交付遵循 ADR-0015，由 V01-021 统一验收。
+HTTPS/PostgreSQL 端到端验收见 V01-015；NAS 容器已按 ADR-0015 由 V01-021 完成真实浏览器统一验收，使用说明见 `docs/releases/NAS_READ_ONLY_WEB.md`。
 本目录的 fixture 测试不能替代对应部署环境的真实验收。
 
 本地命令从仓库根目录执行：

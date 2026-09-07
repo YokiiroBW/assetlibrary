@@ -108,6 +108,13 @@
       "handoff_status": "ready_for_review",
       "acceptance": "required",
       "result": ".codex/handoffs/V01-020/result.json"
+    },
+    {
+      "id": "V01-021",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-021/result.json"
     }
   ],
   "release_targets": [
@@ -236,10 +243,11 @@
       "evidence": [
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-016/result.json",
-        ".codex/handoffs/V01-020/result.json"
+        ".codex/handoffs/V01-020/result.json",
+        ".codex/handoffs/V01-021/result.json"
       ],
       "blockers": [
-        "V01-015/016/020 prove protected local operator bootstrap/recovery, persistent keys, same-origin HTTPS cookies, CSRF and database session revocation. Public multi-client identity and production deployment acceptance are still not approved by this scoped trial."
+        "Windows and NAS LAN trials prove protected operator bootstrap/recovery, same-origin HTTPS, CSRF and persistent sessions. Public multi-client/OIDC identity and full production authentication acceptance remain incomplete."
       ]
     },
     {
@@ -252,10 +260,11 @@
       "evidence": [
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-017/result.json",
-        ".codex/handoffs/V01-020/result.json"
+        ".codex/handoffs/V01-020/result.json",
+        ".codex/handoffs/V01-021/result.json"
       ],
       "blockers": [
-        "V01-015/017/020 make PostgreSQL, exact migrations and least-privilege runtime roles mandatory for the explicit trial. The default diagnostic host stays compatible; all-platform production composition and release lifecycle evidence remain open."
+        "Windows and NAS Docker trials require PostgreSQL, 18 exact migrations and least-privilege roles. Remaining platform lifecycle and full management composition remain open."
       ]
     },
     {
@@ -268,10 +277,11 @@
       "evidence": [
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-018/result.json",
-        "eng/server-release-policy.json"
+        "eng/server-release-policy.json",
+        ".codex/handoffs/V01-021/result.json"
       ],
       "blockers": [
-        "V01-015/018/020 expose authenticated read-only library, first-scan and query APIs in explicit trial mode. Full Alpha business capabilities and production file operations remain unavailable; default diagnostic mode still reports business_api_ready=false."
+        "The shared Windows/NAS Host provides authenticated registration, initial scan and read APIs. Full Alpha management and production file operations remain unavailable; default diagnostic mode remains compatible."
       ]
     },
     {
@@ -284,10 +294,11 @@
       "evidence": [
         ".codex/handoffs/V01-015/result.json",
         ".codex/handoffs/V01-019/result.json",
-        "docs/13_权限分享安全通知与WebDAV.md"
+        "docs/13_权限分享安全通知与WebDAV.md",
+        ".codex/handoffs/V01-021/result.json"
       ],
       "blockers": [
-        "V01-015/019/020 prove encrypted persistent keys, protected state, pinned health, manual certificate renewal history and graceful lifecycle. The loopback trial needs manual browser trust; automated certificate/upgrade lifecycle and abrupt-termination key-container cleanup are not release-complete."
+        "Windows/NAS trials prove protected persistent keys, pinned HTTPS health and restart; NAS PostgreSQL uses VerifyFull. Browser trust and certificate renewal are manual; automatic certificate/upgrade lifecycle and historical Windows abrupt-termination key cleanup remain incomplete."
       ]
     },
     {
@@ -395,18 +406,17 @@
     },
     {
       "id": "docker-runtime-evidence",
-      "status": "blocked_missing_environment",
-      "source_task": "V01-008",
+      "status": "passed",
+      "source_task": "V01-021",
       "release_target": "docker-release",
       "owner": "server-packaging-owner",
-      "follow_up_task": "V01-DOCKER-GATE",
+      "follow_up_task": null,
       "evidence": [
-        ".codex/handoffs/V01-008/result.json",
+        ".codex/handoffs/V01-021/result.json",
+        ".codex/handoffs/V01-021/nas-deployment-evidence.json",
         "tests/architecture/m0-gates.json"
       ],
-      "blockers": [
-        "No real daemon build, health, restart, hardening and down-with-volumes zero-residue evidence is recorded."
-      ]
+      "blockers": []
     }
   ]
 }

@@ -3,15 +3,23 @@
   "task_id": "V01-021",
   "title": "nas-docker-web-milestone",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "architecture-coordinator",
   "branch": "codex/v01-021-nas-docker-web-milestone",
   "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V01-021",
-  "commit": "81110c2cbefe101968d2894d6946cf53c68ef291",
+  "commit": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
   "changed_files": [
+    ".codex/START_HERE.md",
+    ".codex/handoffs/V01-021/nas-deployment-evidence.json",
     ".codex/handoffs/V01-021/result.json",
     ".codex/handoffs/V01-021/summary.md",
     ".codex/handoffs/V01-021/tests.md",
+    ".codex/handoffs/V01-022/build-evidence.json",
+    ".codex/handoffs/V01-022/posix-two.trx",
+    ".codex/handoffs/V01-022/result.json",
+    ".codex/handoffs/V01-022/runtime-cache.Dockerfile",
+    ".codex/handoffs/V01-022/summary.md",
+    ".codex/handoffs/V01-022/tests.md",
     ".codex/handoffs/V01-023/result.json",
     ".codex/handoffs/V01-023/summary.md",
     ".codex/handoffs/V01-023/tests.md",
@@ -19,39 +27,74 @@
     ".codex/task-graph.json",
     ".codex/task-registry.json",
     ".codex/tasks/V01-021.md",
+    ".codex/tasks/V01-022.md",
     ".codex/tasks/V01-023.md",
+    "CODEX_HANDOFF_PROMPT.txt",
+    "README.md",
+    "START_HERE.md",
     "apps/web/README.md",
     "apps/web/src/LibraryScanStatus.tsx",
     "apps/web/src/RegisterLibraryForm.tsx",
+    "docs/00_交接总览.md",
+    "docs/05_总体架构与技术框架.md",
+    "docs/16_版本路线与验收门禁.md",
+    "docs/23_M0架构冻结与质量门禁.md",
     "docs/adr/ADR-0015_NAS容器与首版Web交付.md",
+    "docs/releases/NAS_READ_ONLY_WEB.md",
+    "docs/releases/V0.1_ALPHA_READINESS.md",
     "eng/README.md",
+    "eng/v0.1-alpha-readiness.json",
+    "infra/docker/README.md",
+    "infra/docker/nas/Dockerfile",
+    "infra/docker/nas/Dockerfile.dockerignore",
+    "infra/docker/nas/README.md",
+    "infra/docker/nas/bootstrap.py",
+    "infra/docker/nas/compose.yaml",
+    "infra/docker/nas/entrypoint.sh",
+    "infra/docker/nas/nasctl.sh",
+    "infra/docker/nas/settings.example.json",
+    "scripts/build_nas_deployment.py",
+    "scripts/validate_server_release.py",
+    "scripts/validate_v0_1_alpha.py",
     "services/core-server/Host/Trial/TrialConfigurationValidator.cs",
     "services/core-server/Host/Trial/TrialHealthProbe.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PwnedPasswordsSecretRiskOptions.cs",
     "services/core-server/Modules/LibraryStorage/Application/LibraryManagementServices.cs",
     "services/core-server/Modules/LibraryStorage/Infrastructure/SystemLibraryRootProbe.cs",
     "services/core-server/Modules/ScanReconciliation/Infrastructure/SystemReadOnlyFileDiscovery.cs",
     "services/core-server/README.md",
+    "tests/architecture/m0-gates.json",
+    "tests/database/test_migration_integration.py",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialConfigurationFixture.cs",
     "tests/dotnet/AssetLibrary.Packaging.Tests/TrialHealthProbeTests.cs",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyFileDiscoveryTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/PwnedPasswordsProtocolTests.cs",
+    "tests/dotnet/Shared/TrialTestTls.cs",
+    "tests/release/test_v0_1_alpha_readiness.py",
+    "tests/repository/test_server_packaging_foundation.py",
+    "tests/repository/test_v0_1_alpha_foundation.py",
     "tests/web/trial-library-scan.spec.mjs"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 0,
+    "passed": 191,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "execution_status": "Awaiting consolidated acceptance after Docker implementation completes."
+    "execution_status": "Consolidated native/Web, repository rules, final gate regression and actual NAS delivery passed; no skips."
   },
   "risks": [
-    "NAS deployment and consolidated acceptance have not executed; no usable NAS service or release readiness is claimed."
+    "Manual browser trust/90-day certificate renewal; operator risk check requires a working outbound route.",
+    "NAS kernel provides memory caps and CPU shares, not CFS/PID hard limits.",
+    "Initial committed snapshots only; no preview, raw download, general rescan or asset writes.",
+    "Full Alpha, scale and other platform release gates remain blocked; V01-008 stays partial."
   ],
   "blocked_by": [],
   "recommended_merge_order": 3,
   "handoff_summary": ".codex/handoffs/V01-021/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "module": "NAS Host composition, existing physical-path adapters and coordination",
+    "module": "NAS Host/deployment, existing physical-path adapters and Web integration",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
       "Existing trial Host/CLI, auth/session, read/query and durable scan modules.",
@@ -65,15 +108,20 @@
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [
-      "No new wire encoding. POSIX backslash names fail explicitly before shared normalization.",
-      "Health probe retains public Host/SNI and pin while connecting locally."
+      "No wire, SQL, generated SDK or business permission changes. POSIX backslash paths fail explicitly at physical adapters.",
+      "Health probe keeps exact Host/SNI/certificate while routing locally. Runtime path and read group are deployment-only.",
+      "Risk network budget 2 to 4 seconds remains inside the existing overall 5-second deadline under ADR-0015.",
+      "M0-004-G2 alone closes on actual NAS evidence; complete Alpha remains blocked."
     ],
     "architecture_tests": [
-      "Not executed yet; user requires implementation first and one coordinated final acceptance."
+      "Final repository/architecture/contract/source validation passed; 26 affected evidence-policy regressions passed.",
+      "63 Packaging + 25 Pwned + 2 Linux POSIX + 40 existing Web tests passed.",
+      "Actual NAS readonly browser/HTTPS/PostgreSQL/worker, restart, recovery, hardening and owned cleanup passed."
     ],
     "technical_debt": [
-      "Actual NAS lifecycle, browser and affected checks remain pending.",
-      "Original full Alpha/write/other-platform gates stay open until their own evidence is satisfied."
+      "First-snapshot-only scope and existing full Alpha/asset-write/other-platform gaps remain explicit.",
+      "NAS CFS/PID limitations, manual certificate lifecycle and unreliable direct operator-risk egress remain documented."
     ]
-  }
+  },
+  "base_commit": "69d42b7c98b94198b202e03f18388b5772d8acfb"
 }
