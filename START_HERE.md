@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-需求与架构已冻结，当前已进入 V0.1 受控实现。M0-009 和 V01-001 至 V01-014 的组件交接已进入主线；V01-008 保持 partial，Alpha 发布仍 blocked。先读 `.codex/project-state.json`、`docs/releases/V0.1_ALPHA_READINESS.md` 和 `docs/audits/2026-09-05-alignment.md`，从未完成项继续。
+需求与架构已冻结，V01-015 至 V01-020 已完成首个 Windows x64 Web 只读试用集成。使用入口见 [只读试用交付与启动说明](docs/releases/READ_ONLY_TRIAL.md)。V01-008 保持 partial，完整 Alpha 发布仍 blocked。先读 `.codex/project-state.json`、本轮交接和 `docs/releases/V0.1_ALPHA_READINESS.md`，从未完成项继续。
 
 路线及当前所处位置：
 
@@ -10,7 +10,7 @@
 需求基线校验
 → M0 技术验证与架构决策
 → 仓库与契约骨架
-→ V0.1 资产核心（当前：组件、沙箱与集成准备）
+→ V0.1 资产核心（当前：首个 Web 只读试用已集成，完整管理功能待补）
 → 跨端客户端
 → Explorer 深度集成
 → 专业资源库与增强能力

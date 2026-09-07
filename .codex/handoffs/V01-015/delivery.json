@@ -1,0 +1,78 @@
+{
+  "task_id": "V01-015",
+  "date": "2026-09-07",
+  "status": "delivered_read_only_trial",
+  "scope": "Windows x64 loopback HTTPS first-snapshot read-only trial",
+  "formal_alpha_release": false,
+  "production_file_writes_enabled": false,
+  "source_commit": "864da3b2bfeca614b2654eb380ef6074d826b6c4",
+  "source_tree": "4cbfffc99e714466f20b6e3b44e2c836f188cb92",
+  "integrated_source_checked_at": "0d3825f525f8835ea48c1323c670844353c9fe78",
+  "package_build_inputs_match_integrated_source": true,
+  "checked_build_inputs": [
+    "services",
+    "apps/web",
+    "packages/sdk/assetlink",
+    "database/migrations/production",
+    "infra/windows/trial",
+    "scripts/build_read_only_trial.py",
+    "scripts/build_server_release.py",
+    "scripts/server_release",
+    "eng/server-release-policy.json",
+    "eng/server-release",
+    "global.json",
+    "Directory.Build.props",
+    "Directory.Build.targets",
+    "Directory.Packages.props",
+    "NuGet.Config"
+  ],
+  "archive_sha256": "13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360",
+  "manifest_sha256": "b2f4d12d3e2e5e6519debd67b9e76e18ab7910849c7a46e2680034cd0db419dd",
+  "bytes": 49716196,
+  "package_file_count": 372,
+  "file_count_semantics": "371 manifest payload entries plus package-manifest.json = 372 physical package files",
+  "native_validation": {
+    "status": "passed",
+    "source_revision": "864da3b2bfeca614b2654eb380ef6074d826b6c4",
+    "source_tree": "4cbfffc99e714466f20b6e3b44e2c836f188cb92",
+    "archive_sha256": "13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360",
+    "manifest_sha256": "b2f4d12d3e2e5e6519debd67b9e76e18ab7910849c7a46e2680034cd0db419dd",
+    "file_count": 372,
+    "archive_bytes": 49716196,
+    "checks": [
+      "all package file sizes/SHA256",
+      "exact ZIP file set and streamed SHA256",
+      "18 migrations initialize",
+      "cross-process key rotation",
+      "start/readiness/duplicate refusal",
+      "graceful stop/restart",
+      "source bytes/mtime preserved",
+      "owned temporary state cleanup"
+    ],
+    "external_risk_retest": "not repeated; unchanged from passed build-04 flow"
+  },
+  "copies": [
+    {
+      "repository": "C:\\YOKI\\Codex\\AssetLibrary",
+      "archive": "C:\\YOKI\\Codex\\AssetLibrary\\.runtime\\releases\\V01-015\\assetlibrary-read-only-trial-win-x64.zip",
+      "archive_sha256_readback": "13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360",
+      "bytes": 49716196
+    },
+    {
+      "repository": "Z:\\Codex-Workspaces\\AssetLibrary",
+      "archive": "Z:\\Codex-Workspaces\\AssetLibrary\\.runtime\\releases\\V01-015\\assetlibrary-read-only-trial-win-x64.zip",
+      "archive_sha256_readback": "13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360",
+      "bytes": 49716196
+    }
+  ],
+  "test_reports": [
+    "tests.md",
+    "../V01-019/tests.md",
+    "../V01-020/tests.md",
+    "../V01-017/smb-verification.json"
+  ],
+  "repository_sync": {
+    "status": "pending_final_metadata_commit"
+  },
+  "known_residue_policy": "Ignored build artifacts and denied synthetic fixture cleanup are retained and documented; no deletion bypass."
+}

@@ -66,6 +66,48 @@
       "handoff_status": "partial",
       "acceptance": "adjudication_only",
       "result": ".codex/handoffs/V01-008/result.json"
+    },
+    {
+      "id": "V01-015",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-015/result.json"
+    },
+    {
+      "id": "V01-016",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-016/result.json"
+    },
+    {
+      "id": "V01-017",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-017/result.json"
+    },
+    {
+      "id": "V01-018",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-018/result.json"
+    },
+    {
+      "id": "V01-019",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-019/result.json"
+    },
+    {
+      "id": "V01-020",
+      "registry_status": "completed",
+      "handoff_status": "ready_for_review",
+      "acceptance": "required",
+      "result": ".codex/handoffs/V01-020/result.json"
     }
   ],
   "release_targets": [
@@ -151,7 +193,7 @@
         ".codex/handoffs/V01-006/result.json"
       ],
       "blockers": [
-        "The verified adapter and Web consumer are not connected to a production identity provider, Npgsql data source or executable business host."
+        "V01-015/018/020 now prove authenticated read-only Web with real PostgreSQL and HTTPS. Full Alpha management workflows, multi-client and public deployment acceptance remain outside the loopback Windows trial."
       ]
     },
     {
@@ -186,62 +228,66 @@
     },
     {
       "id": "production-authentication",
-      "status": "blocked_missing_implementation",
-      "source_task": null,
+      "status": "component_only",
+      "source_task": "V01-015",
       "release_target": null,
       "owner": "gateway-auth-owner",
       "follow_up_task": "V01-AUTH-RUNTIME",
       "evidence": [
-        ".codex/handoffs/V01-006/result.json",
-        ".codex/handoffs/V01-008/result.json"
+        ".codex/handoffs/V01-015/result.json",
+        ".codex/handoffs/V01-016/result.json",
+        ".codex/handoffs/V01-020/result.json"
       ],
       "blockers": [
-        "No production login, credential validation, session issuance or identity-provider composition is implemented."
+        "V01-015/016/020 prove protected local operator bootstrap/recovery, persistent keys, same-origin HTTPS cookies, CSRF and database session revocation. Public multi-client identity and production deployment acceptance are still not approved by this scoped trial."
       ]
     },
     {
       "id": "production-database-composition",
-      "status": "blocked_missing_implementation",
-      "source_task": null,
+      "status": "component_only",
+      "source_task": "V01-015",
       "release_target": null,
       "owner": "database-migration-owner",
       "follow_up_task": "V01-DATABASE-RUNTIME",
       "evidence": [
-        ".codex/handoffs/V01-003/result.json",
-        ".codex/handoffs/V01-008/result.json"
+        ".codex/handoffs/V01-015/result.json",
+        ".codex/handoffs/V01-017/result.json",
+        ".codex/handoffs/V01-020/result.json"
       ],
       "blockers": [
-        "The production host does not configure PostgreSQL connectivity, migration-state verification or startup readiness."
+        "V01-015/017/020 make PostgreSQL, exact migrations and least-privilege runtime roles mandatory for the explicit trial. The default diagnostic host stays compatible; all-platform production composition and release lifecycle evidence remain open."
       ]
     },
     {
       "id": "host-business-api",
-      "status": "blocked_missing_implementation",
-      "source_task": null,
+      "status": "component_only",
+      "source_task": "V01-015",
       "release_target": null,
       "owner": "web-gateway-owner",
       "follow_up_task": "V01-READ-HOST-INTEGRATION",
       "evidence": [
-        "eng/server-release-policy.json",
-        ".codex/handoffs/V01-008/result.json"
+        ".codex/handoffs/V01-015/result.json",
+        ".codex/handoffs/V01-018/result.json",
+        "eng/server-release-policy.json"
       ],
       "blockers": [
-        "The released host explicitly reports business_api_ready=false and maps host health endpoints only."
+        "V01-015/018/020 expose authenticated read-only library, first-scan and query APIs in explicit trial mode. Full Alpha business capabilities and production file operations remain unavailable; default diagnostic mode still reports business_api_ready=false."
       ]
     },
     {
       "id": "tls-and-secret-management",
-      "status": "blocked_missing_implementation",
-      "source_task": null,
+      "status": "component_only",
+      "source_task": "V01-015",
       "release_target": null,
       "owner": "server-packaging-owner",
       "follow_up_task": "V01-TLS-SECRETS",
       "evidence": [
-        ".codex/handoffs/V01-008/result.json",
+        ".codex/handoffs/V01-015/result.json",
+        ".codex/handoffs/V01-019/result.json",
         "docs/13_权限分享安全通知与WebDAV.md"
       ],
       "blockers": [
-        "TLS termination, certificate lifecycle, persistent Data Protection keys and separated deployment secrets are not integrated."
+        "V01-015/019/020 prove encrypted persistent keys, protected state, pinned health, manual certificate renewal history and graceful lifecycle. The loopback trial needs manual browser trust; automated certificate/upgrade lifecycle and abrupt-termination key-container cleanup are not release-complete."
       ]
     },
     {

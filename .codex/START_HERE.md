@@ -24,7 +24,7 @@
 2. 检查已有 Git 分支、远端和 worktree，保留未合并提交；只在新仓库首次初始化。
 3. 检查需求、ADR、矩阵与 `.codex/project-state.json` 是否一致；当前 M0-009 已完成架构冻结，V0.1 发布仍受阻断。
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
-5. 阅读 `docs/audits/2026-09-05-alignment.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`，区分已完成组件、Host 未组合能力和待补平台证据。
+5. 阅读 `docs/releases/READ_ONLY_TRIAL.md`、`.codex/handoffs/V01-015/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：显式 HTTPS 只读试用已经集成；默认健康宿主、完整平台发布和资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

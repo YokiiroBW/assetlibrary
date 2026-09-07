@@ -61,8 +61,8 @@ class AlphaReadinessTests(unittest.TestCase):
             report["capability_counts"],
             {
                 "blocked_missing_environment": 4,
-                "blocked_missing_implementation": 7,
-                "component_only": 2,
+                "blocked_missing_implementation": 3,
+                "component_only": 6,
                 "deferred_fail_closed": 2,
                 "passed": 5,
             },
@@ -131,6 +131,29 @@ class AlphaReadinessTests(unittest.TestCase):
 
         errors, _ = self.validate_mutation(use_skipped)
         self.assertIn("capabilities.docker-runtime-evidence: invalid_status", errors)
+
+    def test_trial_evidence_cannot_satisfy_full_release_or_be_omitted(self) -> None:
+        for capability_id in (
+            "production-authentication",
+            "production-database-composition",
+            "host-business-api",
+            "tls-and-secret-management",
+        ):
+            with self.subTest(capability=capability_id):
+                item = capability(BASE_POLICY, capability_id)
+                self.assertEqual(item["status"], "component_only")
+                self.assertEqual(item["source_task"], "V01-015")
+                errors, _ = self.validate_mutation(
+                    lambda policy: capability(policy, capability_id).update(
+                        status="passed", blockers=[]
+                    )
+                )
+                self.assertIn(f"capabilities.{capability_id}: status_mismatch", errors)
+
+        errors, _ = self.validate_mutation(
+            lambda policy: policy["task_inputs"].remove(task_input(policy, "V01-020"))
+        )
+        self.assertIn("task_inputs: required_order_or_membership_mismatch", errors)
 
     def test_partial_input_cannot_be_promoted_by_policy_or_registry_drift(self) -> None:
         def promote_input(policy: dict[str, object]) -> None:

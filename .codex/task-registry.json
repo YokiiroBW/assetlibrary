@@ -451,7 +451,7 @@
       "id": "V01-015",
       "title": "read-only-trial-integration",
       "module": "read-only-trial-integration",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "ALIGN-001",
         "V01-014",
@@ -489,7 +489,7 @@
       "id": "V01-017",
       "title": "persistent-read-only-library-scans",
       "module": "persistent-read-only-library-scans",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "ALIGN-002",
         "V01-005"
@@ -522,7 +522,7 @@
       "id": "V01-019",
       "title": "windows-read-only-trial-package",
       "module": "windows-read-only-trial-package",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-001",
         "ALIGN-004"

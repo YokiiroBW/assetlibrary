@@ -122,12 +122,14 @@ class V01AlphaFoundationTests(unittest.TestCase):
         )
 
         for statement in (
-            "发布判定为 **blocked**",
-            "已验证的组件基础",
-            "尚未集成或实现",
+            "完整 V0.1 Alpha 发布仍为 blocked",
+            "component_only",
+            "V01-008 继续为 partial",
+            "READ_ONLY_TRIAL.md",
+            "--require-ready",
+            "返回 3",
+            "返回 2",
             "外部环境门禁",
-            "才可称为 release candidate",
-            "V01-009 自身可以",
         ):
             self.assertIn(statement, document)
 
