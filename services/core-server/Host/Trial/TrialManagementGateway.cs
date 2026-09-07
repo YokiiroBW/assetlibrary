@@ -68,7 +68,8 @@ internal sealed class TrialManagementGateway(
             {
                 ["sources"] = new JsonArray(libraries.Sources.Select(source => (JsonNode)new JsonObject
                 {
-                    ["source_key"] = source.SourceKey, ["display_name"] = source.DisplayName,
+                    ["source_key"] = source.SourceKey,
+                    ["display_name"] = source.DisplayName,
                 }).ToArray()),
             };
         }

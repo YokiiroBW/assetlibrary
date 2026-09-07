@@ -37,6 +37,8 @@ internal static class TrialHostFactory
         builder.Services.AddAssetLibraryReadOnlyGateway();
         ConfigureReadServices(builder.Services, configuration, connections, testComposition?.Workers ?? ReadOnlyWorkerCommand.ProcessOptions());
         builder.Services.AddSingleton<TrialManagementGateway>();
+        builder.Services.AddSingleton(configuration);
+        builder.Services.AddHostedService<TrialProcessControl>();
         builder.Services.AddHostedService<TrialScanWorker>();
         builder.Services.AddHostedService<TrialAvailabilityWorker>();
         builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromSeconds(30));

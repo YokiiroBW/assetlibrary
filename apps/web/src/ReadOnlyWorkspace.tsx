@@ -45,8 +45,11 @@ export function ReadOnlyWorkspace({
   const selectedLibrary =
     isAccessFailure(libraries.state.statusCode) || isAccessFailure(browse.state.statusCode)
       ? undefined
-      : (libraries.state.items.find((library) => library.library_id === selectedLibraryId) ??
-        (browse.library?.library_id === selectedLibraryId ? browse.library : undefined));
+      : ((browse.library?.library_id === selectedLibraryId ? browse.library : undefined) ??
+        libraries.state.items.find((library) => library.library_id === selectedLibraryId));
+  const navigationLibraries = libraries.state.items.map((library) =>
+    library.library_id === selectedLibrary?.library_id ? selectedLibrary : library,
+  );
 
   useEffect(() => {
     if (selectedLibraryId === null && libraries.state.status === "ready" && libraries.state.items.length > 0) {
@@ -216,7 +219,7 @@ export function ReadOnlyWorkspace({
             />
           )}
           <nav className="library-list">
-            {libraries.state.items.map((library) => (
+            {navigationLibraries.map((library) => (
               <button
                 type="button"
                 key={library.library_id}

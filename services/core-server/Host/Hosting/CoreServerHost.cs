@@ -24,6 +24,11 @@ internal static class CoreServerHost
             return await Trial.TrialHealthProbe.RunAsync(arguments[1]).ConfigureAwait(false);
         }
 
+        if (arguments.Length == 2 && arguments[0] == "--trial-stop")
+        {
+            return await Trial.TrialProcessControl.RequestStopAsync(arguments[1]).ConfigureAwait(false);
+        }
+
         var parsed = CoreServerHostOptions.Parse(arguments, Environment.GetEnvironmentVariable);
         if (!parsed.IsValid)
         {
