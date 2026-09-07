@@ -72,7 +72,30 @@
     "../V01-017/smb-verification.json"
   ],
   "repository_sync": {
-    "status": "pending_final_metadata_commit"
+    "status": "verified",
+    "checkpoint_commit": "4151edc08c93436d7de11a57cbe685f8762186a8",
+    "checkpoint_tree": "60a8ac14676dc136421e2cc569e13e24482d8b69",
+    "main_branches_identical": true,
+    "local_origin_ahead": 0,
+    "local_origin_behind": 0,
+    "workspace_count": 42,
+    "clean_workspace_count": 42,
+    "head_listing_mismatches": 0,
+    "original_local_and_nas_main_histories_preserved": true,
+    "readback": ".runtime/V01-015/workspace-readback.json",
+    "retained_historical_refs": [
+      {
+        "branch": "codex/m0-004-server-packaging",
+        "commit": "9f5788c8915be4b51d44d17ebfa8b9a7daf86262",
+        "reason": "Preserved early experiment; project-state records reviewed clean replacement on main. Ref is intentionally not rewritten or force-merged."
+      },
+      {
+        "branch": "codex/m0-006-file-safety-spike",
+        "commit": "3e0e51bef15c33bf35bc649be4a2814a21be30a8",
+        "reason": "Preserved early experiment; project-state records reviewed clean replacement on main. Ref is intentionally not rewritten or force-merged."
+      }
+    ],
+    "record_semantics": "This acceptance-only metadata commit follows the verified checkpoint. The final tips are fast-forwarded again and read back; Git history provides their identity without a self-referential hash."
   },
   "known_residue_policy": "Ignored build artifacts and denied synthetic fixture cleanup are retained and documented; no deletion bypass."
 }

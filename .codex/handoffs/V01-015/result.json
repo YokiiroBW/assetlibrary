@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v01-015-read-only-trial-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-015",
-  "commit": "0d3825f525f8835ea48c1323c670844353c9fe78",
+  "commit": "4151edc08c93436d7de11a57cbe685f8762186a8",
   "base_commit": "51e8a2fa30ccfbaf2076234b9c1127f1b89f569e",
   "changed_files": [
     ".codex/START_HERE.md",
@@ -283,7 +283,12 @@
     "kotlin_sdk_build": "passed",
     "dependency_build_budgets": "passed",
     "native_package_evidence": "../V01-019/tests.md",
-    "real_smb_evidence": "../V01-017/smb-verification.json"
+    "real_smb_evidence": "../V01-017/smb-verification.json",
+    "repository_cases": 54,
+    "alpha_policy_cases": 14,
+    "default_host_release_cases": 19,
+    "handoff_schemas": 6,
+    "native_package_unique_cases": 8
   },
   "risks": [
     "Windows x64 loopback HTTPS read-only trial only; no previews, raw-content transfer, general rescan/incremental watcher, asset mutations or Explorer.",

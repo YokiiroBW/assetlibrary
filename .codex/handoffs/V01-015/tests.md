@@ -91,3 +91,9 @@ E2E通过真实浏览器登录、登记、扫描、查看进度、浏览与全�
 两侧main仅快进同步，保留所有分支和旧提交；所有工作区逐一读回包含untracked的Git status。NAS旧Linux worktree通过原管理目录检查，不修复指针、不prune。精确HEAD/tree与读回结果记录在最终delivery.json和Git历史中。
 
 自动批准审查拒绝本轮两处合成目录及历史ALIGN-002九个空目录的清理；未执行被拒删除，也没有绕道重试。详情在对应交接。已恢复ACL拒绝规则和SMB assets路径；忽略的产物、缓存和上述残留不影响Git clean。
+
+### 已执行主线同步读回
+
+本地main、NAS main与协调分支快进至`4151edc08c93436d7de11a57cbe685f8762186a8`，tree`60a8ac14676dc136421e2cc569e13e24482d8b69`；origin/main ahead/behind为0/0。42/42工作区Git clean且与清单HEAD一致；原两侧主线和本轮基线仍为祖先。NAS实际迁移清单读回18 migrations / 11 modules / PostgreSQL16.15通过；任务Host/PG进程检查无残留运行实例。最终只追加此验收记录，再快进两侧并重读Git状态，不重跑输入未变的产品测试。
+
+NAS保留的早期`codex/m0-004-server-packaging`（9f5788c）和`codex/m0-006-file-safety-spike`（3e0e51b）并非main祖先；它们在项目状态中已有reviewed clean replacement裁决，原引用和本地origin副本均保留。工作区干净/主线一致不等于把所有旧实验分支强行合并；没有覆盖旧史或为清单外观重写历史。
