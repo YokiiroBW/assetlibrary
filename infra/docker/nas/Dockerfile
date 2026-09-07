@@ -55,7 +55,9 @@ WORKDIR /app
 COPY --from=server /out/ ./
 COPY --from=web /src/apps/web/dist/ ./wwwroot/
 COPY infra/docker/nas/entrypoint.sh /app/entrypoint.sh
-RUN chmod 0555 /app/entrypoint.sh && mkdir -p /var/lib/assetlibrary && chown 1654:1654 /var/lib/assetlibrary
+RUN chmod 0555 /app/entrypoint.sh && mkdir -p /var/lib/assetlibrary /etc/dotnet \
+    && printf '%s\n' /opt/dotnet > /etc/dotnet/install_location_x64 \
+    && chown 1654:1654 /var/lib/assetlibrary
 USER 1654:1654
 LABEL org.opencontainers.image.title="AssetLibrary NAS read-only server" \
       org.opencontainers.image.revision="$SOURCE_REVISION" io.assetlibrary.role="nas-core"

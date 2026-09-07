@@ -56,6 +56,7 @@ services:
   core:
     image: "${ASSETLIBRARY_CORE_IMAGE:?use the image identity from the build manifest}"
     user: "1654:1654"
+    group_add: ["${ASSETLIBRARY_ASSET_READ_GROUP:-1654}"]
     labels: *owner
     init: true
     read_only: true
