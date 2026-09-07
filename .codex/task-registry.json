@@ -563,6 +563,32 @@
       "task_file": ".codex/tasks/V01-021.md",
       "handoff": ".codex/handoffs/V01-021/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V01-022",
+      "title": "nas-docker-deployment",
+      "module": "nas-docker-deployment",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "server-packaging-owner",
+      "branch": "codex/v01-022-nas-docker-deployment",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-022",
+      "task_file": ".codex/tasks/V01-022.md",
+      "handoff": ".codex/handoffs/V01-022/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "V01-023",
+      "title": "web-first-release-alignment",
+      "module": "web-first-release-alignment",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "web-gateway-owner",
+      "branch": "codex/v01-023-web-first-release-alignment",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-023",
+      "task_file": ".codex/tasks/V01-023.md",
+      "handoff": ".codex/handoffs/V01-023/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
