@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-019",
+  "title": "windows-read-only-trial-package",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "server-packaging-owner",
+  "branch": "codex/v01-019-windows-read-only-trial-package",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-019",
+  "commit": "64cdeb2",
+  "changed_files": [
+    ".codex/tasks/V01-019.md",
+    "scripts/build_read_only_trial.py",
+    "infra/windows/trial/trial.ps1",
+    "infra/windows/trial/trial_database.py",
+    "infra/windows/trial/README.zh-CN.md",
+    "tests/release/test_read_only_trial_package.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "failed": 1,
+    "report": "tests.md",
+    "skipped": 0,
+    "passed": 6
+  },
+  "risks": [
+    "Native administrator bootstrap currently fails closed with service_unavailable; test is not accepted as passed.",
+    "The original risk parser rejects observed 2509-line HIBP response and its unterminated final line; authentication owner is correcting this.",
+    "Candidate native artifacts are not final release artifacts."
+  ],
+  "blocked_by": [
+    "Coordinator final operator stdout, current HIBP response compatibility, and certificate decryption retention integration"
+  ],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V01-019/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "contract_changes": [],
+    "new_language_or_framework": [],
+    "reused_existing_logic": [
+      "build_server_release source snapshot, exact SDK, RID locks and self-contained publish",
+      "migration_tool provision_roles, apply_migrations and verified backup",
+      "Host local operator, read-only trial and health CLI"
+    ],
+    "cross_module_access": [
+      "Deployment-only LOGIN provisioning delegates all schema migrations to migration_tool; no runtime module-table access"
+    ],
+    "technical_debt": [
+      "Final same-source package and full native administrator/recovery validation pending coordinator integration"
+    ],
+    "new_major_dependencies": [],
+    "dependency_direction_ok": true,
+    "duplicated_logic": [],
+    "module": "Windows trial deployment adapter (server-packaging-owner)",
+    "architecture_tests": [
+      "validate_architecture_baseline.py: 131 inputs passed",
+      "generate_assetlink_sdks.py --check: 7 generated files current"
+    ]
+  }
+}
