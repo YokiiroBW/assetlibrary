@@ -252,7 +252,7 @@ class TrialNativePackageTests(unittest.TestCase):
             origin = f"https://localhost:{port}"
             settings = root / "settings.json"
             settings.write_text(json.dumps({"public_origin": origin, "storage_sources": [{
-                "source_key": "sandbox", "display_name": "Test library", "allowed_root": str(assets),
+                "source_key": "sandbox", "display_name": "2026-09-07T00:00:00Z", "allowed_root": str(assets),
             }]}), encoding="utf-8")
             def run(action, *arguments, input_text=None, success=True):
                 result = subprocess.run([pwsh, "-NoProfile", "-File", str(script), "-Action", action, "-StatePath", str(state), *arguments], input=input_text, capture_output=True, text=True, encoding="utf-8", timeout=150)
@@ -263,6 +263,7 @@ class TrialNativePackageTests(unittest.TestCase):
             initialized = run("initialize", *initialize)
             self.assertEqual(initialized["status"], "initialized")
             self.assertEqual(initialized["certificate_trust"], "manual_required")
+            self.assertEqual(json.loads((state / "trial.json").read_text())["storage_sources"][0]["display_name"], "2026-09-07T00:00:00Z")
             self.assertEqual(run("initialize", *initialize)["status"], "already_initialized")
             password = secrets.token_urlsafe(40)
             operator = ("-OperatorAction", "bootstrap", "-AccountName", "trialadministrator", "-DisplayName", "Trial administrator", "-PasswordFromStdin")
