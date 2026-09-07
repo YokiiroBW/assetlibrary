@@ -1,0 +1,168 @@
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import shutil
+import socket
+import subprocess
+import sys
+import tempfile
+import unittest
+import uuid
+
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def load_builder():
+    spec = importlib.util.spec_from_file_location("trial_package_builder", ROOT / "scripts/build_read_only_trial.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+BUILDER = load_builder()
+
+
+def powershell_script(pwsh: str, code: str, argument: Path):
+    with tempfile.TemporaryDirectory(prefix="trial-script-") as temporary:
+        path = Path(temporary) / "check.ps1"
+        path.write_text("param([string]$Target)\n$ErrorActionPreference='Stop'\n" + code, encoding="utf-8")
+        return subprocess.run([pwsh, "-NoProfile", "-File", str(path), str(argument)], capture_output=True, text=True, timeout=15)
+
+
+class TrialPackageTests(unittest.TestCase):
+    def test_source_requires_clean_commit_and_binds_all_files(self):
+        with tempfile.TemporaryDirectory(prefix="trial-source-") as temporary:
+            root = Path(temporary)
+            (root / "Directory.Build.props").write_text("<Project />", encoding="utf-8")
+            def git(*args):
+                return subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, check=True, timeout=10).stdout.strip()
+            git("init", "-q")
+            git("add", ".")
+            git("-c", "user.name=Trial Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "baseline")
+            revision = BUILDER.clean_revision(root)
+            self.assertEqual(revision, git("rev-parse", "HEAD"))
+            (root / "new-source.ts").write_text("export const value = 1;", encoding="utf-8")
+            with self.assertRaisesRegex(BUILDER.RELEASE.ReleaseBuildError, "clean committed"):
+                BUILDER.clean_revision(root)
+
+    def test_output_refuses_replacement_and_escape(self):
+        with tempfile.TemporaryDirectory(prefix="trial-output-") as temporary:
+            root = Path(temporary)
+            output = root / ".runtime/sandbox-storage/V01-019/build"
+            BUILDER.create_output(root, output)
+            marker = output / "preserve.txt"
+            marker.write_text("keep", encoding="utf-8")
+            with self.assertRaisesRegex(BUILDER.RELEASE.ReleaseBuildError, "already exists"):
+                BUILDER.create_output(root, output)
+            with self.assertRaises(BUILDER.RELEASE.ReleaseBuildError):
+                BUILDER.create_output(root, root / "outside")
+            self.assertEqual(marker.read_text(), "keep")
+
+    def test_manifest_binds_host_web_and_scripts_without_release_claim(self):
+        with tempfile.TemporaryDirectory(prefix="trial-manifest-") as temporary:
+            root = Path(temporary)
+            for relative in ("host/program.exe", "web/index.html", "trial.ps1", "migrations/manifest.json"):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(relative.encode())
+            manifest = BUILDER.package_manifest(root, "a" * 40, "0.1.0", {})
+            self.assertFalse(manifest["production_file_writes_enabled"])
+            self.assertFalse(manifest["formal_release"])
+            self.assertEqual(len(manifest["files"]), 4)
+            before = manifest["files"]
+            (root / "web/index.html").write_bytes(b"changed")
+            after = BUILDER.package_manifest(root, "a" * 40, "0.1.0", {})["files"]
+            self.assertNotEqual(before, after)
+
+    def test_powershell_parses_and_never_installs_system_components(self):
+        pwsh = shutil.which("pwsh")
+        if not pwsh:
+            self.skipTest("PowerShell 7 is unavailable")
+        script = ROOT / "infra/windows/trial/trial.ps1"
+        command = "$t=$null;$e=$null;[Management.Automation.Language.Parser]::ParseFile($Target,[ref]$t,[ref]$e)|Out-Null;if($e.Count){exit 1}"
+        result = powershell_script(pwsh, command, script)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        source = script.read_text(encoding="utf-8")
+        for forbidden in ("New-Service", "Register-ScheduledTask", "Import-Certificate", "New-NetFirewallRule", "New-SelfSignedCertificate"):
+            self.assertNotIn(forbidden, source)
+        self.assertIn("-WindowStyle Hidden", source)
+
+
+@unittest.skipUnless(os.name == "nt", "native trial database test requires Windows")
+class TrialNativeDatabaseTests(unittest.TestCase):
+    def test_private_cluster_initialize_restart_ownership_and_backup(self):
+        pg_bin = os.environ.get("ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN")
+        pwsh = shutil.which("pwsh")
+        if not pg_bin or not pwsh:
+            if os.environ.get("ASSETLIBRARY_TEST_TRIAL_REQUIRED") == "1":
+                self.fail("required trial PostgreSQL/PowerShell prerequisites are missing")
+            self.skipTest("set ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN for native trial initialization")
+        with tempfile.TemporaryDirectory(prefix="al019-") as temporary:
+            root = Path(temporary)
+            package = root / "package"
+            package.mkdir()
+            shutil.copytree(ROOT / "database/migrations/production", package / "migrations")
+            shutil.copy2(ROOT / "infra/windows/trial/trial_database.py", package)
+            state = root / "state"
+            command = "$s=[Security.Principal.WindowsIdentity]::GetCurrent().User;$a=[Security.AccessControl.DirectorySecurity]::new();$a.SetOwner($s);$a.SetAccessRuleProtection($true,$false);$a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow'));[IO.FileSystemAclExtensions]::Create([IO.DirectoryInfo]::new($Target),$a)"
+            created = powershell_script(pwsh, command, state)
+            self.assertEqual(created.returncode, 0, created.stderr)
+            for directory in ("secrets", "logs", "backups"):
+                (state / directory).mkdir()
+            with socket.socket() as listener:
+                listener.bind(("127.0.0.1", 0))
+                port = listener.getsockname()[1]
+            (state / "trial-owner.json").write_text(json.dumps({
+                "product": "AssetLibrary/read-only-trial", "state_path": str(state), "deployment_id": str(uuid.uuid4()),
+                "postgres_bin": pg_bin, "database_port": port,
+            }), encoding="utf-8")
+            def run(action, success=True):
+                result = subprocess.run([sys.executable, "-I", "-B", str(package / "trial_database.py"), action, "--state", str(state)], capture_output=True, text=True, timeout=150)
+                self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
+                return json.loads(result.stdout)
+            try:
+                initialized = run("initialize")
+                expected_count = len(json.loads((package / "migrations/manifest.json").read_text())["migrations"])
+                self.assertEqual(initialized, {"status": "initialized", "migrations": expected_count, "module_logins": 6})
+                backups = list((state / "backups").glob("*/metadata.json"))
+                self.assertEqual(len(backups), 1)
+                metadata = json.loads(backups[0].read_text())
+                archive = backups[0].parent / metadata["archive_file"]
+                self.assertEqual(hashlib.sha256(archive.read_bytes()).hexdigest(), metadata["archive_sha256"])
+                credentials = (state / "secrets/database-passwords.json").read_bytes()
+                self.assertEqual(len(set(json.loads(credentials).values())), 8)
+                self.assertEqual(run("initialize")["status"], "initialized")
+                self.assertEqual((state / "secrets/database-passwords.json").read_bytes(), credentials)
+                self.assertEqual(len(list((state / "backups").glob("*/metadata.json"))), 1)
+                self.assertEqual(run("start")["status"], "started")
+                self.assertEqual(run("start")["status"], "already_running")
+                process_path = state / "postgres-process.json"
+                original = process_path.read_bytes()
+                altered = json.loads(original)
+                altered["created"] += 1
+                process_path.write_text(json.dumps(altered), encoding="utf-8")
+                self.assertEqual(run("stop", False)["code"], "database_process_record_mismatch")
+                process_path.write_bytes(original)
+                self.assertEqual(run("status")["status"], "running")
+                self.assertEqual(run("stop")["status"], "stopped")
+                self.assertEqual(run("start")["status"], "started")
+                self.assertEqual(run("stop")["status"], "stopped")
+                cluster_path = state / "postgres-cluster.json"
+                original_cluster = cluster_path.read_bytes()
+                altered = json.loads(original_cluster)
+                altered["system_identifier"] = "1"
+                cluster_path.write_text(json.dumps(altered), encoding="utf-8")
+                self.assertEqual(run("start", False)["code"], "database_cluster_owner_mismatch")
+                cluster_path.write_bytes(original_cluster)
+            finally:
+                run("stop")
+
+
+if __name__ == "__main__":
+    unittest.main()
