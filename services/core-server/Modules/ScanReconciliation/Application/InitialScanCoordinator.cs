@@ -6,7 +6,7 @@ using AssetLibrary.Modules.TaskHealth.Contracts;
 namespace AssetLibrary.Modules.ScanReconciliation.Application;
 
 public sealed class InitialScanCoordinator(IScanRequestStore store, ILibraryScanTargetQuery targets,
-    IAssetIndexSnapshotQuery snapshots, IDurableTaskCoordinator tasks, IDurableTaskInspector inspector,
+    ILibraryAvailability availability, IAssetIndexSnapshotQuery snapshots, IDurableTaskCoordinator tasks, IDurableTaskInspector inspector,
     ScanTaskRecovery recovery, InitialScanTaskExecutor executor, InitialScanExecutionOptions options) : IInitialScanCoordinator
 {
     private readonly ScanTaskDispatch dispatch = new(store, tasks, inspector);
@@ -22,14 +22,14 @@ public sealed class InitialScanCoordinator(IScanRequestStore store, ILibraryScan
             return await dispatch.ViewAsync(previous, cancellationToken).ConfigureAwait(false);
         }
 
-        var target = await targets.FindAsync(libraryId, cancellationToken).ConfigureAwait(false)
+        _ = await targets.FindAsync(libraryId, cancellationToken).ConfigureAwait(false)
             ?? throw new ReadOnlyTrialException("library_not_found");
         if (await snapshots.FindAsync(libraryId, cancellationToken).ConfigureAwait(false) is not null)
         {
             throw new ReadOnlyTrialException("already_indexed");
         }
 
-        if (target.Availability != StorageAvailability.Online)
+        if (await availability.RefreshAsync(libraryId, cancellationToken).ConfigureAwait(false) != StorageAvailability.Online)
         {
             throw new ReadOnlyTrialException("storage_unavailable");
         }

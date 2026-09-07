@@ -25,13 +25,7 @@ public sealed class PostgresAssetIndexSnapshotQuery(NpgsqlDataSource dataSource)
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         deadline.CancelAfter(TimeSpan.FromSeconds(30));
         await using var connection = await dataSource.OpenConnectionAsync(deadline.Token).ConfigureAwait(false);
-        await PostgresAssetSessionCommands.InitializeAsync(connection, deadline.Token).ConfigureAwait(false);
-        var locked = await PostgresAssetSessionCommands.ScalarAsync(connection,
-            "SELECT asset_identity.lock_initial_scan($1)", [libraryId.Value], deadline.Token).ConfigureAwait(false);
-        if (locked is not true)
-        {
-            throw new ReadOnlyTrialException("scan_already_running");
-        }
+        await PostgresAssetSessionCommands.LockAsync(connection, libraryId, deadline.Token).ConfigureAwait(false);
 
         try
         {
@@ -49,6 +43,16 @@ public sealed class PostgresAssetIndexSnapshotQuery(NpgsqlDataSource dataSource)
 
 internal static class PostgresAssetSessionCommands
 {
+    public static async ValueTask LockAsync(NpgsqlConnection connection, LibraryId libraryId, CancellationToken token)
+    {
+        await InitializeAsync(connection, token).ConfigureAwait(false);
+        var locked = await ScalarAsync(connection, "SELECT asset_identity.lock_initial_scan($1)", [libraryId.Value], token).ConfigureAwait(false);
+        if (locked is not true)
+        {
+            throw new ReadOnlyTrialException("scan_already_running");
+        }
+    }
+
     public static async ValueTask InitializeAsync(NpgsqlConnection connection, CancellationToken cancellationToken)
     {
         await using var command = new NpgsqlCommand(

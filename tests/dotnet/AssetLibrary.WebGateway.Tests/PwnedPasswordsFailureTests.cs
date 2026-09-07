@@ -83,7 +83,8 @@ public sealed class PwnedPasswordsFailureTests
         var tooFew = PwnedPasswordsTestData.ValidResponse(SecretText, lineCount: 799);
         await AssertUnavailableAsync(PwnedPasswordsTestData.TextResponse(tooFew));
 
-        var tooMany = PwnedPasswordsTestData.ValidResponse(SecretText, lineCount: 1_201);
+        var tooMany = PwnedPasswordsTestData.ValidResponse(SecretText,
+            lineCount: PwnedPasswordsSecretRiskOptions.DefaultMaximumResponseLines + 1);
         await AssertUnavailableAsync(PwnedPasswordsTestData.TextResponse(tooMany));
     }
 
