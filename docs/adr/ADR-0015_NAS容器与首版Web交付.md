@@ -1,0 +1,26 @@
+# ADR-0015 — NAS 容器与第一版 Web 交付
+
+状态：Accepted for implementation，2026-09-07。用户要求按既有架构与设计完成NAS服务端和第一版Web，集中实现后统一验收。Owner V01-021；部署V01-022，Web V01-023。
+
+## 交付边界
+
+NAS运行Docker/Compose，电脑通过NAS HTTPS使用现有第一版Web。沿用ADR0014已实现的认证、物理库登记、首次只读扫描及浏览/搜索契约。此次完成部署落点和已有Web流程；不附加预览、原内容下载、写文件、通用重扫、标签、查重、Provider或新客户端。保留既有Windows交付。
+
+## 部署结构
+
+- 两个长期服务：同一.NET CoreServer托管编译Web，PostgreSQL16.15保存现有模块数据。必要初始化/迁移工具是一次性部署作业，不形成第二业务服务。
+- 固定现有.NET10.0.111/10.0.11、Node24.20.0、pnpm11.19.0。部署工具沿用Python3.12+标准库、PostgreSQL工具和OpenSSL；镜像版本/来源可追溯，不新增应用框架或数据库。
+- 资产是NAS物理目录，bind mount必须只读；Web登记配置允许的容器路径。配置、证书、授权密钥、DP和数据库分别持久化，不和资产混放。停止/重建容器不删除数据；删除卷只允许显式自有验收资源回收。
+- PostgreSQL不发布宿主端口。跨容器连接保持既有VerifyFull，数据库证书匹配内部服务名并有受控CA；不以“内网”为理由禁用TLS或赋予业务超级用户权限。迁移复用migration_tool的所有权、备份验证、前进迁移和漂移拒绝，现有1–18不改。
+- Web/API同源HTTPS，沿用Origin/Host、Cookie/CSRF/限速、持久密钥与带外operator。不新增匿名初始化、任意API地址、CORS或认证绕过。Origin与证书SAN一致；说明包含浏览器信任和RSA≥2048/历史解密要求，不自动改系统信任。
+- 运行时非root、根文件系统只读、最小capabilities、no-new-privileges、限额和正常停机时间。初始化额外权限只作用于新建自有卷。Linux容器生命周期覆盖已有只读子进程，不引入独立Worker服务。
+
+## Web与设计
+
+以docs12和assets/visuals/10_web_admin_asset_browser.png为依据，复用当前设计令牌、导航/搜索/详情、虚拟列表及同源SDK。仅补齐已开放流程的NAS路径说明、部署语义和必要布局问题；不能伪造未来统计或提前开放写入/预览。
+
+## 验收
+
+先集中实现、最后统一验收，不逐文件写测试或反复跑完整套件。稳定diff审查后统一执行必要的真实静态/构建命令、受影响既有回归与NAS容器/浏览器流程，验证持久性、资产只读、拒权与恢复。构建机不能替代NAS验收；SMB文件拷贝不是部署。NAS访问不足时继续独立实现，实际部署仍为未完成项。
+
+Docker门禁仅在相应真实生命周期证据满足后由协调器裁决，不自动关闭完整Alpha、生产写入、Windows SCM、Linux systemd、容量或Explorer门禁。
