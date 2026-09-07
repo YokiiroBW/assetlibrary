@@ -56,6 +56,11 @@ public sealed class InteractiveReadProtocolTests
         Assert.AreEqual(3, fake.CallCount);
     }
 
+}
+
+[TestClass]
+public sealed class InteractiveReadProtocolFailureTests
+{
     [TestMethod]
     public async Task InvalidOptionsAndContradictoryScopesFailBeforeTheReadPort()
     {

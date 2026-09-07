@@ -9,8 +9,6 @@ public interface ILibraryManagementStore : ILibraryScanTargetQuery, IRegisteredL
         CanonicalLibraryRoot root, ManagementOperation operation, DateTimeOffset now, CancellationToken token);
     ValueTask SetAvailabilityAsync(LibraryId libraryId, StorageAvailability availability, string? reason, DateTimeOffset now, CancellationToken token);
     ValueTask<IReadOnlyList<LibraryId>> NextProbesAsync(DateTimeOffset before, int limit, CancellationToken cancellationToken);
-    ValueTask<LibraryCategory> UpdateCategoryAsync(LibraryCategoryUpdate request, ManagementOperation operation,
-        DateTimeOffset now, CancellationToken cancellationToken);
 }
 
 public static class LibraryRootContainment

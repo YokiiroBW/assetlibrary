@@ -1,10 +1,11 @@
 using AssetLibrary.Infrastructure.Postgres;
+using AssetLibrary.Modules.LibraryStorage.Application;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using Npgsql;
 
 namespace AssetLibrary.Modules.LibraryStorage.Infrastructure;
 
-internal sealed class PostgresLibraryCategory(NpgsqlDataSource dataSource)
+public sealed class PostgresLibraryCategory(NpgsqlDataSource dataSource) : ILibraryCategoryStore
 {
     private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.LibraryStorage);
 
