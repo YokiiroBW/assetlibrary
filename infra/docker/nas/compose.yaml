@@ -90,6 +90,10 @@ services:
     environment:
       ASSETLIBRARY_DEPLOYMENT_ID: "${ASSETLIBRARY_DEPLOYMENT_ID:?}"
       ASSETLIBRARY_SOURCE_REVISION: "${ASSETLIBRARY_SOURCE_REVISION:?}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      https_proxy: "${HTTPS_PROXY:-}"
+      NO_PROXY: "postgres,core,localhost,127.0.0.1,::1"
+      no_proxy: "postgres,core,localhost,127.0.0.1,::1"
     volumes:
       - core-state:/var/lib/assetlibrary
       - postgres-data:/bootstrap/postgres-data

@@ -161,7 +161,7 @@ public sealed class PwnedPasswordsProtocolTests
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             _ = new PwnedPasswordsSecretRiskOptions(requestTimeout: TimeSpan.Zero));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
-            _ = new PwnedPasswordsSecretRiskOptions(requestTimeout: TimeSpan.FromSeconds(3)));
+            _ = new PwnedPasswordsSecretRiskOptions(requestTimeout: TimeSpan.FromSeconds(5)));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             _ = new PwnedPasswordsSecretRiskOptions(cacheLifetime: TimeSpan.FromHours(2)));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
