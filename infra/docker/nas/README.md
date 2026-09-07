@@ -68,7 +68,9 @@ operator在一次性容器中隐藏读取口令，再以UID1654调用同一个Ho
 ./nasctl.sh down
 ```
 
-stop先正常停止Core，再停止PG，等待最多60秒；down移除本project的容器和网络，**保留所有持久卷与资产**。没有清空卷或自动删除旧部署的入口。机器重启后Compose的两个长期服务按unless-stopped恢复。非root运行、只读根文件系统、最小capabilities、no-new-privileges、内存/CPU/PID限额和受限tmpfs均在Compose中声明；资产只读挂载不因容器重启而改变。
+stop先正常停止Core，再停止PG，等待最多60秒；down移除本project的容器和网络，**保留所有持久卷与资产**。没有清空卷或自动删除旧部署的入口。机器重启后Compose的两个长期服务按unless-stopped恢复。非root运行、只读根文件系统、最小capabilities、no-new-privileges、内存硬限和受限tmpfs均在Compose中声明；资产只读挂载不因容器重启而改变。
+
+目标NAS内核不支持CFS CPU硬配额或cgroup PID控制；因此使用Core1024、PG512、setup256的相对CPU shares，不声称它们是CPU百分比上限，也没有PID硬限。内存上限、Core请求/Worker并发界限及PG60连接上限保留。此部署不修改NAS内核、不施加影响其他服务的全局nproc，也不把文件句柄限额当成PID隔离的替代。
 
 四个卷分别保存Core私密state、PG数据、PG TLS材料、setup控制数据/数据库口令/迁移备份。它们不能与资产混放。备份时先停止两服务，对自己这四个卷和原始部署目录做受限备份；软件备份不包含资产。迁移工具的每次前进迁移都会先生成并验证数据库备份，但这不等于持续软件备份功能已经实现。保留部署ID、原证书/口令、授权密钥与DP目录，不能通过删除它们“重置管理员”。
 
