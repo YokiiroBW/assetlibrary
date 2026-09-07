@@ -16,11 +16,12 @@ internal sealed class PostgresEntryQuery(
         CancellationToken cancellationToken)
     {
         const string scope = "browse";
-        var filter = $"{query.LibraryId.Value:D}\n{query.ParentPath.Value}";
+        var filter = $"{query.LibraryId.Value:D}\n{query.ParentPath.Value}\n{query.Options.SortBy}\n{query.Options.Direction}\n{query.Options.Kind}\n{query.Options.NameFilter}";
         var cursor = query.Page.Cursor is { } supplied
             ? cursors.Decode(supplied, scope, filter)
             : null;
-        if (cursor is not null && (cursor.EntryId is null || cursor.LibraryId is not null))
+        if (cursor is not null && (cursor.EntryId is null || cursor.LibraryId is not null
+            || (query.Options.SortBy == EntrySortBy.Modified && cursor.Modified is null)))
         {
             throw new InvalidReadCursorException();
         }
@@ -32,6 +33,11 @@ internal sealed class PostgresEntryQuery(
         }
 
         var rows = result.Rows;
+        if (query.AnchorEntryId is not null && (rows.Count == 0 || rows[0].Entry.EntryId != query.AnchorEntryId))
+        {
+            throw new AuthorizedReadNotFoundException();
+        }
+
         var hasMore = rows.Count > query.Page.PageSize;
         if (hasMore)
         {
@@ -39,11 +45,12 @@ internal sealed class PostgresEntryQuery(
         }
 
         ReadPageCursor? next = hasMore
-            ? cursors.Encode(scope, filter, rows[^1].SortName, null, rows[^1].Entry.EntryId.Value)
+            ? cursors.Encode(scope, filter, rows[^1].SortName, null, rows[^1].Entry.EntryId.Value,
+                rows[^1].Entry.LastWriteTimeUtc, rows[^1].Entry.ContentLength)
             : null;
         return new AuthorizedEntryPage(
             result.Library,
             query.ParentPath,
-            new ReadPage<ReadOnlyEntry>(rows.Select(row => row.Entry).ToArray(), next));
+            new ReadPage<ReadOnlyEntry>(rows.Select(row => row.Entry).ToArray(), next), query.AnchorEntryId);
     }
 }

@@ -1,21 +1,44 @@
 using AssetLibrary.Modules.GatewayAuth.Contracts;
 using AssetLibrary.Modules.GatewayAuth.Domain;
+using AssetLibrary.Modules.LibraryStorage.Contracts;
 
 namespace AssetLibrary.Modules.GatewayAuth.Application;
 
 internal static class AuthorizedReadResultValidator
 {
+    public static AuthorizedLibrary? Library(AuthorizedLibrary? result, LibraryId libraryId)
+    {
+        if (result is not null && (result.LibraryId != libraryId || !ValidLibrary(result)))
+        {
+            throw new InvalidOperationException("The authorized library query crossed its request boundary.");
+        }
+
+        return result;
+    }
+
+    public static AuthorizedEntryDetail? Detail(AuthorizedEntryDetail? result, GetEntryQuery request)
+    {
+        if (result is not null)
+        {
+            _ = Library(result.Library, request.LibraryId);
+            if (result.Entry.LibraryId != request.LibraryId || result.Entry.EntryId != request.EntryId)
+            {
+                throw new InvalidOperationException("The authorized entry detail crossed its request boundary.");
+            }
+        }
+
+        return result;
+    }
+
     public static ReadPage<AuthorizedLibrary> Libraries(
         ReadPage<AuthorizedLibrary> result,
-        int pageSize)
+        int pageSize,
+        LibraryCategory? category = null)
     {
         ArgumentNullException.ThrowIfNull(result);
         Page(result.Items, result.NextCursor, pageSize);
         if (result.Items.Any(item =>
-                item.LibraryId.Value == Guid.Empty
-                || string.IsNullOrWhiteSpace(item.DisplayName)
-                || item.DisplayName.Length > 200
-                || !LibraryReadPolicy.CanRead(item.AccessLevel)))
+                !ValidLibrary(item) || (category is not null && item.Category != category)))
         {
             throw new InvalidOperationException("The authorized library query returned invalid data.");
         }
@@ -35,15 +58,22 @@ internal static class AuthorizedReadResultValidator
 
         if (result.Library.LibraryId != request.LibraryId
             || result.ParentPath != request.ParentPath
-            || !LibraryReadPolicy.CanRead(result.Library.AccessLevel))
+            || !ValidLibrary(result.Library)
+            || result.AnchorEntryId != request.AnchorEntryId)
         {
             throw new InvalidOperationException("The authorized entry query crossed its request boundary.");
         }
 
         Page(result.Page.Items, result.Page.NextCursor, pageSize);
+        if (request.AnchorEntryId is { } anchor && (result.Page.Items.Count == 0 || result.Page.Items[0].EntryId != anchor))
+        {
+            throw new InvalidOperationException("The entry query did not begin at its requested anchor.");
+        }
+
         if (result.Page.Items.Any(item =>
                 item.LibraryId != request.LibraryId
-                || !IsDirectChild(item.RelativePath.Value, request.ParentPath.Value)))
+                || !IsDirectChild(item.RelativePath.Value, request.ParentPath.Value)
+                || !request.Options.Includes(item.Kind)))
         {
             throw new InvalidOperationException("The entry query returned an item outside the requested directory.");
         }
@@ -53,13 +83,15 @@ internal static class AuthorizedReadResultValidator
 
     public static ReadPage<AuthorizedSearchHit> Search(
         ReadPage<AuthorizedSearchHit> result,
-        int pageSize)
+        int pageSize,
+        AssetSearchScopeOptions scope = default)
     {
         ArgumentNullException.ThrowIfNull(result);
         Page(result.Items, result.NextCursor, pageSize);
         if (result.Items.Any(item =>
                 item.Library.LibraryId != item.Entry.LibraryId
-                || !LibraryReadPolicy.CanRead(item.Library.AccessLevel)
+                || !ValidLibrary(item.Library)
+                || !scope.Includes(item.Entry)
                 || !Enum.IsDefined(item.Reason)))
         {
             throw new InvalidOperationException("The authorized search query returned invalid data.");
@@ -90,4 +122,9 @@ internal static class AuthorizedReadResultValidator
         var actualParent = separator < 0 ? string.Empty : relativePath[..separator];
         return string.Equals(actualParent, parentPath, StringComparison.Ordinal);
     }
+
+    private static bool ValidLibrary(AuthorizedLibrary item) =>
+        item.LibraryId.Value != Guid.Empty && !string.IsNullOrWhiteSpace(item.DisplayName)
+        && item.DisplayName.Length <= 200 && LibraryReadPolicy.CanRead(item.AccessLevel)
+        && Enum.IsDefined(item.Category);
 }

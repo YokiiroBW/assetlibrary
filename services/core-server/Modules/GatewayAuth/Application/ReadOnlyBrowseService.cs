@@ -12,6 +12,16 @@ public sealed class ReadOnlyBrowseService(
     private readonly ILogger<ReadOnlyBrowseService> logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
+    public ValueTask<AuthorizedLibrary?> GetLibraryAsync(GetLibraryQuery request, CancellationToken cancellationToken) =>
+        ExecuteAsync(new ReadPageOptions(1, request.Timeout), "libraries.get",
+            token => query.GetLibraryAsync(request, token),
+            (result, _) => AuthorizedReadResultValidator.Library(result, request.LibraryId), cancellationToken);
+
+    public ValueTask<AuthorizedEntryDetail?> GetEntryAsync(GetEntryQuery request, CancellationToken cancellationToken) =>
+        ExecuteAsync(new ReadPageOptions(1, request.Timeout), "entries.get",
+            token => query.GetEntryAsync(request, token),
+            (result, _) => AuthorizedReadResultValidator.Detail(result, request), cancellationToken);
+
     public ValueTask<ReadPage<AuthorizedLibrary>> ListLibrariesAsync(
         ListLibrariesQuery request,
         CancellationToken cancellationToken) =>
@@ -19,7 +29,7 @@ public sealed class ReadOnlyBrowseService(
             request.Page,
             "libraries.list",
             token => query.ListLibrariesAsync(request, token),
-            (result, pageSize) => AuthorizedReadResultValidator.Libraries(result, pageSize),
+            (result, pageSize) => AuthorizedReadResultValidator.Libraries(result, pageSize, request.Category),
             cancellationToken);
 
     public ValueTask<AuthorizedEntryPage?> BrowseEntriesAsync(
@@ -28,7 +38,7 @@ public sealed class ReadOnlyBrowseService(
         ExecuteAsync(
             request.Page,
             "entries.browse",
-            token => query.BrowseEntriesAsync(request, token),
+            token => BrowseAsync(request, token),
             (result, pageSize) => AuthorizedReadResultValidator.Entries(result, request, pageSize),
             cancellationToken);
 
@@ -39,8 +49,18 @@ public sealed class ReadOnlyBrowseService(
             request.Page,
             "assets.search",
             token => query.SearchAssetsAsync(request, token),
-            (result, pageSize) => AuthorizedReadResultValidator.Search(result, pageSize),
+            (result, pageSize) => AuthorizedReadResultValidator.Search(result, pageSize, request.Scope),
             cancellationToken);
+
+    private ValueTask<AuthorizedEntryPage?> BrowseAsync(BrowseEntriesQuery request, CancellationToken cancellationToken)
+    {
+        if (request.AnchorEntryId is not null && request.Page.Cursor is not null)
+        {
+            throw new ArgumentException("An anchor cannot be combined with a continuation cursor.");
+        }
+
+        return query.BrowseEntriesAsync(request, cancellationToken);
+    }
 
     private async ValueTask<TResult> ExecuteAsync<TResult>(
         ReadPageOptions page,

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AssetLibrary.AssetLink;
+using AssetLibrary.Modules.AssetIdentity.Contracts;
 using AssetLibrary.Modules.GatewayAuth.Contracts;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 
@@ -33,23 +34,65 @@ internal static class AssetLinkReadRequestParser
         {
             "libraries.list" => new ListLibrariesAssetLinkRequest(
                 requestId,
-                new ListLibrariesQuery(subject, page)),
+                new ListLibrariesQuery(subject, page, Category(request.Body))),
+            "libraries.get" => new GetLibraryAssetLinkRequest(requestId,
+                new GetLibraryQuery(subject, LibraryId(request.Body), DetailTimeout(request.Body, page))),
+            "entries.get" => new GetEntryAssetLinkRequest(requestId,
+                new GetEntryQuery(subject, LibraryId(request.Body), new StableEntryId(Identifier(request.Body, "entry_id")),
+                    DetailTimeout(request.Body, page))),
             "entries.browse" => new BrowseEntriesAssetLinkRequest(
                 requestId,
                 new BrowseEntriesQuery(
                     subject,
                     LibraryId(request.Body),
                     new BrowseParentPath(OptionalString(request.Body, "parent_relative_path")),
-                    page)),
+                    page,
+                    new EntryBrowseOptions(Option<EntrySortBy>(request.Body, "sort_by"),
+                        Option<ReadSortDirection>(request.Body, "sort_direction"), Option<EntryKindFilter>(request.Body, "kind"),
+                        OptionString(request.Body, "name_filter")),
+                    request.Body.ContainsKey("anchor_entry_id") ? new StableEntryId(Identifier(request.Body, "anchor_entry_id")) : null)),
             "assets.search" => new SearchAssetsAssetLinkRequest(
                 requestId,
                 new SearchAssetsQuery(
                     subject,
                     new AssetSearchText(RequiredString(request.Body, "query")),
-                    page)),
+                    page, SearchScope(request.Body))),
             _ => new UnsupportedAssetLinkReadRequest(requestId),
         };
     }
+
+    private static LibraryCategory? Category(JsonObject body) =>
+        body.ContainsKey("category") ? LibraryCategories.Parse(RequiredString(body, "category")) : null;
+
+    private static AssetSearchScopeOptions SearchScope(JsonObject body) =>
+        new(Option<AssetSearchScope>(body, "scope"),
+            body.ContainsKey("library_id") ? LibraryId(body) : null,
+            body.ContainsKey("parent_relative_path") ? new BrowseParentPath(RequiredString(body, "parent_relative_path")) : null);
+
+    private static TimeSpan DetailTimeout(JsonObject body, ReadPageOptions page)
+    {
+        if (body.ContainsKey("cursor") || body.ContainsKey("page_size"))
+        {
+            throw new ArgumentException("A detail request cannot carry pagination fields.");
+        }
+
+        return page.Timeout;
+    }
+
+    private static T Option<T>(JsonObject body, string name) where T : struct, Enum
+    {
+        var value = OptionString(body, name);
+        if (value is null)
+        {
+            return default;
+        }
+
+        return Enum.TryParse<T>(value, true, out var parsed) && Enum.IsDefined(parsed)
+            && parsed.ToString().ToLowerInvariant() == value ? parsed : throw new ArgumentException("A query option is invalid.");
+    }
+
+    private static string? OptionString(JsonObject body, string name) =>
+        body.ContainsKey(name) ? RequiredString(body, name) : null;
 
     private static AuthenticatedSubject Subject(ClaimsPrincipal principal)
     {
@@ -91,13 +134,18 @@ internal static class AssetLinkReadRequestParser
 
     private static LibraryId LibraryId(JsonObject body)
     {
-        var value = RequiredString(body, "library_id");
+        return new LibraryId(Identifier(body, "library_id"));
+    }
+
+    private static Guid Identifier(JsonObject body, string name)
+    {
+        var value = RequiredString(body, name);
         if (!Guid.TryParseExact(value, "D", out var parsed))
         {
             throw new FormatException("A canonical library ID is required.");
         }
 
-        return new LibraryId(parsed);
+        return parsed;
     }
 
     private static string RequestId(string value)

@@ -1,12 +1,26 @@
 using AssetLibrary.Modules.GatewayAuth.Contracts;
 using AssetLibrary.Modules.GatewayAuth.Infrastructure;
+using AssetLibrary.Modules.LibraryStorage.Contracts;
+using AssetLibrary.Modules.LibraryStorage.Infrastructure;
 using Microsoft.AspNetCore.DataProtection;
+using System.Text.Json;
 
 namespace AssetLibrary.WebGateway.Tests;
 
 [TestClass]
 public sealed class GatewayContractTests
 {
+    [TestMethod]
+    public void GeneralRegistrationKeepsTheLegacyFingerprintAndExplicitCategoryChangesIt()
+    {
+        var request = new LibraryRegistrationRequest("fixture", "Fixture", "C:/sandbox/fixture");
+        var legacy = JsonSerializer.Serialize(request, LibraryRegistrationJsonContext.Default.LibraryRegistrationRequest);
+        Assert.AreEqual("{\"SourceKey\":\"fixture\",\"DisplayName\":\"Fixture\",\"RootPath\":\"C:/sandbox/fixture\"}", legacy);
+        var categorized = JsonSerializer.Serialize(request with { Category = LibraryCategory.Images },
+            LibraryRegistrationJsonContext.Default.LibraryRegistrationRequest);
+        Assert.AreNotEqual(legacy, categorized);
+    }
+
     [TestMethod]
     public void ReadContractsNormalizeAndBoundUntrustedInput()
     {

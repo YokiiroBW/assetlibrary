@@ -8,10 +8,10 @@ internal sealed class PostgresSearchQuery(
     ProtectedReadCursorCodec cursors)
 {
     private const string SearchSql = """
-        SELECT library_id, library_display_name, availability, access_level,
+        SELECT library_id, library_display_name, availability, access_level, category,
                entry_id, relative_path, kind, content_length, last_write_time_utc,
                hit_reason, sort_name
-        FROM gateway_auth.search_authorized_entries($1, $2, $3, $4, $5, $6);
+        FROM gateway_auth.search_authorized_entries_v2($1,$2,$3,$4,$5,$6,$7,$8,$9);
         """;
     private readonly NpgsqlDataSource dataSource =
         dataSource ?? throw new ArgumentNullException(nameof(dataSource));
@@ -23,7 +23,7 @@ internal sealed class PostgresSearchQuery(
         CancellationToken cancellationToken)
     {
         const string scope = "search";
-        var filter = query.SearchText.Value;
+        var filter = $"{query.SearchText.Value}\n{query.Scope.Scope}\n{query.Scope.LibraryId?.Value:D}\n{query.Scope.ParentPath?.Value}";
         var cursor = query.Page.Cursor is { } supplied
             ? cursors.Decode(supplied, scope, filter)
             : null;
@@ -41,12 +41,15 @@ internal sealed class PostgresSearchQuery(
             {
                 PostgresReadCommand.Text(command, query.Subject.Value);
                 PostgresReadCommand.Text(command, query.SearchText.Value);
+                PostgresReadCommand.Text(command, query.Scope.Scope.ToString().ToLowerInvariant());
+                PostgresReadCommand.NullableUuid(command, query.Scope.LibraryId?.Value);
+                PostgresReadCommand.NullableText(command, query.Scope.ParentPath?.Value);
                 PostgresReadCommand.NullableText(command, cursor?.SortName);
                 PostgresReadCommand.NullableUuid(command, cursor?.LibraryId);
                 PostgresReadCommand.NullableUuid(command, cursor?.EntryId);
                 PostgresReadCommand.Integer(command, query.Page.PageSize + 1);
             },
-            reader => new SearchRow(PostgresReadCommand.ReadSearchHit(reader), reader.GetString(10)),
+            reader => new SearchRow(PostgresReadCommand.ReadSearchHit(reader), reader.GetString(11)),
             cancellationToken).ConfigureAwait(false);
 
         var hasMore = rows.Count > query.Page.PageSize;

@@ -7,6 +7,7 @@ namespace AssetLibrary.CoreServer.Hosting.Trial;
 internal sealed record TrialLibraryServices(
     PostgresLibraryStore Store,
     ILibraryRegistration Registration,
+    ILibraryCategoryManagement Categories,
     ILibraryAvailability Availability,
     IReadOnlyList<ConfiguredStorageSource> Sources);
 
@@ -25,6 +26,7 @@ internal static class TrialLibraryComposition
         var probe = new ProcessLibraryRootProbe(workers);
         return new TrialLibraryServices(store,
             new LibraryRegistrationService(store, probe, sources, TimeProvider.System),
+            new LibraryCategoryService(store, TimeProvider.System),
             new LibraryAvailabilityService(store, probe, sources, TimeProvider.System), sources);
     }
 }

@@ -23,7 +23,8 @@ internal static class PostgresReadCommand
             new LibraryId(reader.GetGuid(offset)),
             reader.GetString(offset + 1),
             Availability(reader.GetString(offset + 2)),
-            AccessLevel(reader.GetString(offset + 3)));
+            AccessLevel(reader.GetString(offset + 3)),
+            LibraryCategories.Parse(reader.GetString(offset + 4)));
 
     public static ReadOnlyEntry ReadEntry(
         NpgsqlDataReader reader,
@@ -40,8 +41,8 @@ internal static class PostgresReadCommand
     public static AuthorizedSearchHit ReadSearchHit(NpgsqlDataReader reader)
     {
         var library = ReadLibrary(reader, 0);
-        var entry = ReadEntry(reader, library.LibraryId, 4);
-        var reason = reader.GetString(9) switch
+        var entry = ReadEntry(reader, library.LibraryId, 5);
+        var reason = reader.GetString(10) switch
         {
             "name" => SearchHitReason.Name,
             "path" => SearchHitReason.Path,
@@ -83,6 +84,20 @@ internal static class PostgresReadCommand
         {
             NpgsqlDbType = NpgsqlDbType.Integer,
             Value = value,
+        });
+
+    public static void NullableTimestamp(NpgsqlCommand command, DateTimeOffset? value) =>
+        command.Parameters.Add(new NpgsqlParameter
+        {
+            NpgsqlDbType = NpgsqlDbType.TimestampTz,
+            Value = value is null ? DBNull.Value : value.Value,
+        });
+
+    public static void NullableBigint(NpgsqlCommand command, long? value) =>
+        command.Parameters.Add(new NpgsqlParameter
+        {
+            NpgsqlDbType = NpgsqlDbType.Bigint,
+            Value = value is null ? DBNull.Value : value.Value,
         });
 
     private static StorageAvailability Availability(string value) => value switch

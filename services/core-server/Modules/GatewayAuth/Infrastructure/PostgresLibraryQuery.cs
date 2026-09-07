@@ -9,12 +9,12 @@ internal sealed class PostgresLibraryQuery(
     ProtectedReadCursorCodec cursors)
 {
     private const string ListSql = """
-        SELECT library_id, display_name, availability, access_level, sort_name
-        FROM gateway_auth.list_authorized_libraries($1, $2, $3, $4);
+        SELECT library_id, display_name, availability, access_level, category, sort_name
+        FROM gateway_auth.list_authorized_libraries_v2($1, $2, $3, $4, $5);
         """;
     private const string FindSql = """
-        SELECT library_id, display_name, availability, access_level
-        FROM gateway_auth.find_authorized_library($1, $2);
+        SELECT library_id, display_name, availability, access_level, category
+        FROM gateway_auth.find_authorized_library_v2($1, $2);
         """;
     private readonly NpgsqlDataSource dataSource =
         dataSource ?? throw new ArgumentNullException(nameof(dataSource));
@@ -26,8 +26,9 @@ internal sealed class PostgresLibraryQuery(
         CancellationToken cancellationToken)
     {
         const string scope = "libraries";
+        var filter = query.Category is { } category ? LibraryCategories.ToWire(category) : string.Empty;
         var cursor = query.Page.Cursor is { } supplied
-            ? cursors.Decode(supplied, scope, string.Empty)
+            ? cursors.Decode(supplied, scope, filter)
             : null;
         if (cursor is not null && (cursor.LibraryId is null || cursor.EntryId is not null))
         {
@@ -45,8 +46,9 @@ internal sealed class PostgresLibraryQuery(
                 PostgresReadCommand.NullableText(command, cursor?.SortName);
                 PostgresReadCommand.NullableUuid(command, cursor?.LibraryId);
                 PostgresReadCommand.Integer(command, query.Page.PageSize + 1);
+                PostgresReadCommand.NullableText(command, query.Category is null ? null : filter);
             },
-            reader => new LibraryRow(PostgresReadCommand.ReadLibrary(reader, 0), reader.GetString(4)),
+            reader => new LibraryRow(PostgresReadCommand.ReadLibrary(reader, 0), reader.GetString(5)),
             cancellationToken).ConfigureAwait(false);
 
         var hasMore = rows.Count > query.Page.PageSize;
@@ -56,9 +58,20 @@ internal sealed class PostgresLibraryQuery(
         }
 
         ReadPageCursor? next = hasMore
-            ? cursors.Encode(scope, string.Empty, rows[^1].SortName, rows[^1].Library.LibraryId.Value, null)
+            ? cursors.Encode(scope, filter, rows[^1].SortName, rows[^1].Library.LibraryId.Value, null)
             : null;
         return new ReadPage<AuthorizedLibrary>(rows.Select(row => row.Library).ToArray(), next);
+    }
+
+    public async ValueTask<AuthorizedLibrary?> GetAsync(GetLibraryQuery query, CancellationToken cancellationToken)
+    {
+        var rows = await PostgresReadExecutor.ReadAsync(dataSource, FindSql, query.Timeout, 1,
+            command =>
+            {
+                PostgresReadCommand.Text(command, query.Subject.Value);
+                PostgresReadCommand.Uuid(command, query.LibraryId.Value);
+            }, reader => PostgresReadCommand.ReadLibrary(reader, 0), cancellationToken).ConfigureAwait(false);
+        return rows.SingleOrDefault();
     }
 
     public static async ValueTask<AuthorizedLibrary?> FindAsync(

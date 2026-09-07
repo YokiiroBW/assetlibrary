@@ -45,14 +45,22 @@ internal static class AssetLinkReadJson
             ["next_cursor"] = result.NextCursor?.Value,
         };
 
-    public static JsonObject Entries(AuthorizedEntryPage result) =>
-        new()
+    public static JsonObject Entries(AuthorizedEntryPage result)
+    {
+        var body = new JsonObject
         {
             ["library"] = Library(result.Library),
             ["parent_relative_path"] = result.ParentPath.Value,
             ["items"] = Array(result.Page.Items.Select(Entry)),
             ["next_cursor"] = result.Page.NextCursor?.Value,
         };
+        if (result.AnchorEntryId is { } anchor)
+        {
+            body["anchor_entry_id"] = anchor.Value.ToString("D");
+        }
+
+        return body;
+    }
 
     public static JsonObject Search(ReadPage<AuthorizedSearchHit> result) =>
         new()
@@ -64,6 +72,11 @@ internal static class AssetLinkReadJson
     private static AssetLinkProtocolResponse Response(int statusCode, JsonObject body) =>
         new(statusCode, body.ToJsonString(new JsonSerializerOptions { WriteIndented = false }));
 
+    public static JsonObject LibraryDetail(AuthorizedLibrary library) => new() { ["library"] = Library(library) };
+
+    public static JsonObject EntryDetail(AuthorizedEntryDetail result) =>
+        new() { ["library"] = Library(result.Library), ["entry"] = Entry(result.Entry) };
+
     private static JsonObject Library(AuthorizedLibrary library) =>
         new()
         {
@@ -71,6 +84,7 @@ internal static class AssetLinkReadJson
             ["display_name"] = library.DisplayName,
             ["availability"] = Availability(library.Availability),
             ["access_level"] = AccessLevel(library.AccessLevel),
+            ["category"] = LibraryCategories.ToWire(library.Category),
         };
 
     private static JsonObject Entry(ReadOnlyEntry entry) =>

@@ -9,18 +9,20 @@ namespace AssetLibrary.Modules.GatewayAuth.Infrastructure;
 
 internal sealed class ProtectedReadCursorCodec(IDataProtectionProvider protectionProvider)
 {
-    private const int CurrentVersion = 1;
+    private const int CurrentVersion = 2;
     private const int MaximumPlaintextBytes = 6144;
     private readonly IDataProtector protector = (protectionProvider
         ?? throw new ArgumentNullException(nameof(protectionProvider)))
-        .CreateProtector("AssetLibrary.GatewayAuth.ReadCursor.v1");
+        .CreateProtector("AssetLibrary.GatewayAuth.ReadCursor.v2");
 
     public ReadPageCursor Encode(
         string scope,
         string filter,
         string sortName,
         Guid? libraryId,
-        Guid? entryId)
+        Guid? entryId,
+        DateTimeOffset? modified = null,
+        long? size = null)
     {
         var payload = new CursorPayload(
             CurrentVersion,
@@ -28,7 +30,9 @@ internal sealed class ProtectedReadCursorCodec(IDataProtectionProvider protectio
             Fingerprint(filter),
             sortName,
             libraryId,
-            entryId);
+            entryId,
+            modified,
+            size);
         var plaintext = JsonSerializer.SerializeToUtf8Bytes(payload);
         if (plaintext.Length > MaximumPlaintextBytes)
         {
@@ -55,12 +59,14 @@ internal sealed class ProtectedReadCursorCodec(IDataProtectionProvider protectio
                 || !string.Equals(payload.Scope, expectedScope, StringComparison.Ordinal)
                 || !FixedTimeEquals(payload.FilterFingerprint, Fingerprint(expectedFilter))
                 || string.IsNullOrEmpty(payload.SortName)
-                || payload.SortName.Length > 4096)
+                || payload.SortName.Length > 4096
+                || payload.Size < 0
+                || (payload.Modified is { } modified && modified.Offset != TimeSpan.Zero))
             {
                 throw new InvalidReadCursorException();
             }
 
-            return new DecodedReadCursor(payload.SortName, payload.LibraryId, payload.EntryId);
+            return new DecodedReadCursor(payload.SortName, payload.LibraryId, payload.EntryId, payload.Modified, payload.Size);
         }
         catch (InvalidReadCursorException)
         {
@@ -96,10 +102,13 @@ internal sealed class ProtectedReadCursorCodec(IDataProtectionProvider protectio
         string FilterFingerprint,
         string SortName,
         Guid? LibraryId,
-        Guid? EntryId);
+        Guid? EntryId,
+        DateTimeOffset? Modified,
+        long? Size);
 }
 
-internal sealed record DecodedReadCursor(string SortName, Guid? LibraryId, Guid? EntryId);
+internal sealed record DecodedReadCursor(
+    string SortName, Guid? LibraryId, Guid? EntryId, DateTimeOffset? Modified = null, long? Size = null);
 
 public sealed class InvalidReadCursorException : ArgumentException
 {

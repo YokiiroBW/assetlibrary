@@ -10,6 +10,7 @@ public sealed class PostgresAuthorizedReadModelQuery : IAuthorizedReadModelQuery
     private readonly PostgresLibraryQuery libraries;
     private readonly PostgresEntryQuery entries;
     private readonly PostgresSearchQuery search;
+    private readonly PostgresEntryDetailQuery details;
 
     public PostgresAuthorizedReadModelQuery(
         NpgsqlDataSource dataSource,
@@ -20,7 +21,14 @@ public sealed class PostgresAuthorizedReadModelQuery : IAuthorizedReadModelQuery
         libraries = new PostgresLibraryQuery(dataSource, cursors);
         entries = new PostgresEntryQuery(cursors, new PostgresBrowseReader(dataSource));
         search = new PostgresSearchQuery(dataSource, cursors);
+        details = new PostgresEntryDetailQuery(dataSource);
     }
+
+    public ValueTask<AuthorizedLibrary?> GetLibraryAsync(GetLibraryQuery query, CancellationToken cancellationToken) =>
+        libraries.GetAsync(query, cancellationToken);
+
+    public ValueTask<AuthorizedEntryDetail?> GetEntryAsync(GetEntryQuery query, CancellationToken cancellationToken) =>
+        details.GetAsync(query, cancellationToken);
 
     public ValueTask<ReadPage<AuthorizedLibrary>> ListLibrariesAsync(
         ListLibrariesQuery query,

@@ -5,6 +5,23 @@ namespace AssetLibrary.WebGateway.Tests;
 
 internal sealed class FakeAuthorizedReadModelQuery : IAuthorizedReadModelQuery
 {
+    public Func<GetLibraryQuery, CancellationToken, ValueTask<AuthorizedLibrary?>> GetLibrary { get; set; } =
+        static (_, _) => ValueTask.FromResult<AuthorizedLibrary?>(null);
+    public Func<GetEntryQuery, CancellationToken, ValueTask<AuthorizedEntryDetail?>> GetEntry { get; set; } =
+        static (_, _) => ValueTask.FromResult<AuthorizedEntryDetail?>(null);
+
+    public ValueTask<AuthorizedLibrary?> GetLibraryAsync(GetLibraryQuery query, CancellationToken cancellationToken)
+    {
+        CallCount++;
+        return GetLibrary(query, cancellationToken);
+    }
+
+    public ValueTask<AuthorizedEntryDetail?> GetEntryAsync(GetEntryQuery query, CancellationToken cancellationToken)
+    {
+        CallCount++;
+        return GetEntry(query, cancellationToken);
+    }
+
     public Func<ListLibrariesQuery, CancellationToken, ValueTask<ReadPage<AuthorizedLibrary>>> List { get; set; } =
         static (_, _) => ValueTask.FromResult(new ReadPage<AuthorizedLibrary>([], null));
 

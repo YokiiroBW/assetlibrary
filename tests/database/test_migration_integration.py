@@ -35,6 +35,10 @@ class PostgreSqlIntegrationTests(unittest.TestCase):
     AUDITOR = "assetlibrary_v01003_test_auditor"
     AUTHORIZATION_EXPIRY = "2099-01-01T00:00:00Z"
 
+    def test_web_interaction_upgrade_and_dotnet_queries(self) -> None:
+        from web_interaction_checks import verify_interactive_upgrade
+        verify_interactive_upgrade(self, MIGRATIONS, ROOT)
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.required = os.environ.get("ASSETLIBRARY_TEST_POSTGRES_REQUIRED") == "1"
