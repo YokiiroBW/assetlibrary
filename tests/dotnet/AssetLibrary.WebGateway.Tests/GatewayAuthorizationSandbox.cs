@@ -40,6 +40,13 @@ internal sealed class GatewayAuthorizationSandbox : IDisposable
         new DirectoryInfo(System.IO.Path.Combine(Path, "data-protection")),
         builder => builder.SetApplicationName("V01-016-test").ProtectKeysWithCertificate(Certificate));
 
+    public async ValueTask<ProtectedGatewayAuthorizationKeyStore> InitializeKeysAsync(TimeProvider clock)
+    {
+        var keys = new ProtectedGatewayAuthorizationKeyStore(Configuration, Protection(), clock);
+        await keys.InitializeAsync(CancellationToken.None);
+        return keys;
+    }
+
     public void Dispose()
     {
         Certificate.Dispose();

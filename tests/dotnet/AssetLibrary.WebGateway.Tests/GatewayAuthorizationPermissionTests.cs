@@ -15,8 +15,7 @@ public sealed class GatewayAuthorizationPermissionTests
     {
         using var sandbox = new GatewayAuthorizationSandbox();
         var clock = new MutableGatewayTimeProvider(DateTimeOffset.UtcNow);
-        var keys = new ProtectedGatewayAuthorizationKeyStore(sandbox.Configuration, sandbox.Protection(), clock);
-        await keys.InitializeAsync(CancellationToken.None);
+        var keys = await sandbox.InitializeKeysAsync(clock);
         var authorizer = new FileOutOfBandAuthorization(keys, sandbox.Configuration.DeploymentId, clock);
         var request = Request(clock.GetUtcNow());
         using var proof = await authorizer.IssueAsync(request, CancellationToken.None);
