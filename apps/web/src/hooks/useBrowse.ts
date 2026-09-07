@@ -10,11 +10,13 @@ export function useBrowse(
 ): { state: PagedState<Entry>; library: Library | null; loadMore: () => void; reload: () => void } {
   const [state, setState] = useState<PagedState<Entry>>(idlePage);
   const [library, setLibrary] = useState<Library | null>(null);
+  const [scope, setScope] = useState({ client, libraryId, parentPath });
   const [reloadKey, setReloadKey] = useState(0);
   const generation = useRef(0);
   const active = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    setScope({ client, libraryId, parentPath });
     const current = ++generation.current;
     active.current?.abort();
     if (libraryId === null) {
@@ -77,9 +79,11 @@ export function useBrowse(
       });
   }, [client, libraryId, parentPath, state.loadingMore, state.next_cursor]);
 
+  const sameScope = scope.client === client && scope.libraryId === libraryId && scope.parentPath === parentPath;
+  const visibleState = sameScope ? state : libraryId === null ? idlePage<Entry>() : loadingPage<Entry>();
   return {
-    state,
-    library: isAccessFailure(state.statusCode) ? null : library,
+    state: visibleState,
+    library: !sameScope || isAccessFailure(state.statusCode) ? null : library,
     loadMore,
     reload: () => setReloadKey((value) => value + 1),
   };

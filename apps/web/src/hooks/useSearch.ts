@@ -13,11 +13,13 @@ export function useSearch(
 ): { state: PagedState<SearchHit>; loadMore: () => void; reload: () => void } {
   const normalized = normalizeSearch(query);
   const [state, setState] = useState<PagedState<SearchHit>>(idlePage);
+  const [scope, setScope] = useState({ client, normalized });
   const [reloadKey, setReloadKey] = useState(0);
   const generation = useRef(0);
   const active = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    setScope({ client, normalized });
     const current = ++generation.current;
     active.current?.abort();
     if (normalized.length < 2) {
@@ -81,5 +83,7 @@ export function useSearch(
       });
   }, [client, normalized, state.loadingMore, state.next_cursor]);
 
-  return { state, loadMore, reload: () => setReloadKey((value) => value + 1) };
+  const sameScope = scope.client === client && scope.normalized === normalized;
+  const visibleState = sameScope ? state : normalized.length < 2 ? idlePage<SearchHit>() : loadingPage<SearchHit>();
+  return { state: visibleState, loadMore, reload: () => setReloadKey((value) => value + 1) };
 }

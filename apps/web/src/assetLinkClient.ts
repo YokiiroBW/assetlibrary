@@ -1,5 +1,16 @@
 import { encodeAssetLinkMessage, parseAssetLinkMessage, type ControlRequest } from "@assetlibrary/assetlink";
-import type { Entry, EntryPage, Library, Page, SearchHit } from "./types";
+import { decodeEntryPage, decodeLibraryPage, decodeSearchPage, record, string } from "./assetLinkResponses";
+import { decodeScan, decodeSession, decodeSources } from "./trialResponses";
+import type {
+  BrowserSession,
+  EntryPage,
+  Library,
+  LibraryScan,
+  Page,
+  RegisterLibraryRequest,
+  SearchHit,
+  StorageSource,
+} from "./types";
 
 const endpoint = "/assetlink/v1/control";
 const pageSize = 100;
@@ -17,6 +28,22 @@ export class AssetLinkApiError extends Error {
 }
 
 export class AssetLinkClient {
+  public constructor(private readonly csrfToken = "") {}
+
+  public getSession(signal: AbortSignal): Promise<BrowserSession> {
+    return this.auth("session", "GET", undefined, signal, decodeSession);
+  }
+
+  public signIn(accountName: string, password: string, signal: AbortSignal): Promise<BrowserSession> {
+    return this.auth("login", "POST", { account_name: accountName, password }, signal, decodeSession);
+  }
+
+  public signOut(signal: AbortSignal): Promise<void> {
+    return this.auth("logout", "POST", {}, signal, (_body, status) => {
+      if (status !== 204) throw new TypeError("A logout acknowledgement is required");
+    });
+  }
+
   public listLibraries(cursor: string | null, signal: AbortSignal): Promise<Page<Library>> {
     return this.request("libraries.list", pageBody(cursor), signal, decodeLibraryPage);
   }
@@ -29,11 +56,7 @@ export class AssetLinkClient {
   ): Promise<EntryPage> {
     return this.request(
       "entries.browse",
-      {
-        library_id: libraryId,
-        parent_relative_path: parentRelativePath,
-        ...pageBody(cursor),
-      },
+      { library_id: libraryId, parent_relative_path: parentRelativePath, ...pageBody(cursor) },
       signal,
       decodeEntryPage,
     );
@@ -43,58 +66,68 @@ export class AssetLinkClient {
     return this.request("assets.search", { query, ...pageBody(cursor) }, signal, decodeSearchPage);
   }
 
-  private async request<T>(
-    operation: string,
-    body: Record<string, unknown>,
-    signal: AbortSignal,
-    decode: (body: Record<string, unknown>) => T,
-  ): Promise<T> {
-    signal.throwIfAborted();
-    const controller = new AbortController();
-    const cancelFromCaller = () => controller.abort(signal.reason);
-    signal.addEventListener("abort", cancelFromCaller, { once: true });
-    const timeout = window.setTimeout(() => controller.abort(), timeoutMilliseconds);
-    try {
-      return await this.sendRequest(operation, body, controller.signal, decode);
-    } catch (error: unknown) {
-      if (signal.aborted) throw signal.reason;
-      // A received HTTP rejection remains authoritative when its body cannot be read.
-      if (error instanceof AssetLinkApiError) throw error;
-      if (controller.signal.aborted) {
-        throw new AssetLinkApiError(504, "timeout", "读取超时，请重试。");
-      }
-      throw error;
-    } finally {
-      window.clearTimeout(timeout);
-      signal.removeEventListener("abort", cancelFromCaller);
-    }
+  public listStorageSources(signal: AbortSignal): Promise<StorageSource[]> {
+    return this.request("storage_sources.list", {}, signal, decodeSources);
   }
 
-  private async sendRequest<T>(
+  public registerLibrary(body: RegisterLibraryRequest, idempotencyKey: string, signal: AbortSignal): Promise<string> {
+    return this.request(
+      "libraries.register",
+      { ...body },
+      signal,
+      (result) => string(result.library_id, "library_id"),
+      idempotencyKey,
+    );
+  }
+
+  public getLibraryScan(libraryId: string, signal: AbortSignal): Promise<LibraryScan> {
+    return this.request("library_scans.get", { library_id: libraryId }, signal, (body) => decodeScan(body, libraryId));
+  }
+
+  public startLibraryScan(libraryId: string, idempotencyKey: string, signal: AbortSignal): Promise<LibraryScan> {
+    return this.request(
+      "library_scans.start",
+      { library_id: libraryId },
+      signal,
+      (body) => decodeScan(body, libraryId, true),
+      idempotencyKey,
+    );
+  }
+
+  public cancelLibraryScan(
+    libraryId: string,
+    taskId: string,
+    idempotencyKey: string,
+    signal: AbortSignal,
+  ): Promise<LibraryScan> {
+    return this.request(
+      "library_scans.cancel",
+      { library_id: libraryId, task_id: taskId },
+      signal,
+      (body) => decodeScan(body, libraryId, true),
+      idempotencyKey,
+    );
+  }
+
+  private request<T>(
     operation: string,
     body: Record<string, unknown>,
     signal: AbortSignal,
     decode: (body: Record<string, unknown>) => T,
+    idempotencyKey?: string,
   ): Promise<T> {
+    signal.throwIfAborted();
     const request: ControlRequest = {
       message_type: "control.request",
-      request_id: crypto.randomUUID(),
+      request_id: idempotencyKey ?? crypto.randomUUID(),
       operation,
       body,
       timeout_ms: timeoutMilliseconds,
+      ...(idempotencyKey === undefined ? {} : { idempotency_key: idempotencyKey }),
     };
-    const response = await fetch(endpoint, {
-      method: "POST",
-      credentials: "same-origin",
-      headers: { "content-type": "application/json" },
-      body: encodeAssetLinkMessage(request),
-      signal,
-    });
-    try {
-      const message = parseAssetLinkMessage(await response.text());
-      if (message.request_id !== request.request_id) {
-        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
-      }
+    return this.transport(endpoint, "POST", encodeAssetLinkMessage(request), signal, (text, response) => {
+      const message = parseAssetLinkMessage(text);
+      if (message.request_id !== request.request_id) throw invalidResponse(response.status);
       if (message.message_type === "error") {
         const error = record(message.error, "error");
         throw new AssetLinkApiError(
@@ -103,15 +136,69 @@ export class AssetLinkClient {
           string(error.message, "error.message"),
         );
       }
-      if (!response.ok || message.message_type !== "control.result" || !message.ok) {
-        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
-      }
+      if (!response.ok || message.message_type !== "control.result" || !message.ok)
+        throw invalidResponse(response.status);
       return decode(record(message.body, "body"));
-    } catch (error: unknown) {
-      if (!response.ok && !(error instanceof AssetLinkApiError)) {
-        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
+    });
+  }
+
+  private auth<T>(
+    operation: "session" | "login" | "logout",
+    method: "GET" | "POST",
+    body: Record<string, unknown> | undefined,
+    signal: AbortSignal,
+    decode: (body: Record<string, unknown>, status: number) => T,
+  ): Promise<T> {
+    return this.transport(
+      `/assetlink/v1/auth/${operation}`,
+      method,
+      body === undefined ? undefined : JSON.stringify(body),
+      signal,
+      (text, response) => {
+        const result = response.status === 204 ? {} : record(JSON.parse(text), "session response");
+        if (!response.ok)
+          throw new AssetLinkApiError(response.status, string(result.code, "code"), string(result.message, "message"));
+        return decode(result, response.status);
+      },
+    );
+  }
+
+  private async transport<T>(
+    path: string,
+    method: "GET" | "POST",
+    body: string | undefined,
+    signal: AbortSignal,
+    decode: (text: string, response: Response) => T,
+  ): Promise<T> {
+    signal.throwIfAborted();
+    const controller = new AbortController();
+    const cancelFromCaller = () => controller.abort(signal.reason);
+    signal.addEventListener("abort", cancelFromCaller, { once: true });
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMilliseconds);
+    try {
+      const response = await fetch(path, {
+        method,
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: { "content-type": "application/json", "X-AssetLibrary-CSRF": this.csrfToken },
+        body,
+        signal: controller.signal,
+      });
+      try {
+        return decode(await response.text(), response);
+      } catch (error: unknown) {
+        // HTTP rejection remains authoritative even when its body stalls or is malformed.
+        if (!response.ok && !(error instanceof AssetLinkApiError)) throw invalidResponse(response.status);
+        throw error;
       }
+    } catch (error: unknown) {
+      if (signal.aborted) throw signal.reason;
+      if (error instanceof AssetLinkApiError) throw error;
+      if (controller.signal.aborted) throw new AssetLinkApiError(504, "timeout", "读取超时，请重试。");
       throw error;
+    } finally {
+      window.clearTimeout(timeout);
+      signal.removeEventListener("abort", cancelFromCaller);
     }
   }
 }
@@ -120,112 +207,6 @@ function pageBody(cursor: string | null): Record<string, unknown> {
   return cursor === null ? { page_size: pageSize } : { page_size: pageSize, cursor };
 }
 
-function decodeLibraryPage(value: Record<string, unknown>): Page<Library> {
-  return {
-    items: pageItems(value.items, "items").map(decodeLibrary),
-    next_cursor: optionalString(value.next_cursor, "next_cursor"),
-  };
-}
-
-function decodeEntryPage(value: Record<string, unknown>): EntryPage {
-  return {
-    library: decodeLibrary(value.library),
-    parent_relative_path: string(value.parent_relative_path, "parent_relative_path"),
-    items: pageItems(value.items, "items").map(decodeEntry),
-    next_cursor: optionalString(value.next_cursor, "next_cursor"),
-  };
-}
-
-function decodeSearchPage(value: Record<string, unknown>): Page<SearchHit> {
-  return {
-    items: pageItems(value.items, "items").map((item) => {
-      const hit = record(item, "search hit");
-      const reason = string(hit.hit_reason, "hit_reason");
-      if (reason !== "name" && reason !== "path") {
-        throw new TypeError("hit_reason is invalid");
-      }
-      return {
-        library: decodeLibrary(hit.library),
-        entry: decodeEntry(hit.entry),
-        hit_reason: reason,
-      };
-    }),
-    next_cursor: optionalString(value.next_cursor, "next_cursor"),
-  };
-}
-
-function decodeLibrary(value: unknown): Library {
-  const item = record(value, "library");
-  const availability = string(item.availability, "availability");
-  const accessLevel = string(item.access_level, "access_level");
-  if (availability !== "online" && availability !== "offline") {
-    throw new TypeError("availability is invalid");
-  }
-  if (!isAccessLevel(accessLevel)) {
-    throw new TypeError("access_level is invalid");
-  }
-  return {
-    library_id: string(item.library_id, "library_id"),
-    display_name: string(item.display_name, "display_name"),
-    availability,
-    access_level: accessLevel,
-  };
-}
-
-function decodeEntry(value: unknown): Entry {
-  const item = record(value, "entry");
-  const kind = string(item.kind, "kind");
-  if (!isEntryKind(kind)) {
-    throw new TypeError("kind is invalid");
-  }
-  return {
-    entry_id: string(item.entry_id, "entry_id"),
-    library_id: string(item.library_id, "library_id"),
-    relative_path: string(item.relative_path, "relative_path"),
-    name: string(item.name, "name"),
-    kind,
-    content_length: optionalString(item.content_length, "content_length"),
-    last_write_time_utc: string(item.last_write_time_utc, "last_write_time_utc"),
-  };
-}
-
-function record(value: unknown, name: string): Record<string, unknown> {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    throw new TypeError(`${name} must be an object`);
-  }
-  return value as Record<string, unknown>;
-}
-
-function array(value: unknown, name: string): unknown[] {
-  if (!Array.isArray(value)) {
-    throw new TypeError(`${name} must be an array`);
-  }
-  return value;
-}
-
-function pageItems(value: unknown, name: string): unknown[] {
-  const items = array(value, name);
-  if (items.length > pageSize) {
-    throw new TypeError(`${name} exceeds the page bound`);
-  }
-  return items;
-}
-
-function string(value: unknown, name: string): string {
-  if (typeof value !== "string") {
-    throw new TypeError(`${name} must be a string`);
-  }
-  return value;
-}
-
-function optionalString(value: unknown, name: string): string | null {
-  return value === null || value === undefined ? null : string(value, name);
-}
-
-function isAccessLevel(value: string): value is Library["access_level"] {
-  return ["read_only", "read_write", "organize", "library_administrator"].includes(value);
-}
-
-function isEntryKind(value: string): value is Entry["kind"] {
-  return ["file", "directory", "reparse_file", "reparse_directory"].includes(value);
+function invalidResponse(status: number): AssetLinkApiError {
+  return new AssetLinkApiError(status, "invalid_response", "服务返回了无法识别的响应。");
 }
