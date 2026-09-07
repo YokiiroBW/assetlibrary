@@ -111,7 +111,7 @@ def settings(value: dict) -> dict:
         root = PurePosixPath(source["host_path"])
         if (not re.fullmatch(r"[a-z0-9_-]{1,64}", key) or key in keys
                 or not isinstance(source["display_name"], str) or not 1 <= len(source["display_name"]) <= 200
-                or not root.is_absolute() or root == PurePosixPath("/") or ".." in root.parts
+                or not root.is_absolute() or root == PurePosixPath("/") or source["host_path"].startswith("//") or ".." in root.parts
                 or str(root) != source["host_path"]
                 or any(ord(c) < 32 for c in source["host_path"] + source["display_name"])):
             raise DeploymentError("deployment_source_invalid")
