@@ -1,6 +1,6 @@
 # V01-018 验证记录
 
-日期：2026-09-07；实现：`d5ac7f69df48f35cdf4db48ad1d2dd91da42ed50`。
+日期：2026-09-07；实现：`df3bc6c83fd97a3c8818654890050b24ce8be34e`。
 最终结果：73 passed / 0 failed / 0 skipped；不重复累计修正前的运行和定向复验。
 
 ## 环境与真实命令
@@ -22,7 +22,7 @@ Python使用 `C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime
 | `pnpm --dir apps/web run lint` | 通过 |
 | `pnpm --dir apps/web run typecheck` | 通过 |
 | `pnpm --dir apps/web run build` | 通过，真实SDK编译和Vite产物 |
-| `pnpm --dir apps/web run test:browser` | 39通过，17.2秒，无重试/跳过 |
+| `pnpm --dir apps/web run test:browser` | 39通过，17.3秒，无重试/跳过 |
 | `pnpm --dir apps/web audit --audit-level low` | No known vulnerabilities found |
 | `python -B scripts/validate_web_source.py` | 通过，网络仍只有一个fetch |
 | `python -B scripts/validate_web_dependencies.py --require-build-artifacts` | 通过，原依赖/许可/体积预算 |
@@ -37,7 +37,7 @@ Python使用 `C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime
 
 保留22项原浏览/搜索/分页/虚拟化/权限缓存/实际请求与正文截止/调用方取消/畸形拒绝回归。新增17项验证同源会话与CSRF、登录失败/限流/退出失败、绝对到期、多标签换身份、同主体会话代次变更、focus拒绝或503区别、管理员登记/显式初扫、重用请求身份、取消/重试、恢复已有任务、隐藏页停轮询、离线快照/恢复、扫描拒绝与畸形计数、存储源上限、键盘弹窗。
 
-首次运行29/37通过，发现新fixture对名称/路径重复文本定位不唯一、select隐式标签定位不明确、弹窗首次焦点问题；修正标签和焦点后36/37通过，剩余Tab越出边界由弹窗首尾循环修复，单项复验通过。随后补齐session明确拒绝和扫描拒绝后的游标保护，最终39/39完整运行通过。没有跳过失败、放宽时间阈值或自动批准截图基线。
+首次运行29/37通过，发现新fixture对名称/路径重复文本定位不唯一、select隐式标签定位不明确、弹窗首次焦点问题；修正标签和焦点后36/37通过，剩余Tab越出边界由弹窗首尾循环修复，单项复验通过。随后补齐session明确拒绝和扫描拒绝后的游标保护，最终39/39完整运行通过。逐张视觉复核另外发现返回父目录时新标题与旧行/详情有短暂错配；补齐浏览、搜索和扫描的查询范围即时隔离，导航时立即清选择，并让原桌面测试等待父目录实际条目后截图。相关格式/lint/类型/构建、39项浏览器、架构源码与产物预算再次通过；未改变输入的34项单元/政策证据继续复用。没有跳过失败、放宽时间阈值或自动批准截图基线。
 
 最终完整日志：`.runtime/V01-018/browser-final.log`。运行命令为标准test:browser；早期名为browser-targeted.log的文件实际跑了全37项，不将其当作定向测试或最终成功证据。
 
@@ -52,7 +52,7 @@ Python使用 `C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime
 - `trial-library-scan-offline-02336-through-an-explicit-refresh-chromium/offline-narrow-dark.png`
 - `trial-session-login-uses-p-5179c--logout-hides-the-workspace-chromium/login-narrow.png`
 
-`apps/web/dist/assets/index-DkayHSuZ.js`：250286 bytes，gzip约77.90KB，SHA256 `95ac530f4e0cc5a65ce20a50cff67fa9b172510ea672609ee38743c9bb7d2cc7`。
+`apps/web/dist/assets/index-CY_pICQ2.js`：250726 bytes，gzip约78.05KB，SHA256 `d6ed08cc11968e4624bcc84b38076433a422b5ab793d776c3f5ad07b4c8328ad`。
 
 `apps/web/dist/assets/index-yo48TXrB.css`：11507 bytes，gzip约3.33KB，SHA256 `a96272f6d7f6932742dcb9342c26766f1c4bd10ebfcdbf8238094bc33e02fe45`。
 
