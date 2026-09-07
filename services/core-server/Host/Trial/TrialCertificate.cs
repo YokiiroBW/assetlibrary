@@ -33,7 +33,8 @@ internal static class TrialCertificate
             }
 
             var certificate = X509CertificateLoader.LoadPkcs12(
-                bytes.AsSpan(0, length), password.AsSpan(), X509KeyStorageFlags.EphemeralKeySet);
+                bytes.AsSpan(0, length), password.AsSpan(),
+                OperatingSystem.IsWindows() ? X509KeyStorageFlags.UserKeySet : X509KeyStorageFlags.EphemeralKeySet);
             if (!certificate.HasPrivateKey
                 || certificate.NotBefore.ToUniversalTime() > DateTime.UtcNow
                 || certificate.NotAfter.ToUniversalTime() <= DateTime.UtcNow

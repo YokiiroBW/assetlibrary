@@ -1,4 +1,5 @@
 using System.Text;
+using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.LibraryStorage.Infrastructure;
 using AssetLibrary.Modules.ScanReconciliation.Infrastructure;
 
@@ -6,6 +7,15 @@ namespace AssetLibrary.CoreServer.Hosting.Trial;
 
 internal static class ReadOnlyWorkerCommand
 {
+    public static ReadOnlyWorkerProcessOptions ProcessOptions()
+    {
+        var executable = Environment.ProcessPath ?? throw new TrialConfigurationException("trial_executable_unavailable");
+        var arguments = Path.GetFileNameWithoutExtension(executable).Equals("dotnet", StringComparison.OrdinalIgnoreCase)
+            ? new[] { typeof(CoreServerHost).Assembly.Location } : [];
+        return new ReadOnlyWorkerProcessOptions(executable, arguments,
+            probeTimeout: TimeSpan.FromSeconds(2), scanInactivityTimeout: TimeSpan.FromMinutes(1), terminationTimeout: TimeSpan.FromSeconds(5));
+    }
+
     public static async Task<int> RunAsync(IReadOnlyList<string> arguments)
     {
         if (arguments.Count != 2 || arguments[1] is not ("probe" or "scan"))
