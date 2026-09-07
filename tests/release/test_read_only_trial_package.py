@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import urllib.request
 import uuid
 
@@ -96,6 +97,50 @@ class TrialPackageTests(unittest.TestCase):
             self.assertNotIn(forbidden, source)
         self.assertIn("-WindowStyle Hidden", source)
 
+    @unittest.skipUnless(os.name == "nt", "Windows private-directory preflight")
+    def test_runtime_preflight_preserves_foreign_state_and_rejects_tampering(self):
+        pwsh = shutil.which("pwsh")
+        if not pwsh:
+            self.skipTest("PowerShell 7 is unavailable")
+        with tempfile.TemporaryDirectory(prefix="al19pre-") as temporary:
+            root = Path(temporary)
+            package = root / "package"
+            package.mkdir()
+            shutil.copy2(ROOT / "infra/windows/trial/trial.ps1", package)
+            (package / "web").mkdir()
+            index = package / "web/index.html"
+            index.write_bytes(b"<html>test</html>")
+            manifest = BUILDER.package_manifest(package, "a" * 40, "0.1.0", {})
+            manifest_path = package / "package-manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            foreign = root / "foreign"
+            command = "$s=[Security.Principal.WindowsIdentity]::GetCurrent().User;$a=[Security.AccessControl.DirectorySecurity]::new();$a.SetOwner($s);$a.SetAccessRuleProtection($true,$false);$a.AddAccessRule([Security.AccessControl.FileSystemAccessRule]::new($s,'FullControl','ContainerInherit,ObjectInherit','None','Allow'));[IO.FileSystemAclExtensions]::Create([IO.DirectoryInfo]::new($Target),$a)"
+            created = powershell_script(pwsh, command, foreign)
+            self.assertEqual(created.returncode, 0, created.stderr)
+            preserved = foreign / "preserve.txt"
+            preserved.write_bytes(b"foreign state must not be changed")
+            def rejected(state):
+                result = subprocess.run([pwsh, "-NoProfile", "-File", str(package / "trial.ps1"), "-Action", "initialize", "-StatePath", str(state)], capture_output=True, text=True, encoding="utf-8", timeout=15)
+                self.assertNotEqual(result.returncode, 0)
+                return json.loads(result.stdout)["code"]
+            self.assertEqual(rejected(foreign), "trial_existing_state_rejected")
+            self.assertEqual(preserved.read_bytes(), b"foreign state must not be changed")
+            self.assertFalse((foreign / "trial.lock").exists())
+            state = root / "never-created"
+            original = index.read_bytes()
+            index.write_bytes(b"changed")
+            self.assertEqual(rejected(state), "trial_package_integrity_failed")
+            self.assertFalse(state.exists())
+            index.write_bytes(original)
+            extra = package / "unexpected.txt"
+            extra.write_bytes(b"unexpected")
+            self.assertEqual(rejected(state), "trial_package_unexpected_file")
+            extra.unlink()
+            manifest["files"].append({"path": "../foreign/preserve.txt", "length": 0, "sha256": "a" * 64})
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            self.assertEqual(rejected(state), "trial_package_member_invalid")
+            self.assertFalse(state.exists())
+
 
 @unittest.skipUnless(os.name == "nt", "native trial database test requires Windows")
 class TrialNativeDatabaseTests(unittest.TestCase):
@@ -154,6 +199,14 @@ class TrialNativeDatabaseTests(unittest.TestCase):
                 process_path.write_bytes(original)
                 self.assertEqual(run("status")["status"], "running")
                 self.assertEqual(run("stop")["status"], "stopped")
+                spec = importlib.util.spec_from_file_location("native_trial_database", package / "trial_database.py")
+                runtime = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(runtime)
+                database = runtime.TrialDatabase(state, package)
+                with mock.patch.object(runtime, "write_json", side_effect=OSError("simulated full state volume")):
+                    with self.assertRaises(OSError):
+                        database.start()
+                self.assertIsNone(database.actual_process(), "failed process recording left a server running")
                 self.assertEqual(run("start")["status"], "started")
                 self.assertEqual(run("stop")["status"], "stopped")
                 cluster_path = state / "postgres-cluster.json"
@@ -177,11 +230,13 @@ class TrialNativePackageTests(unittest.TestCase):
             if os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE_REQUIRED") == "1":
                 self.fail("required trial package/PG/PowerShell prerequisites are missing")
             self.skipTest("set ASSETLIBRARY_TEST_TRIAL_PACKAGE for same-source native package validation")
-        package = Path(configured).resolve()
-        script = package / "trial.ps1"
+        source_package = Path(configured).resolve()
         transcript = []
         with tempfile.TemporaryDirectory(prefix="al19pkg-") as temporary:
             root = Path(temporary)
+            package = root / "package"
+            shutil.copytree(source_package, package)
+            script = package / "trial.ps1"
             state = root / "state"
             assets = root / "assets"
             assets.mkdir()
@@ -246,6 +301,11 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertEqual(run("status")["status"], "stopped")
                 self.assertEqual(run("start")["status"], "running")
                 login()
+                previous_password = password
+                password = secrets.token_urlsafe(40)
+                recovery = ("-OperatorAction", "recover", "-AccountName", "trialadministrator", "-NewAttempt", "-PasswordFromStdin")
+                self.assertEqual(run("operator", *recovery, input_text=password)["outcome"], "applied")
+                login()
                 index = package / "web/index.html"
                 original_index = index.read_bytes()
                 try:
@@ -256,7 +316,7 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertEqual(run("status")["status"], "ready")
                 self.assertEqual((hashlib.sha256(asset.read_bytes()).hexdigest(), asset.stat().st_mtime_ns), fingerprint)
                 logged = "\n".join(transcript) + "\n".join(path.read_text(encoding="utf-8", errors="replace") for path in (state / "logs").glob("*.log"))
-                for secret in [password, *json.loads((state / "secrets/database-passwords.json").read_text()).values()]:
+                for secret in [password, previous_password, *json.loads((state / "secrets/database-passwords.json").read_text()).values()]:
                     self.assertFalse(secret in logged, "native lifecycle output disclosed a credential")
             finally:
                 run("stop")

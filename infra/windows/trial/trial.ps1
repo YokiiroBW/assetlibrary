@@ -16,6 +16,8 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+[Console]::InputEncoding = [Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 $script:TrialSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $script:Package = [IO.Path]::GetFullPath($PSScriptRoot)
 $script:StateLock = $null
@@ -115,6 +117,9 @@ function Invoke-PrivateProcess([string]$Executable, [string[]]$Arguments, [strin
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
+    $start.StandardInputEncoding = [Text.UTF8Encoding]::new($false)
+    $start.StandardOutputEncoding = [Text.UTF8Encoding]::new($false)
+    $start.StandardErrorEncoding = [Text.UTF8Encoding]::new($false)
     $start.Environment['ASPNETCORE_ENVIRONMENT'] = 'Production'
     $start.Environment['DOTNET_ENVIRONMENT'] = 'Production'
     foreach ($argument in $Arguments) { $start.ArgumentList.Add($argument) }
@@ -277,7 +282,8 @@ function Get-OwnedHost {
 }
 
 function Start-Trial {
-    if (Get-OwnedHost) { throw 'trial_already_running' }
+    $running = Get-OwnedHost
+    if ($running) { $running.Dispose(); throw 'trial_already_running' }
     $pg = Invoke-Database 'start'
     $process = $null
     try {
@@ -293,7 +299,7 @@ function Start-Trial {
         } while ($watch.Elapsed.TotalSeconds -lt 30)
         throw 'trial_host_readiness_timeout'
     } catch {
-        if ($process -and !$process.HasExited) { $owned = Get-OwnedHost; if ($owned) { $owned.Kill($true); $null=$owned.WaitForExit(10000) } }
+        if ($process -and !$process.HasExited) { $process.Kill($true); $null=$process.WaitForExit(10000) }
         if ($pg.status -eq 'started') { $null = Invoke-Database 'stop' }
         throw
     } finally { if ($process) { $process.Dispose() } }
@@ -343,10 +349,8 @@ function Invoke-Operator {
     $pg = Invoke-Database 'start'
     try {
         $result = Invoke-PrivateProcess $script:HostExecutable @('--trial-operator',(Join-Path $script:State 'trial.json'),$OperatorAction) $inputText 30
-        $lines = @($result.output -split "`n" | Where-Object { $_.Trim() })
-        if ($lines.Count -eq 0) { $lines = @($result.error_output -split "`n" | Where-Object { $_.Trim() }) }
-        if ($lines.Count -eq 0) { throw 'trial_operator_result_missing' }
-        $response = $lines[-1] | ConvertFrom-Json -AsHashtable
+        if ([string]::IsNullOrWhiteSpace($result.output)) { throw 'trial_operator_result_missing' }
+        try { $response = $result.output | ConvertFrom-Json -AsHashtable } catch { throw 'trial_operator_result_invalid' }
         if ($result.exit_code -ne 0) {
             if ($response.ContainsKey('message') -and $response.ContainsKey('code')) { $script:OperatorFailure=$response }
             throw 'trial_operator_rejected'

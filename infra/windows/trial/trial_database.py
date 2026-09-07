@@ -169,11 +169,18 @@ class TrialDatabase:
             if not self.process_path.is_file() or read_json(self.process_path) != process:
                 raise TrialDatabaseError("database_process_record_mismatch")
             return False
-        self.run("pg_ctl", ["-D", str(self.data), "-l", str(self.state / "logs/postgres.log"), "-w", "-t", "30", "start"], timeout=40)
-        process = self.actual_process()
-        if process is None:
-            raise TrialDatabaseError("database_start_identity_missing")
-        write_json(self.process_path, process)
+        try:
+            self.run("pg_ctl", ["-D", str(self.data), "-l", str(self.state / "logs/postgres.log"), "-w", "-t", "30", "start"], timeout=40)
+            process = self.actual_process()
+            if process is None:
+                raise TrialDatabaseError("database_start_identity_missing")
+            write_json(self.process_path, process)
+        except Exception:
+            # Startup belongs to this operation. If recording its identity fails (for example disk full),
+            # validate the just-started cluster process before stopping it rather than leaving it untracked.
+            if self.actual_process() is not None:
+                self.run("pg_ctl", ["-D", str(self.data), "-w", "-t", "30", "-m", "fast", "stop"], timeout=40)
+            raise
         return True
 
     def stop(self) -> None:
