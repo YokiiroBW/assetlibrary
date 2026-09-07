@@ -446,6 +446,19 @@
       "handoff": ".codex/handoffs/ALIGN-004/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "V01-015",
+      "title": "read-only-trial-integration",
+      "module": "read-only-trial-integration",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "architecture-coordinator",
+      "branch": "codex/v01-015-read-only-trial-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-015",
+      "task_file": ".codex/tasks/V01-015.md",
+      "handoff": ".codex/handoffs/V01-015/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
