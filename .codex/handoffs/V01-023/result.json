@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v01-023-web-first-release-alignment",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-023",
-  "commit": "bc3d151a681485e93960967c0c9be9c44bf7dc04",
+  "commit": "68e72504a235530976e8926be1a193a8b7c78c06",
   "changed_files": [
     ".codex/handoffs/V01-023/result.json",
     ".codex/handoffs/V01-023/summary.md",
@@ -27,7 +27,8 @@
   },
   "risks": [
     "All runtime/static verification is intentionally pending the user-requested centralized V01-021 acceptance; no passing checks are claimed.",
-    "Container example must stay aligned with V01-022 /assets/<source_key> mount layout."
+    "Container example must stay aligned with V01-022 /assets/<source_key> mount layout.",
+    "entry_path_unsupported presentation awaits joint acceptance with root Linux correction ec3f64a; generic failure wording and wire shape are unchanged."
   ],
   "blocked_by": [],
   "recommended_merge_order": 2,

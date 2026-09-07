@@ -2,7 +2,7 @@
 
 ## 状态
 
-实现已提交，ready_for_review，等待V01-021集中验收。分支codex/v01-023-web-first-release-alignment；实现bc3d151a681485e93960967c0c9be9c44bf7dc04。已合入冻结ced5751，读取任务包、ADR0014/0015、docs12并实际查看assets/visuals/10_web_admin_asset_browser.png。
+实现已提交，ready_for_review，等待V01-021集中验收。分支codex/v01-023-web-first-release-alignment；初始实现bc3d151，最新呈现修正68e72504a235530976e8926be1a193a8b7c78c06。已合入冻结ced5751，读取任务包、ADR0014/0015、docs12并实际查看assets/visuals/10_web_admin_asset_browser.png。
 
 ## 差距与变更
 
@@ -13,6 +13,7 @@
 - 首次扫描完成提示说明当前是索引快照，刷新不会重新扫描目录。
 - Web README同步NAS/Windows语义和V01-021验收归属。
 - 既有登记测试改用photos源和容器路径，并检查关联帮助/快照提示；既有失败重试用例继续使用Windows盘符。未增加测试数量或快照。
+- 根Linux修正ec3f64a对字面反斜杠名称返回entry_path_unsupported。失败状态仅对此码说明名称限制、首次索引未提交及检查后重试；其他失败提示原样保留。既有失败/重试case增加对应文案及重试按钮可用断言，不增加测试数量。按根指令没有合入该产品修正或运行检查。
 
 ## 复用、影响与边界
 
