@@ -71,7 +71,7 @@ ARG SOURCE_REVISION
 # No Python, migration runner or PostgreSQL client is added to the Core image.
 COPY --from=python-tools /usr/local/ /usr/local/
 RUN apt-get update && apt-get install --yes --no-install-recommends \
-       openssl libbz2-1.0 libexpat1 libffi8 libgdbm6 libgdbm-compat4 liblzma5 libncursesw6 libreadline8 libsqlite3-0 \
+       ca-certificates openssl libbz2-1.0 libexpat1 libffi8 libgdbm6 libgdbm-compat4 liblzma5 libncursesw6 libreadline8 libsqlite3-0 \
     && ldconfig && rm -rf /var/lib/apt/lists/*
 COPY --from=core /opt/dotnet/ /opt/dotnet/
 COPY --from=core /app/ /app/
