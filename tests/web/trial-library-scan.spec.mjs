@@ -79,9 +79,14 @@ test("registration errors preserve the form and retry identity without enumerati
   expect(second.request_id).toBe(first.request_id);
   expect(
     state.requests.every((request) =>
-      ["libraries.list", "libraries.get", "entries.browse", "storage_sources.list", "libraries.register", "library_scans.get"].includes(
-        request.operation,
-      ),
+      [
+        "libraries.list",
+        "libraries.get",
+        "entries.browse",
+        "storage_sources.list",
+        "libraries.register",
+        "library_scans.get",
+      ].includes(request.operation),
     ),
   ).toBeTruthy();
 });

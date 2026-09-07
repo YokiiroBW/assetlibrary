@@ -143,9 +143,11 @@ for (const [status, format] of [
       const response =
         request.operation === "libraries.list"
           ? libraryPage(request)
-          : request.operation === "libraries.get" ? libraryDetail(request)
-          : request.operation === "entries.get" ? entryDetail(request, previousEntry)
-          : browsePage(request, [previousEntry], "expired-page");
+          : request.operation === "libraries.get"
+            ? libraryDetail(request)
+            : request.operation === "entries.get"
+              ? entryDetail(request, previousEntry)
+              : browsePage(request, [previousEntry], "expired-page");
       await route.fulfill({ contentType: "application/json", body: JSON.stringify(response.body) });
     });
 
@@ -170,8 +172,6 @@ test("a transient paging error preserves the last readable page while showing th
   await page.goto(browsePath);
   await page.getByRole("button", { name: "载入更多", exact: true }).click();
   await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible();
-  await expect(
-    entryOption(page, previousEntry.name),
-  ).toBeVisible();
+  await expect(entryOption(page, previousEntry.name)).toBeVisible();
   await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
 });

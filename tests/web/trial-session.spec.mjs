@@ -89,12 +89,19 @@ async function sessionFixture(context, initial = null) {
         request.operation === "libraries.list"
           ? libraryPage(request, first ? [visibleLibrary] : [])
           : request.operation === "libraries.get"
-            ? first ? libraryDetail(request) : failure(request, 404, "not_found", "资源库不可用。")
-          : request.operation === "entries.get"
-            ? first ? entryDetail(request, privateEntry) : failure(request, 404, "not_found", "条目不可用。")
-          : request.operation === "assets.search"
-            ? searchPage(request, first ? [{ library: visibleLibrary, entry: privateEntry, hit_reason: "name" }] : [])
-            : browsePage(request, first ? [privateEntry] : [], "more-private");
+            ? first
+              ? libraryDetail(request)
+              : failure(request, 404, "not_found", "资源库不可用。")
+            : request.operation === "entries.get"
+              ? first
+                ? entryDetail(request, privateEntry)
+                : failure(request, 404, "not_found", "条目不可用。")
+              : request.operation === "assets.search"
+                ? searchPage(
+                    request,
+                    first ? [{ library: visibleLibrary, entry: privateEntry, hit_reason: "name" }] : [],
+                  )
+                : browsePage(request, first ? [privateEntry] : [], "more-private");
     }
     await route.fulfill({
       status: response.status ?? 200,

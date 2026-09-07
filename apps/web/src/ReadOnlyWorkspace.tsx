@@ -22,9 +22,18 @@ import { parentPath } from "./libraryMetadata";
 import type { BrowserSession, BrowseOptions, EntryDetail, Library, SearchOptions } from "./types";
 import type { EntryRow } from "./VirtualEntryList";
 
-export function ReadOnlyWorkspace({ session, sessionNotice, onReconnect, onSessionExpired, onSignOut }: {
-  session: BrowserSession; sessionNotice: string | null; onReconnect: () => void;
-  onSessionExpired: () => void; onSignOut: () => void;
+export function ReadOnlyWorkspace({
+  session,
+  sessionNotice,
+  onReconnect,
+  onSessionExpired,
+  onSignOut,
+}: {
+  session: BrowserSession;
+  sessionNotice: string | null;
+  onReconnect: () => void;
+  onSessionExpired: () => void;
+  onSignOut: () => void;
 }) {
   const client = useMemo(() => new AssetLinkClient(session.csrf_token), [session.csrf_token]);
   const navigation = useWorkspaceNavigation();
@@ -34,40 +43,80 @@ export function ReadOnlyWorkspace({ session, sessionNotice, onReconnect, onSessi
   const [mobileNavigation, setMobileNavigation] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Library | null>(null);
-  const libraries = useLibraries(client, route.page === "libraries" ? route.category ?? undefined : undefined);
+  const libraries = useLibraries(client, route.page === "libraries" ? (route.category ?? undefined) : undefined);
   const catalogDenied = isAccessFailure(libraries.state.statusCode);
-  const currentId = route.page === "browse" || route.page === "tasks" || route.page === "search" ? route.libraryId : null;
+  const currentId =
+    route.page === "browse" || route.page === "tasks" || route.page === "search" ? route.libraryId : null;
   const resource = useLibrary(client, catalogDenied ? null : currentId);
   const libraryDenied = catalogDenied || isAccessFailure(resource.statusCode);
-  const options: BrowseOptions | undefined = route.page === "browse" ? {
-    sort_by: route.sort, sort_direction: route.direction, kind: route.kind, name_filter: route.name,
-    ...(route.anchorId ? { anchor_entry_id: route.anchorId } : {}),
-  } : undefined;
-  const searchOptions: SearchOptions | undefined = route.page === "search" ? {
-    scope: route.scope, ...(route.scope !== "all" ? { library_id: route.libraryId! } : {}),
-    ...(route.scope === "directory" ? { parent_relative_path: route.path } : {}),
-  } : undefined;
-  const browse = useBrowse(client, route.page === "browse" && !libraryDenied ? route.libraryId : null,
-    route.page === "browse" ? route.path : "", options);
+  const options: BrowseOptions | undefined =
+    route.page === "browse"
+      ? {
+          sort_by: route.sort,
+          sort_direction: route.direction,
+          kind: route.kind,
+          name_filter: route.name,
+          ...(route.anchorId ? { anchor_entry_id: route.anchorId } : {}),
+        }
+      : undefined;
+  const searchOptions: SearchOptions | undefined =
+    route.page === "search"
+      ? {
+          scope: route.scope,
+          ...(route.scope !== "all" ? { library_id: route.libraryId! } : {}),
+          ...(route.scope === "directory" ? { parent_relative_path: route.path } : {}),
+        }
+      : undefined;
+  const browse = useBrowse(
+    client,
+    route.page === "browse" && !libraryDenied ? route.libraryId : null,
+    route.page === "browse" ? route.path : "",
+    options,
+  );
   const search = useSearch(client, route.page === "search" && !libraryDenied ? route.query : "", searchOptions);
-  const scan = useLibraryScan(client, session.is_system_administrator && !libraryDenied
-    && (route.page === "browse" || route.page === "tasks") ? route.libraryId : null);
+  const scan = useLibraryScan(
+    client,
+    session.is_system_administrator && !libraryDenied && (route.page === "browse" || route.page === "tasks")
+      ? route.libraryId
+      : null,
+  );
   const active = route.page === "search" ? search : browse;
   const accessFailed = libraryDenied || isAccessFailure(active.state.statusCode) || isAccessFailure(scan.statusCode);
-  const library = libraryDenied || (route.page === "browse" && isAccessFailure(browse.state.statusCode)) ? null
-    : browse.library ?? resource.value ?? libraries.state.items.find((item) => item.library_id === currentId) ?? null;
-  const rows = useMemo<EntryRow[]>(() => accessFailed ? [] : route.page === "search"
-    ? search.state.items.map((hit) => ({ entry: hit.entry, library: hit.library, hitReason: hit.hit_reason }))
-    : route.page === "browse" && library ? browse.state.items.map((entry) => ({ entry, library, hitReason: null })) : [],
-  [accessFailed, route.page, search.state.items, browse.state.items, library]);
+  const library =
+    libraryDenied || (route.page === "browse" && isAccessFailure(browse.state.statusCode))
+      ? null
+      : (browse.library ??
+        resource.value ??
+        libraries.state.items.find((item) => item.library_id === currentId) ??
+        null);
+  const rows = useMemo<EntryRow[]>(
+    () =>
+      accessFailed
+        ? []
+        : route.page === "search"
+          ? search.state.items.map((hit) => ({ entry: hit.entry, library: hit.library, hitReason: hit.hit_reason }))
+          : route.page === "browse" && library
+            ? browse.state.items.map((entry) => ({ entry, library, hitReason: null }))
+            : [],
+    [accessFailed, route.page, search.state.items, browse.state.items, library],
+  );
   const selection = useEntrySelection(scope, rows, navigation.position.focusedId);
   const openedId = route.page === "browse" || route.page === "search" ? route.entryId : null;
   const selectedRow = selection.ids.size === 1 ? rows.find((row) => selection.ids.has(row.entry.entry_id)) : undefined;
-  const detailLibraryId = openedId ? route.page === "browse" ? route.libraryId : route.page === "search" ? route.entryLibraryId : null
-    : !narrow ? selectedRow?.library.library_id ?? null : null;
-  const detailId = openedId ?? (!narrow ? selectedRow?.entry.entry_id ?? null : null);
+  const detailLibraryId = openedId
+    ? route.page === "browse"
+      ? route.libraryId
+      : route.page === "search"
+        ? route.entryLibraryId
+        : null
+    : !narrow
+      ? (selectedRow?.library.library_id ?? null)
+      : null;
+  const detailId = openedId ?? (!narrow ? (selectedRow?.entry.entry_id ?? null) : null);
   const detail = useEntry(client, accessFailed ? null : detailLibraryId, accessFailed ? null : detailId);
-  const sessionExpired = [libraries.state, resource, browse.state, search.state, scan, detail].some((item) => item.statusCode === 401);
+  const sessionExpired = [libraries.state, resource, browse.state, search.state, scan, detail].some(
+    (item) => item.statusCode === 401,
+  );
   const lastScan = useRef<{ id: string; state: string } | null>(null);
   const adoptedAnchor = useRef<string | null>(null);
   useEffect(() => {
@@ -77,7 +126,8 @@ export function ReadOnlyWorkspace({ session, sessionNotice, onReconnect, onSessi
     if (accessFailed || active.state.status === "loading" || isAccessFailure(detail.statusCode)) selection.clear();
   }, [accessFailed, active.state.status, detail.statusCode]);
   useEffect(() => {
-    const target = route.page === "browse" ? route.entryId ?? route.anchorId : route.page === "search" ? route.entryId : null;
+    const target =
+      route.page === "browse" ? (route.entryId ?? route.anchorId) : route.page === "search" ? route.entryId : null;
     const key = `${scope}:${target}`;
     if (target && adoptedAnchor.current !== key && rows.some((row) => row.entry.entry_id === target)) {
       adoptedAnchor.current = key;
@@ -86,72 +136,214 @@ export function ReadOnlyWorkspace({ session, sessionNotice, onReconnect, onSessi
   }, [scope, openedId, rows]);
   useEffect(() => {
     const current = scan.scan;
-    if (current?.state === "succeeded" && lastScan.current?.id === current.task_id && lastScan.current.state !== "succeeded") {
-      browse.reload(); libraries.reload(); resource.reload();
+    if (
+      current?.state === "succeeded" &&
+      lastScan.current?.id === current.task_id &&
+      lastScan.current.state !== "succeeded"
+    ) {
+      browse.reload();
+      libraries.reload();
+      resource.reload();
     }
     lastScan.current = current ? { id: current.task_id, state: current.state } : null;
   }, [scan.scan]);
   useEffect(() => {
-    const title = route.page === "home" ? "首页" : route.page === "libraries" ? "资源库管理"
-      : route.page === "tasks" ? "扫描任务" : route.page === "search" ? "搜索结果" : library?.display_name ?? "资产浏览";
+    const title =
+      route.page === "home"
+        ? "首页"
+        : route.page === "libraries"
+          ? "资源库管理"
+          : route.page === "tasks"
+            ? "扫描任务"
+            : route.page === "search"
+              ? "搜索结果"
+              : (library?.display_name ?? "资产浏览");
     document.title = `${title} · AssetLibrary`;
     setMobileNavigation(false);
   }, [scope, library?.display_name]);
   const mutationAccessLost = useCallback(() => {
-    setRegistering(false); setEditingCategory(null); onReconnect();
+    setRegistering(false);
+    setEditingCategory(null);
+    onReconnect();
   }, [onReconnect]);
   if (sessionExpired) return null;
   const closeDetails = () => {
     if (route.page === "browse" || route.page === "search") navigate({ ...route, entryId: null }, true);
   };
-  const selectionControls = { ...selection,
-    select: (...args: Parameters<typeof selection.select>) => { closeDetails(); selection.select(...args); },
-    clear: () => { closeDetails(); selection.clear(); },
-    selectAllLoaded: () => { closeDetails(); selection.selectAllLoaded(); },
+  const selectionControls = {
+    ...selection,
+    select: (...args: Parameters<typeof selection.select>) => {
+      closeDetails();
+      selection.select(...args);
+    },
+    clear: () => {
+      closeDetails();
+      selection.clear();
+    },
+    selectAllLoaded: () => {
+      closeDetails();
+      selection.selectAllLoaded();
+    },
   };
   const openEntry = (row: EntryRow) => {
-    if (row.entry.kind === "directory") navigate(browseRoute(row.library.library_id, row.entry.relative_path,
-      { view: route.page === "browse" || route.page === "search" ? route.view : "list" }));
+    if (row.entry.kind === "directory")
+      navigate(
+        browseRoute(row.library.library_id, row.entry.relative_path, {
+          view: route.page === "browse" || route.page === "search" ? route.view : "list",
+        }),
+      );
     else if (route.page === "browse") navigate({ ...route, entryId: row.entry.entry_id });
-    else if (route.page === "search") navigate({ ...route, entryId: row.entry.entry_id, entryLibraryId: row.library.library_id });
+    else if (route.page === "search")
+      navigate({ ...route, entryId: row.entry.entry_id, entryLibraryId: row.library.library_id });
   };
-  const locate = ({ library: target, entry }: EntryDetail) => navigate(browseRoute(target.library_id, parentPath(entry.relative_path),
-    { anchorId: entry.entry_id, view: route.page === "browse" || route.page === "search" ? route.view : "list" }));
-  const reload = () => { selection.clear(); closeDetails(); active.reload(); libraries.reload(); resource.reload(); scan.reload(); };
+  const locate = ({ library: target, entry }: EntryDetail) =>
+    navigate(
+      browseRoute(target.library_id, parentPath(entry.relative_path), {
+        anchorId: entry.entry_id,
+        view: route.page === "browse" || route.page === "search" ? route.view : "list",
+      }),
+    );
+  const reload = () => {
+    selection.clear();
+    closeDetails();
+    active.reload();
+    libraries.reload();
+    resource.reload();
+    scan.reload();
+  };
   const collection = route.page === "browse" || route.page === "search";
-  return <main className="app-shell">
-    <a className="skip-link" href="#workspace-content">跳到主要内容</a>
-    <WorkspaceHeader route={route} library={library} session={session} navigate={navigate} menu={() => setMobileNavigation(true)} signOut={onSignOut} />
-    {sessionNotice && <div className="connection-notice" role="alert">{sessionNotice}<button className="secondary" onClick={onReconnect}>重试连接</button></div>}
-    <div className="workspace"><WorkspaceSidebar route={route} library={library} libraries={libraries.state.items}
-      navigate={navigate} mobileOpen={mobileNavigation} closeMobile={() => setMobileNavigation(false)} />
-      <div className="workspace-main" id="workspace-content" tabIndex={-1}>
-        <WorkspaceBreadcrumbs route={route} library={library} navigate={navigate} />
-        <div className={`page-layout ${collection && !narrow ? "with-details" : ""}`}>
-          {(route.page === "home" || route.page === "libraries") && <LibraryCatalogPage home={route.page === "home"}
-            category={route.page === "libraries" ? route.category : null} libraries={libraries} admin={session.is_system_administrator}
-            navigate={navigate} register={() => setRegistering(true)} editCategory={setEditingCategory} />}
-          {route.page === "tasks" && <ScanTasksPage libraries={libraries} library={library} selectedId={route.libraryId}
-            libraryError={resource.status === "error" ? resource.message : null} retryLibrary={resource.reload}
-            scan={scan} admin={session.is_system_administrator} navigate={navigate} />}
-          {collection && <div className="collection-wrapper">{libraries.state.status === "error" && <ErrorState message={libraries.state.message} retry={libraries.reload} />}
-            {resource.status === "error" && <ErrorState message={resource.message} retry={resource.reload} />}
-            <EntryCollectionPage key={scope} route={route} library={library} state={active.state} rows={rows}
-              selection={selectionControls} scan={scan} admin={session.is_system_administrator} accessFailed={accessFailed}
-              navigate={navigate} loadMore={active.loadMore} reload={reload} reconnect={onReconnect} open={openEntry}
-              position={navigation.position} remember={navigation.remember} /></div>}
-          {collection && <EntryDetails detail={detail} selectedRows={rows.filter((row) => selection.ids.has(row.entry.entry_id))} narrow={narrow} opened={openedId !== null}
-            close={closeDetails} locate={locate} openDirectory={({ library: target, entry }) => navigate(browseRoute(target.library_id, entry.relative_path, { view: route.view }))} />}
-          {route.page === "invalid" && <section className="invalid-route"><EmptyState title="无法打开此地址">页面路径或查询参数无效，请从资源库导航重新进入。</EmptyState>
-            <WorkspaceLink className="primary" route={{ page: "home" }} navigate={navigate}>回到首页</WorkspaceLink></section>}
+  return (
+    <main className="app-shell">
+      <a className="skip-link" href="#workspace-content">
+        跳到主要内容
+      </a>
+      <WorkspaceHeader
+        route={route}
+        library={library}
+        session={session}
+        navigate={navigate}
+        menu={() => setMobileNavigation(true)}
+        signOut={onSignOut}
+      />
+      {sessionNotice && (
+        <div className="connection-notice" role="alert">
+          {sessionNotice}
+          <button className="secondary" onClick={onReconnect}>
+            重试连接
+          </button>
+        </div>
+      )}
+      <div className="workspace">
+        <WorkspaceSidebar
+          route={route}
+          library={library}
+          libraries={libraries.state.items}
+          navigate={navigate}
+          mobileOpen={mobileNavigation}
+          closeMobile={() => setMobileNavigation(false)}
+        />
+        <div className="workspace-main" id="workspace-content" tabIndex={-1}>
+          <WorkspaceBreadcrumbs route={route} library={library} navigate={navigate} />
+          <div className={`page-layout ${collection && !narrow ? "with-details" : ""}`}>
+            {(route.page === "home" || route.page === "libraries") && (
+              <LibraryCatalogPage
+                home={route.page === "home"}
+                category={route.page === "libraries" ? route.category : null}
+                libraries={libraries}
+                admin={session.is_system_administrator}
+                navigate={navigate}
+                register={() => setRegistering(true)}
+                editCategory={setEditingCategory}
+              />
+            )}
+            {route.page === "tasks" && (
+              <ScanTasksPage
+                libraries={libraries}
+                library={library}
+                selectedId={route.libraryId}
+                libraryError={resource.status === "error" ? resource.message : null}
+                retryLibrary={resource.reload}
+                scan={scan}
+                admin={session.is_system_administrator}
+                navigate={navigate}
+              />
+            )}
+            {collection && (
+              <div className="collection-wrapper">
+                {libraries.state.status === "error" && (
+                  <ErrorState message={libraries.state.message} retry={libraries.reload} />
+                )}
+                {resource.status === "error" && <ErrorState message={resource.message} retry={resource.reload} />}
+                <EntryCollectionPage
+                  key={scope}
+                  route={route}
+                  library={library}
+                  state={active.state}
+                  rows={rows}
+                  selection={selectionControls}
+                  scan={scan}
+                  admin={session.is_system_administrator}
+                  accessFailed={accessFailed}
+                  navigate={navigate}
+                  loadMore={active.loadMore}
+                  reload={reload}
+                  reconnect={onReconnect}
+                  open={openEntry}
+                  position={navigation.position}
+                  remember={navigation.remember}
+                />
+              </div>
+            )}
+            {collection && (
+              <EntryDetails
+                detail={detail}
+                selectedRows={rows.filter((row) => selection.ids.has(row.entry.entry_id))}
+                narrow={narrow}
+                opened={openedId !== null}
+                close={closeDetails}
+                locate={locate}
+                openDirectory={({ library: target, entry }) =>
+                  navigate(browseRoute(target.library_id, entry.relative_path, { view: route.view }))
+                }
+              />
+            )}
+            {route.page === "invalid" && (
+              <section className="invalid-route">
+                <EmptyState title="无法打开此地址">页面路径或查询参数无效，请从资源库导航重新进入。</EmptyState>
+                <WorkspaceLink className="primary" route={{ page: "home" }} navigate={navigate}>
+                  回到首页
+                </WorkspaceLink>
+              </section>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-    {registering && <RegisterLibraryForm client={client} initialCategory={route.page === "libraries" ? route.category ?? "general" : "general"}
-      onClose={() => setRegistering(false)} onAccessLost={mutationAccessLost} onRegistered={(id) => {
-        setRegistering(false); libraries.reload(); navigate(browseRoute(id));
-      }} />}
-    {editingCategory && <LibraryCategoryDialog client={client} library={editingCategory} close={() => setEditingCategory(null)}
-      accessLost={mutationAccessLost} changed={() => { setEditingCategory(null); libraries.reload(); resource.reload(); }} />}
-  </main>;
+      {registering && (
+        <RegisterLibraryForm
+          client={client}
+          initialCategory={route.page === "libraries" ? (route.category ?? "general") : "general"}
+          onClose={() => setRegistering(false)}
+          onAccessLost={mutationAccessLost}
+          onRegistered={(id) => {
+            setRegistering(false);
+            libraries.reload();
+            navigate(browseRoute(id));
+          }}
+        />
+      )}
+      {editingCategory && (
+        <LibraryCategoryDialog
+          client={client}
+          library={editingCategory}
+          close={() => setEditingCategory(null)}
+          accessLost={mutationAccessLost}
+          changed={() => {
+            setEditingCategory(null);
+            libraries.reload();
+            resource.reload();
+          }}
+        />
+      )}
+    </main>
+  );
 }

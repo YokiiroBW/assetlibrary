@@ -2,7 +2,8 @@ export type Availability = "online" | "offline";
 export type AccessLevel = "read_only" | "read_write" | "organize" | "library_administrator";
 export type EntryKind = "file" | "directory" | "reparse_file" | "reparse_directory";
 export type SearchHitReason = "name" | "path";
-export type LibraryCategory = "photos" | "images" | "videos" | "music" | "projects" | "documents" | "characters" | "general";
+export type LibraryCategory =
+  "photos" | "images" | "videos" | "music" | "projects" | "documents" | "characters" | "general";
 export type EntryView = "list" | "grid";
 export type EntrySort = "name" | "modified" | "size";
 export type SortDirection = "asc" | "desc";

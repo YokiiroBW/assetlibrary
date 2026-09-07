@@ -34,9 +34,22 @@ export async function mockTrial(page, { empty = false } = {}) {
   await mockAssetLink(page, (request) => {
     state.requests.push(request);
     if (request.operation === "libraries.list")
-      return libraryPage(request, state.library === null || (request.body.category && request.body.category !== state.library.category) ? [] : [state.library]);
-    if (request.operation === "libraries.get") return state.library ? libraryDetail(request, state.library) : failure(request, 404, "not_found", "资源库不可用。");
-    if (request.operation === "entries.get") return entryDetail(request, entry(980, { name: "sample-photo.jpg", relative_path: "sample-photo.jpg" }), state.library);
+      return libraryPage(
+        request,
+        state.library === null || (request.body.category && request.body.category !== state.library.category)
+          ? []
+          : [state.library],
+      );
+    if (request.operation === "libraries.get")
+      return state.library
+        ? libraryDetail(request, state.library)
+        : failure(request, 404, "not_found", "资源库不可用。");
+    if (request.operation === "entries.get")
+      return entryDetail(
+        request,
+        entry(980, { name: "sample-photo.jpg", relative_path: "sample-photo.jpg" }),
+        state.library,
+      );
     if (request.operation === "entries.browse")
       return browsePage(
         request,

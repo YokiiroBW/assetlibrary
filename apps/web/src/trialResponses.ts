@@ -21,7 +21,8 @@ export function decodeSources(body: Record<string, unknown>): StorageSource[] {
     return {
       source_key: nonempty(item.source_key, "source_key"),
       display_name: nonempty(item.display_name, "display_name"),
-      default_root_path: item.default_root_path === undefined ? null : nonempty(item.default_root_path, "default_root_path"),
+      default_root_path:
+        item.default_root_path === undefined ? null : nonempty(item.default_root_path, "default_root_path"),
     };
   });
 }

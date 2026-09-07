@@ -81,7 +81,11 @@ export function useBrowse(
       });
   }, [client, libraryId, parentPath, optionsKey, state.loadingMore, state.next_cursor]);
 
-  const sameScope = scope.client === client && scope.libraryId === libraryId && scope.parentPath === parentPath && scope.optionsKey === optionsKey;
+  const sameScope =
+    scope.client === client &&
+    scope.libraryId === libraryId &&
+    scope.parentPath === parentPath &&
+    scope.optionsKey === optionsKey;
   const visibleState = sameScope ? state : libraryId === null ? idlePage<Entry>() : loadingPage<Entry>();
   return {
     state: visibleState,

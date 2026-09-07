@@ -41,7 +41,12 @@ for (const pendingStage of ["headers", "body"]) {
       }
     });
     try {
-      await page.goto(browsePath);
+      await page.goto("/");
+      // Start one user navigation after StrictMode's initial mount/cancel probe has settled.
+      await page
+        .getByRole("navigation", { name: "已加载资源库" })
+        .getByRole("link", { name: /设计素材/ })
+        .click();
       await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible({ timeout: 8_000 });
       await expect(page.getByText("读取超时，请重试。")).toBeVisible();
       await expect.poll(() => closedAfter.length).toBe(1);

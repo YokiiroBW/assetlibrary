@@ -3,7 +3,10 @@ import type { AssetLinkClient } from "../assetLinkClient";
 import type { Library, LibraryCategory, PagedState } from "../types";
 import { failedPage, isAbort, loadingPage } from "./queryState";
 
-export function useLibraries(client: AssetLinkClient, category?: LibraryCategory): {
+export function useLibraries(
+  client: AssetLinkClient,
+  category?: LibraryCategory,
+): {
   state: PagedState<Library>;
   loadMore: () => void;
   reload: () => void;

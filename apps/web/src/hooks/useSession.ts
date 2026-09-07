@@ -24,8 +24,13 @@ export function useSession() {
 
   const accept = useCallback((session: BrowserSession) => {
     const accepted = acceptedSession.current;
-    if (accepted !== null && (accepted.principal_id !== session.principal_id || accepted.csrf_token !== session.csrf_token
-      || accepted.is_system_administrator !== session.is_system_administrator)) resetWorkspaceLocation();
+    if (
+      accepted !== null &&
+      (accepted.principal_id !== session.principal_id ||
+        accepted.csrf_token !== session.csrf_token ||
+        accepted.is_system_administrator !== session.is_system_administrator)
+    )
+      resetWorkspaceLocation();
     acceptedSession.current = session;
     previouslyAuthenticated.current = true;
     const nextGeneration = ++workspaceGeneration.current;
@@ -84,8 +89,12 @@ export function useSession() {
       if (event.data === "session-changed") check(true);
     };
     const onFocus = () => check();
-    const onVisibility = () => { if (!document.hidden) check(); };
-    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) check(true); };
+    const onVisibility = () => {
+      if (!document.hidden) check();
+    };
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) check(true);
+    };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onPageShow);

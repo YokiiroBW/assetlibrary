@@ -1,11 +1,24 @@
 import type { AccessLevel, Entry, LibraryCategory } from "./types";
 
 export const libraryCategories: readonly LibraryCategory[] = [
-  "photos", "images", "videos", "music", "projects", "documents", "characters", "general",
+  "photos",
+  "images",
+  "videos",
+  "music",
+  "projects",
+  "documents",
+  "characters",
+  "general",
 ];
 export const categoryLabels: Record<LibraryCategory, string> = {
-  photos: "照片", images: "图片", videos: "视频", music: "音乐", projects: "工程",
-  documents: "文档与阅读", characters: "角色", general: "通用",
+  photos: "照片",
+  images: "图片",
+  videos: "视频",
+  music: "音乐",
+  projects: "工程",
+  documents: "文档与阅读",
+  characters: "角色",
+  general: "通用",
 };
 
 export function isLibraryCategory(value: string): value is LibraryCategory {

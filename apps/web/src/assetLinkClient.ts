@@ -1,5 +1,13 @@
 import { encodeAssetLinkMessage, parseAssetLinkMessage, type ControlRequest } from "@assetlibrary/assetlink";
-import { decodeEntryDetail, decodeEntryPage, decodeLibrary, decodeLibraryPage, decodeSearchPage, record, string } from "./assetLinkResponses";
+import {
+  decodeEntryDetail,
+  decodeEntryPage,
+  decodeLibrary,
+  decodeLibraryPage,
+  decodeSearchPage,
+  record,
+  string,
+} from "./assetLinkResponses";
 import { decodeScan, decodeSession, decodeSources } from "./trialResponses";
 import type {
   BrowserSession,
@@ -49,7 +57,12 @@ export class AssetLinkClient {
   }
 
   public listLibraries(cursor: string | null, signal: AbortSignal, category?: LibraryCategory): Promise<Page<Library>> {
-    return this.request("libraries.list", { ...pageBody(cursor), ...(category === undefined ? {} : { category }) }, signal, decodeLibraryPage);
+    return this.request(
+      "libraries.list",
+      { ...pageBody(cursor), ...(category === undefined ? {} : { category }) },
+      signal,
+      decodeLibraryPage,
+    );
   }
 
   public getLibrary(libraryId: string, signal: AbortSignal): Promise<Library> {
@@ -61,16 +74,28 @@ export class AssetLinkClient {
   }
 
   public getEntry(libraryId: string, entryId: string, signal: AbortSignal): Promise<EntryDetail> {
-    return this.request("entries.get", { library_id: libraryId, entry_id: entryId }, signal,
-      (body) => decodeEntryDetail(body, libraryId, entryId));
+    return this.request("entries.get", { library_id: libraryId, entry_id: entryId }, signal, (body) =>
+      decodeEntryDetail(body, libraryId, entryId),
+    );
   }
 
-  public updateCategory(libraryId: string, category: LibraryCategory, expectedCategory: LibraryCategory,
-    idempotencyKey: string, signal: AbortSignal): Promise<void> {
-    return this.request("libraries.update_category", { library_id: libraryId, category, expected_category: expectedCategory },
-      signal, (body) => {
-        if (body.library_id !== libraryId || body.category !== category) throw new TypeError("The category update was not confirmed");
-      }, idempotencyKey);
+  public updateCategory(
+    libraryId: string,
+    category: LibraryCategory,
+    expectedCategory: LibraryCategory,
+    idempotencyKey: string,
+    signal: AbortSignal,
+  ): Promise<void> {
+    return this.request(
+      "libraries.update_category",
+      { library_id: libraryId, category, expected_category: expectedCategory },
+      signal,
+      (body) => {
+        if (body.library_id !== libraryId || body.category !== category)
+          throw new TypeError("The category update was not confirmed");
+      },
+      idempotencyKey,
+    );
   }
 
   public browseEntries(
@@ -82,19 +107,33 @@ export class AssetLinkClient {
   ): Promise<EntryPage> {
     return this.request(
       "entries.browse",
-      { library_id: libraryId, parent_relative_path: parentRelativePath, ...pageBody(cursor), ...options,
-        ...(cursor !== null ? { anchor_entry_id: undefined } : {}) },
+      {
+        library_id: libraryId,
+        parent_relative_path: parentRelativePath,
+        ...pageBody(cursor),
+        ...options,
+        ...(cursor !== null ? { anchor_entry_id: undefined } : {}),
+      },
       signal,
       (body) => {
         const page = decodeEntryPage(body);
-        if (page.library.library_id !== libraryId || page.parent_relative_path !== parentRelativePath
-          || page.items.some((entry) => entry.library_id !== libraryId)) throw new TypeError("The directory does not match its request");
+        if (
+          page.library.library_id !== libraryId ||
+          page.parent_relative_path !== parentRelativePath ||
+          page.items.some((entry) => entry.library_id !== libraryId)
+        )
+          throw new TypeError("The directory does not match its request");
         return page;
       },
     );
   }
 
-  public searchAssets(query: string, cursor: string | null, signal: AbortSignal, options?: SearchOptions): Promise<Page<SearchHit>> {
+  public searchAssets(
+    query: string,
+    cursor: string | null,
+    signal: AbortSignal,
+    options?: SearchOptions,
+  ): Promise<Page<SearchHit>> {
     return this.request("assets.search", { query, ...pageBody(cursor), ...options }, signal, decodeSearchPage);
   }
 
