@@ -4,13 +4,13 @@
 
 ## 交付
 
-最终运行目录：`.runtime/sandbox-storage/V01-019/delivery-final/assetlibrary-read-only-trial-win-x64/`；同目录上级包含ZIP、`build-evidence.json`和`native-final-smoke.json`。包含自包含.NET10 Windows x64 Host、最终Web、18个前进迁移、私密本机PostgreSQL初始化工具、中文说明，以及initialize/start/status/stop/operator入口。
+最终运行目录：`.runtime/sandbox-storage/V01-019/delivery-rsa-doc/assetlibrary-read-only-trial-win-x64/`；同目录上级包含ZIP、`build-evidence.json`和`native-final-smoke.json`。包含自包含.NET10 Windows x64 Host、最终Web、18个前进迁移、私密本机PostgreSQL初始化工具、中文说明，以及initialize/start/status/stop/operator入口。
 
-- 不可变产物来源commit：`035f2dafccb6b41fef986151230396797b5cbada`。
-- Git tree：`23a2095f567fef85f01e30c38c6d87cdb77b8ffa`。
-- ZIP：`assetlibrary-read-only-trial-win-x64.zip`，49,716,129 bytes。
-- ZIP SHA-256：`41d8b187fab173fd91e2a2bddebb2990ea8406e597588988fcd8034cb6810714`。
-- `package-manifest.json` SHA-256：`e6122a47541d02c9b1b010c3c09b45cf80838c14869ee9df94a0609532daf30a`。
+- 不可变产物来源commit：`864da3b2bfeca614b2654eb380ef6074d826b6c4`。
+- Git tree：`4cbfffc99e714466f20b6e3b44e2c836f188cb92`。
+- ZIP：`assetlibrary-read-only-trial-win-x64.zip`，49,716,196 bytes。
+- ZIP SHA-256：`13caada27dec64f165da1b5bd615422e1378c580ca7faf1dce06def6f372e360`。
+- `package-manifest.json` SHA-256：`b2f4d12d3e2e5e6519debd67b9e76e18ab7910849c7a46e2680034cd0db419dd`。
 - 372个包文件（含manifest）及ZIP内全部文件逐个流式核验长度与SHA-256通过。后续交接元数据commit不改变上述产物身份。
 
 ## 行为与复用
