@@ -12,7 +12,10 @@ value() {
 }
 compose() (
     unset COMPOSE_PROJECT_NAME COMPOSE_FILE COMPOSE_PROFILES COMPOSE_PATH_SEPARATOR COMPOSE_REMOVE_ORPHANS
-    export ASSETLIBRARY_ASSET_READ_GROUP=$(value ASSETLIBRARY_ASSET_READ_GROUP deployment.env 2>/dev/null || printf '1654')
+    read_group=$(sed -n 's/^ASSETLIBRARY_ASSET_READ_GROUP=//p' deployment.env)
+    read_group=${read_group:-1654}
+    case "$read_group" in *[!0-9]*|0) die 'Invalid asset read group.' ;; esac
+    export ASSETLIBRARY_ASSET_READ_GROUP="$read_group"
     for key in ASSETLIBRARY_DEPLOYMENT_NAME ASSETLIBRARY_DEPLOYMENT_ID ASSETLIBRARY_BIND_ADDRESS ASSETLIBRARY_HTTPS_PORT ASSETLIBRARY_SETTINGS_SHA256; do
         export "$key=$(value "$key" deployment.env)"
     done
