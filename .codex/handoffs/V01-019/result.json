@@ -3,39 +3,46 @@
   "task_id": "V01-019",
   "title": "windows-read-only-trial-package",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "server-packaging-owner",
   "branch": "codex/v01-019-windows-read-only-trial-package",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-019",
-  "commit": "64cdeb2",
+  "commit": "035f2dafccb6b41fef986151230396797b5cbada",
   "changed_files": [
     ".codex/tasks/V01-019.md",
+    ".codex/handoffs/V01-019/summary.md",
+    ".codex/handoffs/V01-019/result.json",
+    ".codex/handoffs/V01-019/tests.md",
     "scripts/build_read_only_trial.py",
     "infra/windows/trial/trial.ps1",
     "infra/windows/trial/trial_database.py",
+    "infra/windows/trial/trial_process.py",
     "infra/windows/trial/README.zh-CN.md",
+    "services/core-server/Host/Trial/TrialProcessControl.cs",
     "tests/release/test_read_only_trial_package.py"
   ],
   "changed_contracts": [],
   "tests": {
-    "failed": 1,
-    "report": "tests.md",
+    "task_unique_tests": 8,
     "skipped": 0,
-    "passed": 6
+    "passed": 9,
+    "existing_affected_test_reused": 1,
+    "failed": 0,
+    "report": "tests.md"
   },
   "risks": [
-    "Native administrator bootstrap currently fails closed with service_unavailable; test is not accepted as passed.",
-    "The original risk parser rejects observed 2509-line HIBP response and its unterminated final line; authentication owner is correcting this.",
-    "Candidate native artifacts are not final release artifacts."
+    "Forced termination can leave a newly imported Windows key container; old forced and new graceful paths are separately observed. No profile container was deleted.",
+    "Real risk service TLS can transiently fail. The operator retains identity for explicit retries and stays fail closed.",
+    "Formal Alpha/Windows Service/Explorer release gates remain unchanged."
   ],
-  "blocked_by": [
-    "Coordinator final operator stdout, current HIBP response compatibility, and certificate decryption retention integration"
-  ],
-  "recommended_merge_order": 0,
+  "blocked_by": [],
+  "recommended_merge_order": 5,
   "handoff_summary": ".codex/handoffs/V01-019/summary.md",
   "thread_deep_link": "",
   "architecture_review": {
-    "contract_changes": [],
+    "contract_changes": [
+      "Coordinator-approved private process/stop record protocol, bound to deployment/generation/PID/path/time/nonce; no AssetLink or network endpoint change"
+    ],
     "new_language_or_framework": [],
     "reused_existing_logic": [
       "build_server_release source snapshot, exact SDK, RID locks and self-contained publish",
@@ -46,15 +53,28 @@
       "Deployment-only LOGIN provisioning delegates all schema migrations to migration_tool; no runtime module-table access"
     ],
     "technical_debt": [
-      "Final same-source package and full native administrator/recovery validation pending coordinator integration"
+      "Forced process death can leave its temporary Windows key container; observed and reported, not silently deleted",
+      "Manual certificate trust and explicit certificate/key history maintenance remain deployment responsibilities",
+      "Local Windows read-only trial only; formal Alpha/platform/Explorer and scale evidence remain governed by original gates"
     ],
     "new_major_dependencies": [],
     "dependency_direction_ok": true,
     "duplicated_logic": [],
-    "module": "Windows trial deployment adapter (server-packaging-owner)",
+    "module": "Windows trial deployment and local Host process-control adapters (server-packaging-owner)",
     "architecture_tests": [
-      "validate_architecture_baseline.py: 131 inputs passed",
-      "generate_assetlink_sdks.py --check: 7 generated files current"
+      "validate_architecture_baseline.py",
+      "validate_handoff.py",
+      "generate_assetlink_sdks.py --check",
+      "Host targeted format and Release build zero warnings/errors",
+      "8 task-specific native/contract tests plus 1 existing Windows worker-lifetime regression"
     ]
+  },
+  "artifact": {
+    "archive_sha256": "41d8b187fab173fd91e2a2bddebb2990ea8406e597588988fcd8034cb6810714",
+    "manifest_sha256": "e6122a47541d02c9b1b010c3c09b45cf80838c14869ee9df94a0609532daf30a",
+    "bytes": 49716129,
+    "source_commit": "035f2dafccb6b41fef986151230396797b5cbada",
+    "source_tree": "23a2095f567fef85f01e30c38c6d87cdb77b8ffa",
+    "archive": ".runtime/sandbox-storage/V01-019/delivery-final/assetlibrary-read-only-trial-win-x64.zip"
   }
 }
