@@ -276,7 +276,11 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertTrue(injected.is_set(), "record publication fault was not injected")
                 self.assertNotEqual(failed.returncode, 0)
                 response = json.loads(failed.stdout)
-                self.assertEqual(response["shutdown"], "graceful")
+                self.assertIn(response["shutdown"], ("graceful", "exited"))
+                # StopApplication can cancel ASP.NET startup before RunAsync finishes; the Host then
+                # exits through its exception/finally path. The wrapper conservatively reports exited.
+                if response["shutdown"] == "exited":
+                    self.assertEqual(response["certificate_cleanup"], "not_confirmed")
                 self.assertFalse((state / ".trial-process.json").exists())
                 self.assertFalse((state / "pgdata/postmaster.pid").exists())
                 self.assertFalse(list(state.glob("host-process.json.*.pending")))

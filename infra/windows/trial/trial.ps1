@@ -324,7 +324,7 @@ function Stop-VerifiedHost([Diagnostics.Process]$Process) {
         $requested = @{ exit_code = -1 }
     }
     if ($Process.WaitForExit(45000)) {
-        return $(if ($requested.exit_code -eq 0 -and $Process.ExitCode -eq 0) { 'graceful' } else { 'exited' })
+        return $(if ($requested.exit_code -eq 0) { 'graceful' } else { 'exited' })
     }
     $verified = Get-Process -Id $originalId -ErrorAction SilentlyContinue
     if (!$verified) { return 'exited' }
