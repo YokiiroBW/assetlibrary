@@ -15,9 +15,11 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../../../services/core-server/AssetLibrary.CoreServer.csproj" />
+    <ProjectReference Include="../../../services/core-server/Host/AssetLibrary.CoreServer.Host.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+    <Compile Include="../Shared/TrialTestTls.cs" Link="TrialTestTls.cs" />
   </ItemGroup>
 </Project>

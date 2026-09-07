@@ -3,11 +3,11 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace AssetLibrary.Packaging.Tests;
+namespace AssetLibrary.IntegrationTestSupport;
 
-internal static class TrialAuthenticationTestTls
+internal static class TrialTestTls
 {
-    public static X509Certificate2 Certificate()
+    public static byte[] CreatePkcs12(string? password = null)
     {
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
@@ -15,7 +15,12 @@ internal static class TrialAuthenticationTestTls
         names.AddDnsName("localhost");
         request.CertificateExtensions.Add(names.Build());
         using var generated = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
-        var bytes = generated.Export(X509ContentType.Pkcs12);
+        return generated.Export(X509ContentType.Pkcs12, password);
+    }
+
+    public static X509Certificate2 Certificate()
+    {
+        var bytes = CreatePkcs12();
         try
         {
             return X509CertificateLoader.LoadPkcs12(bytes, null,

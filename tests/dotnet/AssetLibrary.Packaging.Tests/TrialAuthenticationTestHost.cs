@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using AssetLibrary.CoreServer.Hosting;
+using AssetLibrary.IntegrationTestSupport;
 using AssetLibrary.Modules.GatewayAuth.Application;
 using Microsoft.AspNetCore.Builder;
 
@@ -19,7 +20,7 @@ internal sealed class TrialAuthenticationTestHost : IAsyncDisposable
         this.localAuthentication = localAuthentication;
         Store = store;
         Origin = origin;
-        Client = TrialAuthenticationTestTls.Client(certificate, origin);
+        Client = TrialTestTls.Client(certificate, origin);
     }
 
     public TrialAuthenticationStore Store { get; }
@@ -30,8 +31,8 @@ internal sealed class TrialAuthenticationTestHost : IAsyncDisposable
 
     public static async Task<TrialAuthenticationTestHost> StartAsync()
     {
-        var certificate = TrialAuthenticationTestTls.Certificate();
-        var origin = TrialAuthenticationTestTls.ReserveOrigin();
+        var certificate = TrialTestTls.Certificate();
+        var origin = TrialTestTls.ReserveOrigin();
         var store = new TrialAuthenticationStore();
         WebApplication? application = null;
         LocalAuthenticationService? authentication = null;
