@@ -1,13 +1,17 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
 import { mockTrial } from "./trial-fixtures.mjs";
-import { scanSummary } from "./assetlink-fixtures.mjs";
+import { browsePath, entryOption, scanSummary } from "./assetlink-fixtures.mjs";
 
 async function registrationForm(page, rootPath = "C:/fixture-storage/photos") {
   await page.getByRole("button", { name: "添加资源库", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "添加资源库" });
   await expect(dialog.getByLabel("存储源", { exact: true })).toBeEnabled();
   await dialog.getByLabel("资源库名称", { exact: true }).fill("试用照片");
-  await dialog.getByLabel("服务器目录", { exact: true }).fill(rootPath);
+  if (rootPath !== null) {
+    const advanced = dialog.getByRole("checkbox", { name: "高级：指定该范围内的目录" });
+    if (await advanced.count()) await advanced.check();
+    await dialog.getByLabel("服务器目录", { exact: true }).fill(rootPath);
+  }
   return dialog;
 }
 
@@ -15,26 +19,31 @@ test("administrator registers a controlled source and explicitly scans before br
   page,
 }, testInfo) => {
   const state = await mockTrial(page, { empty: true });
-  state.sources = [{ source_key: "photos", display_name: "试用存储" }];
+  state.sources = [{ source_key: "photos", display_name: "试用存储", default_root_path: "/assets/photos" }];
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   await expect(page.getByRole("heading", { name: "没有可见资源库" })).toBeVisible();
-  const dialog = await registrationForm(page, "/assets/photos");
+  const dialog = await registrationForm(page, null);
+  await expect(dialog.getByLabel("服务器目录", { exact: true })).toHaveCount(0);
+  await dialog.getByRole("checkbox", { name: "高级：指定该范围内的目录" }).check();
   await expect(dialog.getByLabel("服务器目录", { exact: true })).toHaveAccessibleDescription(
     /部署挂载表.*\/assets\/photos.*Windows 原生/s,
   );
   await expect(dialog.getByRole("option", { name: "试用存储" })).toHaveCount(1);
+  await dialog.getByLabel("资源库分类", { exact: true }).selectOption("photos");
   await page.screenshot({ path: testInfo.outputPath("register-desktop.png"), animations: "disabled" });
+  await dialog.getByRole("checkbox", { name: "高级：指定该范围内的目录" }).uncheck();
   await dialog.getByRole("button", { name: "添加资源库", exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByText("尚未建立首次索引", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
   expect(state.requests.filter((request) => request.operation === "library_scans.start")).toHaveLength(0);
   const registration = state.requests.find((request) => request.operation === "libraries.register");
   expect(registration.body).toEqual({
     source_key: "photos",
     display_name: "试用照片",
     root_path: "/assets/photos",
+    category: "photos",
   });
   expect(registration.idempotency_key).toMatch(/^[0-9a-f-]{36}$/);
   await page.getByRole("button", { name: "开始首次扫描" }).click();
@@ -44,9 +53,11 @@ test("administrator registers a controlled source and explicitly scans before br
   await expect(page.getByRole("region", { name: "首次扫描" })).toContainText("已发现 1,234 项");
   await page.screenshot({ path: testInfo.outputPath("scan-desktop.png"), animations: "disabled" });
   state.scan = { ...state.scan, state: "succeeded", observed_entries: 1, committed_entries: 1, can_cancel: false };
+  await expect(page.getByText("sample-photo.jpg", { exact: true }).first()).toBeVisible();
+  await page.getByRole("link", { name: "管理扫描", exact: true }).click();
   await expect(page.getByText("首次扫描已完成", { exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "首次扫描" })).toContainText("刷新不会重新扫描目录");
-  await expect(page.getByText("sample-photo.jpg", { exact: true }).first()).toBeVisible();
+  await page.getByRole("link", { name: "浏览资源库", exact: true }).click();
   await expect(page.getByRole("button", { name: "开始首次扫描" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "重试扫描" })).toHaveCount(0);
 });
@@ -54,7 +65,7 @@ test("administrator registers a controlled source and explicitly scans before br
 test("registration errors preserve the form and retry identity without enumerating server paths", async ({ page }) => {
   const state = await mockTrial(page, { empty: true });
   state.registerFailure = 503;
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   const dialog = await registrationForm(page);
   await dialog.getByRole("button", { name: "添加资源库", exact: true }).click();
   await expect(dialog.getByRole("alert")).toBeFocused();
@@ -68,7 +79,7 @@ test("registration errors preserve the form and retry identity without enumerati
   expect(second.request_id).toBe(first.request_id);
   expect(
     state.requests.every((request) =>
-      ["libraries.list", "entries.browse", "storage_sources.list", "libraries.register", "library_scans.get"].includes(
+      ["libraries.list", "libraries.get", "entries.browse", "storage_sources.list", "libraries.register", "library_scans.get"].includes(
         request.operation,
       ),
     ),
@@ -81,7 +92,7 @@ test("unconfirmed start and cancel submissions reuse their keys, while a failed 
   const state = await mockTrial(page);
   state.scan = null;
   state.startFailure = 503;
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   await page.getByRole("button", { name: "开始首次扫描" }).click();
   await expect(page.getByRole("region", { name: "首次扫描" }).getByRole("alert")).toContainText("尚未确认");
   const firstStart = state.requests.find((request) => request.operation === "library_scans.start");
@@ -104,7 +115,7 @@ test("unconfirmed start and cancel submissions reuse their keys, while a failed 
   );
   state.scan = { ...state.scan, state: "cancelled", can_cancel: false, can_retry: true };
   await expect(page.getByText("扫描已取消", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
   await page.getByRole("button", { name: "重试扫描" }).click();
   await expect(page.getByText("等待扫描", { exact: true })).toBeVisible();
   expect(state.tasksStarted).toBe(2);
@@ -127,7 +138,7 @@ test("unconfirmed start and cancel submissions reuse their keys, while a failed 
 test("reload recovers the active durable scan and hiding the page stops polling", async ({ page }) => {
   const state = await mockTrial(page);
   state.scan = scanSummary({ state: "leased", observed_entries: 10 });
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   await expect(page.getByText("正在扫描", { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "首次扫描" })).toContainText("已发现 10 项");
@@ -154,10 +165,10 @@ test("offline libraries preserve their last index and recover through an explici
   state.library = { ...state.library, availability: "offline" };
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   await expect(page.getByText("sample-photo.jpg", { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/此资源库暂时离线/)).toBeVisible();
-  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await page.screenshot({
     path: testInfo.outputPath("offline-narrow-dark.png"),
@@ -173,8 +184,8 @@ test("offline libraries preserve their last index and recover through an explici
 test("scan denial clears selected entries and malformed progress never becomes an empty success", async ({ page }) => {
   const state = await mockTrial(page);
   state.browseCursor = "private-next";
-  await page.goto("/");
-  await page.getByRole("button", { name: "sample-photo.jpg sample-photo.jpg" }).click();
+  await page.goto(state.library ? browsePath : "/libraries");
+  await entryOption(page, "sample-photo.jpg").click();
   await expect(page.locator(".detail-pane")).toContainText("sample-photo.jpg");
   state.scanFailure = 403;
   await page.getByRole("button", { name: "刷新", exact: true }).click();
@@ -186,12 +197,12 @@ test("scan denial clears selected entries and malformed progress never becomes a
   state.scan = scanSummary({ observed_entries: -1 });
   await page.getByRole("button", { name: "刷新扫描状态" }).click();
   await expect(page.getByText("扫描状态需要确认", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
 });
 
 test("registration dialog keeps keyboard focus contained and restores it when closed", async ({ page }) => {
-  await mockTrial(page, { empty: true });
-  await page.goto("/");
+  const state = await mockTrial(page, { empty: true });
+  await page.goto(state.library ? browsePath : "/libraries");
   const open = page.getByRole("button", { name: "添加资源库", exact: true });
   await open.focus();
   await page.keyboard.press("Enter");
@@ -212,7 +223,7 @@ test("source list is bounded and does not accept arbitrary storage definitions",
     source_key: `source-${index}`,
     display_name: `存储 ${index}`,
   }));
-  await page.goto("/");
+  await page.goto(state.library ? browsePath : "/libraries");
   await page.getByRole("button", { name: "添加资源库", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "添加资源库" });
   await expect(dialog.getByRole("alert")).toBeVisible();

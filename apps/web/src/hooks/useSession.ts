@@ -20,8 +20,13 @@ export function useSession() {
   const channel = useRef<BroadcastChannel | null>(null);
   const signingOut = useRef(false);
   const signingIn = useRef(false);
+  const acceptedSession = useRef<BrowserSession | null>(null);
 
   const accept = useCallback((session: BrowserSession) => {
+    const accepted = acceptedSession.current;
+    if (accepted !== null && (accepted.principal_id !== session.principal_id || accepted.csrf_token !== session.csrf_token
+      || accepted.is_system_administrator !== session.is_system_administrator)) resetWorkspaceLocation();
+    acceptedSession.current = session;
     previouslyAuthenticated.current = true;
     const nextGeneration = ++workspaceGeneration.current;
     setState((previous) => {
@@ -55,6 +60,7 @@ export function useSession() {
         .catch((error: unknown) => {
           if (isAbort(error) || revision.current !== current) return;
           if (error instanceof AssetLinkApiError && error.status === 401) {
+            if (previouslyAuthenticated.current) resetWorkspaceLocation();
             setState({ status: "anonymous", expired: previouslyAuthenticated.current });
           } else if (error instanceof AssetLinkApiError && isAccessFailure(error.status)) {
             setState({ status: "unavailable", message: failure(error).message });
@@ -78,12 +84,18 @@ export function useSession() {
       if (event.data === "session-changed") check(true);
     };
     const onFocus = () => check();
+    const onVisibility = () => { if (!document.hidden) check(); };
+    const onPageShow = (event: PageTransitionEvent) => { if (event.persisted) check(true); };
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
     check();
     return () => {
       ++revision.current;
       active.current?.abort();
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
       changes.close();
       channel.current = null;
     };
@@ -109,6 +121,7 @@ export function useSession() {
   const expire = useCallback(() => {
     ++revision.current;
     active.current?.abort();
+    resetWorkspaceLocation();
     setState({ status: "anonymous", expired: true });
     channel.current?.postMessage("session-changed");
   }, []);
@@ -117,6 +130,7 @@ export function useSession() {
     signingOut.current = true;
     const current = ++revision.current;
     active.current?.abort();
+    resetWorkspaceLocation();
     const controller = new AbortController();
     active.current = controller;
     // Hide the old workspace immediately, but await the server before confirming logout.
@@ -152,4 +166,9 @@ export function useSession() {
 
   const reconnect = useCallback(() => check(true), [check]);
   return { state, signIn, signOut, expire, reconnect };
+}
+
+function resetWorkspaceLocation() {
+  // A new identity starts without the previous account's query or open-detail URL.
+  window.history.replaceState(null, "", "/");
 }

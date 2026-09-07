@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { AssetLinkClient } from "./assetLinkClient";
 import { failure, isAbort, isAccessFailure } from "./hooks/queryState";
-import type { RegisterLibraryRequest, StorageSource } from "./types";
+import { categoryLabels, isLibraryCategory, libraryCategories } from "./libraryMetadata";
+import type { LibraryCategory, RegisterLibraryRequest, StorageSource } from "./types";
 
 export function RegisterLibraryForm({
   client,
   onClose,
   onRegistered,
   onAccessLost,
+  initialCategory = "general",
 }: {
   client: AssetLinkClient;
   onClose: () => void;
   onRegistered: (libraryId: string) => void;
   onAccessLost: () => void;
+  initialCategory?: LibraryCategory;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const nameInput = useRef<HTMLInputElement>(null);
@@ -24,6 +27,10 @@ export function RegisterLibraryForm({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [selectedSourceKey, setSelectedSourceKey] = useState("");
+  const [advanced, setAdvanced] = useState(false);
+  const selectedSource = sources.find((source) => source.source_key === selectedSourceKey) ?? sources[0];
+  const manualPath = advanced || selectedSource?.default_root_path == null;
 
   useEffect(() => {
     const element = dialog.current;
@@ -46,7 +53,11 @@ export function RegisterLibraryForm({
     setMessage(null);
     void client
       .listStorageSources(controller.signal)
-      .then(setSources)
+      .then((available) => {
+        setSources(available);
+        setSelectedSourceKey((previous) => available.some((source) => source.source_key === previous)
+          ? previous : available[0]?.source_key ?? "");
+      })
       .catch((error: unknown) => {
         if (isAbort(error)) return;
         const details = failure(error);
@@ -63,10 +74,13 @@ export function RegisterLibraryForm({
     event.preventDefault();
     if (busy || loading || sources.length === 0) return;
     const form = new FormData(event.currentTarget);
+    const category = String(form.get("category") ?? "general");
+    if (!isLibraryCategory(category)) return;
     const body: RegisterLibraryRequest = {
       source_key: String(form.get("source_key") ?? ""),
       display_name: String(form.get("display_name") ?? ""),
-      root_path: String(form.get("root_path") ?? ""),
+      root_path: manualPath ? String(form.get("root_path") ?? "") : selectedSource?.default_root_path ?? "",
+      category,
     };
     const encoded = JSON.stringify(body);
     if (attempt.current?.body !== encoded) attempt.current = { body: encoded, key: crypto.randomUUID() };
@@ -122,11 +136,13 @@ export function RegisterLibraryForm({
             关闭
           </button>
         </div>
-        <p className="form-hint">选择已配置的存储源，填写服务端实际可见的目录。添加后由你开始首次扫描。</p>
+        <p className="form-hint">选择存储源及资源库分类。添加只登记目录，首次扫描由你单独启动。</p>
         {loading && <p role="status">正在读取存储源…</p>}
         {!loading && sources.length === 0 && <p>暂无可用存储源，请联系服务器管理员完成配置。</p>}
         <label htmlFor="storage-source">存储源</label>
-        <select id="storage-source" name="source_key" required disabled={loading || busy || sources.length === 0}>
+        <select id="storage-source" name="source_key" required value={selectedSourceKey}
+          onChange={(event) => { setSelectedSourceKey(event.target.value); setAdvanced(false); }}
+          disabled={loading || busy || sources.length === 0}>
           {sources.map((source) => (
             <option value={source.source_key} key={source.source_key}>
               {source.display_name}
@@ -138,9 +154,23 @@ export function RegisterLibraryForm({
           <input ref={nameInput} name="display_name" required maxLength={200} autoComplete="off" disabled={busy} />
         </label>
         <label>
+          资源库分类
+          <select name="category" defaultValue={initialCategory} disabled={busy}>
+            {libraryCategories.map((category) => <option key={category} value={category}>{categoryLabels[category]}</option>)}
+          </select>
+        </label>
+        {selectedSource?.default_root_path && <div className="source-root">
+          <span>使用存储源根目录</span><code>{selectedSource.default_root_path}</code>
+          <label className="checkbox-line"><input type="checkbox" checked={advanced} disabled={busy}
+            onChange={(event) => setAdvanced(event.target.checked)} />高级：指定该范围内的目录</label>
+        </div>}
+        {manualPath && <>
+        <label>
           服务器目录
           <input
+            key={selectedSourceKey}
             name="root_path"
+            defaultValue={selectedSource?.default_root_path ?? ""}
             required
             maxLength={4096}
             autoComplete="off"
@@ -154,6 +184,7 @@ export function RegisterLibraryForm({
           宿主目录或浏览器电脑的盘符。Windows 原生部署可填写服务器上的 <code>C:\Assets\Photos</code> 或{" "}
           <code>\\nas\photos</code>，完整路径须在所选存储源的允许范围内。
         </p>
+        </>}
         {message !== null && (
           <p className="form-error" role="alert" ref={errorElement} tabIndex={-1}>
             {message}

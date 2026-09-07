@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AssetLinkClient } from "../assetLinkClient";
-import type { PagedState, SearchHit } from "../types";
+import type { PagedState, SearchHit, SearchOptions } from "../types";
 import { failedPage, idlePage, isAbort, loadingPage } from "./queryState";
 
 export function normalizeSearch(value: string): string {
@@ -10,16 +10,18 @@ export function normalizeSearch(value: string): string {
 export function useSearch(
   client: AssetLinkClient,
   query: string,
+  options?: SearchOptions,
 ): { state: PagedState<SearchHit>; loadMore: () => void; reload: () => void } {
   const normalized = normalizeSearch(query);
   const [state, setState] = useState<PagedState<SearchHit>>(idlePage);
-  const [scope, setScope] = useState({ client, normalized });
+  const optionsKey = JSON.stringify(options ?? {});
+  const [scope, setScope] = useState({ client, normalized, optionsKey });
   const [reloadKey, setReloadKey] = useState(0);
   const generation = useRef(0);
   const active = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    setScope({ client, normalized });
+    setScope({ client, normalized, optionsKey });
     const current = ++generation.current;
     active.current?.abort();
     if (normalized.length < 2) {
@@ -31,7 +33,7 @@ export function useSearch(
     setState(loadingPage());
     const timer = window.setTimeout(() => {
       void client
-        .searchAssets(normalized, null, controller.signal)
+        .searchAssets(normalized, null, controller.signal, options)
         .then((page) => {
           if (generation.current === current) {
             setState({
@@ -53,7 +55,7 @@ export function useSearch(
       window.clearTimeout(timer);
       active.current?.abort();
     };
-  }, [client, normalized, reloadKey]);
+  }, [client, normalized, optionsKey, reloadKey]);
 
   const loadMore = useCallback(() => {
     if (normalized.length < 2 || state.next_cursor === null || state.loadingMore) return;
@@ -63,7 +65,7 @@ export function useSearch(
     active.current = controller;
     setState((previous) => ({ ...previous, loadingMore: true }));
     void client
-      .searchAssets(normalized, state.next_cursor, controller.signal)
+      .searchAssets(normalized, state.next_cursor, controller.signal, options)
       .then((page) => {
         if (generation.current === current) {
           setState((previous) => ({
@@ -81,9 +83,9 @@ export function useSearch(
           setState((previous) => failedPage(error, previous));
         }
       });
-  }, [client, normalized, state.loadingMore, state.next_cursor]);
+  }, [client, normalized, optionsKey, state.loadingMore, state.next_cursor]);
 
-  const sameScope = scope.client === client && scope.normalized === normalized;
+  const sameScope = scope.client === client && scope.normalized === normalized && scope.optionsKey === optionsKey;
   const visibleState = sameScope ? state : normalized.length < 2 ? idlePage<SearchHit>() : loadingPage<SearchHit>();
   return { state: visibleState, loadMore, reload: () => setReloadKey((value) => value + 1) };
 }

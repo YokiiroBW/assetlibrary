@@ -2,8 +2,10 @@ import {
   browserSession,
   browsePage,
   entry,
+  entryDetail,
   failure,
   libraryPage,
+  libraryDetail,
   mockAssetLink,
   mockSession,
   result,
@@ -23,15 +25,18 @@ export async function mockTrial(page, { empty = false } = {}) {
     startFailure: null,
     cancelFailure: null,
     scanFailure: null,
-    sources: [{ source_key: "fixtures", display_name: "试用存储" }],
+    sources: [{ source_key: "fixtures", display_name: "试用存储", default_root_path: "C:/fixture-storage" }],
     tasksStarted: 0,
     browseCursor: null,
+    categoryFailure: null,
   };
   await mockSession(page, { ...browserSession, is_system_administrator: true, display_name: "管理员" });
   await mockAssetLink(page, (request) => {
     state.requests.push(request);
     if (request.operation === "libraries.list")
-      return libraryPage(request, state.library === null ? [] : [state.library]);
+      return libraryPage(request, state.library === null || (request.body.category && request.body.category !== state.library.category) ? [] : [state.library]);
+    if (request.operation === "libraries.get") return state.library ? libraryDetail(request, state.library) : failure(request, 404, "not_found", "资源库不可用。");
+    if (request.operation === "entries.get") return entryDetail(request, entry(980, { name: "sample-photo.jpg", relative_path: "sample-photo.jpg" }), state.library);
     if (request.operation === "entries.browse")
       return browsePage(
         request,
@@ -54,10 +59,17 @@ export async function mockTrial(page, { empty = false } = {}) {
       state.library = {
         ...visibleLibrary,
         display_name: request.body.display_name,
+        category: request.body.category ?? "general",
         access_level: "library_administrator",
       };
       state.scan = null;
       return result(request, { library_id: state.library.library_id });
+    }
+    if (request.operation === "libraries.update_category") {
+      if (state.categoryFailure || request.body.expected_category !== state.library.category)
+        return failure(request, state.categoryFailure ?? 409, "state_conflict", "资源库分类已改变。");
+      state.library = { ...state.library, category: request.body.category };
+      return result(request, { library_id: state.library.library_id, category: state.library.category });
     }
     if (request.operation === "library_scans.get" && state.scanFailure !== null)
       return failure(request, state.scanFailure, "service_unavailable", "暂时无法读取扫描状态。");

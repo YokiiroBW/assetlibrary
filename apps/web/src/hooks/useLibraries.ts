@@ -1,26 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AssetLinkClient } from "../assetLinkClient";
-import type { Library, PagedState } from "../types";
+import type { Library, LibraryCategory, PagedState } from "../types";
 import { failedPage, isAbort, loadingPage } from "./queryState";
 
-export function useLibraries(client: AssetLinkClient): {
+export function useLibraries(client: AssetLinkClient, category?: LibraryCategory): {
   state: PagedState<Library>;
   loadMore: () => void;
   reload: () => void;
 } {
   const [state, setState] = useState<PagedState<Library>>(loadingPage);
+  const [scope, setScope] = useState({ client, category });
   const [reloadKey, setReloadKey] = useState(0);
   const generation = useRef(0);
   const active = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    setScope({ client, category });
     const current = ++generation.current;
     active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
     setState(loadingPage());
     void client
-      .listLibraries(null, controller.signal)
+      .listLibraries(null, controller.signal, category)
       .then((page) => {
         if (generation.current === current) {
           setState({
@@ -38,7 +40,7 @@ export function useLibraries(client: AssetLinkClient): {
         }
       });
     return () => active.current?.abort();
-  }, [client, reloadKey]);
+  }, [client, category, reloadKey]);
 
   const loadMore = useCallback(() => {
     if (state.next_cursor === null || state.loadingMore) return;
@@ -48,7 +50,7 @@ export function useLibraries(client: AssetLinkClient): {
     active.current = controller;
     setState((previous) => ({ ...previous, loadingMore: true }));
     void client
-      .listLibraries(state.next_cursor, controller.signal)
+      .listLibraries(state.next_cursor, controller.signal, category)
       .then((page) => {
         if (generation.current === current) {
           setState((previous) => ({
@@ -66,10 +68,10 @@ export function useLibraries(client: AssetLinkClient): {
           setState((previous) => failedPage(error, previous));
         }
       });
-  }, [client, state.loadingMore, state.next_cursor]);
+  }, [client, category, state.loadingMore, state.next_cursor]);
 
   return {
-    state,
+    state: scope.client === client && scope.category === category ? state : loadingPage<Library>(),
     loadMore,
     reload: () => setReloadKey((value) => value + 1),
   };

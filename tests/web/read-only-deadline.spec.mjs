@@ -1,9 +1,13 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
 import {
   browsePage,
+  browsePath,
   entry,
+  entryDetail,
+  entryOption,
   failure,
   libraryPage,
+  libraryDetail,
   mockSession,
   searchPage,
   visibleLibrary,
@@ -23,6 +27,8 @@ for (const pendingStage of ["headers", "body"]) {
       advertisedDeadlines.push(request.timeout_ms);
       if (request.operation === "libraries.list") {
         sendResult(response, libraryPage(request));
+      } else if (request.operation === "libraries.get") {
+        sendResult(response, libraryDetail(request));
       } else if (shouldStall) {
         const started = Date.now();
         response.on("close", () => closedAfter.push(Date.now() - started));
@@ -35,8 +41,8 @@ for (const pendingStage of ["headers", "body"]) {
       }
     });
     try {
-      await page.goto("/");
-      await expect(page.getByRole("heading", { name: "读取失败" })).toBeVisible({ timeout: 8_000 });
+      await page.goto(browsePath);
+      await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible({ timeout: 8_000 });
       await expect(page.getByText("读取超时，请重试。")).toBeVisible();
       await expect.poll(() => closedAfter.length).toBe(1);
       expect(closedAfter[0]).toBeGreaterThanOrEqual(4_000);
@@ -45,8 +51,8 @@ for (const pendingStage of ["headers", "body"]) {
 
       shouldStall = false;
       await page.getByRole("button", { name: "重试", exact: true }).click();
-      await expect(page.getByRole("button", { name: "asset-0950.png asset-0950.png" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "读取失败" })).toHaveCount(0);
+      await expect(entryOption(page, "asset-0950.png")).toBeVisible();
+      await expect(page.getByRole("heading", { name: "暂时无法读取" })).toHaveCount(0);
     } finally {
       await stop();
     }
@@ -81,7 +87,7 @@ test("changing the query cancels its pending request without reporting a timeout
     expect(oldRequestsClosedAfter[0]).toBeLessThan(2_000);
     await page.waitForTimeout(5_100);
     await expect(page.getByText("new-result.jpg", { exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "读取失败" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "暂时无法读取" })).toHaveCount(0);
   } finally {
     await stop();
   }
@@ -94,6 +100,8 @@ test("reconnecting cancels a pending later page from the previous workspace", as
   const stop = await startAssetLinkServer(page, (request, response) => {
     if (request.operation === "libraries.list") {
       sendResult(response, libraryPage(request, reconnected ? [] : [visibleLibrary]));
+    } else if (request.operation === "libraries.get") {
+      sendResult(response, libraryDetail(request));
     } else if (request.operation === "assets.search") {
       sendResult(response, failure(request, 401, "authentication_required", "Authentication is required."));
     } else if (request.body.cursor === undefined) {
@@ -105,7 +113,7 @@ test("reconnecting cancels a pending later page from the previous workspace", as
     }
   });
   try {
-    await page.goto("/");
+    await page.goto(browsePath);
     await page.getByRole("button", { name: "载入更多", exact: true }).click();
     await expect.poll(() => laterPageStarted).toBeTruthy();
     await page.getByRole("searchbox").fill("expired");
@@ -155,6 +163,10 @@ test("an authentication rejection keeps its status when its response body stalls
   const stop = await startAssetLinkServer(page, (request, response) => {
     if (request.operation === "libraries.list") {
       sendResult(response, libraryPage(request));
+    } else if (request.operation === "libraries.get") {
+      sendResult(response, libraryDetail(request));
+    } else if (request.operation === "entries.get") {
+      sendResult(response, entryDetail(request, previousEntry));
     } else if (request.body.cursor === undefined) {
       sendResult(response, browsePage(request, [previousEntry], "expired-page"));
     } else {
@@ -166,8 +178,8 @@ test("an authentication rejection keeps its status when its response body stalls
     }
   });
   try {
-    await page.goto("/");
-    await page.getByRole("button", { name: `${previousEntry.name} ${previousEntry.relative_path}` }).click();
+    await page.goto(browsePath);
+    await entryOption(page, previousEntry.name).click();
     await page.getByRole("button", { name: "载入更多", exact: true }).click();
     await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible({ timeout: 8_000 });
     await expect(page.getByText(previousEntry.name, { exact: true })).toHaveCount(0);

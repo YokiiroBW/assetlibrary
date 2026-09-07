@@ -2,9 +2,13 @@ import { expect, test } from "../../apps/web/node_modules/@playwright/test/index
 import {
   browserSession,
   browsePage,
+  browsePath,
   entry,
+  entryDetail,
+  entryOption,
   failure,
   libraryPage,
+  libraryDetail,
   searchPage,
   visibleLibrary,
 } from "./assetlink-fixtures.mjs";
@@ -84,6 +88,10 @@ async function sessionFixture(context, initial = null) {
       response =
         request.operation === "libraries.list"
           ? libraryPage(request, first ? [visibleLibrary] : [])
+          : request.operation === "libraries.get"
+            ? first ? libraryDetail(request) : failure(request, 404, "not_found", "资源库不可用。")
+          : request.operation === "entries.get"
+            ? first ? entryDetail(request, privateEntry) : failure(request, 404, "not_found", "条目不可用。")
           : request.operation === "assets.search"
             ? searchPage(request, first ? [{ library: visibleLibrary, entry: privateEntry, hit_reason: "name" }] : [])
             : browsePage(request, first ? [privateEntry] : [], "more-private");
@@ -109,7 +117,7 @@ test("login uses password-manager fields and memory CSRF, then logout hides the 
 }, testInfo) => {
   const state = await sessionFixture(context);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto(browsePath);
   await expect(page.getByRole("heading", { name: "登录资源库" })).toBeVisible();
   await expect(page.getByLabel("账号", { exact: true })).toHaveAttribute("autocomplete", "username");
   await expect(page.getByLabel("密码", { exact: true })).toHaveAttribute("autocomplete", "current-password");
@@ -136,7 +144,7 @@ test("login uses password-manager fields and memory CSRF, then logout hides the 
 test("failed logout is not confirmed and can be retried without exposing assets", async ({ page, context }) => {
   const state = await sessionFixture(context, browserSession);
   state.logoutStatus = 503;
-  await page.goto("/");
+  await page.goto(browsePath);
   await expect(page.getByText("first-account-private.png", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "退出登录" }).click();
   await expect(page.getByRole("heading", { name: "退出尚未确认" })).toBeVisible();
@@ -155,7 +163,7 @@ test("session outages stay distinct from expiration and recover without replacin
 }) => {
   const state = await sessionFixture(context, browserSession);
   state.sessionStatus = 503;
-  await page.goto("/");
+  await page.goto(browsePath);
   await expect(page.getByRole("heading", { name: "暂时无法连接" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "登录资源库" })).toHaveCount(0);
   state.sessionStatus = 200;
@@ -177,9 +185,9 @@ test("session changes across tabs discard previous libraries, search, details an
   context,
 }) => {
   await sessionFixture(context, browserSession);
-  await page.goto("/");
+  await page.goto(browsePath);
   await page.getByRole("searchbox").fill("private");
-  await page.getByRole("button", { name: "first-account-private.png 设计素材 · 名称命中" }).click();
+  await entryOption(page, "first-account-private.png").click();
   await expect(page.locator(".detail-pane")).toContainText("first-account-private.png");
   const other = await context.newPage();
   await other.goto("/");
@@ -189,25 +197,33 @@ test("session changes across tabs discard previous libraries, search, details an
   await expect(page.getByRole("heading", { name: "没有可见资源库" })).toBeVisible();
   await expect(page.getByRole("searchbox")).toHaveValue("");
   await expect(page.getByText("first-account-private.png", { exact: true })).toHaveCount(0);
-  await expect(page.locator("[data-library-id]")).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "已加载资源库" }).getByRole("link")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "载入更多", exact: true })).toHaveCount(0);
   await expect(page.getByText("第二账号", { exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByText("first-account-private.png", { exact: true })).toHaveCount(0);
 });
 
 test("focus revalidation detects a new session generation for the same principal", async ({ page, context }) => {
   const state = await sessionFixture(context, browserSession);
-  await page.goto("/");
+  await page.goto(browsePath);
   await page.getByRole("searchbox").fill("private");
   await expect(page.getByText("first-account-private.png", { exact: true }).first()).toBeVisible();
   state.session = { ...browserSession, csrf_token: "replacement-fixture-session" };
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("searchbox")).toHaveValue("");
   await expect.poll(() => state.controls.at(-1)?.csrf).toBe("replacement-fixture-session");
+  const sessionReads = state.authRequests.filter((operation) => operation === "session").length;
+  state.session = null;
+  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
+  await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible();
+  expect(state.authRequests.filter((operation) => operation === "session").length).toBeGreaterThan(sessionReads);
+  await expect(page.getByText("first-account-private.png", { exact: true })).toHaveCount(0);
 });
 
 test("absolute session expiry hides data without waiting for another asset request", async ({ page, context }) => {
   await sessionFixture(context, { ...browserSession, absolute_expires_at: new Date(Date.now() + 1_500).toISOString() });
-  await page.goto("/");
+  await page.goto(browsePath);
   await expect(page.getByText("first-account-private.png", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible();
   await expect(page.getByText("first-account-private.png", { exact: true })).toHaveCount(0);
@@ -216,7 +232,7 @@ test("absolute session expiry hides data without waiting for another asset reque
 test("rate-limited login stays a retryable form with no workspace", async ({ page, context }) => {
   const state = await sessionFixture(context);
   state.loginStatus = 429;
-  await page.goto("/");
+  await page.goto(browsePath);
   await signIn(page);
   await expect(page.getByRole("alert")).toContainText("稍后重试");
   await expect(page.getByRole("button", { name: "登录", exact: true })).toBeEnabled();
@@ -227,7 +243,7 @@ test("rate-limited login stays a retryable form with no workspace", async ({ pag
 for (const status of [403, 404]) {
   test(`a ${status} session rejection on focus hides the previous workspace`, async ({ page, context }) => {
     const state = await sessionFixture(context, browserSession);
-    await page.goto("/");
+    await page.goto(browsePath);
     await expect(page.getByText("first-account-private.png", { exact: true }).first()).toBeVisible();
     state.sessionStatus = status;
     await page.evaluate(() => window.dispatchEvent(new Event("focus")));

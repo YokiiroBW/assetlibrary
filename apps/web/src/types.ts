@@ -2,12 +2,30 @@ export type Availability = "online" | "offline";
 export type AccessLevel = "read_only" | "read_write" | "organize" | "library_administrator";
 export type EntryKind = "file" | "directory" | "reparse_file" | "reparse_directory";
 export type SearchHitReason = "name" | "path";
+export type LibraryCategory = "photos" | "images" | "videos" | "music" | "projects" | "documents" | "characters" | "general";
+export type EntryView = "list" | "grid";
+export type EntrySort = "name" | "modified" | "size";
+export type SortDirection = "asc" | "desc";
+export type EntryFilterKind = "all" | "files" | "directories";
+export interface BrowseOptions {
+  sort_by: EntrySort;
+  sort_direction: SortDirection;
+  kind: EntryFilterKind;
+  name_filter: string;
+  anchor_entry_id?: string;
+}
+export interface SearchOptions {
+  scope: "all" | "library" | "directory";
+  library_id?: string;
+  parent_relative_path?: string;
+}
 
 export interface Library {
   library_id: string;
   display_name: string;
   availability: Availability;
   access_level: AccessLevel;
+  category: LibraryCategory;
 }
 
 export interface Entry {
@@ -36,6 +54,11 @@ export interface EntryPage extends Page<Entry> {
   parent_relative_path: string;
 }
 
+export interface EntryDetail {
+  library: Library;
+  entry: Entry;
+}
+
 export type LoadStatus = "idle" | "loading" | "ready" | "error";
 
 export interface PagedState<T> extends Page<T> {
@@ -57,12 +80,14 @@ export interface BrowserSession {
 export interface StorageSource {
   source_key: string;
   display_name: string;
+  default_root_path: string | null;
 }
 
 export interface RegisterLibraryRequest {
   source_key: string;
   display_name: string;
   root_path: string;
+  category?: LibraryCategory;
 }
 
 export type ScanState = "queued" | "leased" | "succeeded" | "failed" | "cancelled";

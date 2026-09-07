@@ -1,0 +1,87 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-025",
+  "title": "web-navigation-and-workspace",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "web-gateway-owner",
+  "branch": "codex/v01-025-web-navigation-and-workspace",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-025",
+  "commit": "implementation-checkpoint-pending-verification",
+  "changed_files": [
+    "apps/web/src/ReadOnlyWorkspace.tsx",
+    "apps/web/src/RegisterLibraryForm.tsx",
+    "apps/web/src/VirtualEntryList.tsx",
+    "apps/web/src/assetLinkClient.ts",
+    "apps/web/src/assetLinkResponses.ts",
+    "apps/web/src/hooks/useBrowse.ts",
+    "apps/web/src/hooks/useLibraries.ts",
+    "apps/web/src/hooks/useSearch.ts",
+    "apps/web/src/hooks/useSession.ts",
+    "apps/web/src/styles.css",
+    "apps/web/src/trialResponses.ts",
+    "apps/web/src/types.ts",
+    "tests/web/assetlink-fixtures.mjs",
+    "tests/web/read-only-authority.spec.mjs",
+    "tests/web/read-only-deadline.spec.mjs",
+    "tests/web/read-only-workspace.spec.mjs",
+    "tests/web/trial-fixtures.mjs",
+    "tests/web/trial-library-scan.spec.mjs",
+    "tests/web/trial-session.spec.mjs",
+    ".codex/handoffs/V01-025/result.json",
+    ".codex/handoffs/V01-025/summary.md",
+    ".codex/handoffs/V01-025/tests.md",
+    ".codex/tasks/V01-025.md",
+    "apps/web/src/CopyRelativePaths.tsx",
+    "apps/web/src/EntryCollectionPage.tsx",
+    "apps/web/src/EntryDetails.tsx",
+    "apps/web/src/LibraryCatalogPage.tsx",
+    "apps/web/src/LibraryCategoryDialog.tsx",
+    "apps/web/src/ScanTasksPage.tsx",
+    "apps/web/src/WorkspaceIcon.tsx",
+    "apps/web/src/WorkspaceNavigation.tsx",
+    "apps/web/src/WorkspacePrimitives.tsx",
+    "apps/web/src/hooks/useEntrySelection.ts",
+    "apps/web/src/hooks/useNarrowWorkspace.ts",
+    "apps/web/src/hooks/useResource.ts",
+    "apps/web/src/hooks/useWorkspaceNavigation.ts",
+    "apps/web/src/libraryMetadata.ts",
+    "apps/web/src/workspaceRoutes.ts"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "implementation_complete_awaiting_unified_verification"
+  },
+  "risks": [
+    "尚未执行格式、类型、构建和浏览器检查；等待统一验收，不可将本 checkpoint 视为已验收。"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 25,
+  "handoff_summary": ".codex/handoffs/V01-025/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Web Gateway adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "AssetLinkClient and generated TypeScript SDK",
+      "SessionGate and in-memory CSRF/cancel/5-second transport deadline",
+      "Library scan state adapter",
+      "TanStack virtualizer and existing semantic CSS token source"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Consumes coordinator-frozen web-interaction-v1 operations; shared contracts owned by root"
+    ],
+    "architecture_tests": [
+      "Not executed: awaiting coordinator unified acceptance"
+    ],
+    "technical_debt": []
+  }
+}

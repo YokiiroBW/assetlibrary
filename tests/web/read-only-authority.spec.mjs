@@ -1,9 +1,13 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
 import {
   browsePage,
+  browsePath,
   entry,
+  entryDetail,
+  entryOption,
   failure,
   libraryPage,
+  libraryDetail,
   mockAssetLink,
   mockSession,
   searchPage,
@@ -24,14 +28,16 @@ test("reconnecting after authentication loss discards the previous identity's se
         : failure(request, 404, "not_found", "The requested resource is not available.");
     }
     if (request.operation === "libraries.list") return libraryPage(request);
+    if (request.operation === "libraries.get") return libraryDetail(request);
+    if (request.operation === "entries.get") return entryDetail(request, privateEntry);
     if (request.operation === "entries.browse" && request.body.cursor === undefined) {
       return browsePage(request, [privateEntry], "expires-next");
     }
     return failure(request, 401, "authentication_required", "Authentication is required.");
   });
 
-  await page.goto("/");
-  await page.getByRole("button", { name: "previous-identity.png previous-identity.png" }).click();
+  await page.goto(browsePath);
+  await entryOption(page, privateEntry.name).click();
   await expect(page.locator(".detail-pane").getByRole("heading", { name: privateEntry.name })).toBeVisible();
   await page.getByRole("button", { name: "载入更多", exact: true }).click();
   await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible();
@@ -39,7 +45,7 @@ test("reconnecting after authentication loss discards the previous identity's se
   identity = "second";
   await page.getByRole("button", { name: "重试连接" }).click();
   await expect(page.getByRole("heading", { name: "没有可见资源库" })).toBeVisible();
-  await expect(page.locator(".detail-pane")).not.toContainText(privateEntry.name);
+  await expect(page.locator(".detail-pane")).toHaveCount(0);
   await expect(page.locator("[data-entry-row]")).toHaveCount(0);
 });
 
@@ -48,37 +54,43 @@ for (const status of [403, 404]) {
     const previousEntry = entry(902);
     await mockAssetLink(page, async (request) => {
       if (request.operation === "libraries.list") return libraryPage(request);
+      if (request.operation === "libraries.get") return libraryDetail(request);
+      if (request.operation === "entries.get") return entryDetail(request, previousEntry);
       return request.body.cursor === undefined
         ? browsePage(request, [previousEntry], "next-page")
         : failure(request, status, "not_found", "The requested resource is not available.");
     });
 
-    await page.goto("/");
-    await page.getByRole("button", { name: `${previousEntry.name} ${previousEntry.relative_path}` }).click();
+    await page.goto(browsePath);
+    await entryOption(page, previousEntry.name).click();
     await page.getByRole("button", { name: "载入更多", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "读取失败" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible();
     await expect(page.locator("[data-entry-row]")).toHaveCount(0);
     await expect(page.locator(".detail-pane")).not.toContainText(previousEntry.name);
     await expect(page.getByRole("button", { name: "载入更多", exact: true })).toHaveCount(0);
   });
 }
 
-test("a rejected library page clears the dependent browse and selected details", async ({ page }) => {
+test("a rejected catalog refresh clears the dependent browse and selected details", async ({ page }) => {
   const previousEntry = entry(904);
+  let revoked = false;
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") {
-      return request.body.cursor === undefined
+      return !revoked
         ? libraryPage(request, [visibleLibrary], "more-libraries")
         : failure(request, 403, "forbidden", "The requested resource is not available.");
     }
+    if (request.operation === "libraries.get") return libraryDetail(request);
+    if (request.operation === "entries.get") return entryDetail(request, previousEntry);
     return browsePage(request, [previousEntry]);
   });
 
-  await page.goto("/");
-  await page.getByRole("button", { name: `${previousEntry.name} ${previousEntry.relative_path}` }).click();
-  await page.getByRole("button", { name: "载入更多资源库" }).click();
-  await expect(page.getByRole("heading", { name: "读取失败" })).toBeVisible();
-  await expect(page.locator("[data-library-id]")).toHaveCount(0);
+  await page.goto(browsePath);
+  await entryOption(page, previousEntry.name).click();
+  revoked = true;
+  await page.getByRole("button", { name: "刷新", exact: true }).click();
+  await expect(page.getByRole("button", { name: "重新连接" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "已加载资源库" }).getByRole("link")).toHaveCount(0);
   await expect(page.locator("[data-entry-row]")).toHaveCount(0);
   await expect(page.locator(".detail-pane")).not.toContainText(previousEntry.name);
 });
@@ -87,6 +99,7 @@ test("a rejected search page removes earlier matches and the selected match", as
   const previousEntry = entry(905);
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
+    if (request.operation === "entries.get") return entryDetail(request, previousEntry);
     if (request.operation === "entries.browse") return browsePage(request);
     return request.body.cursor === undefined
       ? searchPage(request, [{ library: visibleLibrary, entry: previousEntry, hit_reason: "name" }], "more-hits")
@@ -95,9 +108,9 @@ test("a rejected search page removes earlier matches and the selected match", as
 
   await page.goto("/");
   await page.getByRole("searchbox").fill("asset");
-  await page.getByRole("button", { name: `${previousEntry.name} ${visibleLibrary.display_name} · 名称命中` }).click();
+  await entryOption(page, previousEntry.name).click();
   await page.getByRole("button", { name: "载入更多", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "读取失败" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible();
   await expect(page.locator("[data-entry-row]")).toHaveCount(0);
   await expect(page.locator(".detail-pane")).not.toContainText(previousEntry.name);
 });
@@ -130,14 +143,16 @@ for (const [status, format] of [
       const response =
         request.operation === "libraries.list"
           ? libraryPage(request)
+          : request.operation === "libraries.get" ? libraryDetail(request)
+          : request.operation === "entries.get" ? entryDetail(request, previousEntry)
           : browsePage(request, [previousEntry], "expired-page");
       await route.fulfill({ contentType: "application/json", body: JSON.stringify(response.body) });
     });
 
-    await page.goto("/");
-    await page.getByRole("button", { name: `${previousEntry.name} ${previousEntry.relative_path}` }).click();
+    await page.goto(browsePath);
+    await entryOption(page, previousEntry.name).click();
     await page.getByRole("button", { name: "载入更多", exact: true }).click();
-    await expect(page.getByRole("heading", { name: status === 401 ? "登录状态已失效" : "读取失败" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: status === 401 ? "登录状态已失效" : "暂时无法读取" })).toBeVisible();
     await expect(page.getByText(previousEntry.name, { exact: true })).toHaveCount(0);
   });
 }
@@ -146,16 +161,17 @@ test("a transient paging error preserves the last readable page while showing th
   const previousEntry = entry(903);
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
+    if (request.operation === "libraries.get") return libraryDetail(request);
     return request.body.cursor === undefined
       ? browsePage(request, [previousEntry], "next-page")
       : failure(request, 503, "service_unavailable", "只读服务暂时不可用。");
   });
 
-  await page.goto("/");
+  await page.goto(browsePath);
   await page.getByRole("button", { name: "载入更多", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "读取失败" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暂时无法读取" })).toBeVisible();
   await expect(
-    page.getByRole("button", { name: `${previousEntry.name} ${previousEntry.relative_path}` }),
+    entryOption(page, previousEntry.name),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "这个范围没有条目" })).toHaveCount(0);
 });

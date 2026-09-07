@@ -1,4 +1,5 @@
-import type { Entry, EntryPage, Library, Page, SearchHit } from "./types";
+import { isLibraryCategory } from "./libraryMetadata";
+import type { Entry, EntryDetail, EntryPage, Library, Page, SearchHit } from "./types";
 const pageSize = 100;
 export function decodeLibraryPage(value: Record<string, unknown>): Page<Library> {
   return {
@@ -24,9 +25,12 @@ export function decodeSearchPage(value: Record<string, unknown>): Page<SearchHit
       if (reason !== "name" && reason !== "path") {
         throw new TypeError("hit_reason is invalid");
       }
+      const library = decodeLibrary(hit.library);
+      const entry = decodeEntry(hit.entry);
+      if (entry.library_id !== library.library_id) throw new TypeError("The search entry does not match its library");
       return {
-        library: decodeLibrary(hit.library),
-        entry: decodeEntry(hit.entry),
+        library,
+        entry,
         hit_reason: reason,
       };
     }),
@@ -34,7 +38,7 @@ export function decodeSearchPage(value: Record<string, unknown>): Page<SearchHit
   };
 }
 
-function decodeLibrary(value: unknown): Library {
+export function decodeLibrary(value: unknown): Library {
   const item = record(value, "library");
   const availability = string(item.availability, "availability");
   const accessLevel = string(item.access_level, "access_level");
@@ -44,15 +48,18 @@ function decodeLibrary(value: unknown): Library {
   if (!isAccessLevel(accessLevel)) {
     throw new TypeError("access_level is invalid");
   }
+  const category = item.category === undefined ? "general" : string(item.category, "category");
+  if (!isLibraryCategory(category)) throw new TypeError("category is invalid");
   return {
     library_id: string(item.library_id, "library_id"),
     display_name: string(item.display_name, "display_name"),
     availability,
     access_level: accessLevel,
+    category,
   };
 }
 
-function decodeEntry(value: unknown): Entry {
+export function decodeEntry(value: unknown): Entry {
   const item = record(value, "entry");
   const kind = string(item.kind, "kind");
   if (!isEntryKind(kind)) {
@@ -67,6 +74,14 @@ function decodeEntry(value: unknown): Entry {
     content_length: optionalString(item.content_length, "content_length"),
     last_write_time_utc: string(item.last_write_time_utc, "last_write_time_utc"),
   };
+}
+
+export function decodeEntryDetail(value: Record<string, unknown>, libraryId: string, entryId: string): EntryDetail {
+  const library = decodeLibrary(value.library);
+  const entry = decodeEntry(value.entry);
+  if (library.library_id !== libraryId || entry.library_id !== libraryId || entry.entry_id !== entryId)
+    throw new TypeError("The entry detail does not match its request");
+  return { library, entry };
 }
 
 export function record(value: unknown, name: string): Record<string, unknown> {

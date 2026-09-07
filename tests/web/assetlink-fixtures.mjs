@@ -3,7 +3,22 @@ export const visibleLibrary = {
   display_name: "设计素材",
   availability: "online",
   access_level: "read_only",
+  category: "images",
 };
+
+export const browsePath = `/libraries/${visibleLibrary.library_id}`;
+
+export function entryOption(page, name) {
+  return page.getByRole("listbox", { name: "资产列表" }).getByRole("option", { name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}，`) });
+}
+
+export function libraryDetail(request, library = visibleLibrary) {
+  return result(request, { library });
+}
+
+export function entryDetail(request, item, library = visibleLibrary) {
+  return result(request, { library, entry: item });
+}
 
 export const hiddenLibraryName = "财务私库";
 
