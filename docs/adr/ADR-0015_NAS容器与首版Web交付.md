@@ -15,6 +15,10 @@ NAS运行Docker/Compose，电脑通过NAS HTTPS使用现有第一版Web。沿用
 - Web/API同源HTTPS，沿用Origin/Host、Cookie/CSRF/限速、持久密钥与带外operator。不新增匿名初始化、任意API地址、CORS或认证绕过。Origin与证书SAN一致；说明包含浏览器信任和RSA≥2048/历史解密要求，不自动改系统信任。
 - 运行时非root、根文件系统只读、最小capabilities、no-new-privileges、限额和正常停机时间。初始化额外权限只作用于新建自有卷。Linux容器生命周期覆盖已有只读子进程，不引入独立Worker服务。
 
+Linux文件名中的字面反斜杠会与现有跨端路径契约的分隔符归一化冲突。本轮不扩展路径编码协议：配置源、登记根和发现条目在物理适配边界明确拒绝这种输入；扫描以entry_path_unsupported失败并中止暂存，不静默改成虚构目录、不跳过后宣告成功。Windows路径分隔符语义保持兼容。
+
+容器内健康探针保留公开URI、Host/SNI和精确证书核验，仅将TCP连接路由到配置监听对应loopback，避免依赖NAS外部地址回绕。公开端口与容器监听端口保持一致。
+
 ## Web与设计
 
 以docs12和assets/visuals/10_web_admin_asset_browser.png为依据，复用当前设计令牌、导航/搜索/详情、虚拟列表及同源SDK。仅补齐已开放流程的NAS路径说明、部署语义和必要布局问题；不能伪造未来统计或提前开放写入/预览。

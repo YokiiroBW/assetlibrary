@@ -1,6 +1,6 @@
 # .NET build foundation
 
-V01-001 pins SDK `10.0.111`, C# 14 and `net10.0`. `services/core-server` now contains the scoped V0.1 modules; `Host/` is the common Windows/Linux/Docker entry point with health endpoints and optional PostgreSQL readiness. WorkerSupervisor remains an inert marker. Production authentication, business API and physical writes remain blocked; see `docs/releases/V0.1_ALPHA_READINESS.md`.
+V01-001 pins SDK `10.0.111`, C# 14 and `net10.0`. `services/core-server` contains the scoped V0.1 modules; `Host/` is the common Windows/Linux/Docker entry point. Its default diagnostic mode provides health endpoints and optional PostgreSQL readiness. Explicit `--read-only-trial` composes same-origin HTTPS authentication, required PostgreSQL, initial scans and read APIs with the built Web. WorkerSupervisor remains an inert marker; physical asset writes and full Alpha remain gated. Windows delivery is V01-015; NAS container integration is V01-021 under ADR-0015. See `docs/releases/V0.1_ALPHA_READINESS.md` for the remaining release conditions.
 
 The SDK version is the M0-004-proven feature band for .NET runtime `10.0.11`. `global.json` disables roll-forward, while `NuGet.config` clears inherited sources and keeps the package cache in the ignored `.runtime/nuget` directory.
 
