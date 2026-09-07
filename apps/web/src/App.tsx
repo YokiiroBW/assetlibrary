@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AssetLinkClient } from "./assetLinkClient";
+import { isAccessFailure } from "./hooks/queryState";
 import { useBrowse } from "./hooks/useBrowse";
 import { useLibraries } from "./hooks/useLibraries";
 import { normalizeSearch, useSearch } from "./hooks/useSearch";
@@ -7,19 +8,29 @@ import type { Entry, Library } from "./types";
 import { VirtualEntryList, type EntryRow } from "./VirtualEntryList";
 
 export function App() {
+  const [sessionGeneration, setSessionGeneration] = useState(0);
+  return <ReadOnlyWorkspace key={sessionGeneration} onReconnect={() => setSessionGeneration((value) => value + 1)} />;
+}
+
+function ReadOnlyWorkspace({ onReconnect }: { onReconnect: () => void }) {
   const client = useMemo(() => new AssetLinkClient(), []);
   const libraries = useLibraries(client);
   const [selectedLibraryId, setSelectedLibraryId] = useState<string | null>(null);
   const [parentPath, setParentPath] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [selection, setSelection] = useState<EntryRow | null>(null);
-  const browse = useBrowse(client, selectedLibraryId, parentPath);
-  const search = useSearch(client, searchInput);
+  const libraryAccessFailed = isAccessFailure(libraries.state.statusCode);
+  const browse = useBrowse(client, libraryAccessFailed ? null : selectedLibraryId, parentPath);
+  const search = useSearch(client, libraryAccessFailed ? "" : searchInput);
   const normalizedSearch = normalizeSearch(searchInput);
   const searching = normalizedSearch.length >= 2;
+  const activeState = searching ? search.state : browse.state;
+  const sessionExpired = [libraries.state, browse.state, search.state].some((state) => state.statusCode === 401);
   const selectedLibrary =
-    libraries.state.items.find((library) => library.library_id === selectedLibraryId) ??
-    (browse.library?.library_id === selectedLibraryId ? browse.library : undefined);
+    isAccessFailure(libraries.state.statusCode) || isAccessFailure(browse.state.statusCode)
+      ? undefined
+      : (libraries.state.items.find((library) => library.library_id === selectedLibraryId) ??
+        (browse.library?.library_id === selectedLibraryId ? browse.library : undefined));
 
   useEffect(() => {
     if (selectedLibraryId === null && libraries.state.status === "ready" && libraries.state.items.length > 0) {
@@ -29,33 +40,31 @@ export function App() {
 
   useEffect(() => setSelection(null), [selectedLibraryId, parentPath, normalizedSearch]);
 
-  const sessionExpired = [libraries.state, browse.state, search.state].some((state) => state.statusCode === 401);
+  const accessFailed =
+    sessionExpired || isAccessFailure(libraries.state.statusCode) || isAccessFailure(activeState.statusCode);
+  useEffect(() => {
+    if (accessFailed) setSelection(null);
+  }, [accessFailed]);
+
   if (sessionExpired) {
-    return (
-      <SessionExpired
-        onRetry={() => {
-          libraries.reload();
-          browse.reload();
-          search.reload();
-        }}
-      />
-    );
+    return <SessionExpired onRetry={onReconnect} />;
   }
 
-  const rows: EntryRow[] = searching
-    ? search.state.items.map((hit) => ({
-        entry: hit.entry,
-        library: hit.library,
-        hitReason: hit.hit_reason,
-      }))
-    : selectedLibrary === undefined
-      ? []
-      : browse.state.items.map((entry) => ({
-          entry,
-          library: selectedLibrary,
-          hitReason: null,
-        }));
-  const activeState = searching ? search.state : browse.state;
+  const rows: EntryRow[] = isAccessFailure(libraries.state.statusCode)
+    ? []
+    : searching
+      ? search.state.items.map((hit) => ({
+          entry: hit.entry,
+          library: hit.library,
+          hitReason: hit.hit_reason,
+        }))
+      : selectedLibrary === undefined
+        ? []
+        : browse.state.items.map((entry) => ({
+            entry,
+            library: selectedLibrary,
+            hitReason: null,
+          }));
   const activeLoadMore = searching ? search.loadMore : browse.loadMore;
   const activeReload = searching ? search.reload : browse.reload;
 
@@ -188,7 +197,7 @@ export function App() {
         </section>
 
         <aside className="detail-pane" aria-label="资产详情">
-          {selection === null ? (
+          {selection === null || accessFailed ? (
             <Empty title="选择一个条目" detail="只读详情会显示在这里，不会修改原文件。" />
           ) : (
             <EntryDetails row={selection} />

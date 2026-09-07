@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AssetLinkClient } from "../assetLinkClient";
 import type { Entry, Library, PagedState } from "../types";
-import { failure, idlePage, isAbort, loadingPage } from "./queryState";
+import { failedPage, idlePage, isAbort, isAccessFailure, loadingPage } from "./queryState";
 
 export function useBrowse(
   client: AssetLinkClient,
@@ -42,10 +42,10 @@ export function useBrowse(
       })
       .catch((error: unknown) => {
         if (!isAbort(error) && generation.current === current) {
-          setState({ ...loadingPage(), status: "error", ...failure(error) });
+          setState(failedPage(error));
         }
       });
-    return () => controller.abort();
+    return () => active.current?.abort();
   }, [client, libraryId, parentPath, reloadKey]);
 
   const loadMore = useCallback(() => {
@@ -72,15 +72,15 @@ export function useBrowse(
       })
       .catch((error: unknown) => {
         if (!isAbort(error) && generation.current === current) {
-          setState((previous) => ({
-            ...previous,
-            status: "error",
-            loadingMore: false,
-            ...failure(error),
-          }));
+          setState((previous) => failedPage(error, previous));
         }
       });
   }, [client, libraryId, parentPath, state.loadingMore, state.next_cursor]);
 
-  return { state, library, loadMore, reload: () => setReloadKey((value) => value + 1) };
+  return {
+    state,
+    library: isAccessFailure(state.statusCode) ? null : library,
+    loadMore,
+    reload: () => setReloadKey((value) => value + 1),
+  };
 }

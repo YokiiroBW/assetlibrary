@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AssetLinkClient } from "../assetLinkClient";
 import type { Library, PagedState } from "../types";
-import { failure, isAbort, loadingPage } from "./queryState";
+import { failedPage, isAbort, loadingPage } from "./queryState";
 
 export function useLibraries(client: AssetLinkClient): {
   state: PagedState<Library>;
@@ -34,10 +34,10 @@ export function useLibraries(client: AssetLinkClient): {
       })
       .catch((error: unknown) => {
         if (!isAbort(error) && generation.current === current) {
-          setState({ ...loadingPage(), status: "error", ...failure(error) });
+          setState(failedPage(error));
         }
       });
-    return () => controller.abort();
+    return () => active.current?.abort();
   }, [client, reloadKey]);
 
   const loadMore = useCallback(() => {
@@ -63,12 +63,7 @@ export function useLibraries(client: AssetLinkClient): {
       })
       .catch((error: unknown) => {
         if (!isAbort(error) && generation.current === current) {
-          setState((previous) => ({
-            ...previous,
-            status: "error",
-            loadingMore: false,
-            ...failure(error),
-          }));
+          setState((previous) => failedPage(error, previous));
         }
       });
   }, [client, state.loadingMore, state.next_cursor]);

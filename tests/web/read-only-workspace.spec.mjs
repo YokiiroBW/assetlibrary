@@ -10,7 +10,7 @@ import {
   visibleLibrary,
 } from "./assetlink-fixtures.mjs";
 
-test("desktop browse stays permission-filtered, paged, and virtualized", async ({ page }) => {
+test("desktop browse stays permission-filtered, paged, and virtualized", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const browseCursors = [];
   const folder = entry(1, {
@@ -54,9 +54,10 @@ test("desktop browse stays permission-filtered, paged, and virtualized", async (
 
   await page.getByRole("button", { name: "返回上级" }).click();
   await expect(page.getByRole("heading", { name: "根目录" })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("workspace-desktop.png"), animations: "disabled" });
 });
 
-test("narrow workspace reflows and presents the empty directory state", async ({ page }) => {
+test("narrow workspace reflows and presents the empty directory state", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
@@ -68,6 +69,7 @@ test("narrow workspace reflows and presents the empty directory state", async ({
   await expect(page.getByRole("heading", { name: "这个目录是空的" })).toBeVisible();
   const columns = await page.locator(".workspace").evaluate((element) => getComputedStyle(element).gridTemplateColumns);
   expect(columns.trim().split(/\s+/)).toHaveLength(1);
+  await page.screenshot({ path: testInfo.outputPath("workspace-narrow.png"), animations: "disabled", fullPage: true });
 });
 
 test("read errors and expired authentication have distinct fail-closed states", async ({ page }) => {
@@ -105,7 +107,8 @@ test("read errors and expired authentication have distinct fail-closed states", 
     throw new Error(`unexpected operation ${request.operation}`);
   });
   await page.getByRole("button", { name: "重试连接" }).click();
-  await expect(page.getByRole("heading", { name: "没有匹配结果" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toBeVisible();
+  await expect(page.getByRole("searchbox")).toHaveValue("");
 });
 
 test("a search result can open a library not yet loaded in the sidebar", async ({ page }) => {
