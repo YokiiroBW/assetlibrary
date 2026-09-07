@@ -198,6 +198,14 @@
       "owner_role": "assetlibrary_asset_identity_owner",
       "path": "0013_asset_identity_search_token_alignment.sql",
       "sha256": "2dcd97b305cc00e6e3b43d8f44c8a267ab0a6f0ee4eb4953db674cc42dd154f9"
+    },
+    {
+      "version": 14,
+      "name": "gateway_auth_recovery_preparation",
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "path": "0014_gateway_auth_recovery_preparation.sql",
+      "sha256": "df5e657acda7ec5bdcfaaa0342bb7113849d5f5efd51108a57daf1fa0a11312d"
     }
   ]
 }
