@@ -56,6 +56,14 @@ internal static class TrialCertificate
                 throw new TrialConfigurationException("trial_certificate_invalid");
             }
 
+            using var publicKey = certificate.GetRSAPublicKey();
+            using var privateKey = certificate.GetRSAPrivateKey();
+            if (publicKey is null || privateKey is null || publicKey.KeySize < 2048)
+            {
+                certificate.Dispose();
+                throw new TrialConfigurationException("trial_certificate_requires_rsa");
+            }
+
             return certificate;
         }
         catch (CryptographicException)

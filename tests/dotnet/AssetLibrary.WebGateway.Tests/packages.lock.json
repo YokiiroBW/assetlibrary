@@ -113,6 +113,11 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "System.ServiceProcess.ServiceController": {
+        "type": "Transitive",
+        "resolved": "10.0.11",
+        "contentHash": "khROyIQ3GAZy5MbCabfmlbvxf9nuvdveFP2XbRCteZ9Lq8OFEvImmrjV6acl1LegRu/9T6VMxi9Lr+KZu29VHg=="
+      },
       "assetlibrary.assetlink": {
         "type": "Project"
       },
@@ -121,6 +126,22 @@
         "dependencies": {
           "AssetLibrary.AssetLink": "[1.0.0, )",
           "Npgsql": "[10.0.3, )"
+        }
+      },
+      "assetlibrary.coreserver.host": {
+        "type": "Project",
+        "dependencies": {
+          "AssetLibrary.CoreServer": "[1.0.0, )",
+          "Microsoft.Extensions.Hosting.WindowsServices": "[10.0.11, )"
+        }
+      },
+      "Microsoft.Extensions.Hosting.WindowsServices": {
+        "type": "CentralTransitive",
+        "requested": "[10.0.11, )",
+        "resolved": "10.0.11",
+        "contentHash": "OTlOHRxmt4IyYR5tBejF5ffdVMbo9n5NbPJRzCe0bnJmzTQt0kHNiDiEU96t4KkB3wE3vZqPETtXJVLujrRJnA==",
+        "dependencies": {
+          "System.ServiceProcess.ServiceController": "10.0.11"
         }
       },
       "Npgsql": {

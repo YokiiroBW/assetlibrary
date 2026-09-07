@@ -79,6 +79,30 @@ test("narrow workspace reflows and presents the empty directory state", async ({
   await page.screenshot({ path: testInfo.outputPath("workspace-narrow.png"), animations: "disabled", fullPage: true });
 });
 
+test("directory responses refresh the selected library availability without reloading the library list", async ({
+  page,
+}) => {
+  let libraryReads = 0;
+  const folder = entry(1, { name: "Folder", relative_path: "Folder", kind: "directory", content_length: null });
+  await mockAssetLink(page, (request) => {
+    if (request.operation === "libraries.list") {
+      libraryReads++;
+      return libraryPage(request);
+    }
+    return request.body.parent_relative_path === "Folder"
+      ? browsePage(request, [], null, { ...visibleLibrary, availability: "offline" })
+      : browsePage(request, [folder]);
+  });
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "打开目录 Folder" })).toBeVisible();
+  const initialLibraryReads = libraryReads;
+  await page.getByRole("button", { name: "打开目录 Folder" }).click();
+  await expect(page.getByText(/此资源库暂时离线/)).toBeVisible();
+  await expect(page.locator(".library-list [aria-label='离线']")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "这个目录是空的" })).toHaveCount(0);
+  expect(libraryReads).toBe(initialLibraryReads);
+});
+
 test("read errors and expired authentication have distinct fail-closed states", async ({ page }) => {
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);

@@ -28,12 +28,14 @@ class TaskHealthMigrationTests(unittest.TestCase):
         manifest = MIGRATIONS.load_manifest()
         task_health = [item for item in manifest.migrations if item.module == "TaskHealth"]
 
-        self.assertEqual(len(task_health), 1)
+        self.assertEqual([item.version for item in task_health], [6, 18])
         migration = task_health[0]
         self.assertEqual(migration.version, 6)
         self.assertEqual(migration.module, "TaskHealth")
         self.assertEqual(migration.owner_role, "assetlibrary_task_health_owner")
         self.assertEqual(migration.path, MIGRATION_PATH)
+        self.assertEqual(task_health[1].owner_role, "assetlibrary_task_health_owner")
+        self.assertEqual(task_health[1].path, PRODUCTION / "0018_task_health_scan_commit_guard.sql")
 
     def test_objects_and_writes_stay_inside_the_owned_schema(self) -> None:
         governed = {item[1] for item in MIGRATIONS.EXPECTED_MODULES}

@@ -18,5 +18,6 @@
 
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+    <Compile Include="../Shared/TrialTestTls.cs" Link="TrialTestTls.cs" />
   </ItemGroup>
 </Project>

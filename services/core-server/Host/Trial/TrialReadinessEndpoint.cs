@@ -6,7 +6,10 @@ internal static class TrialReadinessEndpoint
     {
         application.MapGet("/healthz", () => Results.Json(new
         {
-            status = "ok", contract = "v01-015/1", scope = "read_only_trial", production_file_writes_enabled = false,
+            status = "ok",
+            contract = "v01-015/1",
+            scope = "read_only_trial",
+            production_file_writes_enabled = false,
         }));
         application.MapGet("/readyz", async (HttpContext context, CancellationToken token) =>
         {
