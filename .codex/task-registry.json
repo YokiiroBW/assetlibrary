@@ -385,7 +385,7 @@
       "id": "ALIGN-001",
       "title": "repository-architecture-alignment",
       "module": "repository-architecture-alignment",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "M0-009",
         "V01-014",

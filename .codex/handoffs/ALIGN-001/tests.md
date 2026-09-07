@@ -90,3 +90,10 @@ Kotlin `build` 和 `sdkTest` 自检成功，日志 `.runtime/gradle-home/daemon/
 NAS 旧 Linux worktree 在 Windows 显示 prunable，但目录存在且 Git clean；用原管理目录只读核验，未改指针、未 prune/repair。ignored 缓存/产物不算 Git 脏文件。
 
 ALIGN-002 九个无文件目录的清理被自动批准审查两次拒绝，仅返回 `blocked by policy`；命令未执行且未绕过。准确绝对路径见 `../ALIGN-002/tests.md`。Git clean 不表示磁盘完全无残留。
+
+### 已执行同步读回（2026-09-07）
+
+- 本地 main、NAS main 和协调分支首次验收一致：HEAD `663f3f101294baedb7ae2f8a473dbe66aa73a858`；tree `7450cb93f71fea8bd0458ce59e7e21226d013aa2`。仅使用快进合并。
+- 36/36 工作区 Git clean，HEAD 与原 worktree 清单一致；未合并内容为零，旧两端提交的祖先检查均为 true。没有删除、重置历史任务。
+- NAS 实际文件再次执行迁移清单校验：13 migrations / 11 modules / PostgreSQL 16.15，通过；任务数据库/Spike/Host 测试进程均已退出。
+- 上述结果写入本次纯状态/交接提交后再快进同步两端；最终 tip 可从 Git 读取，不将本文件的自引用 hash 写入自身。源码清单对应的 334 个文件未改变，不重复未变源码的已通过测试。
