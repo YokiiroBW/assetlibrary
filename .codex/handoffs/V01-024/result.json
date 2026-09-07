@@ -1,0 +1,59 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-024",
+  "title": "web-product-interaction-integration",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "architecture-coordinator",
+  "branch": "codex/v01-024-web-product-interaction-integration",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-024",
+  "commit": "c38e41ff448c2e18e436c45f9e540135827db3df",
+  "changed_files": [
+    ".codex/tasks/V01-024.md",
+    ".codex/handoffs/V01-024/result.json",
+    ".codex/handoffs/V01-024/summary.md",
+    ".codex/handoffs/V01-024/tests.md",
+    "contracts/assetlink/web-interaction-v1.md",
+    "contracts/assetlink/read-only-trial-v1.md",
+    "docs/adr/ADR-0016_Web产品交互与授权浏览查询.md",
+    "services/core-server/Host/Trial/TrialWebEndpoints.cs",
+    "infra/docker/nas/Dockerfile"
+  ],
+  "changed_contracts": [
+    "contracts/assetlink/web-interaction-v1.md",
+    "contracts/assetlink/read-only-trial-v1.md"
+  ],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "implementation_in_progress_no_per_edit_tests"
+  },
+  "risks": [],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V01-024/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Web product navigation, authorized query contract and NAS composition",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing modular read core, authorized PostgreSQL queries, cursor and migration ownership.",
+      "Existing React/SDK/session/request lifecycle/virtualization and same Host deployment."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Additive library category/details and scoped server-side sort/filter/anchor queries under ADR-0016; no generated envelope changes."
+    ],
+    "architecture_tests": [
+      "Not executed during implementation; consolidated acceptance follows stable code."
+    ],
+    "technical_debt": [
+      "Content previews, general rescan and asset writes remain outside this Web interaction scope."
+    ]
+  }
+}

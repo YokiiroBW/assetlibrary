@@ -3,6 +3,8 @@
 Status: coordinator-approved for V01-015..018 implementation (2026-09-07); ADR-0014.
 This is additive. Existing envelopes and libraries.list/entries.browse/assets.search bodies remain unchanged. Generated SDKs preserve open operations/bodies; consumers never hand-edit generated sources.
 
+V01-024..026 adds optional category/query controls and authorized detail operations under [web-interaction-v1.md](web-interaction-v1.md) and ADR-0016. Existing requests without these options keep their original defaults.
+
 ## Authentication transport
 
 All endpoints are same-origin HTTPS and no-store. No CORS. POST requires one exact configured Origin and a matching Host. A missing/null/multiple/wrong Origin is rejected. All authenticated control/management requests also send `X-AssetLibrary-CSRF` from memory.
