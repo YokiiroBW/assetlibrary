@@ -122,7 +122,7 @@ export function RegisterLibraryForm({
             关闭
           </button>
         </div>
-        <p className="form-hint">选择已配置的存储源，填写服务器上的真实目录。添加后由你开始首次扫描。</p>
+        <p className="form-hint">选择已配置的存储源，填写服务端实际可见的目录。添加后由你开始首次扫描。</p>
         {loading && <p role="status">正在读取存储源…</p>}
         {!loading && sources.length === 0 && <p>暂无可用存储源，请联系服务器管理员完成配置。</p>}
         <label htmlFor="storage-source">存储源</label>
@@ -150,7 +150,9 @@ export function RegisterLibraryForm({
           />
         </label>
         <p id="root-description" className="form-hint">
-          输入所选存储源允许范围内的完整目录路径。
+          NAS 容器部署：按部署挂载表填写 <code>/assets/photos</code> 等容器路径或其子目录，不要直接填写 NAS
+          宿主目录或浏览器电脑的盘符。Windows 原生部署可填写服务器上的 <code>C:\Assets\Photos</code> 或{" "}
+          <code>\\nas\photos</code>，完整路径须在所选存储源的允许范围内。
         </p>
         {message !== null && (
           <p className="form-error" role="alert" ref={errorElement} tabIndex={-1}>

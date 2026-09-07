@@ -39,6 +39,7 @@ export function LibraryScanStatus({
         )}
         {summary?.state === "failed" && <span>扫描未完成，尚未生成可用索引。检查存储连接后可重试。</span>}
         {summary?.state === "cancelled" && <span>扫描已停止，尚未生成可用索引。</span>}
+        {summary?.state === "succeeded" && <span>当前显示首次扫描的索引快照，刷新不会重新扫描目录。</span>}
       </div>
       {scan.message !== null && (
         <p className="form-error" role="alert">
