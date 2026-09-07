@@ -2,7 +2,7 @@
 
 此部署沿用现有只读试用核心：登录、登记物理目录、首次扫描、浏览和名称/路径搜索。Web由同一个Core容器通过HTTPS提供。只运行Core与PostgreSQL两个长期服务；初始化、迁移和管理员操作使用执行完即退出的setup容器。它不开放资产写入、预览、下载原文件、通用重扫、Windows Service或Explorer功能，也不替代完整Alpha门禁。
 
-本任务当前先提交实现候选，尚未运行镜像构建、测试或NAS部署。下面为统一验收及实际部署入口，不能将这些步骤描述为已经通过。
+构建清单记录镜像来源；目标环境的部署验收见`.codex/handoffs/V01-021/`交接。构建成功本身不代表部署通过。
 
 ## 部署前准备
 
@@ -46,6 +46,8 @@ cp settings.example.json settings.json
 ```
 
 configure生成一次性deployment ID、`deployment.env`和只读挂载表`assets.compose.json`。之后检测settings内容漂移；不要为了更改目录而删除ID、复制另一部署的卷或重新configure。若命令被中断，保留`.nasctl.lock`/pending文件并先确认没有同一部署操作仍在运行，再检查自己的残留；不会自动覆盖。
+
+Core以UID/GID `1654:1654`运行。资产目录还需允许该身份读取文件、列出和穿过目录；只读挂载不会绕过NAS权限。如果需要现有NAS读取组，在configure后编辑`deployment.env`，加入唯一一行`ASSETLIBRARY_ASSET_READ_GROUP=101`。这里的`101`是本次目标NAS已验证的读取组，其他NAS须使用其实际具备读取权限的组号。该可选值只能是一个非零数字组号，省略时默认为`1654`；nasctl从文件读取并校验，仅为Core添加这个附加组，主UID/GID不变。执行`./nasctl.sh start`会按新配置重建Core并保留卷。此设置不修改NAS主机ACL，不让Core以root运行，资产挂载仍为只读。
 
 initialize仅在新建或能识别为自己的卷中准备私密目录和证书，启动自己的PG16.15，然后通过既有migration_tool provision角色、验证备份、应用18个前进迁移，最后调用Host初始化授权密钥。重入不更换密码、部署ID或授权密钥；半写入的PKI和身份不一致会被保留并拒绝覆盖。
 
