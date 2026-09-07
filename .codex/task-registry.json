@@ -605,7 +605,7 @@
       "id": "V01-024",
       "title": "web-product-interaction-integration",
       "module": "web-product-interaction-integration",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-021",
         "V01-025",
@@ -623,7 +623,7 @@
       "id": "V01-025",
       "title": "web-navigation-and-workspace",
       "module": "web-navigation-and-workspace",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-023"
       ],
@@ -639,7 +639,7 @@
       "id": "V01-026",
       "title": "library-browse-interaction-contracts",
       "module": "library-browse-interaction-contracts",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-021"
       ],

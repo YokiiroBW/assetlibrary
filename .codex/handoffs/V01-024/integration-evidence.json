@@ -1,0 +1,256 @@
+{
+  "status": "passed",
+  "web": {
+    "passed": 43,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "passed_with_targeted_regression_after_first_run_fixes",
+    "first_run": {
+      "duration_seconds": 45.7,
+      "passed": 37,
+      "failed": 6
+    },
+    "affected_recheck": {
+      "duration_seconds": 9.6,
+      "passed": 7,
+      "failed": 0
+    },
+    "mobile_toolbar_regression": {
+      "duration_seconds": 3.8,
+      "failed": 0,
+      "passed": 1,
+      "report_directory": ".runtime/playwright-results/V01-025-mobile-toolbar"
+    },
+    "css_source_organization": {
+      "artifacts_compared": 4,
+      "source_gate": "passed",
+      "format": "passed",
+      "build": "passed",
+      "output_sha256_equal": true,
+      "browser_rerun": false
+    }
+  },
+  "core": {
+    "passed": 42,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "affected_backend_and_real_web_e2e_passed",
+    "embedded_dotnet_queries": {
+      "passed": 1,
+      "notExecuted": 0,
+      "failed": 0,
+      "executed": 1,
+      "total": 1
+    },
+    "suites": {
+      "protocol_and_fingerprint": 5,
+      "migration_manifest": 21,
+      "required_postgres_driver": 1,
+      "real_https_browser_e2e": 1,
+      "architecture_rules": 14
+    },
+    "real_e2e_evidence": ".runtime/V01-026/real-web-e2e/20260907T174230Z-0d158ac9",
+    "resource_cleanup": "verified",
+    "repository_verification": "passed; Alpha validity audit remains release blocked"
+  },
+  "real_https_postgres_browser": {
+    "status": "passed",
+    "run_id": "20260907T174230Z-0d158ac9",
+    "aggregate_tests_passed": 1,
+    "skipped": 0,
+    "scenarios": [
+      "protected_operator_bootstrap",
+      "runtime_role_boundary",
+      "real_browser_registration",
+      "real_worker_initial_scan",
+      "browse_and_full_path_search",
+      "desktop_and_mobile_dark",
+      "ordinary_user_and_hidden_library_denial",
+      "origin_and_csrf_denial",
+      "persistent_session_restart",
+      "offline_login",
+      "offline_snapshot_preservation",
+      "failed_scan_retry",
+      "queued_scan_cancellation_retry",
+      "administrator_recovery_replay",
+      "old_session_revocation",
+      "unchanged_source_hash_and_mtime",
+      "owned_tls_container_disposal"
+    ],
+    "resource_cleanup": "verified"
+  },
+  "asset_writes_enabled": false,
+  "automatic_personal_scan_started": false,
+  "source_baseline": "6f2944bdf4d3345ccc1245e4e9bf8a1bd8f14b6c",
+  "final_package_source": "61e6c0ef054f91bae6a6f39c692c175fdf151028",
+  "deployment": {
+    "origin": "https://192.168.31.210:5443",
+    "configuration_directory": "/volume2/homes/agent/assetlibrary/V01-021/live",
+    "migrations": 21,
+    "module_logins": 6,
+    "authorization_key": "original_key_retained_no_bootstrap",
+    "containers": [
+      {
+        "service": "core",
+        "image_id": "sha256:939696ed896661bb0804223af81b64165e785a4100b63bb8905cf1204dc1dbd5",
+        "health": "healthy",
+        "user": "1654:1654",
+        "read_only_root": true,
+        "no_new_privileges": true,
+        "cap_drop": [
+          "ALL"
+        ],
+        "asset_mounts": [
+          {
+            "host_path": "/volume1/Documents",
+            "container_path": "/assets/documents",
+            "read_only": true
+          },
+          {
+            "host_path": "/volume1/Pictures",
+            "container_path": "/assets/pictures",
+            "read_only": true
+          }
+        ],
+        "ports": {
+          "5443/tcp": [
+            {
+              "HostIp": "192.168.31.210",
+              "HostPort": "5443"
+            }
+          ]
+        }
+      },
+      {
+        "service": "postgres",
+        "image_id": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+        "health": "healthy",
+        "user": "999:999",
+        "read_only_root": true,
+        "no_new_privileges": true,
+        "cap_drop": [
+          "ALL"
+        ],
+        "asset_mounts": [],
+        "ports": {}
+      }
+    ],
+    "cold_backup": {
+      "status": "verified",
+      "deployment_id": "826109ef-d44c-45be-884c-88f1fb85607a",
+      "backup_directory": "/volume2/homes/agent/assetlibrary/V01-024/backup-6c1b14af-ffe3-4327-8625-0598a81909c2",
+      "old_setup_image_id": "sha256:aed6cc7d538823e3f32f03115f01df35e99904abc541a81dd20260167a31b2ff",
+      "archive_sha256": {
+        "assetlibrary-nas-core-state": "f692d06ffd21e28807bbbbb0a622aed589ddd7529b835d026a8ed331cedd1cd2",
+        "assetlibrary-nas-postgres-data": "bc7cac2f0117b38d484aba1445ed69316dbf14f15c3a496f4d75ad374e5ce5a3",
+        "assetlibrary-nas-postgres-tls": "3c3c7e2a4cf389e4d4ddb1e89f6eec6a39ae455ca61d3389d84aca824eae1452",
+        "assetlibrary-nas-setup-state": "fae79300070c3a881645ca2e7863d3a43a7236ae167cd7f5b6c5b429e3d033db"
+      },
+      "old_container_images": {
+        "assetlibrary-nas-core-1": "sha256:085c7fe51c68bf7a4528d9e44f2629fd2b0a3e5c6eb7f8482eb2a3434dac477d",
+        "assetlibrary-nas-postgres-1": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632"
+      },
+      "numeric_owners_modes_links_acl_xattr_preserved": true
+    },
+    "libraries": [
+      {
+        "library": {
+          "library_id": "6dd9b706-6686-4fde-82c8-1f8e6335a2f7",
+          "display_name": "图片",
+          "availability": "online",
+          "access_level": "library_administrator",
+          "category": "general"
+        },
+        "scan": {
+          "task_id": "0c8923e7-2cf4-445f-b195-31ba2b6cdb1e",
+          "scan_id": "de75c78e-8102-49d0-b970-4dfa3320a711",
+          "state": "succeeded",
+          "cancellation_requested": false,
+          "observed_entries": 195792,
+          "committed_entries": 195792,
+          "started_at": "2026-09-07T15:47:49.643909+00:00",
+          "finished_at": "2026-09-07T15:48:23.476021+00:00",
+          "failure_code": null,
+          "can_cancel": false,
+          "can_retry": false
+        }
+      },
+      {
+        "library": {
+          "library_id": "972f8818-23bc-46d5-9e42-36a0d0264769",
+          "display_name": "文档",
+          "availability": "online",
+          "access_level": "library_administrator",
+          "category": "general"
+        },
+        "scan": null
+      }
+    ],
+    "original_scan_records_unchanged": true,
+    "browser": {
+      "status": "passed",
+      "browser": "151.0.7922.34",
+      "control_calls": [
+        {
+          "operation": "libraries.list",
+          "status": 200
+        },
+        {
+          "operation": "libraries.list",
+          "status": 200
+        },
+        {
+          "operation": "libraries.list",
+          "status": 200
+        },
+        {
+          "operation": "libraries.get",
+          "status": 200
+        },
+        {
+          "operation": "library_scans.get",
+          "status": 200
+        },
+        {
+          "operation": "entries.browse",
+          "status": 200
+        },
+        {
+          "operation": "libraries.list",
+          "status": 200
+        },
+        {
+          "operation": "entries.browse",
+          "status": 200
+        },
+        {
+          "operation": "entries.browse",
+          "status": 200
+        },
+        {
+          "operation": "libraries.list",
+          "status": 200
+        },
+        {
+          "operation": "library_scans.get",
+          "status": 200
+        },
+        {
+          "operation": "libraries.get",
+          "status": 200
+        },
+        {
+          "operation": "libraries.list",
+          "status": 200
+        }
+      ],
+      "management_mutations": 0,
+      "personal_assets_scanned": false,
+      "home_and_library_deep_links": true,
+      "refresh_and_history": true,
+      "mobile": "390x844 dark"
+    }
+  }
+}

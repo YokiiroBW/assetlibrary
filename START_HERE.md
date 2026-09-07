@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-需求与架构已冻结，V01-021 至 V01-023 已完成 NAS Docker 服务端与第一版 Web，保留 V01-015 至 V01-020 的 Windows 只读试用。使用入口见 [NAS Web 交付说明](docs/releases/NAS_READ_ONLY_WEB.md)。V01-008 保持 partial，完整 Alpha 发布仍 blocked。先读 `.codex/project-state.json`、本轮交接和 `docs/releases/V0.1_ALPHA_READINESS.md`，从未完成项继续。
+需求与架构已冻结，V01-024 至 V01-026 已完成 NAS Web 的浏览与库管理交互，V01-021 至 V01-023 记录最初的 Docker/最小只读链路，保留 V01-015 至 V01-020 的 Windows 只读试用。使用入口见 [Web 工作区说明](docs/releases/WEB_WORKSPACE.md)。V01-008 保持 partial，完整 Alpha 发布仍 blocked。先读 `.codex/project-state.json`、本轮交接和 `docs/releases/V0.1_ALPHA_READINESS.md`，从未完成项继续。
 
 路线及当前所处位置：
 
