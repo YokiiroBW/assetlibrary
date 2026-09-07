@@ -12,6 +12,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from unittest import mock
 import urllib.request
@@ -292,6 +293,21 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertEqual(run("start")["status"], "running")
                 self.assertEqual(run("start", success=False)["code"], "trial_already_running")
                 self.assertEqual(run("status")["status"], "ready")
+                control = json.loads((state / ".trial-process.json").read_text())
+                stop_request = state / ".trial-stop.json"
+                try:
+                    stale = dict(control)
+                    stale["generation"] = str(uuid.uuid4())
+                    stop_request.write_text(json.dumps(stale), encoding="utf-8")
+                    time.sleep(0.8)
+                    self.assertEqual(run("status")["status"], "ready")
+                    forged = dict(control)
+                    forged["stop_nonce"] = ("0" if control["stop_nonce"][0] != "0" else "1") + control["stop_nonce"][1:]
+                    stop_request.write_text(json.dumps(forged), encoding="utf-8")
+                    time.sleep(0.8)
+                    self.assertEqual(run("status")["status"], "ready")
+                finally:
+                    stop_request.unlink(missing_ok=True)
                 context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
                 context.load_verify_locations(cadata=ssl.DER_cert_to_PEM_cert((state / "tls/localhost.cer").read_bytes()))
                 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPSHandler(context=context))
@@ -313,7 +329,10 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertEqual(run("stop", success=False)["code"], "trial_host_process_owner_mismatch")
                 process_path.write_bytes(original)
                 self.assertEqual(run("status")["status"], "ready")
-                self.assertEqual(run("stop")["status"], "stopped")
+                stopped = run("stop")
+                self.assertEqual(stopped["status"], "stopped")
+                self.assertEqual(stopped["shutdown"], "graceful")
+                self.assertFalse((state / ".trial-process.json").exists())
                 self.assertEqual(run("status")["status"], "stopped")
                 self.assertEqual(run("start")["status"], "running")
                 login()
@@ -332,7 +351,7 @@ class TrialNativePackageTests(unittest.TestCase):
                 self.assertEqual(run("status")["status"], "ready")
                 self.assertEqual((hashlib.sha256(asset.read_bytes()).hexdigest(), asset.stat().st_mtime_ns), fingerprint)
                 logged = "\n".join(transcript) + "\n".join(path.read_text(encoding="utf-8", errors="replace") for path in (state / "logs").glob("*.log"))
-                for secret in [password, previous_password, *json.loads((state / "secrets/database-passwords.json").read_text()).values()]:
+                for secret in [password, previous_password, control["stop_nonce"], *json.loads((state / "secrets/database-passwords.json").read_text()).values()]:
                     self.assertFalse(secret in logged, "native lifecycle output disclosed a credential")
             finally:
                 run("stop")

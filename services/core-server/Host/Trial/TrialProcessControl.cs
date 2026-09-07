@@ -125,6 +125,9 @@ internal sealed partial class TrialProcessControl(
 internal sealed record TrialProcessRecord(int FormatVersion, Guid DeploymentId, Guid Generation, int Pid,
     string ProcessPath, long StartedTicks, string StopNonce)
 {
+    private static StringComparison PathComparison => OperatingSystem.IsWindows()
+        ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
     [JsonIgnore]
     public bool Valid => FormatVersion == 1 && DeploymentId != Guid.Empty && Generation != Guid.Empty && Pid > 0
         && StartedTicks > 0 && !string.IsNullOrWhiteSpace(ProcessPath) && Path.IsPathFullyQualified(ProcessPath)
@@ -142,13 +145,13 @@ internal sealed record TrialProcessRecord(int FormatVersion, Guid DeploymentId, 
     {
         using var process = Process.GetProcessById(Pid);
         return !process.HasExited && process.StartTime.ToUniversalTime().Ticks == StartedTicks
-            && string.Equals(process.MainModule?.FileName, ProcessPath, StringComparison.OrdinalIgnoreCase)
-            && string.Equals(Environment.ProcessPath, ProcessPath, StringComparison.OrdinalIgnoreCase);
+            && string.Equals(process.MainModule?.FileName, ProcessPath, PathComparison)
+            && string.Equals(Environment.ProcessPath, ProcessPath, PathComparison);
     }
 
     public bool SameGeneration(TrialProcessRecord actual) => actual.Valid && DeploymentId == actual.DeploymentId
         && Generation == actual.Generation && Pid == actual.Pid && StartedTicks == actual.StartedTicks
-        && string.Equals(ProcessPath, actual.ProcessPath, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(ProcessPath, actual.ProcessPath, PathComparison)
         && CryptographicOperations.FixedTimeEquals(Convert.FromHexString(StopNonce), Convert.FromHexString(actual.StopNonce));
 
     public override string ToString() => "[private trial process control]";
