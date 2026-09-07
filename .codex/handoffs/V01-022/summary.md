@@ -40,3 +40,11 @@ Owner server-packaging-owner；分支codex/v01-022-nas-docker-deployment；工�
 - 可加载Recipe目录：`/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/recipe-01/assetlibrary-nas`。其build-manifest记录image/export-tool/deployment-recipe三个实际commit；镜像tar复用已验证文件，SHA保持相同。NAS上传/启动及正式资产验收由根负责。
 
 镜像ID/base digests与可定位证据见build-evidence.json和远端build-manifest.json。当前状态仍partial，等待根NAS验收；没有对其他服务、内核、全局nproc或正式资产执行变更。
+
+## NAS风险网络适配后的镜像更新
+
+根提供70a01e8：真实风险网络上限2→4秒、管理员总截止仍5秒，TLS/body/cache/fail-closed不变；25个风险回归由根通过。合入后的镜像source为29658e1791198e6c84810dc0baa486d100598e91，tree25da4d6fba1f984563370bad744ea8fef21d754e。
+
+本任务只借已有缓存更新Core/setup并重导bundle；PG保持原abcb标签/同一ID，4个base digest完全不变，未重跑其他测试或NAS运行。新包位于dev-230 `/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/risk-update-01/assetlibrary-nas`。images.tar 753087488 bytes，SHA256 5e68b7e76bb44affe3ec8567532a5d68e98762dc69a85f1be6037445d571de60；manifest SHA c8474d435556f8e8574de59cac0e1b657fa91b2fc588e126ca8e6ac779c3c356。SHA256SUMS全文件验证通过。
+
+Core ID sha256:1b733a68908c79539ece4f5c309e9317076afc02f84f9b35087968deffdd5938；setup ID sha256:e31289237cc27a988ff66ae85fa0cdb2d1ad55e27cf6d5657928f5c1a7f41341；PG ID仍sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632。setup仅透传根显式配置的HTTPS_PROXY，排除postgres/core/localhost/loopback；没有在NAS新增长期业务服务或关闭TLS。NAS实际操作及最终验收仍由根执行。

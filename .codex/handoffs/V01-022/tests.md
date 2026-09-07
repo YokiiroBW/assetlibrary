@@ -23,3 +23,5 @@
 - `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj --configuration Release --no-build --no-restore --filter FullyQualifiedName~PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity`：2 passed/0 failed/0 skipped，63ms，TRX为posix-two.trx。
 - SDK提取仅复用已完成server层缓存，不重新编译旧阶段；创建的自有SDK提取container按task标签验证后移除，没有运行持久服务。
 - 此处没有NAS运行测试。内核资源兼容修正是根据根实际docker info反馈，不能把Compose文件存在写成NAS已通过。
+
+镜像更新source29658e1：只执行Core/setup缓存构建与离线导出，所有原base digest/PG/Web输入保持不变。新images.tar SHA5e68b7e76bb44affe3ec8567532a5d68e98762dc69a85f1be6037445d571de60，753087488 bytes；新bundle SHA256SUMS全部通过。根报告70a01e8的25个Pwned回归已通过，本任务未重复这组或旧测试；NAS不在本子任务执行。
