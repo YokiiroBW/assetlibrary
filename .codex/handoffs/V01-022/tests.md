@@ -25,3 +25,5 @@
 - 此处没有NAS运行测试。内核资源兼容修正是根据根实际docker info反馈，不能把Compose文件存在写成NAS已通过。
 
 镜像更新source29658e1：只执行Core/setup缓存构建与离线导出，所有原base digest/PG/Web输入保持不变。新images.tar SHA5e68b7e76bb44affe3ec8567532a5d68e98762dc69a85f1be6037445d571de60，753087488 bytes；新bundle SHA256SUMS全部通过。根报告70a01e8的25个Pwned回归已通过，本任务未重复这组或旧测试；NAS不在本子任务执行。
+
+CA修复包fb6fc0a：仅缓存构建Core/setup+离线导出及全文件SHA清单检查，通过。标准CA来自系统ca-certificates包；无TLS验证关闭、无原测试重复、无NAS运行。本包images.tar SHA df894a32ebd169a361f9219ac6d6a2ea6e6ef4119910455ea1a9480404e0192b。

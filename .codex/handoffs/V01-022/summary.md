@@ -48,3 +48,9 @@ Owner server-packaging-owner；分支codex/v01-022-nas-docker-deployment；工�
 本任务只借已有缓存更新Core/setup并重导bundle；PG保持原abcb标签/同一ID，4个base digest完全不变，未重跑其他测试或NAS运行。新包位于dev-230 `/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/risk-update-01/assetlibrary-nas`。images.tar 753087488 bytes，SHA256 5e68b7e76bb44affe3ec8567532a5d68e98762dc69a85f1be6037445d571de60；manifest SHA c8474d435556f8e8574de59cac0e1b657fa91b2fc588e126ca8e6ac779c3c356。SHA256SUMS全文件验证通过。
 
 Core ID sha256:1b733a68908c79539ece4f5c309e9317076afc02f84f9b35087968deffdd5938；setup ID sha256:e31289237cc27a988ff66ae85fa0cdb2d1ad55e27cf6d5657928f5c1a7f41341；PG ID仍sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632。setup仅透传根显式配置的HTTPS_PROXY，排除postgres/core/localhost/loopback；没有在NAS新增长期业务服务或关闭TLS。NAS实际操作及最终验收仍由根执行。
+
+## 正式setup系统CA修复包
+
+根真实诊断确认旧setup缺少标准CA根（BCL报告UntrustedRoot），同一链在Core正常；根4d17af4仅加入ca-certificates，不关闭证书验证。合入后同源镜像commit fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd / tree795efe55befd4413df8eb486b16c8d8719fd0455。
+
+Core/setup借已有缓存完成更新，PG与四个base digest不变；没有重复测试或操作NAS。正式交付目录dev-230 `/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/ca-update-01/assetlibrary-nas`。images.tar754859520 bytes/SHA256 df894a32ebd169a361f9219ac6d6a2ea6e6ef4119910455ea1a9480404e0192b；manifest SHA fb09b40ff2ef2e4d7f64017ccee94be67ef8733469f5b032d857abbb92bb102e；SHA256SUMS全部通过。Core ID7d5e945e9b7738f524bafa3c81678634a331dee130d838f8d0242ec5f8da76e3，setup IDb19b6d248f0fca6dd844661125bc300d3ab9ffbee58240aebe0fad5ef9b758bc。此正式setup替代旧临时公开CA只读挂载，实际NAS替换和验收由根完成。

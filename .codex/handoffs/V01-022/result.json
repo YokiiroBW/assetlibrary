@@ -7,7 +7,7 @@
   "owner": "server-packaging-owner",
   "branch": "codex/v01-022-nas-docker-deployment",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-022",
-  "commit": "29658e1791198e6c84810dc0baa486d100598e91",
+  "commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
   "changed_files": [
     ".codex/tasks/V01-022.md",
     ".codex/handoffs/V01-022/summary.md",
@@ -73,12 +73,12 @@
     ]
   },
   "artifact": {
-    "remote_bundle": "/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/risk-update-01/assetlibrary-nas",
-    "image_source_commit": "29658e1791198e6c84810dc0baa486d100598e91",
-    "image_source_tree": "25da4d6fba1f984563370bad744ea8fef21d754e",
-    "images_tar_bytes": 753087488,
-    "export_tool_commit": "29658e1791198e6c84810dc0baa486d100598e91",
-    "images_tar_sha256": "5e68b7e76bb44affe3ec8567532a5d68e98762dc69a85f1be6037445d571de60",
-    "deployment_recipe_commit": "29658e1791198e6c84810dc0baa486d100598e91"
+    "remote_bundle": "/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/ca-update-01/assetlibrary-nas",
+    "images_tar_sha256": "df894a32ebd169a361f9219ac6d6a2ea6e6ef4119910455ea1a9480404e0192b",
+    "image_source_tree": "795efe55befd4413df8eb486b16c8d8719fd0455",
+    "image_source_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
+    "deployment_recipe_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
+    "export_tool_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
+    "images_tar_bytes": 754859520
   }
 }
