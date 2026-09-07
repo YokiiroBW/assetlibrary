@@ -26,22 +26,21 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
             throw new FileDiscoveryException("storage_unavailable");
         }
 
-        var pendingDirectories = new Stack<string>();
-        pendingDirectories.Push(root);
+        var frames = new Stack<(string Directory, IEnumerator<string> Children)>();
+        ValidatePhysicalDirectory(root, cancellationToken);
+        frames.Push((root, OpenDirectory(root)));
         var processed = 0;
-        while (pendingDirectories.TryPop(out var directory))
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ValidatePhysicalDirectory(directory, cancellationToken);
-            using var children = OpenDirectory(directory);
-            while (true)
+            while (frames.TryPeek(out var frame))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 // A consumer may suspend enumeration after each yield while an ancestor is replaced.
-                ValidatePhysicalDirectory(directory, cancellationToken);
-                if (!MoveNext(children, out var child))
+                ValidatePhysicalDirectory(frame.Directory, cancellationToken);
+                if (!MoveNext(frame.Children, out var child))
                 {
-                    break;
+                    frames.Pop().Children.Dispose();
+                    continue;
                 }
 
                 var entry = ReadEntry(root, child);
@@ -53,7 +52,8 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
                 yield return entry;
                 if (DefaultDiscoveryPolicy.ShouldRecurse(entry))
                 {
-                    pendingDirectories.Push(child);
+                    ValidatePhysicalDirectory(child, cancellationToken);
+                    frames.Push((child, OpenDirectory(child)));
                 }
 
                 processed++;
@@ -61,6 +61,15 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
                 {
                     await Task.Yield();
                 }
+            }
+
+            ValidatePhysicalDirectory(root, cancellationToken);
+        }
+        finally
+        {
+            while (frames.TryPop(out var frame))
+            {
+                frame.Children.Dispose();
             }
         }
     }
