@@ -1,6 +1,6 @@
 # V01-025 Web 导航与产品工作区
 
-状态：ready_for_review。分支 codex/v01-025-web-navigation-and-workspace；产品与测试 commit 1336afe1be6604ffc20dae4c37de0cb837425b18，基于 root c429f66。Web 范围已验收，真实 HTTPS/PostgreSQL 集成与 NAS 更新由协调器继续。
+状态：ready_for_review。分支 codex/v01-025-web-navigation-and-workspace；产品与测试 commit 928fcd1ed40181cc8ef0600bfbf951a91e75b7a7，基于 root c429f66。Web 范围已验收，真实 HTTPS/PostgreSQL 集成与 NAS 更新由协调器继续。
 
 ## 完成行为
 
@@ -36,3 +36,8 @@
 协调器在 390px 单条搜索结果中复现：第一次点击使选择摘要变宽，窄屏 flex 工具栏从一行换成两行，列表向下位移，第二次点击落空。独立修正 1336afe 将宽度不超过 450px 的工具栏预留固定两行；没有改双击行为或回避 E2E。
 
 在原手机/多选例加入单条搜索结果的选中前/选中后/取消选择后三个 row boundingBox.y 完全一致断言，然后实际双击确认详情抽屉打开。受影响 1/1 通过（3.8s），必要格式检查与生产 build 通过；未重跑 43 项全量。新 dist 已供协调器继续真实 HTTPS/PG 复验。
+## CSS 源码组织门禁修正
+
+928fcd1 将原 styles.css 按原始规则序列连续切分为 base、shell、catalog、entries、management-and-forms 和 responsive 六个文件，入口只保留同序 @import。未改任何选择器、属性、规则顺序、主题 token 或源码门禁阈值。最大分块 8546 bytes，低于原 24000-byte review bound。
+
+validate_web_source.py、format:check、生产 build 和 diff 检查通过。构建后 index.html、CSS、JS 与 JS source map 的文件名、字节数及 SHA-256 与拆分前完全一致。没有行为字节变化，因此未重跑浏览器；摘要见 tests.md。
