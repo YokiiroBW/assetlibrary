@@ -34,6 +34,7 @@ internal sealed class ProtectedGatewayAuthorizationKeyStore : IGatewayAuthorizat
 
     public async ValueTask<GatewayAuthorizationKeyMaterial> ReadAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         PrivateAuthorizationFiles.ValidateFile(keyFile);
         await using var stream = new FileStream(
             keyFile, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete,
@@ -61,6 +62,7 @@ internal sealed class ProtectedGatewayAuthorizationKeyStore : IGatewayAuthorizat
         CancellationToken cancellationToken)
     {
         using var deadline = AuthenticationOperationDeadline.Create(cancellationToken);
+        deadline.Token.ThrowIfCancellationRequested();
         PrivateAuthorizationFiles.ValidateParent(keyFile);
         await using var lease = await AcquireLeaseAsync(deadline.Token).ConfigureAwait(false);
         if (File.Exists(keyFile) == initialize)

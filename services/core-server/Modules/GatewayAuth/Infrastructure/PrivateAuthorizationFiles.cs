@@ -95,18 +95,26 @@ internal static class PrivateAuthorizationFiles
     {
         using var identity = WindowsIdentity.GetCurrent(TokenAccessLevels.Query);
         var user = identity.User ?? throw Unavailable();
+        if (security.GetOwner(typeof(SecurityIdentifier)) is not SecurityIdentifier owner || !Permitted(owner, user))
+        {
+            throw Unavailable();
+        }
+
         foreach (FileSystemAccessRule rule in security.GetAccessRules(true, true, typeof(SecurityIdentifier)))
         {
             var sid = (SecurityIdentifier)rule.IdentityReference;
             if (rule.AccessControlType == AccessControlType.Allow
-                && !sid.Equals(user)
-                && !sid.IsWellKnown(WellKnownSidType.LocalSystemSid)
-                && !sid.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid))
+                && !Permitted(sid, user))
             {
                 throw Unavailable();
             }
         }
     }
+
+    [SupportedOSPlatform("windows")]
+    private static bool Permitted(SecurityIdentifier sid, SecurityIdentifier user) =>
+        sid.Equals(user) || sid.IsWellKnown(WellKnownSidType.LocalSystemSid)
+        || sid.IsWellKnown(WellKnownSidType.BuiltinAdministratorsSid);
 
     [SupportedOSPlatform("windows")]
     private static void RestrictWindowsFile(string path)
@@ -115,7 +123,6 @@ internal static class PrivateAuthorizationFiles
         var user = identity.User ?? throw Unavailable();
         var security = new FileSecurity();
         security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-        security.SetOwner(user);
         security.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.FullControl, AccessControlType.Allow));
         new FileInfo(path).SetAccessControl(security);
     }

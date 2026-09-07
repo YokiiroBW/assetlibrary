@@ -92,6 +92,11 @@ public sealed class GatewayAuthenticationRuntime : IDisposable
         {
             throw;
         }
+        catch (OperatorAuthorizationRejectedException)
+        {
+            return AdministratorBootstrapRecoveryResult.Rejected(
+                AdministratorBootstrapRecoveryOutcome.AuthorizationRejected);
+        }
         catch (Exception)
         {
             return AdministratorBootstrapRecoveryResult.Rejected(

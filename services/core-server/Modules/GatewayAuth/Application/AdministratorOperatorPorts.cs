@@ -9,6 +9,14 @@ internal interface IOperatorAuthorizationIssuer
         CancellationToken cancellationToken);
 }
 
+internal sealed class OperatorAuthorizationRejectedException : InvalidOperationException
+{
+    public OperatorAuthorizationRejectedException()
+        : base("The operator authorization is invalid or expired.")
+    {
+    }
+}
+
 internal interface IGatewayAuthorizationKeyLifecycle
 {
     ValueTask<GatewayAuthorizationKeyState> InitializeAsync(CancellationToken cancellationToken);
