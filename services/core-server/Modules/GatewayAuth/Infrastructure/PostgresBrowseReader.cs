@@ -7,7 +7,7 @@ internal sealed class PostgresBrowseReader(NpgsqlDataSource dataSource)
 {
     private const string BrowseSql = """
         SELECT entry_id, relative_path, kind, content_length, last_write_time_utc, sort_name
-        FROM gateway_auth.browse_authorized_entries($1, $2, $3, $4, $5, $6);
+        FROM gateway_auth.browse_authorized_entries_v2($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13);
         """;
     private readonly NpgsqlDataSource dataSource =
         dataSource ?? throw new ArgumentNullException(nameof(dataSource));
@@ -58,8 +58,15 @@ internal sealed class PostgresBrowseReader(NpgsqlDataSource dataSource)
         PostgresReadCommand.Text(command, query.Subject.Value);
         PostgresReadCommand.Uuid(command, query.LibraryId.Value);
         PostgresReadCommand.Text(command, query.ParentPath.Value);
+        PostgresReadCommand.Text(command, query.Options.SortBy.ToString().ToLowerInvariant());
+        PostgresReadCommand.Text(command, query.Options.Direction.ToString().ToLowerInvariant());
+        PostgresReadCommand.Text(command, query.Options.Kind.ToString().ToLowerInvariant());
+        PostgresReadCommand.Text(command, query.Options.NameFilter);
         PostgresReadCommand.NullableText(command, cursor?.SortName);
         PostgresReadCommand.NullableUuid(command, cursor?.EntryId);
+        PostgresReadCommand.NullableTimestamp(command, cursor?.Modified);
+        PostgresReadCommand.NullableBigint(command, cursor?.Size);
+        PostgresReadCommand.NullableUuid(command, query.AnchorEntryId?.Value);
         PostgresReadCommand.Integer(command, query.Page.PageSize + 1);
 
         var rows = new List<PostgresEntryRow>(query.Page.PageSize + 1);

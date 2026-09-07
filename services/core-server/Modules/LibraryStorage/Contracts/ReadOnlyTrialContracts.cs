@@ -15,7 +15,8 @@ public readonly record struct ManagementOperation(Guid PrincipalId, Guid Idempot
     }
 }
 
-public sealed record LibraryRegistrationRequest(string SourceKey, string DisplayName, string RootPath);
+public sealed record LibraryRegistrationRequest(
+    string SourceKey, string DisplayName, string RootPath, LibraryCategory Category = LibraryCategory.General);
 
 public sealed class ReadOnlyTrialException(string code) : InvalidOperationException("The read-only trial operation was rejected.")
 {

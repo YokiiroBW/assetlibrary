@@ -38,13 +38,15 @@ internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
             return await database.RunAsync(async (connection, transaction, ct) =>
             {
                 await using var command = ModulePostgresSession.Command(connection, transaction,
-                    "SELECT library_storage.register_trial_library($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)");
+                    "SELECT library_storage.register_trial_library_v2($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)");
                 RegistrationParameters(command, request, operation);
                 foreach (var value in new object[] { Guid.NewGuid(), source.StorageSourceId.Value, source.DisplayName,
                     source.AllowedRoot.Comparison == RootPathComparison.CaseSensitive, request.DisplayName, root.Value, now })
                 {
                     command.Parameters.Add(new NpgsqlParameter { Value = value });
                 }
+
+                command.Parameters.Add(new NpgsqlParameter { Value = LibraryCategories.ToWire(request.Category) });
 
                 return new LibraryId((Guid)(await command.ExecuteScalarAsync(ct).ConfigureAwait(false))!);
             }, token).ConfigureAwait(false);
@@ -68,4 +70,5 @@ internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
 }
 
 [JsonSerializable(typeof(LibraryRegistrationRequest))]
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault)]
 internal sealed partial class LibraryRegistrationJsonContext : JsonSerializerContext;

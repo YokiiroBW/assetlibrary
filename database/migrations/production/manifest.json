@@ -238,6 +238,30 @@
       "owner_role": "assetlibrary_task_health_owner",
       "path": "0018_task_health_scan_commit_guard.sql",
       "sha256": "dc99259bb1b3470fd0ebfff5248b23c94c6fe38445f30769f690dcd46cbf5a36"
+    },
+    {
+      "version": 19,
+      "name": "library_storage_categories",
+      "module": "LibraryStorage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "path": "0019_library_storage_categories.sql",
+      "sha256": "90221ab5f9cb82df12a818b5c12788559285543d8bd7261e0e7630a74f5d41fa"
+    },
+    {
+      "version": 20,
+      "name": "asset_identity_interactive_reads",
+      "module": "AssetIdentity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "path": "0020_asset_identity_interactive_reads.sql",
+      "sha256": "6c806b8bd7a2455d70cb6d234256ae0d8cd9718d54df192def1b6364c10b63a1"
+    },
+    {
+      "version": 21,
+      "name": "gateway_auth_interactive_reads",
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "path": "0021_gateway_auth_interactive_reads.sql",
+      "sha256": "887e6738daca27e88063b507044271fb50c18a48fe3261e20706a5780cee2c62"
     }
   ]
 }

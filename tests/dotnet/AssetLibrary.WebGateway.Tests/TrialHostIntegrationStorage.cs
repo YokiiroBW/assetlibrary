@@ -27,6 +27,19 @@ internal static class TrialHostIntegrationStorage
         }
 
         Assert.AreEqual(StorageAvailability.Online, await availability.RefreshAsync(new LibraryId(libraryId), CancellationToken.None));
+        var operation = Guid.NewGuid();
+        var categoryBody = Body(libraryId);
+        categoryBody["category"] = "photos";
+        categoryBody["expected_category"] = "general";
+        var changed = await TrialHostIntegrationHttp.ControlAsync(host, session, "libraries.update_category", categoryBody, operation);
+        Assert.AreEqual(200, changed.Status);
+        Assert.AreEqual("photos", changed.Payload["body"]!["category"]!.GetValue<string>());
+        var replay = await TrialHostIntegrationHttp.ControlAsync(host, session, "libraries.update_category", categoryBody, operation);
+        Assert.AreEqual(200, replay.Status);
+        var conflict = await TrialHostIntegrationHttp.ControlAsync(host, session, "libraries.update_category", categoryBody, Guid.NewGuid());
+        Assert.AreEqual(409, conflict.Status);
+        var details = await TrialHostIntegrationHttp.ControlAsync(host, session, "libraries.get", Body(libraryId));
+        Assert.AreEqual("photos", details.Payload["body"]!["library"]!["category"]!.GetValue<string>());
     }
 
     public static async Task AssertFailureRetryAsync(TrialHostIntegrationFixture host,

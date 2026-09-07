@@ -4,6 +4,12 @@ namespace AssetLibrary.CoreServer.Adapters.AssetLink;
 
 internal abstract record AssetLinkReadRequest(string RequestId, string Operation);
 
+internal sealed record GetLibraryAssetLinkRequest(string RequestId, GetLibraryQuery Query)
+    : AssetLinkReadRequest(RequestId, "libraries.get");
+
+internal sealed record GetEntryAssetLinkRequest(string RequestId, GetEntryQuery Query)
+    : AssetLinkReadRequest(RequestId, "entries.get");
+
 internal sealed record ListLibrariesAssetLinkRequest(
     string RequestId,
     ListLibrariesQuery Query)

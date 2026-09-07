@@ -15,6 +15,26 @@ internal static class PostgresReadExecutor
         Func<NpgsqlDataReader, T> readRow,
         CancellationToken cancellationToken)
     {
+        try
+        {
+            return await ExecuteAsync(dataSource, commandText, timeout, maximumRows, addParameters, readRow, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (PostgresException exception) when (exception.SqlState == PostgresErrorCodes.NoDataFound)
+        {
+            throw new AuthorizedReadNotFoundException();
+        }
+    }
+
+    private static async ValueTask<List<T>> ExecuteAsync<T>(
+        NpgsqlDataSource dataSource,
+        string commandText,
+        TimeSpan timeout,
+        int maximumRows,
+        Action<NpgsqlCommand> addParameters,
+        Func<NpgsqlDataReader, T> readRow,
+        CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(dataSource);
         ArgumentNullException.ThrowIfNull(addParameters);
         ArgumentNullException.ThrowIfNull(readRow);

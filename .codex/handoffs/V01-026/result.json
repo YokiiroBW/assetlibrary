@@ -1,0 +1,107 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-026",
+  "title": "Web library categories and complete-scope browse queries",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "library-asset-scan-owner",
+  "branch": "codex/v01-026-library-browse-interaction-contracts",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-026",
+  "commit": "",
+  "changed_files": [
+    ".codex/handoffs/V01-026/result.json",
+    ".codex/handoffs/V01-026/summary.md",
+    ".codex/handoffs/V01-026/tests.md",
+    ".codex/tasks/V01-026.md",
+    "database/migrations/production/0019_library_storage_categories.sql",
+    "database/migrations/production/0020_asset_identity_interactive_reads.sql",
+    "database/migrations/production/0021_gateway_auth_interactive_reads.sql",
+    "database/migrations/production/manifest.json",
+    "services/core-server/Adapters/AssetLink/AssetLinkReadJson.cs",
+    "services/core-server/Adapters/AssetLink/AssetLinkReadRequest.cs",
+    "services/core-server/Adapters/AssetLink/AssetLinkReadRequestParser.cs",
+    "services/core-server/Adapters/AssetLink/ReadOnlyAssetLinkProtocol.cs",
+    "services/core-server/Host/Trial/TrialLibraryComposition.cs",
+    "services/core-server/Host/Trial/TrialManagementGateway.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AuthorizedReadModelPort.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AuthorizedReadResultValidator.cs",
+    "services/core-server/Modules/GatewayAuth/Application/ReadOnlyBrowseService.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/ReadOnlyBrowseContracts.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/ReadQueryOptions.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAuthorizedReadModelQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresBrowseReader.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresEntryDetailQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresEntryQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresLibraryQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresReadCommand.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresReadExecutor.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresSearchQuery.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/ProtectedReadCursorCodec.cs",
+    "services/core-server/Modules/LibraryStorage/Application/LibraryCategoryService.cs",
+    "services/core-server/Modules/LibraryStorage/Application/LibraryManagementServices.cs",
+    "services/core-server/Modules/LibraryStorage/Contracts/LibraryCategory.cs",
+    "services/core-server/Modules/LibraryStorage/Contracts/ReadOnlyTrialContracts.cs",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryCategory.cs",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryRegistration.cs",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryStore.cs",
+    "tests/database/test_migration_integration.py",
+    "tests/database/test_migration_manifest.py",
+    "tests/database/web_interaction_checks.py",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/FakeAuthorizedReadModelQuery.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayContractTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadModelIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadProtocolTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationAuthorization.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationStorage.cs"
+  ],
+  "changed_contracts": [
+    "LibraryStorage public category command and optional registration category",
+    "GatewayAuth authorized details and bounded query options",
+    "production migrations 0019/0020/0021"
+  ],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "implementation_complete_awaiting_coordinated_verification"
+  },
+  "risks": [
+    "v1 cursors are rejected after upgrade; refresh resumes with a v2 cursor",
+    "Host rollback requires matching pre-upgrade database/state backup",
+    "Unselective literal/kind filters may examine many indexed candidates; bounded deadline remains"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 26,
+  "handoff_summary": ".codex/handoffs/V01-026/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "LibraryStorage / AssetIdentity approved read projection / GatewayAuth / AssetLink and Trial management adapters",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Gateway current administrator and read authorization",
+      "LibraryStorage management operation and ModulePostgresSession",
+      "GatewayAuth bounded read executor and result validation",
+      "Protected keyset cursor and AssetIdentity present-fact projection",
+      "Existing required PostgreSQL integration fixture"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "GatewayAuth reads LibraryStorage approved catalog/permission projections and executes AssetIdentity approved read functions",
+      "All writes and migrations stay in their own fixed owner schema; no reverse authentication dependency"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "LibraryStorage public category command and optional registration category",
+      "GatewayAuth authorized details and bounded query options",
+      "production migrations 0019/0020/0021"
+    ],
+    "architecture_tests": [
+      "Pending coordinated verification; no test pass claimed"
+    ],
+    "technical_debt": [
+      "No new dependency or bypass; capacity/release gates remain independent"
+    ]
+  }
+}

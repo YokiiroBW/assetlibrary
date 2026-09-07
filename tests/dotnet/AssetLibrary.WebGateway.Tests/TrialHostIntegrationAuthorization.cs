@@ -24,6 +24,11 @@ internal static class TrialHostIntegrationAuthorization
         var reader = await TrialHostIntegrationHttp.SignInAsync(host, "trial-reader");
         var management = await TrialHostIntegrationHttp.ControlAsync(host, reader, "storage_sources.list", new JsonObject());
         Assert.AreEqual(403, management.Status);
+        var category = await TrialHostIntegrationHttp.ControlAsync(host, reader, "libraries.update_category", new JsonObject
+        {
+            ["library_id"] = libraryId.ToString("D"), ["category"] = "photos", ["expected_category"] = "general",
+        }, Guid.NewGuid());
+        Assert.AreEqual(403, category.Status);
         var hidden = await TrialHostIntegrationHttp.ControlAsync(host, reader, "entries.browse", new JsonObject
         {
             ["library_id"] = libraryId.ToString("D"),

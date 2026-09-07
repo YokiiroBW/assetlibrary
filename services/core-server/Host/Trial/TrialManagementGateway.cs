@@ -70,6 +70,7 @@ internal sealed class TrialManagementGateway(
                 {
                     ["source_key"] = source.SourceKey,
                     ["display_name"] = source.DisplayName,
+                    ["default_root_path"] = source.AllowedRoot.Value,
                 }).ToArray()),
             };
         }
@@ -77,12 +78,21 @@ internal sealed class TrialManagementGateway(
         if (request.Operation == "libraries.register")
         {
             var id = await libraries.Registration.RegisterAsync(
-                new LibraryRegistrationRequest(Text(request.Body, "source_key"), Text(request.Body, "display_name"), Text(request.Body, "root_path")),
+                new LibraryRegistrationRequest(Text(request.Body, "source_key"), Text(request.Body, "display_name"), Text(request.Body, "root_path"),
+                    request.Body.ContainsKey("category") ? LibraryCategories.Parse(Text(request.Body, "category")) : LibraryCategory.General),
                 Operation(request, principalId), token).ConfigureAwait(false);
             return new JsonObject { ["library_id"] = id.Value.ToString("D") };
         }
 
         var libraryId = new LibraryId(Identifier(request.Body, "library_id"));
+        if (request.Operation == "libraries.update_category")
+        {
+            var category = await libraries.Categories.UpdateAsync(new LibraryCategoryUpdate(libraryId,
+                LibraryCategories.Parse(Text(request.Body, "category")), LibraryCategories.Parse(Text(request.Body, "expected_category"))),
+                Operation(request, principalId), token).ConfigureAwait(false);
+            return new JsonObject { ["library_id"] = libraryId.Value.ToString("D"), ["category"] = LibraryCategories.ToWire(category) };
+        }
+
         var scan = request.Operation switch
         {
             "library_scans.get" => await scans.GetAsync(libraryId, token).ConfigureAwait(false),
@@ -94,7 +104,7 @@ internal sealed class TrialManagementGateway(
     }
 
     private static bool IsManagement(string operation) => operation is
-        "storage_sources.list" or "libraries.register" or "library_scans.get" or "library_scans.start" or "library_scans.cancel";
+        "storage_sources.list" or "libraries.register" or "libraries.update_category" or "library_scans.get" or "library_scans.start" or "library_scans.cancel";
 
     private static ManagementOperation Operation(ControlRequestMessage request, Guid principalId) =>
         Guid.TryParseExact(request.IdempotencyKey, "D", out var key) && key != Guid.Empty
@@ -123,7 +133,7 @@ internal sealed class TrialManagementGateway(
     private static int Status(string code) => code switch
     {
         "library_not_found" or "scan_not_found" => 404,
-        "idempotency_conflict" or "root_overlap" or "already_indexed" or "scan_already_running" => 409,
+        "idempotency_conflict" or "state_conflict" or "root_overlap" or "already_indexed" or "scan_already_running" => 409,
         "root_not_allowed" or "storage_source_not_allowed" => 403,
         "root_unavailable" or "root_inaccessible" or "storage_unavailable" or "worker_timed_out" => 503,
         "invalid_request" => 400,

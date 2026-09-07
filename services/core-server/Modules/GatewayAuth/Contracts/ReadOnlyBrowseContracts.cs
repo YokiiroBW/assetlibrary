@@ -124,7 +124,8 @@ public sealed record AuthorizedLibrary(
     LibraryId LibraryId,
     string DisplayName,
     StorageAvailability Availability,
-    LibraryAccessLevel AccessLevel);
+    LibraryAccessLevel AccessLevel,
+    LibraryCategory Category = LibraryCategory.General);
 
 public sealed record ReadOnlyEntry(
     StableEntryId EntryId,
@@ -150,19 +151,30 @@ public sealed record ReadPage<T>(IReadOnlyList<T> Items, ReadPageCursor? NextCur
 public sealed record AuthorizedEntryPage(
     AuthorizedLibrary Library,
     BrowseParentPath ParentPath,
-    ReadPage<ReadOnlyEntry> Page);
+    ReadPage<ReadOnlyEntry> Page,
+    StableEntryId? AnchorEntryId = null);
+
+public sealed record AuthorizedEntryDetail(AuthorizedLibrary Library, ReadOnlyEntry Entry);
+
+public sealed record GetLibraryQuery(AuthenticatedSubject Subject, LibraryId LibraryId, TimeSpan Timeout);
+
+public sealed record GetEntryQuery(AuthenticatedSubject Subject, LibraryId LibraryId, StableEntryId EntryId, TimeSpan Timeout);
 
 public sealed record ListLibrariesQuery(
     AuthenticatedSubject Subject,
-    ReadPageOptions Page);
+    ReadPageOptions Page,
+    LibraryCategory? Category = null);
 
 public sealed record BrowseEntriesQuery(
     AuthenticatedSubject Subject,
     LibraryId LibraryId,
     BrowseParentPath ParentPath,
-    ReadPageOptions Page);
+    ReadPageOptions Page,
+    EntryBrowseOptions Options = default,
+    StableEntryId? AnchorEntryId = null);
 
 public sealed record SearchAssetsQuery(
     AuthenticatedSubject Subject,
     AssetSearchText SearchText,
-    ReadPageOptions Page);
+    ReadPageOptions Page,
+    AssetSearchScopeOptions Scope = default);

@@ -9,6 +9,8 @@ public interface ILibraryManagementStore : ILibraryScanTargetQuery, IRegisteredL
         CanonicalLibraryRoot root, ManagementOperation operation, DateTimeOffset now, CancellationToken token);
     ValueTask SetAvailabilityAsync(LibraryId libraryId, StorageAvailability availability, string? reason, DateTimeOffset now, CancellationToken token);
     ValueTask<IReadOnlyList<LibraryId>> NextProbesAsync(DateTimeOffset before, int limit, CancellationToken cancellationToken);
+    ValueTask<LibraryCategory> UpdateCategoryAsync(LibraryCategoryUpdate request, ManagementOperation operation,
+        DateTimeOffset now, CancellationToken cancellationToken);
 }
 
 public static class LibraryRootContainment
@@ -34,7 +36,8 @@ public sealed class LibraryRegistrationService(
         operation.Validate();
         if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Length > 200
             || request.DisplayName != request.DisplayName.Trim() || request.DisplayName.Any(char.IsControl)
-            || string.IsNullOrWhiteSpace(request.RootPath) || request.RootPath.Length > 4096)
+            || string.IsNullOrWhiteSpace(request.RootPath) || request.RootPath.Length > 4096
+            || !Enum.IsDefined(request.Category))
         {
             throw new ReadOnlyTrialException("invalid_request");
         }

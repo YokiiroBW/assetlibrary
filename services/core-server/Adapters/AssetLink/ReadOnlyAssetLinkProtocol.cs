@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using AssetLibrary.Modules.GatewayAuth.Application;
+using AssetLibrary.Modules.GatewayAuth.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace AssetLibrary.CoreServer.Adapters.AssetLink;
@@ -42,6 +43,10 @@ public sealed class ReadOnlyAssetLinkProtocol(
         {
             return Reject(requestId, operation, 504, "timeout", "The read request timed out.");
         }
+        catch (AuthorizedReadNotFoundException)
+        {
+            return Reject(requestId, operation, 404, "not_found", "The requested resource is not available.");
+        }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
@@ -72,6 +77,14 @@ public sealed class ReadOnlyAssetLinkProtocol(
     {
         switch (request)
         {
+            case GetLibraryAssetLinkRequest library:
+                var detail = await browse.GetLibraryAsync(library.Query, cancellationToken).ConfigureAwait(false)
+                    ?? throw new AuthorizedReadNotFoundException();
+                return AssetLinkReadJson.Success(request.RequestId, AssetLinkReadJson.LibraryDetail(detail));
+            case GetEntryAssetLinkRequest entry:
+                var entryDetail = await browse.GetEntryAsync(entry.Query, cancellationToken).ConfigureAwait(false)
+                    ?? throw new AuthorizedReadNotFoundException();
+                return AssetLinkReadJson.Success(request.RequestId, AssetLinkReadJson.EntryDetail(entryDetail));
             case ListLibrariesAssetLinkRequest libraries:
                 return AssetLinkReadJson.Success(
                     request.RequestId,
