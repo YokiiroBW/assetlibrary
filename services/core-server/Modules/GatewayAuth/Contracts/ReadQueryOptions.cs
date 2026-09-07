@@ -28,7 +28,7 @@ public readonly record struct EntryBrowseOptions
         SortBy = sortBy;
         Direction = direction;
         Kind = kind;
-        this.nameFilter = normalized;
+        this.nameFilter = normalized.Length == 0 ? null : normalized;
     }
 
     public EntrySortBy SortBy { get; }

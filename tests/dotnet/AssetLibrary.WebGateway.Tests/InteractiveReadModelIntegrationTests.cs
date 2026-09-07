@@ -59,7 +59,8 @@ public sealed class InteractiveReadModelIntegrationTests
             var nullRequest = request with { Page = new ReadPageOptions(1, TimeSpan.FromSeconds(5)),
                 Options = new(EntrySortBy.Size, direction, EntryKindFilter.All), AnchorEntryId = nulls[0].EntryId };
             var nullPage = await queries.BrowseEntriesAsync(nullRequest, CancellationToken.None);
-            Assert.IsNotNull(nullPage?.Page.NextCursor);
+            Assert.IsNotNull(nullPage);
+            Assert.IsNotNull(nullPage.Page.NextCursor);
             var continuation = await queries.BrowseEntriesAsync(nullRequest with { AnchorEntryId = null,
                 Page = new ReadPageOptions(1, TimeSpan.FromSeconds(5), nullPage.Page.NextCursor) }, CancellationToken.None);
             Assert.IsNotNull(continuation);
@@ -78,7 +79,8 @@ public sealed class InteractiveReadModelIntegrationTests
         Assert.IsNotNull(anchored);
         CollectionAssert.AreEqual(baseline.Skip(130).Select(item => item.EntryId).ToArray(), anchored.Page.Items.Select(item => item.EntryId).ToArray());
         var earlier = await queries.BrowseEntriesAsync(request with { AnchorEntryId = baseline[100].EntryId }, CancellationToken.None);
-        Assert.IsNotNull(earlier?.Page.NextCursor);
+        Assert.IsNotNull(earlier);
+        Assert.IsNotNull(earlier.Page.NextCursor);
         var later = await queries.BrowseEntriesAsync(request with
         {
             Page = new ReadPageOptions(31, TimeSpan.FromSeconds(5), earlier.Page.NextCursor),
@@ -101,7 +103,8 @@ public sealed class InteractiveReadModelIntegrationTests
     private static async Task AssertCursorScopesAsync(PostgresAuthorizedReadModelQuery queries, BrowseEntriesQuery request)
     {
         var first = await queries.BrowseEntriesAsync(request, CancellationToken.None);
-        Assert.IsNotNull(first?.Page.NextCursor);
+        Assert.IsNotNull(first);
+        Assert.IsNotNull(first.Page.NextCursor);
         var next = request with { Page = new ReadPageOptions(31, TimeSpan.FromSeconds(5), first.Page.NextCursor) };
         foreach (var options in new EntryBrowseOptions[]
         {
