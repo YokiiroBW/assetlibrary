@@ -103,7 +103,7 @@ public sealed class TrialConfigurationTests
         var json = File.ReadAllText(fixture.ConfigurationPath);
         File.WriteAllText(fixture.ConfigurationPath, json.Insert(1, "\"production_file_writes_enabled\":true,"));
 
-        await Assert.ThrowsExactlyAsync<System.Text.Json.JsonException>(async () =>
+        await Assert.ThrowsExactlyAsync<TrialConfigurationException>(async () =>
             await TrialConfiguration.LoadAsync(fixture.ConfigurationPath, CancellationToken.None));
     }
 

@@ -38,13 +38,14 @@ internal static class PwnedPasswordsRangeParser
             while (!remaining.IsEmpty)
             {
                 var lineFeed = remaining.IndexOf('\n');
-                if (lineFeed <= 0 || remaining[lineFeed - 1] != '\r')
+                if (lineFeed == 0 || lineFeed > 0 && remaining[lineFeed - 1] != '\r')
                 {
                     return false;
                 }
 
-                var line = remaining[..(lineFeed - 1)];
-                remaining = remaining[(lineFeed + 1)..];
+                // The API separates records with CRLF but can end at the last count.
+                var line = lineFeed < 0 ? remaining : remaining[..(lineFeed - 1)];
+                remaining = lineFeed < 0 ? [] : remaining[(lineFeed + 1)..];
                 lineCount++;
                 if (lineCount > maximumLines
                     || !TryParseLine(line, out var suffix, out var count))

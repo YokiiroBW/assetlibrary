@@ -67,7 +67,7 @@ internal static class PostgresReadExecutor
             await using var command = PostgresReadCommand.Create(
                 connection,
                 transaction,
-                "SET TRANSACTION READ ONLY;",
+                "SET TRANSACTION READ ONLY; SET LOCAL ROLE assetlibrary_gateway_auth_runtime;",
                 timeout);
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
             return transaction;

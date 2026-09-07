@@ -22,16 +22,18 @@ internal static class TrialHostFactory
         TrialDatabaseConnections connections,
         X509Certificate2 certificate,
         IDatabaseReadinessProbe readiness,
-        TrialHostTestComposition? testComposition = null)
+        TrialHostTestComposition? testComposition = null,
+        bool operatorMode = false,
+        IReadOnlyList<X509Certificate2>? decryptionCertificates = null)
     {
         var builder = WebApplication.CreateSlimBuilder(new WebApplicationOptions
         {
             EnvironmentName = Environments.Production,
             WebRootPath = configuration.WebRoot,
         });
-        CoreServerHostLogging.Configure(builder);
+        CoreServerHostLogging.Configure(builder, diagnosticsToStandardError: operatorMode);
         TrialHttpTransport.Configure(builder, configuration, certificate);
-        TrialIdentityServices.Configure(builder.Services, configuration, connections, certificate, testComposition);
+        TrialIdentityServices.Configure(builder.Services, configuration, connections, certificate, testComposition, decryptionCertificates);
         builder.Services.AddAssetLibraryReadOnlyGateway();
         ConfigureReadServices(builder.Services, configuration, connections, testComposition?.Workers ?? ReadOnlyWorkerCommand.ProcessOptions());
         builder.Services.AddSingleton<TrialManagementGateway>();

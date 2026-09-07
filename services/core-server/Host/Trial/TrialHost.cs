@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text.Json;
 using AssetLibrary.Modules.GatewayAuth.Application;
 
 namespace AssetLibrary.CoreServer.Hosting.Trial;
@@ -12,8 +10,10 @@ internal static class TrialHost
         {
             var configuration = await TrialConfiguration.LoadAsync(configurationPath, CancellationToken.None).ConfigureAwait(false);
             using var certificate = await TrialCertificate.LoadAsync(configuration, CancellationToken.None).ConfigureAwait(false);
+            using var history = await TrialCertificateHistory.LoadAsync(configuration, CancellationToken.None).ConfigureAwait(false);
             await using var connections = await TrialDatabaseConnections.CreateAsync(configuration.Database, CancellationToken.None).ConfigureAwait(false);
-            await using var readiness = PostgresDatabaseReadinessProbe.Create(connections.Audit);
+            await using var audit = PostgresDatabaseReadinessProbe.Create(connections.Audit);
+            var readiness = new TrialRuntimeReadinessProbe(audit, connections);
             if (operatorAction is not ("initialize-key" or "rotate-key"))
             {
                 var status = await readiness.CheckAsync(CancellationToken.None).ConfigureAwait(false);
@@ -23,8 +23,9 @@ internal static class TrialHost
                 }
             }
 
-            using var instance = operatorAction is null ? AcquireInstance(configuration) : null;
-            await using var application = TrialHostFactory.Build(configuration, connections, certificate, readiness);
+            using var instance = operatorAction is null ? TrialPrivateState.AcquireInstance(configuration.StatePath) : null;
+            await using var application = TrialHostFactory.Build(configuration, connections, certificate, readiness,
+                operatorMode: operatorAction is not null, decryptionCertificates: history.Certificates);
             if (operatorAction is not null)
             {
                 var runtime = application.Services.GetRequiredService<GatewayAuthenticationRuntime>();
@@ -41,27 +42,13 @@ internal static class TrialHost
         {
             return await ErrorAsync(CoreServerExitCode.InvalidConfiguration, exception.Code).ConfigureAwait(false);
         }
-        catch (Exception exception) when (exception is ArgumentException or JsonException or CryptographicException)
+        catch (ArgumentException)
         {
             return await ErrorAsync(CoreServerExitCode.InvalidConfiguration, "trial_configuration_invalid").ConfigureAwait(false);
         }
         catch (Exception)
         {
             return await ErrorAsync(CoreServerExitCode.Unavailable, "trial_host_unavailable").ConfigureAwait(false);
-        }
-    }
-
-    private static FileStream AcquireInstance(TrialConfiguration configuration)
-    {
-        var path = Path.Combine(configuration.StatePath, ".read-only-trial.lock");
-        TrialPrivateState.RequireSafePath(path);
-        try
-        {
-            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-        }
-        catch (IOException)
-        {
-            throw new TrialConfigurationException("trial_instance_already_running");
         }
     }
 
