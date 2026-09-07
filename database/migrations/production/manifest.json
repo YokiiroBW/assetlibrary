@@ -190,6 +190,14 @@
       "owner_role": "assetlibrary_gateway_auth_owner",
       "path": "0012_gateway_auth_admin_bootstrap_recovery.sql",
       "sha256": "3df76214f5b1424dce1422987612a97ba8c81801b9bb758760c0cab5a3dd6ec3"
+    },
+    {
+      "version": 13,
+      "name": "asset_identity_search_token_alignment",
+      "module": "AssetIdentity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "path": "0013_asset_identity_search_token_alignment.sql",
+      "sha256": "2dcd97b305cc00e6e3b43d8f44c8a267ab0a6f0ee4eb4953db674cc42dd154f9"
     }
   ]
 }

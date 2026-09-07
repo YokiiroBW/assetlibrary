@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
   [ValidateSet('Debug', 'Release')]
-  [string] $Configuration = 'Release'
+  [string] $Configuration = 'Release',
+  [ValidateRange(1, 8)]
+  [int] $Parallel = 2
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -12,7 +14,7 @@ if ($LASTEXITCODE -ne 0) {
   throw "CMake configure failed with exit code $LASTEXITCODE."
 }
 
-& cmake --build $build --config $Configuration --parallel
+& cmake --build $build --config $Configuration --parallel $Parallel
 if ($LASTEXITCODE -ne 0) {
   throw "CMake build failed with exit code $LASTEXITCODE."
 }

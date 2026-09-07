@@ -151,3 +151,7 @@ worker 的 250 ms deadline 或取消排空。协议静态上限为 4 KiB payload
 原始 DLL 的真实 Explorer view activation/lifetime、Shell worker deadline/cancel、
 Explorer failure isolation、20-cycle crash/restart、8-hour soak，以及任何生产规模
 性能结论。
+
+## 2026-09-05 两端历史对齐
+
+ALIGN-001 将 NAS `6fd8fb1` 的保护性修复与本地 Windows 证据整合。本交接原有 commit、平台观测和测试计数保留为对应历史快照；新实现及验证见 `.codex/handoffs/ALIGN-001/`。原 partial 状态、缺失平台证据和所有发布阻断不变。

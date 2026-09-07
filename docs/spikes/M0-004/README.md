@@ -55,3 +55,7 @@ Windows 本机精确检查结果均为 false：PATH 中 Docker CLI、Docker Desk
 ## 规模、安全与架构边界
 
 Spike 不触碰真实资产、NAS 路径、生产服务、公共接口、共享契约、ADR、任务注册表、项目状态或 M0-009。生成物、NuGet cache、日志、逐文件 manifest 和原始命令输出不进入 Git。健康路径为 O(1)，发布为 O(runtime files)；50 万资产索引、数据库、缓存和 Worker 性能不在本 Spike 范围。无 Docker 时无法证明容器 non-root/read-only 边界；无批准的 SCM 周期时无法证明 Windows Service lifecycle，二者继续列为显式风险。
+
+## 2026-09-05 两端保护性修复对齐
+
+ALIGN-001/004 保留上述 Windows provenance、build-info、环境变量及原 CLI 配置证据，同时整合 NAS 的独立 staging、LocalService ACL、安装标识、服务归属核验、互斥、进程/listener 绑定与有界停止/删除。查询失败不得视为服务不存在；未确认移除时保留 staging/data。新增修复和测试由 ALIGN-004 单独交接，历史冷发布摘要不冒充本次构建产物；SCM 与 Docker 发布门禁仍未关闭。

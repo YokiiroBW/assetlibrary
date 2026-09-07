@@ -54,3 +54,7 @@ Docker 精确阻塞证据：`Get-Command docker` 为 absent；Docker Desktop 标
 ## 清理与边界
 
 测试结束后无 `ServerPackagingSpike` 进程或测试监听；无 service、专属 HKLM service key、service-data、容器、volume 或 Docker 改动。构建输出、缓存、hash manifest 与原始日志全部留在 Git 忽略 runtime，提交内容仅包含文本源码、测试、脱敏证据和 handoff。
+
+## 2026-09-05 两端历史对齐
+
+ALIGN-001 将 NAS `6fd8fb1` 的保护性修复与本地 Windows 证据整合。本交接原有 commit、平台观测和测试计数保留为对应历史快照；新实现及验证见 `.codex/handoffs/ALIGN-001/` 与 `.codex/handoffs/ALIGN-004/`。原 partial 状态、缺失平台证据和所有发布阻断不变。

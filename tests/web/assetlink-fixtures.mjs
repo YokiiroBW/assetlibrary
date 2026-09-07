@@ -55,8 +55,8 @@ export function failure(request, status, code, message) {
   };
 }
 
-export function libraryPage(request, libraries = [visibleLibrary]) {
-  return result(request, { items: libraries, next_cursor: null });
+export function libraryPage(request, libraries = [visibleLibrary], nextCursor = null) {
+  return result(request, { items: libraries, next_cursor: nextCursor });
 }
 
 export function browsePage(request, items = [], nextCursor = null, library = visibleLibrary) {

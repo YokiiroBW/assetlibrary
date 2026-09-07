@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AssetLinkClient } from "../assetLinkClient";
 import type { PagedState, SearchHit } from "../types";
-import { failure, idlePage, isAbort, loadingPage } from "./queryState";
+import { failedPage, idlePage, isAbort, loadingPage } from "./queryState";
 
 export function normalizeSearch(value: string): string {
   return value.trim().replace(/\s+/g, " ");
@@ -43,13 +43,13 @@ export function useSearch(
         })
         .catch((error: unknown) => {
           if (!isAbort(error) && generation.current === current) {
-            setState({ ...loadingPage(), status: "error", ...failure(error) });
+            setState(failedPage(error));
           }
         });
     }, 250);
     return () => {
       window.clearTimeout(timer);
-      controller.abort();
+      active.current?.abort();
     };
   }, [client, normalized, reloadKey]);
 
@@ -76,12 +76,7 @@ export function useSearch(
       })
       .catch((error: unknown) => {
         if (!isAbort(error) && generation.current === current) {
-          setState((previous) => ({
-            ...previous,
-            status: "error",
-            loadingMore: false,
-            ...failure(error),
-          }));
+          setState((previous) => failedPage(error, previous));
         }
       });
   }, [client, normalized, state.loadingMore, state.next_cursor]);

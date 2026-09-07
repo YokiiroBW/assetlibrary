@@ -42,7 +42,8 @@
     "取消后的 overlapped I/O 排空不阻塞 Explorer UI，但其独立时长上限尚未在 Windows 证明。",
     "本地 Spike DLL/host 未签名，只能用于受控验证，不能作为分发产物。",
     "8 小时 soak 尚未执行；当前无稳定性结论。",
-    "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。"
+    "Spike PIDL、视图和 IPC payload 不能直接升级为生产接口。",
+    "2026-09-05 alignment preserves this historical evidence; subsequent guardrail implementation and validation belong to ALIGN-001/ALIGN-004, without closing any residual gate."
   ],
   "blocked_by": [
     "M0-009 需决定 Windows 11 26100 上原始自定义 COM 的受支持且满足 HKCU-only 边界的 Explorer namespace 注册/部署模型；未经批准不得改用 HKLM",

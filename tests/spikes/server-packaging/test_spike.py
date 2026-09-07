@@ -1,4 +1,5 @@
 import hashlib
+import http.server
 import json
 import os
 import pathlib
@@ -6,6 +7,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
+import threading
 import time
 import unittest
 import urllib.request
@@ -136,26 +138,72 @@ class SpikeTests(unittest.TestCase):
                 if p.stderr: p.stderr.close()
 
     def test_command_line_configuration_for_windows_service(self):
-        with tempfile.TemporaryDirectory() as d:
-            command = [
-                str(RUN_BIN),
-                "--SPIKE_DATA_PATH", d,
-                "--SPIKE_PORT", "5093",
-                "--SPIKE_BIND_HOST", "127.0.0.1",
-            ]
-            p = subprocess.Popen(command, env=run_env({"SPIKE_DATA_PATH": ""}), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=popen_flags())
-            try:
-                for _ in range(40):
-                    try:
-                        body = urllib.request.urlopen("http://127.0.0.1:5093/healthz", timeout=.2).read()
-                        if json.loads(body)["status"] == "ok": break
-                    except Exception: time.sleep(.1)
-                else: self.fail("command-line configured endpoint did not start")
-                self.assertEqual(graceful_stop(p), 0)
-            finally:
-                if p.poll() is None: p.kill(); p.wait()
-                if p.stdout: p.stdout.close()
-                if p.stderr: p.stderr.close()
+        for keys in (("--SPIKE_DATA_PATH", "--SPIKE_PORT", "--SPIKE_BIND_HOST"), ("--spike-data-path", "--spike-port", "--spike-bind-host")):
+            with self.subTest(keys=keys), tempfile.TemporaryDirectory() as d:
+                command = [str(RUN_BIN), keys[0], d, keys[1], "5093", keys[2], "127.0.0.1"]
+                p = subprocess.Popen(command, env=run_env({"SPIKE_DATA_PATH": ""}), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=popen_flags())
+                try:
+                    for _ in range(40):
+                        try:
+                            body = urllib.request.urlopen("http://127.0.0.1:5093/healthz", timeout=.2).read()
+                            if json.loads(body)["status"] == "ok": break
+                        except Exception: time.sleep(.1)
+                    else: self.fail("command-line configured endpoint did not start")
+                    self.assertEqual(graceful_stop(p), 0)
+                finally:
+                    if p.poll() is None: p.kill(); p.wait()
+                    if p.stdout: p.stdout.close()
+                    if p.stderr: p.stderr.close()
+
+    def test_missing_and_duplicate_cli_options_fail_before_host_start(self):
+        for options in (["--SPIKE_DATA_PATH"], ["--spike-port", "--health-probe"], ["--SPIKE_PORT", "5080", "--spike-port", "5081"]):
+            with self.subTest(options=options):
+                result = subprocess.run([str(RUN_BIN), *options], env=run_env({"SPIKE_DATA_PATH": ""}), capture_output=True, text=True, timeout=5)
+                self.assertEqual(result.returncode, 78)
+                self.assertIn("invalid_configuration", result.stderr)
+
+    def test_health_probe_requires_bounded_matching_contract_response(self):
+        valid = b'{"status":"ok","contract":"m0-004/v1"}'
+        cases = [
+            (200, valid, 0, 0),
+            (200, b'{"status":"ok","contract":"other/v1"}', 0, 1),
+            (200, b'{"status":42,"contract":"m0-004/v1"}', 0, 1),
+            (200, b'[]', 0, 1),
+            (200, b'not json', 0, 1),
+            (200, valid + b' ' * 4096, 0, 1),
+            (503, valid, 0, 1),
+            (200, valid, 3, 1),
+        ]
+        for status, body, delay, expected in cases:
+            with self.subTest(status=status, length=len(body), delay=delay):
+                class Handler(http.server.BaseHTTPRequestHandler):
+                    def do_GET(self):
+                        self.send_response(status)
+                        self.send_header("Content-Length", str(len(body)))
+                        self.end_headers()
+                        if delay:
+                            time.sleep(delay)
+                        try:
+                            self.wfile.write(body)
+                        except (BrokenPipeError, ConnectionResetError):
+                            pass
+
+                    def log_message(self, *_):
+                        pass
+
+                server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+                thread = threading.Thread(target=lambda: server.serve_forever(poll_interval=.05), daemon=True)
+                thread.start()
+                try:
+                    command = [str(RUN_BIN), "--health-probe", "--spike-port", str(server.server_port), "--SPIKE_PROBE_HOST", "127.0.0.1"]
+                    started = time.monotonic()
+                    result = subprocess.run(command, env=run_env({"SPIKE_PORT": "1"}), capture_output=True, text=True, timeout=5)
+                    self.assertEqual(result.returncode, expected, result.stderr)
+                    self.assertLess(time.monotonic() - started, 4.5)
+                finally:
+                    server.shutdown()
+                    server.server_close()
+                    thread.join(timeout=1)
 
     def test_invalid_port_and_bind_host(self):
         for env in ({"SPIKE_DATA_PATH": tempfile.gettempdir(), "SPIKE_PORT": "80"}, {"SPIKE_DATA_PATH": tempfile.gettempdir(), "SPIKE_BIND_HOST": "bad host"}):
@@ -197,6 +245,7 @@ class SpikeTests(unittest.TestCase):
         self.assertIn("--SPIKE_DATA_PATH", script)
         self.assertIn("verify-absent", script)
         self.assertNotIn("service.cmd", script)
-        self.assertNotIn("Set-Content", script)
+        self.assertIn("'owner.json'", script)
+        self.assertNotIn("$Wrapper", script)
 
 if __name__ == "__main__": unittest.main()

@@ -210,3 +210,7 @@ namespace 注册/部署兼容路径，再按 `docs/spikes/M0-002/explorer-soak-p
 ## Codex 线程链接（可选）
 
 仅作为导航，不是唯一交接依据。
+
+## 2026-09-05 两端历史对齐
+
+ALIGN-001 将 NAS `6fd8fb1` 的保护性修复与本地 Windows 证据整合。本交接原有 commit、平台观测和测试计数保留为对应历史快照；新实现及验证见 `.codex/handoffs/ALIGN-001/`。原 partial 状态、缺失平台证据和所有发布阻断不变。

@@ -1,0 +1,76 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "ALIGN-002",
+  "title": "修复只读根探测与扫描的联接边界",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "library-asset-scan-owner",
+  "branch": "codex/align-002-scan-physical-boundary",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-002",
+  "commit": "4f0fcc2ffe0c29709d212baae71401d01e9e5d41",
+  "changed_files": [
+    ".codex/handoffs/ALIGN-002/result.json",
+    ".codex/handoffs/ALIGN-002/summary.md",
+    ".codex/handoffs/ALIGN-002/tests.md",
+    ".codex/tasks/ALIGN-002.md",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/SystemLibraryRootProbe.cs",
+    "services/core-server/Modules/ScanReconciliation/Infrastructure/SystemReadOnlyFileDiscovery.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/InitialScanBoundaryTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/RepositorySandbox.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/SandboxDirectoryLink.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyBoundaryTests.cs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "This bounded component fix rejects static linked roots/ancestors and deterministic directory-to-junction replacement between enumeration yields; it does not remove the check-to-use race between metadata checks and operating-system calls.",
+    "Ordinary-directory identity replacement, other physical-root aliases and non-cooperative Linux namespace mutation remain unproven. Production scanning still needs no-follow/handle-based access evidence and supervised Worker isolation; existing release and write gates are unchanged.",
+    "Synchronous filesystem metadata calls cannot forcibly cancel a stalled kernel/NAS call. Added ancestor checks cost O((entry count + directory count) * ancestor depth) metadata queries; no real 500,000-asset NAS latency/capacity evidence was produced.",
+    "The new filesystem regressions ran on Windows with directory junctions. The Linux symbolic-link branch was not executed in this task, and a successful Windows run is not Linux platform evidence.",
+    "Initial fixture-cleanup failures left seven file-free fixture roots and two empty child directories under this worktree's ignored sandbox. Two cleanup commands were rejected by automatic approval review with the reason 'blocked by policy'; they were not executed or retried through another interface. Exact residual paths are retained in tests.md."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/ALIGN-002/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "LibraryStorage.Infrastructure root probe and ScanReconciliation.Infrastructure read-only discovery; owner: library-asset-scan-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ILibraryRootProbe and LibraryRootValidationService retain the existing Inaccessible result path, canonical-root value and overlap policy; no registration or identity policy is reimplemented.",
+      "IReadOnlyFileDiscovery, FileDiscoveryException and InitialReadOnlyScanService retain staged observation abort, terminal journaling, cancellation, timeout and structured failure logging.",
+      "DefaultDiscoveryPolicy and existing entry classification keep unchanged child reparse directories visible without recursion, with streaming enumeration and bounded observation batches.",
+      "RepositorySandbox, TestObservationSink, TestScanJournal and TestTargetQuery provide isolated filesystem fixtures and the existing scan application test ports; .NET 10/C# 14, MSTest and locked dependencies remain unchanged."
+    ],
+    "duplicated_logic": [
+      "Each owning Infrastructure adapter performs a small ancestor-attribute walk with its existing error semantics. This intentional adapter-local repetition avoids a cross-module Infrastructure dependency or an unowned filesystem utility layer, as specified in ALIGN-002; no application, permission, identity or state-machine logic is duplicated."
+    ],
+    "cross_module_access": [
+      "The production diff adds no cross-module references. ScanReconciliation continues to use only the existing LibraryStorage and AssetIdentity public contracts; LibraryStorage and ScanReconciliation do not reference one another's Infrastructure.",
+      "No Domain/Application/Host implementation, database table, migration, permission model, shared wire contract or generated SDK is changed. Test-only composition uses the existing public ports and concrete adapters."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "No public type, field, wire schema, generated SDK or migration changes. The existing FileDiscoveryException.FailureCode path now reports directory_reparse_point, directory_unavailable or directory_metadata_failed for the new physical-directory checks; InitialReadOnlyScanService uses its unchanged DiscoveryFailed/abort contract."
+    ],
+    "architecture_tests": [
+      "ReadCore MSTest: 51 passed, 0 failed, 0 skipped, including eight new boundary cases; controlled pre-fix reproduction had 6 failed and 1 passed before the EOF case was added.",
+      "Architecture rule tests: 14/14; AssetLink contract/spike tests: 21/21; 86 unique final test cases total.",
+      "Locked restore, format verify, Release build with 0 warnings/errors and source validation over 209 C# files passed; architecture baseline passed over 114 inputs.",
+      "production-file-writes remains blocked by M0-006-G2 with native exit code 3. Gate files are unchanged; this is expected negative evidence, not a release pass.",
+      "Final handoff structure, declared changed-file list and whitespace are checked separately; exact commands and results are recorded in tests.md."
+    ],
+    "technical_debt": [
+      "The library-asset-scan-owner must provide no-follow/handle-based identity and namespace mutation evidence before claiming safe production scanning under non-cooperative path changes.",
+      "Retain V01-004's follow-up requirement for supervised isolation of synchronous filesystem calls and real NAS interruption, permission-change, capacity and 500,000-asset performance evidence.",
+      "Execute the Linux symbolic-link branch on the corresponding platform runner; no Windows result substitutes for that evidence.",
+      "The coordinator owns disposition of the nine documented sandbox directory remnants. Preserve the automatic approval rejection; this task must not bypass it or imply Git cleanliness means the runtime sandbox is empty."
+    ]
+  }
+}

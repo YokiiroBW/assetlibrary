@@ -29,7 +29,8 @@
   "risks": [
     "Windows Service install/start/health/stop/uninstall was not executed because explicit approval for administrator SCM/HKLM operations was not received",
     "Docker CLI, service and engine pipe are absent, so build/run/health and non-root/read-only container boundaries remain unproven",
-    "Cross-host artifacts are not claimed bit-for-bit identical; identity relies on source commit, complete manifest and behavior evidence"
+    "Cross-host artifacts are not claimed bit-for-bit identical; identity relies on source commit, complete manifest and behavior evidence",
+    "2026-09-05 alignment preserves this historical evidence; subsequent guardrail implementation and validation belong to ALIGN-001/ALIGN-004, without closing any residual gate."
   ],
   "blocked_by": [
     "Explicit user approval for the fixed AssetLibrary-M0-004-Spike administrator service cycle",

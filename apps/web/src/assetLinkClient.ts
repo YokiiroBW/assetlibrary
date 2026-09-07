@@ -49,6 +49,33 @@ export class AssetLinkClient {
     signal: AbortSignal,
     decode: (body: Record<string, unknown>) => T,
   ): Promise<T> {
+    signal.throwIfAborted();
+    const controller = new AbortController();
+    const cancelFromCaller = () => controller.abort(signal.reason);
+    signal.addEventListener("abort", cancelFromCaller, { once: true });
+    const timeout = window.setTimeout(() => controller.abort(), timeoutMilliseconds);
+    try {
+      return await this.sendRequest(operation, body, controller.signal, decode);
+    } catch (error: unknown) {
+      if (signal.aborted) throw signal.reason;
+      // A received HTTP rejection remains authoritative when its body cannot be read.
+      if (error instanceof AssetLinkApiError) throw error;
+      if (controller.signal.aborted) {
+        throw new AssetLinkApiError(504, "timeout", "读取超时，请重试。");
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeout);
+      signal.removeEventListener("abort", cancelFromCaller);
+    }
+  }
+
+  private async sendRequest<T>(
+    operation: string,
+    body: Record<string, unknown>,
+    signal: AbortSignal,
+    decode: (body: Record<string, unknown>) => T,
+  ): Promise<T> {
     const request: ControlRequest = {
       message_type: "control.request",
       request_id: crypto.randomUUID(),
@@ -63,22 +90,29 @@ export class AssetLinkClient {
       body: encodeAssetLinkMessage(request),
       signal,
     });
-    const message = parseAssetLinkMessage(await response.text());
-    if (message.request_id !== request.request_id) {
-      throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
+    try {
+      const message = parseAssetLinkMessage(await response.text());
+      if (message.request_id !== request.request_id) {
+        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
+      }
+      if (message.message_type === "error") {
+        const error = record(message.error, "error");
+        throw new AssetLinkApiError(
+          response.status,
+          string(error.code, "error.code"),
+          string(error.message, "error.message"),
+        );
+      }
+      if (!response.ok || message.message_type !== "control.result" || !message.ok) {
+        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
+      }
+      return decode(record(message.body, "body"));
+    } catch (error: unknown) {
+      if (!response.ok && !(error instanceof AssetLinkApiError)) {
+        throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
+      }
+      throw error;
     }
-    if (message.message_type === "error") {
-      const error = record(message.error, "error");
-      throw new AssetLinkApiError(
-        response.status,
-        string(error.code, "error.code"),
-        string(error.message, "error.message"),
-      );
-    }
-    if (!response.ok || message.message_type !== "control.result" || !message.ok) {
-      throw new AssetLinkApiError(response.status, "invalid_response", "服务返回了无法识别的响应。");
-    }
-    return decode(record(message.body, "body"));
   }
 }
 

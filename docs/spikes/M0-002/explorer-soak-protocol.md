@@ -15,6 +15,8 @@ save the evidence outside the repository or in an approved test-results store.
 - Explorer restart available for the recovery checkpoints.
 - Use the checked-in scripts with the 3-second bounded background
   `SHChangeNotify`; do not substitute an older synchronous-notification copy.
+- Disable Windows/system sleep for the duration; sleep/wake gaps are not valid
+  soak evidence. Stop an existing `AssetHostStub` before starting the cycle helper.
 
 ## Manual procedure
 
@@ -44,6 +46,13 @@ save the evidence outside the repository or in an approved test-results store.
    disappears and ordinary Explorer navigation remains functional.
 
 ## Evidence checklist
+
+The host-cycle helper uses monotonic elapsed time, a 30-second interval and at
+most 1000 iterations by default (about 960 cycles for eight hours). Scheduling
+gaps, nonzero host exits, exhausting the iteration limit early, or failure to
+stop a host within five seconds fail the run. Each process handle is disposed
+before the next cycle. These bounds limit the helper; they do not prove Shell
+DLL responsiveness, cancellation drain time or the eight-hour Explorer gate.
 
 Record Windows build, SDK/MSVC/CMake versions, DLL/EXE hashes, start/end times,
 host mode, iteration counts, Explorer responsiveness, failure-to-recovery times,

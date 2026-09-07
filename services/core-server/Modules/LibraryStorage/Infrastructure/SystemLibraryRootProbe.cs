@@ -24,6 +24,12 @@ public sealed class SystemLibraryRootProbe : ILibraryRootProbe
                     new LibraryRootProbeResult(LibraryRootProbeStatus.Missing, canonical));
             }
 
+            if (HasReparseAncestor(fullPath, cancellationToken))
+            {
+                return ValueTask.FromResult(
+                    new LibraryRootProbeResult(LibraryRootProbeStatus.Inaccessible, canonical));
+            }
+
             using var entries = Directory.EnumerateFileSystemEntries(fullPath).GetEnumerator();
             _ = entries.MoveNext();
             cancellationToken.ThrowIfCancellationRequested();
@@ -54,6 +60,21 @@ public sealed class SystemLibraryRootProbe : ILibraryRootProbe
             return ValueTask.FromResult(
                 new LibraryRootProbeResult(LibraryRootProbeStatus.Inaccessible, canonical));
         }
+    }
+
+    private static bool HasReparseAncestor(string fullPath, CancellationToken cancellationToken)
+    {
+        // A lexical alias must not bypass the one-physical-root overlap policy.
+        for (var ancestor = new DirectoryInfo(fullPath); ancestor is not null; ancestor = ancestor.Parent)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if ((ancestor.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static string NormalizeSeparators(string path) => path.Replace('\\', '/');

@@ -436,11 +436,16 @@ GRANT assetlibrary_database_auditor TO {cls.AUDITOR}
             check=check,
         )
 
-    def web_gateway_database(self, label: str) -> str:
+    def web_gateway_database(
+        self,
+        label: str,
+        manifest: MIGRATIONS.Manifest | None = None,
+    ) -> str:
+        selected = manifest or self.manifest
         database = self.fresh_database(label)
         MIGRATIONS.apply_migrations(
-            self.runner_tools(database),
-            self.manifest,
+            self.runner_tools(database, selected),
+            selected,
             self.backup_directory(label),
         )
         self.sql(
@@ -635,7 +640,7 @@ SELECT task_health.enqueue_outbox_event(
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 13)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 14)))
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -681,7 +686,21 @@ SELECT task_health.enqueue_outbox_event(
             )
 
     def test_web_gateway_filters_permissions_pages_and_revocation_in_database(self) -> None:
-        database = self.web_gateway_database("web_gateway")
+        # Exercise the real v12 -> v13 upgrade with unchanged indexed asset data.
+        previous_directory = tempfile.TemporaryDirectory()
+        self.addCleanup(previous_directory.cleanup)
+        previous_root = Path(previous_directory.name) / "production"
+        shutil.copytree(TOOL_PATH.parent, previous_root)
+        previous_path = previous_root / "manifest.json"
+        previous_data = json.loads(previous_path.read_text(encoding="utf-8"))
+        for entry in previous_data["migrations"][12:]:
+            (previous_root / entry["path"]).unlink()
+        previous_data["migrations"] = previous_data["migrations"][:12]
+        previous_path.write_text(
+            json.dumps(previous_data, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
+        previous_manifest = MIGRATIONS.load_manifest(previous_path)
+        database = self.web_gateway_database("web_gateway", previous_manifest)
         source_id = uuid.uuid4()
         alpha_library = uuid.uuid4()
         beta_library = uuid.uuid4()
@@ -756,6 +775,30 @@ SELECT asset_identity.commit_initial_scan('{hidden_scan}', '{hidden_library}', '
 """,
         )
 
+        filename_query = (
+            "SELECT relative_path FROM gateway_auth.search_authorized_entries("
+            "'oidc:user-1', 'folder/secret-blue.png', NULL, NULL, NULL, 101);"
+        )
+        self.assertEqual(self.gateway_sql(database, filename_query).stdout.strip(), "")
+        before_upgrade = self.sql(
+            database, self.admin,
+            "SELECT oid, proowner, proacl::text FROM pg_proc "
+            "WHERE oid = 'asset_identity.search_read_entries(uuid[],text,text,uuid,uuid,integer)'::regprocedure;",
+        ).stdout.strip()
+        upgrade_backup = MIGRATIONS.apply_migrations(
+            self.runner_tools(database), self.manifest, self.backup_directory("search-upgrade")
+        )
+        self.assertIsNotNone(upgrade_backup)
+        after_upgrade = self.sql(
+            database, self.admin,
+            "SELECT oid, proowner, proacl::text FROM pg_proc "
+            "WHERE oid = 'asset_identity.search_read_entries(uuid[],text,text,uuid,uuid,integer)'::regprocedure;",
+        ).stdout.strip()
+        self.assertEqual(after_upgrade, before_upgrade)
+        self.assertEqual(
+            self.gateway_sql(database, filename_query).stdout.strip(), "folder/secret-blue.png"
+        )
+
         normal_libraries = self.gateway_sql(
             database,
             "SELECT display_name || ':' || access_level "
@@ -820,6 +863,24 @@ SELECT asset_identity.commit_initial_scan('{hidden_scan}', '{hidden_library}', '
         self.assertEqual(search, ["Alpha|folder/secret-blue.png|name"])
         self.assertNotIn("hidden-secret.txt", "\n".join(search))
 
+        # Query and index must split filename/path punctuation identically.
+        for text, expected in (
+            ("Alpha.jpg", "Alpha.jpg"),
+            ("secret-blue.png", "folder/secret-blue.png"),
+            ("folder/secret-blue.png", "folder/secret-blue.png"),
+            ("secret_blue.png", "folder/secret-blue.png"),
+            ("SECRET-BLUE.PNG", "folder/secret-blue.png"),
+            ("hidden-secret.txt", ""),
+            ("../__--", ""),
+        ):
+            with self.subTest(search_text=text):
+                result = self.gateway_sql(
+                    database,
+                    "SELECT relative_path FROM gateway_auth.search_authorized_entries("
+                    f"'oidc:user-1', '{text}', NULL, NULL, NULL, 101);",
+                ).stdout.strip()
+                self.assertEqual(result, expected)
+
         self.sql(
             database,
             self.admin,
@@ -840,6 +901,14 @@ SELECT asset_identity.commit_initial_scan('{hidden_scan}', '{hidden_library}', '
                 "'oidc:user-1', 'secret', NULL, NULL, NULL, 101);",
             ).stdout.strip(),
             "",
+        )
+        self.assertEqual(
+            self.gateway_sql(
+                database,
+                "SELECT count(*) FROM gateway_auth.search_authorized_entries("
+                "'oidc:user-1', 'folder/secret-blue.png', NULL, NULL, NULL, 101);",
+            ).stdout.strip(),
+            "0",
         )
         self.assertEqual(
             self.gateway_sql(
@@ -3220,7 +3289,7 @@ LIMIT 256;
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 13)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, 14)))
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -3273,7 +3342,7 @@ LIMIT 256;
                 self.admin,
                 "SELECT count(*) FROM migration.ledger;",
             ).stdout.strip(),
-            "12",
+            str(len(self.manifest.migrations)),
         )
         self.assertGreater(len(list(backups.iterdir())), before_failure)
 
@@ -3480,7 +3549,7 @@ LIMIT 256;
             self.assertEqual(ready.get("status"), "ready")
             self.assertEqual(ready.get("scope"), "host_database")
             self.assertEqual(ready.get("database_contract"), "v01-010/1")
-            self.assertEqual(ready.get("database_schema_version"), 12)
+            self.assertEqual(ready.get("database_schema_version"), 13)
             self.assertIs(ready.get("business_api_ready"), False)
             self.assertIs(ready.get("production_file_writes_enabled"), False)
             health_status, health = self.http_payload(port, path="/healthz")

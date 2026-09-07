@@ -56,7 +56,7 @@ namespace 与 HideDesktopIcons 值均不存在。仍显示的 control folder 只
 环境中，从此目录执行：
 
 ```powershell
-./tests/spikes/windows-shell/scripts/build.ps1
+./tests/spikes/windows-shell/scripts/build.ps1 -Parallel 2
 ./tests/spikes/windows-shell/scripts/register.ps1
 ./tests/spikes/windows-shell/scripts/verify-registration.ps1
 ./tests/spikes/windows-shell/scripts/run-host.ps1 -Mode normal
@@ -75,7 +75,10 @@ namespace 与 HideDesktopIcons 值均不存在。仍显示的 control folder 只
 重启 Explorer，确认该 namespace 消失且 Explorer 正常。重复 crash/restart
 至少 20 次后，在保持 Explorer 视图打开并按
 `explorer-soak-protocol.md` 采集证据的同时执行 `soak.ps1 -Hours 8`。
-该脚本本身只是 host-cycle helper，不执行 Explorer 导航；soak 未执行或缺少
+该脚本默认最多执行 1000 轮（8 小时、30 秒间隔约需 960 轮），允许上限为 12000
+轮（96 小时、30 秒间隔约需 11520 轮），每轮只保留一个 Host 进程；达到上限而
+尚未到 deadline 会明确失败。该脚本本身只是 host-cycle
+helper，不执行 Explorer 导航；soak 未执行或缺少
 人工 Explorer 证据不得记为通过。
 
 ## 观察与结论边界

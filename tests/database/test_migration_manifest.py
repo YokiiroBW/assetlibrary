@@ -71,7 +71,7 @@ class MigrationManifestTests(unittest.TestCase):
         self.assertEqual(manifest.postgresql_major, 16)
         self.assertEqual(manifest.verified_patch, "16.15")
         self.assertEqual(len(manifest.modules), 11)
-        self.assertEqual(len(manifest.migrations), 12)
+        self.assertEqual(len(manifest.migrations), 13)
         self.assertEqual(
             [
                 (item.version, item.path.name, item.module, item.owner_role)
@@ -149,6 +149,12 @@ class MigrationManifestTests(unittest.TestCase):
                     "0012_gateway_auth_admin_bootstrap_recovery.sql",
                     "GatewayAuth",
                     "assetlibrary_gateway_auth_owner",
+                ),
+                (
+                    13,
+                    "0013_asset_identity_search_token_alignment.sql",
+                    "AssetIdentity",
+                    "assetlibrary_asset_identity_owner",
                 ),
             ],
         )

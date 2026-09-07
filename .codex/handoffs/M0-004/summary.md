@@ -44,3 +44,7 @@
 ## 清理状态与建议
 
 `AssetLibrary-M0-004-Spike` service、对应 HKLM service key 和任务 service-data 均不存在；5080/5091/5092/5093/5094/5095 测试监听与 `ServerPackagingSpike` 进程均已结束。Docker 没有被安装或修改。建议 Linux 主协调器先审查实现/证据提交，再审查 handoff 元数据提交；若用户稍后授权，应在同一分支追加真实 SCM 周期证据并再次更新 handoff，最后仍必须执行 uninstall 与三项残留验证。
+
+## 2026-09-05 两端历史对齐
+
+ALIGN-001 将 NAS `6fd8fb1` 的保护性修复与本地 Windows 证据整合。本交接原有 commit、平台观测和测试计数保留为对应历史快照；新实现及验证见 `.codex/handoffs/ALIGN-001/` 与 `.codex/handoffs/ALIGN-004/`。原 partial 状态、缺失平台证据和所有发布阻断不变。
