@@ -35,6 +35,15 @@ def command(arguments: list[str], *, cwd: Path, capture: bool = False) -> str:
     return result.stdout.strip() if capture else ""
 
 
+def save_images_archive(docker: str, tags: list[str], destination: Path, source: Path) -> None:
+    # The caller owns the file descriptor even when its Docker CLI uses sudo.
+    # docker save --output would instead create a root-owned, often 0600 archive.
+    with destination.open("xb") as stream:
+        subprocess.run([docker, "save", *tags], cwd=source, stdout=stream, check=True, timeout=900)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
 def build(args: argparse.Namespace) -> dict:
     RELEASE.assert_msbuild_auto_import_boundary(ROOT)
     if RELEASE.git_output(ROOT, "status", "--porcelain=v1", "--untracked-files=all"):
@@ -94,7 +103,7 @@ def build(args: argparse.Namespace) -> dict:
     for name in tags:
         env += [f"ASSETLIBRARY_{name.upper()}_IMAGE={tags[name]}", f"ASSETLIBRARY_{name.upper()}_IMAGE_ID={image_ids[name]}"]
     (bundle / "images.env").write_text("\n".join(env) + "\n", encoding="utf-8", newline="\n")
-    command([docker, "save", "--output", str(bundle / "images.tar"), *tags.values()], cwd=source)
+    save_images_archive(docker, list(tags.values()), bundle / "images.tar", source)
     manifest = {"format_version": 1, "product": "AssetLibrary/NAS/read-only/v1", "source_revision": revision,
                 "source_tree": tree, "base_images": resolved, "images": tags, "image_ids": image_ids,
                 "asset_writes": False, "native_deployment_validation": "not_executed_by_builder"}
