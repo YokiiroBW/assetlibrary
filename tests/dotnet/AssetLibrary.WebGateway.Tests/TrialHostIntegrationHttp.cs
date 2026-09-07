@@ -27,7 +27,7 @@ internal static class TrialHostIntegrationHttp
             ["message_type"] = "control.request",
             ["request_id"] = Guid.NewGuid().ToString("D"),
             ["operation"] = operation,
-            ["body"] = body,
+            ["body"] = body.DeepClone(),
         };
         if (idempotencyKey.HasValue) envelope["idempotency_key"] = idempotencyKey.Value.ToString("D");
         return SendAsync(host, session, HttpMethod.Post, "/assetlink/v1/control", envelope.ToJsonString());
