@@ -49,7 +49,9 @@ configure生成一次性deployment ID、`deployment.env`和只读挂载表`asset
 
 Core以UID/GID `1654:1654`运行。资产目录还需允许该身份读取文件、列出和穿过目录；只读挂载不会绕过NAS权限。如果需要现有NAS读取组，在configure后编辑`deployment.env`，加入唯一一行`ASSETLIBRARY_ASSET_READ_GROUP=101`。这里的`101`是本次目标NAS已验证的读取组，其他NAS须使用其实际具备读取权限的组号。该可选值只能是一个非零数字组号，省略时默认为`1654`；nasctl从文件读取并校验，仅为Core添加这个附加组，主UID/GID不变。执行`./nasctl.sh start`会按新配置重建Core并保留卷。此设置不修改NAS主机ACL，不让Core以root运行，资产挂载仍为只读。
 
-initialize仅在新建或能识别为自己的卷中准备私密目录和证书，启动自己的PG16.15，然后通过既有migration_tool provision角色、验证备份、应用18个前进迁移，最后调用Host初始化授权密钥。重入不更换密码、部署ID或授权密钥；半写入的PKI和身份不一致会被保留并拒绝覆盖。
+initialize仅在新建或能识别为自己的卷中准备私密目录和证书，启动自己的PG16.15，然后通过既有migration_tool provision角色、验证备份、应用当前清单中的前进迁移，最后调用Host初始化授权密钥。V01-024的清单包含21条迁移。重入不更换密码、部署ID或授权密钥；半写入的PKI和身份不一致会被保留并拒绝覆盖。
+
+升级现有部署前先正常停止Core和PG，冷备四个专用卷及原部署配置，保留混合UID/GID、mode、ACL/xattr和链接。只替换并校验新包的公共交付文件，保留settings、deployment ID、挂载表和密钥，再initialize/start；不要重新configure或bootstrap。旧Host要求其匹配的迁移清单，回退必须同时恢复同一次冷备的数据库/私密状态与旧配置、镜像，不能只换旧镜像。软件备份不包含资产原文件。
 
 首次HTTPS证书是90天、自签名、SAN匹配配置Origin的RSA3072证书。将导出的**公有证书**通过可信方式交给使用者，核对指纹后由使用者手动配置浏览器/系统的当前用户信任，或采用匹配主机名的可信RSA证书。不要跳过TLS校验。本工具不导入CA到宿主信任库。数据库另有独立私有CA，服务证书SAN为`postgres`；Core与setup的跨容器连接均使用VerifyFull及该CA，数据库端口不发布到NAS。
 
