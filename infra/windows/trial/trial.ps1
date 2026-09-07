@@ -22,6 +22,7 @@ $script:TrialSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $script:Package = [IO.Path]::GetFullPath($PSScriptRoot)
 $script:StateLock = $null
 $script:OperatorFailure = $null
+$script:RollbackShutdown = $null
 
 function Get-SafeLocalPath([string]$Path) {
     if ([string]::IsNullOrWhiteSpace($Path) -or ![IO.Path]::IsPathFullyQualified($Path) -or
@@ -77,9 +78,11 @@ function Write-PrivateJson([string]$Path, [object]$Value) {
     $null = Get-SafeLocalPath $Path
     if (Test-Path -LiteralPath $Path) { Assert-Private $Path }
     $temporary = $Path + '.' + [guid]::NewGuid().ToString('N') + '.pending'
-    [IO.File]::WriteAllText($temporary, (($Value | ConvertTo-Json -Depth 10 -Compress) + "`n"), [Text.UTF8Encoding]::new($false))
-    Assert-Private $temporary
-    [IO.File]::Move($temporary,$Path,$true)
+    try {
+        [IO.File]::WriteAllText($temporary, (($Value | ConvertTo-Json -Depth 10 -Compress) + "`n"), [Text.UTF8Encoding]::new($false))
+        Assert-Private $temporary
+        [IO.File]::Move($temporary,$Path,$true)
+    } finally { if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) } }
 }
 
 function Assert-Package {
@@ -286,6 +289,7 @@ function Start-Trial {
     if ($running) { $running.Dispose(); throw 'trial_already_running' }
     $pg = Invoke-Database 'start'
     $process = $null
+    $owned = $false
     try {
         $configuration = Join-Path $script:State 'trial.json'
         $launched = Invoke-PrivateProcess $script:Owner.python @('-I','-B',(Join-Path $script:Package 'trial_process.py'),'--state',$script:State)
@@ -294,6 +298,7 @@ function Start-Trial {
         $process = Get-Process -Id $identity.pid
         $created = [DateTime]::FromFileTimeUtc($identity.created).Ticks
         if ($process.Path -ne $script:HostExecutable -or $process.Path -ne $identity.image -or $process.StartTime.ToUniversalTime().Ticks -ne $created) { throw 'trial_host_process_owner_mismatch' }
+        $owned = $true
         Write-PrivateJson (Join-Path $script:State 'host-process.json') @{ pid=$process.Id; image=$script:HostExecutable; created_ticks=$created }
         $watch = [Diagnostics.Stopwatch]::StartNew()
         do {
@@ -304,31 +309,41 @@ function Start-Trial {
         } while ($watch.Elapsed.TotalSeconds -lt 30)
         throw 'trial_host_readiness_timeout'
     } catch {
-        if ($process -and !$process.HasExited) { $process.Kill($true); $null=$process.WaitForExit(10000) }
+        if ($owned -and $process -and !$process.HasExited) { $script:RollbackShutdown = Stop-VerifiedHost $process }
         if ($pg.status -eq 'started') { $null = Invoke-Database 'stop' }
         throw
     } finally { if ($process) { $process.Dispose() } }
+}
+
+function Stop-VerifiedHost([Diagnostics.Process]$Process) {
+    $originalId = $Process.Id
+    $originalStart = $Process.StartTime.ToUniversalTime().Ticks
+    try {
+        $requested = Invoke-PrivateProcess $script:HostExecutable @('--trial-stop',(Join-Path $script:State 'trial.json')) '' 10
+    } catch {
+        $requested = @{ exit_code = -1 }
+    }
+    if ($Process.WaitForExit(45000)) {
+        return $(if ($requested.exit_code -eq 0 -and $Process.ExitCode -eq 0) { 'graceful' } else { 'exited' })
+    }
+    $verified = Get-Process -Id $originalId -ErrorAction SilentlyContinue
+    if (!$verified) { return 'exited' }
+    try {
+        if ($verified.Path -ne $script:HostExecutable -or $verified.StartTime.ToUniversalTime().Ticks -ne $originalStart) { throw 'trial_host_process_owner_mismatch' }
+        $verified.Kill($true)
+        if (!$verified.WaitForExit(10000)) { throw 'trial_host_stop_timeout' }
+    } finally { $verified.Dispose() }
+    return 'forced'
 }
 
 function Stop-Trial {
     $process = Get-OwnedHost
     $mode = 'already_stopped'
     if ($process) {
-        try {
-            $originalId = $process.Id
-            $originalStart = $process.StartTime.ToUniversalTime().Ticks
-            $null = Invoke-PrivateProcess $script:HostExecutable @('--trial-stop',(Join-Path $script:State 'trial.json')) '' 10
-            $mode = 'graceful'
-            if (!$process.WaitForExit(45000)) {
-                $verified = Get-OwnedHost
-                if (!$verified -or $verified.Id -ne $originalId -or $verified.StartTime.ToUniversalTime().Ticks -ne $originalStart) { throw 'trial_host_process_owner_mismatch' }
-                try { $verified.Kill($true); if (!$verified.WaitForExit(10000)) { throw 'trial_host_stop_timeout' } } finally { $verified.Dispose() }
-                $mode = 'forced'
-            }
-        } finally { $process.Dispose() }
+        try { $mode = Stop-VerifiedHost $process } finally { $process.Dispose() }
     }
     $null = Invoke-Database 'stop'
-    return @{ status='stopped'; shutdown=$mode; persistent_state='preserved'; certificate_cleanup=$(if ($mode -eq 'forced') {'not_confirmed'} else {'normal_exit_or_already_stopped'}) }
+    return @{ status='stopped'; shutdown=$mode; persistent_state='preserved'; certificate_cleanup=$(if ($mode -eq 'graceful') {'normal_exit'} else {'not_confirmed'}) }
 }
 
 function Invoke-Operator {
@@ -416,6 +431,7 @@ try {
     $code=$_.Exception.Message
     if ($code -notmatch '^(trial|database)_[a-z_]+$') { $code='trial_operation_failed' }
     $failure=@{status='failed';code=$code}
+    if ($script:RollbackShutdown) { $failure.shutdown=$script:RollbackShutdown; $failure.certificate_cleanup=$(if ($script:RollbackShutdown -eq 'graceful') {'normal_exit'} else {'not_confirmed'}) }
     if ($script:OperatorFailure) { $failure.message=$script:OperatorFailure.message; $failure.reason=$script:OperatorFailure.code }
     Write-Output ($failure | ConvertTo-Json -Compress)
     exit 1

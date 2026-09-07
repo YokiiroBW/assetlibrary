@@ -12,6 +12,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from unittest import mock
@@ -226,6 +227,67 @@ class TrialNativeDatabaseTests(unittest.TestCase):
 
 @unittest.skipUnless(os.name == "nt", "native trial package test requires Windows")
 class TrialNativePackageTests(unittest.TestCase):
+    def test_failed_host_record_publish_requests_graceful_rollback(self):
+        configured = os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE")
+        pg_bin = os.environ.get("ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN")
+        pwsh = shutil.which("pwsh")
+        if not configured or not pg_bin or not pwsh:
+            if os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE_REQUIRED") == "1":
+                self.fail("required trial package prerequisites are missing")
+            self.skipTest("native trial package is not configured")
+        with tempfile.TemporaryDirectory(prefix="al19rollback-") as temporary:
+            root = Path(temporary)
+            package = root / "package"
+            shutil.copytree(Path(configured), package)
+            state = root / "state"
+            assets = root / "assets"
+            assets.mkdir()
+            with socket.socket() as listener:
+                listener.bind(("127.0.0.1", 0))
+                port = listener.getsockname()[1]
+            with socket.socket() as listener:
+                listener.bind(("127.0.0.1", 0))
+                database_port = listener.getsockname()[1]
+            settings = root / "settings.json"
+            settings.write_text(json.dumps({"public_origin": f"https://localhost:{port}", "storage_sources": [{
+                "source_key": "sandbox", "display_name": "Rollback", "allowed_root": str(assets),
+            }]}), encoding="utf-8")
+            def run(action, *arguments):
+                return subprocess.run([pwsh, "-NoProfile", "-File", str(package / "trial.ps1"), "-Action", action,
+                                       "-StatePath", str(state), *arguments], capture_output=True, text=True, encoding="utf-8", timeout=100)
+            initialized = run("initialize", "-SettingsFile", str(settings), "-Python", sys.executable,
+                              "-PostgresBin", pg_bin, "-DatabasePort", str(database_port))
+            self.assertEqual(initialized.returncode, 0, initialized.stdout)
+            injected = threading.Event()
+            stop_injector = threading.Event()
+            record = state / "host-process.json"
+            def obstruct_record():
+                deadline = time.monotonic() + 20
+                while time.monotonic() < deadline and not stop_injector.is_set():
+                    if (state / "logs/host.stdout.log").exists():
+                        record.mkdir()
+                        injected.set()
+                        return
+                    time.sleep(0.001)
+            injector = threading.Thread(target=obstruct_record)
+            injector.start()
+            try:
+                failed = run("start")
+                self.assertTrue(injected.is_set(), "record publication fault was not injected")
+                self.assertNotEqual(failed.returncode, 0)
+                response = json.loads(failed.stdout)
+                self.assertEqual(response["shutdown"], "graceful")
+                self.assertFalse((state / ".trial-process.json").exists())
+                self.assertFalse((state / "pgdata/postmaster.pid").exists())
+                self.assertFalse(list(state.glob("host-process.json.*.pending")))
+            finally:
+                stop_injector.set()
+                injector.join(timeout=5)
+                if record.is_dir():
+                    record.rmdir()
+                stopped = run("stop")
+                self.assertEqual(stopped.returncode, 0, stopped.stdout)
+
     def test_real_package_operator_https_restart_and_integrity(self):
         configured = os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE")
         pg_bin = os.environ.get("ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN")
