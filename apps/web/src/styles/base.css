@@ -1,0 +1,153 @@
+:root {
+  font-family:
+    Inter,
+    "Segoe UI",
+    "Microsoft YaHei UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--ink);
+  background: var(--surface);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  color-scheme: light;
+  --ink: #25334a;
+  --muted: #69768b;
+  --line: #dfe5ed;
+  --surface: #f5f7fb;
+  --surface-strong: #ffffff;
+  --accent: #2365cc;
+  --accent-soft: #eaf2ff;
+  --on-accent: #ffffff;
+  --danger: #b03637;
+  --positive: #2b8664;
+  --folder: #bb872c;
+  --focus: #3175dc;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--surface);
+  font-size: 13px;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1 {
+  font-size: 23px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+h2 {
+  font-size: 16px;
+  font-weight: 650;
+}
+h3 {
+  font-size: 14px;
+}
+svg.workspace-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.primary,
+.secondary,
+.icon-button,
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.secondary:hover,
+.icon-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+.primary:hover {
+  filter: brightness(1.08);
+  text-decoration: none;
+}
+.icon-button {
+  width: 34px;
+  padding: 6px;
+}
+.text-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  padding: 4px 6px;
+}
+.text-button:hover {
+  background: var(--accent-soft);
+}
+input,
+select {
+  min-height: 34px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 10px;
+  background: var(--surface-strong);
+}
+input::placeholder {
+  color: var(--muted);
+}
