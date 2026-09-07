@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-023",
+  "title": "web-first-release-alignment",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "web-gateway-owner",
+  "branch": "codex/v01-023-web-first-release-alignment",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-023",
+  "commit": "68e72504a235530976e8926be1a193a8b7c78c06",
+  "changed_files": [
+    ".codex/handoffs/V01-023/result.json",
+    ".codex/handoffs/V01-023/summary.md",
+    ".codex/handoffs/V01-023/tests.md",
+    ".codex/tasks/V01-023.md",
+    "apps/web/README.md",
+    "apps/web/src/LibraryScanStatus.tsx",
+    "apps/web/src/RegisterLibraryForm.tsx",
+    "tests/web/trial-library-scan.spec.mjs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "All runtime/static verification is intentionally pending the user-requested centralized V01-021 acceptance; no passing checks are claimed.",
+    "Container example must stay aligned with V01-022 /assets/<source_key> mount layout.",
+    "entry_path_unsupported presentation awaits joint acceptance with root Linux correction ec3f64a; generic failure wording and wire shape are unchanged."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V01-023/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Existing read-only Web registration and scan-status presentation",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing RegisterLibraryForm aria-describedby, modal/focus/scroll and request/idempotency flow.",
+      "Existing LibraryScanStatus succeeded state and frozen initial-snapshot contract.",
+      "Existing SDK, same-origin session/CSRF and server-authoritative path/permission handling.",
+      "Existing browser registration fixture, retaining Windows retry coverage."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "Not executed, as explicitly requested for centralized acceptance; manual diff and ownership review only."
+    ],
+    "technical_debt": [
+      "V01-021 must perform existing Web checks and real NAS acceptance before declaring the release usable."
+    ]
+  }
+}

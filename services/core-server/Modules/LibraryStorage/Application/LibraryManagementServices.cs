@@ -53,7 +53,7 @@ public sealed class LibraryRegistrationService(
         }
 
         var validation = await new LibraryRootValidationService(probe, store).ValidateAsync(
-            LibraryId.New(), source.StorageSourceId, candidate.Value, source.AllowedRoot.Comparison, cancellationToken).ConfigureAwait(false);
+            LibraryId.New(), source.StorageSourceId, request.RootPath, source.AllowedRoot.Comparison, cancellationToken).ConfigureAwait(false);
         if (validation.Status != LibraryRootValidationStatus.Valid)
         {
             throw new ReadOnlyTrialException(validation.Status switch

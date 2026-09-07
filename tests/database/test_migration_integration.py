@@ -2461,7 +2461,9 @@ INSERT INTO library_storage.library_permission (
         environment["ASSETLIBRARY_TRIAL_TEST_ADMIN_CONNECTION"] = (
             f"Host={self.host};Port={self.port};Database={database};Username={self.admin};Pooling=true;Timeout=5")
         native_filter = "FullyQualifiedName~AssetLibrary.ReadCore.Tests"
-        if os.name != "nt":
+        if os.name == "nt":
+            native_filter = f"({native_filter})&FullyQualifiedName!~PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity"
+        else:
             # The Windows-only ACL case belongs to the Windows trial evidence, not the portable subset.
             native_filter = f"({native_filter})&FullyQualifiedName!~ReadOnlyTrialPermissionIntegrationTests"
         result = subprocess.run(

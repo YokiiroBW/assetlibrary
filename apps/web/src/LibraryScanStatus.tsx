@@ -37,8 +37,15 @@ export function LibraryScanStatus({
         ) : (
           <span>首次扫描只读取目录信息，不会修改原文件。</span>
         )}
-        {summary?.state === "failed" && <span>扫描未完成，尚未生成可用索引。检查存储连接后可重试。</span>}
+        {summary?.state === "failed" && (
+          <span>
+            {summary.failure_code === "entry_path_unsupported"
+              ? "文件或目录名包含当前版本不支持的反斜杠，首次索引未提交，请检查路径名称后重试。"
+              : "扫描未完成，尚未生成可用索引。检查存储连接后可重试。"}
+          </span>
+        )}
         {summary?.state === "cancelled" && <span>扫描已停止，尚未生成可用索引。</span>}
+        {summary?.state === "succeeded" && <span>当前显示首次扫描的索引快照，刷新不会重新扫描目录。</span>}
       </div>
       {scan.message !== null && (
         <p className="form-error" role="alert">
