@@ -2,12 +2,12 @@ import { expect, test } from "../../apps/web/node_modules/@playwright/test/index
 import { mockTrial } from "./trial-fixtures.mjs";
 import { scanSummary } from "./assetlink-fixtures.mjs";
 
-async function registrationForm(page) {
+async function registrationForm(page, rootPath = "C:/fixture-storage/photos") {
   await page.getByRole("button", { name: "添加资源库", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "添加资源库" });
   await expect(dialog.getByLabel("存储源", { exact: true })).toBeEnabled();
   await dialog.getByLabel("资源库名称", { exact: true }).fill("试用照片");
-  await dialog.getByLabel("服务器目录", { exact: true }).fill("C:/fixture-storage/photos");
+  await dialog.getByLabel("服务器目录", { exact: true }).fill(rootPath);
   return dialog;
 }
 
@@ -15,10 +15,14 @@ test("administrator registers a controlled source and explicitly scans before br
   page,
 }, testInfo) => {
   const state = await mockTrial(page, { empty: true });
+  state.sources = [{ source_key: "photos", display_name: "试用存储" }];
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "没有可见资源库" })).toBeVisible();
-  const dialog = await registrationForm(page);
+  const dialog = await registrationForm(page, "/assets/photos");
+  await expect(dialog.getByLabel("服务器目录", { exact: true })).toHaveAccessibleDescription(
+    /部署挂载表.*\/assets\/photos.*Windows 原生/s,
+  );
   await expect(dialog.getByRole("option", { name: "试用存储" })).toHaveCount(1);
   await page.screenshot({ path: testInfo.outputPath("register-desktop.png"), animations: "disabled" });
   await dialog.getByRole("button", { name: "添加资源库", exact: true }).click();
@@ -28,9 +32,9 @@ test("administrator registers a controlled source and explicitly scans before br
   expect(state.requests.filter((request) => request.operation === "library_scans.start")).toHaveLength(0);
   const registration = state.requests.find((request) => request.operation === "libraries.register");
   expect(registration.body).toEqual({
-    source_key: "fixtures",
+    source_key: "photos",
     display_name: "试用照片",
-    root_path: "C:/fixture-storage/photos",
+    root_path: "/assets/photos",
   });
   expect(registration.idempotency_key).toMatch(/^[0-9a-f-]{36}$/);
   await page.getByRole("button", { name: "开始首次扫描" }).click();
@@ -41,6 +45,7 @@ test("administrator registers a controlled source and explicitly scans before br
   await page.screenshot({ path: testInfo.outputPath("scan-desktop.png"), animations: "disabled" });
   state.scan = { ...state.scan, state: "succeeded", observed_entries: 1, committed_entries: 1, can_cancel: false };
   await expect(page.getByText("首次扫描已完成", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "首次扫描" })).toContainText("刷新不会重新扫描目录");
   await expect(page.getByText("sample-photo.jpg", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "开始首次扫描" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "重试扫描" })).toHaveCount(0);
