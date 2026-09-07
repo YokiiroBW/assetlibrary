@@ -7,7 +7,7 @@
   "owner": "library-asset-scan-owner",
   "branch": "codex/v01-026-library-browse-interaction-contracts",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-026",
-  "commit": "",
+  "commit": "2eedeb5",
   "changed_files": [
     ".codex/handoffs/V01-026/result.json",
     ".codex/handoffs/V01-026/summary.md",
@@ -60,18 +60,28 @@
     "production migrations 0019/0020/0021"
   ],
   "tests": {
-    "passed": 0,
-    "failed": 0,
+    "passed": 27,
+    "failed": 1,
     "skipped": 0,
     "report": "tests.md",
-    "execution_status": "implementation_complete_awaiting_coordinated_verification"
+    "execution_status": "backend_verified_e2e_mobile_layout_failure_awaiting_web_fix",
+    "embedded_dotnet_queries": {
+      "passed": 1,
+      "notExecuted": 0,
+      "failed": 0,
+      "executed": 1,
+      "total": 1
+    }
   },
   "risks": [
     "v1 cursors are rejected after upgrade; refresh resumes with a v2 cursor",
     "Host rollback requires matching pre-upgrade database/state backup",
     "Unselective literal/kind filters may examine many indexed candidates; bounded deadline remains"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "V01-025 narrow-screen toolbar layout correction before real E2E rerun",
+    "Coordinator-generated SDK consumer fingerprint synchronization for repository gate"
+  ],
   "recommended_merge_order": 26,
   "handoff_summary": ".codex/handoffs/V01-026/summary.md",
   "thread_deep_link": "",
@@ -83,7 +93,8 @@
       "LibraryStorage management operation and ModulePostgresSession",
       "GatewayAuth bounded read executor and result validation",
       "Protected keyset cursor and AssetIdentity present-fact projection",
-      "Existing required PostgreSQL integration fixture"
+      "Existing required PostgreSQL integration fixture",
+      "Shared lookahead paging for three actual read consumers; no query repository abstraction"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -98,7 +109,10 @@
       "production migrations 0019/0020/0021"
     ],
     "architecture_tests": [
-      "Pending coordinated verification; no test pass claimed"
+      "Fixed SDK format and Release build passed without warnings",
+      "validate_dotnet_source.py passed across 353 C# files",
+      "Migration manifest 21/21; real PostgreSQL schema-role negative checks passed",
+      "Repository gate pending shared SDK fingerprints; no suppression"
     ],
     "technical_debt": [
       "No new dependency or bypass; capacity/release gates remain independent"
