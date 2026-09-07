@@ -14,7 +14,7 @@
 - 格式支持矩阵、客户端功能矩阵、版本路线和验收门禁；
 - Codex 主协调线程、worktree、任务登记和标准交接模板；
 - 已冻结的 AssetLink 契约与 .NET、TypeScript、Kotlin 生成 SDK；
-- .NET 核心、18 条生产迁移、可部署的 HTTPS Web 只读试用、认证、沙箱文件操作与 Windows/Linux/Docker 共用宿主；
+- .NET 核心、21 条生产迁移、可部署的 HTTPS Web 只读工作区、认证、沙箱文件操作与 Windows/Linux/Docker 共用宿主；
 - 强制编码/架构原则、语言预算和已激活的原生 CI 门禁。
 
 当前已完成 **NAS Docker 服务端与第一版 Web**，并保留 Windows x64 只读试用：登录、管理员初始化/恢复、登记真实物理目录、首次扫描、进度/取消/失败重试、浏览和名称/路径搜索。运行包使用显式试用入口；默认健康宿主行为兼容。NAS 使用入口见 [NAS Web 交付说明](docs/releases/NAS_READ_ONLY_WEB.md)，Windows 入口见 [只读试用说明](docs/releases/READ_ONLY_TRIAL.md)。
