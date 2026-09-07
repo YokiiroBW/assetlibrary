@@ -7,9 +7,10 @@
   "owner": "library-asset-scan-owner",
   "branch": "codex/v01-017-persistent-read-only-library-scans",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-017",
-  "commit": "25aba97de991b300af1709f875cb1e0c27632e06",
+  "commit": "43a4f2c05fe6790adcafbf9835eb84aad72149c7",
   "changed_files": [
     ".codex/handoffs/V01-017/result.json",
+    ".codex/handoffs/V01-017/smb-verification.json",
     ".codex/handoffs/V01-017/summary.md",
     ".codex/handoffs/V01-017/tests.md",
     ".codex/tasks/V01-017.md",
@@ -23,6 +24,7 @@
     "services/core-server/Infrastructure/Postgres/ModulePostgresSession.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProcess.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs",
     "services/core-server/Modules/AssetIdentity/Contracts/AssetIdentityContracts.cs",
     "services/core-server/Modules/AssetIdentity/Infrastructure/PostgresAssetIndexSnapshotQuery.cs",
     "services/core-server/Modules/AssetIdentity/Infrastructure/PostgresAssetObservationSink.cs",
@@ -74,6 +76,8 @@
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialRunningCancellationIntegrationTests.cs",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialStorageFailureIntegrationTests.cs",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialTimeoutIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/WorkerParentFixture.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/test_worker_lifetime.py",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/worker_faults.py"
   ],
   "changed_contracts": [
@@ -97,13 +101,33 @@
     "task_health": 32,
     "assetlink": 13,
     "database": 69,
-    "architecture": 14
+    "architecture": 14,
+    "incremental_windows_parent_lifetime": {
+      "new_passed": 1,
+      "new_failed": 0,
+      "pre_fix_regression_reproduced": true,
+      "existing_worker_tests_rechecked": 10,
+      "report": "tests.md#2026-09-07-windows父硬死增量独立计数",
+      "does_not_change_previous_77_69_counts": true
+    },
+    "incremental_real_smb": {
+      "validation": "passed",
+      "protocol_phases": 6,
+      "online_entries": 7,
+      "restored_entries": 7,
+      "hash_and_mtime_preserved": true,
+      "scope": "Real SMB read; only newly owned directory renamed and restored; no share/server disconnection",
+      "evidence": "smb-verification.json",
+      "cleaned": false,
+      "cleanup_status": "blocked_by_policy_not_executed_no_retry"
+    }
   },
   "risks": [
     "首次只读快照；未实现增量/通用重扫、原内容下载、预览或真实文件整理。",
     "仅Windows x64原生进程和隔离文件系统证据；真实NAS50万/长时soak与完整平台发行门禁未关闭。",
     "目录祖先/reparse复验不是内核级原子no-follow或全文件系统快照；沿用ALIGN-002的竞态边界。",
-    "自动审查拒绝旧失败ACL fixture的删除；仅安全恢复测试Deny规则，保留一个17字节合成文件及其目录，详见summary.md。"
+    "自动审查拒绝旧失败ACL fixture的删除；仅安全恢复测试Deny规则，保留一个17字节合成文件及其目录，详见summary.md。",
+    "新增实际SMB合成fixture验证完成；精确GUID目录删除被自动审查拒绝并停止，目录已恢复原路径且保留，见smb-verification.json。"
   ],
   "blocked_by": [],
   "recommended_merge_order": 2,
@@ -117,7 +141,8 @@
       "InitialReadOnlyScanService / DefaultDiscoveryPolicy / IAssetObservationSink and existing initial snapshot SQL",
       "DurableTaskService and existing enqueue/claim/heartbeat/cancel/finish/reclaim state machine",
       "Existing migration ownership, forward-only manifest, verified backup/restore, Npgsql and locked .NET stack",
-      "Coordinator-approved ModulePostgresSession extracts only repeated connection/transaction/role mechanics from three actual consumers"
+      "Coordinator-approved ModulePostgresSession extracts only repeated connection/transaction/role mechanics from three actual consumers",
+      "M0-007 Windows Job layout/constants; DllImport and SafeHandle close ownership without unsafe or new dependencies"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -138,12 +163,15 @@
       "validate_architecture_baseline.py passed: 153 inputs",
       "validate_dotnet_source.py passed: 289 C# files; no analyzer or duplicate-policy suppression",
       "verify_repository.py passed, including 14 architecture and 21 manifest tests, generated SDK checks; Alpha blocked",
-      "69 real/database tests and 77 ReadCore tests include role isolation, cancellation/recovery/process protocol/ACL/capacity boundaries"
+      "69 real/database tests and 77 ReadCore tests include role isolation, cancellation/recovery/process protocol/ACL/capacity boundaries",
+      "Incremental parent-death fix: source policy291 and architecture153; independent Windows hard-parent-death1/1, existing worker10/10; format and complete build zero warnings",
+      "Incremental real SMB probe/scan six phases passed; source hashes/mtime unchanged; scope excludes machine/share disconnection; product code unchanged"
     ],
     "technical_debt": [
       "Kernel-atomic no-follow and live reconciliation remain outside this initial read-only trial",
       "Full NAS scale/endurance, Host/Web final E2E and deployment package are coordinator-owned acceptance",
-      "Denied fixture deletion remains documented; original asset data and Git state unaffected"
+      "Denied fixture deletion remains documented; original asset data and Git state unaffected",
+      "Windows Job parent-death guarantee verified only on Windows x64; Linux unchanged and not covered by this proof"
     ]
   }
 }

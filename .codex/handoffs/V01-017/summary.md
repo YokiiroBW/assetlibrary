@@ -38,3 +38,19 @@
 - 初次Windows ACL故障测试恢复对象未标记修改，已改为显式恢复原安全描述符，新测试通过。自动审批拒绝该失败fixture的ACL恢复+递归删除组合，仅返回 `blocked by policy`，整体未执行。随后更小的、**不删除**操作成功恢复唯一测试Deny规则；不再尝试删除。保留 `C:/YOKI/Codex/AssetLibrary-worktrees/V01-017/.runtime/sandbox-storage/V01-004/tests/501eeef49e3046efa343512838df6c06/library/summer-photo.jpg`（17字节固定合成内容），不影响Git状态，不涉及ALIGN-002旧9个目录或真实资产。
 
 建议先合入本分支与认证组件，再由V01-015/V01-019/V01-020完成Host/Web组合与独立试用验收。完整V0.1、平台发行和生产写门禁保持关闭；本交接不宣布整个里程碑完成。
+
+## 集成评审后增量：Windows父进程硬退出
+
+协调器批准继续修复真实Host硬退出时的子进程归属。实现提交 `43a4f2c05fe6790adcafbf9835eb84aad72149c7`：先创建匿名、不可继承的 Windows Job 并设置 KILL_ON_JOB_CLOSE，再启动并绑定child，只有绑定成功才发送包含库根的stdin。创建/配置/绑定任一步失败均闭锁；正常取消继续杀树并等待退出，父进程崩溃或被TerminateProcess时由OS关闭Job句柄并终止成员。
+
+互操作复用M0-007 Windows Job结构与常量，通过DllImport、System32限定查找及SafeFileHandle/SafeProcessHandle实现；没有AllowUnsafeBlocks、LibraryImport生成代码、依赖或项目配置变化。跨模块合同、SQL和Linux行为不变；不把Windows证明外推为Linux父死亡保证。
+
+新增独立父硬死回归1/1通过，旧实现相同测试明确失败。测试用生产ProcessReadOnlyFileDiscovery启动已收到root请求并阻塞120秒的受控child；仅强制结束父PID，父finally没有机会执行，仍在5秒内收到child退出信号。10项既有worker协议/取消/故障测试再次通过。原77/69是先前基线，未将新增回归混进历史计数，详见tests.md增量段。
+
+## 实际SMB补充验收
+
+在协调器指定的 `//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/` 下创建唯一 `smb-v017-0645202bc2d749c7bc4559526a8219fe` 合成fixture。调用V01-015已编译Host的 `--read-only-worker probe|scan`，root仅经stdin JSON传递。在线Available、完整7项；仅对新建assets目录改名后，原路径Missing且scan以exit20/storage_unavailable失败，无complete；移回后Available并再次完整7项。每次扫描前后hash/mtime、改名恢复后的文件hash/mtime均保持一致。
+
+这是实际SMB读取与指定目录暂不可达/恢复证据，**不是NAS整机断网**；没有断开Z盘、共享会话或改变全局网络设置。原始帧、耗时、源清单与强摘要见 `smb-verification.json`，独立于历史77/69及父硬死回归计数。
+
+自动审批拒绝删除该GUID合成fixture的操作，仅返回 `blocked by policy`；命令未执行，已停止且没有换方式重试。目录已恢复为assets原名并完整保留，`cleanup_status=blocked_by_policy_not_executed_no_retry`。不存在用户资产读写或未知目录清理。
