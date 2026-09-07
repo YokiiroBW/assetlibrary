@@ -7,7 +7,7 @@
   "owner": "server-packaging-owner",
   "branch": "codex/v01-019-windows-read-only-trial-package",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-019",
-  "commit": "",
+  "commit": "64cdeb2",
   "changed_files": [
     ".codex/tasks/V01-019.md",
     "scripts/build_read_only_trial.py",
@@ -18,16 +18,19 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 5,
-    "failed": 0,
+    "failed": 1,
+    "report": "tests.md",
     "skipped": 0,
-    "report": "tests.md"
+    "passed": 6
   },
   "risks": [
-    "Native Host/Web package end-to-end verification remains pending the coordinator integration commit.",
-    "Only explicitly scoped local Windows read-only trial; original Alpha/platform release gates remain unchanged."
+    "Native administrator bootstrap currently fails closed with service_unavailable; test is not accepted as passed.",
+    "The original risk parser rejects observed 2509-line HIBP response and its unterminated final line; authentication owner is correcting this.",
+    "Candidate native artifacts are not final release artifacts."
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "Coordinator final operator stdout, current HIBP response compatibility, and certificate decryption retention integration"
+  ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V01-019/summary.md",
   "thread_deep_link": "",
@@ -43,7 +46,7 @@
       "Deployment-only LOGIN provisioning delegates all schema migrations to migration_tool; no runtime module-table access"
     ],
     "technical_debt": [
-      "Native Host/Web end-to-end evidence pending integration; final handoff will replace this partial snapshot"
+      "Final same-source package and full native administrator/recovery validation pending coordinator integration"
     ],
     "new_major_dependencies": [],
     "dependency_direction_ok": true,
