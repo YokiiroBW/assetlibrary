@@ -2,7 +2,7 @@ namespace AssetLibrary.Modules.GatewayAuth.Infrastructure;
 
 internal sealed class PwnedPasswordsSecretRiskOptions
 {
-    public static readonly TimeSpan MaximumRequestTimeout = TimeSpan.FromSeconds(2);
+    public static readonly TimeSpan MaximumRequestTimeout = TimeSpan.FromSeconds(4);
     public static readonly TimeSpan MaximumCacheLifetime = TimeSpan.FromHours(1);
     public static readonly TimeSpan DefaultRequestTimeout = MaximumRequestTimeout;
     public static readonly TimeSpan DefaultCacheLifetime = TimeSpan.FromMinutes(15);
