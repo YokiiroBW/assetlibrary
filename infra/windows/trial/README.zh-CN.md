@@ -4,7 +4,7 @@
 
 ## 前置条件
 
-- Windows x64、PowerShell 7.4+、Python 3.12+，以及 PostgreSQL **16.15** 的完整 Windows `bin` 目录（含 `initdb`、`pg_ctl`、`postgres`、`psql`、`pg_dump`、`pg_restore`、`pg_controldata`）。工具路径只保存在本部署的私密配置中，不修改全局 PATH。
+- Windows x64、PowerShell 7.5+、Python 3.12+，以及 PostgreSQL **16.15** 的完整 Windows `bin` 目录（含 `initdb`、`pg_ctl`、`postgres`、`psql`、`pg_dump`、`pg_restore`、`pg_controldata`）。工具路径只保存在本部署的私密配置中，不修改全局 PATH。PowerShell需保留JSON字符串的原值，避免把名称或重试有效期隐式改成当地日期格式。
 - 包已包含自包含 .NET Host 和预构建 Web，日常运行不需要 .NET SDK、Node 或 pnpm。
 - 将包解压到本机固定磁盘的独立目录；保留 `package-manifest.json`。每次操作均校验所有包文件的长度、SHA-256 和来源绑定；不要把状态或资产放入包目录。
 - 使用拥有资产**读取权限**的普通 Windows 用户运行。状态目录的父目录必须已存在；状态目录必须是新的或已由本包初始化的私密目录，完整路径最长140字符。脚本拒绝网络状态盘、链接、外来目录及配置重入不一致。

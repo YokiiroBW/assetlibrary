@@ -1,4 +1,4 @@
-#requires -Version 7.4
+#requires -Version 7.5
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][ValidateSet('initialize','start','stop','status','operator')][string]$Action,
@@ -70,7 +70,7 @@ function New-PrivateDirectory([string]$Path) {
 function Read-Json([string]$Path, [int]$MaximumBytes = 65536) {
     $null = Get-SafeLocalPath $Path
     if ((Get-Item -LiteralPath $Path).Length -gt $MaximumBytes) { throw 'trial_input_too_large' }
-    return [IO.File]::ReadAllText($Path) | ConvertFrom-Json -AsHashtable
+    return [IO.File]::ReadAllText($Path) | ConvertFrom-Json -AsHashtable -DateKind String
 }
 
 function Write-PrivateJson([string]$Path, [object]$Value) {
@@ -146,11 +146,11 @@ function Invoke-PrivateProcess([string]$Executable, [string[]]$Arguments, [strin
 function Invoke-Database([string]$DatabaseAction) {
     $result = Invoke-PrivateProcess $script:Owner.python @('-I','-B',(Join-Path $script:Package 'trial_database.py'),$DatabaseAction,'--state',$script:State)
     if ($result.exit_code -ne 0) {
-        $detail = $result.output | ConvertFrom-Json -AsHashtable
+        $detail = $result.output | ConvertFrom-Json -AsHashtable -DateKind String
         if ($detail.code -match '^database_[a-z_]+$') { throw $detail.code }
         throw 'trial_database_operation_failed'
     }
-    return ($result.output | ConvertFrom-Json -AsHashtable)
+    return ($result.output | ConvertFrom-Json -AsHashtable -DateKind String)
 }
 
 function Assert-State {
@@ -350,7 +350,7 @@ function Invoke-Operator {
     try {
         $result = Invoke-PrivateProcess $script:HostExecutable @('--trial-operator',(Join-Path $script:State 'trial.json'),$OperatorAction) $inputText 30
         if ([string]::IsNullOrWhiteSpace($result.output)) { throw 'trial_operator_result_missing' }
-        try { $response = $result.output | ConvertFrom-Json -AsHashtable } catch { throw 'trial_operator_result_invalid' }
+        try { $response = $result.output | ConvertFrom-Json -AsHashtable -DateKind String } catch { throw 'trial_operator_result_invalid' }
         if ($result.exit_code -ne 0) {
             if ($response.ContainsKey('message') -and $response.ContainsKey('code')) { $script:OperatorFailure=$response }
             throw 'trial_operator_rejected'
