@@ -84,7 +84,8 @@ internal static class TrialConfigurationValidator
             if (source is null || !ValidKey(source.SourceKey)
                 || !keys.Add(source.SourceKey) || source.StorageSourceId == Guid.Empty || !ids.Add(source.StorageSourceId)
                 || string.IsNullOrWhiteSpace(source.DisplayName) || source.DisplayName.Length > 200
-                || source.DisplayName.Any(char.IsControl) || !Path.IsPathFullyQualified(source.AllowedRoot))
+                || source.DisplayName.Any(char.IsControl) || !Path.IsPathFullyQualified(source.AllowedRoot)
+                || !OperatingSystem.IsWindows() && source.AllowedRoot.Contains('\\'))
             {
                 throw new TrialConfigurationException("trial_storage_sources_invalid");
             }

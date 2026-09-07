@@ -155,7 +155,14 @@ public sealed class SystemReadOnlyFileDiscovery : IReadOnlyFileDiscovery
             var isDirectory = (attributes & FileAttributes.Directory) != 0;
             var isReparsePoint = (attributes & FileAttributes.ReparsePoint) != 0;
             var kind = SelectKind(isDirectory, isReparsePoint);
-            var relativePath = new RelativeAssetPath(Path.GetRelativePath(root, path));
+            var physicalRelativePath = Path.GetRelativePath(root, path);
+            if (!OperatingSystem.IsWindows() && physicalRelativePath.Contains('\\'))
+            {
+                // The current shared path contract treats backslashes as separators; do not invent another physical location.
+                throw new FileDiscoveryException("entry_path_unsupported");
+            }
+
+            var relativePath = new RelativeAssetPath(physicalRelativePath);
             var contentLength = isDirectory || isReparsePoint ? (long?)null : new FileInfo(path).Length;
             var observedAttributes = ToDiscoveryAttributes(attributes);
             return new DiscoveredEntry(

@@ -15,6 +15,11 @@ public sealed class SystemLibraryRootProbe : ILibraryRootProbe
 
         var fullPath = Path.GetFullPath(path);
         var canonical = new CanonicalLibraryRoot(NormalizeSeparators(fullPath), comparison);
+        if (!OperatingSystem.IsWindows() && fullPath.Contains('\\'))
+        {
+            return ValueTask.FromResult(new LibraryRootProbeResult(LibraryRootProbeStatus.Inaccessible, canonical));
+        }
+
         try
         {
             var attributes = File.GetAttributes(fullPath);
