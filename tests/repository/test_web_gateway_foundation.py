@@ -135,7 +135,8 @@ snapshots:
     def test_postgres_gateway_reads_use_explicit_read_only_transactions(self) -> None:
         infrastructure = ROOT / "services/core-server/Modules/GatewayAuth/Infrastructure"
         executor = (infrastructure / "PostgresReadExecutor.cs").read_text(encoding="utf-8")
-        self.assertIn('"SET TRANSACTION READ ONLY;"', executor)
+        self.assertIn("SET TRANSACTION READ ONLY;", executor)
+        self.assertIn("SET LOCAL ROLE assetlibrary_gateway_auth_runtime;", executor)
 
         for source_name in ("PostgresLibraryQuery.cs", "PostgresSearchQuery.cs"):
             source = (infrastructure / source_name).read_text(encoding="utf-8")

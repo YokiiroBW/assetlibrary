@@ -1,0 +1,472 @@
+{
+  "task": "V01-017",
+  "run_id": "0645202bc2d749c7bc4559526a8219fe",
+  "timestamp_utc": "2026-09-07T10:38:38.6480973Z",
+  "scope": "real SMB reads; owned directory temporarily renamed; no share or machine disconnection",
+  "approved_base": "\\\\YokiiroNAS\\Documents\\Codex-Workspaces\\AssetLibrary\\.runtime\\sandbox-storage\\V01-015",
+  "fixture_root": "\\\\YokiiroNAS\\Documents\\Codex-Workspaces\\AssetLibrary\\.runtime\\sandbox-storage\\V01-015\\smb-v017-0645202bc2d749c7bc4559526a8219fe",
+  "scan_root": "\\\\YokiiroNAS\\Documents\\Codex-Workspaces\\AssetLibrary\\.runtime\\sandbox-storage\\V01-015\\smb-v017-0645202bc2d749c7bc4559526a8219fe\\assets",
+  "offline_root": "\\\\YokiiroNAS\\Documents\\Codex-Workspaces\\AssetLibrary\\.runtime\\sandbox-storage\\V01-015\\smb-v017-0645202bc2d749c7bc4559526a8219fe\\assets-unavailable",
+  "host_dll": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-015\\services\\core-server\\Host\\bin\\Release\\net10.0\\AssetLibrary.CoreServer.Host.dll",
+  "host_sha256": "5B4BF1FE6C94B9073A5F8F609783F1B7041419DB1E815AEADF22966A203EF47F",
+  "status": "passed",
+  "cleaned": false,
+  "cleanup_status": "blocked_by_policy_not_executed_no_retry",
+  "steps": {
+    "online_probe": {
+      "mode": "probe",
+      "exit_code": 0,
+      "elapsed_ms": 85,
+      "frames": [
+        {
+          "version": 1,
+          "type": "probe",
+          "status": "Available",
+          "canonicalRoot": "//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/smb-v017-0645202bc2d749c7bc4559526a8219fe/assets",
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": null,
+          "code": null
+        }
+      ],
+      "stderr": ""
+    },
+    "online_scan": {
+      "mode": "scan",
+      "exit_code": 0,
+      "elapsed_ms": 87,
+      "frames": [
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "docs",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0993126+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "docs/notes.md",
+          "kind": 0,
+          "contentLength": 17,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "empty",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0893125+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "main.txt",
+          "kind": 0,
+          "contentLength": 67,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0983126+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos/small.bin",
+          "kind": 0,
+          "contentLength": 32768,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos/示例-a.txt",
+          "kind": 0,
+          "contentLength": 42,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "complete",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": 7,
+          "code": null
+        }
+      ],
+      "stderr": ""
+    },
+    "unavailable_probe": {
+      "mode": "probe",
+      "exit_code": 0,
+      "elapsed_ms": 73,
+      "frames": [
+        {
+          "version": 1,
+          "type": "probe",
+          "status": "Missing",
+          "canonicalRoot": "//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/smb-v017-0645202bc2d749c7bc4559526a8219fe/assets",
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": null,
+          "code": null
+        }
+      ],
+      "stderr": ""
+    },
+    "unavailable_scan": {
+      "mode": "scan",
+      "exit_code": 20,
+      "elapsed_ms": 73,
+      "frames": [
+        {
+          "version": 1,
+          "type": "failure",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": null,
+          "code": "storage_unavailable"
+        }
+      ],
+      "stderr": ""
+    },
+    "restored_probe": {
+      "mode": "probe",
+      "exit_code": 0,
+      "elapsed_ms": 73,
+      "frames": [
+        {
+          "version": 1,
+          "type": "probe",
+          "status": "Available",
+          "canonicalRoot": "//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/smb-v017-0645202bc2d749c7bc4559526a8219fe/assets",
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": null,
+          "code": null
+        }
+      ],
+      "stderr": ""
+    },
+    "restored_scan": {
+      "mode": "scan",
+      "exit_code": 0,
+      "elapsed_ms": 83,
+      "frames": [
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "docs",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0993126+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "docs/notes.md",
+          "kind": 0,
+          "contentLength": 17,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "empty",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0893125+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "main.txt",
+          "kind": 0,
+          "contentLength": 67,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos",
+          "kind": 1,
+          "contentLength": null,
+          "lastWriteTimeUtc": "2026-09-07T18:38:38.0983126+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos/small.bin",
+          "kind": 0,
+          "contentLength": 32768,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "entry",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": "photos/示例-a.txt",
+          "kind": 0,
+          "contentLength": 42,
+          "lastWriteTimeUtc": "2026-09-07T08:00:00+08:00",
+          "attributes": 0,
+          "observedEntries": null,
+          "code": null
+        },
+        {
+          "version": 1,
+          "type": "complete",
+          "status": null,
+          "canonicalRoot": null,
+          "relativePath": null,
+          "kind": null,
+          "contentLength": null,
+          "lastWriteTimeUtc": null,
+          "attributes": null,
+          "observedEntries": 7,
+          "code": null
+        }
+      ],
+      "stderr": ""
+    }
+  },
+  "before": [
+    {
+      "path": ".assetmeta",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743181003126,
+      "sha256": null
+    },
+    {
+      "path": ".assetmeta/ignored.txt",
+      "directory": false,
+      "length": 26,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "2BC515673BA113F43464D0ADF0A3361F6AC7B097468281AA8BE44FC000B44030"
+    },
+    {
+      "path": "docs",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180993126,
+      "sha256": null
+    },
+    {
+      "path": "docs/notes.md",
+      "directory": false,
+      "length": 17,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "681D0B5F6538627106EB856651D08C7127AD78E944C3875381E354ACBDB84A7C"
+    },
+    {
+      "path": "empty",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180893125,
+      "sha256": null
+    },
+    {
+      "path": "main.txt",
+      "directory": false,
+      "length": 67,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "342FBD4ED290FC0624C9D9A9F515931FD13C0F2A420471A1E1518922A5D3BFDA"
+    },
+    {
+      "path": "photos",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180983126,
+      "sha256": null
+    },
+    {
+      "path": "photos/示例-a.txt",
+      "directory": false,
+      "length": 42,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "15636DB2AD0BC5A72DF8D401A305EF4A3F924F12C619D16C5FA9C524DF0A1E79"
+    },
+    {
+      "path": "photos/small.bin",
+      "directory": false,
+      "length": 32768,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "E11360251D1173650CDCD20F111D8F1CA2E412F572E8B36A4DC067121C1799B8"
+    }
+  ],
+  "online_scan_unchanged": true,
+  "path_temporarily_renamed": true,
+  "path_restored": true,
+  "after": [
+    {
+      "path": ".assetmeta",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743181003126,
+      "sha256": null
+    },
+    {
+      "path": ".assetmeta/ignored.txt",
+      "directory": false,
+      "length": 26,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "2BC515673BA113F43464D0ADF0A3361F6AC7B097468281AA8BE44FC000B44030"
+    },
+    {
+      "path": "docs",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180993126,
+      "sha256": null
+    },
+    {
+      "path": "docs/notes.md",
+      "directory": false,
+      "length": 17,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "681D0B5F6538627106EB856651D08C7127AD78E944C3875381E354ACBDB84A7C"
+    },
+    {
+      "path": "empty",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180893125,
+      "sha256": null
+    },
+    {
+      "path": "main.txt",
+      "directory": false,
+      "length": 67,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "342FBD4ED290FC0624C9D9A9F515931FD13C0F2A420471A1E1518922A5D3BFDA"
+    },
+    {
+      "path": "photos",
+      "directory": true,
+      "length": null,
+      "mtime_utc_ticks": 639243743180983126,
+      "sha256": null
+    },
+    {
+      "path": "photos/示例-a.txt",
+      "directory": false,
+      "length": 42,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "15636DB2AD0BC5A72DF8D401A305EF4A3F924F12C619D16C5FA9C524DF0A1E79"
+    },
+    {
+      "path": "photos/small.bin",
+      "directory": false,
+      "length": 32768,
+      "mtime_utc_ticks": 639243360000000000,
+      "sha256": "E11360251D1173650CDCD20F111D8F1CA2E412F572E8B36A4DC067121C1799B8"
+    }
+  ],
+  "restored_scan_unchanged": true,
+  "file_hash_and_mtime_preserved_across_rename": true,
+  "cleanup_attempt": {
+    "review_result": "blocked by policy",
+    "executed": false,
+    "subsequent_attempts": 0,
+    "recorded_utc": "2026-09-07T10:43:47.9674247Z"
+  },
+  "core_artifact_readback": {
+    "path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-015\\services\\core-server\\Host\\bin\\Release\\net10.0\\AssetLibrary.CoreServer.dll",
+    "sha256": "69DA379ACC579A4336A9D61B3C6A0943DB9F895DBB8FCB90571876E4BEEB1339",
+    "last_write_utc": "2026-09-07T10:37:11.6628513Z",
+    "recorded_after_run": true
+  }
+}

@@ -214,12 +214,7 @@ jobs:
           pnpm --dir apps/web run build
           pnpm --dir apps/web exec playwright install --with-deps chromium
       - name: Real HTTPS PostgreSQL worker and browser trial
-        run: >-
-          python -I -B tests/integration/read-only-trial/run_e2e.py --execute --postgres-external
-          --dotnet "$(command -v dotnet)" --postgres-bin /usr/lib/postgresql/16/bin
-          --node "$(command -v node)" --web-root apps/web/dist
-          --playwright-module apps/web/node_modules/@playwright/test/index.mjs
-          --evidence .runtime/real-trial-evidence
+        run: python -I -B tests/integration/read-only-trial/run_e2e.py --execute --postgres-external --dotnet "$(command -v dotnet)" --postgres-bin /usr/lib/postgresql/16/bin --node "$(command -v node)" --web-root apps/web/dist --playwright-module apps/web/node_modules/@playwright/test/index.mjs --evidence .runtime/real-trial-evidence
       - uses: actions/upload-artifact@v4
         if: always()
         with:
