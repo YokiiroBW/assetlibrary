@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "ALIGN-004",
+  "title": "windows-service-guard-reconciliation",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "server-packaging-owner",
+  "branch": "codex/align-004-windows-service-guard-reconciliation",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-004",
+  "commit": "e6074f265f7de023512b79ffcf15ee1d31fec5ac",
+  "changed_files": [
+    ".codex/tasks/ALIGN-004.md",
+    ".codex/handoffs/ALIGN-004/summary.md",
+    ".codex/handoffs/ALIGN-004/result.json",
+    ".codex/handoffs/ALIGN-004/tests.md",
+    "tests/spikes/server-packaging/scripts/windows-service.ps1",
+    "tests/spikes/server-packaging/src/Program.cs",
+    "tests/spikes/server-packaging/src/ServerPackagingSpike.csproj",
+    "tests/spikes/server-packaging/test_windows_service_contract.py",
+    "tests/spikes/server-packaging/test_spike.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Real Windows Service and Docker lifecycles remain unexecuted under their existing release gates.",
+    "Linux artifacts were cross-published on Windows; current Linux runtime behavior and cross-host binary identity are not claimed.",
+    "The task-local ignored package/build caches are retained; they are not service, registry, system-temp staging or tracked Git residue."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/ALIGN-004/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "server-packaging-spike",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing ASP.NET Core host and WindowsServices lifetime",
+      "M0-004 deterministic bootstrap and build-info provenance",
+      "Spike-local m0-004/v1 health contract",
+      "Existing Python/PowerShell test tooling",
+      "Existing central WindowsServices package pin and per-runtime bootstrap intermediate directories",
+      "Framework LoggerMessage generation for structured lifecycle diagnostics"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "9 service adapter static and executable mock/sandbox regressions passed",
+      "11 native process/provenance tests passed, including three independent cold dual-runtime publishes",
+      "Read-only preflight and verify-absent returned no service, registry or system-temp staging residue",
+      "scripts/validate_handoff.py includes scripts/validate_architecture_baseline.py",
+      "Task result validated against contracts/handoffs/task-result.schema.json",
+      "git diff --check"
+    ],
+    "technical_debt": [
+      "M0-004-G1 Windows Service and M0-004-G2 Docker release evidence remain open."
+    ]
+  }
+}
