@@ -3,11 +3,11 @@
   "task_id": "V01-026",
   "title": "Web library categories and complete-scope browse queries",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "library-asset-scan-owner",
   "branch": "codex/v01-026-library-browse-interaction-contracts",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-026",
-  "commit": "2eedeb5",
+  "commit": "2d2bef2bf1e43f65baf3114aa5e790523ebdfd70",
   "changed_files": [
     ".codex/handoffs/V01-026/result.json",
     ".codex/handoffs/V01-026/summary.md",
@@ -17,12 +17,16 @@
     "database/migrations/production/0020_asset_identity_interactive_reads.sql",
     "database/migrations/production/0021_gateway_auth_interactive_reads.sql",
     "database/migrations/production/manifest.json",
+    "services/core-server/Adapters/AssetLink/AssetLinkReadBodyParser.cs",
+    "services/core-server/Adapters/AssetLink/AssetLinkReadFields.cs",
     "services/core-server/Adapters/AssetLink/AssetLinkReadJson.cs",
     "services/core-server/Adapters/AssetLink/AssetLinkReadRequest.cs",
     "services/core-server/Adapters/AssetLink/AssetLinkReadRequestParser.cs",
     "services/core-server/Adapters/AssetLink/ReadOnlyAssetLinkProtocol.cs",
     "services/core-server/Host/Trial/TrialLibraryComposition.cs",
+    "services/core-server/Host/Trial/TrialLibraryManagementControls.cs",
     "services/core-server/Host/Trial/TrialManagementGateway.cs",
+    "services/core-server/Host/Trial/TrialManagementRequest.cs",
     "services/core-server/Modules/GatewayAuth/Application/AuthorizedReadModelPort.cs",
     "services/core-server/Modules/GatewayAuth/Application/AuthorizedReadResultValidator.cs",
     "services/core-server/Modules/GatewayAuth/Application/ReadOnlyBrowseService.cs",
@@ -35,6 +39,7 @@
     "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresLibraryQuery.cs",
     "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresReadCommand.cs",
     "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresReadExecutor.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresReadPage.cs",
     "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresSearchQuery.cs",
     "services/core-server/Modules/GatewayAuth/Infrastructure/ProtectedReadCursorCodec.cs",
     "services/core-server/Modules/LibraryStorage/Application/LibraryCategoryService.cs",
@@ -43,15 +48,19 @@
     "services/core-server/Modules/LibraryStorage/Contracts/ReadOnlyTrialContracts.cs",
     "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryCategory.cs",
     "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryRegistration.cs",
-    "services/core-server/Modules/LibraryStorage/Infrastructure/PostgresLibraryStore.cs",
     "tests/database/test_migration_integration.py",
     "tests/database/test_migration_manifest.py",
     "tests/database/web_interaction_checks.py",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/FakeAuthorizedReadModelQuery.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayContractTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadAnchorAssertions.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadModelIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadPageFixture.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadProtocolTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadScopeAssertions.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/InteractiveReadSortingAssertions.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationAuthorization.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationHttp.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationStorage.cs"
   ],
   "changed_contracts": [
@@ -60,28 +69,35 @@
     "production migrations 0019/0020/0021"
   ],
   "tests": {
-    "passed": 27,
-    "failed": 1,
+    "passed": 42,
+    "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "execution_status": "backend_verified_e2e_mobile_layout_failure_awaiting_web_fix",
+    "execution_status": "affected_backend_and_real_web_e2e_passed",
     "embedded_dotnet_queries": {
       "passed": 1,
       "notExecuted": 0,
       "failed": 0,
       "executed": 1,
       "total": 1
-    }
+    },
+    "suites": {
+      "protocol_and_fingerprint": 5,
+      "migration_manifest": 21,
+      "required_postgres_driver": 1,
+      "real_https_browser_e2e": 1,
+      "architecture_rules": 14
+    },
+    "real_e2e_evidence": ".runtime/V01-026/real-web-e2e/20260907T174230Z-0d158ac9",
+    "resource_cleanup": "verified",
+    "repository_verification": "passed; Alpha validity audit remains release blocked"
   },
   "risks": [
     "v1 cursors are rejected after upgrade; refresh resumes with a v2 cursor",
     "Host rollback requires matching pre-upgrade database/state backup",
     "Unselective literal/kind filters may examine many indexed candidates; bounded deadline remains"
   ],
-  "blocked_by": [
-    "V01-025 narrow-screen toolbar layout correction before real E2E rerun",
-    "Coordinator-generated SDK consumer fingerprint synchronization for repository gate"
-  ],
+  "blocked_by": [],
   "recommended_merge_order": 26,
   "handoff_summary": ".codex/handoffs/V01-026/summary.md",
   "thread_deep_link": "",
@@ -109,13 +125,12 @@
       "production migrations 0019/0020/0021"
     ],
     "architecture_tests": [
-      "Fixed SDK format and Release build passed without warnings",
+      "Fixed SDK locked restore, format and Release build passed without warnings",
       "validate_dotnet_source.py passed across 353 C# files",
       "Migration manifest 21/21; real PostgreSQL schema-role negative checks passed",
-      "Repository gate pending shared SDK fingerprints; no suppression"
+      "Original real HTTPS/PG/Worker/browser E2E passed, zero skip; source hash and mtime unchanged",
+      "verify_repository.py passed: handoff, M0-009, Alpha blocked validity audit, SDK/dependency/Web source gates and 14 architecture regressions; no suppression"
     ],
-    "technical_debt": [
-      "No new dependency or bypass; capacity/release gates remain independent"
-    ]
+    "technical_debt": []
   }
 }
