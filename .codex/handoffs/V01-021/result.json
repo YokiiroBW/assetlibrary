@@ -1,0 +1,79 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-021",
+  "title": "nas-docker-web-milestone",
+  "milestone": "V0.1",
+  "status": "partial",
+  "owner": "architecture-coordinator",
+  "branch": "codex/v01-021-nas-docker-web-milestone",
+  "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V01-021",
+  "commit": "81110c2cbefe101968d2894d6946cf53c68ef291",
+  "changed_files": [
+    ".codex/handoffs/V01-021/result.json",
+    ".codex/handoffs/V01-021/summary.md",
+    ".codex/handoffs/V01-021/tests.md",
+    ".codex/handoffs/V01-023/result.json",
+    ".codex/handoffs/V01-023/summary.md",
+    ".codex/handoffs/V01-023/tests.md",
+    ".codex/project-state.json",
+    ".codex/task-graph.json",
+    ".codex/task-registry.json",
+    ".codex/tasks/V01-021.md",
+    ".codex/tasks/V01-023.md",
+    "apps/web/README.md",
+    "apps/web/src/LibraryScanStatus.tsx",
+    "apps/web/src/RegisterLibraryForm.tsx",
+    "docs/adr/ADR-0015_NAS容器与首版Web交付.md",
+    "eng/README.md",
+    "services/core-server/Host/Trial/TrialConfigurationValidator.cs",
+    "services/core-server/Host/Trial/TrialHealthProbe.cs",
+    "services/core-server/Modules/LibraryStorage/Application/LibraryManagementServices.cs",
+    "services/core-server/Modules/LibraryStorage/Infrastructure/SystemLibraryRootProbe.cs",
+    "services/core-server/Modules/ScanReconciliation/Infrastructure/SystemReadOnlyFileDiscovery.cs",
+    "services/core-server/README.md",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialHealthProbeTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyFileDiscoveryTests.cs",
+    "tests/web/trial-library-scan.spec.mjs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "Awaiting consolidated acceptance after Docker implementation completes."
+  },
+  "risks": [
+    "NAS deployment and consolidated acceptance have not executed; no usable NAS service or release readiness is claimed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/V01-021/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "NAS Host composition, existing physical-path adapters and coordination",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing trial Host/CLI, auth/session, read/query and durable scan modules.",
+      "Existing PostgreSQL migration/roles/backup and Web SDK/UI.",
+      "Existing worker failure propagation and physical-root validation."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Only existing public ports; no cross-module table writes or Domain OS dependencies."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "No new wire encoding. POSIX backslash names fail explicitly before shared normalization.",
+      "Health probe retains public Host/SNI and pin while connecting locally."
+    ],
+    "architecture_tests": [
+      "Not executed yet; user requires implementation first and one coordinated final acceptance."
+    ],
+    "technical_debt": [
+      "Actual NAS lifecycle, browser and affected checks remain pending.",
+      "Original full Alpha/write/other-platform gates stay open until their own evidence is satisfied."
+    ]
+  }
+}
