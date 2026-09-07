@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "ALIGN-003",
+  "title": "Web 请求截止时间与权限缓存对齐",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "web-gateway-owner",
+  "branch": "codex/align-003-web-request-deadline",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-003",
+  "commit": "7a1ed4203f8fd2de695e270ef543652839abe551",
+  "changed_files": [
+    ".codex/handoffs/ALIGN-003/result.json",
+    ".codex/handoffs/ALIGN-003/summary.md",
+    ".codex/handoffs/ALIGN-003/tests.md",
+    ".codex/tasks/ALIGN-003.md",
+    "apps/web/src/App.tsx",
+    "apps/web/src/assetLinkClient.ts",
+    "apps/web/src/hooks/queryState.ts",
+    "apps/web/src/hooks/useBrowse.ts",
+    "apps/web/src/hooks/useLibraries.ts",
+    "apps/web/src/hooks/useSearch.ts",
+    "tests/web/assetlink-fixtures.mjs",
+    "tests/web/hanging-assetlink-server.mjs",
+    "tests/web/read-only-authority.spec.mjs",
+    "tests/web/read-only-deadline.spec.mjs",
+    "tests/web/read-only-workspace.spec.mjs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 47,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "This is a Web adapter fix; existing authentication Host, Alpha and release gates remain unchanged.",
+    "Validation uses Chromium and loopback fixtures on Windows, not production identity composition, other browser/platform evidence or 500,000-asset NAS performance.",
+    "The unchanged .NET and real PostgreSQL suites were not repeated for this Web-only diff; the coordinator owns final integrated fast-merge verification."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/ALIGN-003/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Web authenticated read-only adapter / web-gateway-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Reuses the single AssetLinkClient fetch path and generated TypeScript SDK encoder/parser without changing the wire contract.",
+      "Reuses AbortController, per-query generation guards, existing paged state and React remount lifecycle; the shared failedPage helper keeps the three existing hooks aligned.",
+      "Reuses the existing AssetLink browser fixtures and virtualized entry list; synthetic loopback HTTP tests verify real request cancellation."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Only apps/web/src, tests/web and the owned task/handoff files change.",
+      "HTTP failures only invalidate browser presentation state; server permission rules, GatewayAuth, database ownership and physical assets remain outside the Web adapter."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "Final Web format, lint, typecheck, build and read-only source boundary passed.",
+      "Chromium 22/22, architecture 14/14, Web repository 6/6 and native TypeScript SDK 5/5 passed, with no final failed or skipped tests.",
+      "Four added malformed/stalled rejection scenarios failed before the HTTP-status fix and passed in the final complete browser suite.",
+      "SDK audit and Web dependency, integrity, license and build-budget validation passed; frozen install, Web audit, architecture baseline and SDK generation checks retain their earlier unchanged-input passes.",
+      "Desktop 1440x900 and narrow 390x844 screenshots were inspected; the 100-item page still renders fewer than 40 entry rows, and JS plus CSS is 240445 bytes within the 286720-byte budget."
+    ],
+    "technical_debt": []
+  }
+}
