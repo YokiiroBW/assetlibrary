@@ -9,13 +9,18 @@ internal static class TrialTestTls
 {
     public static byte[] CreatePkcs12(string? password = null)
     {
-        using var rsa = RSA.Create(2048);
-        var request = new CertificateRequest("CN=localhost", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        var names = new SubjectAlternativeNameBuilder();
-        names.AddDnsName("localhost");
-        request.CertificateExtensions.Add(names.Build());
-        using var generated = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
+        using var generated = CreateSelfSigned();
         return generated.Export(X509ContentType.Pkcs12, password);
+    }
+
+    public static X509Certificate2 CreateSelfSigned(string hostname = "localhost")
+    {
+        using var rsa = RSA.Create(2048);
+        var request = new CertificateRequest($"CN={hostname}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var names = new SubjectAlternativeNameBuilder();
+        names.AddDnsName(hostname);
+        request.CertificateExtensions.Add(names.Build());
+        return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
     }
 
     public static X509Certificate2 Certificate()

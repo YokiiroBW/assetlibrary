@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using AssetLibrary.CoreServer.Hosting.Trial;
 using AssetLibrary.IntegrationTestSupport;
@@ -16,12 +14,7 @@ public sealed class TrialHealthProbeTests
     public async Task LocalProbePreservesPublicAuthorityAndRejectsWrongIdentityOrCertificate()
     {
         using var fixture = new TrialConfigurationFixture();
-        using var key = RSA.Create(2048);
-        var request = new CertificateRequest("CN=nas-probe.invalid", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        var names = new SubjectAlternativeNameBuilder();
-        names.AddDnsName("nas-probe.invalid");
-        request.CertificateExtensions.Add(names.Build());
-        using var generated = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
+        using var generated = TrialTestTls.CreateSelfSigned("nas-probe.invalid");
         var files = TrialCertificateTestSupport.WriteCertificate(fixture, generated, "probe-server");
         var origin = new Uri($"https://nas-probe.invalid:{TrialTestTls.ReserveOrigin().Port}");
         var configuration = fixture.Configuration with
@@ -60,10 +53,7 @@ public sealed class TrialHealthProbeTests
         Assert.AreEqual(69, await TrialHealthProbe.RunAsync(fixture.ConfigurationPath));
 
         returnedIdentity = configuration.DeploymentId;
-        using var alternateKey = RSA.Create(2048);
-        var alternateRequest = new CertificateRequest("CN=nas-probe.invalid", alternateKey, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        alternateRequest.CertificateExtensions.Add(names.Build());
-        using var alternate = alternateRequest.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
+        using var alternate = TrialTestTls.CreateSelfSigned("nas-probe.invalid");
         var alternateFiles = TrialCertificateTestSupport.WriteCertificate(fixture, alternate, "other-server");
         WriteConfiguration(fixture, configuration with
         {

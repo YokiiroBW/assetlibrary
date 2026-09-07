@@ -21,7 +21,7 @@ internal static class TrialHealthProbe
                 UseProxy = false,
                 AllowAutoRedirect = false,
                 // Keep the public authority for Host/SNI and certificate checks without depending on NAS hairpin routing.
-                ConnectCallback = (_, cancellationToken) => ConnectLocalAsync(configuration, cancellationToken),
+                ConnectCallback = (_, cancellationToken) => TrialHealthConnection.ConnectAsync(configuration, cancellationToken),
                 SslOptions = new SslClientAuthenticationOptions
                 {
                     RemoteCertificateValidationCallback = (_, peer, _, errors) =>
@@ -63,7 +63,11 @@ internal static class TrialHealthProbe
         peer is not null && (errors & (SslPolicyErrors.RemoteCertificateNotAvailable | SslPolicyErrors.RemoteCertificateNameMismatch)) == 0
         && CryptographicOperations.FixedTimeEquals(peer.GetCertHash(HashAlgorithmName.SHA256), expected.GetCertHash(HashAlgorithmName.SHA256));
 
-    private static async ValueTask<Stream> ConnectLocalAsync(TrialConfiguration configuration, CancellationToken cancellationToken)
+}
+
+internal static class TrialHealthConnection
+{
+    public static async ValueTask<Stream> ConnectAsync(TrialConfiguration configuration, CancellationToken cancellationToken)
     {
         var address = configuration.BindAddress;
         address = address.Equals(IPAddress.Any) ? IPAddress.Loopback
