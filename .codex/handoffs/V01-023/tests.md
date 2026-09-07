@@ -1,6 +1,6 @@
 # V01-023 待统一验收记录
 
-实现：bc3d151，2026-09-07。没有执行任何测试、构建、formatter、lint、typecheck或运行时截图。passed=0、failed=0、skipped=0表示尚未启动检查，不是已有40项回归通过或被跳过。
+实现：bc3d151与68e7250，2026-09-07。没有执行任何测试、构建、formatter、lint、typecheck或运行时截图。passed=0、failed=0、skipped=0表示尚未启动检查，不是已有40项回归通过或被跳过。
 
 ## 已完成的只读工作
 
@@ -9,6 +9,8 @@
 ## 保留的最小断言变更
 
 现有tests/web/trial-library-scan.spec.mjs首个登记用例使用photos源+/assets/photos，检查关联帮助包含部署挂载表和Windows说明，确认原样提交；扫描成功后检查刷新不重扫提示。原Windows路径错误重试用例保留。没有新增测试、黄金快照或测试基础设施。
+
+68e7250在已有失败/重试case补入entry_path_unsupported状态，检查反斜杠名称限制/索引未提交说明和重试按钮；其他失败提示未改。该断言尚未执行，需与根ec3f64a的Linux失败链在统一验收中对齐。
 
 ## 根统一验收入口
 

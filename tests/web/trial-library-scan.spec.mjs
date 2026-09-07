@@ -111,6 +111,17 @@ test("unconfirmed start and cancel submissions reuse their keys, while a failed 
   expect(
     state.requests.filter((request) => request.operation === "library_scans.start").at(-1).idempotency_key,
   ).not.toBe(firstStart.idempotency_key);
+  state.scan = {
+    ...state.scan,
+    state: "failed",
+    failure_code: "entry_path_unsupported",
+    can_cancel: false,
+    can_retry: true,
+  };
+  await expect(page.getByRole("region", { name: "首次扫描" })).toContainText(
+    "文件或目录名包含当前版本不支持的反斜杠，首次索引未提交，请检查路径名称后重试。",
+  );
+  await expect(page.getByRole("button", { name: "重试扫描", exact: true })).toBeEnabled();
 });
 
 test("reload recovers the active durable scan and hiding the page stops polling", async ({ page }) => {
