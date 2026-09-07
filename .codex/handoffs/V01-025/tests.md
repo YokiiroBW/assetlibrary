@@ -65,3 +65,24 @@ pnpm --dir apps/web run test:browser --grep "multi-selection, keyboard, grid and
 ```
 
 格式、diff 和含类型检查的 build 全部通过；只复验该例，1/1 通过、0 failed、0 skipped，3.8s。本轮仅复验定位到的手机选择行为，其余 42 项未重复运行。新 dist 的 CSS 为 index-DedOXqR9.css（25.94kB/gzip5.93kB），JS 为 index-cVzg_3bQ.js（290.45kB/gzip89.55kB）；真实环境由协调器继续复验。
+## CSS 分块门禁与等价性（928fcd1）
+
+机械切分时重新拼接六个字符串分块，与原 styles.css 完全相等后才写入顺序导入入口。base.css 2504B、shell.css 5175B、catalog.css 3845B、entries.css 8546B、management-and-forms.css 5924B、responsive.css 6333B。没有修改 per-file 24000B 阈值或复制 token 定义。
+
+```text
+python -I -B scripts/validate_web_source.py
+pnpm --dir apps/web run format:check
+pnpm --dir apps/web run build
+git diff --check
+```
+
+全部通过。构建前将全部四个产物的名称/长度/SHA-256 保存为 `.runtime/V01-025-css-before.json`，构建后逐项 Compare-Object，差异 0：
+
+| 产物 | 字节 | 拆分前后相同的 SHA-256 |
+| --- | ---: | --- |
+| index.html | 526 | 02D972A3F7E2C400623A0E78C1D3921F6E39D18D3498A64D2BD5788819E7F454 |
+| assets/index-DedOXqR9.css | 25942 | 8B650ED8665E56DD6D91C5804A2DA84CD0A38E050F1B66F3C46DB83FD2C3F6D6 |
+| assets/index-cVzg_3bQ.js | 290457 | 9A1C0B2151A86BF8D6B55FEB5CCFFE9C36255458FEAAE674EE5E348F5CC5208F |
+| assets/index-cVzg_3bQ.js.map | 1159681 | 95907EAD8A34D30CDE253B3ED4494DF395361CA32A95AE97E2E8BB2A3DE153DB |
+
+产物字节完全相同，本次按协调器要求不重复任何浏览器用例。此前手机位移受影响 1/1 和既有完整验收的行为产物证据继续有效。

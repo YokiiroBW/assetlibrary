@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v01-025-web-navigation-and-workspace",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-025",
-  "commit": "1336afe1be6604ffc20dae4c37de0cb837425b18",
+  "commit": "928fcd1ed40181cc8ef0600bfbf951a91e75b7a7",
   "changed_files": [
     ".codex/handoffs/V01-025/result.json",
     ".codex/handoffs/V01-025/summary.md",
@@ -38,6 +38,12 @@
     "apps/web/src/hooks/useWorkspaceNavigation.ts",
     "apps/web/src/libraryMetadata.ts",
     "apps/web/src/styles.css",
+    "apps/web/src/styles/base.css",
+    "apps/web/src/styles/catalog.css",
+    "apps/web/src/styles/entries.css",
+    "apps/web/src/styles/management-and-forms.css",
+    "apps/web/src/styles/responsive.css",
+    "apps/web/src/styles/shell.css",
     "apps/web/src/trialResponses.ts",
     "apps/web/src/types.ts",
     "apps/web/src/workspaceRoutes.ts",
@@ -71,6 +77,14 @@
       "failed": 0,
       "passed": 1,
       "report_directory": ".runtime/playwright-results/V01-025-mobile-toolbar"
+    },
+    "css_source_organization": {
+      "artifacts_compared": 4,
+      "source_gate": "passed",
+      "format": "passed",
+      "build": "passed",
+      "output_sha256_equal": true,
+      "browser_rerun": false
     }
   },
   "risks": [
@@ -100,7 +114,8 @@
     "architecture_tests": [
       "Web format:check, lint, typecheck, production build passed",
       "43 distinct browser tests passed after bounded affected regression",
-      "Root owns repository architecture/contract/PG/HTTPS gates"
+      "Root owns repository architecture/contract/PG/HTTPS gates",
+      "validate_web_source.py passed after unchanged-rule CSS split; all four final build artifact SHA-256 values identical"
     ],
     "technical_debt": []
   }
