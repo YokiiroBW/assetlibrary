@@ -280,6 +280,8 @@ test("multi-selection, keyboard, grid and mobile details share real entry inform
   await mockAssetLink(page, (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
     if (request.operation === "libraries.get") return libraryDetail(request);
+    if (request.operation === "assets.search")
+      return searchPage(request, [{ library: visibleLibrary, entry: items[0], hit_reason: "path" }]);
     if (request.operation === "entries.get")
       return entryDetail(
         request,
@@ -317,6 +319,19 @@ test("multi-selection, keyboard, grid and mobile details share real entry inform
   await expect(drawer).toHaveCount(0);
   await expect(page).not.toHaveURL(/entry=/);
   await expect(page.locator(".detail-pane")).toHaveCount(0);
+  await page.getByRole("searchbox").fill(items[0].name);
+  await page.getByRole("button", { name: "列表视图" }).click();
+  const resultEntry = entryOption(page, items[0].name);
+  await expect(resultEntry).toBeVisible();
+  const unselectedPosition = await resultEntry.boundingBox();
+  await resultEntry.click();
+  await expect(resultEntry).toHaveAttribute("aria-selected", "true");
+  expect((await resultEntry.boundingBox()).y).toBe(unselectedPosition.y);
+  await page.getByRole("button", { name: "取消选择", exact: true }).click();
+  await expect(resultEntry).toHaveAttribute("aria-selected", "false");
+  expect((await resultEntry.boundingBox()).y).toBe(unselectedPosition.y);
+  await resultEntry.dblclick();
+  await expect(drawer.getByRole("heading", { name: items[0].name })).toBeVisible();
 });
 
 test("scope, server-wide filters and bounded deep links survive refresh and history", async ({ page }) => {

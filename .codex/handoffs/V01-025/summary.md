@@ -1,6 +1,6 @@
 # V01-025 Web 导航与产品工作区
 
-状态：ready_for_review。分支 codex/v01-025-web-navigation-and-workspace；产品与测试 commit 46ff8e28a85bc44da2408a2c44c12cb5b6aa3ef4，基于 root c429f66。Web 范围已验收，真实 HTTPS/PostgreSQL 集成与 NAS 更新由协调器继续。
+状态：ready_for_review。分支 codex/v01-025-web-navigation-and-workspace；产品与测试 commit 1336afe1be6604ffc20dae4c37de0cb837425b18，基于 root c429f66。Web 范围已验收，真实 HTTPS/PostgreSQL 集成与 NAS 更新由协调器继续。
 
 ## 完成行为
 
@@ -24,10 +24,15 @@
 
 首轮修正包括下拉框精确可访问名称、StrictMode 下共享 dialog 的关闭与焦点恢复、选中项测试作用域、单一用户操作超时 fixture 避免初始挂载取消探针。首轮类型检查唯一错误为 History key 的模板字符串推断，已明确为 string。
 
-生产构建 JS 290.45 kB / gzip 89.55 kB，CSS 25.84 kB / gzip 5.90 kB。查看了桌面列表、首页、网格详情和 390px 暗色手机页面/详情抽屉；未见横向溢出，手机详情未堆到页面底部。截图路径与命令见 tests.md。
+生产构建 JS 290.45 kB / gzip 89.55 kB，CSS 25.94 kB / gzip 5.93 kB。查看了桌面列表、首页、网格详情和 390px 暗色手机页面/详情抽屉；未见横向溢出，手机详情未堆到页面底部。截图路径与命令见 tests.md。
 
 ## 使用标签与合并
 
 /libraries 的「添加资源库」dialog；标签「存储源」「资源库名称」「资源库分类」，checkbox「高级：指定该范围内的目录」，高级字段「服务器目录」。资产列表 role=listbox / name=资产列表；条目 role=option，名称为「文件名，类型」，目录双击/Enter 进入，文件双击/Enter 查看文件信息。扫描页 /tasks?library=<id>，复用开始首次扫描/取消扫描/重试扫描。详情 dialog/aside 名称「资产详情」，关闭按钮「关闭资产详情」，定位按钮「定位所在目录」。
 
 在 root 的共享合同/查询实现之后合入本分支（checkpoint 3fbbdd9 与修正 46ff8e2），由 root 运行真实 HTTPS/PG E2E 和最终仓库/发布门禁。当前截图与浏览器 fixture 不替代新版 NAS 实际部署证据，本任务不宣布整个里程碑完成。
+## 真实 E2E 反馈后的移动端修正
+
+协调器在 390px 单条搜索结果中复现：第一次点击使选择摘要变宽，窄屏 flex 工具栏从一行换成两行，列表向下位移，第二次点击落空。独立修正 1336afe 将宽度不超过 450px 的工具栏预留固定两行；没有改双击行为或回避 E2E。
+
+在原手机/多选例加入单条搜索结果的选中前/选中后/取消选择后三个 row boundingBox.y 完全一致断言，然后实际双击确认详情抽屉打开。受影响 1/1 通过（3.8s），必要格式检查与生产 build 通过；未重跑 43 项全量。新 dist 已供协调器继续真实 HTTPS/PG 复验。

@@ -52,4 +52,16 @@ pnpm --dir apps/web run test:browser --grep "stalled (headers|body)|narrow works
 
 ## 边界
 
-生产输出 JS 290.45 kB/gzip89.55 kB；CSS25.84 kB/gzip5.90 kB。分页与虚拟化并非 50 万条数据库性能测试，真实规模 SQL 与 HTTPS/PG 由协调器统一验收。浏览器自动化的剪贴板成功写入使用受控 transport；拒绝后的手动复制弹窗当前只有静态生命周期审查。没有真实资产写操作、自动初扫、通用重扫或新的生产测试开关。
+生产输出 JS 290.45 kB/gzip89.55 kB；CSS25.94 kB/gzip5.93 kB。分页与虚拟化并非 50 万条数据库性能测试，真实规模 SQL 与 HTTPS/PG 由协调器统一验收。浏览器自动化的剪贴板成功写入使用受控 transport；拒绝后的手动复制弹窗当前只有静态生命周期审查。没有真实资产写操作、自动初扫、通用重扫或新的生产测试开关。
+## 移动端选择位移回归（1336afe）
+
+由真实 HTTPS/PG E2E 在 390px 单条搜索结果触发的位移，采用固定窄屏工具栏两行布局修正。原有多选/手机用例增加选择前、选择后和取消选择后的 row boundingBox.y 完全相等断言，并执行真正的 dblclick，确认资产详情 dialog 可见。没有新增测试数量或产品功能。
+
+```text
+pnpm --dir apps/web exec prettier --check src/styles.css ../../tests/web/read-only-workspace.spec.mjs
+git diff --check
+pnpm --dir apps/web run build
+pnpm --dir apps/web run test:browser --grep "multi-selection, keyboard, grid and mobile details" --output ../../.runtime/playwright-results/V01-025-mobile-toolbar
+```
+
+格式、diff 和含类型检查的 build 全部通过；只复验该例，1/1 通过、0 failed、0 skipped，3.8s。本轮仅复验定位到的手机选择行为，其余 42 项未重复运行。新 dist 的 CSS 为 index-DedOXqR9.css（25.94kB/gzip5.93kB），JS 为 index-cVzg_3bQ.js（290.45kB/gzip89.55kB）；真实环境由协调器继续复验。
