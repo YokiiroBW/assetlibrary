@@ -52,3 +52,22 @@ ReadCore的原生测试由 `test_read_only_trial_dotnet_runtime_and_isolated_wor
 - `dotnet format AssetLibrary.slnx --verify-no-changes --no-restore` 与完整Release build通过，0警告/0错误。源码策略291 C#、架构153 inputs通过；未提高阈值或抑制警告。
 
 该增量没有改动SQL或其他业务源，未重复数据库69项套件。原77/69基线保持原含义；新增1项及重跑的10项分开记录。Linux不具有本次Windows Job父死亡证据，未宣称已验证。
+
+## 实际SMB增量验收（独立记录）
+
+命令：在V01-017工作区执行 `& '.runtime/V01-017/smb-validation.ps1'`。脚本仅用于本次指定沙箱，产品代码无变化。证据文件为 `smb-verification.json`；本地原始输出 `.runtime/V01-017/smb-validation-0645202bc2d749c7bc4559526a8219fe.json`。
+
+Host路径：`C:/YOKI/Codex/AssetLibrary-worktrees/V01-015/services/core-server/Host/bin/Release/net10.0/AssetLibrary.CoreServer.Host.dll`，调用时SHA256 `5B4BF1FE6C94B9073A5F8F609783F1B7041419DB1E815AEADF22966A203EF47F`。真实UNC fixture位于唯一标记目录 `//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/smb-v017-0645202bc2d749c7bc4559526a8219fe`，所有写入、改名均验证在此已批准沙箱内；目录/祖先非reparse。
+
+| 阶段 | 返回 | 耗时 |
+|---|---|---:|
+| 在线probe | exit0，Available | 85ms |
+| 在线scan | exit0，唯一complete，7项与精确清单一致 | 87ms |
+| 仅改名自身assets后的原路径probe | exit0，Missing | 73ms |
+| 暂不可达原路径scan | exit20，failure/storage_unavailable，无complete | 73ms |
+| 恢复自身目录后的probe | exit0，Available | 73ms |
+| 恢复后的scan | exit0，complete，7项 | 83ms |
+
+5个合成文件（含应被忽略的.assetmeta文件）、中文文件名、小型二进制及空目录的强摘要/大小/mtime保存在JSON。两次扫描均不改变源快照；改名恢复也不改变文件hash/mtime。未运行数据库闭环或重新计数模块套件；实际SMB路径不可达不代表整机断网/SMB会话断开。
+
+清理：针对精确GUID目录的marker与非reparse验证后递归删除命令被自动审批拒绝，仅返回 `blocked by policy`，整体未执行。已停止此动作、不重试或换接口删除。保留的fixture已恢复原路径；指定V01-015沙箱容器是本次创建，其他目录与用户资产未动。

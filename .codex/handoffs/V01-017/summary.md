@@ -46,3 +46,11 @@
 互操作复用M0-007 Windows Job结构与常量，通过DllImport、System32限定查找及SafeFileHandle/SafeProcessHandle实现；没有AllowUnsafeBlocks、LibraryImport生成代码、依赖或项目配置变化。跨模块合同、SQL和Linux行为不变；不把Windows证明外推为Linux父死亡保证。
 
 新增独立父硬死回归1/1通过，旧实现相同测试明确失败。测试用生产ProcessReadOnlyFileDiscovery启动已收到root请求并阻塞120秒的受控child；仅强制结束父PID，父finally没有机会执行，仍在5秒内收到child退出信号。10项既有worker协议/取消/故障测试再次通过。原77/69是先前基线，未将新增回归混进历史计数，详见tests.md增量段。
+
+## 实际SMB补充验收
+
+在协调器指定的 `//YokiiroNAS/Documents/Codex-Workspaces/AssetLibrary/.runtime/sandbox-storage/V01-015/` 下创建唯一 `smb-v017-0645202bc2d749c7bc4559526a8219fe` 合成fixture。调用V01-015已编译Host的 `--read-only-worker probe|scan`，root仅经stdin JSON传递。在线Available、完整7项；仅对新建assets目录改名后，原路径Missing且scan以exit20/storage_unavailable失败，无complete；移回后Available并再次完整7项。每次扫描前后hash/mtime、改名恢复后的文件hash/mtime均保持一致。
+
+这是实际SMB读取与指定目录暂不可达/恢复证据，**不是NAS整机断网**；没有断开Z盘、共享会话或改变全局网络设置。原始帧、耗时、源清单与强摘要见 `smb-verification.json`，独立于历史77/69及父硬死回归计数。
+
+自动审批拒绝删除该GUID合成fixture的操作，仅返回 `blocked by policy`；命令未执行，已停止且没有换方式重试。目录已恢复为assets原名并完整保留，`cleanup_status=blocked_by_policy_not_executed_no_retry`。不存在用户资产读写或未知目录清理。
