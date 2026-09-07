@@ -59,6 +59,8 @@ test("desktop browse stays permission-filtered, paged, and virtualized", async (
 
   await page.getByRole("button", { name: "返回上级" }).click();
   await expect(page.getByRole("heading", { name: "根目录" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "打开目录 Folder" })).toBeVisible();
+  await expect(page.locator(".detail-pane")).not.toContainText("inside.jpg");
   await page.screenshot({ path: testInfo.outputPath("workspace-desktop.png"), animations: "disabled" });
 });
 

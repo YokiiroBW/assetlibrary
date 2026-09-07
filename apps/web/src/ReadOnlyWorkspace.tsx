@@ -104,12 +104,14 @@ export function ReadOnlyWorkspace({
   const activeReload = searching ? search.reload : browse.reload;
 
   const chooseLibrary = (library: Library) => {
+    setSelection(null);
     setSelectedLibraryId(library.library_id);
     setParentPath("");
     setSearchInput("");
   };
   const openDirectory = (entry: Entry) => {
     if (entry.kind !== "directory") return;
+    setSelection(null);
     setSelectedLibraryId(entry.library_id);
     setParentPath(entry.relative_path);
     setSearchInput("");
@@ -131,12 +133,22 @@ export function ReadOnlyWorkspace({
           <input
             type="search"
             value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
+            onChange={(event) => {
+              setSelection(null);
+              setSearchInput(event.target.value);
+            }}
             placeholder="搜索文件名或相对路径"
             maxLength={200}
           />
           {searchInput.length > 0 && (
-            <button type="button" onClick={() => setSearchInput("")} aria-label="清除搜索">
+            <button
+              type="button"
+              onClick={() => {
+                setSelection(null);
+                setSearchInput("");
+              }}
+              aria-label="清除搜索"
+            >
               ×
             </button>
           )}
@@ -250,7 +262,14 @@ export function ReadOnlyWorkspace({
                 刷新
               </button>
               {!searching && parentPath !== "" && (
-                <button className="secondary" type="button" onClick={() => setParentPath(parent(parentPath))}>
+                <button
+                  className="secondary"
+                  type="button"
+                  onClick={() => {
+                    setSelection(null);
+                    setParentPath(parent(parentPath));
+                  }}
+                >
                   返回上级
                 </button>
               )}
@@ -305,7 +324,7 @@ export function ReadOnlyWorkspace({
         </section>
 
         <aside className="detail-pane" aria-label="资产详情">
-          {selection === null || accessFailed ? (
+          {selection === null || accessFailed || activeState.status === "loading" ? (
             <Empty title="选择一个条目" detail="只读详情会显示在这里，不会修改原文件。" />
           ) : (
             <EntryDetails row={selection} />

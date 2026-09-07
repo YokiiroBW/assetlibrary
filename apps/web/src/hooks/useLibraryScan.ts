@@ -128,9 +128,11 @@ export function useLibraryScan(client: AssetLinkClient, libraryId: string | null
     }
   };
 
+  const sameScope = currentLibrary.current === libraryId;
+  const visibleState: ScanView = sameScope ? state : { ...initial, status: libraryId === null ? "idle" : "loading" };
   return {
-    ...state,
-    unconfirmed: action.current?.kind ?? null,
+    ...visibleState,
+    unconfirmed: sameScope ? (action.current?.kind ?? null) : null,
     reload: () => setRefreshKey((value) => value + 1),
     start: () => void execute("start"),
     cancel: () => void execute("cancel"),
