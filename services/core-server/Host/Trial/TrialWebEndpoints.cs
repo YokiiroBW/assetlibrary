@@ -27,11 +27,15 @@ internal static class TrialWebEndpoints
                 context.Context.Response.Headers.CacheControl = "no-store";
             },
         });
-        application.MapGet("/", async (HttpContext context) =>
+        // Only product routes serve the shell. Missing APIs and asset files must remain 404.
+        foreach (var route in new[] { "/", "/libraries", "/libraries/{libraryId:guid}", "/categories/{category}", "/search", "/tasks" })
         {
-            context.Response.Headers.CacheControl = "no-store";
-            context.Response.ContentType = "text/html; charset=utf-8";
-            await context.Response.SendFileAsync(Path.Combine(configuration.WebRoot, "index.html"), context.RequestAborted).ConfigureAwait(false);
-        });
+            application.MapGet(route, async (HttpContext context) =>
+            {
+                context.Response.Headers.CacheControl = "no-store";
+                context.Response.ContentType = "text/html; charset=utf-8";
+                await context.Response.SendFileAsync(Path.Combine(configuration.WebRoot, "index.html"), context.RequestAborted).ConfigureAwait(false);
+            });
+        }
     }
 }
