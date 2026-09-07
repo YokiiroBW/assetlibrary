@@ -1,0 +1,86 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-020",
+  "title": "read-only-trial-end-to-end",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "integration-test-owner",
+  "branch": "codex/v01-020-read-only-trial-end-to-end",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-020",
+  "commit": "ce4cafa6ee3b9be7888f257039595fae840fc2fa",
+  "changed_files": [
+    ".codex/handoffs/V01-020/result.json",
+    ".codex/handoffs/V01-020/summary.md",
+    ".codex/handoffs/V01-020/tests.md",
+    ".codex/tasks/V01-020.md",
+    "services/core-server/Host/AssemblyInfo.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationTestHost.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationAssets.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationAuthentication.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationAuthorization.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationBrowser.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationCertificateContainer.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationConfiguration.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationFixture.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationHttp.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationPrivateDirectory.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationReadModel.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationReadiness.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationRecovery.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationSettings.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationStorage.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/packages.lock.json",
+    "tests/dotnet/Shared/TrialTestTls.cs",
+    "tests/integration/read-only-trial/README.md",
+    "tests/integration/read-only-trial/browser.mjs",
+    "tests/integration/read-only-trial/run_e2e.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 134,
+    "failed": 0,
+    "skipped": 2,
+    "report": "tests.md"
+  },
+  "risks": [
+    "One real aggregate E2E proves functional HTTPS/PG/Web behavior; renamed isolated directories are not a real NAS or power-loss test.",
+    "Two pre-existing conditional PostgreSQL bodies did not execute in the default suite and are excluded from actual pass counts.",
+    "Root owns four remaining whole-solution whitespace findings in two unchanged product files.",
+    "Normal owned Windows TLS key-container disposal is verified; abnormal termination cleanup remains root-owned."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 4,
+  "handoff_summary": ".codex/handoffs/V01-020/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Read-only trial integration tests and shared test TLS support",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "PostgreSqlIntegrationTests cluster/roles/migration/backup/cleanup fixture via composition, not entire inherited suite.",
+      "Root TrialHostFactory, TrialRuntimeReadinessProbe, actual module adapters, operator and isolated Host worker.",
+      "GatewayAuth real key/verifier/session/lifecycle and controlled PwnedPasswords transport helpers.",
+      "Single Shared/TrialTestTls file compiled into both affected test projects."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Test-only Host friend and approved internal composition; no production cross-module table writes or business bypass."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "No wire or migration changes; approved Host ProjectReference/friend and corresponding existing WindowsServices transitive lock entries only."
+    ],
+    "architecture_tests": [
+      "verify_repository passed, 332 C# and 169 architecture inputs.",
+      "Release build zero warnings; owned C# format and browser Prettier checks passed.",
+      "Required real E2E1/1 and shared TLS16/16; full WebGateway suite accounted separately."
+    ],
+    "technical_debt": [
+      "Root must resolve whole-solution whitespace in its product files.",
+      "Real NAS, power-loss durability, leased scan cancellation and abrupt Windows TLS-container cleanup are separately scoped evidence."
+    ]
+  }
+}
