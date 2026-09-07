@@ -7,6 +7,41 @@ export const visibleLibrary = {
 
 export const hiddenLibraryName = "财务私库";
 
+export const browserSession = {
+  authenticated: true,
+  principal_id: "66666666-6666-4666-8666-666666666666",
+  display_name: "素材访客",
+  is_system_administrator: false,
+  csrf_token: "fixture-csrf-token-v1",
+  absolute_expires_at: "2036-09-07T12:00:00Z",
+};
+
+export async function mockSession(page, session = browserSession) {
+  await page.route("**/assetlink/v1/auth/session", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify(session),
+    }),
+  );
+}
+
+export function scanSummary(overrides = {}) {
+  return {
+    task_id: "77777777-7777-4777-8777-777777777777",
+    scan_id: null,
+    state: "queued",
+    cancellation_requested: false,
+    observed_entries: 0,
+    committed_entries: 0,
+    started_at: null,
+    finished_at: null,
+    failure_code: null,
+    can_cancel: true,
+    can_retry: false,
+    ...overrides,
+  };
+}
+
 export function entry(index, overrides = {}) {
   const suffix = String(index).padStart(4, "0");
   return {
@@ -24,6 +59,7 @@ export function entry(index, overrides = {}) {
 export async function mockAssetLink(page, handler) {
   await page.route("**/assetlink/v1/control", async (route) => {
     const request = route.request().postDataJSON();
+    if (!route.request().headers()["x-assetlibrary-csrf"]) throw new Error("A memory CSRF token is required");
     const response = await handler(request);
     await route.fulfill({
       status: response.status ?? 200,

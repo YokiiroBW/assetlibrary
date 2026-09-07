@@ -6,9 +6,14 @@ import {
   hiddenLibraryName,
   libraryPage,
   mockAssetLink,
+  mockSession,
   searchPage,
   visibleLibrary,
 } from "./assetlink-fixtures.mjs";
+
+test.beforeEach(async ({ page }) => {
+  await mockSession(page);
+});
 
 test("desktop browse stays permission-filtered, paged, and virtualized", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -82,14 +87,16 @@ test("read errors and expired authentication have distinct fail-closed states", 
   await expect(page.getByText("只读服务暂时不可用。")).toBeVisible();
 
   await page.unrouteAll({ behavior: "wait" });
+  await mockSession(page);
   await mockAssetLink(page, async (request) =>
     failure(request, 401, "authentication_required", "Authentication is required."),
   );
   await page.reload();
   await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible();
-  await expect(page.getByText("请先通过宿主身份系统重新登录，然后再重试。")).toBeVisible();
+  await expect(page.getByText("请重新登录，继续浏览你的资源库。")).toBeVisible();
 
   await page.unrouteAll({ behavior: "wait" });
+  await mockSession(page);
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
     if (request.operation === "entries.browse") return browsePage(request);
@@ -100,6 +107,7 @@ test("read errors and expired authentication have distinct fail-closed states", 
   await expect(page.getByRole("heading", { name: "登录状态已失效" })).toBeVisible();
 
   await page.unrouteAll({ behavior: "wait" });
+  await mockSession(page);
   await mockAssetLink(page, async (request) => {
     if (request.operation === "libraries.list") return libraryPage(request);
     if (request.operation === "entries.browse") return browsePage(request);
