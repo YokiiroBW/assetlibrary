@@ -600,6 +600,56 @@
       "handoff": ".codex/handoffs/V01-023/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "V01-024",
+      "title": "web-product-interaction-integration",
+      "module": "web-product-interaction-integration",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-021",
+        "V01-025",
+        "V01-026"
+      ],
+      "owner": "architecture-coordinator",
+      "branch": "codex/v01-024-web-product-interaction-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-024",
+      "task_file": ".codex/tasks/V01-024.md",
+      "handoff": ".codex/handoffs/V01-024/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-025",
+      "title": "web-navigation-and-workspace",
+      "module": "web-navigation-and-workspace",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-023"
+      ],
+      "owner": "web-gateway-owner",
+      "branch": "codex/v01-025-web-navigation-and-workspace",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-025",
+      "task_file": ".codex/tasks/V01-025.md",
+      "handoff": ".codex/handoffs/V01-025/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-026",
+      "title": "library-browse-interaction-contracts",
+      "module": "library-browse-interaction-contracts",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-021"
+      ],
+      "owner": "library-asset-scan-owner",
+      "branch": "codex/v01-026-library-browse-interaction-contracts",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-026",
+      "task_file": ".codex/tasks/V01-026.md",
+      "handoff": ".codex/handoffs/V01-026/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }
