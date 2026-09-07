@@ -7,7 +7,7 @@
   "owner": "library-asset-scan-owner",
   "branch": "codex/v01-017-persistent-read-only-library-scans",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-017",
-  "commit": "25aba97de991b300af1709f875cb1e0c27632e06",
+  "commit": "43a4f2c05fe6790adcafbf9835eb84aad72149c7",
   "changed_files": [
     ".codex/handoffs/V01-017/result.json",
     ".codex/handoffs/V01-017/summary.md",
@@ -23,6 +23,7 @@
     "services/core-server/Infrastructure/Postgres/ModulePostgresSession.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProcess.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs",
     "services/core-server/Modules/AssetIdentity/Contracts/AssetIdentityContracts.cs",
     "services/core-server/Modules/AssetIdentity/Infrastructure/PostgresAssetIndexSnapshotQuery.cs",
     "services/core-server/Modules/AssetIdentity/Infrastructure/PostgresAssetObservationSink.cs",
@@ -74,6 +75,8 @@
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialRunningCancellationIntegrationTests.cs",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialStorageFailureIntegrationTests.cs",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialTimeoutIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/WorkerParentFixture.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/test_worker_lifetime.py",
     "tests/dotnet/AssetLibrary.ReadCore.Tests/worker_faults.py"
   ],
   "changed_contracts": [
@@ -97,7 +100,15 @@
     "task_health": 32,
     "assetlink": 13,
     "database": 69,
-    "architecture": 14
+    "architecture": 14,
+    "incremental_windows_parent_lifetime": {
+      "new_passed": 1,
+      "new_failed": 0,
+      "pre_fix_regression_reproduced": true,
+      "existing_worker_tests_rechecked": 10,
+      "report": "tests.md#2026-09-07-windows父硬死增量独立计数",
+      "does_not_change_previous_77_69_counts": true
+    }
   },
   "risks": [
     "首次只读快照；未实现增量/通用重扫、原内容下载、预览或真实文件整理。",
@@ -117,7 +128,8 @@
       "InitialReadOnlyScanService / DefaultDiscoveryPolicy / IAssetObservationSink and existing initial snapshot SQL",
       "DurableTaskService and existing enqueue/claim/heartbeat/cancel/finish/reclaim state machine",
       "Existing migration ownership, forward-only manifest, verified backup/restore, Npgsql and locked .NET stack",
-      "Coordinator-approved ModulePostgresSession extracts only repeated connection/transaction/role mechanics from three actual consumers"
+      "Coordinator-approved ModulePostgresSession extracts only repeated connection/transaction/role mechanics from three actual consumers",
+      "M0-007 Windows Job layout/constants; DllImport and SafeHandle close ownership without unsafe or new dependencies"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -138,12 +150,14 @@
       "validate_architecture_baseline.py passed: 153 inputs",
       "validate_dotnet_source.py passed: 289 C# files; no analyzer or duplicate-policy suppression",
       "verify_repository.py passed, including 14 architecture and 21 manifest tests, generated SDK checks; Alpha blocked",
-      "69 real/database tests and 77 ReadCore tests include role isolation, cancellation/recovery/process protocol/ACL/capacity boundaries"
+      "69 real/database tests and 77 ReadCore tests include role isolation, cancellation/recovery/process protocol/ACL/capacity boundaries",
+      "Incremental parent-death fix: source policy291 and architecture153; independent Windows hard-parent-death1/1, existing worker10/10; format and complete build zero warnings"
     ],
     "technical_debt": [
       "Kernel-atomic no-follow and live reconciliation remain outside this initial read-only trial",
       "Full NAS scale/endurance, Host/Web final E2E and deployment package are coordinator-owned acceptance",
-      "Denied fixture deletion remains documented; original asset data and Git state unaffected"
+      "Denied fixture deletion remains documented; original asset data and Git state unaffected",
+      "Windows Job parent-death guarantee verified only on Windows x64; Linux unchanged and not covered by this proof"
     ]
   }
 }

@@ -37,3 +37,18 @@ ReadCore的原生测试由 `test_read_only_trial_dotnet_runtime_and_isolated_wor
 ## 边界
 
 没有运行真实用户NAS或修改用户原文件。未提供真实50万资产、NAS长时间soak、内核级原子no-follow、全平台服务安装或浏览器最终部署证据；这些不得由当前单元/集成数据替代。最终Web/HTTPS包由协调器及对应任务验证。
+
+## 2026-09-07 Windows父硬死增量（独立计数）
+
+源提交 `43a4f2c`。新增命令：
+
+`python -B -m unittest discover -s tests/dotnet/AssetLibrary.ReadCore.Tests -p test_worker_lifetime.py -v`
+
+设置 `ASSETLIBRARY_TEST_DOTNET` 为已固定的10.0.111工具路径，并先构建当前Release Core。该测试只在Windows执行；在系统临时目录把已提交WorkerParentFixture.cs构建为父进程控制台，引用现有Core和共享框架，无PackageReference、新生产项目或根锁文件。
+
+- **修复前：1项失败，7.885秒。** 父使用生产transport，child确认收到请求后不再读写管道并阻塞120秒。控制器仅调用Windows TerminateProcess结束父PID，等待child原生句柄5秒仍为WAIT_TIMEOUT。控制器最后清理自己的进程，未遗留本次测试进程。
+- **修复后：新增1/1通过，1.071秒。** 同样硬杀父进程，没有Ctrl-C、正常Exit或杀树操作；Job关闭后child句柄在5秒内发出退出信号。保留原生句柄避免PID复用误判。
+- **受影响既有回归10/10通过，0.8795秒。** `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj --configuration Release --no-build --no-restore --filter FullyQualifiedName~IsolatedReadOnlyWorker --logger "console;verbosity=normal"`；覆盖6种worker故障、正常协议/只读、取消、宽目录遍历。
+- `dotnet format AssetLibrary.slnx --verify-no-changes --no-restore` 与完整Release build通过，0警告/0错误。源码策略291 C#、架构153 inputs通过；未提高阈值或抑制警告。
+
+该增量没有改动SQL或其他业务源，未重复数据库69项套件。原77/69基线保持原含义；新增1项及重跑的10项分开记录。Linux不具有本次Windows Job父死亡证据，未宣称已验证。
