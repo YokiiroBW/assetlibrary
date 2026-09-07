@@ -2441,6 +2441,65 @@ INSERT INTO library_storage.library_permission (
             result.stderr or result.stdout,
         )
 
+    def test_read_only_trial_dotnet_runtime_and_isolated_workers(self) -> None:
+        dotnet, host = self.host_command()
+        project = ROOT / "tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj"
+        dll = project.parent / "bin/Release/net10.0/AssetLibrary.ReadCore.Tests.dll"
+        if not dll.is_file():
+            self.unavailable("built read-only core tests are required")
+        database = self.fresh_database("readonly_trial")
+        MIGRATIONS.apply_migrations(self.runner_tools(database), self.manifest, self.backup_directory("readonly_trial"))
+        self.sql(database, self.admin, "GRANT assetlibrary_asset_identity_runtime, assetlibrary_scan_reconciliation_runtime, "
+                 f"assetlibrary_task_health_runtime TO {self.RUNTIME} WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;")
+        environment = self.environment.copy()
+        environment["ASSETLIBRARY_TEST_DOTNET"] = dotnet
+        environment["ASSETLIBRARY_TEST_HOST_DLL"] = host
+        environment["ASSETLIBRARY_TEST_PYTHON"] = sys.executable
+        environment["ASSETLIBRARY_TEST_WORKER_FAULT_SCRIPT"] = str(project.parent / "worker_faults.py")
+        environment["ASSETLIBRARY_TRIAL_TEST_CONNECTION"] = (
+            f"Host={self.host};Port={self.port};Database={database};Username={self.RUNTIME};Pooling=true;Timeout=5")
+        environment["ASSETLIBRARY_TRIAL_TEST_ADMIN_CONNECTION"] = (
+            f"Host={self.host};Port={self.port};Database={database};Username={self.admin};Pooling=true;Timeout=5")
+        native_filter = "FullyQualifiedName~AssetLibrary.ReadCore.Tests"
+        if os.name != "nt":
+            # The Windows-only ACL case belongs to the Windows trial evidence, not the portable subset.
+            native_filter = f"({native_filter})&FullyQualifiedName!~ReadOnlyTrialPermissionIntegrationTests"
+        result = subprocess.run(
+            [dotnet, "test", str(project), "--configuration", "Release", "--no-build", "--no-restore",
+             "--filter", native_filter,
+             "--logger", "console;verbosity=normal"], cwd=ROOT, env=environment,
+            text=True, encoding="utf-8", capture_output=True, timeout=180)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("Skipped", result.stdout)
+        self.assertNotIn("已跳过", result.stdout)
+        evidence = ROOT / ".runtime/V01-017/native-read-only-tests.log"
+        evidence.parent.mkdir(parents=True, exist_ok=True)
+        evidence.write_text(result.stdout + result.stderr, encoding="utf-8")
+
+    def test_administrator_recovery_preparation_is_read_only_and_replays_original_version(self) -> None:
+        database = self.authentication_database("recovery_prepare")
+        principal = uuid.uuid4()
+        self.gateway_sql(database, "SELECT * FROM " + self.administrator_bootstrap_call(uuid.uuid4(), uuid.uuid4(), principal) + ";")
+        self.sql(database, self.admin, "SET ROLE assetlibrary_gateway_auth_owner; "
+                 f"UPDATE gateway_auth.authenticated_principal SET disabled_at=clock_timestamp() WHERE principal_id='{principal}'; "
+                 "UPDATE gateway_auth.local_account_credential SET disabled_at=clock_timestamp() WHERE account_name='bootstrap-admin';")
+        authorization, operation = uuid.uuid4(), uuid.uuid4()
+        def prepare(auth: uuid.UUID, op: uuid.UUID, name: str = "bootstrap-admin", expiry: str = self.AUTHORIZATION_EXPIRY) -> str:
+            return self.gateway_sql(database, "BEGIN READ ONLY; SELECT outcome,expected_credential_version FROM "
+                f"gateway_auth.prepare_local_administrator_recovery('{auth}','{op}','{name}','{expiry}'); COMMIT;").stdout.strip()
+        self.assertEqual(prepare(authorization, operation), "ready|1")
+        self.assertEqual(prepare(uuid.uuid4(), uuid.uuid4(), "unknown-admin"), "state_conflict|")
+        self.assertEqual(prepare(uuid.uuid4(), uuid.uuid4(), expiry="2020-01-01T00:00:00Z"), "authorization_rejected|")
+        call = self.administrator_recovery_call(authorization, operation, "bootstrap-admin", 1)
+        self.assertEqual(self.gateway_sql(database, "SELECT outcome,was_replayed,credential_version FROM " + call + ";").stdout.strip(), "applied|f|2")
+        self.assertEqual(prepare(authorization, operation), "ready|1")
+        self.assertEqual(self.gateway_sql(database, "SELECT outcome,was_replayed,credential_version FROM " + call + ";").stdout.strip(), "applied|t|2")
+        self.assertEqual(prepare(authorization, uuid.uuid4()), "request_conflict|")
+        self.assertEqual(prepare(uuid.uuid4(), operation), "request_conflict|")
+        denied = self.sql(database, self.RUNTIME, "SET ROLE assetlibrary_library_storage_runtime; "
+            f"SELECT * FROM gateway_auth.prepare_local_administrator_recovery('{authorization}','{operation}','bootstrap-admin','{self.AUTHORIZATION_EXPIRY}');", check=False)
+        self.assertNotEqual(denied.returncode, 0)
+
     def test_read_core_roots_initial_commit_and_scan_status_are_fail_closed(self) -> None:
         database = self.fresh_database("read_core")
         backups = self.backup_directory("read_core")

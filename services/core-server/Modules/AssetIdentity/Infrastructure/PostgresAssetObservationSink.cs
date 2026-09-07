@@ -15,13 +15,7 @@ public sealed class PostgresAssetObservationSink(NpgsqlDataSource dataSource) : 
         var connection = await dataSource.OpenConnectionAsync(deadline.Token).ConfigureAwait(false);
         try
         {
-            await PostgresAssetSessionCommands.InitializeAsync(connection, deadline.Token).ConfigureAwait(false);
-            var locked = await PostgresAssetSessionCommands.ScalarAsync(connection,
-                "SELECT asset_identity.lock_initial_scan($1)", [libraryId.Value], deadline.Token).ConfigureAwait(false);
-            if (locked is not true)
-            {
-                throw new ReadOnlyTrialException("scan_already_running");
-            }
+            await PostgresAssetSessionCommands.LockAsync(connection, libraryId, deadline.Token).ConfigureAwait(false);
 
             return new PostgresAssetObservationSession(connection, scanId, libraryId, startedAt);
         }
@@ -55,8 +49,11 @@ internal sealed class PostgresAssetObservationSession(
                 command.Parameters.Add(new NpgsqlParameter { Value = value });
             }
 
-            command.Parameters.Add(new NpgsqlParameter { NpgsqlDbType = NpgsqlDbType.Bigint,
-                Value = observation.ContentLength is null ? DBNull.Value : observation.ContentLength.Value });
+            command.Parameters.Add(new NpgsqlParameter
+            {
+                NpgsqlDbType = NpgsqlDbType.Bigint,
+                Value = observation.ContentLength is null ? DBNull.Value : observation.ContentLength.Value
+            });
             command.Parameters.Add(new NpgsqlParameter { Value = observation.LastWriteTimeUtc });
             command.Parameters.Add(new NpgsqlParameter { Value = startedAt });
             batch.BatchCommands.Add(command);
@@ -99,8 +96,10 @@ internal sealed class PostgresAssetObservationSession(
 
     private static string Kind(AssetEntryKind kind) => kind switch
     {
-        AssetEntryKind.File => "file", AssetEntryKind.Directory => "directory",
-        AssetEntryKind.ReparseFile => "reparse_file", AssetEntryKind.ReparseDirectory => "reparse_directory",
+        AssetEntryKind.File => "file",
+        AssetEntryKind.Directory => "directory",
+        AssetEntryKind.ReparseFile => "reparse_file",
+        AssetEntryKind.ReparseDirectory => "reparse_directory",
         _ => throw new ArgumentOutOfRangeException(nameof(kind)),
     };
 }

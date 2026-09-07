@@ -1,3 +1,4 @@
+using AssetLibrary.Infrastructure.Postgres;
 using System.Runtime.CompilerServices;
 using AssetLibrary.Modules.LibraryStorage.Application;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
@@ -8,7 +9,7 @@ namespace AssetLibrary.Modules.LibraryStorage.Infrastructure;
 
 public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibraryManagementStore
 {
-    private readonly LibraryStorageDatabase database = new(dataSource);
+    private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.LibraryStorage);
 
     private readonly PostgresLibraryRegistration registration = new(dataSource);
     public ValueTask<LibraryId?> FindRegistrationAsync(LibraryRegistrationRequest request, ManagementOperation operation, CancellationToken token) =>
@@ -20,7 +21,7 @@ public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibrary
     public ValueTask<LibraryScanTarget?> FindAsync(LibraryId libraryId, CancellationToken cancellationToken) =>
         database.RunAsync<LibraryScanTarget?>(async (connection, transaction, token) =>
         {
-            await using var command = LibraryStorageDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT root.storage_source_id,root.canonical_root,source.root_case_sensitive," +
                 "CASE WHEN source.availability='offline' THEN 'offline' ELSE root.availability END " +
                 "FROM library_storage.library_root root JOIN library_storage.storage_source source USING(storage_source_id) WHERE library_id=$1");
@@ -55,7 +56,7 @@ public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibrary
     private ValueTask<List<RegisteredLibraryRoot>> ReadRootsAsync(StorageSourceId sourceId, Guid? cursor, CancellationToken cancellationToken) =>
         database.RunAsync(async (connection, transaction, token) =>
         {
-            await using var command = LibraryStorageDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT root.library_id,root.canonical_root,source.root_case_sensitive FROM library_storage.library_root root " +
                 "JOIN library_storage.storage_source source USING(storage_source_id) WHERE root.storage_source_id=$1 " +
                 "AND ($2::uuid IS NULL OR root.library_id>$2) ORDER BY root.library_id LIMIT 100");
@@ -76,7 +77,7 @@ public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibrary
     {
         _ = await database.RunAsync(async (connection, transaction, ct) =>
         {
-            await using var command = LibraryStorageDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "UPDATE library_storage.library_root SET availability=$2,availability_reason=$3,availability_observed_at=$4 WHERE library_id=$1");
             command.Parameters.Add(new NpgsqlParameter { Value = libraryId.Value });
             command.Parameters.Add(new NpgsqlParameter { Value = availability == StorageAvailability.Online ? "online" : "offline" });
@@ -91,7 +92,7 @@ public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibrary
         {
             ArgumentOutOfRangeException.ThrowIfLessThan(limit, 1);
             ArgumentOutOfRangeException.ThrowIfGreaterThan(limit, 100);
-            await using var command = LibraryStorageDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT library_id FROM library_storage.library_root WHERE availability_observed_at<$1 ORDER BY availability_observed_at,library_id LIMIT $2");
             command.Parameters.Add(new NpgsqlParameter { Value = before });
             command.Parameters.Add(new NpgsqlParameter { Value = limit });
