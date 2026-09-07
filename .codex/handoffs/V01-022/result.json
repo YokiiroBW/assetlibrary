@@ -3,11 +3,11 @@
   "task_id": "V01-022",
   "title": "nas-docker-deployment",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "server-packaging-owner",
   "branch": "codex/v01-022-nas-docker-deployment",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-022",
-  "commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
+  "commit": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
   "changed_files": [
     ".codex/tasks/V01-022.md",
     ".codex/handoffs/V01-022/summary.md",
@@ -24,14 +24,15 @@
     "infra/docker/nas/README.md",
     "scripts/build_nas_deployment.py",
     ".codex/handoffs/V01-022/build-evidence.json",
-    ".codex/handoffs/V01-022/posix-two.trx"
+    ".codex/handoffs/V01-022/posix-two.trx",
+    ".codex/handoffs/V01-022/runtime-cache.Dockerfile"
   ],
   "changed_contracts": [],
   "tests": {
     "report": "tests.md",
     "skipped": 0,
     "failed": 0,
-    "execution_status": "docker_images_and_posix_targeted_checks_passed_nas_runtime_pending",
+    "execution_status": "final_cached_images_and_artifact_hashes_passed_nas_runtime_owned_by_V01_021",
     "passed": 2
   },
   "risks": [
@@ -39,9 +40,7 @@
     "Real NAS TLS/non-root/readonly/persistence/bootstrap acceptance remains root-owned",
     "No full Alpha/platform release gate changed"
   ],
-  "blocked_by": [
-    "NAS upload/runtime/real asset acceptance belongs to root coordination and remains pending here"
-  ],
+  "blocked_by": [],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V01-022/summary.md",
   "thread_deep_link": "",
@@ -50,7 +49,9 @@
     "architecture_tests": [
       "Root reported unified repository/architecture/.NET format/Release/Packaging63 checks passed before image phase",
       "Docker images built from exact source and immutable base digests",
-      "ReadCore Release build zero warnings/errors and exactly two new POSIX cases passed"
+      "ReadCore Release build zero warnings/errors and exactly two new POSIX cases passed",
+      "Final 818d028 refresh proved exact unchanged application inputs against fb6fc0a; no application recompilation or test reruns",
+      "Source and NAS shared bundle SHA256SUMS passed after copy to a previously absent directory"
     ],
     "new_major_dependencies": [],
     "duplicated_logic": [],
@@ -60,7 +61,8 @@
     "dependency_direction_ok": true,
     "module": "NAS Docker deployment adapter",
     "technical_debt": [
-      "Real image and NAS lifecycle evidence remains pending and is not treated as passed"
+      "NAS lifecycle acceptance belongs to V01-021; packaging does not assert deployment success",
+      "NAS kernel has CPU shares but no CFS quota or cgroup PID hard limit"
     ],
     "reused_existing_logic": [
       "Existing Host/Trial configuration and CLI including health transport",
@@ -69,16 +71,42 @@
       "build_server_release immutable source/path/hash primitives"
     ],
     "contract_changes": [
-      "ADR0015-approved container mount convention /assets/<source_key> and one-shot deployment layout; no AssetLink/Host/SQL changes"
+      "ADR0015-approved /assets/<source_key>, one-shot setup and optional numeric read group; no application/SQL/permission contract changes"
     ]
   },
   "artifact": {
-    "remote_bundle": "/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/ca-update-01/assetlibrary-nas",
-    "images_tar_sha256": "df894a32ebd169a361f9219ac6d6a2ea6e6ef4119910455ea1a9480404e0192b",
-    "image_source_tree": "795efe55befd4413df8eb486b16c8d8719fd0455",
-    "image_source_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
-    "deployment_recipe_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
-    "export_tool_commit": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
-    "images_tar_bytes": 754859520
+    "remote_bundle": "/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/runtime-final-02/assetlibrary-nas",
+    "shared_release": "/mnt/astrbot-documents/Codex-Workspaces/AssetLibrary/.runtime/releases/V01-021/build-818d028",
+    "images_tar_sha256": "d4582e7b0894bc9c5f31a8cf18860a24e7214aadbaff6fe55edd69b0ff884336",
+    "images_tar_bytes": 754869248,
+    "manifest_sha256": "f513a304072dc6cd989f6ad149af4cffdf4cdbfd7ede27dafd2bc6a727a2c9d2",
+    "image_source_tree": "85abae49a6c3746bae874f84bf54dbd306aa93ad",
+    "image_source_commit": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
+    "deployment_recipe_commit": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
+    "export_tool_commit": "818d02827ee41f4e7f1e6bbb29d3841b110ab3c8",
+    "application_payload": {
+      "changed_source_paths": [
+        ".codex/handoffs/V01-022/build-evidence.json",
+        ".codex/handoffs/V01-022/result.json",
+        ".codex/handoffs/V01-022/summary.md",
+        ".codex/handoffs/V01-022/tests.md",
+        "infra/docker/nas/Dockerfile",
+        "infra/docker/nas/README.md",
+        "infra/docker/nas/compose.yaml",
+        "infra/docker/nas/nasctl.sh"
+      ],
+      "core_image_id": "sha256:7d5e945e9b7738f524bafa3c81678634a331dee130d838f8d0242ec5f8da76e3",
+      "generated_runtime_dockerfile_sha256": "b93e358c3b755f6b215aa1e7fb3c01a399534e061f059d42722cfa9a6a8bde9e",
+      "server_web_recompiled": false,
+      "setup_image_id": "sha256:b19b6d248f0fca6dd844661125bc300d3ab9ffbee58240aebe0fad5ef9b758bc",
+      "source_revision": "fb6fc0a4dc44f4ad0d7fb69d1d9fd90dd95a5bbd",
+      "source_tree": "795efe55befd4413df8eb486b16c8d8719fd0455",
+      "unchanged_application_inputs": true
+    },
+    "image_ids": {
+      "core": "sha256:085c7fe51c68bf7a4528d9e44f2629fd2b0a3e5c6eb7f8482eb2a3434dac477d",
+      "postgres": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+      "setup": "sha256:aed6cc7d538823e3f32f03115f01df35e99904abc541a81dd20260167a31b2ff"
+    }
   }
 }
