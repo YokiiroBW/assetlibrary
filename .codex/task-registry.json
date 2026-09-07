@@ -451,14 +451,105 @@
       "id": "V01-015",
       "title": "read-only-trial-integration",
       "module": "read-only-trial-integration",
-      "status": "ready",
-      "depends_on": [],
+      "status": "in_progress",
+      "depends_on": [
+        "ALIGN-001",
+        "V01-014",
+        "V01-016",
+        "V01-017",
+        "V01-018",
+        "V01-019",
+        "V01-020"
+      ],
       "owner": "architecture-coordinator",
       "branch": "codex/v01-015-read-only-trial-integration",
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-015",
       "task_file": ".codex/tasks/V01-015.md",
       "handoff": ".codex/handoffs/V01-015/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-016",
+      "title": "secure-browser-authentication",
+      "module": "secure-browser-authentication",
+      "status": "completed",
+      "depends_on": [
+        "V01-014"
+      ],
+      "owner": "gateway-auth-owner",
+      "branch": "codex/v01-016-secure-browser-authentication",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-016",
+      "task_file": ".codex/tasks/V01-016.md",
+      "handoff": ".codex/handoffs/V01-016/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-017",
+      "title": "persistent-read-only-library-scans",
+      "module": "persistent-read-only-library-scans",
+      "status": "in_progress",
+      "depends_on": [
+        "ALIGN-002",
+        "V01-005"
+      ],
+      "owner": "library-asset-scan-owner",
+      "branch": "codex/v01-017-persistent-read-only-library-scans",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-017",
+      "task_file": ".codex/tasks/V01-017.md",
+      "handoff": ".codex/handoffs/V01-017/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-018",
+      "title": "web-read-only-trial-workflow",
+      "module": "web-read-only-trial-workflow",
+      "status": "completed",
+      "depends_on": [
+        "ALIGN-003"
+      ],
+      "owner": "web-gateway-owner",
+      "branch": "codex/v01-018-web-read-only-trial-workflow",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-018",
+      "task_file": ".codex/tasks/V01-018.md",
+      "handoff": ".codex/handoffs/V01-018/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-019",
+      "title": "windows-read-only-trial-package",
+      "module": "windows-read-only-trial-package",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-001",
+        "ALIGN-004"
+      ],
+      "owner": "server-packaging-owner",
+      "branch": "codex/v01-019-windows-read-only-trial-package",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-019",
+      "task_file": ".codex/tasks/V01-019.md",
+      "handoff": ".codex/handoffs/V01-019/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
+    },
+    {
+      "id": "V01-020",
+      "title": "read-only-trial-end-to-end",
+      "module": "read-only-trial-end-to-end",
+      "status": "completed",
+      "depends_on": [
+        "ALIGN-001"
+      ],
+      "owner": "integration-test-owner",
+      "branch": "codex/v01-020-read-only-trial-end-to-end",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-020",
+      "task_file": ".codex/tasks/V01-020.md",
+      "handoff": ".codex/handoffs/V01-020/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }

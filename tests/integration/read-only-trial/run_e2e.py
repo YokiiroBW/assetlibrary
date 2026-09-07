@@ -22,6 +22,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--dotnet", type=Path, required=True)
     parser.add_argument("--postgres-bin", type=Path, required=True)
+    parser.add_argument("--postgres-external", action="store_true", help="Use the explicit PostgreSQL test connection environment (CI service).")
     parser.add_argument("--node", type=Path, required=True)
     parser.add_argument("--web-root", type=Path, required=True)
     parser.add_argument("--playwright-module", type=Path, required=True)
@@ -39,7 +40,7 @@ def load_fixture():
     return module
 
 
-def prepare_database(module, fixture) -> dict[str, object]:
+def prepare_database(module, fixture, created_logins: list[str]) -> dict[str, object]:
     database = fixture.fresh_database("trial_e2e")
     module.MIGRATIONS.apply_migrations(
         fixture.runner_tools(database), fixture.manifest, fixture.backup_directory("trial_e2e")
@@ -54,12 +55,15 @@ def prepare_database(module, fixture) -> dict[str, object]:
     }
     logins = {}
     for key, role in roles.items():
-        login = f"v020_{key}_login"
+        login = f"v020_{key}_{uuid.uuid4().hex[:12]}"
         fixture.sql(database, fixture.admin, f"""
+BEGIN;
 CREATE ROLE {login} LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 GRANT {role} TO {login} WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;
 GRANT CONNECT ON DATABASE "{database}" TO {login};
+COMMIT;
 """)
+        created_logins.append(login)
         logins[key] = login
     return {"host": fixture.host, "port": fixture.port, "database": database, "logins": logins}
 
@@ -86,14 +90,15 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="al20-") as temporary:
         runtime = Path(temporary)
         os.environ["ASSETLIBRARY_TEST_POSTGRES_REQUIRED"] = "1"
-        os.environ["ASSETLIBRARY_TEST_POSTGRES_EXTERNAL"] = "0"
+        os.environ["ASSETLIBRARY_TEST_POSTGRES_EXTERNAL"] = "1" if options.postgres_external else "0"
         os.environ["ASSETLIBRARY_TEST_POSTGRES_BIN"] = str(options.postgres_bin.resolve())
         os.environ["ASSETLIBRARY_TEST_RUNTIME"] = str(runtime)
         fixture_type = module.PostgreSqlIntegrationTests
         fixture = fixture_type(methodName="runTest")
+        created_logins: list[str] = []
         try:
             fixture_type.setUpClass()
-            settings = prepare_database(module, fixture)
+            settings = prepare_database(module, fixture, created_logins)
             settings.update({
                 "runtime_root": str(runtime),
                 "web_root": str(options.web_root.resolve()),
@@ -150,7 +155,11 @@ def main() -> int:
             exit_code = process.returncode
         finally:
             cleaned = fixture.doCleanups()
-            fixture_type.doClassCleanups()
+            try:
+                for login in created_logins:
+                    fixture.sql("postgres", fixture.admin, f"DROP ROLE {login};")
+            finally:
+                fixture_type.doClassCleanups()
             if not cleaned or getattr(fixture_type, "tearDown_exceptions", []):
                 raise RuntimeError("owned PostgreSQL cleanup did not complete")
     if exit_code == 0:

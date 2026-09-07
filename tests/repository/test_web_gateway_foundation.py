@@ -101,6 +101,8 @@ snapshots:
             "apps/web audit --audit-level low",
             "validate_web_dependencies.py --require-build-artifacts",
             "validate_web_source.py",
+            "tests/integration/read-only-trial/run_e2e.py --execute --postgres-external",
+            "test_worker_lifetime.py",
         ):
             self.assertIn(marker, commands)
         self.assertIn(
