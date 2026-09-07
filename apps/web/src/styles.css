@@ -1489,11 +1489,16 @@ dialog::backdrop {
     display: none;
   }
   .collection-toolbar {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 34px 34px;
+    gap: 6px;
     padding: 9px 0;
   }
   .collection-toolbar .content-actions {
-    margin-left: auto;
+    margin-left: 0;
+    justify-self: end;
+    flex-wrap: nowrap;
   }
   .browse-filters .name-filter {
     flex-basis: calc(100% - 64px);
