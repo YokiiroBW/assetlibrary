@@ -19,6 +19,7 @@ $ErrorActionPreference = 'Stop'
 $script:TrialSid = [Security.Principal.WindowsIdentity]::GetCurrent().User
 $script:Package = [IO.Path]::GetFullPath($PSScriptRoot)
 $script:StateLock = $null
+$script:OperatorFailure = $null
 
 function Get-SafeLocalPath([string]$Path) {
     if ([string]::IsNullOrWhiteSpace($Path) -or ![IO.Path]::IsPathFullyQualified($Path) -or
@@ -131,9 +132,9 @@ function Invoke-PrivateProcess([string]$Executable, [string[]]$Arguments, [strin
             throw 'trial_command_timeout'
         }
         $output = $stdout.GetAwaiter().GetResult()
-        $null = $stderr.GetAwaiter().GetResult()
-        if ($output.Length -gt 65536) { throw 'trial_command_output_invalid' }
-        return @{ exit_code = $process.ExitCode; output = $output }
+        $errorOutput = $stderr.GetAwaiter().GetResult()
+        if ($output.Length -gt 65536 -or $errorOutput.Length -gt 65536) { throw 'trial_command_output_invalid' }
+        return @{ exit_code = $process.ExitCode; output = $output; error_output = $errorOutput }
     } finally { $process.Dispose() }
 }
 
@@ -342,11 +343,15 @@ function Invoke-Operator {
     $pg = Invoke-Database 'start'
     try {
         $result = Invoke-PrivateProcess $script:HostExecutable @('--trial-operator',(Join-Path $script:State 'trial.json'),$OperatorAction) $inputText 30
-        $response = $result.output | ConvertFrom-Json -AsHashtable
+        $lines = @($result.output -split "`n" | Where-Object { $_.Trim() })
+        if ($lines.Count -eq 0) { $lines = @($result.error_output -split "`n" | Where-Object { $_.Trim() }) }
+        if ($lines.Count -eq 0) { throw 'trial_operator_result_missing' }
+        $response = $lines[-1] | ConvertFrom-Json -AsHashtable
         if ($result.exit_code -ne 0) {
-            if ($response.ContainsKey('message')) { Write-Output ($response | ConvertTo-Json -Compress) }
+            if ($response.ContainsKey('message') -and $response.ContainsKey('code')) { $script:OperatorFailure=$response }
             throw 'trial_operator_rejected'
         }
+        if ($response.outcome -ne 'applied') { throw 'trial_operator_result_invalid' }
         return $response
     } finally { $inputText=$null; if ($pg.status -eq 'started') { $null = Invoke-Database 'stop' } }
 }
@@ -389,6 +394,8 @@ try {
 } catch {
     $code=$_.Exception.Message
     if ($code -notmatch '^(trial|database)_[a-z_]+$') { $code='trial_operation_failed' }
-    Write-Output (@{status='failed';code=$code} | ConvertTo-Json -Compress)
+    $failure=@{status='failed';code=$code}
+    if ($script:OperatorFailure) { $failure.message=$script:OperatorFailure.message; $failure.reason=$script:OperatorFailure.code }
+    Write-Output ($failure | ConvertTo-Json -Compress)
     exit 1
 } finally { if ($script:StateLock) { $script:StateLock.Dispose() } }

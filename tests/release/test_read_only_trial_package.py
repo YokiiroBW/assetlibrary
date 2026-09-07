@@ -5,12 +5,15 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import secrets
 import shutil
 import socket
+import ssl
 import subprocess
 import sys
 import tempfile
 import unittest
+import urllib.request
 import uuid
 
 
@@ -160,6 +163,101 @@ class TrialNativeDatabaseTests(unittest.TestCase):
                 cluster_path.write_text(json.dumps(altered), encoding="utf-8")
                 self.assertEqual(run("start", False)["code"], "database_cluster_owner_mismatch")
                 cluster_path.write_bytes(original_cluster)
+            finally:
+                run("stop")
+
+
+@unittest.skipUnless(os.name == "nt", "native trial package test requires Windows")
+class TrialNativePackageTests(unittest.TestCase):
+    def test_real_package_operator_https_restart_and_integrity(self):
+        configured = os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE")
+        pg_bin = os.environ.get("ASSETLIBRARY_TEST_TRIAL_POSTGRES_BIN")
+        pwsh = shutil.which("pwsh")
+        if not configured or not pg_bin or not pwsh:
+            if os.environ.get("ASSETLIBRARY_TEST_TRIAL_PACKAGE_REQUIRED") == "1":
+                self.fail("required trial package/PG/PowerShell prerequisites are missing")
+            self.skipTest("set ASSETLIBRARY_TEST_TRIAL_PACKAGE for same-source native package validation")
+        package = Path(configured).resolve()
+        script = package / "trial.ps1"
+        transcript = []
+        with tempfile.TemporaryDirectory(prefix="al19pkg-") as temporary:
+            root = Path(temporary)
+            state = root / "state"
+            assets = root / "assets"
+            assets.mkdir()
+            asset = assets / "unchanged.txt"
+            asset.write_bytes(b"read-only-package-native-evidence\n")
+            fingerprint = (hashlib.sha256(asset.read_bytes()).hexdigest(), asset.stat().st_mtime_ns)
+            with socket.socket() as listener:
+                listener.bind(("127.0.0.1", 0))
+                port = listener.getsockname()[1]
+            with socket.socket() as listener:
+                listener.bind(("127.0.0.1", 0))
+                database_port = listener.getsockname()[1]
+            origin = f"https://localhost:{port}"
+            settings = root / "settings.json"
+            settings.write_text(json.dumps({"public_origin": origin, "storage_sources": [{
+                "source_key": "sandbox", "display_name": "Test library", "allowed_root": str(assets),
+            }]}), encoding="utf-8")
+            def run(action, *arguments, input_text=None, success=True):
+                result = subprocess.run([pwsh, "-NoProfile", "-File", str(script), "-Action", action, "-StatePath", str(state), *arguments], input=input_text, capture_output=True, text=True, encoding="utf-8", timeout=150)
+                transcript.append(result.stdout + result.stderr)
+                self.assertEqual(result.returncode == 0, success, result.stdout + result.stderr)
+                return json.loads(result.stdout.splitlines()[-1])
+            initialize = ("-SettingsFile", str(settings), "-Python", sys.executable, "-PostgresBin", pg_bin, "-DatabasePort", str(database_port))
+            initialized = run("initialize", *initialize)
+            self.assertEqual(initialized["status"], "initialized")
+            self.assertEqual(initialized["certificate_trust"], "manual_required")
+            self.assertEqual(run("initialize", *initialize)["status"], "already_initialized")
+            password = secrets.token_urlsafe(40)
+            operator = ("-OperatorAction", "bootstrap", "-AccountName", "trialadministrator", "-DisplayName", "Trial administrator", "-PasswordFromStdin")
+            try:
+                self.assertEqual(run("operator", *operator, input_text=password)["outcome"], "applied")
+                attempt_before = (state / "operator-attempt.json").read_bytes()
+                self.assertFalse(password in attempt_before.decode(), "operator attempt persisted a password")
+                replay = run("operator", *operator, input_text=password)
+                self.assertTrue(replay["was_replayed"])
+                self.assertEqual((state / "operator-attempt.json").read_bytes(), attempt_before)
+                self.assertEqual(run("start")["status"], "running")
+                self.assertEqual(run("start", success=False)["code"], "trial_already_running")
+                self.assertEqual(run("status")["status"], "ready")
+                context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+                context.load_verify_locations(cadata=ssl.DER_cert_to_PEM_cert((state / "tls/localhost.cer").read_bytes()))
+                opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPSHandler(context=context))
+                with opener.open(origin + "/", timeout=10) as response:
+                    self.assertEqual(response.status, 200)
+                    self.assertIn(b"<html", response.read(8192))
+                def login():
+                    request = urllib.request.Request(origin + "/assetlink/v1/auth/login", data=json.dumps({"account_name": "trialadministrator", "password": password}).encode(), headers={"Origin": origin, "Content-Type": "application/json"}, method="POST")
+                    with opener.open(request, timeout=15) as response:
+                        payload = json.loads(response.read(8192))
+                        self.assertTrue(payload["authenticated"])
+                        self.assertTrue(payload["is_system_administrator"])
+                login()
+                process_path = state / "host-process.json"
+                original = process_path.read_bytes()
+                altered = json.loads(original)
+                altered["created_ticks"] += 1
+                process_path.write_text(json.dumps(altered), encoding="utf-8")
+                self.assertEqual(run("stop", success=False)["code"], "trial_host_process_owner_mismatch")
+                process_path.write_bytes(original)
+                self.assertEqual(run("status")["status"], "ready")
+                self.assertEqual(run("stop")["status"], "stopped")
+                self.assertEqual(run("status")["status"], "stopped")
+                self.assertEqual(run("start")["status"], "running")
+                login()
+                index = package / "web/index.html"
+                original_index = index.read_bytes()
+                try:
+                    index.write_bytes(original_index + b"\n<!-- integrity test -->")
+                    self.assertEqual(run("status", success=False)["code"], "trial_package_integrity_failed")
+                finally:
+                    index.write_bytes(original_index)
+                self.assertEqual(run("status")["status"], "ready")
+                self.assertEqual((hashlib.sha256(asset.read_bytes()).hexdigest(), asset.stat().st_mtime_ns), fingerprint)
+                logged = "\n".join(transcript) + "\n".join(path.read_text(encoding="utf-8", errors="replace") for path in (state / "logs").glob("*.log"))
+                for secret in [password, *json.loads((state / "secrets/database-passwords.json").read_text()).values()]:
+                    self.assertFalse(secret in logged, "native lifecycle output disclosed a credential")
             finally:
                 run("stop")
 

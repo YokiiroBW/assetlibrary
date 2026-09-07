@@ -6,7 +6,6 @@ import argparse
 import contextlib
 import ctypes
 from ctypes import wintypes
-import hashlib
 import importlib.util
 import io
 import json
@@ -16,7 +15,6 @@ import secrets
 import stat
 import subprocess
 import sys
-import time
 
 
 class TrialDatabaseError(RuntimeError):
