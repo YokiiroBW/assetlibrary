@@ -47,3 +47,11 @@ Official references: PostgreSQL [versioning policy](https://www.postgresql.org/s
 ## ALIGN-001 查询分词对齐
 
 迁移 13 由 AssetIdentity owner 以 `CREATE OR REPLACE FUNCTION` 修正只读搜索：输入查询与既有 `path_search_document` 统一分割 `/._-`，使完整文件名和路径可匹配。保留函数签名、调用方权限过滤、keyset、GIN 索引及既有 execute grants；不改迁移 1–12、资产原文件或任何功能门禁。升级遵循既有备份优先/前进迁移/空库恢复合同。
+
+## V01-017 持久只读试用
+
+迁移14在 GatewayAuth 内提供已获本机授权的管理员恢复准备查询；其重放仍取原期望凭据版本，由既有恢复函数最终 CAS。迁移15由 LibraryStorage 保存按调用者隔离的登记幂等记录及每库可用性，普通 catalog 投影保持原列合同。迁移16增加 AssetIdentity 快照事实查询和每库扫描会话锁，首次快照保持不可替换。迁移17由 ScanReconciliation 保存接受/补投意图、调用者操作幂等绑定、任务与扫描尝试关联及进度。迁移18由 TaskHealth 增加按类型领取、有界最终提交租约行锁，以及经扫描快照证实的成功终态修复。没有跨schema写表、外键、权限扩张或原文件写路径。
+
+数据库先保存扫描请求，再幂等入队；重启可补投。发现按256条默认批次暂存，每批短事务；完整发现才原子提交。中断只删除相应未提交stage；已提交快照按scan_id核对后修复任务结果，绝不清空索引重扫。任务提交guard在自己的事务中保留TaskHealth租约行锁，AssetIdentity通过公开端口完成自己的事务。二者之间的进程/响应故障依靠不可变快照恢复，不承诺跨模块分布式原子事务。
+
+原生验证入口沿 `tests/database/test_migration_integration.py`：`test_read_only_trial_dotnet_runtime_and_isolated_workers` 以隔离PostgreSQL运行已构建ReadCore测试，并调用真实Host只读worker入口。需设置既有 `ASSETLIBRARY_TEST_POSTGRES_BIN`、`ASSETLIBRARY_TEST_POSTGRES_REQUIRED=1`、`ASSETLIBRARY_TEST_DOTNET` 和 `ASSETLIBRARY_TEST_HOST_DLL`；Windows试用ACL证据只在Windows运行。未授权其他发行门禁或通用重新扫描。

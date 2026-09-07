@@ -1,3 +1,4 @@
+using AssetLibrary.Infrastructure.Postgres;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.ScanReconciliation.Application;
 using AssetLibrary.Modules.TaskHealth.Contracts;
@@ -8,7 +9,7 @@ namespace AssetLibrary.Modules.ScanReconciliation.Infrastructure;
 public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanRequestStore
 {
     private const string Columns = "request.task_id,request.library_id,request.created_at,request.dispatched,request.terminal,request.cancellation_requested_at IS NOT NULL";
-    private readonly ScanDatabase database = new(dataSource);
+    private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.ScanReconciliation);
 
     public async ValueTask<ScanRequestRecord?> FindOperationAsync(LibraryId libraryId, ManagementOperation operation, CancellationToken token)
     {
@@ -30,7 +31,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
         {
             id = await database.RunAsync(async (connection, transaction, token) =>
             {
-                await using var command = ScanDatabase.Command(connection, transaction,
+                await using var command = ModulePostgresSession.Command(connection, transaction,
                     "SELECT scan_reconciliation.accept_initial_scan($1,$2,$3,$4,$5)", operation.PrincipalId,
                     operation.IdempotencyKey, libraryId.Value, Guid.NewGuid(), DateTimeOffset.UtcNow);
                 return (Guid)(await command.ExecuteScalarAsync(token).ConfigureAwait(false))!;
@@ -53,7 +54,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
     private ValueTask<ScanRequestRecord?> ReadRequestAsync(string predicate, object[] parameters, CancellationToken cancellationToken) =>
         database.RunAsync<ScanRequestRecord?>(async (connection, transaction, token) =>
         {
-            await using var command = ScanDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT " + Columns + " FROM scan_reconciliation.scan_request request " + predicate, parameters);
             await using var reader = await command.ExecuteReaderAsync(token).ConfigureAwait(false);
             return await reader.ReadAsync(token).ConfigureAwait(false) ? ReadRequest(reader) : null;
@@ -62,7 +63,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
     public ValueTask<IReadOnlyList<ScanRequestRecord>> RecoverBatchAsync(CancellationToken cancellationToken) =>
         database.RunAsync<IReadOnlyList<ScanRequestRecord>>(async (connection, transaction, token) =>
         {
-            await using var command = ScanDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "WITH candidates AS (SELECT task_id FROM scan_reconciliation.scan_request WHERE NOT terminal " +
                 "ORDER BY recovered_at,task_id FOR UPDATE SKIP LOCKED LIMIT 32) UPDATE scan_reconciliation.scan_request request " +
                 "SET recovered_at=clock_timestamp() FROM candidates WHERE request.task_id=candidates.task_id RETURNING " + Columns);
@@ -88,7 +89,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
         {
             return await database.RunAsync(async (connection, transaction, token) =>
             {
-                await using var command = ScanDatabase.Command(connection, transaction,
+                await using var command = ModulePostgresSession.Command(connection, transaction,
                     "SELECT scan_reconciliation.request_scan_cancellation($1,$2,$3,$4,$5)",
                     operation.PrincipalId, operation.IdempotencyKey, libraryId.Value, taskId.Value, DateTimeOffset.UtcNow);
                 return await command.ExecuteScalarAsync(token).ConfigureAwait(false) is true;
@@ -103,7 +104,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
     public ValueTask<IReadOnlyList<ScanRunRecord>> RunsAsync(DurableTaskId taskId, CancellationToken cancellationToken) =>
         database.RunAsync<IReadOnlyList<ScanRunRecord>>(async (connection, transaction, token) =>
         {
-            await using var command = ScanDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT scan_id,attempt,observed_entries,committed_entries,started_at,finished_at,failure_code " +
                 "FROM scan_reconciliation.scan_run WHERE task_id=$1 ORDER BY attempt DESC LIMIT 100", taskId.Value);
             await using var reader = await command.ExecuteReaderAsync(token).ConfigureAwait(false);
@@ -131,10 +132,10 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
     {
         _ = await database.RunAsync(async (connection, transaction, token) =>
         {
-            await using var command = ScanDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "UPDATE scan_reconciliation.scan_run SET status=$2,observed_entries=$3,committed_entries=$4,finished_at=$5,failure_code=$6 " +
                 "WHERE scan_id=$1 AND (status<>'completed' OR $2='completed')", scanId, State(state), observed, committed, finishedAt);
-            ScanDatabase.OptionalText(command, failureCode);
+            ModulePostgresSession.OptionalText(command, failureCode);
             return await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }, cancellationToken).ConfigureAwait(false);
     }
@@ -143,7 +144,7 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
     {
         _ = await database.RunAsync(async (connection, transaction, token) =>
         {
-            await using var command = ScanDatabase.Command(connection, transaction, sql, parameters);
+            await using var command = ModulePostgresSession.Command(connection, transaction, sql, parameters);
             return await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }, cancellationToken).ConfigureAwait(false);
     }
@@ -154,8 +155,10 @@ public sealed class PostgresScanStore(NpgsqlDataSource dataSource) : IScanReques
 
     private static string State(ScanRunTerminalState state) => state switch
     {
-        ScanRunTerminalState.Completed => "completed", ScanRunTerminalState.Cancelled => "cancelled",
-        ScanRunTerminalState.TimedOut => "timed_out", ScanRunTerminalState.DiscoveryFailed => "discovery_failed",
+        ScanRunTerminalState.Completed => "completed",
+        ScanRunTerminalState.Cancelled => "cancelled",
+        ScanRunTerminalState.TimedOut => "timed_out",
+        ScanRunTerminalState.DiscoveryFailed => "discovery_failed",
         _ => throw new ArgumentOutOfRangeException(nameof(state)),
     };
 }

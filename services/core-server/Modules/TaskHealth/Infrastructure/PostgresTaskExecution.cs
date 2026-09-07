@@ -1,3 +1,4 @@
+using AssetLibrary.Infrastructure.Postgres;
 using AssetLibrary.Modules.TaskHealth.Contracts;
 using Npgsql;
 
@@ -5,12 +6,12 @@ namespace AssetLibrary.Modules.TaskHealth.Infrastructure;
 
 public sealed class PostgresTaskExecution(NpgsqlDataSource dataSource) : IDurableTaskInspector, IDurableTaskCommitGuard
 {
-    private readonly TaskHealthDatabase database = new(dataSource);
+    private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.TaskHealth);
 
     public ValueTask<DurableTaskDetails?> FindAsync(DurableTaskId taskId, CancellationToken cancellationToken) =>
         database.RunAsync<DurableTaskDetails?>(async (connection, transaction, token) =>
         {
-            await using var command = TaskHealthDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT state::text,attempts,max_attempts,cancellation_requested_at IS NOT NULL,created_at,updated_at,last_failure_code " +
                 "FROM task_health.durable_task WHERE task_id=$1", taskId.Value);
             await using var reader = await command.ExecuteReaderAsync(token).ConfigureAwait(false);
@@ -23,7 +24,7 @@ public sealed class PostgresTaskExecution(NpgsqlDataSource dataSource) : IDurabl
     public ValueTask<bool> ReconcileCommittedAsync(DurableTaskId taskId, CancellationToken cancellationToken) =>
         database.RunAsync(async (connection, transaction, token) =>
         {
-            await using var command = TaskHealthDatabase.Command(connection, transaction,
+            await using var command = ModulePostgresSession.Command(connection, transaction,
                 "SELECT task_health.reconcile_committed_task($1)", taskId.Value);
             return await command.ExecuteScalarAsync(token).ConfigureAwait(false) is true;
         }, cancellationToken);
@@ -32,10 +33,8 @@ public sealed class PostgresTaskExecution(NpgsqlDataSource dataSource) : IDurabl
         CancellationToken cancellationToken) =>
         database.RunAsync(async (connection, transaction, token) =>
         {
-            await using var command = TaskHealthDatabase.Command(connection, transaction,
-                "SELECT task_health.lock_durable_task_commit($1,$2,$3,$4,$5)", request.TaskId.Value,
-                request.Identity.Owner.Value, request.Identity.Token.Value, request.Identity.Generation,
-                checked((int)request.LeaseDuration.TotalSeconds));
+            await using var command = TaskHealthLeaseSql.Command(connection, transaction,
+                "SELECT task_health.lock_durable_task_commit($1,$2,$3,$4,$5)", request);
             var status = (string)(await command.ExecuteScalarAsync(token).ConfigureAwait(false))!;
             if (status != "accepted")
             {

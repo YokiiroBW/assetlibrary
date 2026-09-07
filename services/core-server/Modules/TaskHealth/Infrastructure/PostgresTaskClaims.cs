@@ -1,3 +1,4 @@
+using AssetLibrary.Infrastructure.Postgres;
 using AssetLibrary.Modules.TaskHealth.Application;
 using AssetLibrary.Modules.TaskHealth.Contracts;
 using Npgsql;
@@ -5,7 +6,7 @@ using NpgsqlTypes;
 
 namespace AssetLibrary.Modules.TaskHealth.Infrastructure;
 
-internal sealed class PostgresTaskClaims(TaskHealthDatabase database, TaskTypeName? taskTypeFilter)
+internal sealed class PostgresTaskClaims(ModulePostgresSession database, TaskTypeName? taskTypeFilter)
 {
     public ValueTask<IReadOnlyList<DurableTaskLease>> ClaimAsync(DurableTaskClaimRequest request, DateTimeOffset now, CancellationToken cancellationToken) =>
         database.RunAsync<IReadOnlyList<DurableTaskLease>>(async (connection, transaction, token) =>
@@ -13,7 +14,7 @@ internal sealed class PostgresTaskClaims(TaskHealthDatabase database, TaskTypeNa
             var sql = taskTypeFilter.HasValue
                 ? "SELECT * FROM task_health.claim_durable_tasks_of_type($1,$2,$3,$4)"
                 : "SELECT * FROM task_health.claim_durable_tasks($1,$2,$3)";
-            await using var command = TaskHealthDatabase.Command(connection, transaction, sql,
+            await using var command = ModulePostgresSession.Command(connection, transaction, sql,
                 request.Worker.Value, request.BatchSize, checked((int)request.LeaseDuration.TotalSeconds));
             if (taskTypeFilter is { } filter)
             {

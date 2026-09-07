@@ -1,3 +1,4 @@
+using AssetLibrary.Infrastructure.Postgres;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AssetLibrary.Modules.LibraryStorage.Application;
@@ -9,7 +10,7 @@ namespace AssetLibrary.Modules.LibraryStorage.Infrastructure;
 
 internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
 {
-    private readonly LibraryStorageDatabase database = new(dataSource);
+    private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.LibraryStorage);
 
     public async ValueTask<LibraryId?> FindRegistrationAsync(LibraryRegistrationRequest request, ManagementOperation operation, CancellationToken token)
     {
@@ -17,7 +18,7 @@ internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
         {
             return await database.RunAsync<LibraryId?>(async (connection, transaction, ct) =>
             {
-                await using var command = LibraryStorageDatabase.Command(connection, transaction,
+                await using var command = ModulePostgresSession.Command(connection, transaction,
                     "SELECT library_storage.find_registration_operation($1,$2,$3)");
                 RegistrationParameters(command, request, operation);
                 return await command.ExecuteScalarAsync(ct).ConfigureAwait(false) is Guid id ? new LibraryId(id) : null;
@@ -36,7 +37,7 @@ internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
         {
             return await database.RunAsync(async (connection, transaction, ct) =>
             {
-                await using var command = LibraryStorageDatabase.Command(connection, transaction,
+                await using var command = ModulePostgresSession.Command(connection, transaction,
                     "SELECT library_storage.register_trial_library($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)");
                 RegistrationParameters(command, request, operation);
                 foreach (var value in new object[] { Guid.NewGuid(), source.StorageSourceId.Value, source.DisplayName,
@@ -58,8 +59,11 @@ internal sealed class PostgresLibraryRegistration(NpgsqlDataSource dataSource)
     {
         command.Parameters.Add(new NpgsqlParameter { Value = operation.PrincipalId });
         command.Parameters.Add(new NpgsqlParameter { Value = operation.IdempotencyKey });
-        command.Parameters.Add(new NpgsqlParameter { NpgsqlDbType = NpgsqlDbType.Jsonb,
-            Value = JsonSerializer.Serialize(request, LibraryRegistrationJsonContext.Default.LibraryRegistrationRequest) });
+        command.Parameters.Add(new NpgsqlParameter
+        {
+            NpgsqlDbType = NpgsqlDbType.Jsonb,
+            Value = JsonSerializer.Serialize(request, LibraryRegistrationJsonContext.Default.LibraryRegistrationRequest)
+        });
     }
 }
 
