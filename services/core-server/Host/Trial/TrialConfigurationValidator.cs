@@ -40,10 +40,16 @@ internal static class TrialConfigurationValidator
             throw new TrialConfigurationException("trial_database_configuration_missing");
         }
 
+        if (configuration.DecryptionCertificates is null || configuration.DecryptionCertificates.Length > 3
+            || configuration.DecryptionCertificates.Any(item => item is null))
+        {
+            throw new TrialConfigurationException("trial_decryption_certificates_invalid");
+        }
+
         return configuration.Database.Paths().Concat([
             configuration.TlsCertificateFile, configuration.TlsCertificatePasswordFile,
             configuration.DataProtectionPath, configuration.AuthorizationKeyFile,
-        ]);
+        ]).Concat(configuration.DecryptionCertificates.SelectMany(item => new[] { item.CertificateFile, item.PasswordFile }));
     }
 
     private static void ValidateOrigin(string value, string bindHost)

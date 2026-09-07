@@ -1,13 +1,18 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging.Console;
 
 namespace AssetLibrary.CoreServer.Hosting;
 
 internal static class CoreServerHostLogging
 {
-    public static void Configure(WebApplicationBuilder builder)
+    public static void Configure(WebApplicationBuilder builder, bool diagnosticsToStandardError = false)
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Logging.ClearProviders();
+        if (diagnosticsToStandardError)
+        {
+            builder.Services.Configure<ConsoleLoggerOptions>(options => options.LogToStandardErrorThreshold = LogLevel.Trace);
+        }
         builder.Logging.AddJsonConsole(console => console.JsonWriterOptions = new JsonWriterOptions
         {
             Indented = false,

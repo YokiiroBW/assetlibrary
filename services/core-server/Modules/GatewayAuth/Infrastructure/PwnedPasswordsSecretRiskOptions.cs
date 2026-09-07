@@ -8,10 +8,10 @@ internal sealed class PwnedPasswordsSecretRiskOptions
     public static readonly TimeSpan DefaultCacheLifetime = TimeSpan.FromMinutes(15);
     public const int DefaultCacheCapacity = 64;
     public const int MaximumCacheCapacity = 256;
-    public const int DefaultMaximumResponseBytes = 128 * 1024;
+    public const int DefaultMaximumResponseBytes = 256 * 1024;
     public const int AbsoluteMaximumResponseBytes = 256 * 1024;
     public const int DefaultMinimumResponseLines = 800;
-    public const int DefaultMaximumResponseLines = 1_200;
+    public const int DefaultMaximumResponseLines = 5_000;
     public const int AbsoluteMaximumResponseLines = DefaultMaximumResponseLines;
 
     public PwnedPasswordsSecretRiskOptions(

@@ -14,10 +14,10 @@ public sealed class DatabaseReadinessTests
 
         Assert.AreEqual(16, contract.PostgreSqlMajor);
         Assert.AreEqual("assetlibrary_database_auditor", contract.AuditorRole);
-        Assert.AreEqual(13, contract.LatestVersion);
-        Assert.HasCount(13, contract.Migrations);
+        Assert.AreEqual(18, contract.LatestVersion);
+        Assert.HasCount(18, contract.Migrations);
         CollectionAssert.AreEqual(
-            Enumerable.Range(1, 13).ToArray(),
+            Enumerable.Range(1, 18).ToArray(),
             contract.Migrations.Select(migration => migration.Version).ToArray());
     }
 

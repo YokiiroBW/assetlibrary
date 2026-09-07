@@ -21,6 +21,7 @@ internal sealed record TrialConfiguration
     public required string StatePath { get; init; }
     public required string TlsCertificateFile { get; init; }
     public required string TlsCertificatePasswordFile { get; init; }
+    public TrialDecryptionCertificate[] DecryptionCertificates { get; init; } = [];
     public required string DataProtectionPath { get; init; }
     public required string AuthorizationKeyFile { get; init; }
     public required string WebRoot { get; init; }
@@ -38,8 +39,16 @@ internal sealed record TrialConfiguration
     public static async ValueTask<TrialConfiguration> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var json = await TrialPrivateState.ReadTextAsync(path, 64 * 1024, cancellationToken).ConfigureAwait(false);
-        var configuration = JsonSerializer.Deserialize<TrialConfiguration>(json, SerializerOptions)
-            ?? throw new TrialConfigurationException("trial_configuration_invalid");
+        TrialConfiguration configuration;
+        try
+        {
+            configuration = JsonSerializer.Deserialize<TrialConfiguration>(json, SerializerOptions)
+                ?? throw new TrialConfigurationException("trial_configuration_invalid");
+        }
+        catch (JsonException)
+        {
+            throw new TrialConfigurationException("trial_configuration_invalid");
+        }
         TrialConfigurationValidator.Validate(configuration, path);
         return configuration;
     }
@@ -71,6 +80,12 @@ internal sealed record TrialStorageSource
     public required bool CaseSensitive { get; init; }
 
     public override string ToString() => "[configured storage source]";
+}
+
+internal sealed record TrialDecryptionCertificate
+{
+    public required string CertificateFile { get; init; }
+    public required string PasswordFile { get; init; }
 }
 
 internal sealed class TrialConfigurationException(string code) : Exception(code)

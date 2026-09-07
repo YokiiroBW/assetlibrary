@@ -32,6 +32,6 @@ internal static class TrialScanComposition
         var executor = new InitialScanTaskExecutor(store, libraries.Store, libraries.Availability,
             new ProcessReadOnlyFileDiscovery(workers), sink, tasks, execution, recovery, TimeProvider.System, options,
             new InitialScanLogger(loggerFactory.CreateLogger<InitialReadOnlyScanService>()));
-        return new InitialScanCoordinator(store, libraries.Store, snapshot, tasks, execution, recovery, executor, options);
+        return new InitialScanCoordinator(store, libraries.Store, libraries.Availability, snapshot, tasks, execution, recovery, executor, options);
     }
 }

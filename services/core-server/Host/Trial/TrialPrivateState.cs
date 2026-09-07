@@ -8,6 +8,20 @@ internal static class TrialPrivateState
     private static StringComparison PathComparison => OperatingSystem.IsWindows()
         ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
+    public static FileStream AcquireInstance(string statePath)
+    {
+        var path = Path.Combine(statePath, ".read-only-trial.lock");
+        RequireSafePath(path);
+        try
+        {
+            return new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        }
+        catch (IOException)
+        {
+            throw new TrialConfigurationException("trial_instance_already_running");
+        }
+    }
+
     public static async ValueTask<string> ReadTextAsync(string path, int maximumBytes, CancellationToken cancellationToken)
     {
         RequireSafePath(path);

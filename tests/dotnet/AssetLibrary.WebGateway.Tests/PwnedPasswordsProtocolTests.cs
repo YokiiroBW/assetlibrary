@@ -173,6 +173,6 @@ public sealed class PwnedPasswordsProtocolTests
                 minimumResponseLines: 799));
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             _ = new PwnedPasswordsSecretRiskOptions(
-                maximumResponseLines: 1_201));
+                maximumResponseLines: PwnedPasswordsSecretRiskOptions.AbsoluteMaximumResponseLines + 1));
     }
 }
