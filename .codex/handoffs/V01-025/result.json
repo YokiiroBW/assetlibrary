@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v01-025-web-navigation-and-workspace",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-025",
-  "commit": "46ff8e28a85bc44da2408a2c44c12cb5b6aa3ef4",
+  "commit": "1336afe1be6604ffc20dae4c37de0cb837425b18",
   "changed_files": [
     ".codex/handoffs/V01-025/result.json",
     ".codex/handoffs/V01-025/summary.md",
@@ -65,6 +65,12 @@
       "duration_seconds": 9.6,
       "passed": 7,
       "failed": 0
+    },
+    "mobile_toolbar_regression": {
+      "duration_seconds": 3.8,
+      "failed": 0,
+      "passed": 1,
+      "report_directory": ".runtime/playwright-results/V01-025-mobile-toolbar"
     }
   },
   "risks": [
