@@ -21,12 +21,12 @@
 ## 先做什么
 
 1. 运行交接包与架构基线校验。
-2. 初始化或检查 Git，并先提交可引用的 `main` 基线。
-3. 检查需求、ADR 和矩阵是否一致。
+2. 检查已有 Git 分支、远端和 worktree，保留未合并提交；只在新仓库首次初始化。
+3. 检查需求、ADR、矩阵与 `.codex/project-state.json` 是否一致；当前 M0-009 已完成架构冻结，V0.1 发布仍受阻断。
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
-5. 完成 M0 的技术验证与仓库底座。
-6. 汇总全部 M0 Spike，通过 M0-009 冻结依赖方向、技术栈和 CI 门禁。
-7. 只有 M0-009 通过后，才并行实现服务端、Web、Windows、Android和测试。
+5. 阅读 `docs/audits/2026-09-05-alignment.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`，区分已完成组件、Host 未组合能力和待补平台证据。
+6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
+7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 
 ## 不要做什么
 

@@ -2,13 +2,15 @@
 
 ## 当前状态
 
-需求探索与工程原则已冻结。现在应进入：
+需求与架构已冻结，当前已进入 V0.1 受控实现。M0-009 和 V01-001 至 V01-014 的组件交接已进入主线；V01-008 保持 partial，Alpha 发布仍 blocked。先读 `.codex/project-state.json`、`docs/releases/V0.1_ALPHA_READINESS.md` 和 `docs/audits/2026-09-05-alignment.md`，从未完成项继续。
+
+路线及当前所处位置：
 
 ```text
 需求基线校验
 → M0 技术验证与架构决策
 → 仓库与契约骨架
-→ V0.1 资产核心
+→ V0.1 资产核心（当前：组件、沙箱与集成准备）
 → 跨端客户端
 → Explorer 深度集成
 → 专业资源库与增强能力
@@ -48,21 +50,21 @@ Linux / Git Bash：
 
 脚本会生成并尝试打开一个 `codex://new?...` 深度链接，工作区指向当前仓库，提示词要求读取 `.codex/START_HERE.md`。链接只会预填提示词，不应被当作自动执行或唯一交接机制。
 
-## 初始化仓库
+## 检查现有仓库
 
 ```bash
-python scripts/bootstrap_repo.py
-python scripts/validate_handoff.py
-python scripts/validate_architecture_baseline.py
+python -I -B scripts/verify_repository.py
+python -I -B scripts/validate_v0_1_alpha.py
+python -B tests/architecture/check_release_gates.py --target v0.1-start
 ```
 
 然后让主协调线程：
 
 1. 检查需求基线与废弃清单是否互相冲突；
-2. 完成 M0 技术验证，并以 M0-009 冻结编码架构门禁；重点包括 Windows Shell 自定义视图、跨平台服务端发行、AssetLink 协议和文件操作恢复；
+2. 读取 M0-009 冻结结果及残余门禁，核对已有组件与发布宿主的组合缺口；
 3. 创建独立 worktree 任务；
 4. 要求每个任务提交标准交接文件和测试；
-5. 只在契约稳定后启动 Windows、Android、Web 等并行实现。
+5. 按现有门禁推进已授权能力，先稳定独立客户端，再开展生产 Explorer 集成。
 
 ## 安全提醒
 

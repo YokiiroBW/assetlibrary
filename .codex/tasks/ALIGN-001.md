@@ -4,7 +4,7 @@
 - 所有者：architecture-coordinator
 - 分支：codex/align-001-repository-architecture-alignment
 - Worktree：C:\YOKI\Codex\AssetLibrary-worktrees\ALIGN-001
-- 依赖：M0-009、V01-014；集成 ALIGN-002、ALIGN-003 的独立修复。
+- 依赖：M0-009、V01-014；集成 ALIGN-002、ALIGN-003、ALIGN-004 的独立修复。
 
 ## 目标与验收
 
@@ -18,7 +18,7 @@
 
 - 协调状态、任务图与登记、启动说明和审查报告。
 - 整合 origin/main 的 M0-002/M0-004 实现与测试，保留后续 Windows 证据及 partial 状态。
-- 评审并合并 ALIGN-002 扫描边界和 ALIGN-003 Web 请求/会话修复。
+- 评审并合并 ALIGN-002 扫描边界、ALIGN-003 Web 请求/会话修复及 ALIGN-004 服务 Spike 保护。
 - 修复证据充分的仓库检查与文档一致性问题；公共契约、数据库迁移另行裁决。
 
 禁止覆盖独有提交、修改真实资产、启用生产写/Explorer/Provider/发布功能、删除历史证据、以 skipped 充当通过、引入新技术栈或依赖。
@@ -28,3 +28,7 @@
 复用现有端口、生成 SDK、迁移清单及架构/发布门禁，不复制业务规则。基线使用 python -I -B scripts/verify_repository.py。稳定后 review 完整 diff，再按 tests/architecture/ci-tiers.json 执行 fast-merge 和受影响平台验证。破坏性夹具限 .runtime/sandbox-storage/ 或系统临时目录。缺失平台、大文件与 soak 证据继续保持阻断。
 
 完成时更新状态，写入 .codex/handoffs/ALIGN-001/summary.md、result.json、tests.md，记录起始提交、合并决策、结果、风险、优化次序和同步读回。
+
+## 数据库单一所有权裁决
+
+主协调器在 ALIGN-001 中独占追加 AssetIdentity 迁移 13 及 manifest/对应测试：真实 PostgreSQL 16.15 已复现完整文件名搜索两侧 token 不一致。仅修正查询分词以匹配既有生成列，不修改迁移 1–12、不变更公开函数签名、索引、权限、角色或 Host 功能。用真实查询、撤权、100k 索引及备份/恢复/升级回归验证。

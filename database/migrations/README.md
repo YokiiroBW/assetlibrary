@@ -43,3 +43,7 @@ Cross-cluster recovery first applies the same role provisioning to the empty des
 - Business tables for Library/Asset/Scan and TaskHealth/Outbox belong to V01-004 and V01-005. The M0-005 `library`, `tasks` and `events` objects are not production tables.
 
 Official references: PostgreSQL [versioning policy](https://www.postgresql.org/support/versioning/), [role membership](https://www.postgresql.org/docs/16/role-membership.html), [`GRANT`](https://www.postgresql.org/docs/16/sql-grant.html), [`pg_dump`](https://www.postgresql.org/docs/16/app-pgdump.html), and [`pg_restore`](https://www.postgresql.org/docs/16/app-pgrestore.html). PostgreSQL 16.15 is supported through 2028-11-09; the Windows task-local evidence uses the EDB binary archive linked from the PostgreSQL Windows download page.
+
+## ALIGN-001 查询分词对齐
+
+迁移 13 由 AssetIdentity owner 以 `CREATE OR REPLACE FUNCTION` 修正只读搜索：输入查询与既有 `path_search_document` 统一分割 `/._-`，使完整文件名和路径可匹配。保留函数签名、调用方权限过滤、keyset、GIN 索引及既有 execute grants；不改迁移 1–12、资产原文件或任何功能门禁。升级遵循既有备份优先/前进迁移/空库恢复合同。

@@ -2,6 +2,8 @@
 
 The authoritative machine-readable registry is `.codex/task-registry.json`.
 
+This table preserves the initial M0 task plan. M0-009 has completed architecture freezing and the repository now contains V01-001 through V01-014 component work. Use `.codex/task-graph.json`, the registry and `docs/releases/V0.1_ALPHA_READINESS.md` for current dependencies, partial tasks and release blockers.
+
 | ID | Task | Purpose |
 |---|---|---|
 | M0-001 | Repository foundation | Freeze build, modules, ownership and CI skeleton |

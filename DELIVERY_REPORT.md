@@ -1,5 +1,7 @@
 # Delivery Verification Report
 
+Historical v2.1 handoff snapshot (2026-08-31). The counts and `SHA256SUMS.txt` below describe the original package, not the evolving repository. Current implementation and verification evidence: `docs/audits/2026-09-05-alignment.md` and `.codex/project-state.json`.
+
 ## Package identity
 
 - Project: AssetLibrary

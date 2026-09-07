@@ -388,7 +388,10 @@
       "status": "in_progress",
       "depends_on": [
         "M0-009",
-        "V01-014"
+        "V01-014",
+        "ALIGN-002",
+        "ALIGN-003",
+        "ALIGN-004"
       ],
       "owner": "architecture-coordinator",
       "branch": "codex/align-001-repository-architecture-alignment",
@@ -402,7 +405,7 @@
       "id": "ALIGN-002",
       "title": "scan-physical-boundary",
       "module": "scan-physical-boundary",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-004"
       ],
@@ -418,7 +421,7 @@
       "id": "ALIGN-003",
       "title": "web-request-deadline",
       "module": "web-request-deadline",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V01-006"
       ],
@@ -434,14 +437,15 @@
       "id": "ALIGN-004",
       "title": "windows-service-guard-reconciliation",
       "module": "windows-service-guard-reconciliation",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [],
       "owner": "server-packaging-owner",
       "branch": "codex/align-004-windows-service-guard-reconciliation",
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-004",
       "task_file": ".codex/tasks/ALIGN-004.md",
       "handoff": ".codex/handoffs/ALIGN-004/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "milestone": "V0.1"
     }
   ]
 }

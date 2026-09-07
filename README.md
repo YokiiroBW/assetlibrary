@@ -3,7 +3,7 @@
 **交接包版本：v2.1**  
 **需求冻结日期：2026-08-31**
 
-这是一个面向自建 NAS、Windows、Android 和 Web 的全方面资产预览与管理系统交接包。它的目标不是替代 Photoshop、AutoCAD、Jellyfin、专业音乐软件或项目协作平台，而是把真实物理文件、跨格式预览、搜索、同步、整理、查重、角色资料与外部系统连接统一到一套可维护的资产内核中。
+这是一个面向自建 NAS、Windows、Android 和 Web 的资产预览与管理系统仓库。它将真实物理文件、跨格式预览、搜索、同步、整理、查重、角色资料与外部系统连接统一到一套可维护的资产内核中。
 
 本包包含：
 
@@ -13,10 +13,13 @@
 - 视觉方向总览、总体架构图、领域框架图和 Codex 并行开发框架图；
 - 格式支持矩阵、客户端功能矩阵、版本路线和验收门禁；
 - Codex 主协调线程、worktree、任务登记和标准交接模板；
-- 面向后续实现的仓库骨架与契约草案；
-- 强制编码/架构原则、语言预算、架构评审清单与 CI 骨架。
+- 已冻结的 AssetLink 契约与 .NET、TypeScript、Kotlin 生成 SDK；
+- .NET 核心、13 条生产迁移、Web 只读浏览、认证组件、沙箱文件操作与 Windows/Linux/Docker 共用宿主；
+- 强制编码/架构原则、语言预算和已激活的原生 CI 门禁。
 
-> 这是“需求与架构交接包”，不是已经完成的软件。`apps/`、`services/`、`providers/` 等目录是模块边界骨架，Codex 必须先完成 M0 技术验证和架构决策，再进入真实实现。
+当前处于 **V0.1 受控实现阶段，尚不可发布**。M0-009 已冻结架构；V01-001 至 V01-014 已提供组件或沙箱证据，V01-008 平台发行证据仍为 partial。发布宿主只开放健康与就绪端点，生产认证、业务 API 和文件写入尚未开放。Windows 独立客户端、Android、浏览器扩展及生产 Explorer 集成仍待实现。
+
+当前事实以 [项目状态](.codex/project-state.json)、[Alpha 就绪记录](docs/releases/V0.1_ALPHA_READINESS.md) 和 [代码与架构对齐审查](docs/audits/2026-09-05-alignment.md) 为准。v2.1 DOCX、`DELIVERY_REPORT.md` 和 `SHA256SUMS.txt` 是原始交接快照，不代表当前代码状态。
 
 ## 先从这里开始
 
@@ -30,10 +33,10 @@
    - `docs/16_版本路线与验收门禁.md`
    - `docs/17_Codex并行开发工作流.md`
    - `docs/22_编码与架构开发原则.md`
-4. 运行 `python scripts/validate_handoff.py` 和 `python scripts/validate_architecture_baseline.py`。
-5. 初始化 Git 后，由主协调线程建立 M0 任务图，不要直接同时开发所有客户端和 Provider。
+4. 运行 `python -I -B scripts/verify_repository.py`，再按修改范围执行原生检查。
+5. 读取现有任务登记与交接，从未完成项创建隔离 worktree，保留仍开放的发布门禁。
 
-仓库级快速验证入口是 `python scripts/verify_repository.py`。它只检查交接骨架、当前架构基线、Python/JSON 解析和结构完整性；语言级依赖图、完整安全与性能门禁仍由 M0-009 根据 Spike 结果确定。
+快速入口检查交接、架构、Alpha 判定、迁移清单、SDK 生成一致性和源码/依赖策略。完整 `fast-merge` 还包含 .NET、TypeScript/Web 和 Kotlin 构建与测试；真实命令见 [构建说明](eng/README.md) 和 [CI 合同](tests/architecture/ci-tiers.json)。平台缺失或测试跳过不等于发布通过。
 
 ## 最重要的六条约束
 

@@ -1,5 +1,7 @@
 # Package Manifest
 
+This list describes the original v2.1 handoff package. Its DOCX, delivery report and checksum file are historical artifacts. For the current source inventory, component status and checks, read `docs/audits/2026-09-05-alignment.md`, `docs/releases/V0.1_ALPHA_READINESS.md` and `tests/architecture/ci-tiers.json`.
+
 ## Core reading
 
 - `DELIVERY_REPORT.md`

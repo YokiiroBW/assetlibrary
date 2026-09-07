@@ -100,3 +100,9 @@
 - 图片只用于视觉方向、架构图、框架图和必要 UI 原型。
 - 需求改变必须同步更新基线、ADR、矩阵和废弃清单。
 - 不得把实现猜测写成已经确认的事实。
+
+## 12. 当前验证入口
+
+M0-009 已冻结架构，当前处于 V0.1 受控实现。先运行 `python -I -B scripts/verify_repository.py`；`python -I -B scripts/validate_v0_1_alpha.py` 应通过有效性审计并保持发布 blocked，`python -B tests/architecture/check_release_gates.py --target v0.1-start` 允许受控开发。
+
+原生 .NET 使用 `global.json` 的精确 SDK：`dotnet restore AssetLibrary.slnx --locked-mode`、`dotnet format AssetLibrary.slnx --verify-no-changes --no-restore`、`dotnet build AssetLibrary.slnx --configuration Release --no-restore`、`dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore`。Web/SDK、依赖、数据库和平台的真实命令统一见 `tests/architecture/ci-tiers.json`、对应 workflow 及 `eng/README.md`，不得自造测试层级或将平台缺证据记为通过。
