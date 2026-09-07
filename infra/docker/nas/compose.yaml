@@ -1,0 +1,133 @@
+name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?configure the deployment first}"
+
+x-owner: &owner
+  io.assetlibrary.deployment: "${ASSETLIBRARY_DEPLOYMENT_ID:?configure the deployment first}"
+  io.assetlibrary.product: "nas-read-only-v1"
+
+services:
+  postgres:
+    image: "${ASSETLIBRARY_POSTGRES_IMAGE:?use the image identity from the build manifest}"
+    user: "999:999"
+    labels: *owner
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      POSTGRES_USER: assetlibrary_nas_cluster_admin
+      POSTGRES_DB: assetlibrary
+      POSTGRES_PASSWORD_FILE: /run/postgresql-tls/superuser-password
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/data/pgdata
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/run/postgresql-tls/server.crt
+      - -c
+      - ssl_key_file=/run/postgresql-tls/server.key
+      - -c
+      - ssl_ca_file=/run/postgresql-tls/ca.crt
+      - -c
+      - hba_file=/run/postgresql-tls/pg_hba.conf
+      - -c
+      - max_connections=60
+      - -c
+      - log_statement=none
+      - -c
+      - log_min_error_statement=panic
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - postgres-tls:/run/postgresql-tls:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+      - /var/run/postgresql:rw,noexec,nosuid,nodev,size=4m,mode=1777
+    networks: [database]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -p 5432 -d assetlibrary -U assetlibrary_nas_cluster_admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    mem_limit: 1g
+    cpus: 1.5
+    pids_limit: 128
+    stop_grace_period: 60s
+    restart: unless-stopped
+
+  core:
+    image: "${ASSETLIBRARY_CORE_IMAGE:?use the image identity from the build manifest}"
+    user: "1654:1654"
+    labels: *owner
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - core-state:/var/lib/assetlibrary
+    # assets.compose.json adds only read_only bind mounts at /assets/<source_key>.
+    ports:
+      - "${ASSETLIBRARY_BIND_ADDRESS:?}:${ASSETLIBRARY_HTTPS_PORT:?}:${ASSETLIBRARY_HTTPS_PORT:?}"
+    networks: [database, egress]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    mem_limit: 1g
+    cpus: 2.0
+    pids_limit: 128
+    stop_grace_period: 60s
+    restart: unless-stopped
+
+  setup:
+    image: "${ASSETLIBRARY_SETUP_IMAGE:?use the image identity from the build manifest}"
+    profiles: [setup]
+    user: "0:0"
+    labels: *owner
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, FOWNER, DAC_OVERRIDE, SETUID, SETGID]
+    security_opt: [no-new-privileges:true]
+    environment:
+      ASSETLIBRARY_DEPLOYMENT_ID: "${ASSETLIBRARY_DEPLOYMENT_ID:?}"
+      ASSETLIBRARY_SOURCE_REVISION: "${ASSETLIBRARY_SOURCE_REVISION:?}"
+    volumes:
+      - core-state:/var/lib/assetlibrary
+      - postgres-data:/bootstrap/postgres-data
+      - postgres-tls:/bootstrap/postgres-tls
+      - setup-state:/bootstrap/control
+      - type: bind
+        source: ./settings.json
+        target: /bootstrap/settings.json
+        read_only: true
+        bind:
+          create_host_path: false
+    networks: [database, egress]
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 64
+    restart: "no"
+
+networks:
+  database:
+    internal: true
+    labels: *owner
+  egress:
+    labels: *owner
+
+volumes:
+  core-state:
+    name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-core-state"
+    labels: *owner
+  postgres-data:
+    name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-postgres-data"
+    labels: *owner
+  postgres-tls:
+    name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-postgres-tls"
+    labels: *owner
+  setup-state:
+    name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-setup-state"
+    labels: *owner
