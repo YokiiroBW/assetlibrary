@@ -7,7 +7,7 @@
   "owner": "server-packaging-owner",
   "branch": "codex/v01-022-nas-docker-deployment",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-022",
-  "commit": "e676f09c1d5618488b01d36fed9c38ed03d82e83",
+  "commit": "70b5048566c8660b6036d979bb32c1129251947e",
   "changed_files": [
     ".codex/tasks/V01-022.md",
     ".codex/handoffs/V01-022/summary.md",
@@ -22,23 +22,25 @@
     "infra/docker/nas/nasctl.sh",
     "infra/docker/nas/settings.example.json",
     "infra/docker/nas/README.md",
-    "scripts/build_nas_deployment.py"
+    "scripts/build_nas_deployment.py",
+    ".codex/handoffs/V01-022/build-evidence.json",
+    ".codex/handoffs/V01-022/posix-two.trx"
   ],
   "changed_contracts": [],
   "tests": {
     "report": "tests.md",
-    "execution_status": "not_executed_per_user_instruction",
     "skipped": 0,
-    "passed": 0,
-    "failed": 0
+    "failed": 0,
+    "execution_status": "docker_images_and_posix_targeted_checks_passed_nas_runtime_pending",
+    "passed": 2
   },
   "risks": [
-    "Image availability and one-shot Python/PG/OpenSSL compatibility have not been executed",
-    "Actual NAS TLS/non-root/readonly/persistence/first bootstrap acceptance is pending",
-    "No full Alpha/platform release gate has been changed"
+    "NAS kernel supplies CPU shares only and no cgroup PID hard limit; documented, not replaced by global nproc",
+    "Real NAS TLS/non-root/readonly/persistence/bootstrap acceptance remains root-owned",
+    "No full Alpha/platform release gate changed"
   ],
   "blocked_by": [
-    "Root-controlled unified build/test/NAS acceptance is deliberately pending"
+    "NAS upload/runtime/real asset acceptance belongs to root coordination and remains pending here"
   ],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V01-022/summary.md",
@@ -46,7 +48,9 @@
   "architecture_review": {
     "new_language_or_framework": [],
     "architecture_tests": [
-      "Not executed during implementation, per user instruction; root will run existing gates during unified acceptance"
+      "Root reported unified repository/architecture/.NET format/Release/Packaging63 checks passed before image phase",
+      "Docker images built from exact source and immutable base digests",
+      "ReadCore Release build zero warnings/errors and exactly two new POSIX cases passed"
     ],
     "new_major_dependencies": [],
     "duplicated_logic": [],
@@ -67,5 +71,14 @@
     "contract_changes": [
       "ADR0015-approved container mount convention /assets/<source_key> and one-shot deployment layout; no AssetLink/Host/SQL changes"
     ]
+  },
+  "artifact": {
+    "image_source_tree": "9dde5f7b6107ff2acbcd32001c3c1f15d4cd1e5a",
+    "export_tool_commit": "c7d606558d95fa0e8e38279ac738b144db454816",
+    "deployment_recipe_commit": "70b5048566c8660b6036d979bb32c1129251947e",
+    "image_source_commit": "abcb7aaa0de46a1ed1d3d653002fb86b024f1e4e",
+    "images_tar_sha256": "a257efa6e2ddd11bd9608d489f86650597abc913ce35e9d5945c1c0e32c9e931",
+    "images_tar_bytes": 753087488,
+    "remote_bundle": "/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/recipe-01/assetlibrary-nas"
   }
 }

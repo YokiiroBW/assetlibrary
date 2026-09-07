@@ -12,3 +12,14 @@
 - 关键边界：正常源/不存在源/host根别名；错误source/readonly挂载表或部署env拒绝；外部COMPOSE_PROJECT_NAME/ASSETLIBRARY_*不能改变已核验目标；外来volume/network/container标签拒绝；PG VerifyFull错误CA/SAN/非TLS失败；现有LOGIN权限漂移拒绝；初始化重入不替换密钥或已有数据。
 
 上述只是待执行入口，不是通过记录。用户先集中实现再统一验收的指令覆盖了通常的逐任务测试节奏；最终真正结果由根执行后更新。
+
+## 已授权并执行的统一构建/窄回归
+
+- 初始同源bundle由fbfc275生成并校验SHA后传dev-230新自有目录，exact checkout。后续abcb7aa只改失败的pnpm下载RUN（network-concurrency2/fetch-retries4/max-backoff60s），供应链检查与锁不变。
+- Docker Core/setup构建通过；打包首次在sudo创建的images.tar读权限失败，c7d6065改为调用用户打开xb文件并接收docker save stdout，成功镜像复用。
+- 离线包SHA256SUMS全文件读回通过；image tar753087488 bytes/SHA a257efa6e2ddd11bd9608d489f86650597abc913ce35e9d5945c1c0e32c9e931。
+- `dotnet restore tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj --locked-mode --disable-build-servers`通过；用同一server阶段SDK10.0.111。
+- `dotnet build tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj --configuration Release --no-restore --disable-build-servers`通过，0warning/0error。
+- `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj --configuration Release --no-build --no-restore --filter FullyQualifiedName~PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity`：2 passed/0 failed/0 skipped，63ms，TRX为posix-two.trx。
+- SDK提取仅复用已完成server层缓存，不重新编译旧阶段；创建的自有SDK提取container按task标签验证后移除，没有运行持久服务。
+- 此处没有NAS运行测试。内核资源兼容修正是根据根实际docker info反馈，不能把Compose文件存在写成NAS已通过。

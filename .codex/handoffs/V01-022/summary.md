@@ -27,3 +27,16 @@ Owner server-packaging-owner；分支codex/v01-022-nas-docker-deployment；工�
 建议先合此候选及根8270475，再统一验收与收口证据。不要把0已执行测试理解成通过；本子任务没有触碰远程其他容器、NAS既有资源、真实资产或Windows交付。
 
 可审查实现commit：e676f09c1d5618488b01d36fed9c38ed03d82e83（主候选4c96349加双斜杠根拒绝）。根要求的环境优先级封闭、挂载表精确重生成比对、host_path双斜杠根拒绝均包含。工作区Git clean；仍未运行构建/测试，等待唯一统一验收阶段。
+
+## 统一构建阶段结果
+
+原实施阶段遵守不构建/不测试要求；根统一静态与Host验收完成后，授权本任务在dev-230执行镜像/离线包构建及新增2个POSIX参数用例。以下为实际结果，不覆盖或冒称NAS运行验收：
+
+- 镜像源commit `abcb7aaa0de46a1ed1d3d653002fb86b024f1e4e`，tree `9dde5f7b6107ff2acbcd32001c3c1f15d4cd1e5a`；基于根fbfc275，仅为npm连接重置增加低并发/有界重试。Node/.NET/PG/锁/attestation不变。
+- Core与setup镜像真实构建完成；离线images.tar共753,087,488 bytes，SHA256 `a257efa6e2ddd11bd9608d489f86650597abc913ce35e9d5945c1c0e32c9e931`。导出工具commit `c7d606558d95fa0e8e38279ac738b144db454816`。通过调用用户先打开文件、docker save流式stdout写入，避免sudo生成不可读归档；没有重编成功镜像。
+- Docker26构建器没有buildx，使用已有legacy layer cache；一次网络失败发生在Web依赖RUN，55条供应链校验保持通过，降低并发后该层成功。官方SDK10.0.111 Linux归档SHA512在镜像层校验通过，Host/Web生产构建完成。
+- 同一server缓存阶段导出Linux SDK10.0.111，仅构建目标ReadCore测试项目，并一次执行 `FullyQualifiedName~PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity`：2通过/0失败/0跳过，63ms。未重复旧大套、Web40或Packaging63。
+- 根在NAS实测cfs_quota/cfs_period和PidsLimit不支持；Recipe改CPU shares(core1024/PG512/setup256)、移除pids_limit，保留内存及其他安全/应用上限。该Recipe commit `70b5048566c8660b6036d979bb32c1129251947e`，原镜像未修改。
+- 可加载Recipe目录：`/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/.runtime/sandbox-storage/V01-022/recipe-01/assetlibrary-nas`。其build-manifest记录image/export-tool/deployment-recipe三个实际commit；镜像tar复用已验证文件，SHA保持相同。NAS上传/启动及正式资产验收由根负责。
+
+镜像ID/base digests与可定位证据见build-evidence.json和远端build-manifest.json。当前状态仍partial，等待根NAS验收；没有对其他服务、内核、全局nproc或正式资产执行变更。

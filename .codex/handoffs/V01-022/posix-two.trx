@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="7fece5da-84d2-4aed-95a2-0c68add40b9f" name="@yokiiroubuntu 2026-09-07 21:59:06" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-07T21:59:06.0032176+08:00" queuing="2026-09-07T21:59:06.0032177+08:00" start="2026-09-07T21:59:05.1090325+08:00" finish="2026-09-07T21:59:06.0095119+08:00" />
+  <TestSettings name="default" id="a43970fb-ddd0-4d39-aaea-3f370c0163e4">
+    <Deployment runDeploymentRoot="_yokiiroubuntu_2026-09-07_21_59_06" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="dc401a88-27d3-4404-a424-aa5b9c1969da" testId="1e54e91f-3814-82b1-a3fd-6f977f948a23" testName="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)" computerName="yokiiroubuntu" duration="00:00:00.0370027" startTime="2026-09-07T21:59:05.6983042+08:00" endTime="2026-09-07T21:59:05.7613585+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dc401a88-27d3-4404-a424-aa5b9c1969da" />
+    <UnitTestResult executionId="d49d2652-5bae-4ee7-bd5d-f864e2679881" testId="1d67f6e3-4255-83bf-90a0-c93c34ce52b8" testName="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)" computerName="yokiiroubuntu" duration="00:00:00.0369956" startTime="2026-09-07T21:59:05.6983291+08:00" endTime="2026-09-07T21:59:05.7613585+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d49d2652-5bae-4ee7-bd5d-f864e2679881" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)" storage="/home/yokiirobw/.cache/assetlibrary/v01-021/nas-fbfc275-b18a9d/checkout/tests/dotnet/assetlibrary.readcore.tests/bin/release/net10.0/assetlibrary.readcore.tests.dll" id="1d67f6e3-4255-83bf-90a0-c93c34ce52b8">
+      <Execution id="d49d2652-5bae-4ee7-bd5d-f864e2679881" />
+      <TestMethod codeBase="/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/tests/dotnet/AssetLibrary.ReadCore.Tests/bin/Release/net10.0/AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity" />
+    </UnitTest>
+    <UnitTest name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)" storage="/home/yokiirobw/.cache/assetlibrary/v01-021/nas-fbfc275-b18a9d/checkout/tests/dotnet/assetlibrary.readcore.tests/bin/release/net10.0/assetlibrary.readcore.tests.dll" id="1e54e91f-3814-82b1-a3fd-6f977f948a23">
+      <Execution id="dc401a88-27d3-4404-a424-aa5b9c1969da" />
+      <TestMethod codeBase="/home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/tests/dotnet/AssetLibrary.ReadCore.Tests/bin/Release/net10.0/AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1e54e91f-3814-82b1-a3fd-6f977f948a23" executionId="dc401a88-27d3-4404-a424-aa5b9c1969da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d67f6e3-4255-83bf-90a0-c93c34ce52b8" executionId="d49d2652-5bae-4ee7-bd5d-f864e2679881" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>已为 /home/yokiirobw/.cache/assetlibrary/V01-021/nas-fbfc275-b18a9d/checkout/tests/dotnet/AssetLibrary.ReadCore.Tests/bin/Release/net10.0/AssetLibrary.ReadCore.Tests.dll 启用测试并行化(Workers: 8，Scope: MethodLevel)
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>
