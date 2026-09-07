@@ -24,11 +24,19 @@ public static class ReadOnlyAssetLinkEndpoints
 
     public static IEndpointConventionBuilder MapAssetLibraryReadOnlyGateway(
         this IEndpointRouteBuilder endpoints)
+        => endpoints.MapAssetLibraryControl(async (context, payload, token) =>
+            await context.RequestServices.GetRequiredService<ReadOnlyAssetLinkProtocol>()
+                .HandleAsync(context.User, payload, token).ConfigureAwait(false));
+
+    public static IEndpointConventionBuilder MapAssetLibraryControl(
+        this IEndpointRouteBuilder endpoints,
+        Func<HttpContext, string, CancellationToken, ValueTask<AssetLinkProtocolResponse>> handler)
     {
         ArgumentNullException.ThrowIfNull(endpoints);
+        ArgumentNullException.ThrowIfNull(handler);
         return endpoints.MapPost(
             "/assetlink/v1/control",
-            async (HttpContext context, ReadOnlyAssetLinkProtocol protocol) =>
+            async (HttpContext context) =>
             {
                 AssetLinkProtocolResponse response;
                 try
@@ -41,8 +49,8 @@ public static class ReadOnlyAssetLinkEndpoints
                     var payload = await ReadBoundedBodyAsync(
                         context.Request,
                         context.RequestAborted).ConfigureAwait(false);
-                    response = await protocol.HandleAsync(
-                        context.User,
+                    response = await handler(
+                        context,
                         payload,
                         context.RequestAborted).ConfigureAwait(false);
                 }

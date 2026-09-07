@@ -6,7 +6,7 @@ public sealed class DurableTaskService(
     IDurableTaskStore store,
     TimeProvider timeProvider,
     TaskHealthExecutionLimits limits,
-    TaskHealthLogger logger)
+    TaskHealthLogger logger) : IDurableTaskCoordinator
 {
     public async ValueTask<DurableTaskEnqueueResult> EnqueueAsync(
         DurableTaskEnqueueRequest request,

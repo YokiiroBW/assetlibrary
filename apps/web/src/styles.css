@@ -38,7 +38,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -48,6 +49,7 @@ button {
 
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 [role="button"]:focus-visible {
   outline: 3px solid #48a787;
   outline-offset: 2px;
@@ -99,6 +101,182 @@ input:focus-visible,
   margin-top: 3px;
   color: #9fb2aa;
   font-size: 11px;
+}
+
+.account-actions,
+.content-actions,
+.scan-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.sign-out {
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid #648174;
+  border-radius: 8px;
+  background: transparent;
+  color: #eef8f3;
+  cursor: pointer;
+}
+
+.sign-out:hover {
+  background: #2e443a;
+}
+
+.sign-in-form,
+.register-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.sign-in-form {
+  width: min(100%, 390px);
+}
+
+.sign-in-form h1,
+.sign-in-form p,
+.register-dialog p {
+  margin-bottom: 0;
+}
+
+.sign-in-form .brand-mark {
+  background: #13211c;
+}
+
+.sign-in-form label,
+.register-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sign-in-form input,
+.register-dialog input,
+.register-dialog select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+
+.primary,
+.centered-state .primary {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--surface-strong);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover,
+.centered-state .primary:hover {
+  filter: brightness(1.08);
+  background: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.form-hint {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.form-error {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.register-dialog {
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: var(--surface-strong);
+  box-shadow: 0 24px 80px #0005;
+}
+
+.register-dialog::backdrop {
+  background: #0b151bb3;
+}
+.register-dialog .pane-heading {
+  min-height: 34px;
+  align-items: center;
+}
+.register-dialog h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.add-library {
+  margin: 0 0 12px;
+}
+
+.scan-status,
+.storage-notice,
+.connection-notice {
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.connection-notice {
+  width: min(1540px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 0;
+}
+
+.scan-copy {
+  display: flex;
+  flex-direction: column;
+}
+.scan-copy span {
+  color: var(--muted);
+}
+.scan-actions:has(button) {
+  margin-top: 8px;
+}
+.scan-status .form-error {
+  margin: 8px 0;
 }
 
 .search-box {
@@ -623,6 +801,13 @@ p {
     grid-row: 2;
   }
 
+  .account-name {
+    max-width: 85px;
+  }
+  .register-dialog {
+    padding: 20px;
+  }
+
   .workspace {
     height: auto;
     min-height: calc(100vh - 112px);
@@ -657,7 +842,7 @@ p {
   }
 
   .content-pane {
-    height: 62vh;
+    height: max(70vh, 600px);
     min-height: 450px;
     padding: 18px 16px;
   }
@@ -679,6 +864,7 @@ p {
     --surface-strong: #1b2621;
     --accent: #75c9a9;
     --accent-soft: #243c32;
+    --danger: #ffb4ad;
   }
 
   body,
@@ -714,5 +900,14 @@ p {
 
   .safety-note {
     background: #203029;
+    color: var(--muted);
+  }
+
+  .entry-row.is-selected {
+    background: #263e32;
+    border-color: #618575;
+  }
+  .open-directory {
+    color: #b9dfcb;
   }
 }

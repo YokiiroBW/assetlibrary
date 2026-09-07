@@ -21,9 +21,10 @@ internal sealed class FileOutOfBandAuthorization(
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
         if (!IsLive(request.ExpiresAt))
         {
-            throw new InvalidOperationException("The operator authorization has expired or is outside its validity window.");
+            throw new OperatorAuthorizationRejectedException();
         }
 
         using var key = await keys.ReadAsync(cancellationToken).ConfigureAwait(false);

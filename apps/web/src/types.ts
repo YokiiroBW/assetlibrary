@@ -44,3 +44,44 @@ export interface PagedState<T> extends Page<T> {
   statusCode: number | null;
   loadingMore: boolean;
 }
+
+export interface BrowserSession {
+  authenticated: true;
+  principal_id: string;
+  display_name: string;
+  is_system_administrator: boolean;
+  csrf_token: string;
+  absolute_expires_at: string;
+}
+
+export interface StorageSource {
+  source_key: string;
+  display_name: string;
+}
+
+export interface RegisterLibraryRequest {
+  source_key: string;
+  display_name: string;
+  root_path: string;
+}
+
+export type ScanState = "queued" | "leased" | "succeeded" | "failed" | "cancelled";
+
+export interface ScanSummary {
+  task_id: string;
+  scan_id: string | null;
+  state: ScanState;
+  cancellation_requested: boolean;
+  observed_entries: number;
+  committed_entries: number;
+  started_at: string | null;
+  finished_at: string | null;
+  failure_code: string | null;
+  can_cancel: boolean;
+  can_retry: boolean;
+}
+
+export interface LibraryScan {
+  library_id: string;
+  scan: ScanSummary | null;
+}

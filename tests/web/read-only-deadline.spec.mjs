@@ -1,6 +1,18 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
-import { browsePage, entry, failure, libraryPage, searchPage, visibleLibrary } from "./assetlink-fixtures.mjs";
+import {
+  browsePage,
+  entry,
+  failure,
+  libraryPage,
+  mockSession,
+  searchPage,
+  visibleLibrary,
+} from "./assetlink-fixtures.mjs";
 import { sendResult, startAssetLinkServer } from "./hanging-assetlink-server.mjs";
+
+test.beforeEach(async ({ page }) => {
+  await mockSession(page);
+});
 
 for (const pendingStage of ["headers", "body"]) {
   test(`a request with stalled ${pendingStage} times out, closes the connection, and can retry`, async ({ page }) => {

@@ -1,0 +1,80 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-018",
+  "title": "Web只读试用完整流程",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "web-gateway-owner",
+  "branch": "codex/v01-018-web-read-only-trial-workflow",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-018",
+  "commit": "df3bc6c83fd97a3c8818654890050b24ce8be34e",
+  "changed_files": [
+    ".codex/handoffs/V01-018/result.json",
+    ".codex/handoffs/V01-018/summary.md",
+    ".codex/handoffs/V01-018/tests.md",
+    ".codex/tasks/V01-018.md",
+    "apps/web/README.md",
+    "apps/web/playwright.config.mjs",
+    "apps/web/src/App.tsx",
+    "apps/web/src/LibraryScanStatus.tsx",
+    "apps/web/src/ReadOnlyWorkspace.tsx",
+    "apps/web/src/RegisterLibraryForm.tsx",
+    "apps/web/src/SessionGate.tsx",
+    "apps/web/src/assetLinkClient.ts",
+    "apps/web/src/assetLinkResponses.ts",
+    "apps/web/src/hooks/useBrowse.ts",
+    "apps/web/src/hooks/useLibraryScan.ts",
+    "apps/web/src/hooks/useSearch.ts",
+    "apps/web/src/hooks/useSession.ts",
+    "apps/web/src/styles.css",
+    "apps/web/src/trialResponses.ts",
+    "apps/web/src/types.ts",
+    "tests/web/assetlink-fixtures.mjs",
+    "tests/web/read-only-authority.spec.mjs",
+    "tests/web/read-only-deadline.spec.mjs",
+    "tests/web/read-only-workspace.spec.mjs",
+    "tests/web/trial-fixtures.mjs",
+    "tests/web/trial-library-scan.spec.mjs",
+    "tests/web/trial-session.spec.mjs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 73,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "真实HTTPS Host、PostgreSQL、隔离物理目录端到端由V01-015集成验收；本任务仅Web fixture组件证据。",
+    "50万真实NAS规模和完整发行/预览/写入/Explorer证据未在本任务执行。"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 4,
+  "handoff_summary": ".codex/handoffs/V01-018/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Web read-only trial adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "生成AssetLink SDK与既有AssetLinkClient有界传输",
+      "queryState/useLibraries/useBrowse/useSearch/VirtualEntryList",
+      "GatewayAuth会话与已批准read-only-trial-v1应用合同",
+      "既有CSS令牌和原生浏览器能力"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "只调用冻结HTTPS认证和AssetLink control公开合同，不直接读取数据库或服务器目录"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "validate_architecture_baseline.py:130 inputs通过",
+      "tests/architecture:14通过",
+      "tests/repository/test_web_gateway_foundation.py:6通过",
+      "tests/sdk:14通过",
+      "validate_web_source.py和SDK generation --check通过"
+    ],
+    "technical_debt": []
+  }
+}

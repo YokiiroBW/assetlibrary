@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "../../tests/web",
-  outputDir: "../../.runtime/playwright-results/V01-006",
+  outputDir: "../../.runtime/playwright-results/V01-018",
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,

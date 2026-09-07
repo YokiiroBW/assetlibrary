@@ -1,0 +1,110 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V01-016",
+  "title": "secure-browser-authentication",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "gateway-auth-owner",
+  "branch": "codex/v01-016-secure-browser-authentication",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V01-016",
+  "commit": "f5e0eba99b25e240bae66a436ff02694d5194200",
+  "changed_files": [
+    ".codex/handoffs/V01-016/result.json",
+    ".codex/handoffs/V01-016/summary.md",
+    ".codex/handoffs/V01-016/tests.md",
+    ".codex/tasks/V01-016.md",
+    "services/core-server/Host/Trial/Authentication/TrialAdministratorOperator.cs",
+    "services/core-server/Host/Trial/Authentication/TrialAuthenticatedRequest.cs",
+    "services/core-server/Host/Trial/Authentication/TrialAuthentication.cs",
+    "services/core-server/Host/Trial/Authentication/TrialAuthenticationEndpoints.cs",
+    "services/core-server/Host/Trial/Authentication/TrialAuthenticationMiddleware.cs",
+    "services/core-server/Host/Trial/Authentication/TrialAuthenticationResponses.cs",
+    "services/core-server/Host/Trial/Authentication/TrialBrowserCookieCodec.cs",
+    "services/core-server/Host/Trial/Authentication/TrialLoginLimiter.cs",
+    "services/core-server/Host/Trial/Authentication/TrialLoginRequest.cs",
+    "services/core-server/Host/Trial/Authentication/TrialOperatorInput.cs",
+    "services/core-server/Host/Trial/Authentication/TrialRequestTrust.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorBootstrapRecoveryLog.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorBootstrapRecoveryService.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorOperatorPorts.cs",
+    "services/core-server/Modules/GatewayAuth/Application/AdministratorRecoveryMutation.cs",
+    "services/core-server/Modules/GatewayAuth/Application/CurrentAdministratorPolicy.cs",
+    "services/core-server/Modules/GatewayAuth/Application/GatewayAuthenticationRuntime.cs",
+    "services/core-server/Modules/GatewayAuth/Contracts/AdministratorOperatorRequest.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/FileOutOfBandAuthorization.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/GatewayAuthenticationComposition.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/GatewayAuthorizationConfiguration.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/GatewayAuthorizationKeyMaterial.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PostgresAdministratorRecoveryPreparationStore.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/PrivateAuthorizationFiles.cs",
+    "services/core-server/Modules/GatewayAuth/Infrastructure/ProtectedGatewayAuthorizationKeyStore.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationCookieTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationLimitTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationOperatorTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationRequests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationStore.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationTestApplication.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationTestComposition.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationTestHost.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationTestTls.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialAuthenticationWireTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/AdministratorRecoveryPreparationTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayAuthorizationKeyTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayAuthorizationPermissionTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayAuthorizationSandbox.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/GatewayOperatorRuntimeTests.cs"
+  ],
+  "changed_contracts": [
+    "services/core-server/Modules/GatewayAuth/Contracts/AdministratorOperatorRequest.cs"
+  ],
+  "tests": {
+    "passed": 181,
+    "failed": 0,
+    "skipped": 2,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Two pre-existing optional PostgreSQL bodies returned without configured connection; excluded from actual local execution. V01-017 owns SQL14 evidence and V01-015 owns complete Host/PG/browser acceptance.",
+    "New credentials require the existing fail-closed HIBP risk provider; existing login and reads work offline.",
+    "Root Host must preserve prior Data Protection decryption certificates or rewrap keys when renewing TLS private keys.",
+    "Windows normal UserKeySet disposal has zero-delta evidence; abnormal termination cleanup belongs to root fault integration.",
+    "Global abuse limits apply to one trial process, not a distributed deployment."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V01-016/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "GatewayAuth and Host/Trial/Authentication",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "V01-011 LocalAuthenticationService, BrowserSessionIssuer and BrowserSessionService",
+      "V01-012 credential derivation and lifecycle contracts",
+      "V01-013 PwnedPasswordsSecretRiskChecker fail-closed transport",
+      "V01-014 AdministratorBootstrapRecoveryService and original PostgreSQL CAS recovery",
+      "PostgresAuthenticationExecutor role/timeout/cancellation boundary",
+      "ReadOnlyAssetLinkProtocol.TransportError and generated codec"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "No cross-module tables or internal entities; Host calls GatewayAuth and existing public AssetLink error serialization."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Coordinator-approved additive authentication facade/factory and operator request contract.",
+      "Implements frozen read-only-trial-v1 authentication transport; no generated SDK changes.",
+      "Consumes SQL14 four-parameter/two-column prepare owned exclusively by V01-017; no SQL/manifest changes here."
+    ],
+    "architecture_tests": [
+      "verify_repository: architecture and 14 architecture tests passed",
+      "format verify and zero-warning Release build under unchanged analyzer limits",
+      "SDK generation/source and 21 AssetLink contracts passed"
+    ],
+    "technical_debt": [
+      "V01-015 must verify abnormal-process Windows TLS container lifecycle.",
+      "Offline initial enrollment requires a future trustworthy offline risk source, with no bypass.",
+      "Complete HTTPS/PG/Web package acceptance is coordinated separately."
+    ]
+  }
+}

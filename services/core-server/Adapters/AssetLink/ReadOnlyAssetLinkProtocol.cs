@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AssetLibrary.Modules.GatewayAuth.Application;
 using Microsoft.Extensions.Logging;
 
@@ -58,6 +59,12 @@ public sealed class ReadOnlyAssetLinkProtocol(
 
     public static AssetLinkProtocolResponse TransportError(int statusCode, string code, string message) =>
         AssetLinkReadJson.Error(statusCode, "unknown", code, message);
+
+    public static AssetLinkProtocolResponse ControlResult(string requestId, JsonObject body) =>
+        AssetLinkReadJson.Success(requestId, body);
+
+    public static AssetLinkProtocolResponse ControlError(int statusCode, string requestId, string code, string message) =>
+        AssetLinkReadJson.Error(statusCode, requestId, code, message);
 
     private async ValueTask<AssetLinkProtocolResponse> ExecuteAsync(
         AssetLinkReadRequest request,

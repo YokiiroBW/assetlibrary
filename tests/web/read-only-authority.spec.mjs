@@ -5,9 +5,14 @@ import {
   failure,
   libraryPage,
   mockAssetLink,
+  mockSession,
   searchPage,
   visibleLibrary,
 } from "./assetlink-fixtures.mjs";
+
+test.beforeEach(async ({ page }) => {
+  await mockSession(page);
+});
 
 test("reconnecting after authentication loss discards the previous identity's selection", async ({ page }) => {
   let identity = "first";

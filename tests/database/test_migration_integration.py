@@ -640,7 +640,7 @@ SELECT task_health.enqueue_outbox_event(
         backup = MIGRATIONS.apply_migrations(tools, self.manifest, backups)
         self.assertIsNotNone(backup)
         _, rows = MIGRATIONS.ledger_rows(tools, self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 14)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, len(self.manifest.migrations) + 1)))
         before = sorted(path.name for path in backups.iterdir())
         self.assertIsNone(MIGRATIONS.apply_migrations(tools, self.manifest, backups))
         self.assertEqual(sorted(path.name for path in backups.iterdir()), before)
@@ -3289,7 +3289,7 @@ LIMIT 256;
                 future.result(timeout=60)
 
         _, rows = MIGRATIONS.ledger_rows(self.runner_tools(database), self.manifest)
-        self.assertEqual([row["version"] for row in rows], list(range(1, 14)))
+        self.assertEqual([row["version"] for row in rows], list(range(1, len(self.manifest.migrations) + 1)))
 
     def test_provisioning_rejects_unexpected_fixed_role_membership(self) -> None:
         database = self.fresh_database("unexpected_membership")
@@ -3549,7 +3549,7 @@ LIMIT 256;
             self.assertEqual(ready.get("status"), "ready")
             self.assertEqual(ready.get("scope"), "host_database")
             self.assertEqual(ready.get("database_contract"), "v01-010/1")
-            self.assertEqual(ready.get("database_schema_version"), 13)
+            self.assertEqual(ready.get("database_schema_version"), len(self.manifest.migrations))
             self.assertIs(ready.get("business_api_ready"), False)
             self.assertIs(ready.get("production_file_writes_enabled"), False)
             health_status, health = self.http_payload(port, path="/healthz")

@@ -14,8 +14,22 @@ internal static class TrialAuthentication
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(runtime);
-        services.AddSingleton(new TrialAuthenticationServices(runtime.LocalAuthentication, runtime.BrowserSessions));
-        services.AddSingleton(new TrialBrowserCookieCodec(protection, TimeProvider.System));
+        ArgumentNullException.ThrowIfNull(protection);
+        services.AddSingleton(runtime);
+        services.AddSingleton(protection);
+        Configure(services, publicOrigin);
+    }
+
+    public static void Configure(IServiceCollection services, Uri publicOrigin)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        services.AddSingleton(provider =>
+        {
+            var runtime = provider.GetRequiredService<GatewayAuthenticationRuntime>();
+            return new TrialAuthenticationServices(runtime.LocalAuthentication, runtime.BrowserSessions);
+        });
+        services.AddSingleton(provider => new TrialBrowserCookieCodec(
+            provider.GetRequiredService<IDataProtectionProvider>(), TimeProvider.System));
         services.AddSingleton(new TrialRequestTrust(publicOrigin));
         services.AddSingleton<TrialLoginLimiter>();
     }

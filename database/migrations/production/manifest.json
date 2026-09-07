@@ -206,6 +206,38 @@
       "owner_role": "assetlibrary_gateway_auth_owner",
       "path": "0014_gateway_auth_recovery_preparation.sql",
       "sha256": "df5e657acda7ec5bdcfaaa0342bb7113849d5f5efd51108a57daf1fa0a11312d"
+    },
+    {
+      "version": 15,
+      "name": "library_storage_trial_registration",
+      "module": "LibraryStorage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "path": "0015_library_storage_trial_registration.sql",
+      "sha256": "da4edd74a407913bf6d1dfa2cc2bb655e49970ac7c936edfc300affd6f3a261b"
+    },
+    {
+      "version": 16,
+      "name": "asset_identity_initial_scan_recovery",
+      "module": "AssetIdentity",
+      "owner_role": "assetlibrary_asset_identity_owner",
+      "path": "0016_asset_identity_initial_scan_recovery.sql",
+      "sha256": "11dbbfed726f5a387a7362add92f83e0b470b4a156f7bd946b936160a88b629f"
+    },
+    {
+      "version": 17,
+      "name": "scan_reconciliation_durable_requests",
+      "module": "ScanReconciliation",
+      "owner_role": "assetlibrary_scan_reconciliation_owner",
+      "path": "0017_scan_reconciliation_durable_requests.sql",
+      "sha256": "ee1f6261082239605c731701e07ff9b24dfaf8165ab660dd346d28d8adcc6480"
+    },
+    {
+      "version": 18,
+      "name": "task_health_scan_commit_guard",
+      "module": "TaskHealth",
+      "owner_role": "assetlibrary_task_health_owner",
+      "path": "0018_task_health_scan_commit_guard.sql",
+      "sha256": "dc99259bb1b3470fd0ebfff5248b23c94c6fe38445f30769f690dcd46cbf5a36"
     }
   ]
 }
