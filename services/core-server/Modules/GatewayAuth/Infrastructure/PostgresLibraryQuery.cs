@@ -51,15 +51,8 @@ internal sealed class PostgresLibraryQuery(
             reader => new LibraryRow(PostgresReadCommand.ReadLibrary(reader, 0), reader.GetString(5)),
             cancellationToken).ConfigureAwait(false);
 
-        var hasMore = rows.Count > query.Page.PageSize;
-        if (hasMore)
-        {
-            rows.RemoveAt(rows.Count - 1);
-        }
-
-        ReadPageCursor? next = hasMore
-            ? cursors.Encode(scope, filter, rows[^1].SortName, rows[^1].Library.LibraryId.Value, null)
-            : null;
+        var next = PostgresReadPage.Complete(rows, query.Page.PageSize,
+            row => cursors.Encode(scope, filter, row.SortName, row.Library.LibraryId.Value, null));
         return new ReadPage<AuthorizedLibrary>(rows.Select(row => row.Library).ToArray(), next);
     }
 

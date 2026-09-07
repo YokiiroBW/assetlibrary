@@ -4,6 +4,7 @@ using AssetLibrary.AssetLink;
 using AssetLibrary.CoreServer.Adapters.AssetLink;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.ScanReconciliation.Contracts;
+using static AssetLibrary.CoreServer.Hosting.Trial.TrialManagementRequest;
 
 namespace AssetLibrary.CoreServer.Hosting.Trial;
 
@@ -12,6 +13,8 @@ internal sealed class TrialManagementGateway(
     TrialLibraryServices libraries,
     IInitialScanCoordinator scans)
 {
+    private readonly TrialLibraryManagementControls libraryControls = new(libraries);
+
     public async ValueTask<AssetLinkProtocolResponse> HandleAsync(HttpContext context, string payload, CancellationToken token)
     {
         var requestId = "unknown";
@@ -62,37 +65,12 @@ internal sealed class TrialManagementGateway(
 
     private async ValueTask<JsonObject> ExecuteAsync(ControlRequestMessage request, Guid principalId, CancellationToken token)
     {
-        if (request.Operation == "storage_sources.list")
+        if (TrialLibraryManagementControls.CanHandle(request.Operation))
         {
-            return new JsonObject
-            {
-                ["sources"] = new JsonArray(libraries.Sources.Select(source => (JsonNode)new JsonObject
-                {
-                    ["source_key"] = source.SourceKey,
-                    ["display_name"] = source.DisplayName,
-                    ["default_root_path"] = source.AllowedRoot.Value,
-                }).ToArray()),
-            };
-        }
-
-        if (request.Operation == "libraries.register")
-        {
-            var id = await libraries.Registration.RegisterAsync(
-                new LibraryRegistrationRequest(Text(request.Body, "source_key"), Text(request.Body, "display_name"), Text(request.Body, "root_path"),
-                    request.Body.ContainsKey("category") ? LibraryCategories.Parse(Text(request.Body, "category")) : LibraryCategory.General),
-                Operation(request, principalId), token).ConfigureAwait(false);
-            return new JsonObject { ["library_id"] = id.Value.ToString("D") };
+            return await libraryControls.ExecuteAsync(request, principalId, token).ConfigureAwait(false);
         }
 
         var libraryId = new LibraryId(Identifier(request.Body, "library_id"));
-        if (request.Operation == "libraries.update_category")
-        {
-            var category = await libraries.Categories.UpdateAsync(new LibraryCategoryUpdate(libraryId,
-                LibraryCategories.Parse(Text(request.Body, "category")), LibraryCategories.Parse(Text(request.Body, "expected_category"))),
-                Operation(request, principalId), token).ConfigureAwait(false);
-            return new JsonObject { ["library_id"] = libraryId.Value.ToString("D"), ["category"] = LibraryCategories.ToWire(category) };
-        }
-
         var scan = request.Operation switch
         {
             "library_scans.get" => await scans.GetAsync(libraryId, token).ConfigureAwait(false),
@@ -103,16 +81,8 @@ internal sealed class TrialManagementGateway(
         return new JsonObject { ["library_id"] = libraryId.Value.ToString("D"), ["scan"] = TrialScanJson.Serialize(scan) };
     }
 
-    private static bool IsManagement(string operation) => operation is
-        "storage_sources.list" or "libraries.register" or "libraries.update_category" or "library_scans.get" or "library_scans.start" or "library_scans.cancel";
-
-    private static ManagementOperation Operation(ControlRequestMessage request, Guid principalId) =>
-        Guid.TryParseExact(request.IdempotencyKey, "D", out var key) && key != Guid.Empty
-            ? new ManagementOperation(principalId, key) : throw new ArgumentException("A valid operation identity is required.");
-
-    private static string Text(JsonObject body, string name) =>
-        body[name] is JsonValue value && value.TryGetValue<string>(out var text) && text is not null
-            ? text : throw new ArgumentException("A required field is missing.");
+    private static bool IsManagement(string operation) => TrialLibraryManagementControls.CanHandle(operation)
+        || operation is "library_scans.get" or "library_scans.start" or "library_scans.cancel";
 
     private static AssetLinkMessage Parse(string payload)
     {
@@ -125,10 +95,6 @@ internal sealed class TrialManagementGateway(
             throw new JsonException("The control envelope is invalid.");
         }
     }
-
-    private static Guid Identifier(JsonObject body, string name) =>
-        Guid.TryParseExact(Text(body, name), "D", out var value) && value != Guid.Empty
-            ? value : throw new ArgumentException("A valid identifier is required.");
 
     private static int Status(string code) => code switch
     {

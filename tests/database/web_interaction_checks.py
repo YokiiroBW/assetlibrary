@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import tempfile
 import uuid
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
@@ -71,10 +72,14 @@ ANALYZE asset_identity.filesystem_entry;
     facts = ("SELECT count(*) || ':' || md5(string_agg(md5(entry::text),'' ORDER BY entry_id)) "
              "FROM asset_identity.filesystem_entry entry;")
     before = test.sql(database, test.admin, facts).stdout.strip()
+    entry_count = int(before.split(":", 1)[0])
+    test.assertEqual(200157, entry_count)
     snapshot = test.sql(database, test.admin, "SELECT row_to_json(snapshot) FROM asset_identity.library_index_snapshot snapshot;").stdout.strip()
     migrations.apply_migrations(test.runner_tools(database), test.manifest, test.backup_directory("interactive-upgrade"))
     test.assertEqual(before, test.sql(database, test.admin, facts).stdout.strip())
     test.assertEqual(snapshot, test.sql(database, test.admin, "SELECT row_to_json(snapshot) FROM asset_identity.library_index_snapshot snapshot;").stdout.strip())
+    print(json.dumps({"v026_upgrade": "18_to_21", "entries": entry_count, "facts_preserved": True,
+        "snapshot_preserved": json.loads(snapshot)}, sort_keys=True))
     test.assertEqual("general", test.gateway_sql(database, f"SELECT category FROM gateway_auth.find_authorized_library_v2('oidc:interactive-reader','{library}');").stdout.strip())
     _category_checks(test, database, library, principal, source, registration_key, legacy_body, stamp)
     _index_checks(test, database, library, stamp)
@@ -112,6 +117,10 @@ def _category_checks(test, database, library, principal, source, registration_ke
     hidden = test.gateway_sql(database, f"SELECT * FROM gateway_auth.find_authorized_library_v2('oidc:interactive-hidden','{library}');")
     test.assertEqual("", hidden.stdout.strip())
     test.assertEqual(["Fixture", "Other"], test.gateway_sql(database, "SELECT display_name FROM gateway_auth.list_authorized_libraries('oidc:interactive-reader',NULL,NULL,101);").stdout.strip().splitlines())
+    test.assertEqual("101", test.gateway_sql(database, "SELECT count(*) FROM gateway_auth.browse_authorized_entries("
+        f"'oidc:interactive-reader','{library}','folder',NULL,NULL,101);").stdout.strip())
+    test.assertEqual("2", test.gateway_sql(database, "SELECT count(*) FROM gateway_auth.search_authorized_entries("
+        "'oidc:interactive-reader','boundary',NULL,NULL,NULL,101);").stdout.strip())
 
 
 def _index_checks(test, database, library, stamp):
@@ -135,6 +144,8 @@ ORDER BY {ordering} LIMIT 101;
 """).stdout
             test.assertIn(index, plan)
             test.assertNotIn("Sort Method", plan)
+    print(json.dumps({"v026_indexes": "first_and_later_pages", "scale_directory_entries": 200000,
+        "plans_checked": 6, "full_sort": False}, sort_keys=True))
     bounded = test.gateway_sql(database, "SELECT count(*) FROM gateway_auth.browse_authorized_entries_v2("
         f"'oidc:interactive-reader','{library}','huge','modified','desc','all','',NULL,NULL,NULL,NULL,NULL,101);")
     test.assertEqual("101", bounded.stdout.strip())
@@ -152,7 +163,14 @@ def _dotnet_checks(test, database, library, root):
         f"Host={test.host};Port={test.port};Database={database};Username={test.RUNTIME};"
         "Pooling=false;Timeout=5;Command Timeout=5;SSL Mode=Disable")
     environment["ASSETLIBRARY_TEST_INTERACTIVE_LIBRARY"] = str(library)
+    results = test.backup_directory("interactive-dotnet-results")
     result = subprocess.run([str(dotnet), "test", str(project), "--configuration", "Release", "--no-build", "--no-restore",
-        "--filter", "FullyQualifiedName~InteractiveReadModelIntegrationTests", "--logger", "console;verbosity=minimal"],
+        "--filter", "FullyQualifiedName~InteractiveReadModelIntegrationTests", "--logger", "console;verbosity=minimal",
+        "--logger", "trx;LogFileName=interactive.trx", "--results-directory", str(results)],
         cwd=root, env=environment, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120, check=False)
     test.assertEqual(0, result.returncode, result.stdout + result.stderr)
+    counters = ET.parse(results / "interactive.trx").find("{*}ResultSummary/{*}Counters")
+    test.assertIsNotNone(counters, result.stdout)
+    observed = {key: int(counters.attrib[key]) for key in ("total", "executed", "passed", "failed", "notExecuted")}
+    test.assertEqual({"total": 1, "executed": 1, "passed": 1, "failed": 0, "notExecuted": 0}, observed)
+    print(json.dumps({"v026_dotnet": observed}, sort_keys=True))

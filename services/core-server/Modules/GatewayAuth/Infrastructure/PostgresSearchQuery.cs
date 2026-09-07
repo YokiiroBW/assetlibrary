@@ -52,20 +52,8 @@ internal sealed class PostgresSearchQuery(
             reader => new SearchRow(PostgresReadCommand.ReadSearchHit(reader), reader.GetString(11)),
             cancellationToken).ConfigureAwait(false);
 
-        var hasMore = rows.Count > query.Page.PageSize;
-        if (hasMore)
-        {
-            rows.RemoveAt(rows.Count - 1);
-        }
-
-        ReadPageCursor? next = hasMore
-            ? cursors.Encode(
-                scope,
-                filter,
-                rows[^1].SortName,
-                rows[^1].Hit.Library.LibraryId.Value,
-                rows[^1].Hit.Entry.EntryId.Value)
-            : null;
+        var next = PostgresReadPage.Complete(rows, query.Page.PageSize,
+            row => cursors.Encode(scope, filter, row.SortName, row.Hit.Library.LibraryId.Value, row.Hit.Entry.EntryId.Value));
         return new ReadPage<AuthorizedSearchHit>(rows.Select(row => row.Hit).ToArray(), next);
     }
 

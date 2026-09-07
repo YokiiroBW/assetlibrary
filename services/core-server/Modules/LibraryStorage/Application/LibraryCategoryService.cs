@@ -2,7 +2,13 @@ using AssetLibrary.Modules.LibraryStorage.Contracts;
 
 namespace AssetLibrary.Modules.LibraryStorage.Application;
 
-public sealed class LibraryCategoryService(ILibraryManagementStore store, TimeProvider timeProvider) : ILibraryCategoryManagement
+public interface ILibraryCategoryStore
+{
+    ValueTask<LibraryCategory> UpdateAsync(LibraryCategoryUpdate request, ManagementOperation operation,
+        DateTimeOffset now, CancellationToken cancellationToken);
+}
+
+public sealed class LibraryCategoryService(ILibraryCategoryStore store, TimeProvider timeProvider) : ILibraryCategoryManagement
 {
     public ValueTask<LibraryCategory> UpdateAsync(
         LibraryCategoryUpdate request, ManagementOperation operation, CancellationToken cancellationToken)
@@ -14,6 +20,6 @@ public sealed class LibraryCategoryService(ILibraryManagementStore store, TimePr
             throw new ReadOnlyTrialException("invalid_request");
         }
 
-        return store.UpdateCategoryAsync(request, operation, timeProvider.GetUtcNow(), cancellationToken);
+        return store.UpdateAsync(request, operation, timeProvider.GetUtcNow(), cancellationToken);
     }
 }

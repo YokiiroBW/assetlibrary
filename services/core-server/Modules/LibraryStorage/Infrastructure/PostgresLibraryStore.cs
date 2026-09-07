@@ -12,10 +12,6 @@ public sealed class PostgresLibraryStore(NpgsqlDataSource dataSource) : ILibrary
     private readonly ModulePostgresSession database = new(dataSource, ModuleDatabaseRole.LibraryStorage);
 
     private readonly PostgresLibraryRegistration registration = new(dataSource);
-    private readonly PostgresLibraryCategory categories = new(dataSource);
-    public ValueTask<LibraryCategory> UpdateCategoryAsync(LibraryCategoryUpdate request, ManagementOperation operation,
-        DateTimeOffset now, CancellationToken cancellationToken) =>
-        categories.UpdateAsync(request, operation, now, cancellationToken);
     public ValueTask<LibraryId?> FindRegistrationAsync(LibraryRegistrationRequest request, ManagementOperation operation, CancellationToken token) =>
         registration.FindRegistrationAsync(request, operation, token);
     public ValueTask<LibraryId> RegisterAsync(ConfiguredStorageSource source, LibraryRegistrationRequest request,

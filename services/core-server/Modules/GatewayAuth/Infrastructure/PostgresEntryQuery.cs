@@ -38,16 +38,9 @@ internal sealed class PostgresEntryQuery(
             throw new AuthorizedReadNotFoundException();
         }
 
-        var hasMore = rows.Count > query.Page.PageSize;
-        if (hasMore)
-        {
-            rows.RemoveAt(rows.Count - 1);
-        }
-
-        ReadPageCursor? next = hasMore
-            ? cursors.Encode(scope, filter, rows[^1].SortName, null, rows[^1].Entry.EntryId.Value,
-                rows[^1].Entry.LastWriteTimeUtc, rows[^1].Entry.ContentLength)
-            : null;
+        var next = PostgresReadPage.Complete(rows, query.Page.PageSize,
+            row => cursors.Encode(scope, filter, row.SortName, null, row.Entry.EntryId.Value,
+                row.Entry.LastWriteTimeUtc, row.Entry.ContentLength));
         return new AuthorizedEntryPage(
             result.Library,
             query.ParentPath,
