@@ -429,6 +429,19 @@
       "handoff": ".codex/handoffs/ALIGN-003/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "ALIGN-004",
+      "title": "windows-service-guard-reconciliation",
+      "module": "windows-service-guard-reconciliation",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "server-packaging-owner",
+      "branch": "codex/align-004-windows-service-guard-reconciliation",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\ALIGN-004",
+      "task_file": ".codex/tasks/ALIGN-004.md",
+      "handoff": ".codex/handoffs/ALIGN-004/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
