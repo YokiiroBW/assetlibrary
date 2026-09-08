@@ -78,7 +78,7 @@ export function VirtualEntryList({
       element.focus({ preventScroll: true });
       pendingFocus.current = null;
     }
-  }, [virtualItems]);
+  }, [virtualItems, selection.focusedId]);
 
   const focusIndex = (index: number, event: KeyboardEvent) => {
     const row = rows[Math.max(0, Math.min(rows.length - 1, index))];

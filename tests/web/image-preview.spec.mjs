@@ -151,6 +151,18 @@ test("foreground revalidation and identity changes revoke every image URL before
   expect(await page.evaluate(() => window.liveImageUrls.size)).toBe(0);
 });
 
+test("keyboard focus follows selection between already mounted virtual rows", async ({ page }) => {
+  const items = [entry(21), entry(22), entry(23)];
+  await imageWorkspace(page, items);
+  await page.goto(browsePath);
+  await entryOption(page, items[0].name).click();
+  await page.keyboard.press("ArrowRight");
+  await expect(entryOption(page, items[1].name)).toHaveAttribute("aria-selected", "true");
+  await expect(entryOption(page, items[1].name)).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(entryOption(page, items[2].name)).toBeFocused();
+});
+
 test("image admission bounds its queue and expires queued work within the original budget", async ({ page }) => {
   await imageWorkspace(page, []);
   await page.clock.install();
