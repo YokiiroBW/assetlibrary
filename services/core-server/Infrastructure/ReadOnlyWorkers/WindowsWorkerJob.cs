@@ -6,12 +6,14 @@ namespace AssetLibrary.Infrastructure.ReadOnlyWorkers;
 
 internal sealed class WindowsWorkerJob(SafeFileHandle handle) : IDisposable
 {
+    internal SafeFileHandle Handle => handle;
     private const uint KillOnJobClose = 0x00002000;
     private const int ExtendedLimitInformationClass = 9;
 
     [SupportedOSPlatform("windows")]
-    public static WindowsWorkerJob Create()
+    public static WindowsWorkerJob Create(nuint memoryBytes = 0, long cpuTicks = 0, uint activeProcesses = 0)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(cpuTicks);
         // An unnamed, non-inheritable handle makes parent process lifetime the job's lifetime.
         var job = NativeMethods.CreateJobObjectW(nint.Zero, nint.Zero);
         if (job.IsInvalid)
@@ -23,6 +25,21 @@ internal sealed class WindowsWorkerJob(SafeFileHandle handle) : IDisposable
         try
         {
             var limits = new ExtendedLimits { Basic = new BasicLimits { LimitFlags = KillOnJobClose } };
+            if (memoryBytes != 0)
+            {
+                limits.Basic.LimitFlags |= 0x100;
+                limits.ProcessMemoryLimit = memoryBytes;
+            }
+            if (cpuTicks != 0)
+            {
+                limits.Basic.LimitFlags |= 2;
+                limits.Basic.PerProcessUserTimeLimit = cpuTicks;
+            }
+            if (activeProcesses != 0)
+            {
+                limits.Basic.LimitFlags |= 8;
+                limits.Basic.ActiveProcessLimit = activeProcesses;
+            }
             if (!NativeMethods.SetInformationJobObject(job, ExtendedLimitInformationClass,
                 ref limits, checked((uint)Marshal.SizeOf<ExtendedLimits>())))
             {
@@ -39,6 +56,18 @@ internal sealed class WindowsWorkerJob(SafeFileHandle handle) : IDisposable
     }
 
     [SupportedOSPlatform("windows")]
+    public static bool CurrentProcessHasLimits(nuint maximumMemory, long maximumCpuTicks, uint maximumProcesses)
+    {
+        const uint requiredFlags = KillOnJobClose | 0x100 | 2 | 8;
+        return NativeMethods.QueryInformationJobObject(nint.Zero, ExtendedLimitInformationClass,
+            out var limits, checked((uint)Marshal.SizeOf<ExtendedLimits>()), nint.Zero)
+            && (limits.Basic.LimitFlags & requiredFlags) == requiredFlags
+            && limits.ProcessMemoryLimit > 0 && limits.ProcessMemoryLimit <= maximumMemory
+            && limits.Basic.PerProcessUserTimeLimit > 0 && limits.Basic.PerProcessUserTimeLimit <= maximumCpuTicks
+            && limits.Basic.ActiveProcessLimit > 0 && limits.Basic.ActiveProcessLimit <= maximumProcesses;
+    }
+
+    [SupportedOSPlatform("windows")]
     public void Assign(SafeProcessHandle process)
     {
         if (!NativeMethods.AssignProcessToJobObject(handle, process))
@@ -52,6 +81,9 @@ internal sealed class WindowsWorkerJob(SafeFileHandle handle) : IDisposable
         handle.Dispose();
         GC.SuppressFinalize(this);
     }
+
+    [SupportedOSPlatform("windows")]
+    public void Terminate() => _ = NativeMethods.TerminateJobObject(handle, 1);
 
     // Same Windows SDK layout already exercised by M0-007 windows_isolation_probe.py.
     [StructLayout(LayoutKind.Sequential)]
@@ -107,5 +139,16 @@ internal sealed class WindowsWorkerJob(SafeFileHandle handle) : IDisposable
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool AssignProcessToJobObject(SafeFileHandle job, SafeProcessHandle process);
+
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool QueryInformationJobObject(nint job, int informationClass,
+            out ExtendedLimits information, uint informationLength, nint returnedLength);
+
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool TerminateJobObject(SafeFileHandle job, uint exitCode);
     }
 }

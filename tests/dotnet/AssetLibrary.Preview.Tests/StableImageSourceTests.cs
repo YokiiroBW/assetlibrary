@@ -39,6 +39,21 @@ public sealed class StableImageSourceTests
     }
 
     [TestMethod]
+    public void PersistedMicrosecondPrecisionDoesNotRejectAnUnchangedFile()
+    {
+        using var fixture = new ImageSourceFixture();
+        var precise = new DateTimeOffset(2026, 9, 8, 12, 0, 0, TimeSpan.Zero).AddTicks(7);
+        File.SetLastWriteTimeUtc(fixture.Asset, precise.UtcDateTime);
+        using var source = fixture.Open();
+        using var output = new MemoryStream();
+        var indexed = precise.AddTicks(-7);
+        _ = source.CopyVerifiedTo(output, fixture.Bytes.Length, indexed, 4096, CancellationToken.None);
+        CollectionAssert.AreEqual(fixture.Bytes, output.ToArray());
+        File.SetLastWriteTimeUtc(fixture.Asset, precise.AddTicks(1).UtcDateTime);
+        Assert.ThrowsExactly<ReadOnlyWorkerException>(() => source.VerifyCurrent(CancellationToken.None));
+    }
+
+    [TestMethod]
     public void CancelledOpenAndCopyDoNotReadOrWriteContent()
     {
         using var fixture = new ImageSourceFixture();

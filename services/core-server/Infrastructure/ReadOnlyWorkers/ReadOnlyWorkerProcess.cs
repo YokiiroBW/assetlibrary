@@ -14,7 +14,7 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         using var job = OperatingSystem.IsWindows() ? WindowsWorkerJob.Create() : null;
-        using var process = new Process { StartInfo = CreateStartInfo(mode) };
+        using var process = new Process { StartInfo = CreateStartInfo(options, mode) };
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         if (!process.Start())
         {
@@ -121,7 +121,7 @@ internal sealed class ReadOnlyWorkerProcess(ReadOnlyWorkerProcessOptions options
         }
     }
 
-    private ProcessStartInfo CreateStartInfo(string mode)
+    internal static ProcessStartInfo CreateStartInfo(ReadOnlyWorkerProcessOptions options, string mode)
     {
         var start = new ProcessStartInfo(options.ExecutablePath)
         {

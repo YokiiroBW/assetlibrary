@@ -1,5 +1,6 @@
 using System.Text;
 using AssetLibrary.CoreServer.Adapters.AssetLink;
+using AssetLibrary.CoreServer.Hosting.Trial.Preview;
 
 namespace AssetLibrary.CoreServer.Hosting.Trial;
 
@@ -9,7 +10,7 @@ internal static class TrialWebEndpoints
     {
         application.Use(async (context, next) =>
         {
-            context.Response.Headers.ContentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'";
+            context.Response.Headers.ContentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'";
             context.Response.Headers.XContentTypeOptions = "nosniff";
             context.Response.Headers["Referrer-Policy"] = "no-referrer";
             context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
@@ -17,6 +18,7 @@ internal static class TrialWebEndpoints
         });
         TrialAuthentication.Use(application);
         TrialAuthentication.Map(application);
+        TrialImageEndpoints.Map(application);
         application.MapAssetLibraryControl((context, payload, token) =>
             context.RequestServices.GetRequiredService<TrialManagementGateway>().HandleAsync(context, payload, token));
         TrialReadinessEndpoint.Map(application, configuration.DeploymentId, readiness);

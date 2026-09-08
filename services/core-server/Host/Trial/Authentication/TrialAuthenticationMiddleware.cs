@@ -1,3 +1,6 @@
+using AssetLibrary.CoreServer.Hosting.Trial.Preview;
+using AssetLibrary.Modules.PreviewProvider.Contracts;
+
 namespace AssetLibrary.CoreServer.Hosting;
 
 internal sealed class TrialAuthenticationMiddleware(
@@ -23,7 +26,7 @@ internal sealed class TrialAuthenticationMiddleware(
 
         var originalCancellation = context.RequestAborted;
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(originalCancellation);
-        deadline.CancelAfter(TimeSpan.FromSeconds(5));
+        deadline.CancelAfter(TimeSpan.FromSeconds(TrialImageEndpointMetadata.Applies(context) ? 15 : 5));
         context.RequestAborted = deadline.Token;
         try
         {
@@ -38,6 +41,11 @@ internal sealed class TrialAuthenticationMiddleware(
         catch (OperationCanceledException) when (originalCancellation.IsCancellationRequested)
         {
             throw;
+        }
+        catch (Exception) when (deadline.IsCancellationRequested && TrialImageEndpointMetadata.Applies(context) && !context.Response.HasStarted)
+        {
+            context.RequestAborted = originalCancellation;
+            await TrialImageResponses.Failure(context, ImagePreviewFailure.Timeout).ExecuteAsync(context).ConfigureAwait(false);
         }
         catch (Exception) when (!context.Response.HasStarted)
         {
@@ -57,7 +65,7 @@ internal sealed class TrialAuthenticationMiddleware(
         if (ticket is null)
         {
             TrialBrowserCookieCodec.Clear(context.Response);
-            await TrialAuthenticationResponses.AuthenticationRequired(context).ExecuteAsync(context).ConfigureAwait(false);
+            await AuthenticationRequired(context).ExecuteAsync(context).ConfigureAwait(false);
             return;
         }
 
@@ -72,11 +80,14 @@ internal sealed class TrialAuthenticationMiddleware(
         if (result.Identity is null)
         {
             TrialBrowserCookieCodec.Clear(context.Response);
-            await TrialAuthenticationResponses.AuthenticationRequired(context).ExecuteAsync(context).ConfigureAwait(false);
+            await AuthenticationRequired(context).ExecuteAsync(context).ConfigureAwait(false);
             return;
         }
 
         new TrialAuthenticatedRequest(result.Identity, ticket).Attach(context);
         await next(context).ConfigureAwait(false);
     }
+
+    private static IResult AuthenticationRequired(HttpContext context) => TrialImageEndpointMetadata.Applies(context)
+        ? TrialImageResponses.Unauthenticated(context) : TrialAuthenticationResponses.AuthenticationRequired(context);
 }

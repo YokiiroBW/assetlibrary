@@ -5,6 +5,7 @@ using AssetLibrary.Modules.GatewayAuth.Application;
 using AssetLibrary.Modules.GatewayAuth.Infrastructure;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.ScanReconciliation.Contracts;
+using AssetLibrary.CoreServer.Hosting.Trial.Preview;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Npgsql;
@@ -56,6 +57,7 @@ internal static class TrialHostFactory
         services.AddSingleton(libraries);
         services.AddSingleton(libraries.Registration);
         services.AddSingleton(libraries.Availability);
+        TrialImagePreviewConfiguration.Configure(services, configuration, libraries.Store, workers);
         services.AddSingleton<IInitialScanCoordinator>(provider =>
             TrialScanComposition.Create(connections, libraries, workers, provider.GetRequiredService<ILoggerFactory>()));
     }
