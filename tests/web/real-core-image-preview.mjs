@@ -464,7 +464,7 @@ async function readRealImage(page, connection, entryId, variant) {
           chunks.push(String.fromCharCode(...bytes.subarray(offset, Math.min(count, offset + 32768))));
         return {
           status: response.status,
-          headers: Object.fromEntries(response.headers()),
+          headers: Object.fromEntries(response.headers),
           body64: btoa(chunks.join("")),
         };
       } finally {
@@ -478,6 +478,24 @@ async function readRealImage(page, connection, entryId, variant) {
 }
 async function imageEvidence(page, connection, entryId, variant, sample) {
   const response = await readRealImage(page, connection, entryId, variant);
+  receipt.last_wire = {
+    case: sample.path,
+    variant,
+    status: response.status,
+    content_type: response.headers["content-type"],
+    declared_length: Number(response.headers["content-length"]),
+    received_bytes: response.body.length,
+    cache_control: response.headers["cache-control"],
+    nosniff: response.headers["x-content-type-options"],
+    resource_policy: response.headers["cross-origin-resource-policy"],
+    ...(response.body.length >= 29 && response.body.subarray(0, 8).toString("hex") === "89504e470d0a1a0a"
+      ? {
+          width: response.body.readUInt32BE(16),
+          height: response.body.readUInt32BE(20),
+          bit_depth: response.body[24],
+        }
+      : {}),
+  };
   assert.equal(response.status, 200, "derived image must succeed on the real service");
   const headers = response.headers;
   assert.equal(headers["content-type"], "image/png");
