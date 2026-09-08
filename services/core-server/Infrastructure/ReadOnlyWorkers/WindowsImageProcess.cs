@@ -7,7 +7,7 @@ using Microsoft.Win32.SafeHandles;
 namespace AssetLibrary.Infrastructure.ReadOnlyWorkers;
 
 [SupportedOSPlatform("windows")]
-internal sealed class WindowsImageProcess : IAsyncDisposable
+internal sealed class WindowsImageProcess : IImageChildProcess
 {
     private readonly WindowsImageProfile profile;
     private readonly WindowsWorkerJob job;
@@ -18,8 +18,12 @@ internal sealed class WindowsImageProcess : IAsyncDisposable
     public AnonymousPipeServerStream Input { get; }
     public AnonymousPipeServerStream Output { get; }
     public AnonymousPipeServerStream Error { get; }
+    Stream IImageChildProcess.Input => Input;
+    Stream IImageChildProcess.Output => Output;
+    Stream IImageChildProcess.Error => Error;
     public int ExitCode => Native.GetExitCodeProcess(processHandle, out var code)
         ? unchecked((int)code) : throw new ReadOnlyWorkerException("preview_exit_status_unavailable", Marshal.GetLastPInvokeError());
+    public Task WaitForExitAsync(CancellationToken cancellationToken) => Process.WaitForExitAsync(cancellationToken);
 
     private WindowsImageProcess(WindowsImageProfile profile, WindowsWorkerJob job, Process process, SafeProcessHandle processHandle,
         AnonymousPipeServerStream input, AnonymousPipeServerStream output, AnonymousPipeServerStream error,

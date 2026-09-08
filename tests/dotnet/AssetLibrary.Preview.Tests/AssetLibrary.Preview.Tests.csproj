@@ -23,6 +23,8 @@
     <Compile Include="../AssetLibrary.ReadCore.Tests/RepositorySandbox.cs" Link="Fixture/RepositorySandbox.cs" />
     <Compile Include="../AssetLibrary.ReadCore.Tests/SandboxDirectoryLink.cs" Link="Fixture/SandboxDirectoryLink.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs" Link="Boundary/WindowsWorkerJob.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageCapability.cs" Link="Boundary/WindowsImageCapability.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageChildProcess.cs" Link="Boundary/ImageChildProcess.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProfile.cs" Link="Boundary/WindowsImageProfile.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageStartup.cs" Link="Boundary/WindowsImageStartup.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcess.cs" Link="Boundary/WindowsImageProcess.cs" />

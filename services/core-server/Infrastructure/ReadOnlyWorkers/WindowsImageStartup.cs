@@ -9,6 +9,7 @@ internal sealed class WindowsImageStartup : IDisposable
     private readonly List<nint> allocations = [];
     private nint attributes;
     private bool initialized;
+    private WindowsImageCapability? compatibility;
 
     public WindowsImageStartup(nint sid, nint job, nint[] pipes)
     {
@@ -24,8 +25,11 @@ internal sealed class WindowsImageStartup : IDisposable
             }
             initialized = true;
 
+            compatibility = WindowsImageCapability.Create();
+            var capabilityEntry = Allocate(Marshal.SizeOf<SidAttributes>());
+            Marshal.StructureToPtr(new SidAttributes { Sid = compatibility.Sid, Attributes = 4 }, capabilityEntry, fDeleteOld: false);
             var capabilities = Allocate(Marshal.SizeOf<SecurityCapabilities>());
-            Marshal.StructureToPtr(new SecurityCapabilities { AppContainerSid = sid }, capabilities, fDeleteOld: false);
+            Marshal.StructureToPtr(new SecurityCapabilities { AppContainerSid = sid, Capabilities = capabilityEntry, Count = 1 }, capabilities, fDeleteOld: false);
             Add(0x20009, capabilities, checked((nuint)Marshal.SizeOf<SecurityCapabilities>()));
             var handles = Allocate(pipes.Length * nint.Size);
             Marshal.Copy(pipes, 0, handles, pipes.Length);
@@ -81,7 +85,6 @@ internal sealed class WindowsImageStartup : IDisposable
         var values = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["DOTNET_EnableDiagnostics"] = "0",
-            ["DOTNET_GCHeapHardLimit"] = "8000000",
             ["SystemRoot"] = Environment.GetFolderPath(Environment.SpecialFolder.Windows),
             ["WINDIR"] = Environment.GetFolderPath(Environment.SpecialFolder.Windows),
             ["LOCALAPPDATA"] = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -116,6 +119,8 @@ internal sealed class WindowsImageStartup : IDisposable
         }
         foreach (var allocation in allocations) Marshal.FreeHGlobal(allocation);
         allocations.Clear();
+        compatibility?.Dispose();
+        compatibility = null;
         GC.SuppressFinalize(this);
     }
 
@@ -126,6 +131,13 @@ internal sealed class WindowsImageStartup : IDisposable
         public nint Capabilities;
         public uint Count;
         public uint Reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SidAttributes
+    {
+        public nint Sid;
+        public uint Attributes;
     }
 
     [StructLayout(LayoutKind.Sequential)]
