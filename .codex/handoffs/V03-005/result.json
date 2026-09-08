@@ -49,6 +49,18 @@
     ".codex/handoffs/V03-006/windows-image-lifecycle/profile-delete-idempotence.json",
     ".codex/handoffs/V03-006/windows-image-lifecycle/session-latest.json",
     ".codex/handoffs/V03-006/windows-image-lifecycle/tests.json",
+    ".codex/handoffs/V03-006/windows-native-matrix.md",
+    ".codex/handoffs/V03-006/windows-native/CrashParent.cs.txt",
+    ".codex/handoffs/V03-006/windows-native/CrashParent.csproj.txt",
+    ".codex/handoffs/V03-006/windows-native/NativeCMakeLists.txt",
+    ".codex/handoffs/V03-006/windows-native/NativeProbe.cpp.txt",
+    ".codex/handoffs/V03-006/windows-native/NetworkControl.cs.txt",
+    ".codex/handoffs/V03-006/windows-native/NetworkControl.csproj.txt",
+    ".codex/handoffs/V03-006/windows-native/NormalStartup.cs.txt",
+    ".codex/handoffs/V03-006/windows-native/evidence.json",
+    ".codex/handoffs/V03-006/windows-native/explorer-disconnected-again.json",
+    ".codex/handoffs/V03-006/windows-native/lan-confirmed-controls.json",
+    ".codex/handoffs/V03-006/windows-native/lan-first-positive-failed.json",
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/decoder-dependencies.json",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -320,7 +332,8 @@
       "Contract generator --check and architecture checks passed at freeze38aedca",
       "Merged repository verification passed: handoffs/module architecture/contracts/source/SDK/theme/dependencies,21 migration and14 architecture regressions;Alpha remains blocked",
       "Exact f580b15 source boundary linked into shared solution/CI: Linux locked restore/format/Release and9 tests passed, including actual leaf symlink denial with no skip; no decoder/NAS conclusion",
-      "Final Windows identity/native-test integration: affected format/Release zero warnings; root positive-timestamp/live-SID regression1/1; repository architecture/contracts/source gates passed. See tests.md for distinct native and LAN evidence limits."
+      "Final Windows identity/native-test integration: affected format/Release zero warnings; root positive-timestamp/live-SID regression1/1; repository architecture/contracts/source gates passed. See tests.md for distinct native and LAN evidence limits.",
+      "Windows final fe9530c evidence archive integrated and its 10 normalized snapshot digests independently verified; native12/12 and LAN6 scoped results retain original failures and limits."
     ],
     "technical_debt": [
       "Complete native Explorer/IPC and current Windows controls with a usable desktop.",
