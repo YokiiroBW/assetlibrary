@@ -10,14 +10,15 @@ public sealed class DatabaseReadinessTests
     [TestMethod]
     public void EmbeddedManifestMatchesCurrentProductionContract()
     {
+        const int approvedLatestVersion = 21;
         var contract = DatabaseMigrationContract.LoadCurrent();
 
         Assert.AreEqual(16, contract.PostgreSqlMajor);
         Assert.AreEqual("assetlibrary_database_auditor", contract.AuditorRole);
-        Assert.AreEqual(18, contract.LatestVersion);
-        Assert.HasCount(18, contract.Migrations);
+        Assert.AreEqual(approvedLatestVersion, contract.LatestVersion);
+        Assert.HasCount(approvedLatestVersion, contract.Migrations);
         CollectionAssert.AreEqual(
-            Enumerable.Range(1, 18).ToArray(),
+            Enumerable.Range(1, approvedLatestVersion).ToArray(),
             contract.Migrations.Select(migration => migration.Version).ToArray());
     }
 
