@@ -1,4 +1,4 @@
-# V03-007 图片派生预览提案（等待主协调冻结）
+# V03-007 图片派生预览提案（wire方向已批，待文件冻结与依赖/隔离准入）
 
 2026-09-08。工作区 `C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary`，分支 `codex/v03-007-image-preview-server`，基线 `70ce45c743ba6d026e695c118d1927d291b37918`。本文是提案，不是已交付能力或解除门禁的证据。
 
@@ -6,13 +6,14 @@
 
 `GET /assetlink/v1/libraries/{library_id}/entries/{entry_id}/image?variant=thumbnail|preview`。两个 ID 必须为非空 UUID，variant 必填且仅固定枚举；拒绝额外参数、重复参数和客户端路径。沿用既有 HTTPS、Cookie、Host/Origin/Fetch-Metadata 信任检查，无 CORS、无查询串凭据。GET 不引入新的 CSRF 协议。
 
-- `thumbnail`：最长边 256px；`preview`：最长边 1600px。保持比例，不放大，无裁剪。
+- `thumbnail`：最长边 512px；`preview`：最长边 1600px。保持比例，不放大，无裁剪。此处已按主协调2026-09-08消息裁决更新，尚待唯一合同提交。
 - JPEG、PNG、WebP，通过真实字节签名和解码器识别双校验；仅静态单帧。动图/APNG/动画 WebP 明确 415，不将首帧冒充动画支持。SVG、HTML、PDF、文本和其他格式保持 L0；文本/PDF 属于下一阶段。
 - 输出统一 `image/png`，透明保留，EXIF 方向归一化，转换为 sRGB 显示代理并剥离源 EXIF/GPS/ICC 文本。不是原文件流，也不是 CSS 缩小原图。
-- 源上限 32 MiB、解码像素上限 40,000,000、每边上限 16,384；派生 PNG 上限 thumbnail 512 KiB、preview 12 MiB。安全上限属于服务端实现合同，客户端只按明确错误显示降级。
+- 源上限 32 MiB、解码像素上限 40,000,000、每边上限 16,384；派生 PNG 上限 thumbnail 2 MiB、preview 12 MiB，固定8bit。安全上限属于服务端实现合同，客户端只按明确错误显示降级。
 - 200 为完整有界派生字节，已知 Content-Length；`Cache-Control: private, no-store`、`X-Content-Type-Options: nosniff`、`Cross-Origin-Resource-Policy: same-origin`。首版不返回 ETag/304/Range/重定向/源 hash，避免跨身份缓存语义。不得把资源挂到公开静态目录。
-- 错误为既有认证风格 `{code,message}`：400 `invalid_request`，401 沿用，403 信任边界沿用，404 `entry_not_found`（缺失/不可见一致），409 `source_changed`，415 `preview_unsupported`，422 `preview_invalid`/`preview_limit_exceeded`，429 `preview_busy` + Retry-After:1，503 `preview_unavailable`，504 `preview_timeout`。失败绝不返回原图或旧缓存。
+- 错误为既有认证风格 `{code,message}`：400 `invalid_request`，401 沿用，403 信任边界沿用，404 `not_found`（缺失/不可见一致），409 `source_changed`，415 `preview_unsupported`，422 `preview_invalid`/`preview_limit_exceeded`，429 `preview_busy` + Retry-After:1，503 `preview_unavailable`，504 `preview_timeout`。失败绝不返回原图或旧缓存。
 - 按需同步请求，无 202/no polling，不挂 durable queue，不全库预生成。客户端只请求当前可见图片和当前详情；离开/身份变化取消，结果代际校验，退出/撤权回收 object URL/bitmap。Web CSP 需准许 `img-src blob:`，由协调集成；跨账号不共享客户端缓存。
+- 主协调已批准图片端点服务端总期限15秒、客户端20秒（含429最多2次重试）；客户端并发至多2。既有JSON仍5秒。仅精确图片路由使用新预算，不扩大其他认证/控制请求期限。
 
 ## 2. 复用与模块职责
 
@@ -47,11 +48,11 @@ SkiaSharp 是 MIT；需随发行保留 Skia 与捆绑 libjpeg/libpng/libwebp 等
 
 已验证源码事实：`ReadOnlyWorkerProcess` 仅清理环境、限制诊断/协议、超时 kill tree；`WindowsWorkerJob` 仅 KILL_ON_JOB_CLOSE。现有模式没有 CPU/内存硬限制，也没有文件/网络沙箱。复用其进程生命周期思路不能等同于已有安全解码运行时。
 
-建议解码使用**独立 .NET 可执行程序集**，不引用 Host/Core/Npgsql，不加载配置/密钥/连接；核心传递有界字节。Windows 在传输入前加入 Job，内存上限 512 MiB、进程数1、CPU时间3秒、墙钟3秒、父退出kill；Linux 在解析前 setrlimit CPU/输出/内存（须按.NET实际虚拟地址预留验证，不能错误地将低RLIMIT_AS当RSS），配合 cgroup memory.max / pids.max 的真实边界。请求总期限须小于现有认证 middleware 的5秒，并为二次授权/响应留出预算。
+建议解码使用**独立 .NET 可执行程序集**，不引用 Host/Core/Npgsql，不加载配置/密钥/连接；核心传递有界字节。Windows 在传输入前加入 Job，内存上限 512 MiB、进程数1、CPU时间3秒、解码墙钟8秒、父退出kill；Linux 在解析前 setrlimit CPU/输出/内存（须按.NET实际虚拟地址预留验证，不能错误地将低RLIMIT_AS当RSS）。受控NAS缺少CFS/PID cgroup硬限，实际约束方案及证据见 [isolation-plan.md](isolation-plan.md)。请求总期限按主协调批准的15秒，并为二次授权/响应留出预算。
 
 完整文件/网络隔离需额外真实证据：Windows 无网络 capability 的 AppContainer/受限目录授予；Linux 单独 mount/network namespace（如受支持的 bubblewrap/systemd/容器 profile），只读映射精确运行时与程序、仅当前副本，**不映射资产根、Host状态和数据库网络**。同uid子进程、清空环境、RestrictedToken/Job本身都不足以保证读不到Host密钥文件或发不出网络请求。
 
-内置受信 Worker 意味着精确固定代码、固定三种格式与无插件装载/manifest/side-loading；不意味输入可信，也不意味着绕过隔离。第三方 Provider 的 M0-007-G1/G2/G3 不改、不关闭。若本轮环境不能证明上述硬隔离，则端点/流水线可实现并在合成fixture验证，但生产解码必须 fail-closed 返回503，交接明确 partial。需要协调裁决该启用条件及新独立 Worker 的目录/接线所有权。
+内置受信 Worker 意味着精确固定代码、固定三种格式与无插件装载/manifest/side-loading；不意味输入可信，也不意味着绕过隔离。第三方 Provider 的 M0-008-G1/G2/G3 不改、不关闭。若本轮环境不能证明上述硬隔离，则端点/流水线可实现并在合成fixture验证，但生产解码必须 fail-closed 返回503，交接明确 partial。需要协调裁决该启用条件及新独立 Worker 的目录/接线所有权。
 
 ## 6. 请求批准的跨界文件
 
