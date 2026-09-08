@@ -14,9 +14,9 @@
 
 ## 当前工作和边界
 
-V03-007继续实现真实受限decoder、稳定读取broker与Host端点。Windows NativeAOT编译已取得首证据，但LPAC/Job/零capability、Linux NativeAOT/TSYNC/RLIMIT和实际攻击/资源探针仍需验证。root在现有dev-230开发机准备自有临时Linux编译环境，复用已核实10.0.111缓存；没有在NAS210生产内安装工具或部署。开发机内核6.14的结果不能代替NAS5.10.55。
+V03-007专注Core有界源broker、缓存/lease与精确HTTP接口，本地真实Core/PG的权限/禁用语义已取得阶段证据，待稳定提交。Windows隔离收尾已按57d1578/ca1d235精确转交V03-006单写，保留原Explorer目标。Linux默认worker40d2d69已在开发机完成10图片+4隔离/资源+1父退出共15实际场景，完整notices/锁/产物hash可追溯；没有GC环境覆盖或Docker外层替代。此前Console fd、VM超限与内存配置失败/修正完整记录在linux-decoder-progress/default.json。开发机内核6.14不能代替NAS5.10.55。
 
-Web窗口继续准备独立真实Core浏览器runner，Android的真实Core图片仪器用例已编译等待同一私密连接文件；自有模拟器保持关闭、无转发残留。待decoder隔离成立后，root启动同一真实服务供消费者验收，最后核验源hash/mtime、进程/端口/账号/私密临时目录完整清理。
+Web独立真实Core浏览器runner及7项输入检查已准备并集成；Android真实Core图片仪器用例已编译，二者等待同一私密连接文件，未执行不记通过。自有模拟器关闭、无转发残留。root已备好仅复用缓存的Linux Core工具镜像（Python3.13.15/.NET10.0.111/PG16.15）和核hash的Web dist。Core接线提交后在独立临时源码启动真实服务，保持localhost身份供两端共用，最终核验源hash/mtime、进程/端口/账号/私密目录清理，不触碰NAS生产。
 
 Windows需要用户恢复原RDP Session2并保持解锁，之后仅在新鲜窗口所有权和实际观测基础上继续一次原生入口验证；不改系统策略、重启用户Explorer或用独立客户端替代。当前无Windows安装包。生产Shell和全部既有平台/Provider/写入/版本门禁保持开放，现有NAS和原Android包保留。
 
