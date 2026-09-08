@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "25a7bed",
+  "commit": "d18b2246858f8aa735ba46baa6c6c0d5c414b034",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -85,34 +85,41 @@
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageArtifact.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageOwnerJournal.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcessIdentity.cs",
-    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs"
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs",
+    "infra/docker/nas/Dockerfile",
+    "infra/docker/nas/compose.yaml",
+    "infra/docker/nas/README.md",
+    "scripts/build_nas_deployment.py",
+    "tests/release/test_nas_image_preview_package.py",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs"
   ],
   "changed_contracts": [
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 132,
+    "passed": 141,
     "failed": 0,
-    "skipped": 1,
+    "skipped": 3,
     "report": "tests.md"
   },
   "risks": [
     "Windows lifecycle helpers and StartAsync are integrated and tested; the separate native fault/resource/COM boundary matrix remains owned by V03-006.",
     "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance.",
-    "Existing native/Docker/trial release scripts omit the independent Worker and its enablement; root packaging integration remains required."
+    "NAS Worker packaging is implemented but actual same-commit Docker/target-kernel evidence remains with root; generic Docker/native/Windows trial packaging gaps remain explicitly open."
   ],
   "blocked_by": [
     "V03-006 remaining Windows native fault/resource/COM boundary evidence.",
-    "Coordinator-owned packaging and final unified acceptance."
+    "Coordinator same-commit NAS image build, target-platform evidence and final unified acceptance."
   ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V03-007/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
   "architecture_review": {
-    "module": "PreviewProvider, authorized GatewayAuth orchestration, private read-only worker infrastructure and independent image decoder",
+    "module": "PreviewProvider, authorized GatewayAuth orchestration, private read-only worker infrastructure and independent image decoder; bounded NAS image packaging adapter",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
-      "Existing canonical root and relative path value objects, read-only worker error, RepositorySandbox, SandboxDirectoryLink and MSTest pins."
+      "Existing canonical root and relative path value objects, read-only worker error, RepositorySandbox, SandboxDirectoryLink and MSTest pins.",
+      "NAS build reuses existing clean Git snapshot, owned-output boundary, streaming SHA256, immutable image IDs, normal/RID lock separation and exact SDK; no second decoder runtime."
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -130,11 +137,12 @@
       "validate_architecture_baseline and validate_dotnet_source passed after Core implementation.",
       "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md.",
       "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests).",
-      "Windows source/link combination and StartAsync25a7bed: format passed, Core/Host/WebGateway Release zero warnings, related21/21 and realHTTPS2/2 passed with no skip and verified fixture cleanup."
+      "Windows source/link combination and StartAsync25a7bed: format passed, Core/Host/WebGateway Release zero warnings, related21/21 and realHTTPS2/2 passed with no skip and verified fixture cleanup.",
+      "NAS packaging: dedicated9 passed/2 POSIX platform gaps; affected release suite47 passed/0 failed/5 explicit platform/environment gaps. Actual Docker build stays pending root."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
-      "Windows native boundary matrix belongs to V03-006; root must integrate Worker into actual release artifacts; NAS and full V0.3 remain separately gated."
+      "Actual NAS image/target-kernel evidence remains with root; generic Docker/native/Windows trial worker packaging is still absent and outside the authorized NAS change."
     ]
   }
 }

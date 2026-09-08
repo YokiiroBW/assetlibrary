@@ -30,4 +30,8 @@ StartAsync组装、format/affected checks与实际HTTPS已验证；末阶段仍�
 
 Windows完整源组装后，本地format通过、Preview/Core/Host/WebGateway Release零告警；核心/授权/PNG/reaper/Windows生命周期及真实LPAC共21/21，HTTPS实际2/2、0skip。新fixture停止后CLEANUP verified。不同逻辑用例更新为132通过/0失败/1本机叶symlink缺证据，Windows新5生命周期及1直接AOT用例计入，其余重复运行不重复计数。
 
-只读发行检查发现现有NAS/通用Docker、原生及Windows trial只发布Host，既未打包独立Worker，也未设置其显式环境变量；现有包不能宣称已交付图片。最小受控方案、来源绑定和真实验证命令见packaging-review.md，交root裁决；本任务未修改根发行脚本或生产NAS。
+只读发行检查后，root通过f673a12精确授权NAS的5文件接线，已由d18b224实现。通用Docker/原生/Windows trial的独立Worker打包仍未修改。NAS同提交镜像构建和目标平台验收仍交root；本任务没有部署或启用生产NAS。最初检查及后续范围见packaging-review.md。
+
+NAS打包d18b224：现有server构建层单独发布linux-x64 AOT，使用已提交RID锁和同一SDK/source；仅构建层加入clang/zlib。运行镜像固定6个图片产物（exe、Skia、2声明、checksum、source revision），按0555/0444提供nonroot读/执行。Compose仅透传显式变量，默认空。打包工具创建从不启动的所属检查容器，提取并严格检查文件集合、commit/SHA/ELF/权限，finally删除检查容器；清单绑定image ID、commit、锁与文件hash，平台状态仍not_executed。新增打包组本机9过/2POSIX未执行，发行整组47过/0失败/5明确环境缺口。当前任务逻辑汇总141过/0失败/3本机平台缺证据；其他既有发行测试单独记录不重复累计。
+
+Windows owner的53bc455继承Modify目录兼容修复已合为39ce06d；其原始7/7结果由V03-006持有，不重复计入本任务本地总数。

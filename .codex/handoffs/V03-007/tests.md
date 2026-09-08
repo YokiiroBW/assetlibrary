@@ -68,3 +68,13 @@ Host与WebGateway fixture均重新Release构建0警告0错误，避免no-build f
 打包只读检查见packaging-review.md：现有发行尚不包括Worker，未运行新的发行构建或NAS部署。Windows完整资源/故障/COM边界仍由V03-006继续，不以这些生命周期测试替代。
 
 最终源组装与交接更新后verify_repository再次通过：424份C#源码、21迁移与14架构测试；Alpha有效性审计继续blocked。后续仅追加此执行事实与任务检查点，无运行代码变更。
+
+## NAS实际打包接线的本地回归（d18b224）
+
+按f673a12限定5文件修改；最终diff保持通用Docker、原生发行、中央依赖、NAS资源/安全边界与门禁未动。新增专属测试用真实临时文件验证：缺少任一产物/声明/完整性文件、额外DLL/符号、revision错、任一payload的SHA漂移、已重算SHA但错误PE/ARM64/32bit ELF、空声明、重复/路径逃逸/漏项/超限checksum；mock只用于Docker适配边界，验证不启动检查容器且拒绝坏包仍删除该所属容器。合成ELF仅验证打包拒绝逻辑，不是执行/隔离证据。
+
+精确命令`python -I -B -m unittest discover -s tests/release -p test_nas_image_preview_package.py -v`：11项9过/0失败/2POSIX缺本机平台。随后`ASSETLIBRARY_TEST_DOTNET=<exact10.0.111>`，`python -I -B -m unittest discover -s tests/release -p test_*.py -v`：52项47过/0失败/5未执行，12.318秒；其中2项同POSIX权限，另3项为原有native试用包/PG环境变量未设置。既有Host过程smoke按其真实固定dotnet运行通过。
+
+本机无Docker CLI，未伪称Compose解析、Docker构建或NAS目标内核已过；root收到d18b224精确SHA后负责Linux11项和同提交镜像/平台验收。任务当前计入新增9个逻辑用例，总141过/0失败/3本机平台缺证据；已有整发行suite单独报告不与旧逻辑汇总相加。
+
+NAS代码、Windows39ce06d及交接组合后verify_repository通过：425份C#、21迁移、14架构；发布审计仍blocked。此后仅追加本执行事实。
