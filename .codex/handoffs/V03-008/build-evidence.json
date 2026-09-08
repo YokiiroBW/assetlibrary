@@ -1,6 +1,6 @@
 {
   "task_id": "V03-008",
-  "source_commit": "d9443009853e4ad057037efcfa700dc1c5ad68a4",
+  "source_commit": "77271e05c176d9b461f0baf71951dd800b63703c",
   "shared_contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
   "node": "24.20.0",
   "pnpm": "11.19.0",
@@ -8,16 +8,16 @@
   "web_source_boundary": "passed",
   "browser_unique_tests": {
     "existing": 43,
-    "new_image": 22,
-    "passed": 65,
+    "new_image": 23,
+    "passed": 66,
     "failed": 0,
     "skipped": 0
   },
   "artifacts": [
     {
-      "path": "apps/web/dist/assets/index-JlKwn-yq.js",
-      "bytes": 302081,
-      "sha256": "f7284e168ac0dcbe59db7e5d95a654e7be37227f7200b61799aa91045ecbd708"
+      "path": "apps/web/dist/assets/index-BzqEMFMC.js",
+      "bytes": 302093,
+      "sha256": "b248f3ac02a29f82a795bf4716ca5604f67c5e556089cf2bc08810ce192866ea"
     },
     {
       "path": "apps/web/dist/assets/index-YNHjwimt.css",
@@ -25,7 +25,7 @@
       "sha256": "c4b01b9d4517d1e554e5508b0764981a6fe45d30cf622f5fdf195c52a4bdf4a1"
     }
   ],
-  "bundle_budget_gate": "passed after coordinator 23ad33d5618eb825e60cd941a07962c3ba8b19e1; passed again for d944300 build",
+  "bundle_budget_gate": "passed for 77271e0 keyboard-focus correction; coordinator 23ad33d policy retained",
   "real_core_integration": "pending_coordinator",
   "nas_deployment": "not_performed",
   "personal_asset_access": "not_performed",
