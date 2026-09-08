@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -15,6 +16,55 @@ SPEC.loader.exec_module(SERVE)
 
 
 class NativeClientRunnerTests(unittest.TestCase):
+    def write_image_manifest(self, source, relative="tiny.png", content=b"synthetic", **overrides):
+        manifest = {"kind": "synthetic_preview_integration_inputs", "files": [
+            {"path": relative, "bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}]}
+        manifest.update(overrides)
+        (source / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    def test_images_are_explicit_bounded_verified_copies(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, runtime = root / "corpus", root / "runtime"
+            source.mkdir()
+            runtime.mkdir()
+            original = source / "tiny.png"
+            original.write_bytes(b"synthetic")
+            stamp = original.stat().st_mtime_ns
+            self.write_image_manifest(source)
+            copied = SERVE.stage_image_fixtures(source, runtime)
+            self.assertEqual((copied / "tiny.png").read_bytes(), original.read_bytes())
+            self.assertEqual(original.stat().st_mtime_ns, stamp)
+            self.assertFalse((copied / "manifest.json").exists())
+
+    def test_image_manifest_cannot_copy_outside_paths_or_unknown_corpora(self):
+        for relative in ("../escape.png", "/absolute.png", "C:/private.png", "folder\\private.png"):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                source, runtime = root / "corpus", root / "runtime"
+                source.mkdir()
+                runtime.mkdir()
+                self.write_image_manifest(source, relative=relative)
+                with self.assertRaises(ValueError):
+                    SERVE.stage_image_fixtures(source, runtime)
+                self.assertFalse((root / "escape.png").exists())
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.write_image_manifest(root, kind="ordinary_personal_folder")
+            with self.assertRaisesRegex(ValueError, "synthetic"):
+                SERVE.stage_image_fixtures(root, root)
+
+    def test_changed_fixture_is_not_silently_used(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source, runtime = root / "corpus", root / "runtime"
+            source.mkdir()
+            runtime.mkdir()
+            (source / "tiny.png").write_bytes(b"different")
+            self.write_image_manifest(source)
+            with self.assertRaisesRegex(ValueError, "changed"):
+                SERVE.stage_image_fixtures(source, runtime)
+
     def test_lifetime_cannot_be_unbounded(self):
         self.assertEqual(SERVE.lifetime("7200"), 7200)
         for value in ("0", "-1", "7201"):

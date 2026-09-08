@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import hashlib
 from datetime import datetime, timezone
 import importlib.util
 import json
@@ -37,6 +38,8 @@ def arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--web-root", required=True, type=Path)
     parser.add_argument("--lifetime-seconds", type=lifetime, default=MAXIMUM_SECONDS)
     parser.add_argument("--evidence", type=Path, default=ROOT / ".runtime/native-clients-evidence")
+    parser.add_argument("--image-fixtures", type=Path, help="Explicit synthetic preview corpus with its generated manifest")
+    parser.add_argument("--image-preview-worker", type=Path, help="Explicit published isolated decoder; no fixture bypass")
     return parser.parse_args(argv)
 
 
@@ -48,6 +51,58 @@ def existing_runner():
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def stage_image_fixtures(source: Path, runtime: Path) -> Path:
+    if source.is_symlink() or source.is_junction():
+        raise ValueError("synthetic image corpus root must not be a link")
+    source = source.resolve(strict=True)
+    manifest_path = source / "manifest.json"
+    if manifest_path.is_symlink() or manifest_path.stat().st_size > 131072:
+        raise ValueError("synthetic image manifest is invalid or exceeds its bound")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entries = manifest.get("files", [])
+    if manifest.get("kind") != "synthetic_preview_integration_inputs" or not isinstance(entries, list) or not 1 <= len(entries) <= 32:
+        raise ValueError("only an explicit bounded synthetic preview corpus may be staged")
+    destination = runtime / "native-image-fixtures"
+    destination.mkdir(exist_ok=False)
+    total = 0
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError("synthetic image manifest entries must be objects")
+        relative = entry.get("path", "")
+        if not isinstance(relative, str) or len(relative) > 512:
+            raise ValueError("synthetic image path is invalid")
+        parts = relative.split("/")
+        if not relative or "\\" in relative or ":" in relative or any(part in ("", ".", "..") for part in parts) or len(parts) > 16:
+            raise ValueError("synthetic image path escaped its declared corpus")
+        if relative.casefold() in seen:
+            raise ValueError("synthetic image paths collide")
+        seen.add(relative.casefold())
+        original = source.joinpath(*parts)
+        part = original
+        while part != source:
+            if part.is_symlink() or part.is_junction():
+                raise ValueError("synthetic image corpus must not contain links")
+            part = part.parent
+        if not original.is_file() or not original.resolve().is_relative_to(source) or not 0 < original.stat().st_size <= 33554432:
+            raise ValueError("synthetic image input is missing, nonregular or too large")
+        target = destination.joinpath(*parts)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        count = 0
+        digest = hashlib.sha256()
+        with original.open("rb") as incoming, target.open("xb") as outgoing:
+            while chunk := incoming.read(65536):
+                count += len(chunk)
+                total += len(chunk)
+                if count > 33554432 or total > 67108864:
+                    raise ValueError("synthetic image copy exceeded its bound")
+                digest.update(chunk)
+                outgoing.write(chunk)
+        if count != entry.get("bytes") or digest.hexdigest() != entry.get("sha256"):
+            raise ValueError("synthetic image changed since its generated manifest")
+    return destination
 
 
 def process_exists(identifier: int) -> bool:
@@ -117,6 +172,16 @@ def run_host(options, evidence: Path, runtime: Path, settings: dict) -> dict:
         "ASSETLIBRARY_NATIVE_CLIENT_SECONDS": str(options.lifetime_seconds),
         "DOTNET_GENERATE_ASPNET_CERTIFICATE": "false", "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
     })
+    environment.pop("ASSETLIBRARY_NATIVE_IMAGE_FIXTURES", None)
+    environment.pop("ASSETLIBRARY_IMAGE_PREVIEW_WORKER", None)
+    if options.image_fixtures is not None:
+        staged = stage_image_fixtures(options.image_fixtures, runtime)
+        environment["ASSETLIBRARY_NATIVE_IMAGE_FIXTURES"] = str(staged)
+    if options.image_preview_worker is not None:
+        worker = options.image_preview_worker
+        if not worker.is_absolute() or not worker.is_file():
+            raise ValueError("the explicit image decoder must be an existing absolute executable")
+        environment["ASSETLIBRARY_IMAGE_PREVIEW_WORKER"] = str(worker.resolve())
     command = [str(options.dotnet), "test",
                str(ROOT / "tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj"),
                "--configuration", "Release", "--no-build", "--no-restore",
