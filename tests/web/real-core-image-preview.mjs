@@ -86,6 +86,10 @@ try {
       receipt.tls = "exact_leaf_sha256_localhost_validity_verified_before_credentials";
       await checkpoint("launch_browser");
       browser = await chromium.launch({ headless: true, args: [`--ignore-certificate-errors-spki-list=${spki}`] });
+      if (timedOut) {
+        await browser.close();
+        throw new Error("bounded_run_deadline");
+      }
       clearTimeout(deadline);
       deadline = setTimeout(
         () => {
@@ -397,6 +401,7 @@ try {
 }
 
 async function checkpoint(next) {
+  assert.ok(!timedOut, "bounded run deadline reached before the next phase");
   stage = next;
   const progress = { status: "running", stage, completed_cases: receipt.cases.length };
   if (evidence) await writeFile(join(evidence, "progress.json"), JSON.stringify(progress, null, 2));

@@ -59,3 +59,11 @@ PNG是Node标准库生成的有限RGBA合成渐变/透明数据，图片内容�
 真实CLI须等root报告同一fixture READY后用私密connection文件执行。凭据不进命令/输出/trace，失败只报固定阶段。PNG与HTML/JS/CSS全部从真实HTTPS Host读取，不拦截/替换route；产物hash与审查build-evidence核对。普通无权限账号拒权不直写DB；同账号动态撤权和原件/进程/DB清理由root控制。此阶段总计新增4项工具检查，消费者65项证据保持，真实运行尚无通过或失败记录。
 
 root审查后的发现断言修正：确认0020 search_read_entries_v2没有文件kind过滤，查询会返回物理目录；脚本现先校验所有hit的library/entry关联、UUID、kind与wire name，再仅筛kind=file及精确`图片样例/`前缀，断言10个预期文件唯一齐全，不通过Map吞重复。确认`services/core-server/Adapters/AssetLink/AssetLinkReadJson.cs:96`直接写出wire `name`，前端decodeEntry只是读取而非生成，故继续使用经校验的真实名称。增加目录/相似前缀正例、过滤前跨库拒绝、缺项/重复ID/重复路径/非文件/无名或假名负例；Node输入套件现7/7通过、0skip（125.0ms），两个runner模块语法和diff检查通过。没有修改产品搜索/后端、没有重跑65项自测或启动真实服务。总计为65个既有浏览器通过加7个工具输入通过，仍无真实Core图片成功声明。
+
+## 真实连接首轮环境中断
+
+root提供Linux Core源码874fb6a、worker40d2d69、localhost44147转发与私密连接后，执行已提交CLI到本任务`.runtime/real-core-preview/linux-live-874fb6a`。执行会话随后变为Unknown process，目录为空且没有最终receipt/截图；本机核查无该runner Node或指定SPKI的Chrome残留。**无证据首轮不计产品通过或明确产品失败。** root随后独立确认SSH转发会话也丢失、执行helper故障，与其他窗口运行态消失有同时性，但未断言具体根因。
+
+runner099d579补齐固定阶段progress.json/stdout、git子进程5秒期限、整体Promise.race期限和浏览器10秒关闭确认，避免仅关闭浏览器却不能结束未知await；后续阶段也检查总截止。语法/格式通过。暂停消息到达前的诊断复验输出`linux-live-874fb6a-recheck/web-real-image.json`：读连接/公共输入和provenance完成，**verify_tls_identity失败**，cases和screenshots均空，浏览器尚未启动且未发送登录凭据。这是转发不可用时的前置失败，不是图片功能失败；未修改生产客户端、TLS断言或共享数据，未stop服务。
+
+收到root暂停要求后停止所有真实重试，等待其恢复转发并再次READY。没有重跑65项mock或7项未变工具输入测试。connection未复制/打印，私密文件由root统一清理。

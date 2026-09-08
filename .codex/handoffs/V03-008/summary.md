@@ -32,4 +32,6 @@
 
 发现逻辑已按root审查收敛：接受搜索里的物理目录，先校验每条hit的库/entry关联，再挑选10个精确路径普通文件并拒绝重复/缺失；确认name为实际wire字段而非UI派生。新增3个发现边界用例后，工具输入检查为7/7通过；产品65项证据不变。后续manifest使用root f1e0dd9内固定的`tests/integration/native-clients/fixtures/image-preview-v1/manifest.json`。
 
+真实首轮遇到执行会话/转发丢失，未留下receipt；补阶段记录与硬截止后的诊断复验在TLS前置检查处失败，没有启动浏览器或发送凭据。root已确认原SSH转发消失并要求暂停，当前等待恢复后的新READY；不将这两次计为真实图片通过或产品功能失败。详见tests.md。
+
 先合root38aedca与23ad33d，准备文档238c61c可合，再合本实现4e633e8、拒权补充d944300及最终交接提交。不要重复合3f3cfba/f6fecae（对应同一协调基线）。由主协调统一真实Core/PG/HTTPS与跨端合成资产验收、包来源和部署。Provider、文件写入、Explorer、完整Alpha/V0.3门禁均保持独立。
