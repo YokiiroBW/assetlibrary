@@ -13,6 +13,7 @@ dotnet restore tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGatewa
 dotnet build tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj --configuration Release --no-restore
 python -I -B -m unittest discover -s tests/integration/native-clients -p test_serve.py -v
 dotnet test tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj --configuration Release --no-build --no-restore --filter FullyQualifiedName~NativeClientTlsFixtureTests
+dotnet test tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj --configuration Release --no-build --no-restore --filter FullyQualifiedName~NativeClientImageFixtureTests
 ```
 
 提供可启动的 PostgreSQL 16.15 `bin` 目录与真实 Web `dist`。Web 只是生产 Host 所需静态目录，此入口不重新验证 Web。Linux 在能运行 initdb 的非 root 账号下执行；不支持外部/生产 PostgreSQL。
@@ -40,6 +41,21 @@ adb -s <device-id> reverse tcp:<port> tcp:<port>
 CI 可将 `--lifetime-seconds` 设为 2 验证截止与清理；交互运行用明确 stop 文件覆盖另一条路径。最终验收必须等 `NATIVE_CLIENT_CLEANUP verified`，不能只因 READY 就算通过。
 
 本入口只证明真实服务器及隔离生命周期，原生客户端的真实请求、错误处理、UI、TLS 拒绝、模拟器/设备证据由对应任务分别记录。临时 PostgreSQL 沿用已有 fixture 的 fsync 等测试优化，不作为断电耐久、50 万资产性能或真实 NAS 证据。
+
+## 图片预览联合验收
+
+V03-005 提供两个显式可选参数，默认行为和原138文件样例保持不变：
+
+```text
+--image-fixtures <synthetic-preview-corpus>
+--image-preview-worker <absolute-published-worker-executable>
+```
+
+图片目录必须带 `kind=synthetic_preview_integration_inputs` 的生成manifest，最多32个文件，逐文件长度/强hash验证后才复制到本次私密runtime。图片进入同一个被扫描库的 `图片样例/` 目录，客户端可通过既有搜索得到稳定UUID，不需要改变认证连接JSON。不得将个人素材目录作为此参数。默认清除从外部继承的图片模式环境变量，只有显式参数才启用。
+
+worker参数只传给真实Host的 `ASSETLIBRARY_IMAGE_PREVIEW_WORKER`，必须是已发布、已验证的独立decoder，仍走生产相同的隔离/ready检查；没有fixture bypass或假服务注入。没有设置worker或隔离不成立时，图片端点应返回契约503，而不能算真实图片验收通过。
+
+合成图片的原hash/mtime继续参加既有结束核验；任何图片模式运行仍须等待Host、数据库/角色、私密临时目录与监听器完整清理。生成样例、启动服务与UI fixture通过都不能替代真实派生内容验收。
 
 ## 必测客户端边界
 

@@ -17,7 +17,8 @@ public sealed class NativeClientIntegrationServerTests
         var duration = int.Parse(Environment.GetEnvironmentVariable("ASSETLIBRARY_NATIVE_CLIENT_SECONDS") ?? "7200", CultureInfo.InvariantCulture);
         Assert.IsTrue(duration is >= 1 and <= 7200, "The native server must have a bounded lifetime.");
         var settings = TrialHostIntegrationSettings.Load();
-        var assets = new NativeClientSampleAssets(settings.RuntimeRoot);
+        var assets = new NativeClientSampleAssets(settings.RuntimeRoot,
+            Environment.GetEnvironmentVariable("ASSETLIBRARY_NATIVE_IMAGE_FIXTURES"));
         string stopReason;
         await using (var host = await TrialHostIntegrationFixture.CreateAsync(settings, TimeSpan.FromSeconds(duration).Add(TimeSpan.FromMinutes(5))))
         {
