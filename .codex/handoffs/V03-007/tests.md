@@ -100,3 +100,11 @@ c5495f7308903aabe2a356ca496c777f5b9287b0新增tests/integration/native-clients/v
 root审查后增量c5ffb03：create失败/超时或正常返回却无cid/标签记录时，不再清creation_unconfirmed；cleanup_verified继续false。仅发现并核验已记录ID，或最终确认该ID被移除且不再存在后，才清此标志。三个适配边界自检（失败、超时、正常返回，均无ID）全部拒绝、保持unconfirmed并确认未发rm；Python3.8语法/diff通过。成功主组输入未变，未重复运行。
 
 Windows owner后续5bce4cdf7f2d4919cbe02cdd9c883fbeff91f1e4已独立审查合为bfc5fc1：journal拒绝负creation，保持既有canonical数字及合法Created0/Started正值；owner实际14/14，未冒充本机重跑。该组合本地Core Release/no-restore构建0警告0错误。此为Windows原有所有权源码，NAS harness和打包代码未改。
+
+## NAS首项实际未就绪与安全诊断增量
+
+root实际NAS首case image-0-0在0.605秒失败worker_not_ready，未parent timeout、未发送图片；实际Docker策略核验通过，cleanup verified、corpus unchanged且所属测试容器均已不存在。这是目标平台真实失败，不能由开发Linux或镜像构建通过抵消；后续19项尚未执行，不算通过。
+
+808eb3a25d9e709c3ac2b1ed27ed8022158c8d27仅改harness诊断：先保存24-byte ready的六个整数再判断；stderr增量保存长度/hash/complete/超限标志，失败前仍有部分流摘要；启动失败关闭stdin不发原件，最多2秒等CLI退出、2秒观察有界stderr，并在清理前记录实际State.ExitCode/OOM/Running/开始结束时间。观察失败仅保存安全类型/代码，不输出原始未知字节、stack或body；成功case判断不改。
+
+自检用真实本机Python子进程模拟CLI：先发status7 header与synthetic stderr，随后确认stdin严格空，再退出1；六int、Exit1/OOMfalse和stderr长度/hash在清理前均保存，source未发送、无raw诊断落入JSON，子进程reap确认；另stderr越界只记录限额+1探测字节的长度/hash并拒绝。Python3.8语法/diff通过；未复跑未变化的主组。实际NAS诊断重跑与产品Linux.Enter定位由root进行。

@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "c5ffb03b7fcf7a0bda27afb84d1d174b67799a4d",
+  "commit": "808eb3a25d9e709c3ac2b1ed27ed8022158c8d27",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -100,14 +100,15 @@
   ],
   "tests": {
     "passed": 144,
-    "failed": 0,
+    "failed": 1,
     "skipped": 1,
     "report": "tests.md"
   },
   "risks": [
     "Windows lifecycle helpers and StartAsync are integrated and tested; the separate native fault/resource/COM boundary matrix remains owned by V03-006.",
     "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance.",
-    "NAS actual image packaging a12b0d1 is built_not_deployed; target-kernel harness and parent-death evidence remain with root; generic Docker/native/Windows trial packaging gaps remain explicitly open."
+    "NAS actual image packaging a12b0d1 is built_not_deployed; target-kernel harness and parent-death evidence remain with root; generic Docker/native/Windows trial packaging gaps remain explicitly open.",
+    "Target NAS first actual image-0-0 failed worker_not_ready at0.605s without parent timeout or sending image bytes; policy/corpus/cleanup passed, remaining19 cases not executed. Safe failure diagnostics808eb3a committed; root investigates Linux.Enter conditions."
   ],
   "blocked_by": [
     "V03-006 remaining Windows native fault/resource/COM boundary evidence.",
@@ -144,7 +145,8 @@
       "Root dev-230 clean checkpoint0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2: new NAS packaging11/11 passed,38ms,no skip; actual image builder started but not yet accepted.",
       "00b03b1 adds actual Docker restore/publish graph-parity regression: local NAS10 passed/2 POSIX unavailable; first real image NETSDK1112 failure remains recorded pending root rebuild.",
       "Root a12b0d1: Linux NAS12/12 and actual AOT/full image package passed, built_not_deployed. Test-only harness c5495f7 Python3.8 syntax, PNG/pipe negatives and real bounded subprocess/reap self-checks passed; actual NAS20 cases pending root.",
-      "Integrated Windows owner5bce4cd as bfc5fc1; owner14/14 identity cases reported, local Core Release build zero warnings; no NAS harness/package changes."
+      "Integrated Windows owner5bce4cd as bfc5fc1; owner14/14 identity cases reported, local Core Release build zero warnings; no NAS harness/package changes.",
+      "Actual target NAS first case failed readiness with verified cleanup/source integrity;808eb3a safe diagnostic path validated using a real synthetic CLI child, with zero stdin bytes and exit/stderr evidence retained before cleanup."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
