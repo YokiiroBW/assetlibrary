@@ -50,6 +50,8 @@ BOUNDARY_FILE_EXTENSIONS = KNOWN_SOURCE_EXTENSIONS | {
 IGNORED_DIRECTORY_NAMES = {
     ".git",
     ".runtime",
+    ".gradle",
+    ".kotlin",
     ".venv",
     "__pycache__",
     "bin",

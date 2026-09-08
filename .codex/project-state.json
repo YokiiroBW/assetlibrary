@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "v0_1_web_product_interaction_delivered_full_release_blocked",
-  "next_action": "Use the updated NAS Web at https://192.168.31.210:5443 and docs/releases/WEB_WORKSPACE.md. Homepage/category/library management, durable URL navigation, scoped queries, selection/details and scan management are delivered. Existing libraries default to general until explicitly classified. Preserve current snapshots; choose a subsequent frozen-roadmap milestone only from user direction. Content preview, incremental/general rescan, asset writes and full Alpha remain independently gated.",
+  "status": "v0_1_web_delivered_native_client_first_delivery_in_progress",
+  "next_action": "Implement and validate Android/Compose read-only app plus the actual native Explorer Windows entry under ADR-0017/0018. Resolve real HKCU custom namespace discovery before production Shell implementation; retain M0-002-G1..G4 and all existing Alpha/write gates. Preserve the NAS Web and assets.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_full_release_blocked",
   "notes": [
@@ -69,7 +69,19 @@
     "User approved NAS Docker plus first Web as the next milestone after retaining V01-015 Windows delivery. V01-021 coordinates, V01-022 owns Docker deployment and V01-023 owns necessary existing-Web alignment. User explicitly requests consolidated implementation and final acceptance, not per-edit testing or feature expansion.",
     "V01-021..023 delivered NAS Docker and first Web under ADR-0015. Real NAS browser registration/scan/browse/search, rejection, administrator recovery, restart persistence, RO boundaries and unchanged fixture hashes/mtime passed. The separate acceptance project containers/networks/four volumes were removed and absence verified; M0-004-G2 alone closed. Live Core/PostgreSQL are healthy with two user-approved roots registered without scanning. Temporary operator egress relay was stopped. Immutable package source 818d028 remains distinct from later evidence/documentation commits; V01-008 remains partial and full Alpha blocked.",
     "User identified that the delivered Web was only a minimum read-only workflow and requested Web completion first. V01-024 coordinates, V01-025 owns all Web implementation/tests, V01-026 owns required existing-read/query/library metadata adapters. Do not treat the old 40 green cases as product interaction acceptance; do not fabricate unfinished management capabilities or expand to asset writes/Provider/preview services.",
-    "V01-024..026 delivered Web product interactions under ADR-0016 with 21 migrations: explicit category/CAS, authorized details, complete-scope SQL sort/filter/anchor/search, URL/history and responsive selection/details. 43 Web cases and 42 backend/repository checks passed, including real HTTPS/PG/Chromium and 200157-row upgrade preservation. Actual NAS cold backup of all four owned volumes/configuration was verified; upgrade kept keys/accounts, both libraries and the existing 195792-entry completed picture snapshot, with Documents unscanned. Live desktop/mobile routing review passed with zero scan/management mutations. Package source61e6c0e uses this round actual747 server build and separately verified equivalent Linux Web; later commits only record evidence/docs. Full Alpha/write gates unchanged."
+    "V01-024..026 delivered Web product interactions under ADR-0016 with 21 migrations: explicit category/CAS, authorized details, complete-scope SQL sort/filter/anchor/search, URL/history and responsive selection/details. 43 Web cases and 42 backend/repository checks passed, including real HTTPS/PG/Chromium and 200157-row upgrade preservation. Actual NAS cold backup of all four owned volumes/configuration was verified; upgrade kept keys/accounts, both libraries and the existing 195792-entry completed picture snapshot, with Documents unscanned. Live desktop/mobile routing review passed with zero scan/management mutations. Package source61e6c0e uses this round actual747 server build and separately verified equivalent Linux Web; later commits only record evidence/docs. Full Alpha/write gates unchanged.",
+    "On 2026-09-08 the user explicitly requested Windows and Android first native clients following the visual and architecture documents. V03-001 coordinates shared semantics and platform evidence; V03-002 owns WinUI, V03-003 owns Compose phone/tablet, and V03-004 provides the existing real Core/PostgreSQL test fixture in bounded temporary storage. Single-origin in-memory Cookie/CSRF adaptation is approved by ADR-0017; implementation and verification are in progress, not a full V0.3 or Alpha release.",
+    "The user corrected the Windows requirement during V03-001: it must be embedded in native Explorer, not a separately opened application. ADR-0018 selects native DefView/IShellFolder2 plus out-of-process C# AssetHost for the first supported view. Real HKCU discovery, fault and stability evidence are required; independent COM/hidden browser probes do not close Explorer gates."
   ],
-  "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated"
+  "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
+  "active_work": {
+    "milestone": "V0.3 native read-only preview",
+    "tasks": [
+      "V03-001",
+      "V03-002",
+      "V03-003",
+      "V03-004"
+    ],
+    "windows_entry": "Native Explorer namespace with out-of-process AssetHost; ADR-0018 supersedes standalone launch as the user entry."
+  }
 }

@@ -9,6 +9,8 @@
 | TRANSFER-001 | 临时接收+分块+强校验 | V0.1 | 100GB断点传输 | confirmed |
 | TRASH-001 | 统一垃圾桶与恢复 | V0.1 | 冲突恢复/保留期 | confirmed |
 | SEARCH-001 | 名称/路径/元数据/全文搜索 | V0.1 | 50万数据P95 | confirmed |
+| CLIENT-001 | Windows原生Explorer资产库入口 | V0.3预备 | V03-002真实Shell视图/隔离与ADR0018 | in_progress |
+| CLIENT-002 | Android与平板原生只读浏览首版 | V0.3预备 | V03-003构建/协议/手机平板UI与ADR0017 | in_progress |
 | SYNC-001 | Windows单向备份/移动归档 | V0.3 | 断网/崩溃/改名 | confirmed |
 | SYNC-002 | Android相册与指定文件夹同步 | V0.3 | MediaStore/SAF/HyperOS实机 | confirmed |
 | SHELL-001 | Windows Explorer原生外壳与右侧视图 | V0.5 | 崩溃隔离/8小时稳定 | confirmed |

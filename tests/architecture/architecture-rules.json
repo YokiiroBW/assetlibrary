@@ -186,7 +186,8 @@
       "framework": "WinUI 3 / Windows App SDK 2 stable",
       "allowed_source_extensions": [".cs"],
       "activation_extensions": [".cs"],
-      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"]
+      "required_manifest_globs": ["*.sln", "*.slnx", "*.csproj", "**/*.csproj"],
+      "required_lockfile_globs": ["packages.lock.json", "**/packages.lock.json"]
     },
     {
       "root": "apps/windows-shell",

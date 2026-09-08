@@ -12,6 +12,8 @@ SOURCE_ROOTS = (
     "services/core-server",
     "services/worker-supervisor",
     "tests/dotnet",
+    "apps/windows-client",
+    "tests/windows-client",
 )
 IGNORED_DIRECTORIES = {"bin", "obj"}
 TOKEN_RE = re.compile(

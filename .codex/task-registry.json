@@ -659,7 +659,8 @@
       "depends_on": [
         "V01-024",
         "V03-002",
-        "V03-003"
+        "V03-003",
+        "V03-004"
       ],
       "owner": "architecture-coordinator",
       "branch": "codex/v03-001-native-client-first-delivery",
@@ -700,6 +701,22 @@
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-003",
       "task_file": ".codex/tasks/V03-003.md",
       "handoff": ".codex/handoffs/V03-003/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.3"
+    },
+    {
+      "id": "V03-004",
+      "title": "native-client-real-integration",
+      "module": "native-client-real-integration",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-024"
+      ],
+      "owner": "integration-test-owner",
+      "branch": "codex/v03-004-native-client-real-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-004",
+      "task_file": ".codex/tasks/V03-004.md",
+      "handoff": ".codex/handoffs/V03-004/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3"
     }

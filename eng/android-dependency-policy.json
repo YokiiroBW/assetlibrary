@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "scope": "Resolved APK runtime dependencies; build and test tools are separately pinned and verified by Gradle.",
+  "apk_size_budget_bytes": 134217728,
+  "license_names": {
+    "The Apache Software License, Version 2.0": "Apache-2.0",
+    "Apache-2.0": "Apache-2.0",
+    "Apache 2.0": "Apache-2.0",
+    "The Apache License, Version 2.0": "Apache-2.0",
+    "Apache License, Version 2.0": "Apache-2.0",
+    "Apache License v2.0": "Apache-2.0",
+    "Apache License V2.0": "Apache-2.0",
+    "BSD-3-Clause": "BSD-3-Clause",
+    "The MIT License": "MIT",
+    "MIT license": "MIT",
+    "MIT License": "MIT"
+  },
+  "security_update_sources": [
+    "https://developer.android.com/build/releases",
+    "https://developer.android.com/jetpack/androidx/releases/compose",
+    "https://github.com/JetBrains/kotlin/security/advisories",
+    "https://github.com/gradle/gradle/security/advisories",
+    "https://osv.dev/"
+  ],
+  "maintenance": "Review stable updates within the frozen Kotlin/AGP/Compose families; regenerate locks and verification from official repositories and rerun affected native gates.",
+  "platforms": "Android 11 and later; phone and tablet share one Compose application.",
+  "exit_strategy": "Remove Android UI dependencies with the app adapter; the generated AssetLink contracts and server data have no Android dependency."
+}
