@@ -47,9 +47,12 @@ internal static class WindowsImageOwnerJournal
         file.ReadExactly(bytes);
         var fields = Encoding.UTF8.GetString(bytes).Split('\n');
         if (fields.Length != 6 || fields[0] != Version || fields[1] != name || fields[5].Length != 0
-            || !int.TryParse(fields[2], NumberStyles.None, CultureInfo.InvariantCulture, out var phase) || phase is < 0 or > 4
-            || !uint.TryParse(fields[3], NumberStyles.None, CultureInfo.InvariantCulture, out var pid)
-            || !long.TryParse(fields[4], NumberStyles.None, CultureInfo.InvariantCulture, out var creation)
+            || !int.TryParse(fields[2], CultureInfo.InvariantCulture, out var phase) || phase is < 0 or > 4
+            || !uint.TryParse(fields[3], CultureInfo.InvariantCulture, out var pid)
+            || !long.TryParse(fields[4], CultureInfo.InvariantCulture, out var creation)
+            || fields[2] != phase.ToString(CultureInfo.InvariantCulture)
+            || fields[3] != pid.ToString(CultureInfo.InvariantCulture)
+            || fields[4] != creation.ToString(CultureInfo.InvariantCulture)
             || (phase == (int)WindowsImageOwnerPhase.Started && (pid == 0 || creation == 0)))
             throw new ReadOnlyWorkerException("preview_owner_record_invalid");
         return ((WindowsImageOwnerPhase)phase, pid, creation);
@@ -92,7 +95,6 @@ internal static class WindowsImageOwnerJournal
     {
         var security = new DirectorySecurity();
         security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-        security.SetOwner(owner);
         foreach (var principal in new[] { owner, new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null) })
         {
             security.AddAccessRule(new FileSystemAccessRule(principal, FileSystemRights.FullControl,
@@ -100,6 +102,17 @@ internal static class WindowsImageOwnerJournal
         }
 
         directory.SetAccessControl(security);
+        // Object owners have WRITE_DAC even when the inherited ACL grants only Modify.
+        // Requesting WRITE_OWNER in that first update can fail before the private DACL is applied.
+        var current = directory.GetAccessControl();
+        if (!owner.Equals(current.GetOwner(typeof(SecurityIdentifier))))
+        {
+            current.SetOwner(owner);
+            directory.SetAccessControl(current);
+            current = directory.GetAccessControl();
+        }
+        if (!current.AreAccessRulesProtected || !owner.Equals(current.GetOwner(typeof(SecurityIdentifier))))
+            throw new ReadOnlyWorkerException("preview_owner_acl_unverified");
     }
 
     public static FileStream CreateLease(string root, string name)
