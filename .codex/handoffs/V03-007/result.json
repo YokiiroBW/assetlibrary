@@ -1,0 +1,61 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-007",
+  "title": "image-preview-server",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "preview-provider-owner",
+  "branch": "codex/v03-007-image-preview-server",
+  "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
+  "commit": "37ef0df74d8bca568a0d962627932240761588d1",
+  "changed_files": [
+    ".codex/handoffs/V03-007/isolation-plan.md",
+    ".codex/handoffs/V03-007/proposal.md",
+    ".codex/handoffs/V03-007/result.json",
+    ".codex/handoffs/V03-007/summary.md",
+    ".codex/handoffs/V03-007/tests.md",
+    ".codex/tasks/V03-007.md",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourcePath.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceStamp.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/LinuxImageSourceHandle.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/StableImageSourceFile.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageSourceHandle.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj",
+    "tests/dotnet/AssetLibrary.Preview.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/StableImageSourceTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 43,
+    "failed": 0,
+    "skipped": 1,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Source boundary implemented and Windows-tested; decoder, HTTP, Linux and complete confinement are not yet accepted.",
+    "Windows file symlink evidence is unavailable because the current token lacks creation privilege."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-007/summary.md",
+  "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
+  "architecture_review": {
+    "module": "PreviewProvider read-only source infrastructure",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing canonical root and relative path value objects, read-only worker error, RepositorySandbox, SandboxDirectoryLink and MSTest pins."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "python -I -B scripts/verify_repository.py: baseline passed; 21 migration and 14 architecture cases"
+    ],
+    "technical_debt": [
+      "No new runtime debt; complete OS file/network confinement is an explicit implementation and activation requirement awaiting coordinator decision."
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssetLibrary.Preview.Tests</AssemblyName>
+    <RootNamespace>AssetLibrary.Preview.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <ProjectReference Include="../../../services/core-server/AssetLibrary.CoreServer.csproj" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Exercise the exact internal worker source without widening the core assembly's public or friend API. -->
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourcePath.cs" Link="Boundary/ImageSourcePath.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceStamp.cs" Link="Boundary/ImageSourceStamp.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageSourceHandle.cs" Link="Boundary/WindowsImageSourceHandle.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/LinuxImageSourceHandle.cs" Link="Boundary/LinuxImageSourceHandle.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/StableImageSourceFile.cs" Link="Boundary/StableImageSourceFile.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs" Link="Boundary/ReadOnlyWorkerProtocol.cs" />
+    <Compile Include="../AssetLibrary.ReadCore.Tests/RepositorySandbox.cs" Link="Fixture/RepositorySandbox.cs" />
+    <Compile Include="../AssetLibrary.ReadCore.Tests/SandboxDirectoryLink.cs" Link="Fixture/SandboxDirectoryLink.cs" />
+  </ItemGroup>
+</Project>
