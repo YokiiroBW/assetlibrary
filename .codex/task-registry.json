@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "session_active_native_explorer_observation_resumed_windows_matrix_in_progress"
+      "execution_status": "desktop_stopped_by_physical_escape_awaiting_explicit_resume_cli_matrix_continues"
     },
     {
       "id": "V03-007",

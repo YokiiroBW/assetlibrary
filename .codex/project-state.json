@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
   "status": "parallel_browse_preview_real_integration_in_progress",
-  "next_action": "Continue V03-005 from verified real Android/Web images and shared cleanup. Windows Session2 is now active; continue the registered Explorer task with fresh owned-window observation, not a standalone substitute. Complete NAS same-commit NativeAOT packaging (first actual build found inconsistent SelfContained restore/publish), then target-kernel acceptance and controlled deployment. Preserve existing release gates and independent platform evidence.",
+  "next_action": "Continue V03-005 NAS same-commit image build/target-kernel validation and non-UI Windows confinement work. Real Web/Android image acceptance and shared cleanup passed. Windows desktop became active but physical Esc stopped the subsequent Explorer observation; all CU/navigation/window closure is paused until the user explicitly permits resume. Do not bypass the stop with another tool. Preserve release gates; no Windows installer or completed Explorer claim.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

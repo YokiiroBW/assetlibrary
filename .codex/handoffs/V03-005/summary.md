@@ -18,7 +18,7 @@
 
 ## 当前接续与分工
 
-1. Windows最新只读状态在2026-09-08T16:44:08Z已恢复WTSActive，真实“此电脑”窗口可见。root已授权立即恢复一次有界Explorer入口观测，不再沿用旧Disconnected阻断。Windows owner先结束已开始的profile幂等小组，再优先推进真实入口/IPC；不改HKLM/UAC/全局策略、不重启用户Explorer。尚无Windows安装包，独立出图/loader矩阵不等于G1..G4完成。
+1. Windows会话已恢复WTSActive，真实“此电脑”可操作；随后新建任务测试窗口2229954并完成临时注册，但导航前收到用户物理Esc停止信号。已停止全部CU、终止watchdog、unregister并确认两键均false；原窗口1247028未改导航，新窗口留待后续新鲜核验。root已询问用户是否恢复测试窗口，尚未获答；不得继续CU或改用其他工具完成导航/关窗。仅继续无桌面交互的CLI代码/平台矩阵。实际Explorer入口尚未验收，没有Windows安装包；独立出图和loader成功不等于G1..G4。
 2. NAS旧包只带Host，缺图片引擎。f673a12限定授权V03-007接入NAS Docker/离线包及负例，d18b224已集成；Linux包验证11/11通过。root已从同提交0f4d0c6实际构建，首次AOT publish报NETSDK1112，原因是restore与publish的SelfContained属性不一致，正由所有者修正后重建。NAS5.10.55、Docker24.0.2和agent-210只读访问已核；实际目标平台测试、备份/回滚/受控启用归root，缺省图片仍关闭。其他通用/原生包缺口独立记录。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 
