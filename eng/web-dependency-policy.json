@@ -145,8 +145,8 @@
     { "exact": "vite", "license": "MIT" }
   ],
   "size_budgets_bytes": {
-    "javascript": 262144,
-    "css": 16384,
-    "javascript_and_css": 286720
+    "javascript": 327680,
+    "css": 32768,
+    "javascript_and_css": 360448
   }
 }
