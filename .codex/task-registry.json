@@ -812,7 +812,7 @@
       "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
       "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
       "milestone": "V0.3",
-      "execution_status": "consumer_integrated_waiting_for_real_core_image_fixture"
+      "execution_status": "real_core_phone_tablet_images_passed_evidence_integrated_shared_cleanup_pending"
     }
   ]
 }
