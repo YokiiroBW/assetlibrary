@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-007",
+  "title": "image-preview-server",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "preview-provider-owner",
+  "branch": "codex/v03-007-image-preview-server",
+  "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
+  "commit": "",
+  "changed_files": [],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-007/summary.md",
+  "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
+  "architecture_review": {
+    "module": "",
+    "dependency_direction_ok": false,
+    "reused_existing_logic": [],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [],
+    "technical_debt": []
+  }
+}
