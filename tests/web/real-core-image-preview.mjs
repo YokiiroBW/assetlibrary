@@ -110,11 +110,13 @@ try {
       context.setDefaultNavigationTimeout(25_000);
       const page = await context.newPage();
       const responses = [];
+      const completedRequests = new WeakSet();
       const foreignRequests = [];
       let scriptDialogs = 0;
       page.on("response", (response) => {
         if (responses.length < 300 && new URL(response.url()).origin === connection.origin) responses.push(response);
       });
+      page.on("requestfinished", (request) => completedRequests.add(request));
       page.on("request", (request) => {
         const url = new URL(request.url());
         if (
@@ -211,7 +213,15 @@ try {
         await row.scrollIntoViewIfNeeded();
         if (sample.result === "image") {
           await expect(row.locator(".image-thumbnail img")).toBeVisible({ timeout: 25_000 });
-          const thumb = await imageEvidence(responses, connection, entry.entry_id, "thumbnail", sample);
+          await checkpoint(`thumbnail_bytes:${sample.path}`);
+          const thumb = await imageEvidence(
+            responses,
+            completedRequests,
+            connection,
+            entry.entry_id,
+            "thumbnail",
+            sample,
+          );
           receipt.cases.push({ case: sample.path, variant: "thumbnail", ...thumb });
         }
         const before = page.url();
@@ -221,7 +231,15 @@ try {
         if (sample.result === "image") {
           const image = dialog.getByRole("img", { name: entry.name, exact: true });
           await expect(image).toBeVisible({ timeout: 25_000 });
-          const preview = await imageEvidence(responses, connection, entry.entry_id, "preview", sample);
+          await checkpoint(`preview_bytes:${sample.path}`);
+          const preview = await imageEvidence(
+            responses,
+            completedRequests,
+            connection,
+            entry.entry_id,
+            "preview",
+            sample,
+          );
           assert.deepEqual(await image.evaluate((element) => [element.naturalWidth, element.naturalHeight]), [
             preview.width,
             preview.height,
@@ -262,7 +280,13 @@ try {
           }
         } else {
           await expect(dialog.getByRole("button", { name: "重试图片", exact: true })).toBeVisible({ timeout: 25_000 });
-          const response = await completedImageResponse(responses, connection, entry.entry_id, "preview");
+          const response = await completedImageResponse(
+            responses,
+            completedRequests,
+            connection,
+            entry.entry_id,
+            "preview",
+          );
           assert.ok(
             sample.status.includes(response.status()),
             "unsafe input must fail with the contract status, not engine unavailability",
@@ -422,17 +446,18 @@ async function screenshot(page, directory, report, filename) {
   await page.screenshot({ path: join(directory, filename), animations: "disabled" });
   report.screenshots.push(filename);
 }
-async function completedImageResponse(responses, connection, entryId, variant) {
+async function completedImageResponse(responses, completedRequests, connection, entryId, variant) {
   const url = new URL(
     `/assetlink/v1/libraries/${connection.library_id}/entries/${entryId}/image?variant=${variant}`,
     connection.origin,
   ).href;
-  for (const response of responses.filter((item) => item.url() === url).reverse())
-    if ((await response.finished()) === null) return response;
-  throw new Error("no_completed_real_image_response");
+  // Playwright's requestfailed path does not resolve Response.finished(). Never await an obsolete response.
+  const complete = () => responses.findLast((item) => item.url() === url && completedRequests.has(item.request()));
+  await expect.poll(() => Boolean(complete()), { timeout: 25_000 }).toBe(true);
+  return complete();
 }
-async function imageEvidence(responses, connection, entryId, variant, sample) {
-  const response = await completedImageResponse(responses, connection, entryId, variant);
+async function imageEvidence(responses, completedRequests, connection, entryId, variant, sample) {
+  const response = await completedImageResponse(responses, completedRequests, connection, entryId, variant);
   assert.equal(response.status(), 200, "derived image must succeed on the real service");
   const headers = response.headers();
   assert.equal(headers["content-type"], "image/png");
