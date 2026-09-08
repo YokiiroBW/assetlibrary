@@ -3,40 +3,79 @@
   "task_id": "V03-008",
   "title": "web-image-preview",
   "milestone": "V0.3",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "web-gateway-owner",
   "branch": "codex/v03-008-web-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
-  "commit": "",
+  "commit": "d9443009853e4ad057037efcfa700dc1c5ad68a4",
   "changed_files": [
-    ".codex/tasks/V03-008.md",
-    ".codex/handoffs/V03-008/summary.md",
+    ".codex/handoffs/V03-008/build-evidence.json",
+    ".codex/handoffs/V03-008/implementation-plan.md",
     ".codex/handoffs/V03-008/result.json",
+    ".codex/handoffs/V03-008/screenshots/preview-desktop.png",
+    ".codex/handoffs/V03-008/screenshots/preview-mobile-dark.png",
+    ".codex/handoffs/V03-008/screenshots/preview-mobile-text200.png",
+    ".codex/handoffs/V03-008/summary.md",
     ".codex/handoffs/V03-008/tests.md",
-    ".codex/handoffs/V03-008/implementation-plan.md"
+    ".codex/tasks/V03-008.md",
+    "apps/web/README.md",
+    "apps/web/src/assetLinkClient.ts",
+    "apps/web/src/assetLinkError.ts",
+    "apps/web/src/DerivedImage.tsx",
+    "apps/web/src/EntryCollectionPage.tsx",
+    "apps/web/src/EntryDetails.tsx",
+    "apps/web/src/hooks/useSession.ts",
+    "apps/web/src/ImagePreview.tsx",
+    "apps/web/src/imageRequests.ts",
+    "apps/web/src/imageResponses.ts",
+    "apps/web/src/ReadOnlyWorkspace.tsx",
+    "apps/web/src/SessionGate.tsx",
+    "apps/web/src/styles.css",
+    "apps/web/src/styles/images.css",
+    "apps/web/src/VirtualEntryList.tsx",
+    "apps/web/src/WorkspacePrimitives.tsx",
+    "tests/web/assetlink-fixtures.mjs",
+    "tests/web/image-fixtures.mjs",
+    "tests/web/image-preview.spec.mjs",
+    "tests/web/read-only-workspace.spec.mjs"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 35,
+    "passed": 65,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
   },
-  "risks": ["No product preview implementation or real Core integration evidence yet."],
-  "blocked_by": ["awaiting_coordinator_freeze: committed preview contract from V03-005/V03-007"],
+  "risks": [
+    "Real Core/PG/HTTPS/CSP and cross-client integration remain with V03-005; browser fixtures are not server decoder evidence.",
+    "No 500k-asset or long-running browser process memory stress evidence; Blob/pixel caps do not measure total browser RSS."
+  ],
+  "blocked_by": [],
   "recommended_merge_order": 3,
   "handoff_summary": ".codex/handoffs/V03-008/summary.md",
   "thread_deep_link": "codex://threads/01a0808d-7174-7900-a2d6-9ee4ecc89779",
   "architecture_review": {
-    "module": "WebGateway: V03-008 task and implementation analysis only",
+    "module": "WebGateway UI and AssetLink HTTP adapter; web-gateway-owner",
     "dependency_direction_ok": true,
-    "reused_existing_logic": ["Existing Web/SDK/session/virtualization and repository verification inspected; no runtime logic changed"],
+    "reused_existing_logic": [
+      "Existing generated AssetLink envelope, single fetch adapter, same-origin Cookie/CSRF and unchanged JSON deadline",
+      "Existing React/TypeScript, TanStack virtualization, paginated queries, workspace history, selection, Modal and semantic CSS",
+      "Coordinator image-preview-v1/ADR-0019 consumed without duplicating server permission, source identity or physical-path rules"
+    ],
     "duplicated_logic": [],
-    "cross_module_access": [],
+    "cross_module_access": [
+      "Only public AssetLink endpoints; no database, server module internals or original file access"
+    ],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [],
-    "architecture_tests": ["python -I -B scripts/verify_repository.py: passed on product baseline 70ce45c"],
+    "architecture_tests": [
+      "validate_architecture_baseline.py passed for final d944300 source",
+      "validate_web_source.py passed for final source",
+      "validate_web_dependencies.py --require-build-artifacts passed with coordinator 23ad33d policy for final source",
+      "65 unique Playwright cases passed; no skipped tests",
+      "verify_repository baseline passed; later old bundle budget failure closed by original targeted check; aggregate was not unnecessarily rerun"
+    ],
     "technical_debt": []
   }
 }
