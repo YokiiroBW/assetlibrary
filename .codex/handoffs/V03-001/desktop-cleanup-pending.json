@@ -1,0 +1,20 @@
+{
+  "status": "pending_input_access",
+  "input_error": "0x80070005",
+  "known_task_window_ids": [
+    853858,
+    330062,
+    68104,
+    198672,
+    461092,
+    526594,
+    68216,
+    592360
+  ],
+  "kind": "three task-created Desktop windows and five task-created no-association diagnostic dialogs",
+  "protected_existing_window_ids": [
+    1181100
+  ],
+  "instructions": "Refresh Computer Use window selection and confirm ownership before any action; handles may be stale or reused. Do not close other user windows. No security setting or Explorer restart is authorized by this record.",
+  "registry_cleanup": "both task CLSID and Desktop NameSpace keys absent; no production Shell enabled"
+}

@@ -1,0 +1,36 @@
+{
+  "status": "partial_android_delivered_windows_blocked",
+  "android": {
+    "implementation_commit": "e24331afc7c8fc4806e172ba200342eed2895637",
+    "package": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-readonly.1.apk",
+    "sha256": "afd7cbd3f387aebc1f2d00ec34c3f824909673615546404b81afd2a24a79b8cb",
+    "bytes": 30064814,
+    "signature": "verified_debug_trial_v2",
+    "runtime_osv_components": 101,
+    "verification_components": 475,
+    "merged_source_inputs_equal_to_tested_commit": true
+  },
+  "windows": {
+    "status": "partial",
+    "installer": null,
+    "production_shell_enabled": false,
+    "real_explorer_entry": "failed_before_class_factory",
+    "cause": "undetermined"
+  },
+  "fixture_cleanup": "verified",
+  "nas_mutation": false,
+  "integration_verification": {
+    "status": "passed",
+    "command": "python -I -B scripts/verify_repository.py",
+    "source_commit": "ce454c61fc00a9c75b22f71964a6b6778a9e66e6",
+    "log": ".runtime/final-repository-verification.log",
+    "native_roots_active": [
+      "apps/windows-client",
+      "apps/android"
+    ],
+    "csharp_files": 373,
+    "android_verification_components": 475,
+    "alpha_decision": "blocked",
+    "remote_github_actions": "not_executed_in_this_task"
+  }
+}

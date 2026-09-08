@@ -1,0 +1,9 @@
+{
+  "origin": "https://192.168.31.210:5443",
+  "path": "/readyz",
+  "status": 200,
+  "certificate_sha256": "96:B0:BB:7A:59:3D:59:48:27:18:18:4E:C8:EC:5D:B9:59:30:B0:32:54:2B:E5:41:DB:9A:28:87:F9:BB:83:C1",
+  "tls_verified": true,
+  "checked_at": "2026-09-08T09:33:37.812Z",
+  "authenticated": false
+}
