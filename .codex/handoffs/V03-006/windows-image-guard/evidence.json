@@ -1,0 +1,79 @@
+{
+  "RecordedAtUtc": "2026-09-08T15:08:01.8870820+00:00",
+  "SourceCommit": "a06d3f37dcaeea8791da0963787d9b00ebe27a6d",
+  "TransferredBase": "7cd555b9859ee29e929ed78a91814828b90da912",
+  "ProductionWorkerSha256": "155FD3C8334F3AD60E4437FFB83BD9B4C956C0A0225DF6E221E1261BEBFC97AA",
+  "NativeObserverSha256": "143B001AD67E94F317016FB8351BB28A471385609B6D9535AF8B5332D40E3ADF",
+  "Artifacts": [
+    {
+      "File": "normal-result.txt",
+      "Sha256": "4EE4A830DB1C8C43F4E875A789AD791385867F61E1BCFEBACBB4E31CD231BF05"
+    },
+    {
+      "File": "AccessParent.csproj.txt",
+      "Sha256": "EFE5CDDB189BB1665120558C5990E648F99A83F46925711EBABB8F3E56F39AEA"
+    },
+    {
+      "File": "NativeCMakeLists.txt",
+      "Sha256": "D29CD382F915345B53637CEA6D97EEEA5B2DEB86A8C037F0725EF1F8E6656E7A"
+    },
+    {
+      "File": "NativeAccessObserver.cpp.txt",
+      "Sha256": "102E754BBE4FDF87666452A21B70E1AC4FB7FD0154F235A53EAFCABD46C45AED"
+    },
+    {
+      "File": "AccessParent.cs.txt",
+      "Sha256": "356482630944537955ED4DCE5D0A90379CFE2581995155D55046DA718B2E9903"
+    },
+    {
+      "File": "lpac-result.txt",
+      "Sha256": "475EA3408682CACC216BEA4C316436F0285EA524FB5A306131E0D777CAD7F39A"
+    }
+  ],
+  "Tests": [
+    {
+      "Report": "stage-diagnostic.trx",
+      "Sha256": "938484FE1C4D81E3ECA03296505094C6C5CC83C86D27CA233D853B2D918FF104",
+      "Test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "Outcome": "Failed",
+      "Duration": "00:00:00.0759846",
+      "Message": "Assert.Fail 失败。Native startup status 7; exit 1; stages stage=1 | stage=2 | check=29;actual=1 | check=30;actual=1 | stage=4."
+    },
+    {
+      "Report": "stage-diagnostic-v2.trx",
+      "Sha256": "03F2FB3552473B08DF944CC4BA96DF2A5A581EF843671E403A87EEE5F09836AC",
+      "Test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "Outcome": "Failed",
+      "Duration": "00:00:00.0762678",
+      "Message": "Assert.Fail 失败。Native startup status 7; exit 1; stages stage=1 | stage=2 | check=29;required=4;error=122 | check=29;actual=00000001 | check=30;actual=00000001 | check=46;required=0;error=87 | check=46;actual=FFFFFFFF | stage=4."
+    },
+    {
+      "Report": "stage-diagnostic-v3.trx",
+      "Sha256": "D6D3896D038C6C08F749D525393B2430745A69BCD4080CFC2A00069DC8D83F2D",
+      "Test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "Outcome": "Failed",
+      "Duration": "00:00:00.0763045",
+      "Message": "Assert.Fail 失败。Native startup status 7; exit 1; stages stage=1 | stage=2 | check=29;required=4;error=122 | check=29;actual=00000001 | check=30;actual=00000001 | check=146;result=0;written=0;error=87;value=00000000 | check=46;required=0;error=87 | check=46;actual=FFFFFFFF | stage=4."
+    },
+    {
+      "Report": "stage-diagnostic-v4.trx",
+      "Sha256": "D76DE9DA3127A7E19BFF6A20BB94D7F9231CDDE2B884D2EFE5D8F84F6F0D2983",
+      "Test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "Outcome": "Failed",
+      "Duration": "00:00:00.0785809",
+      "Message": "Assert.Fail 失败。Native startup status 7; exit 1; stages stage=1 | stage=2 | check=29;required=4;error=122 | check=29;actual=00000001 | check=30;actual=00000001 | check=146;result=0;written=0;error=87;value=00000000 | check=246;status=C0000003;written=0;value=00000000 | check=46;required=0;error=87 | check=46;actual=FFFFFFFF | stage=4."
+    },
+    {
+      "Report": "production-first-image.trx",
+      "Sha256": "ECB2044CA09FAC8803385BFAFD9C4FA829289299E690CD3D65D9AB6488133106",
+      "Test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "Outcome": "Passed",
+      "Duration": "00:00:00.0871793",
+      "Message": null
+    }
+  ],
+  "LpacOwnerRecords": 0,
+  "NormalOwnerRecords": 0,
+  "ProductionEnabled": false,
+  "Scope": "Guard correction plus trusted controls and one real production AOT thumbnail; resource/network/COM/cancellation/recovery acceptance remains pending."
+}

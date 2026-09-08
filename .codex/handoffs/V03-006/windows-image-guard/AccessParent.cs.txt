@@ -1,0 +1,85 @@
+using System.Diagnostics;
+using System.IO.Pipes;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using System.Text;
+using AssetLibrary.Infrastructure.ReadOnlyWorkers;
+using Microsoft.Win32.SafeHandles;
+
+if (!OperatingSystem.IsWindows() || args.Length != 2) return 2;
+return AccessParent.Run(args[0], args[1]);
+
+[SupportedOSPlatform("windows")]
+internal static class AccessParent
+{
+    internal static int Run(string executable, string state)
+    {
+        using var profile = WindowsImageProfile.Create(executable, state);
+        using var identity = WindowsIdentity.GetCurrent();
+        var user = identity.User!;
+        AddMarker(profile.DirectoryPath, "explicit-app.txt", user, new SecurityIdentifier(profile.Sid));
+        AddMarker(profile.DirectoryPath, "aap-only.txt", user, new SecurityIdentifier("S-1-15-2-1"));
+        using var job = WindowsWorkerJob.Create(512U * 1024 * 1024, TimeSpan.FromSeconds(3).Ticks, 1);
+        using var input = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+        using var output = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+        using var error = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable);
+        nint[] handles = [input.ClientSafePipeHandle.DangerousGetHandle(), output.ClientSafePipeHandle.DangerousGetHandle(), error.ClientSafePipeHandle.DangerousGetHandle()];
+        using var startup = new WindowsImageStartup(profile.Sid, job.Handle.DangerousGetHandle(), handles);
+        var native = startup.Start(profile, handles);
+        using var processHandle = new SafeProcessHandle(native.Process, true);
+        using var thread = new SafeFileHandle(native.Thread, true);
+        using var process = Process.GetProcessById(checked((int)native.ProcessId));
+        var result = 0;
+        var stopped = false;
+        try
+        {
+            input.DisposeLocalCopyOfClientHandle(); output.DisposeLocalCopyOfClientHandle(); error.DisposeLocalCopyOfClientHandle();
+            if (Native.ResumeThread(thread) == uint.MaxValue) result = 3;
+            else if (!process.WaitForExit(10000)) result = 4;
+            else
+            {
+                var bytes = new byte[2048];
+                var length = output.ReadAtLeast(bytes, bytes.Length, throwOnEndOfStream: false);
+                if (length == bytes.Length) result = 5;
+                else
+                {
+                    Console.Write(Encoding.ASCII.GetString(bytes, 0, length));
+                    result = Native.GetExitCodeProcess(processHandle, out var code) ? checked((int)code) : 6;
+                }
+            }
+        }
+        finally
+        {
+            job.Terminate();
+            stopped = process.WaitForExit(2000);
+        }
+        if (!stopped) throw new IOException("Owned probe did not exit.");
+        return result;
+    }
+
+    private static void AddMarker(string directory, string name, SecurityIdentifier user, SecurityIdentifier package)
+    {
+        var path = Path.Combine(directory, name);
+        File.WriteAllBytes(path, [65]);
+        var security = new FileSecurity();
+        security.SetOwner(user);
+        security.SetAccessRuleProtection(true, false);
+        security.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.FullControl, AccessControlType.Allow));
+        security.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null), FileSystemRights.FullControl, AccessControlType.Allow));
+        security.AddAccessRule(new FileSystemAccessRule(package, FileSystemRights.Read, AccessControlType.Allow));
+        new FileInfo(path).SetAccessControl(security);
+    }
+
+    private static class Native
+    {
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern uint ResumeThread(SafeFileHandle thread);
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetExitCodeProcess(SafeProcessHandle process, out uint code);
+    }
+}

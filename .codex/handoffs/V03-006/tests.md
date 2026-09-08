@@ -54,3 +54,7 @@ computer-use列举只有Codex可定位；launch_app(Microsoft.Windows.Explorer)�
 原加载观察器使用CREATE_SUSPENDED|CREATE_NO_WINDOW创建，仅读进程创建时身份，不恢复主线程；TerminateProcess后WaitForSingleObject(3000)确认退出并关闭双句柄。没有运行加载矩阵、加载DLL、发起COM/GUI操作或修改Explorer。原EXE SHA256保持0526f024…，完整原始JSON含退出/哈希证据。
 
 本追加只改交接文件；仓库既有 `python -I -B scripts/validate_handoff.py` 与 `git diff --check` 均通过，不重复输入未变的构建、矩阵或完整仓库回归。
+
+## 转交后的Windows图片guard检查点
+
+详见[独立记录](windows-image-guard.md)与[证据索引](windows-image-guard/evidence.json)。合入root57d1578、V03-007 ca1d235的新基线后verify_repository通过（397个C#文件及既有35项回归，Alpha blocked）。仅guard和测试诊断修改后，两个文件format whitespace verify、NativeAOT实际publish、validate_dotnet_source及diff检查通过。生产Ready→PNG→退出/owner清理用例1/1通过，0skip；另有可信native LPAC/普通AC两个对照，四项访问/文件结果各自一致。此为新Windows图片证据，不改原4项loader计数，不将4次诊断失败日志当4个独立产品测试。其余故障、网络/COM旁路、资源与恢复仍待完成。

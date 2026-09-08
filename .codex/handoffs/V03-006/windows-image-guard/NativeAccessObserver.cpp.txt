@@ -1,0 +1,74 @@
+#include <windows.h>
+#include <sddl.h>
+#include <cstdio>
+#include <string>
+#include <vector>
+
+static bool tokenBytes(HANDLE token, TOKEN_INFORMATION_CLASS kind, std::vector<BYTE>& bytes) {
+    DWORD length = 0;
+    GetTokenInformation(token, kind, nullptr, 0, &length);
+    if (length == 0 || length > 16384) return false;
+    bytes.resize(length);
+    return GetTokenInformation(token, kind, bytes.data(), length, &length) != FALSE;
+}
+
+static bool check(HANDLE token, const wchar_t* userSid, const wchar_t* packageSid, const char* label) {
+    std::wstring sddl = L"O:SYG:SYD:(A;;0x1;;;";
+    sddl += userSid;
+    sddl += L")(A;;0x1;;;";
+    sddl += packageSid;
+    sddl += L")";
+    PSECURITY_DESCRIPTOR descriptor = nullptr;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl.c_str(), SDDL_REVISION_1, &descriptor, nullptr)) return false;
+    GENERIC_MAPPING mapping{1, 2, 4, 7};
+    alignas(PRIVILEGE_SET) BYTE privileges[512]{};
+    DWORD length = sizeof(privileges), granted = 0;
+    BOOL allowed = FALSE;
+    const BOOL queried = AccessCheck(descriptor, token, 1, &mapping,
+        reinterpret_cast<PPRIVILEGE_SET>(privileges), &length, &granted, &allowed);
+    const DWORD error = queried ? 0 : GetLastError();
+    std::printf("%s_api=%u;%s_allowed=%u;%s_granted=%lu;%s_error=%lu\n",
+        label, queried ? 1u : 0u, label, allowed ? 1u : 0u, label, granted, label, error);
+    LocalFree(descriptor);
+    return queried != FALSE;
+}
+
+static void readMarker(const wchar_t* name, const char* label) {
+    const HANDLE file = CreateFileW(name, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    const DWORD error = file == INVALID_HANDLE_VALUE ? GetLastError() : 0;
+    BYTE value = 0;
+    DWORD read = 0;
+    const bool readable = file != INVALID_HANDLE_VALUE && ReadFile(file, &value, 1, &read, nullptr) && read == 1 && value == 65;
+    std::printf("%s_open=%u;%s_read=%u;%s_error=%lu\n", label,
+        file != INVALID_HANDLE_VALUE ? 1u : 0u, label, readable ? 1u : 0u, label, error);
+    if (file && file != INVALID_HANDLE_VALUE) CloseHandle(file);
+}
+
+int main() {
+    HANDLE primary = nullptr, impersonation = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY | TOKEN_DUPLICATE, &primary)) return 2;
+    if (!DuplicateTokenEx(primary, TOKEN_QUERY, nullptr, SecurityImpersonation, TokenImpersonation, &impersonation)) {
+        CloseHandle(primary); return 3;
+    }
+    std::vector<BYTE> user, package;
+    const bool queried = tokenBytes(primary, TokenUser, user) && tokenBytes(primary, TokenAppContainerSid, package);
+    wchar_t* userText = nullptr;
+    wchar_t* packageText = nullptr;
+    bool valid = false;
+    if (queried) {
+        const auto userInfo = reinterpret_cast<TOKEN_USER*>(user.data());
+        const auto packageInfo = reinterpret_cast<TOKEN_APPCONTAINER_INFORMATION*>(package.data());
+        if (packageInfo->TokenAppContainer && ConvertSidToStringSidW(userInfo->User.Sid, &userText)
+            && ConvertSidToStringSidW(packageInfo->TokenAppContainer, &packageText)) {
+            valid = check(impersonation, userText, packageText, "positive")
+                && check(impersonation, userText, L"S-1-15-2-1", "aap");
+        }
+    }
+    if (userText) LocalFree(userText);
+    if (packageText) LocalFree(packageText);
+    readMarker(L"explicit-app.txt", "app_file");
+    readMarker(L"aap-only.txt", "aap_file");
+    CloseHandle(impersonation);
+    CloseHandle(primary);
+    return valid ? 0 : 4;
+}

@@ -1,0 +1,4 @@
+positive_api=1;positive_allowed=1;positive_granted=1;positive_error=0
+aap_api=1;aap_allowed=0;aap_granted=0;aap_error=0
+app_file_open=1;app_file_read=1;app_file_error=0
+aap_file_open=0;aap_file_read=0;aap_file_error=5

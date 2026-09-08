@@ -2,6 +2,8 @@
 
 状态 **partial**。实现提交 `453e10b`，分支 `codex/v03-006-windows-explorer-native-integration`，独立 worktree `C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary`，基线 `70ce45c`。本轮交付可复现的加载器诊断，未交付真实 Explorer 入口、AssetHost IPC 或 Windows 安装包；G1..G4 与生产 Shell 保持开放/禁用。
 
+后续按root冻结57d1578和V03-007转交ca1d235接手Windows图片隔离。新[LPAC guard检查点](windows-image-guard.md)实现提交 `a06d3f3`：完成有效访问双控制/真实文件对照，以及无trace生产NativeAOT首张PNG生成；完整拒权/资源/启动取消/清理恢复仍待收尾，Windows预览尚不启用。下述Explorer诊断仍作为独立partial保留，不被图片进展替代。
+
 ## 新证据与判断
 
 旧 DLL SHA256 `0174db9b1b4ccd4925d3a28470930fa6faebd4070348cc374a7cb87313e2fd15` 与 V03-002 记录一致。实际导入包括 MSVCP140、VCRUNTIME140、VCRUNTIME140_1、UCRT 和系统 COM/Shell DLL。
