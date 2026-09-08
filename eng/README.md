@@ -21,3 +21,32 @@ python scripts/validate_dotnet_source.py
 Roslyn analyzers run with warnings as errors. The code-metrics analyzer reads `eng/CodeMetricsConfig.txt`; the repository source gate independently rejects repeated C# token blocks and likely logging of secrets or credentials.
 
 Repository and architecture checks run with `python -I -B scripts/verify_repository.py`. The complete cross-stack commands, exact runtimes and platform requirements are recorded in `tests/architecture/ci-tiers.json` and `.github/workflows/handoff-quality.yml`; Web commands also live in `apps/web/package.json`, and SDK commands in `packages/sdk/assetlink/README.md`. Use the pinned SDK and package-manager versions, not the machine's default runtime. A missing tool or skipped platform test is missing evidence.
+
+## Native Android platform checks
+
+`apps/android/README.md` records the exact SDK packages, Gradle/AGP/Kotlin versions,
+build, lint, unit, instrumentation and real Core commands. The platform workflow
+runs a real API 36 emulator and explicitly selects `WorkspaceUiTest`; its synthetic
+UI data does not claim Core integration. `RealCoreUiTest` separately consumes the
+bounded, private fixture from `tests/integration/native-clients/serve.py` and is
+recorded in task handoffs after real client execution and fixture cleanup.
+
+The workflow uses `reactivecircus/android-emulator-runner@v2.38.0` (Apache-2.0,
+CI-only) to manage a temporary emulator; it is not an application dependency.
+Its [upstream updates](https://github.com/ReactiveCircus/android-emulator-runner)
+are reviewed with platform changes. It can be replaced by the Android SDK's
+`avdmanager`/`emulator` lifecycle without changing app code or data.
+
+`scripts/validate_android_dependencies.py` checks the Gradle wrapper against the
+already verified generated-SDK wrapper and requires explicit artifact SHA256s.
+With runtime inventory, Gradle cache, APK and audit output arguments, it checks
+actual runtime POM licenses (including inherited declarations), package size and
+fresh OSV results for every packaged dependency. Missing/incomplete OSV results
+fail the check. Build/test tool pins and integrity remain under Gradle strict
+verification; the runtime audit must not be described as an audit of all SDK tools.
+
+When the local HTTPS client cannot reach OSV, `--osv-response` may consume an
+actual response fetched by another TLS-verifying client. It must record the fixed
+OSV endpoint, exact query list, runtime-inventory SHA256, UTC `checked_at` and
+corresponding `results`; mismatched, incomplete or older-than-24-hour data fails.
+This transport option cannot replace missing results with a clean audit.

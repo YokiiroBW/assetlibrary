@@ -7,6 +7,14 @@ on:
       - 'tests/spikes/windows-shell/**'
       - 'tests/spikes/file-safety/**'
       - 'tests/spikes/provider-sandbox/**'
+      - 'apps/android/**'
+      - 'apps/windows-client/**'
+      - 'tests/windows-client/**'
+      - 'tests/windows-shell/**'
+      - 'packages/sdk/assetlink/**'
+      - 'packages/ui/**'
+      - 'scripts/validate_android_dependencies.py'
+      - 'eng/android-dependency-policy.json'
       - '.github/workflows/platform-quality.yml'
 
 jobs:
@@ -53,5 +61,53 @@ jobs:
         with:
           name: platform-unittest-${{ matrix.label }}
           path: .runtime/ci/*.log
+          if-no-files-found: error
+          retention-days: 14
+
+  android:
+    name: android-native-build-and-ui
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GRADLE_USER_HOME: ${{ github.workspace }}/.runtime/gradle-home
+      ANDROID_SERIAL: emulator-5554
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21.0.12+8'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Enable emulator access on the isolated CI runner
+        run: sudo setfacl -m u:$(id -un):rw /dev/kvm
+      - name: Native Android checks on API 36
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: '37.0'
+          system-image-api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          port: 5554
+          disable-animations: true
+          script: |
+            sdkmanager 'build-tools;36.0.0'
+            python -I -B scripts/export_native_theme.py --check
+            bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:assembleDebug :app:assembleRelease :app:testDebugUnitTest :app:lintDebug :app:dependencyInventory
+            python -I -B scripts/validate_android_dependencies.py --inventory apps/android/app/build/reports/runtime-dependency-inventory.tsv --gradle-cache .runtime/gradle-home --apk apps/android/app/build/outputs/apk/debug/app-debug.apk --audit-output .runtime/android-dependency-audit.json
+            bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.WorkspaceUiTest
+      - name: Preserve native Android evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-native-evidence
+          path: |
+            apps/android/app/build/reports/
+            apps/android/app/build/outputs/apk/debug/
+            .runtime/android-dependency-audit.json
           if-no-files-found: error
           retention-days: 14

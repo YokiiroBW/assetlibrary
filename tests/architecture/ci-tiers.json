@@ -3,12 +3,22 @@
   "tiers": [
     {
       "id": "fast-merge",
-      "required_for": ["push", "pull_request", "worktree-review"],
-      "runners": ["ubuntu-latest", "windows-latest"],
+      "required_for": [
+        "push",
+        "pull_request",
+        "worktree-review"
+      ],
+      "runners": [
+        "ubuntu-latest",
+        "windows-latest"
+      ],
       "timeout_minutes": 20,
       "workflow": ".github/workflows/handoff-quality.yml",
       "cache": "setup-dotnet, setup-node and setup-gradle restore only dependency caches keyed by committed NuGet, pnpm and Gradle lock or verification inputs; global.json and exact native tool versions remain enforced, and build outputs/runtime state are not cached.",
-      "artifacts": ["job log on failure", "read-only-trial-e2e"],
+      "artifacts": [
+        "job log on failure",
+        "read-only-trial-e2e"
+      ],
       "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
       "commands": [
         "python scripts/verify_repository.py",
@@ -56,28 +66,50 @@
     },
     {
       "id": "platform",
-      "required_for": ["affected-platform-merge", "platform-release"],
-      "runners": ["ubuntu-latest", "windows-latest"],
+      "required_for": [
+        "affected-platform-merge",
+        "platform-release"
+      ],
+      "runners": [
+        "ubuntu-latest",
+        "windows-latest"
+      ],
       "timeout_minutes": 30,
       "workflow": ".github/workflows/platform-quality.yml",
-      "cache": "No mutable runtime sandbox is cached; future build caches must be keyed by the committed lock or verification file.",
-      "artifacts": ["platform-unittest-windows", "platform-unittest-ubuntu"],
+      "cache": "Gradle dependency caches use the committed wrapper, locks and verification inputs; mutable device, server, database, fixture and APK output state is not cached.",
+      "artifacts": [
+        "platform-unittest-windows",
+        "platform-unittest-ubuntu",
+        "android-native-evidence"
+      ],
       "failure_policy": "A failure blocks the affected platform; a missing required runner or platform skip leaves its release evidence open.",
       "commands": [
         "python -m unittest discover -s tests/spikes/windows-shell -p test_*.py -v",
         "python -m unittest discover -s tests/spikes/file-safety -p test_*.py -v",
-        "python -m unittest discover -s tests/spikes/provider-sandbox -p test_*.py -v"
+        "python -m unittest discover -s tests/spikes/provider-sandbox -p test_*.py -v",
+        "python -I -B scripts/export_native_theme.py --check",
+        "bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:assembleDebug :app:assembleRelease :app:testDebugUnitTest :app:lintDebug :app:dependencyInventory",
+        "python -I -B scripts/validate_android_dependencies.py --inventory apps/android/app/build/reports/runtime-dependency-inventory.tsv --gradle-cache .runtime/gradle-home --apk apps/android/app/build/outputs/apk/debug/app-debug.apk --audit-output .runtime/android-dependency-audit.json",
+        "bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.WorkspaceUiTest"
       ],
       "skip_policy": "A platform skip is evidence of a missing gate, never a pass for that platform."
     },
     {
       "id": "scheduled-release",
-      "required_for": ["scheduled-regression", "release-candidate"],
-      "runners": ["ubuntu-latest", "approved-self-hosted-labs"],
+      "required_for": [
+        "scheduled-regression",
+        "release-candidate"
+      ],
+      "runners": [
+        "ubuntu-latest",
+        "approved-self-hosted-labs"
+      ],
       "timeout_minutes": 600,
       "workflow": ".github/workflows/scheduled-quality.yml",
       "cache": "Generated performance manifests and fault state are never restored from cache.",
-      "artifacts": ["performance-summary-500k"],
+      "artifacts": [
+        "performance-summary-500k"
+      ],
       "failure_policy": "Scheduled profile regressions fail the run; an on-demand release-readiness check fails while any target gate is open.",
       "commands": [
         "python tests/spikes/performance/profile_500k.py",
@@ -89,7 +121,7 @@
   "future_native_gate_activation": {
     "dotnet": "Active in V01-001: fixed SDK, locked restore, format, Release build, non-empty MSTest, vulnerability, license, duplicate-code, Roslyn complexity and sensitive-log gates run in fast-merge. Integration, contract and migration suites must join the same solution when their owning production tasks activate them.",
     "typescript": "Active for the generated AssetLink SDK in V01-002 and the authenticated read-only Web consumer in V01-006: exact Node.js 24 LTS, pnpm and TypeScript versions; frozen installs, generator formatting/drift, lint, typecheck, production build, Node unit tests, Chromium browser regressions, audit, license, integrity, size and sensitive-log gates run in fast-merge.",
-    "android": "The Kotlin/JVM AssetLink SDK activates fixed Kotlin, JDK and Gradle wrapper, dependency locking and verification, compile, SDK tests, license, size and sensitive-log gates in V01-002. The first Android app build must still add AGP/Compose lint, selected instrumentation and Android-specific vulnerability gates.",
+    "android": "Active in V03-003: fixed AGP/Kotlin/Compose and SDK packages, Gradle strict locks/verification, Debug/Release compile, Android lint, JVM protocol/state tests, selected real API36 Compose instrumentation, runtime POM-license/OSV/integrity/APK-size audit. Real Core/PostgreSQL client evidence is provided separately by V03-003/004; missing devices or skipped platform runs do not count as passing evidence.",
     "cpp": "Production Shell activation remains blocked by M0-002 gates; its first approved build must add MSVC/CMake formatting/static analysis, ABI/export, forbidden-link, dependency vulnerability/license and fault tests.",
     "database": "Active in V01-003: the production manifest and PostgreSQL 16.15 job enforce forward migration, verified pre-migration backup, empty-database restore/replay, checksum drift, serialized ownership and least privilege. Business data access libraries remain owned by their first real infrastructure use case.",
     "release_labs": "Capacity, sudden-power-loss, administrator SCM, Docker hardening, Provider hard-sandbox and soak commands may be added only after their task names an approved runner, fixed sandbox boundary, cleanup and artifact retention policy."

@@ -96,11 +96,40 @@ def licenses(cache: Path, coordinate: tuple[str, str, str], policy: dict, seen: 
     return {"coordinate": ":".join(coordinate), "pom_sha256": digest(pom), "inherited_from": inherited}
 
 
+def osv_queries(coordinates: list[tuple[str, str, str]]) -> list[dict]:
+    return [{"package": {"ecosystem": "Maven", "name": f"{group}:{name}"}, "version": version} for group, name, version in coordinates]
+
+
+def correlated_results(coordinates: list[tuple[str, str, str]], items: object) -> list[dict]:
+    if not isinstance(items, list) or len(items) != len(coordinates) or any(not isinstance(item, dict) for item in items):
+        raise ValueError("OSV did not return one result for every dependency")
+    results = []
+    for coordinate, item in zip(coordinates, items, strict=True):
+        if item.get("next_page_token"):
+            raise ValueError("OSV result is incomplete; investigate before delivery")
+        if set(item) - {"vulns", "next_page_token"} or not isinstance(item.get("vulns", []), list):
+            raise ValueError("OSV returned an error or invalid vulnerability list")
+        results.append({"coordinate": ":".join(coordinate), "vulnerabilities": item.get("vulns", [])})
+    return results
+
+
+def recorded_osv(path: Path, inventory: Path, coordinates: list[tuple[str, str, str]]) -> list[dict]:
+    if path.stat().st_size > 8 * 1024 * 1024:
+        raise ValueError("Recorded OSV response exceeds its bound")
+    record = json.loads(path.read_text(encoding="utf-8"))
+    if record.get("endpoint") != "https://api.osv.dev/v1/querybatch" or record.get("inventory_sha256") != digest(inventory) or record.get("queries") != osv_queries(coordinates):
+        raise ValueError("Recorded OSV response does not match this exact runtime inventory")
+    checked = datetime.fromisoformat(record["checked_at"])
+    if checked.tzinfo is None or not -300 <= (datetime.now(timezone.utc) - checked).total_seconds() <= 86400:
+        raise ValueError("Recorded OSV response must be from the last 24 hours")
+    return correlated_results(coordinates, record.get("results"))
+
+
 def query_osv(coordinates: list[tuple[str, str, str]]) -> list[dict]:
     results = []
-    for start in range(0, len(coordinates), 100):
-        batch = coordinates[start:start + 100]
-        payload = {"queries": [{"package": {"ecosystem": "Maven", "name": f"{group}:{name}"}, "version": version} for group, name, version in batch]}
+    for start in range(0, len(coordinates), 10):
+        batch = coordinates[start:start + 10]
+        payload = {"queries": osv_queries(batch)}
         request = urllib.request.Request("https://api.osv.dev/v1/querybatch", json.dumps(payload).encode(), {"Content-Type": "application/json"}, method="POST")
         with urllib.request.urlopen(request, timeout=30) as response:
             raw = response.read(8 * 1024 * 1024 + 1)
@@ -109,15 +138,7 @@ def query_osv(coordinates: list[tuple[str, str, str]]) -> list[dict]:
         decoded = json.loads(raw)
         if not isinstance(decoded, dict):
             raise ValueError("OSV response must be an object")
-        items = decoded.get("results")
-        if not isinstance(items, list) or len(items) != len(batch) or any(not isinstance(item, dict) for item in items):
-            raise ValueError("OSV did not return one result for every dependency")
-        for coordinate, item in zip(batch, items, strict=True):
-            if item.get("next_page_token"):
-                raise ValueError("OSV result is incomplete; investigate before delivery")
-            if set(item) - {"vulns", "next_page_token"} or not isinstance(item.get("vulns", []), list):
-                raise ValueError("OSV returned an error or invalid vulnerability list")
-            results.append({"coordinate": ":".join(coordinate), "vulnerabilities": item.get("vulns", [])})
+        results.extend(correlated_results(batch, decoded.get("results")))
     return results
 
 
@@ -128,12 +149,15 @@ def main() -> int:
     parser.add_argument("--gradle-cache", type=Path)
     parser.add_argument("--apk", type=Path)
     parser.add_argument("--audit-output", type=Path)
+    parser.add_argument("--osv-response", type=Path, help="Use a fresh exact-inventory OSV batch response fetched by another TLS client")
     args = parser.parse_args()
     try:
         verified = check_source(args.root)
         optional = (args.inventory, args.gradle_cache, args.apk, args.audit_output)
         if any(optional) and not all(optional):
             raise ValueError("Full audit requires inventory, Gradle cache, APK and output paths")
+        if args.osv_response and not all(optional):
+            raise ValueError("Recorded OSV responses require a full artifact audit")
         if all(optional):
             policy = json.loads((args.root / "eng/android-dependency-policy.json").read_text(encoding="utf-8"))
             coordinates = runtime_inventory(args.inventory)
@@ -142,7 +166,7 @@ def main() -> int:
             license_evidence = [licenses(args.gradle_cache / "caches/modules-2/files-2.1", item, policy) for item in coordinates]
             if not 0 < args.apk.stat().st_size <= policy["apk_size_budget_bytes"]:
                 raise ValueError("APK is empty or exceeds the reviewed size budget")
-            advisories = query_osv(coordinates)
+            advisories = recorded_osv(args.osv_response, args.inventory, coordinates) if args.osv_response else query_osv(coordinates)
             report = {"checked_at": datetime.now(timezone.utc).isoformat(), "scope": policy["scope"], "licenses": license_evidence, "osv": advisories, "apk_bytes": args.apk.stat().st_size, "apk_sha256": digest(args.apk)}
             args.audit_output.parent.mkdir(parents=True, exist_ok=True)
             args.audit_output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

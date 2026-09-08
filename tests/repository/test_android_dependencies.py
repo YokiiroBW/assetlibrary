@@ -6,6 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from datetime import datetime, timedelta, timezone
 
 ROOT = Path(__file__).resolve().parents[2]
 SPEC = importlib.util.spec_from_file_location("android_dependencies", ROOT / "scripts/validate_android_dependencies.py")
@@ -37,6 +38,20 @@ class AndroidDependencyAuditTests(unittest.TestCase):
                 path.write_text(text, encoding="utf-8")
                 with self.subTest(text=text), self.assertRaises(ValueError):
                     AUDIT.runtime_inventory(path)
+
+    def test_recorded_response_must_be_fresh_and_match_exact_query_inventory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            inventory = Path(temporary) / "inventory.tsv"
+            response = Path(temporary) / "response.json"
+            inventory.write_text("sample.runtime\tlibrary\t1.0.0\n", encoding="utf-8")
+            coordinates = AUDIT.runtime_inventory(inventory)
+            record = {"endpoint": "https://api.osv.dev/v1/querybatch", "inventory_sha256": AUDIT.digest(inventory), "checked_at": datetime.now(timezone.utc).isoformat(), "queries": AUDIT.osv_queries(coordinates), "results": [{}]}
+            response.write_text(json.dumps(record), encoding="utf-8")
+            self.assertEqual(AUDIT.recorded_osv(response, inventory, coordinates)[0]["vulnerabilities"], [])
+            for change in ({"inventory_sha256": "0" * 64}, {"queries": []}, {"checked_at": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()}):
+                response.write_text(json.dumps({**record, **change}), encoding="utf-8")
+                with self.subTest(change=change), self.assertRaises(ValueError):
+                    AUDIT.recorded_osv(response, inventory, coordinates)
 
     def test_license_parent_evidence_and_unreviewed_license_rejection(self):
         with tempfile.TemporaryDirectory() as temporary:
