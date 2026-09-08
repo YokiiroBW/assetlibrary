@@ -110,13 +110,11 @@ try {
       context.setDefaultNavigationTimeout(25_000);
       const page = await context.newPage();
       const responses = [];
-      const completedRequests = new WeakSet();
       const foreignRequests = [];
       let scriptDialogs = 0;
       page.on("response", (response) => {
         if (responses.length < 300 && new URL(response.url()).origin === connection.origin) responses.push(response);
       });
-      page.on("requestfinished", (request) => completedRequests.add(request));
       page.on("request", (request) => {
         const url = new URL(request.url());
         if (
@@ -211,18 +209,12 @@ try {
         await checkpoint(`case:${sample.path}`);
         const row = option(sample);
         await row.scrollIntoViewIfNeeded();
+        let thumbnailDimensions;
         if (sample.result === "image") {
           await expect(row.locator(".image-thumbnail img")).toBeVisible({ timeout: 25_000 });
-          await checkpoint(`thumbnail_bytes:${sample.path}`);
-          const thumb = await imageEvidence(
-            responses,
-            completedRequests,
-            connection,
-            entry.entry_id,
-            "thumbnail",
-            sample,
-          );
-          receipt.cases.push({ case: sample.path, variant: "thumbnail", ...thumb });
+          thumbnailDimensions = await row
+            .locator(".image-thumbnail img")
+            .evaluate((image) => [image.naturalWidth, image.naturalHeight]);
         }
         const before = page.url();
         await row.dblclick();
@@ -231,15 +223,13 @@ try {
         if (sample.result === "image") {
           const image = dialog.getByRole("img", { name: entry.name, exact: true });
           await expect(image).toBeVisible({ timeout: 25_000 });
+          // The visible preview pauses thumbnail work. Revalidate wire bytes sequentially through real GETs.
+          await checkpoint(`thumbnail_bytes:${sample.path}`);
+          const thumb = await imageEvidence(page, connection, entry.entry_id, "thumbnail", sample);
+          assert.deepEqual(thumbnailDimensions, [thumb.width, thumb.height]);
+          receipt.cases.push({ case: sample.path, variant: "thumbnail", ...thumb });
           await checkpoint(`preview_bytes:${sample.path}`);
-          const preview = await imageEvidence(
-            responses,
-            completedRequests,
-            connection,
-            entry.entry_id,
-            "preview",
-            sample,
-          );
+          const preview = await imageEvidence(page, connection, entry.entry_id, "preview", sample);
           assert.deepEqual(await image.evaluate((element) => [element.naturalWidth, element.naturalHeight]), [
             preview.width,
             preview.height,
@@ -280,18 +270,12 @@ try {
           }
         } else {
           await expect(dialog.getByRole("button", { name: "重试图片", exact: true })).toBeVisible({ timeout: 25_000 });
-          const response = await completedImageResponse(
-            responses,
-            completedRequests,
-            connection,
-            entry.entry_id,
-            "preview",
-          );
+          const response = await readRealImage(page, connection, entry.entry_id, "preview");
           assert.ok(
-            sample.status.includes(response.status()),
+            sample.status.includes(response.status),
             "unsafe input must fail with the contract status, not engine unavailability",
           );
-          const body = await response.body();
+          const body = response.body;
           assert.ok(body.length <= 8192, "error response must be bounded");
           const error = JSON.parse(body);
           assert.ok(sample.codes.includes(error.code), "error code must identify the supported failure boundary");
@@ -301,7 +285,7 @@ try {
           receipt.cases.push({
             case: sample.path,
             variant: "preview",
-            http_status: response.status(),
+            http_status: response.status,
             code: error.code,
             l0_retained: true,
           });
@@ -372,6 +356,7 @@ try {
       assert.deepEqual(foreignRequests, [], "the acceptance flow must stay on its exact fixture origin");
       receipt.browser_version = browser.version();
       receipt.csp_blob_rendering = "verified_without_bypass";
+      receipt.wire_evidence = "sequential_real_GET_revalidation_after_UI_render_no_response_replacement";
       assert.ok(!timedOut, "bounded run deadline reached");
       receipt.status = "passed";
     })(),
@@ -446,25 +431,60 @@ async function screenshot(page, directory, report, filename) {
   await page.screenshot({ path: join(directory, filename), animations: "disabled" });
   report.screenshots.push(filename);
 }
-async function completedImageResponse(responses, completedRequests, connection, entryId, variant) {
-  const url = new URL(
-    `/assetlink/v1/libraries/${connection.library_id}/entries/${entryId}/image?variant=${variant}`,
-    connection.origin,
-  ).href;
-  // Playwright's requestfailed path does not resolve Response.finished(). Never await an obsolete response.
-  const complete = () => responses.findLast((item) => item.url() === url && completedRequests.has(item.request()));
-  await expect.poll(() => Boolean(complete()), { timeout: 25_000 }).toBe(true);
-  return complete();
+async function readRealImage(page, connection, entryId, variant) {
+  const path = `/assetlink/v1/libraries/${connection.library_id}/entries/${entryId}/image?variant=${variant}`;
+  const result = await page.evaluate(
+    async ({ path, variant }) => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20_000);
+      let complete = false;
+      try {
+        const response = await fetch(path, {
+          credentials: "same-origin",
+          cache: "no-store",
+          redirect: "error",
+          signal: controller.signal,
+        });
+        const limit = response.status === 200 ? (variant === "thumbnail" ? 2_097_152 : 12_582_912) : 8192;
+        if (Number(response.headers.get("content-length")) > limit || !response.body)
+          throw new Error("bounded_wire_body_required");
+        const bytes = new Uint8Array(limit);
+        const reader = response.body.getReader();
+        let count = 0;
+        while (true) {
+          const part = await reader.read();
+          if (part.done) break;
+          if (count + part.value.byteLength > limit) throw new Error("wire_body_limit_exceeded");
+          bytes.set(part.value, count);
+          count += part.value.byteLength;
+        }
+        complete = true;
+        const chunks = [];
+        for (let offset = 0; offset < count; offset += 32768)
+          chunks.push(String.fromCharCode(...bytes.subarray(offset, Math.min(count, offset + 32768))));
+        return {
+          status: response.status,
+          headers: Object.fromEntries(response.headers()),
+          body64: btoa(chunks.join("")),
+        };
+      } finally {
+        clearTimeout(timeout);
+        if (!complete) controller.abort();
+      }
+    },
+    { path, variant },
+  );
+  return { status: result.status, headers: result.headers, body: Buffer.from(result.body64, "base64") };
 }
-async function imageEvidence(responses, completedRequests, connection, entryId, variant, sample) {
-  const response = await completedImageResponse(responses, completedRequests, connection, entryId, variant);
-  assert.equal(response.status(), 200, "derived image must succeed on the real service");
-  const headers = response.headers();
+async function imageEvidence(page, connection, entryId, variant, sample) {
+  const response = await readRealImage(page, connection, entryId, variant);
+  assert.equal(response.status, 200, "derived image must succeed on the real service");
+  const headers = response.headers;
   assert.equal(headers["content-type"], "image/png");
   assert.ok(headers["cache-control"]?.includes("private") && headers["cache-control"]?.includes("no-store"));
   assert.equal(headers["x-content-type-options"], "nosniff");
   assert.equal(headers["cross-origin-resource-policy"], "same-origin");
-  const bytes = await response.body();
+  const bytes = response.body;
   assert.equal(Number(headers["content-length"]), bytes.length);
   return { http_status: 200, ...inspectDerivedPng(bytes, variant, sample.size) };
 }
