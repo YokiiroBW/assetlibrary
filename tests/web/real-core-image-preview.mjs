@@ -8,6 +8,7 @@ import { parseArgs } from "node:util";
 import { chromium, expect } from "../../apps/web/node_modules/@playwright/test/index.mjs";
 import {
   corpusCases,
+  discoverCorpusEntries,
   inspectDerivedPng,
   readBoundedJson,
   validateConnection,
@@ -168,18 +169,8 @@ try {
   assert.equal(searchResult.request_id, searched.request().postDataJSON().request_id, "query correlation must match");
   assert.equal(searchResult.message_type, "control.result");
   assert.equal(searchResult.body.next_cursor, null, "the corpus query must fit one bounded page");
-  const hits = searchResult.body.items;
-  assert.equal(hits.length, corpusCases.length, "the real index must contain all ten synthetic files");
-  const entries = new Map(
-    hits.map(({ entry, library }) => {
-      assert.equal(entry.library_id, connection.library_id);
-      assert.equal(library.library_id, connection.library_id);
-      assert.match(entry.entry_id, /^[0-9a-f-]{36}$/i);
-      return [entry.relative_path, entry];
-    }),
-  );
-  for (const sample of corpusCases)
-    assert.ok(entries.has(`图片样例/${sample.path}`), "corpus entry missing from the real index");
+  const entries = discoverCorpusEntries(searchResult.body.items, connection.library_id);
+  receipt.discovery = { total_hits: searchResult.body.items.length, corpus_files: entries.size };
   const option = (sample) =>
     page
       .getByRole("listbox", { name: "资产列表" })

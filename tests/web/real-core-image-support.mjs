@@ -69,6 +69,48 @@ export function validateCorpus(manifest) {
   return manifest;
 }
 
+export function discoverCorpusEntries(hits, libraryId) {
+  assert.ok(Array.isArray(hits) && hits.length <= 100, "search discovery must stay within one bounded page");
+  const ids = new Set();
+  // Search can include physical directories. Validate every hit before narrowing to the corpus files.
+  for (const hit of hits) {
+    assert.ok(hit?.entry && hit?.library, "search hit associations are required");
+    assert.equal(hit.library.library_id, libraryId, "search library must match the requested scope");
+    assert.equal(hit.entry.library_id, libraryId, "search entry must belong to its associated library");
+    assert.match(hit.entry.entry_id ?? "", uuid, "search entry needs a stable UUID");
+    assert.ok(!ids.has(hit.entry.entry_id), "search entry IDs must be unique");
+    ids.add(hit.entry.entry_id);
+    assert.ok(
+      ["file", "directory", "reparse_file", "reparse_directory"].includes(hit.entry.kind),
+      "search kind is invalid",
+    );
+    assert.ok(
+      typeof hit.entry.relative_path === "string" &&
+        hit.entry.relative_path.length > 0 &&
+        hit.entry.relative_path.length <= 4096,
+      "search relative path is required",
+    );
+    // AssetLinkReadJson.Entry writes name on the wire; this is not a UI-derived fallback.
+    assert.equal(
+      hit.entry.name,
+      hit.entry.relative_path.split("/").at(-1),
+      "wire entry name must match its relative path",
+    );
+  }
+  const files = hits.filter(({ entry }) => entry.kind === "file" && entry.relative_path.startsWith("图片样例/"));
+  const entries = new Map();
+  for (const { entry } of files) {
+    assert.ok(!entries.has(entry.relative_path), "corpus file paths must be unique");
+    entries.set(entry.relative_path, entry);
+  }
+  assert.deepEqual(
+    [...entries.keys()].sort(),
+    corpusCases.map((sample) => `图片样例/${sample.path}`).sort(),
+    "the exact ten expected corpus files must be present once",
+  );
+  return entries;
+}
+
 export async function readBoundedJson(filename, maximum) {
   const info = await lstat(filename);
   assert.ok(

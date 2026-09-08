@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { corpusCases, inspectDerivedPng, validateConnection, validateCorpus } from "./real-core-image-support.mjs";
+import {
+  corpusCases,
+  discoverCorpusEntries,
+  inspectDerivedPng,
+  validateConnection,
+  validateCorpus,
+} from "./real-core-image-support.mjs";
 import { png } from "./image-fixtures.mjs";
 
 const connection = {
@@ -60,4 +66,61 @@ test("real PNG acceptance checks profile, aspect, orientation and complete bytes
   assert.throws(() => inspectDerivedPng(png(1600, 1067), "preview", [1200, 1800]));
   assert.throws(() => inspectDerivedPng(png(513, 342), "thumbnail", [1800, 1200]));
   assert.throws(() => inspectDerivedPng(png().subarray(0, 40), "preview", [320, 200]));
+});
+
+function searchHit(path, index, kind = "file") {
+  return {
+    library: { library_id: connection.library_id },
+    entry: {
+      library_id: connection.library_id,
+      entry_id: `aaaaaaaa-aaaa-4aaa-8aaa-${String(index).padStart(12, "0")}`,
+      relative_path: path,
+      kind,
+      name: path.split("/").at(-1),
+    },
+  };
+}
+function corpusHits() {
+  return corpusCases.map((sample, index) => searchHit(`图片样例/${sample.path}`, index));
+}
+test("discovery accepts physical directory hits while selecting the exact ten files and wire names", () => {
+  const hits = [
+    ...corpusHits(),
+    searchHit("图片样例", 10, "directory"),
+    searchHit("图片样例/中文目录", 11, "directory"),
+    searchHit("图片样例备份/other.png", 12),
+  ];
+  const files = discoverCorpusEntries(hits, connection.library_id);
+  assert.equal(files.size, 10);
+  assert.equal(files.get("图片样例/中文目录/重复内容.dat").name, "重复内容.dat");
+  assert.equal(files.get("图片样例/landscape.jpg"), hits[0].entry);
+});
+test("discovery validates every association before filtering directory or unrelated hits", () => {
+  for (const mismatch of ["library", "entry"]) {
+    const extra = searchHit("图片样例/中文目录", 10, "directory");
+    extra[mismatch].library_id = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    assert.throws(() => discoverCorpusEntries([...corpusHits(), extra], connection.library_id));
+  }
+  const invalid = searchHit("图片样例备份/other.png", 10);
+  invalid.entry.entry_id = "not-a-uuid";
+  assert.throws(() => discoverCorpusEntries([...corpusHits(), invalid], connection.library_id));
+});
+test("discovery rejects missing, duplicate, non-file corpus entries and absent or false wire names", () => {
+  assert.throws(() => discoverCorpusEntries(corpusHits().slice(1), connection.library_id));
+  assert.throws(() =>
+    discoverCorpusEntries([...corpusHits(), searchHit("图片样例/landscape.jpg", 10)], connection.library_id),
+  );
+  const duplicateId = corpusHits();
+  duplicateId[1].entry.entry_id = duplicateId[0].entry.entry_id;
+  assert.throws(() => discoverCorpusEntries(duplicateId, connection.library_id));
+  for (const change of [
+    { kind: "reparse_file" },
+    { relative_path: "图片样例备份/landscape.jpg" },
+    { name: undefined },
+    { name: "wrong.png" },
+  ]) {
+    const hits = corpusHits();
+    Object.assign(hits[0].entry, change);
+    assert.throws(() => discoverCorpusEntries(hits, connection.library_id));
+  }
 });

@@ -7,7 +7,7 @@
 ## 准备
 
 - root共享fixture提交5edf25c，`--image-fixtures`指向带manifest的已校验合成corpus，`--image-preview-worker`指向其批准的真实独立Worker。
-- 库内固定 `图片样例/`，10个样例加原138文件；由fixture先注册/扫描，客户端只通过已有登录、浏览、搜索API发现稳定entry ID。
+- 库内固定 `图片样例/`，10个样例加原138文件；由fixture先注册/扫描，客户端只通过已有登录、浏览、搜索API发现稳定entry ID。搜索可以同时命中物理目录：先校验每条hit的库/entry关联、UUID与wire名称，再只选kind=file且精确位于`图片样例/`前缀内的文件，断言预期10条唯一齐全。`name`是`AssetLinkReadJson.Entry`实际写出的wire字段，不使用UI派生兜底。
 - Web产物必须匹配本任务 `build-evidence.json` 中的JS/CSS大小和SHA256，或通过参数显式传入协调审查后的新build evidence。不以旧Web源码跑出图片验收。
 - 使用仓库固定Node24.20.0与现有Playwright1.62.1依赖。命令中的connection路径由root就绪消息提供；绝不能把文件内容、密码放入命令行、日志、提交或截图。
 
