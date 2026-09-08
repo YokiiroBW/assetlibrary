@@ -15,3 +15,9 @@ V03-007获准单写PreviewProvider.Contracts中的ImagePreviewSource(LibraryId, 
 ## 联调样例
 
 root独占共享NativeClient fixture的可选图片模式；旧默认138文件保持不变。显式合成manifest经过路径/大小/hash检查后复制到私密runtime，图片放在同库的图片样例目录。实际decoder通过显式绝对worker路径传入，仍走生产相同的隔离检查，不添加测试绕过模式。
+
+## 平台实测后的受限调整
+
+V03-007的任务自有native COM/FLS观察器经原LPAC/Job启动器实测COM初始化E_ACCESSDENIED；微软官方文档明确LPAC的COM能力单独命名lpacCom。批准仅此SID的受控兼容性探针/实现，Windows图片启用仍须完整真实拒权/资源/取消/清理证据；零网络capability、LPAC与其他限制不变，不新增registryRead或全局策略。具体准入与验收条件同步ADR0019。
+
+Linux6af1486在实际非root、父进程无cap/无seccomp环境中首次启动SIGABRT，尚未读取图片。安全stderr和精确runtime源码确认Console标准流会Dup描述符并触发懒初始化，与只许fd0/1/2的过滤冲突；owner44ab45c改固定描述符，未放宽dup/open。另补非root/零cap和RLIMIT_NPROC256软硬限制及最多257次线程探针。root按不可变SHA独立编译并进行下一轮实际验证，旧失败保留，不计decoder成功。

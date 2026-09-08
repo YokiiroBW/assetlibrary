@@ -13,6 +13,7 @@
     ".codex/handoffs/V03-005/decisions.md",
     ".codex/handoffs/V03-005/image-fixture-lifecycle.json",
     ".codex/handoffs/V03-005/integration-checkpoint.json",
+    ".codex/handoffs/V03-005/linux-decoder-progress.json",
     ".codex/handoffs/V03-005/linux-source-boundary.json",
     ".codex/handoffs/V03-005/result.json",
     ".codex/handoffs/V03-005/summary.md",
@@ -24,6 +25,7 @@
     ".codex/handoffs/V03-006/shell-policy-evidence.json",
     ".codex/handoffs/V03-006/summary.md",
     ".codex/handoffs/V03-006/tests.md",
+    ".codex/handoffs/V03-006/v03-007-windows-startup-static-review.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
     ".codex/handoffs/V03-007/proposal.md",
     ".codex/handoffs/V03-007/result.json",
@@ -147,10 +149,10 @@
   ],
   "tests": {
     "passed": 59,
-    "failed": 0,
+    "failed": 1,
     "skipped": 0,
     "report": "tests.md",
-    "scope": "Coordinator fixture14 + merged repository35 + real Core148-file lifecycle1 + Linux source-boundary9. Worker cases separate; image endpoint acceptance not executed."
+    "scope": "Coordinator previously verified59 checks; current reviewed default Linux decoder nominal case fails memory admission, with successful64MiB diagnostic kept separate. No Core image endpoint acceptance."
   },
   "risks": [
     "Actual Explorer discovery remains unresolved; Windows Session 2 is disconnected and no usable Windows package exists.",

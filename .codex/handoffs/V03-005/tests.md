@@ -43,3 +43,13 @@ f580b15经代码审查后合入，4b87896将Preview.Tests加入既有solution/Wi
 结束读回自有容器不存在，测试sandbox子目录为0。构建镜像和自有临时源码保留供后续NativeAOT测试；没有启动decoder、修改NAS、或用Docker外层拒绝冒充worker自身隔离。SDK首次提示workload验证诊断，但实际restore/format/Release和测试通过；未因此更新全局workload或忽略警告。
 
 审查另发现数据库timestamptz与文件100ns时间精度潜在不一致，已交V03-007在实际索引接线前复现并修正；上述9项只覆盖物理读取基础，不能替代持久索引/解码/HTTP联调。
+
+## 独立Linux解码平台验证进行中
+
+6af1486与44ab45c分别按不可变tar强hash传入同一自有开发环境，均完成实际NativeAOT编译。44ab使用独立RID锁，restore显式传 `-p:RuntimeIdentifier=linux-x64` 加 `--locked-mode`，之后publish `--no-restore`；普通restore的 `--runtime` 设置复数属性导致首次误选普通lock/NU1004，纠正命令后通过，未解锁或改依赖。DebugType=None/DebugSymbols=false使44ab产物仅含2,182,152B可执行文件、11,756,440B Skia库和精确MIT/完整native notices。
+
+实际直接运行在dev-230非root用户、父进程cap0/seccomp0下，没有Docker外层隔离替代。6af因Console.Dup/懒初始化与fd白名单冲突，Ready前SIGABRT；精确runtime源码与安全stderr互证，44ab改固定fd后已能Ready并读完输入。44ab的默认GC128MiB使VmSize752996KiB超过AS512MiB，8.6MiB位图mmap实际ENOMEM，图片返回Unavailable，仍不能启用。
+
+同44ab的隔离probe实际从seccomp0进入2/NNP1，文件、创建socket、预存socket连接、跨进程信号/内存、fork、非线程clone、exec、io_uring均拒绝；io_uring前置EFAULT与后置EPERM区分外层策略。CPU探针由内核在约3.001秒SIGKILL，非parent timeout。native内存/线程探针虽报告拒绝，但在已过量保留VM下的失败不能单独证明目标预算；未把它们当最终通过。
+
+只降低子进程GC至64MiB的单变量诊断使Ready VmSize424728KiB，10个合成正常/异常样例全部符合预期，方向/尺寸、相同JPEG改名派生hash一致，透明图corner alpha0/center160、只有标准srgb元数据，派生图已实看。该覆盖用于指导owner固化预算，不能代替无环境覆盖的正式配置验收。原始文件索引与摘要见linux-decoder-progress.json，当前等待新默认/VM admission guard与Host接线稳定提交后复测。

@@ -1,0 +1,58 @@
+{
+  "status": "partial",
+  "scope": "Linux decoder platform verification; no Core image endpoint or client acceptance yet",
+  "artifacts": {
+    "publish-6af1486.json": "a1ea65d572399fdbdd1f2dab6c8be9af268103325278a73c46441f41560c2977",
+    "startup-6af1486.json": "c30146a80a3243628f7ed7e13c8022726d24fb997384eeac42430e5aac55035a",
+    "publish-44ab45c.json": "6b770d6d0110db96cb634876164bdaac83e391c8423d935ff6d9e36a315c57b8",
+    "smoke-44ab45c.json": "699c0261b0496fe329d27136be1a6e1a5ec66fd241e63de6a7979c414d40eb7c",
+    "probes-44ab45c.json": "02f37bc7bf5825288acd8ef46fa3e3eb396ea90b3da8c229cfb50909b2c6c7d5",
+    "trace-44ab45c.json": "903347e0e00a7dd37c754908668d2cdb26e53315d658c9c6f22c6e97724e6472",
+    "gc64-44ab45c.json": "f192eaa71c17e4b8968c93d1ffa546be437b147ecd82ef6cbf9d0464fcdd37aa",
+    "corpus-gc64-44ab45c.json": "755aefcf676e7bbba09cb22552ce5f5b783b275b18b9b8d6fd3a7e29fd6663e7"
+  },
+  "builds": {
+    "6af1486": "NativeAOT published with full notices; late native dbg remained",
+    "44ab45c": "locked RID restore and NativeAOT published; explicit RuntimeIdentifier selects release lock; DebugType=None/DebugSymbols=false removes symbols"
+  },
+  "default_failures": [
+    {
+      "source": "6af1486",
+      "failure": "ConsolePal duplicated descriptors/lazy Console.Out after seccomp caused SIGABRT before input; fixed by44ab45c",
+      "resolved": true
+    },
+    {
+      "source": "44ab45c",
+      "failure": "735MiB existing virtual mapping exceeds512MiB AS ceiling; actual8.6MiB bitmap mmap ENOMEM after complete input read",
+      "resolved_in_reviewed_default": false
+    }
+  ],
+  "isolation44ab45c": {
+    "outside_docker": true,
+    "initial_seccomp": 0,
+    "capabilities": "zero",
+    "file_socket_connect_cross_process_fork_clone_exec_io_uring": "denied",
+    "cpu_probe": "kernel SIGKILL at3.001seconds; parent timeout false",
+    "memory_thread_probe_limitations": "memory rejected and threads_created0; initial VM over AS makes these insufficient as final budget evidence"
+  },
+  "diagnostic_gc64": {
+    "source": "44ab45c",
+    "only_override": "DOTNET_GCHeapHardLimit=4000000 hex",
+    "ready_vm_kib": 424728,
+    "corpus_cases": 10,
+    "all_expected_statuses": true,
+    "same_jpeg_and_renamed_derivative": true,
+    "source_images": "synthetic tracked corpus only",
+    "formal_default_acceptance": false
+  },
+  "visual_and_pixel_review": {
+    "rotate_six": "1066x1600, blue/green/ochre/red top to bottom matches clockwise orientation6",
+    "transparent": "900x1200;cornerRGBA0,0,0,0;center35,100,204,160",
+    "metadata_keys": [
+      "srgb"
+    ],
+    "sources": ".runtime/linux-aot-evidence/derived"
+  },
+  "next": "Rebuild the owner-committed64MiB default/VM admission guard, run without GC override, then real Core endpoint and client integration",
+  "runtime_reference": "https://raw.githubusercontent.com/dotnet/runtime/v10.0.11/src/libraries/System.Console/src/System/ConsolePal.Unix.cs"
+}
