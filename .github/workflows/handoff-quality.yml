@@ -54,6 +54,7 @@ jobs:
           cache-dependency-path: |
             services/core-server/packages.lock.json
             services/worker-supervisor/packages.lock.json
+            services/worker-supervisor/ImagePreview/packages.lock.json
             packages/sdk/assetlink/dotnet/packages.lock.json
             tests/dotnet/AssetLibrary.AssetLink.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
