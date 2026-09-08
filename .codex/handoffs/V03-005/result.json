@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "ae224053351641397674fc694bf3ee3e36f11479",
+  "commit": "249fed9",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/decisions.md",
@@ -216,10 +216,17 @@
     "tests/dotnet/AssetLibrary.Preview.Tests/MSTestSettings.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/PngDerivativeValidationTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/StableImageSourceTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsComBoundaryTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageBoundaryTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageIdentityTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageNetworkTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageOwnerJournalTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageParentExitTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProbe.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProcessTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageResourceTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientImageFixtureTests.cs",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientIntegrationServerTests.cs",
@@ -274,7 +281,8 @@
       "windows_deleted_profile_recovery": 1,
       "windows_owner_journal": 14,
       "actual_package_linux_cases": 20,
-      "actual_package_linux_parent_death": 1
+      "actual_package_linux_parent_death": 1,
+      "windows_live_positive_identity": 1
     },
     "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified."
   },
@@ -311,7 +319,8 @@
     "architecture_tests": [
       "Contract generator --check and architecture checks passed at freeze38aedca",
       "Merged repository verification passed: handoffs/module architecture/contracts/source/SDK/theme/dependencies,21 migration and14 architecture regressions;Alpha remains blocked",
-      "Exact f580b15 source boundary linked into shared solution/CI: Linux locked restore/format/Release and9 tests passed, including actual leaf symlink denial with no skip; no decoder/NAS conclusion"
+      "Exact f580b15 source boundary linked into shared solution/CI: Linux locked restore/format/Release and9 tests passed, including actual leaf symlink denial with no skip; no decoder/NAS conclusion",
+      "Final Windows identity/native-test integration: affected format/Release zero warnings; root positive-timestamp/live-SID regression1/1; repository architecture/contracts/source gates passed. See tests.md for distinct native and LAN evidence limits."
     ],
     "technical_debt": [
       "Complete native Explorer/IPC and current Windows controls with a usable desktop.",

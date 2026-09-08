@@ -24,6 +24,6 @@
 
 ## 验证口径
 
-最新带Host/Python/原生Worker的整solution格式和Release零告警，360通过/0失败/25明确NotExecuted。随后删除profile恢复1/1、负/非规范身份14/14通过。NAS平台Ready失败1项单列，后续19项未执行；开发Linux实际包20/20与父退出1/1不能抵消NAS失败。Windows最新native和LAN证据正在按稳定提交集成。详细原始结果见tests.md及.runtime/v03-005-final-tests。
+最新带Host/Python/原生Worker的整solution格式和Release零告警，360通过/0失败/25明确NotExecuted。随后删除profile恢复1/1、负/非规范身份14/14通过。NAS平台Ready失败1项单列，后续19项未执行；开发Linux实际包20/20与父退出1/1不能抵消NAS失败。Windows c6649c5稳定native/身份修复已集成，原窗口12/12与LAN6对照明确范围；root新增活SID身份回归1/1及affected构建/仓库验证通过。详细原始结果见tests.md及.runtime/v03-005-final-tests。
 
 线程/路径见windows.json与注册表，模块按任务包单写；共享wire、中央依赖/CI、版本、迁移和最终集成由root维护。

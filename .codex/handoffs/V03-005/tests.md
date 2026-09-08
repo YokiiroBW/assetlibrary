@@ -91,3 +91,7 @@ NAS打包d18首次0f4d0c6在NativeAOT发布遇NETSDK1112；00b03b1统一restore/
 NAS5.10.55+第一image-0-0在Ready前受控失败（status7、零stderr、未发图、非parent timeout），其余19项未执行，所有自有容器回收、源hash/mtime不变，见nas-worker-first-failure.json。宿主只读查询PR_GET_SECCOMP=-1/EINVAL22，seccomp GET_ACTION_AVAIL=-1/ENOSYS38，proc/status无Seccomp，Docker仅apparmor；同策略临时容器cap0/NNP/AS/CPU/FSIZE/CORE/NPROC均成功，但TSYNC仍ENOSYS。禁止据此放宽隔离或启用图片。nas-kernel-capability.json与nas-platform-decision.md记录证据及待用户确认的部署方向。
 
 Windows已恢复过真实桌面并收到用户明确恢复授权，随后在新鲜Ctrl+L前遇0x80070005，2026-09-08T17:16:27Z又读到WTSDisconnected。授权保留，但要保持RDP连接/解锁才能继续；已撤销本轮注册且两键false，不盲重复。无GUI边界测试仍在推进，普通token/普通AC/LPAC的LAN对照待精确端点回执；Windows整体和Explorer不宣告完成。
+
+Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验实际进程的精确AppContainer SID，不能只凭时间不符就把活Worker视为已退出。Root审查生产diff及相关测试，affected format/Release零告警；以原窗口已核hash的可信native probe DADE2F45F34DB1C271BE6BC8EB756DA4D830D68D20FE0E1B2BBA00E6CDD272EC实际执行新身份回归1/1通过，101ms、0skip。后续仓库/架构/契约验证通过；未重复完整360项。
+
+原窗口稳定native矩阵12/12通过，范围包括宿主marker/RX、非stdio事件、FSO/BITS COM、真实内存、3秒CPU配置与周期性overshoot、子进程拒绝、取消、持stdin的父退出和身份；网络用例准确记为LPAC初始化阻断，不能改称直接connect EACCES。另一次LAN6对照在root短时端点完成：普通token TCP0/HTTP成功，普通AC solelpacCom且零network的connect10013/WinHTTP12029，LPAC WSAStartup10107/WinHTTP12004。Root服务端仅见自己先验1连接和普通token的2连接，无AC/LPAC连接，零源过滤拒绝，端点已关闭。windows-lan-control.json保存原始时刻与清理。第一轮59249被既有防火墙挡住的正控失败保留；第二轮选既有允许区间内空闲39420，没有修改防火墙。所有这些证据不代替真实Explorer入口或通用Provider门禁。
