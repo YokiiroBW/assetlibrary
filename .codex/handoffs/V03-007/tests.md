@@ -1,20 +1,3 @@
-# V03-007 测试记录
-
-## 执行环境
-
-## 执行命令
-
-## 架构与契约测试
-
-## 通过
-
-## 失败 / 跳过
-
-## 故障注入与恢复验证
-
-## 性能数据
-
-## 尚未覆盖
 # V03-007 验证记录
 
 2026-09-08，在本任务独立工作区运行基线 `python -I -B scripts/verify_repository.py` 成功。Python 使用 `C:/Users/Administrator/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe`，默认 PATH 没有 python；没有安装新运行时。
