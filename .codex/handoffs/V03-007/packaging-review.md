@@ -28,7 +28,7 @@ Docker 忽略规则排除了 bin/obj/.runtime，不能依赖开发机的已发�
 独立构建命令已经由本任务 Windows 与 root Linux 使用。以下占位路径须由调用方替换为自有目录：
 
 ```text
-dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -p:RuntimeIdentifier=<win-x64|linux-x64> -p:PublishAot=true -p:AssetLibraryReleaseLockRoot=<absolute-worker-lock-directory> --locked-mode
+dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -p:RuntimeIdentifier=<win-x64|linux-x64> -p:PublishAot=true -p:SelfContained=true -p:AssetLibraryReleaseLockRoot=<absolute-worker-lock-directory> --locked-mode
 dotnet publish services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -c Release -p:RuntimeIdentifier=<same-RID> --self-contained true -p:PublishAot=true -p:AssetLibraryReleaseLockRoot=<same-lock-directory> -p:DebugType=None -p:DebugSymbols=false --no-restore -o <owned-worker-output>
 ```
 

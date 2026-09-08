@@ -19,7 +19,7 @@ WindowsWorkerJob.cs、ImageChildProcess.cs（跨平台共享接口/普通子进�
 
 ## 构建、候选与复现
 
-SDK `C:/Users/Administrator/AppData/Local/Temp/V01-014-tooling-and-tests/tooling/dotnet/dotnet.exe`。独立worker普通锁为net10.0，实际AOT用locks/<project>.win-x64.lock.json与显式`-p:RuntimeIdentifier=win-x64 -p:PublishAot=true -p:AssetLibraryReleaseLockRoot=<absolute>`；不要再把RID写回普通lock。
+SDK `C:/Users/Administrator/AppData/Local/Temp/V01-014-tooling-and-tests/tooling/dotnet/dotnet.exe`。独立worker普通锁为net10.0，实际AOT用locks/<project>.win-x64.lock.json与显式`-p:RuntimeIdentifier=win-x64 -p:PublishAot=true -p:SelfContained=true -p:AssetLibraryReleaseLockRoot=<absolute>`；不要再把RID写回普通lock。
 
 最新候选 `.runtime/preview-worker/win-x64-candidate`：exe1,469,952B、Skia12,274,488B、MIT1129B、完整notices139775B，另有8,359,936B项目PDB尚需从最终候选分离（native PDB已不在此候选）。这不是最终交付包。Native symbols保留在build输出供诊断。
 

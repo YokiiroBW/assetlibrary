@@ -16,7 +16,7 @@ dotnet build services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.W
 Actual AOT publishing enables strict AOT/trimming diagnostics. Use the existing `AssetLibraryReleaseLockRoot` property with a task-owned absolute directory, distinct from the ordinary lock. The first RID restore generates the release lock; subsequent verification must use `--locked-mode`. Linux must build on Linux with the pinned SDK, clang and zlib development headers. Windows uses the installed MSVC toolchain. Native symbols remain diagnostic build artifacts; final package symbol separation still needs verification.
 
 ```text
-dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true -p:AssetLibraryReleaseLockRoot=<absolute-release-lock-directory> --locked-mode
+dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true -p:SelfContained=true -p:AssetLibraryReleaseLockRoot=<absolute-release-lock-directory> --locked-mode
 dotnet publish services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj -c Release -p:RuntimeIdentifier=linux-x64 --self-contained true -p:PublishAot=true -p:AssetLibraryReleaseLockRoot=<absolute-release-lock-directory> -p:DebugType=None -p:DebugSymbols=false --no-restore -o <owned-output>
 ```
 

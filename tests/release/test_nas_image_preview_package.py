@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import os
 from pathlib import Path
+import shlex
 import shutil
 import tempfile
 import unittest
@@ -20,6 +21,25 @@ IMAGE = "sha256:" + "b" * 64
 
 
 class NasImagePreviewPackageTests(unittest.TestCase):
+    def test_docker_restore_and_publish_resolve_the_same_self_contained_aot_graph(self):
+        dockerfile = (ROOT / "infra/docker/nas/Dockerfile").read_text(encoding="utf-8").replace("\\\n", " ")
+        instruction = next(line for line in dockerfile.splitlines()
+                           if line.startswith("RUN dotnet restore services/worker-supervisor/ImagePreview/"))
+        restore, publish = [shlex.split(part) for part in instruction.removeprefix("RUN ").split("&&")[:2]]
+        properties = []
+        for arguments in (restore, publish):
+            values = dict(argument[3:].split("=", 1) for argument in arguments if argument.startswith("-p:"))
+            if "--self-contained" in arguments:
+                values["SelfContained"] = arguments[arguments.index("--self-contained") + 1]
+            properties.append(values)
+        for name in ("RuntimeIdentifier", "PublishAot", "SelfContained", "AssetLibraryReleaseLockRoot"):
+            with self.subTest(property=name):
+                self.assertIn(name, properties[0])
+                self.assertEqual(properties[0][name], properties[1][name])
+        self.assertEqual("true", properties[0]["SelfContained"])
+        self.assertIn("--locked-mode", restore)
+        self.assertIn("--no-restore", publish)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="nas-preview-package-")
         self.addCleanup(self.temporary.cleanup)

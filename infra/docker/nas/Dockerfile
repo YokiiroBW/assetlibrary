@@ -51,7 +51,7 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends clang zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 RUN dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj \
-       --locked-mode -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true \
+       --locked-mode -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true -p:SelfContained=true \
        -p:AssetLibraryReleaseLockRoot=/src/services/worker-supervisor/ImagePreview/locks \
     && dotnet publish services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj \
        --configuration Release --self-contained true --no-restore \
