@@ -1,0 +1,74 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-004",
+  "title": "native-client-real-integration",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "integration-test-owner",
+  "branch": "codex/v03-004-native-client-real-integration",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-004",
+  "commit": "0296df89e572814085cde2a8105bb4ad5992bad5",
+  "changed_files": [
+    ".codex/handoffs/V03-004/result.json",
+    ".codex/handoffs/V03-004/summary.md",
+    ".codex/handoffs/V03-004/tests.md",
+    ".codex/tasks/V03-004.md",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientConnectionFiles.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientFixtureSeed.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientIntegrationServerTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientSampleAssets.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientTlsFixtureTests.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationCertificateContainer.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationConfiguration.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/TrialHostIntegrationFixture.cs",
+    "tests/dotnet/Shared/TrialTestTls.cs",
+    "tests/integration/native-clients/README.md",
+    "tests/integration/native-clients/serve.py",
+    "tests/integration/native-clients/test_serve.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "execution_status": "code_and_completed_regressions_passed_live_client_fixture_still_running",
+    "suites": { "runner_boundaries": 5, "tls_fixture": 3, "native_deadline": 1, "original_real_trial": 1, "migration_manifest": 21, "architecture": 14 },
+    "deadline_evidence": ".runtime/native-clients-evidence/20260908T085311Z-adf0d3a3",
+    "original_trial_evidence": ".runtime/real-trial-regression/20260908T085618Z-963768ae",
+    "active_client_fixture": ".runtime/native-clients-evidence/20260908T085431Z-e77b23d2",
+    "completed_runs_cleanup": "verified",
+    "active_run_cleanup": "pending_explicit_stop_or_deadline"
+  },
+  "risks": [
+    "Live two-hour client fixture remains active; its cleanup is not yet accepted.",
+    "Native UI/device/TLS negative acceptance belongs to each client task.",
+    "Temporary PostgreSQL fsync optimizations are not power-loss durability evidence.",
+    "GC/finalizer handling is confined to the test fixture and is not production crash-lifecycle proof."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 4,
+  "handoff_summary": ".codex/handoffs/V03-004/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "test-only native client integration using existing production TrialHost/Core composition",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Original real-trial Python PostgreSQL fixture, 21 production migrations and six NOINHERIT module LOGINs",
+      "TrialHostIntegrationFixture and production TrialHostFactory/Kestrel/authentication/worker composition",
+      "Existing local operator bootstrap, account lifecycle and same-origin Cookie/CSRF HTTP helpers",
+      "Existing test TLS generator and exact owned certificate-container observation"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": ["Existing integration-test assembly composes production modules; native consumers access only production HTTPS endpoints."],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "Exact SDK locked restore and warning-free Release build; dotnet format passed",
+      "verify_repository.py passed including 358-file .NET source gate, SDK/contracts, manifest and architecture regressions",
+      "Real native deadline fixture and original HTTPS/PostgreSQL/worker/browser integration both passed with verified cleanup"
+    ],
+    "technical_debt": ["Complete and record cleanup of the still-running native client fixture before final task acceptance."]
+  }
+}
