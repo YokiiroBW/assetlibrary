@@ -1,0 +1,32 @@
+{
+  "RecordedAtUtc": "2026-09-08T11:54:05.5405623+00:00",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "SourceUnchanged": true,
+  "Results": [
+    {
+      "Case": "default-inherited-path",
+      "Passed": true,
+      "ExitCode": 0,
+      "Output": "RuntimePreloaded=false\r\nLoadLibrary=00000000\r\nRuntime.MSVCP140.dll=System32\r\nRuntime.VCRUNTIME140.dll=System32\r\nRuntime.VCRUNTIME140_1.dll=System32\r\nDllGetClassObject=00000000\r\nCreateInstance=00000000"
+    },
+    {
+      "Case": "default-system32-path",
+      "Passed": true,
+      "ExitCode": 0,
+      "Output": "RuntimePreloaded=false\r\nLoadLibrary=00000000\r\nRuntime.MSVCP140.dll=System32\r\nRuntime.VCRUNTIME140.dll=System32\r\nRuntime.VCRUNTIME140_1.dll=System32\r\nDllGetClassObject=00000000\r\nCreateInstance=00000000"
+    },
+    {
+      "Case": "restricted-system32-path",
+      "Passed": true,
+      "ExitCode": 0,
+      "Output": "RuntimePreloaded=false\r\nLoadLibrary=00000000\r\nRuntime.MSVCP140.dll=System32\r\nRuntime.VCRUNTIME140.dll=System32\r\nRuntime.VCRUNTIME140_1.dll=System32\r\nDllGetClassObject=00000000\r\nCreateInstance=00000000"
+    },
+    {
+      "Case": "missing-dll-negative-control",
+      "Passed": true,
+      "ExitCode": 1,
+      "Output": "RuntimePreloaded=false\r\nLoadLibrary=0000007e"
+    }
+  ],
+  "Scope": "Direct DLL loading and class factory only; no registry writes or Explorer activation."
+}

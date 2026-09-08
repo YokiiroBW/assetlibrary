@@ -1,0 +1,31 @@
+{
+  "observed_date": "2026-09-08",
+  "scope": "Read-only snapshot; no process, registry, or security policy changes",
+  "old_dll_sha256": "0174db9b1b4ccd4925d3a28470930fa6faebd4070348cc374a7cb87313e2fd15",
+  "old_dll_direct_imports": ["ole32.dll", "OLEAUT32.dll", "SHELL32.dll", "SHLWAPI.dll", "KERNEL32.dll", "MSVCP140.dll", "VCRUNTIME140.dll", "VCRUNTIME140_1.dll", "api-ms-win-crt-runtime-l1-1-0.dll", "api-ms-win-crt-string-l1-1-0.dll", "api-ms-win-crt-stdio-l1-1-0.dll", "api-ms-win-crt-heap-l1-1-0.dll"],
+  "system32_vc_runtime_versions": {"msvcp140.dll": "14.50.35719.0", "vcruntime140.dll": "14.50.35719.0", "vcruntime140_1.dll": "14.50.35719.0"},
+  "observer": {"file": "ExplorerLoaderProbe.exe", "sha256": "0526f024ba101fbd73866d6b0bc2ba130b8ea7f55fd77ba9de8c4b1d405775f0", "bytes": 142336, "direct_imports": ["ole32.dll", "KERNEL32.dll"]},
+  "process_context": [
+    {"pid": 28020, "name": "pwsh", "session": 2, "integrity_rid": 8192, "extension_point_disable_flags": 0, "signature_flags": 0, "image_load_flags": 0},
+    {"pid": 6284, "name": "explorer", "session": 2, "integrity_rid": 8192, "extension_point_disable_flags": 0, "signature_flags": 0, "image_load_flags": 0},
+    {"pid": 17944, "name": "explorer", "session": 2, "integrity_rid": 8192, "extension_point_disable_flags": 0, "signature_flags": 0, "image_load_flags": 0},
+    {"pid": 24644, "name": "explorer", "session": 2, "integrity_rid": 8192, "extension_point_disable_flags": 0, "signature_flags": 0, "image_load_flags": 0},
+    {"pid": 26128, "name": "explorer", "session": 2, "integrity_rid": 8192, "extension_point_disable_flags": 0, "signature_flags": 0, "image_load_flags": 0}
+  ],
+  "process_context_method": "OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION), GetTokenInformation(TokenIntegrityLevel), GetProcessMitigationPolicy(6,8,10). No process memory writes or policy changes.",
+  "explorer_module_snapshot": {"proof_dll_loaded": false, "ucrtbase_from_system32": true, "vc_runtime_app_variants_observed": true, "vc_runtime_app_variants_source": "MicrosoftWindows.Client.Photon SystemApps", "limitation": "Snapshot only; not a loader event trace."},
+  "event_queries": {
+    "start_local": "2026-09-08T16:00:00+08:00",
+    "limit_per_log": 200,
+    "match": "AssetLibraryExplorerProof or ExplorerProofProbe in rendered message",
+    "code_integrity_operational": {"events_read": 200, "matching_events": 0, "truncated_window_possible": true},
+    "applocker_exe_dll": "NoMatchingEventsFound",
+    "application_side_by_side": "NoMatchingEventsFound",
+    "limitation": "Absence of matched records does not prove no policy or dependency failure. No actual Explorer loader trace was collected."
+  },
+  "native_ui": {"list_apps_and_windows": "Only Codex was targetable", "action": "sky.launch_app(Microsoft.Windows.Explorer)", "error": "GetCursorPos 0x80070005 access denied", "after_readback": "Only Codex was targetable", "further_input": "stopped", "old_owned_windows": "Still require coordinator to establish fresh ownership and clean up; no stale handle actions", "launch_effect": "No new Explorer window observed; cannot assert unavailable UI has no hidden window"},
+  "registry_final": {"ClassPresent": false, "NamespacePresent": false, "writes_in_this_task": false},
+  "explorer_path_environment_read": false,
+  "real_explorer_entry_retried": false,
+  "production_shell_enabled": false
+}
