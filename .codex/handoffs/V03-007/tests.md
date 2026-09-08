@@ -98,3 +98,5 @@ c5495f7308903aabe2a356ca496c777f5b9287b0新增tests/integration/native-clients/v
 运行入口：python3 -I -B verify_nas_worker.py --build-manifest <verified-bundle>/build-manifest.json --corpus <fixed-image-preview-v1> --marker <existing-daemon-visible-readonly-canary> --evidence <new-directory-under-owned-parent>。Target NAS kernel5.10.55+/Docker24.0.2/Python3.8.15由root执行，本窗口未连接NAS。实际20项仍待root结果，parent-death后续单列。
 
 root审查后增量c5ffb03：create失败/超时或正常返回却无cid/标签记录时，不再清creation_unconfirmed；cleanup_verified继续false。仅发现并核验已记录ID，或最终确认该ID被移除且不再存在后，才清此标志。三个适配边界自检（失败、超时、正常返回，均无ID）全部拒绝、保持unconfirmed并确认未发rm；Python3.8语法/diff通过。成功主组输入未变，未重复运行。
+
+Windows owner后续5bce4cdf7f2d4919cbe02cdd9c883fbeff91f1e4已独立审查合为bfc5fc1：journal拒绝负creation，保持既有canonical数字及合法Created0/Started正值；owner实际14/14，未冒充本机重跑。该组合本地Core Release/no-restore构建0警告0错误。此为Windows原有所有权源码，NAS harness和打包代码未改。

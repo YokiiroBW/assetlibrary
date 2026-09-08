@@ -92,7 +92,8 @@
     "scripts/build_nas_deployment.py",
     "tests/release/test_nas_image_preview_package.py",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs",
-    "tests/integration/native-clients/verify_nas_worker.py"
+    "tests/integration/native-clients/verify_nas_worker.py",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageOwnerJournalTests.cs"
   ],
   "changed_contracts": [
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
@@ -142,7 +143,8 @@
       "NAS packaging: dedicated9 passed/2 POSIX platform gaps; affected release suite47 passed/0 failed/5 explicit platform/environment gaps. Actual Docker build stays pending root.",
       "Root dev-230 clean checkpoint0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2: new NAS packaging11/11 passed,38ms,no skip; actual image builder started but not yet accepted.",
       "00b03b1 adds actual Docker restore/publish graph-parity regression: local NAS10 passed/2 POSIX unavailable; first real image NETSDK1112 failure remains recorded pending root rebuild.",
-      "Root a12b0d1: Linux NAS12/12 and actual AOT/full image package passed, built_not_deployed. Test-only harness c5495f7 Python3.8 syntax, PNG/pipe negatives and real bounded subprocess/reap self-checks passed; actual NAS20 cases pending root."
+      "Root a12b0d1: Linux NAS12/12 and actual AOT/full image package passed, built_not_deployed. Test-only harness c5495f7 Python3.8 syntax, PNG/pipe negatives and real bounded subprocess/reap self-checks passed; actual NAS20 cases pending root.",
+      "Integrated Windows owner5bce4cd as bfc5fc1; owner14/14 identity cases reported, local Core Release build zero warnings; no NAS harness/package changes."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
