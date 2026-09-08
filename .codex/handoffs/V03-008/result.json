@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v03-008-web-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
-  "commit": "9bf074e2273f2ecc03cfaa96b2f7cc800eca379e",
+  "commit": "badf942ab520a0be093761a30f5ecf93b25ae543",
   "changed_files": [
     ".codex/handoffs/V03-008/build-evidence.json",
     ".codex/handoffs/V03-008/implementation-plan.md",
@@ -45,7 +45,7 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 69,
+    "passed": 72,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
@@ -79,7 +79,8 @@
       "validate_web_dependencies.py --require-build-artifacts passed with coordinator 23ad33d policy for final source",
       "65 unique Playwright cases passed; no skipped tests",
       "verify_repository baseline passed; later old bundle budget failure closed by original targeted check; aggregate was not unnecessarily rerun",
-      "Real Core CLI preparation: syntax/format passed, four Node input checks passed, default Playwright collection remains 65; live server run awaits coordinator READY"
+      "Real Core CLI preparation: syntax/format passed, four Node input checks passed, default Playwright collection remains 65; live server run awaits coordinator READY",
+      "Runner discovery correction: validates every raw hit before selecting the exact 10 corpus files; actual wire name confirmed; seven Node input checks and syntax passed, no product regression rerun or live service run"
     ],
     "technical_debt": []
   }
