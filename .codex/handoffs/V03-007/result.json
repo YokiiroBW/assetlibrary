@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "c5495f7308903aabe2a356ca496c777f5b9287b0",
+  "commit": "c5ffb03b7fcf7a0bda27afb84d1d174b67799a4d",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",

@@ -96,3 +96,5 @@ c5495f7308903aabe2a356ca496c777f5b9287b0新增tests/integration/native-clients/v
 脚本每Docker control20秒、ready10秒、worker25秒、全组600秒；stderr16KiB、PNG按2MiB/12MiB+24-byte header、probe16KiB。Core镜像身份/commit/固定Worker path核对；每新容器设置并inspect校验1654:1654、cap_drop ALL、NNP、init、readonly、networknone、1GiB、cpu-shares1024、tmpfs64m，不设置CFS/PID上限或seccomp覆盖。原样例不挂载，只ready后发有界字节。CPU必须137/OOMfalse/非parent timeout；threads必须真实created>0且内部passed（含join）；保存initial seccomp/io_uring而不把外层拒绝冒充新增隔离证据。输出仅安全JSON/派生PNG，完整ID ledger与逐项cleanup verification，失败也finally核身份后删除并查询不存在。
 
 运行入口：python3 -I -B verify_nas_worker.py --build-manifest <verified-bundle>/build-manifest.json --corpus <fixed-image-preview-v1> --marker <existing-daemon-visible-readonly-canary> --evidence <new-directory-under-owned-parent>。Target NAS kernel5.10.55+/Docker24.0.2/Python3.8.15由root执行，本窗口未连接NAS。实际20项仍待root结果，parent-death后续单列。
+
+root审查后增量c5ffb03：create失败/超时或正常返回却无cid/标签记录时，不再清creation_unconfirmed；cleanup_verified继续false。仅发现并核验已记录ID，或最终确认该ID被移除且不再存在后，才清此标志。三个适配边界自检（失败、超时、正常返回，均无ID）全部拒绝、保持unconfirmed并确认未发rm；Python3.8语法/diff通过。成功主组输入未变，未重复运行。
