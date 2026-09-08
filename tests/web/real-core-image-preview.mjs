@@ -24,6 +24,7 @@ const { values } = parseArgs({
     manifest: { type: "string" },
     evidence: { type: "string" },
     "build-evidence": { type: "string" },
+    "interaction-only": { type: "boolean", default: false },
   },
 });
 if (values.help || !values.execute) {
@@ -37,6 +38,7 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const receipt = {
   status: "failed",
   source: "real_core_https",
+  scope: values["interaction-only"] ? "interaction_continuation" : "complete_corpus_and_interactions",
   cases: [],
   screenshots: [],
   browser_closed: false,
@@ -48,6 +50,7 @@ let browser;
 let deadline;
 let timedOut = false;
 let abortAcceptance;
+let diagnosticPage;
 try {
   await Promise.race([
     (async () => {
@@ -109,6 +112,7 @@ try {
       context.setDefaultTimeout(25_000);
       context.setDefaultNavigationTimeout(25_000);
       const page = await context.newPage();
+      diagnosticPage = page;
       const responses = [];
       const foreignRequests = [];
       let scriptDialogs = 0;
@@ -204,17 +208,12 @@ try {
           .getByRole("listbox", { name: "资产列表" })
           .locator(`[data-entry-id="${entries.get(`图片样例/${sample.path}`).entry_id}"]`);
 
-      for (const sample of corpusCases) {
+      for (const sample of values["interaction-only"] ? [] : corpusCases) {
         const entry = entries.get(`图片样例/${sample.path}`);
         await checkpoint(`case:${sample.path}`);
         const row = option(sample);
         // Drive the application's virtual-list keyboard navigation; generic DOM scrolling can detach its target.
-        await page.getByRole("listbox", { name: "资产列表" }).locator('[data-entry-row][tabindex="0"]').focus();
-        await page.keyboard.press("Home");
-        const rowIndex = searchResult.body.items.findIndex((hit) => hit.entry.entry_id === entry.entry_id);
-        assert.ok(rowIndex >= 0 && rowIndex < 100);
-        for (let index = 0; index < rowIndex; index++) await page.keyboard.press("ArrowRight");
-        await expect(row).toBeFocused();
+        await focusRealEntry(page, row, entry.entry_id, searchResult.body.items);
         const trigger = await row.elementHandle();
         let thumbnailDimensions;
         if (sample.result === "image") {
@@ -313,15 +312,21 @@ try {
       }
       const jpeg = receipt.cases.find((item) => item.case === "landscape.jpg" && item.variant === "preview");
       const renamed = receipt.cases.find((item) => item.case === "中文目录/重复内容.dat" && item.variant === "preview");
-      assert.equal(
-        jpeg.sha256,
-        renamed.sha256,
-        "identical source bytes under a Unicode .dat name must produce the same derivative",
-      );
+      if (!values["interaction-only"])
+        assert.equal(
+          jpeg.sha256,
+          renamed.sha256,
+          "identical source bytes under a Unicode .dat name must produce the same derivative",
+        );
 
       await checkpoint("real_quick_look");
       const transparent = corpusCases.find((sample) => sample.alpha);
-      await option(transparent).click();
+      await focusRealEntry(
+        page,
+        option(transparent),
+        entries.get(`图片样例/${transparent.path}`).entry_id,
+        searchResult.body.items,
+      );
       const previousHistory = await page.evaluate(() => ({ href: location.href, length: history.length }));
       await page.keyboard.press("Space");
       const quick = page.getByRole("dialog", { name: "快速查看", exact: true });
@@ -393,6 +398,26 @@ try {
         ? "assertion_failed"
         : "execution_failed",
   };
+  if (diagnosticPage && !diagnosticPage.isClosed()) {
+    try {
+      receipt.failure.ui_state = await diagnosticPage.evaluate(() => ({
+        active_id: document.activeElement?.id ?? "",
+        active_entry_id: document.activeElement?.getAttribute("data-entry-id") ?? null,
+        open_dialogs: [...document.querySelectorAll("dialog[open]")].map((dialog) => dialog.getAttribute("aria-label")),
+      }));
+      receipt.failure.category = /toBeFocused/.test(error?.message ?? "")
+        ? "focus_assertion"
+        : /toBeVisible/.test(error?.message ?? "")
+          ? "visibility_assertion"
+          : /strict mode violation/.test(error?.message ?? "")
+            ? "ambiguous_target"
+            : /not attached|detached/.test(error?.message ?? "")
+              ? "detached_target"
+              : "other";
+    } catch {
+      receipt.failure.ui_state = "unavailable";
+    }
+  }
   process.exitCode = 1;
 } finally {
   clearTimeout(deadline);
@@ -419,6 +444,7 @@ try {
   process.stdout.write(
     JSON.stringify({
       status: receipt.status,
+      scope: receipt.scope,
       stage: receipt.failure?.stage ?? "complete",
       evidence: evidence ?? null,
     }) + "\n",
@@ -431,6 +457,15 @@ async function checkpoint(next) {
   const progress = { status: "running", stage, completed_cases: receipt.cases.length };
   if (evidence) await writeFile(join(evidence, "progress.json"), JSON.stringify(progress, null, 2));
   process.stdout.write(JSON.stringify(progress) + "\n");
+}
+
+async function focusRealEntry(page, row, entryId, hits) {
+  await page.getByRole("listbox", { name: "资产列表" }).locator('[data-entry-row][tabindex="0"]').focus();
+  await page.keyboard.press("Home");
+  const rowIndex = hits.findIndex((hit) => hit.entry.entry_id === entryId);
+  assert.ok(rowIndex >= 0 && rowIndex < 100);
+  for (let index = 0; index < rowIndex; index++) await page.keyboard.press("ArrowRight");
+  await expect(row).toBeFocused();
 }
 
 async function signIn(page, account, password) {
