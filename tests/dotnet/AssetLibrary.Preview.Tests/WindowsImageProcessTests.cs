@@ -41,10 +41,16 @@ public sealed class WindowsImageProcessTests
                 var diagnostics = new byte[4097];
                 var count = await worker.Error.ReadAtLeastAsync(diagnostics, diagnostics.Length, throwOnEndOfStream: false, deadline.Token);
                 Assert.IsLessThanOrEqualTo(4096, count);
-                // This startup-only failure precedes any input; the executable has no Host/DB environment.
-                Assert.Fail($"Decoder exited before readiness: 0x{worker.ExitCode:X8}; {Encoding.UTF8.GetString(diagnostics, 0, count)}");
+                Assert.Fail($"Decoder exited before readiness: 0x{worker.ExitCode:X8}; {SafeDiagnostics(diagnostics, count)}");
             }
             var ready = ImageWorkerProtocol.ReadHeader(readyBytes);
+            if (ready.Status != (int)ImageWorkerStatus.Ready)
+            {
+                await worker.Process.WaitForExitAsync(deadline.Token);
+                var diagnostics = new byte[4096];
+                var count = await worker.Error.ReadAsync(diagnostics, deadline.Token);
+                Assert.Fail($"Native startup status {ready.Status}; exit {worker.ExitCode}; stages {SafeDiagnostics(diagnostics, count)}.");
+            }
             Assert.AreEqual((int)ImageWorkerStatus.Ready, ready.Status);
             var source = TestPng.Create(1024, 600);
             await worker.Input.WriteAsync(ImageWorkerProtocol.Header((int)ImageWorkerStatus.Request, 0, source.Length), deadline.Token);
@@ -67,6 +73,18 @@ public sealed class WindowsImageProcessTests
             Assert.AreEqual(0, worker.ExitCode);
         }
         Assert.IsEmpty(Directory.GetFiles(profiles));
+    }
+
+    private static string SafeDiagnostics(byte[] diagnostics, int count)
+    {
+        // Only task-owned numeric stages and exception type/HRESULT may reach test output.
+        var lines = Encoding.UTF8.GetString(diagnostics, 0, count).Split('\n')
+            .Select(line => line.Trim()).Where(line => line.Length <= 160
+                && (line.StartsWith("stage=", StringComparison.Ordinal)
+                    || line.StartsWith("check=", StringComparison.Ordinal)
+                    || line.StartsWith("exceptionType=", StringComparison.Ordinal))
+                && line.All(character => char.IsAsciiLetterOrDigit(character) || character is ';' or '=' or '_'));
+        return string.Join(" | ", lines);
     }
 
     [SupportedOSPlatform("windows")]
