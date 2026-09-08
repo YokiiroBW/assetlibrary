@@ -13,10 +13,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -52,12 +54,14 @@ import app.assetlibrary.android.workspace.*
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
 fun WorkspaceApp(model: WorkspaceModel) {
     val state by model.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { model.onForeground() }
-    BackHandler(state.detail != null || state.canBack) { model.back() }
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { model.onBackground() }
+    BackHandler(state.preview != null || state.detail != null || state.canBack) { model.back() }
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         if (state.session == null) LoginScreen(state, model)
         else if (state.checkingSession) Column(Modifier.fillMaxSize().safeDrawingPadding().padding(28.dp), verticalArrangement = Arrangement.Center) {
@@ -103,16 +107,17 @@ fun WorkspaceApp(model: WorkspaceModel) {
                             if (state.detail == null) Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text("文件信息", style = MaterialTheme.typography.titleMedium)
                                 Text("选择文件查看真实相对路径、类型、大小和修改时间。", color = LocalWorkspaceColors.current.muted)
-                            } else EntryDetail(requireNotNull(state.detail), model::closeDetail, model::locate)
+                            } else EntryDetail(requireNotNull(state.detail), model::closeDetail, model::locate, model::openPreview)
                         }
                     }
                 }
             }
             if (!wide && state.detail != null) {
                 ModalBottomSheet(onDismissRequest = model::closeDetail, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-                    EntryDetail(requireNotNull(state.detail), model::closeDetail, model::locate, Modifier.fillMaxHeight(0.86f))
+                    EntryDetail(requireNotNull(state.detail), model::closeDetail, model::locate, model::openPreview, Modifier.fillMaxHeight(0.86f))
                 }
             }
+            state.preview?.let { ImagePreview(it, model) }
         }
     }
 }
@@ -238,6 +243,18 @@ private fun LibraryHome(state: WorkspaceState, model: WorkspaceModel) {
 @Composable
 private fun AssetBrowser(state: WorkspaceState, model: WorkspaceModel) {
     val location = state.location
+    val gridState = rememberLazyGridState()
+    val listState = rememberLazyListState()
+    LaunchedEffect(state.rows, state.grid) {
+        snapshotFlow {
+            if (state.grid) gridState.layoutInfo.visibleItemsInfo.map { it.key }
+            else listState.layoutInfo.visibleItemsInfo.map { it.key }
+        }.distinctUntilChanged().collect { keys ->
+            val visible = keys.toSet()
+            model.visibleImages(state.rows.filter { it.entry.libraryId + it.entry.id in visible })
+        }
+    }
+    DisposableEffect(model) { onDispose { model.visibleImages(emptyList()) } }
     Column(Modifier.fillMaxSize()) {
         if (location.screen == Screen.SEARCH) {
             OutlinedTextField(location.query, model::searchText, Modifier.fillMaxWidth().padding(12.dp), label = { Text("搜索文件名或路径") }, singleLine = true,
@@ -265,13 +282,14 @@ private fun AssetBrowser(state: WorkspaceState, model: WorkspaceModel) {
         }
         if (state.rows.isEmpty() && !state.loading) EmptyState(if (location.screen == Screen.SEARCH && location.query.isBlank()) "查找你的资产" else "没有匹配条目",
             if (location.screen == Screen.SEARCH) "输入文件名或路径，搜索只返回你有权限的结果。" else "可以调整筛选或在 Web 查看首次扫描状态。", Modifier.weight(1f))
-        else if (state.grid) LazyVerticalGrid(columns = GridCells.Adaptive(144.dp), modifier = Modifier.weight(1f), contentPadding = PaddingValues(12.dp),
+        else if (state.grid) LazyVerticalGrid(state = gridState, columns = GridCells.Adaptive(144.dp), modifier = Modifier.weight(1f), contentPadding = PaddingValues(12.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            items(state.rows, key = { it.entry.libraryId + it.entry.id }) { row -> AssetTile(row, row.entry.id == (state.detail?.entry?.id ?: location.anchor), model::openRow, model::select) }
-        } else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(horizontal = 12.dp)) {
+            items(state.rows, key = { it.entry.libraryId + it.entry.id }) { row -> AssetTile(row, row.entry.id == (state.detail?.entry?.id ?: location.anchor), model) }
+        } else LazyColumn(Modifier.weight(1f), state = listState, contentPadding = PaddingValues(horizontal = 12.dp)) {
             items(state.rows, key = { it.entry.libraryId + it.entry.id }) { row ->
                 Row(Modifier.fillMaxWidth().clickable(role = Role.Button) { model.openRow(row) }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    AppIcon(if (row.entry.directory) "folder" else "file", Modifier.padding(8.dp).size(28.dp))
+                    if (row.entry.kind == "file") ImageThumbnail(row, model, Modifier.padding(8.dp).size(44.dp))
+                    else AppIcon(if (row.entry.directory) "folder" else "file", Modifier.padding(8.dp).size(28.dp))
                     Column(Modifier.weight(1f)) { Text(row.entry.name, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("${row.library.name} · ${fileSize(row.entry.bytes)}", color = LocalWorkspaceColors.current.muted, style = MaterialTheme.typography.bodySmall) }
                     IconButton({ model.select(row) }) { AppIcon("info", description = "${row.entry.name} 文件信息") }
                 }
@@ -307,27 +325,27 @@ private fun BrowseFilters(options: BrowseOptions, change: (BrowseOptions) -> Uni
 }
 
 @Composable
-private fun AssetTile(row: AssetRow, selected: Boolean, open: (AssetRow) -> Unit, info: (AssetRow) -> Unit) {
+private fun AssetTile(row: AssetRow, selected: Boolean, model: WorkspaceModel) {
     val entry = row.entry
     Surface(Modifier.fillMaxWidth().border(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.primary else LocalWorkspaceColors.current.line, RoundedCornerShape(10.dp)), shape = RoundedCornerShape(10.dp)) {
         Column {
-            Column(Modifier.fillMaxWidth().clickable(role = Role.Button) { open(row) }) {
+            Column(Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = if (entry.directory) "打开文件夹" else "打开图片预览") { model.openRow(row) }) {
                 Box(Modifier.fillMaxWidth().height(104.dp).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-                    AppIcon(if (entry.directory) "folder" else "file", Modifier.size(44.dp))
-                    if (!entry.directory) Text(entry.name.substringAfterLast('.', "FILE").take(10).uppercase(), Modifier.align(Alignment.BottomEnd).padding(8.dp), style = MaterialTheme.typography.labelSmall, color = LocalWorkspaceColors.current.muted)
+                    if (entry.kind == "file") ImageThumbnail(row, model, Modifier.fillMaxSize())
+                    else AppIcon(if (entry.directory) "folder" else "file", Modifier.size(44.dp))
                 }
                 Text(entry.name, Modifier.padding(start = 10.dp, end = 10.dp, top = 10.dp), maxLines = 2, minLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
             }
             Row(Modifier.fillMaxWidth().padding(start = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(if (entry.directory) "物理文件夹" else fileSize(entry.bytes), Modifier.weight(1f), color = LocalWorkspaceColors.current.muted, style = MaterialTheme.typography.labelSmall)
-                IconButton({ info(row) }) { AppIcon("info", description = "${entry.name} 文件信息") }
+                IconButton({ model.select(row) }) { AppIcon("info", description = "${entry.name} 文件信息") }
             }
         }
     }
 }
 
 @Composable
-private fun EntryDetail(row: AssetRow, close: () -> Unit, locate: (AssetRow) -> Unit, modifier: Modifier = Modifier) {
+private fun EntryDetail(row: AssetRow, close: () -> Unit, locate: (AssetRow) -> Unit, preview: (AssetRow) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var copied by remember(row.entry.id) { mutableStateOf(false) }
     Column(modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -337,7 +355,8 @@ private fun EntryDetail(row: AssetRow, close: () -> Unit, locate: (AssetRow) -> 
         }
         Box(Modifier.fillMaxWidth().height(144.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { AppIcon(if (row.entry.directory) "folder" else "file", Modifier.size(56.dp)) }
         Text(row.entry.name, style = MaterialTheme.typography.titleLarge)
-        Text("基础文件信息 · 内容预览尚未开放", style = MaterialTheme.typography.bodySmall, color = LocalWorkspaceColors.current.muted)
+        Text("基础文件信息 · 原文件保持不变", style = MaterialTheme.typography.bodySmall, color = LocalWorkspaceColors.current.muted)
+        if (row.entry.kind == "file") Button({ preview(row) }, Modifier.fillMaxWidth()) { Text("打开图片预览") }
         HorizontalDivider()
         DetailField("资源库", row.library.name)
         DetailField("类型", when (row.entry.kind) { "directory" -> "真实文件夹"; "reparse_directory" -> "链接文件夹（不递归浏览）"; "reparse_file" -> "链接文件"; else -> "文件" })
@@ -372,7 +391,7 @@ private fun ConnectionScreen(state: WorkspaceState, model: WorkspaceModel) {
         HorizontalDivider()
         Text("Android 只读首版", style = MaterialTheme.typography.titleMedium)
         Text("此设备不保存口令或登录会话，关闭应用后需重新登录。")
-        Text("库管理和首次扫描请使用 Web。内容预览、原文件传输与同步将在对应服务端能力交付后开放。", color = LocalWorkspaceColors.current.muted)
+        Text("库管理和首次扫描请使用 Web。图片使用服务端生成的显示副本；原文件传输与同步尚未开放。", color = LocalWorkspaceColors.current.muted)
         Button(model::logout, Modifier.heightIn(min = 48.dp)) { Text("退出并清除本机会话") }
     }
 }

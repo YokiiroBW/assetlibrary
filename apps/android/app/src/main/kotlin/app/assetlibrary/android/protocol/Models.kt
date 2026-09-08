@@ -91,4 +91,5 @@ interface AssetApi {
     suspend fun search(query: String, scope: SearchScope, cursor: String?): Page<AssetRow>
     suspend fun detail(libraryId: String, entryId: String): AssetRow
     suspend fun scan(libraryId: String): Scan?
+    suspend fun image(libraryId: String, entryId: String, variant: ImageVariant): ImagePayload
 }

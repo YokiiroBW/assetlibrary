@@ -1,14 +1,14 @@
-# Android / Tablet — 原生只读首版
+# Android / Tablet — 原生只读浏览与图片预览
 
 Android 11+ 的 Kotlin/Jetpack Compose 应用。手机顶部切库、底部导航和文件信息抽屉；宽度至少 960 dp 时为库导航、内容、详情三栏。遵循 ADR-0017、docs04/12/20，读取同一份 `packages/ui/workspace-theme.json`，不嵌入 WebView。
 
 ## 使用
 
-安装交接记录中的 `AssetLibrary-Android-0.3.0-readonly.1.apk`。它使用明确标识的 Android 调试试用签名，不是商店或正式生产签名。输入与 Web 相同的 HTTPS 根地址和账号。自签 NAS 必须显式填写已核对的叶证书 SHA256；主机名与有效期仍需正确。不会自动接受首次遇到的证书。
+安装交接记录中的 `AssetLibrary-Android-0.3.0-preview.1.apk`。它使用明确标识的 Android 调试试用签名，不是商店或正式生产签名。输入与 Web 相同的 HTTPS 根地址和账号。自签 NAS 必须显式填写已核对的叶证书 SHA256；主机名与有效期仍需正确。不会自动接受首次遇到的证书。
 
-已提供库分类/切换、真实目录历史、列表/网格、服务端排序/过滤、范围搜索、文件信息/定位/复制相对路径、扫描状态、退出、前台会话复核与失败恢复。库管理在 Web 进行；内容预览、原文件下载、同步、写入、主备切换和设备配对保留后续门禁。类型图标不代表已生成内容缩略图。
+已提供库分类/切换、真实目录历史、列表/网格、服务端排序/过滤、范围搜索、文件信息/定位/复制相对路径、扫描状态、退出、前台会话复核与失败恢复。库管理在 Web 进行。按 ADR-0019 接入服务端派生图片缩略图与全屏图片预览，提供双指/双击缩放、放大/缩小/复位按钮和关闭/系统返回。原文件下载、同步、写入、主备切换和设备配对保留后续门禁。服务端未部署或未安全启用图片引擎时明确降级为文件信息，不返回原图。
 
-只持久保存 HTTPS 地址和用户配置的公开证书指纹。口令、Cookie、CSRF 和登录状态不保存到磁盘或 Activity SavedState，关闭进程后重新登录。备份/设备迁移均排除应用数据。401/403 清除账号和所有列表；404 清除失效结果；网络错误标记旧快照。前台恢复先验证到期和 GET 会话身份，未确认时遮蔽旧工作区。退出网络失败会明确表示未确认服务器撤销。
+只持久保存 HTTPS 地址和用户配置的公开证书指纹。口令、Cookie、CSRF 和登录状态不保存到磁盘或 Activity SavedState，关闭进程后重新登录。备份/设备迁移均排除应用数据。401/403 清除账号和所有列表；404 清除失效结果；网络错误标记旧快照。离开前台立即遮蔽工作区、关闭预览、取消图片并释放内存缓存，禁止系统任务快照保留敏感画面。前台恢复先验证到期、GET 会话身份与库权限，未确认时遮蔽旧工作区。退出网络失败会明确表示未确认服务器撤销。
 
 ## 构建与真实命令
 
@@ -24,7 +24,7 @@ apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification s
 apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.WorkspaceUiTest
 ```
 
-设置 `ANDROID_SERIAL` 选择唯一测试设备。`WorkspaceUiTest` 使用明确的内存样例检查真实 Compose 控件；真实 Core 联调单独运行 `app.assetlibrary.android.RealCoreUiTest`，需要 `tests/integration/native-clients/serve.py` 提供的隔离 Core/PostgreSQL 实例。先 `adb reverse tcp:<port> tcp:<port>`，将私密连接 JSON 推送到模拟器 `/data/local/tmp/assetlibrary-native-connection.json`；不把账号写入源码、参数或日志。测试后移除该文件和反向端口。仪器截图暂存 `/data/local/tmp/real-core-*.png` 或 `native-*.png`，必须拉取并验证，不以编译代替真实运行。
+设置 `ANDROID_SERIAL` 选择唯一测试设备。`WorkspaceUiTest` 使用明确的内存样例检查真实 Compose 控件；真实 Core 浏览联调单独运行 `app.assetlibrary.android.RealCoreUiTest`；图片联调运行 `app.assetlibrary.android.RealCoreImageUiTest`（协调实例需启用受限引擎并登记合成图片样例），需要 `tests/integration/native-clients/serve.py` 提供的隔离 Core/PostgreSQL 实例。先 `adb reverse tcp:<port> tcp:<port>`，将私密连接 JSON 推送到模拟器 `/data/local/tmp/assetlibrary-native-connection.json`；不把账号写入源码、参数或日志。测试后移除该文件和反向端口。仪器截图暂存 `/data/local/tmp/real-core-*.png` 或 `native-*.png`，必须拉取并验证，不以编译代替真实运行。
 
 `app/gradle.lockfile` 和 `buildscript-gradle.lockfile` 固定依赖图，Gradle strict lock 与 `gradle/verification-metadata.xml` 固定完整性。只有批准的依赖更新才运行 `--write-locks --write-verification-metadata sha256 :app:dependencyInventory`，并完成来源/漏洞/许可证评审；普通检查不得更新锁。
 
@@ -34,4 +34,6 @@ apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification s
 
 请求每页最多 100 项，界面只保留当前结果页并使用 Lazy 列表/网格；导航最多 64 步、分页回退最多 64 页，不会拉取全库统计。超过回退窗口时可刷新回首屏。服务端对整个查询范围排序/筛选，客户端只展示。响应最多 2 MiB，总请求期限 5 秒，切换查询会取消旧请求；HTTP 拒绝在读取正文之前生效。
 
-JVM 协议测试使用即时生成的 localhost TLS 证书，覆盖错误/过期 pin、主机名错误、未信任证书、跨源重定向、失配请求、超大响应/页、同库越界、取消、错误退出和 uint64 边界；状态测试覆盖取消搜索、失效权限、刷新游标与前台复核。模拟器证据不替代 HyperOS 真机、50 万资产实测、完整同步/预览或正式发行门禁。
+图片只接收冻结 GET 接口的 PNG：thumbnail 最大512px/2MiB，preview 最大1600px/12MiB。验证长度、PNG签名、CRC、尺寸与非动画/无私密源元数据；Android平台采样解码缩略图至最长256px。实际可见项最多32个，图片排队/传输/重试/解码共用20秒预算，最多2并发，429最多重试2次。解码缓存最多24MiB、仅本工作区会话内存，每次重新可见都先请求服务端复核权限和源；成功收到相同派生字节后才能复用解码结果。无图片磁盘缓存，不请求原图，50万资产下仍只保存当前100条页和有界图片状态。关闭大图、导航、刷新、后台、拒权和切账号清理或重新验证相应内容。
+
+JVM 协议测试使用即时生成的 localhost TLS 证书，覆盖错误/过期 pin、主机名错误、未信任证书、跨源重定向、失配请求、超大响应/页、同库越界、取消、错误退出和 uint64 边界；状态测试覆盖取消搜索、失效权限、刷新游标与前台复核。模拟器证据不替代 HyperOS 真机、50 万资产实测、完整跨格式预览/同步或正式发行门禁。

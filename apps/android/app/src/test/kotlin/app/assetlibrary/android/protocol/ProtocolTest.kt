@@ -35,6 +35,9 @@ class ProtocolTest {
     private val controls = AtomicInteger()
     private val logins = AtomicInteger()
     private var mode = "valid"
+    private val imageId = "c2f1d6c4-129d-4bf3-9458-a9ac420eaf25"
+    private val imageLibrary = "cc2f9dc1-ed95-48f7-a325-ebae19f01924"
+    private val images = AtomicInteger()
     private val libraryJson = """{"library_id":"lib-1","display_name":"样例库","availability":"online","access_level":"read_only","category":"images"}"""
 
     @Before fun setup() {
@@ -70,6 +73,28 @@ class ProtocolTest {
                         reply(exchange, 200, """{"authenticated":true,"display_name":"样例账号","principal_id":"test","is_system_administrator":false,"csrf_token":"${"x".repeat(43)}","absolute_expires_at":"${Instant.now().plusSeconds(3600)}"}""")
                     }
                     "/assetlink/v1/auth/logout" -> reply(exchange, 500, "{}")
+                    "/assetlink/v1/libraries/$imageLibrary/entries/$imageId/image" -> {
+                        images.incrementAndGet()
+                        assertEquals("GET", exchange.requestMethod)
+                        assertEquals("variant=thumbnail", exchange.requestURI.query)
+                        assertEquals("image/png", exchange.requestHeaders.getFirst("Accept"))
+                        assertEquals("__Host-AssetLibrary-Session=synthetic", exchange.requestHeaders.getFirst("Cookie"))
+                        assertNull(exchange.requestHeaders.getFirst("X-AssetLibrary-CSRF"))
+                        when (mode) {
+                            "401", "403", "404" -> { exchange.sendResponseHeaders(mode.toInt(), 4096); Thread.sleep(1500) }
+                            "image_redirect" -> { exchange.responseHeaders.add("Location", "https://elsewhere.invalid/"); reply(exchange, 302, "{}") }
+                            "image_busy", "image_budget" -> { exchange.responseHeaders.add("Retry-After", if (mode == "image_budget") "30" else "0"); reply(exchange, 429, """{"code":"preview_busy","message":"busy"}""") }
+                            "image_source" -> reply(exchange, 409, """{"code":"source_changed","message":"changed"}""")
+                            "image_unknown" -> reply(exchange, 503, """{"code":"future_code","message":"private path must not be displayed"}""")
+                            else -> {
+                                val bytes = if (mode == "image_json") "{}".toByteArray() else TestPng.image(12, 6)
+                                exchange.responseHeaders.add("Content-Type", if (mode == "image_type") "text/html" else "image/png")
+                                exchange.sendResponseHeaders(200, when (mode) { "image_huge" -> 2097153; "image_chunked" -> 0; else -> bytes.size.toLong() })
+                                if (mode == "image_slow" || mode == "image_huge") Thread.sleep(1500)
+                                else exchange.responseBody.write(bytes)
+                            }
+                        }
+                    }
                     else -> {
                         controls.incrementAndGet()
                         assertEquals("__Host-AssetLibrary-Session=synthetic", exchange.requestHeaders.getFirst("Cookie"))
@@ -184,5 +209,65 @@ class ProtocolTest {
         val valid = """{"entry_id":"one","library_id":"lib-1","relative_path":"file","name":"file","kind":"file","content_length":"18446744073709551615","last_write_time_utc":"2026-09-08T00:00:00Z"}"""
         assertEquals("18446744073709551615", Json.parseToJsonElement(valid).entry().bytes)
         assertThrows(Exception::class.java) { Json.parseToJsonElement(valid.replace("18446744073709551615", "18446744073709551616")).entry() }
+    }
+
+    @Test fun `derived PNG uses exact authenticated route without CSRF and bounded dimensions`() = runBlocking {
+        val payload = loggedIn().image(imageLibrary, imageId, ImageVariant.THUMBNAIL)
+        assertEquals(12, payload.width); assertEquals(6, payload.height)
+        assertEquals(1, images.get())
+    }
+
+    @Test fun `image IDs cannot inject paths or queries`() = runBlocking {
+        val client = loggedIn()
+        for (id in listOf("../other", "$imageId?variant=preview", "00000000-0000-0000-0000-000000000000"))
+            assertNotNull(failure { client.image(imageLibrary, id, ImageVariant.THUMBNAIL) })
+        assertEquals(0, images.get())
+    }
+
+    @Test fun `image rejects redirect mime missing length oversized body and JSON success`() = runBlocking {
+        val client = loggedIn()
+        for (case in listOf("image_redirect", "image_type", "image_huge", "image_chunked", "image_json")) {
+            mode = case
+            assertNotNull(failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) })
+        }
+    }
+
+    @Test fun `image authorization rejection precedes body and destroys session`() = runBlocking {
+        for (status in listOf("401", "403", "404")) {
+            val client = loggedIn(); mode = status
+            val started = System.nanoTime()
+            assertEquals(status.toInt(), failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.status)
+            assertTrue((System.nanoTime() - started) / 1_000_000 < 1200)
+            if (status != "404") assertEquals(401, failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.status)
+        }
+    }
+
+    @Test fun `image busy retries only twice and other failures never retry`() = runBlocking {
+        val client = loggedIn(); mode = "image_busy"
+        assertEquals(429, failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.status)
+        assertEquals(3, images.get())
+        mode = "image_source"
+        assertEquals("source_changed", failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.code)
+        assertEquals(4, images.get())
+        mode = "image_unknown"
+        assertFalse(failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.imageMessage().contains("private"))
+        assertEquals(5, images.get())
+    }
+
+    @Test fun `image Retry After cannot extend the twenty second total budget`() = runBlocking {
+        val client = loggedIn(); mode = "image_budget"
+        val started = System.nanoTime()
+        assertEquals("preview_timeout", failure { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }.code)
+        val elapsed = (System.nanoTime() - started) / 1_000_000
+        assertTrue("elapsed=$elapsed", elapsed in 19_500..23_000)
+        assertEquals(1, images.get())
+    }
+
+    @Test fun `image cancellation terminates stalled read without retries`() = runBlocking {
+        val client = loggedIn(); mode = "image_slow"
+        val task = async { client.image(imageLibrary, imageId, ImageVariant.THUMBNAIL) }
+        delay(150); task.cancelAndJoin()
+        assertTrue(task.isCancelled)
+        assertTrue(images.get() <= 1)
     }
 }

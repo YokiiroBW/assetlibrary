@@ -5,6 +5,8 @@ import app.assetlibrary.assetlink.ControlRequestMessage
 import app.assetlibrary.assetlink.ControlResultMessage
 import app.assetlibrary.assetlink.ErrorMessage
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -20,6 +22,7 @@ class AssetLinkClient(profile: ServerProfile) : AssetApi {
     private var cookie: String? = null
     private var csrf: String? = null
     private var principal: String? = null
+    private var sessionGeneration = 0L
 
     override suspend fun signIn(account: String, password: String): Session = decode {
         clearSession()
@@ -62,7 +65,33 @@ class AssetLinkClient(profile: ServerProfile) : AssetApi {
         } finally { clearSession() }
     }
 
-    override fun clearSession() { cookie = null; csrf = null; principal = null }
+    override fun clearSession() { sessionGeneration++; cookie = null; csrf = null; principal = null }
+
+    override suspend fun image(libraryId: String, entryId: String, variant: ImageVariant): ImagePayload {
+        val generation = sessionGeneration
+        return decode {
+            fun checkedId(value: String): String {
+                require(value.matches(Regex("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}")))
+                require(UUID.fromString(value) != UUID(0, 0))
+                return value
+            }
+            val path = "/assetlink/v1/libraries/${checkedId(libraryId)}/entries/${checkedId(entryId)}/image?variant=${variant.wire}"
+            val currentCookie = cookie ?: throw ApiFailure(401, "authentication_required")
+            try {
+                val reply = transport.image(path, currentCookie, variant)
+                if (generation != sessionGeneration) throw CancellationException("Obsolete image session")
+                if (reply.status != 200) {
+                    val code = try { (Json.parseToJsonElement(reply.body) as JsonObject).text("code", 128) }
+                        catch (_: Exception) { "preview_invalid" }
+                    throw ApiFailure(reply.status, code)
+                }
+                withContext(Dispatchers.Default) { ImagePayload.parse(reply.bytes, variant) }
+            } catch (error: Exception) {
+                if (generation != sessionGeneration) throw CancellationException("Obsolete image session")
+                throw error
+            }
+        }
+    }
 
     override suspend fun libraries(cursor: String?, category: String?): Page<Library> = decode {
         val result = control("libraries.list", page(cursor) { category?.let { put("category", it) } })

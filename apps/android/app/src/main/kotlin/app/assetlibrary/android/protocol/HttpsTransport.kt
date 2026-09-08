@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpCookie
@@ -22,7 +23,9 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal data class HttpReply(val status: Int, val body: String, val cookie: String?)
+internal data class HttpReply(val status: Int, val bytes: ByteArray, val cookie: String?, val retryAfter: String?) {
+    val body: String get() = bytes.toString(Charsets.UTF_8)
+}
 
 // ADR-0017 explicitly permits an origin-bound exact leaf pin. This rejects all other
 // certificates and expired leaves; HttpsURLConnection separately verifies hostnames.
@@ -44,10 +47,27 @@ internal class HttpsTransport(private val profile: ServerProfile) {
     }.socketFactory
 
     suspend fun request(path: String, method: String, body: String?, cookie: String?, csrf: String?): HttpReply = try {
-        withTimeout(5_000) { execute(path, method, body, cookie, csrf) }
+        withTimeout(5_000) { execute(path, method, body, cookie, csrf, MAX_BODY, 5_000, false) }
     } catch (_: TimeoutCancellationException) { throw ApiFailure(504, "timeout") }
 
-    private suspend fun execute(path: String, method: String, body: String?, cookie: String?, csrf: String?): HttpReply =
+    suspend fun image(path: String, cookie: String, variant: ImageVariant): HttpReply = try {
+        withTimeout(20_000) {
+            var attempts = 0
+            var reply = execute(path, "GET", null, cookie, null, variant.maxBytes, 20_000, true)
+            while (reply.status == 429 && attempts++ < 2) {
+                val seconds = reply.retryAfter?.toLongOrNull()
+                val wait = if (seconds != null) seconds.coerceIn(0, 20) * 1000 else try {
+                    java.time.Duration.between(java.time.Instant.now(), java.time.ZonedDateTime.parse(
+                        reply.retryAfter, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME).toInstant()).toMillis().coerceIn(0, 20_000)
+                } catch (_: Exception) { 1000L }
+                delay(wait)
+                reply = execute(path, "GET", null, cookie, null, variant.maxBytes, 20_000, true)
+            }
+            reply
+        }
+    } catch (_: TimeoutCancellationException) { throw ApiFailure(504, "preview_timeout") }
+
+    private suspend fun execute(path: String, method: String, body: String?, cookie: String?, csrf: String?, maxBody: Int, timeout: Int, image: Boolean): HttpReply =
         suspendCancellableCoroutine { continuation ->
             val active = AtomicReference<HttpsURLConnection?>()
             continuation.invokeOnCancellation { active.getAndSet(null)?.disconnect() }
@@ -59,12 +79,13 @@ internal class HttpsTransport(private val profile: ServerProfile) {
                     try {
                         if (!continuation.isActive) return@dispatch
                         connection.instanceFollowRedirects = false
-                        connection.connectTimeout = 5_000
-                        connection.readTimeout = 5_000
+                        connection.connectTimeout = timeout
+                        connection.readTimeout = timeout
                         connection.useCaches = false
                         connection.requestMethod = method
                         connection.setRequestProperty("Origin", profile.origin)
-                        connection.setRequestProperty("Accept", "application/json")
+                        connection.setRequestProperty("Accept", if (image) "image/png" else "application/json")
+                        connection.setRequestProperty("Accept-Encoding", "identity")
                         connection.setRequestProperty("Content-Type", "application/json")
                         cookie?.let { connection.setRequestProperty("Cookie", it) }
                         csrf?.let { connection.setRequestProperty("X-AssetLibrary-CSRF", it) }
@@ -81,7 +102,11 @@ internal class HttpsTransport(private val profile: ServerProfile) {
                         if (status in 300..399) throw ApiFailure(status, "redirect_refused")
                         if (status == 401 || status == 403 || status == 404) throw ApiFailure(status, "access_rejected")
                         val declared = connection.contentLengthLong
-                        if (declared > MAX_BODY) throw ApiFailure(status, "response_too_large")
+                        val limit = if (image && status != 200) 16 * 1024 else maxBody
+                        if (declared > limit) throw ApiFailure(status, "response_too_large")
+                        if (image && status == 200 && (declared <= 0 ||
+                            connection.contentType?.substringBefore(';')?.trim()?.lowercase() != "image/png" ||
+                            connection.contentEncoding?.lowercase()?.let { it != "identity" } == true)) throw ApiFailure(0, "preview_invalid")
                         val input = if (status >= 400) connection.errorStream else connection.inputStream
                         val output = ByteArrayOutputStream()
                         input?.use {
@@ -89,13 +114,14 @@ internal class HttpsTransport(private val profile: ServerProfile) {
                             while (continuation.isActive) {
                                 val read = it.read(buffer)
                                 if (read < 0) break
-                                if (output.size() + read > MAX_BODY) throw ApiFailure(status, "response_too_large")
+                                if (output.size() + read > limit) throw ApiFailure(status, "response_too_large")
                                 output.write(buffer, 0, read)
                             }
                         }
+                        if (image && status == 200 && output.size().toLong() != declared) throw ApiFailure(0, "preview_invalid")
                         val receivedCookie = connection.headerFields.entries.filter { it.key.equals("Set-Cookie", true) }
                             .flatMap { it.value }.mapNotNull(::sessionCookie).singleOrNull()
-                        if (continuation.isActive) continuation.resume(HttpReply(status, output.toString(Charsets.UTF_8.name()), receivedCookie))
+                        if (continuation.isActive) continuation.resume(HttpReply(status, output.toByteArray(), receivedCookie, connection.getHeaderField("Retry-After")))
                     } finally { active.getAndSet(null)?.disconnect() }
                 } catch (error: Exception) {
                     val failure = when (error) {

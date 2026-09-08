@@ -50,6 +50,7 @@ class WorkspaceModelTest {
         }
         override suspend fun detail(libraryId: String, entryId: String): AssetRow { error?.let { throw it }; return AssetRow(library, entry) }
         override suspend fun scan(libraryId: String): Scan? = null
+        override suspend fun image(libraryId: String, entryId: String, variant: ImageVariant): ImagePayload = throw ApiFailure(415, "preview_unsupported")
     }
     private fun login() { model.connect("https://localhost", "", "sample", "fixture") }
     @Test fun `paging replaces bounded page and back restores prior cursor`() = runTest(dispatcher) {
@@ -112,5 +113,29 @@ class WorkspaceModelTest {
         runCurrent()
         assertNull(model.state.value.session)
         assertTrue(model.state.value.rows.isEmpty())
+    }
+    @Test fun `background closes preview clears images and masks workspace until permission recheck`() = runTest(dispatcher) {
+        login(); runCurrent(); model.openLibrary(library); runCurrent()
+        model.openPreview(AssetRow(library, entry)); runCurrent()
+        assertNotNull(model.state.value.preview)
+        model.onBackground(); runCurrent()
+        assertNull(model.state.value.preview)
+        assertTrue(model.images.state.value.isEmpty())
+        assertTrue(model.state.value.checkingSession)
+        model.onForeground(); runCurrent()
+        assertFalse(model.state.value.checkingSession)
+        assertEquals(1, model.state.value.rows.size)
+    }
+    @Test fun `preview back preserves directory location and source switch removes picture state`() = runTest(dispatcher) {
+        login(); runCurrent(); model.openLibrary(library); runCurrent()
+        val location = model.state.value.location
+        model.openPreview(AssetRow(library, entry)); runCurrent()
+        assertTrue(model.back())
+        assertNull(model.state.value.preview)
+        assertEquals(location, model.state.value.location)
+        model.openPreview(AssetRow(library, entry)); runCurrent()
+        model.connect("https://new.localhost", "", "sample", "fixture"); runCurrent()
+        assertNull(model.state.value.preview)
+        assertTrue(model.images.state.value.isEmpty())
     }
 }

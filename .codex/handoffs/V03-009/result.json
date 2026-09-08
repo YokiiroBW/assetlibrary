@@ -1,0 +1,108 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-009",
+  "title": "android-image-preview",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "android-client-owner",
+  "branch": "codex/v03-009-android-image-preview",
+  "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\85ca\\AssetLibrary",
+  "commit": "",
+  "changed_files": [
+    ".codex/handoffs/V03-009/android-dependency-audit.json",
+    ".codex/handoffs/V03-009/result.json",
+    ".codex/handoffs/V03-009/screenshots/phone-font200-preview.png",
+    ".codex/handoffs/V03-009/screenshots/phone-font200-thumbnails.png",
+    ".codex/handoffs/V03-009/screenshots/phone-preview.png",
+    ".codex/handoffs/V03-009/screenshots/phone-thumbnails.png",
+    ".codex/handoffs/V03-009/screenshots/tablet-dark-preview.png",
+    ".codex/handoffs/V03-009/screenshots/tablet-dark-thumbnails.png",
+    ".codex/handoffs/V03-009/summary.md",
+    ".codex/handoffs/V03-009/tests.md",
+    ".codex/tasks/V03-009.md",
+    "apps/android/README.md",
+    "apps/android/app/build.gradle.kts",
+    "apps/android/app/src/androidTest/kotlin/app/assetlibrary/android/RealCoreImageUiTest.kt",
+    "apps/android/app/src/androidTest/kotlin/app/assetlibrary/android/WorkspaceUiTest.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/MainActivity.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/AssetLinkClient.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/HttpsTransport.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/Images.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/Models.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/ui/ImagePreview.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/ui/WorkspaceApp.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/workspace/WorkspaceImages.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/workspace/WorkspaceModel.kt",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/protocol/ImagePayloadTest.kt",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/protocol/ProtocolTest.kt",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/workspace/WorkspaceImagesTest.kt",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/workspace/WorkspaceModelTest.kt"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 77,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "jvm": 37,
+    "distinct_instrumented_tests": 5,
+    "instrumented_viewports": 3,
+    "repository_regressions": 35,
+    "not_run": [
+      "RealCoreUiTest",
+      "RealCoreImageUiTest"
+    ],
+    "dependency_audit": "passed exact-inventory same-day OSV response, 101 runtime and 475 verification components"
+  },
+  "risks": [
+    "RealCoreUiTest and RealCoreImageUiTest are compiled but not yet executed for this task; synthetic Compose PNG tests are not real-server image acceptance.",
+    "Trial debug signing; HyperOS/Android11 physical devices and 500k client performance remain open."
+  ],
+  "blocked_by": [
+    "V03-007 isolated preview engine and coordinator real Core/PostgreSQL image fixture for actual integration"
+  ],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/V03-009/summary.md",
+  "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
+  "architecture_review": {
+    "module": "apps/android AssetLink HTTPS adaptation, bounded image presentation and native lifecycle/UI",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Unmodified generated Kotlin AssetLink SDK sourceSet",
+      "Existing same-origin TLS/Cookie auth, server authorization and read-only queries",
+      "Shared packages/ui/workspace-theme.json and Compose native workspace",
+      "Existing Gradle exact versions, strict locks/verification and native real Core fixture contract"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Public frozen HTTPS endpoint only; no server internals, database or asset filesystem access"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "Final verify_repository.py passed, including 21 migration and 14 architecture regressions; Alpha remains blocked",
+      "37 JVM and 5 distinct instrumentation cases passed across three real emulator viewports",
+      "Debug/Release builds and Android Lint passed with strict locking and verification",
+      "101 runtime license/OSV and 475 component integrity audit passed; APK v2 signature and copied SHA256 verified"
+    ],
+    "technical_debt": [
+      "Await actual isolated Core/PostgreSQL image integration; do not claim V03-009 or full V0.3 complete before that evidence",
+      "Existing physical HyperOS/Android11, 500k native performance and production signing gates remain"
+    ]
+  },
+  "artifacts": {
+    "apk": ".runtime/releases/android/AssetLibrary-Android-0.3.0-preview.1.apk",
+    "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
+    "bytes": 30278429,
+    "signing": "Android debug trial; APK v2 verified",
+    "screenshots": "screenshots/; explicitly synthetic image UI evidence",
+    "dependency_audit": "android-dependency-audit.json"
+  },
+  "runtime_cleanup": {
+    "emulator": "v03-009-api36 / emulator-5584 explicitly stopped; adb devices empty",
+    "private_connection_created": false,
+    "reverse_ports_created": false,
+    "heavy_builds_finished": true
+  }
+}

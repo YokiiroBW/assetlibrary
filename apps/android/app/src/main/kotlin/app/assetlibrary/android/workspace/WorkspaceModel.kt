@@ -35,6 +35,7 @@ data class WorkspaceState(
     val rows: List<AssetRow> = emptyList(), val next: String? = null, val page: Int = 1,
     val hasPreviousPage: Boolean = false, val hasPreviousLibraries: Boolean = false,
     val detail: AssetRow? = null, val scan: Scan? = null,
+    val preview: AssetRow? = null,
     val loading: Boolean = false, val error: String? = null, val stale: Boolean = false,
     val checkingSession: Boolean = false,
     val grid: Boolean = true, val canBack: Boolean = false, val canForward: Boolean = false,
@@ -55,6 +56,31 @@ class WorkspaceModel(
     private val future = ArrayDeque<Location>()
     private val cursors = mutableListOf<String?>(null)
     private val libraryCursors = mutableListOf<String?>(null)
+    val images = WorkspaceImages(viewModelScope, { key -> requireNotNull(api).image(key.library, key.entry, key.variant) }) { failure ->
+        reset(state.value.profile)
+        mutable.value = state.value.copy(error = failure.userMessage)
+    }
+
+    fun visibleImages(rows: List<AssetRow>) {
+        val current = state.value.rows.map { it.library.id to it.entry.id }.toSet()
+        images.visible(rows.filter { (it.library.id to it.entry.id) in current })
+    }
+
+    fun openPreview(row: AssetRow) {
+        if (row.entry.kind != "file") { select(row); return }
+        request?.cancel(); revision++
+        mutable.value = state.value.copy(preview = row, detail = null, loading = false)
+        images.preview(row)
+    }
+
+    fun closePreview() { mutable.value = state.value.copy(preview = null); images.preview(null) }
+
+    fun onBackground() {
+        if (state.value.session == null) return
+        request?.cancel(); revision++
+        images.pause()
+        mutable.value = state.value.copy(preview = null, checkingSession = true, loading = false)
+    }
 
     fun connect(address: String, fingerprint: String, account: String, password: String) {
         val profile = try { ServerProfile.parse(address, fingerprint) } catch (_: Exception) {
@@ -73,6 +99,7 @@ class WorkspaceModel(
             currentCoroutineContext().ensureActive()
             saveProfile(profile)
             mutable.value = state.value.copy(session = session)
+            images.resume()
             expiry = viewModelScope.launch {
                 delay(Duration.between(Instant.now(), session.expiresAt).toMillis().coerceAtLeast(1))
                 reset(profile)
@@ -83,6 +110,7 @@ class WorkspaceModel(
     }
 
     fun logout() {
+        images.pause()
         val client = api
         val profile = state.value.profile
         request?.cancel()
@@ -92,11 +120,12 @@ class WorkspaceModel(
         runRequest {
             try { client?.signOut() } catch (_: ApiFailure) {
                 mutable.value = state.value.copy(error = "已清除此设备会话；网络错误，未确认服务器退出。")
-            } finally { client?.clearSession(); api = null }
+            } finally { client?.clearSession(); if (api === client) api = null }
         }
     }
 
     private fun reset(profile: ServerProfile?) {
+        images.pause()
         revision++
         request?.cancel(); expiry?.cancel(); api?.clearSession(); api = null
         past.clear(); future.clear(); cursors.clear(); cursors.add(null)
@@ -114,15 +143,17 @@ class WorkspaceModel(
     }
 
     private fun moveTo(location: Location) {
+        images.clear()
         request?.cancel(); revision++
         cursors.clear(); cursors.add(null)
         mutable.value = state.value.copy(location = location, rows = emptyList(), next = null, page = 1, hasPreviousPage = false,
-            detail = null, scan = null, error = null, stale = false, loading = false,
+            detail = null, preview = null, scan = null, error = null, stale = false, loading = false,
             canBack = past.isNotEmpty(), canForward = future.isNotEmpty())
         if (location.screen != Screen.CONNECTION) refresh()
     }
 
     fun back(): Boolean {
+        if (state.value.preview != null) { closePreview(); return true }
         if (state.value.detail != null) { closeDetail(); return true }
         if (past.isEmpty()) return false
         future.addLast(state.value.location)
@@ -137,7 +168,7 @@ class WorkspaceModel(
     fun openLibrary(library: Library) = navigate(Location(Screen.BROWSE, library))
     fun openRow(row: AssetRow) {
         if (row.entry.directory) navigate(Location(Screen.BROWSE, row.library, row.entry.path))
-        else select(row)
+        else openPreview(row)
     }
     fun up() {
         val current = state.value.location
@@ -183,17 +214,20 @@ class WorkspaceModel(
         if (cursor == cursors.last()) { mutable.value = state.value.copy(error = "分页游标未前进，请刷新目录。"); return }
         cursors.add(cursor)
         if (cursors.size > 65) cursors.removeAt(0)
-        mutable.value = state.value.copy(page = state.value.page + 1, rows = emptyList(), detail = null, hasPreviousPage = true)
+        images.clear()
+        mutable.value = state.value.copy(page = state.value.page + 1, rows = emptyList(), detail = null, preview = null, hasPreviousPage = true)
         loadCurrent()
     }
     fun previousPage() {
         if (cursors.size <= 1) return
         cursors.removeAt(cursors.lastIndex)
-        mutable.value = state.value.copy(page = (state.value.page - 1).coerceAtLeast(1), rows = emptyList(), detail = null, hasPreviousPage = cursors.size > 1)
+        images.clear()
+        mutable.value = state.value.copy(page = (state.value.page - 1).coerceAtLeast(1), rows = emptyList(), detail = null, preview = null, hasPreviousPage = cursors.size > 1)
         loadCurrent()
     }
     fun refresh() {
         if (state.value.session == null) return
+        images.refresh()
         cursors.clear(); cursors.add(null)
         libraryCursors.clear(); libraryCursors.add(null)
         mutable.value = state.value.copy(page = 1, librariesPage = 1, next = null, librariesNext = null, hasPreviousPage = false, hasPreviousLibraries = false)
@@ -202,12 +236,13 @@ class WorkspaceModel(
     }
     fun onForeground() {
         val session = state.value.session ?: return
+        images.pause()
         if (session.expiresAt <= Instant.now()) {
             reset(state.value.profile)
             mutable.value = state.value.copy(error = "登录已到期，请重新登录。")
             return
         }
-        mutable.value = state.value.copy(checkingSession = true)
+        mutable.value = state.value.copy(checkingSession = true, preview = null)
         runRequest {
             val verified = requireNotNull(api).validateSession()
             currentCoroutineContext().ensureActive()
@@ -232,6 +267,7 @@ class WorkspaceModel(
                 currentCoroutineContext().ensureActive()
                 mutable.value = state.value.copy(detail = detail)
             }
+            images.resume()
             mutable.value = state.value.copy(checkingSession = false)
         }
     }
@@ -283,7 +319,8 @@ class WorkspaceModel(
                     reset(state.value.profile)
                     mutable.value = state.value.copy(error = if (failure.status == 401) "登录失败或已失效，请检查账号与口令后重新登录。" else failure.userMessage)
                 } else if (failure.status == 404) {
-                    mutable.value = state.value.copy(rows = emptyList(), detail = null, next = null, error = failure.userMessage, stale = false)
+                    images.clear()
+                    mutable.value = state.value.copy(rows = emptyList(), detail = null, preview = null, next = null, error = failure.userMessage, stale = false)
                 } else {
                     mutable.value = state.value.copy(error = failure.userMessage, stale = state.value.rows.isNotEmpty())
                 }
@@ -292,5 +329,5 @@ class WorkspaceModel(
             }
         }
     }
-    override fun onCleared() { api?.clearSession() }
+    override fun onCleared() { images.pause(); api?.clearSession() }
 }
