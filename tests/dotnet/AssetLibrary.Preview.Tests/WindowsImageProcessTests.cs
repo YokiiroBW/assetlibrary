@@ -73,6 +73,8 @@ public sealed class WindowsImageProcessTests
             Assert.AreEqual(0, worker.ExitCode);
         }
         Assert.IsEmpty(Directory.GetFiles(profiles));
+        Assert.AreEqual(0, Directory.EnumerateFiles(profiles, "*.owner*", SearchOption.AllDirectories).Count());
+        Assert.AreEqual(0, Directory.EnumerateFiles(profiles, "*.lease", SearchOption.AllDirectories).Count());
     }
 
     private static string SafeDiagnostics(byte[] diagnostics, int count)

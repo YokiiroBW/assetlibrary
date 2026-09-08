@@ -17,11 +17,12 @@ internal sealed class WindowsImageStartup : IDisposable
         {
             nuint size = 0;
             _ = Native.InitializeProcThreadAttributeList(nint.Zero, 4, 0, ref size);
-            if (size is 0 or > 65536) throw new ReadOnlyWorkerException("preview_startup_attributes_failed");
+            var error = Marshal.GetLastPInvokeError();
+            if (size is 0 or > 65536 || error != 122) throw new ReadOnlyWorkerException("preview_startup_attributes_failed", error);
             attributes = Marshal.AllocHGlobal(checked((int)size));
             if (!Native.InitializeProcThreadAttributeList(attributes, 4, 0, ref size))
             {
-                throw new ReadOnlyWorkerException("preview_startup_attributes_failed");
+                throw new ReadOnlyWorkerException("preview_startup_attributes_failed", Marshal.GetLastPInvokeError());
             }
             initialized = true;
 
@@ -48,7 +49,7 @@ internal sealed class WindowsImageStartup : IDisposable
         }
     }
 
-    public NativeProcessInformation Start(WindowsImageProfile profile, nint[] pipes)
+    public NativeProcessInformation Start(WindowsImageProfile profile, nint[] pipes, CancellationToken token = default)
     {
         var startup = new StartupExtended
         {
@@ -65,13 +66,15 @@ internal sealed class WindowsImageStartup : IDisposable
         var environment = Marshal.StringToHGlobalUni(EnvironmentBlock(profile.DirectoryPath));
         try
         {
+            token.ThrowIfCancellationRequested();
+            profile.BeginLaunch();
+            token.ThrowIfCancellationRequested();
             const uint flags = 0x00000004 | 0x00000400 | 0x00080000 | 0x08000000;
             if (!Native.CreateProcessW(profile.Executable, ('"' + profile.Executable + '"' + '\0').ToCharArray(),
                 nint.Zero, nint.Zero, true, flags, environment, profile.DirectoryPath, ref startup, out var process))
             {
                 throw new ReadOnlyWorkerException("preview_process_creation_failed", Marshal.GetLastPInvokeError());
             }
-
             return process;
         }
         finally
@@ -105,7 +108,7 @@ internal sealed class WindowsImageStartup : IDisposable
     {
         if (!Native.UpdateProcThreadAttribute(attributes, 0, kind, value, bytes, nint.Zero, nint.Zero))
         {
-            throw new ReadOnlyWorkerException("preview_startup_attributes_failed");
+            throw new ReadOnlyWorkerException("preview_startup_attributes_failed", Marshal.GetLastPInvokeError());
         }
     }
 
