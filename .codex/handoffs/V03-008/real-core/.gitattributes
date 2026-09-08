@@ -1,0 +1,2 @@
+# Raw evidence receipts are SHA-bound; checkout must not rewrite line endings.
+*.json -text

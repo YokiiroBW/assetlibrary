@@ -67,3 +67,21 @@ root提供Linux Core源码874fb6a、worker40d2d69、localhost44147转发与私�
 runner099d579补齐固定阶段progress.json/stdout、git子进程5秒期限、整体Promise.race期限和浏览器10秒关闭确认，避免仅关闭浏览器却不能结束未知await；后续阶段也检查总截止。语法/格式通过。暂停消息到达前的诊断复验输出`linux-live-874fb6a-recheck/web-real-image.json`：读连接/公共输入和provenance完成，**verify_tls_identity失败**，cases和screenshots均空，浏览器尚未启动且未发送登录凭据。这是转发不可用时的前置失败，不是图片功能失败；未修改生产客户端、TLS断言或共享数据，未stop服务。
 
 收到root暂停要求后停止所有真实重试，等待其恢复转发并再次READY。没有重跑65项mock或7项未变工具输入测试。connection未复制/打印，私密文件由root统一清理。
+
+## 同一真实fixture的最终收敛
+
+root恢复授权后，本窗口只检查ssh -V与空闲端口，在自有任务内建立BatchMode/StrictHostKeyChecking/ExitOnForwardFailure、loopback44147转发。证书叶SHA、localhost与有效期前置再次通过。转发所有权由PID20820/开始时间/可执行路径记录；没有改root或服务端文件。
+
+先后定位两个runner收集问题：Playwright1.62.1的requestfailed不resolve Response.finished，不能等待取消请求；因此在真实UI图像已显示且缩略工作暂停后顺序同源GET（20秒/字节上限）核对wire，未替换UI响应。浏览器原生Response.headers是属性，旧headers()误用导致收集前异常，已修正并记录固定安全header/dimension诊断。完整历史receipt在本机.runtime，失败不改写、不计通过。
+
+旧Web d944300实际完成10项PNG/方向/alpha与3图，但真实键盘定位揭示产品焦点缺陷：mounted行间方向键已改变selected，却不改变DOM焦点，因pendingFocus效果只依赖virtualItems。新增最小回归明确失败（第二行selected=true/toBeFocused inactive），77271e0补selection.focusedId依赖。新用例+QuickLook1440/390+既有多选4/4通过，7.5s；其他65未重跑。最终format、TS/build、Web源码、产物预算通过。现**66个不同浏览器用例、7个工具输入检查**，无未解决失败/skip。
+
+root审查并将77271e0静态Web切入同一Core874fb6a/worker40d2d69/PG/148样例fixture，保留旧dist；未变Core/DB/资产。最终JS302093 B/SHA256 b248f3ac02a29f82a795bf4716ca5604f67c5e556089cf2bc08810ce192866ea，CSS27768 B/SHA256 c4b01b9d4517d1e554e5508b0764981a6fe45d30cf622f5fdf195c52a4bdf4a1。真实入口重新核TLS与实际HTTP静态哈希后登录。
+
+- `linux-live-77271e0-acceptance/web-real-image.json`完成16项图片/错误检查，顶层在最后QuickLook pointer定位处failed，原文保留。实际返回12个搜索hits，其中校验得到10文件；12个成功图片检查覆盖JPEG/PNG/WebP、EXIF6、透明与中文.dat；4错误为SVG415、不支持非图415/422、截断422、超限422并保留L0。透明384×512/900×1200、角alpha0/中心160；JPEG与中文.dat派生SHA一致。所有用户可见步骤走真实Home/ArrowRight和双击，正常关闭回焦、响应式trigger卸载后的工作区回焦均验证。
+- `--interaction-only`只继续收尾，未再次做16项wire；重新校验同TLS/Webhash/发现。最新cb4f66e的`linux-live-77271e0-interactions-final/web-real-image.json` **passed，exit0，scope=interaction_continuation，cases为空**。实际Space打开、Escape关闭、历史不变、toBeFocused原行；退出全部URL释放；普通账号已知ID404/非image，匿名401；无CSP绕过/违规、无脚本/跨源请求，浏览器关闭确认。
+- [acceptance-index.json](real-core/acceptance-index.json)明确两阶段同fixture，绑定原case receipt SHA84fd9c37b4b671b085a70c755c80ed6ec5b9f498245a9985c765630fb902e72f与最终interaction SHAfe106a357eb5cc12a7699f4b2f43a22fadec0c1fa2de783850d3ff4e5afaebad。复制前后原SHA一致，未把failed顶层改成passed，也未把continuation的0个图片case写成16。真实客户端结论由两阶段共同形成，不虚报一次全跑。
+
+已查看real-core下最终桌面、手机透明/暗色、200%文字与无权限账号截图（实际Web77271e0）。其来源与早先mock screenshots明确分开，未截登录凭据或复制私密JSON。
+
+root显式stop后提供公开清理receipt `.codex/handoffs/V03-005/real-core-cleanup.json`，SHA751cc658fef1eb608d247f4842be68b359cdf9c10f344b00693ae0b8e2aaa04b，已只读核对。root verified覆盖148源hash/mtime不变、6LOGIN、runtime、Host/PG、HTTPS及自有容器清理；Windows/远端私密connection副本由root删除。本任务按PID/创建时间/执行路径核对关闭SSH20820，WaitForExit通过、44147无监听，公开forward-cleanup.json记录closed_verified。历史receipt的owned_and_verified_by_coordinator只是当时责任标签；最终索引以root canonical receipt确认共享清理。

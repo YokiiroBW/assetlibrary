@@ -1,0 +1,10 @@
+{
+  "pid": 20820,
+  "started_utc": "2026-09-08T16:04:54.6998025Z",
+  "executable": "C:\\Program Files\\OpenSSH\\ssh.exe",
+  "host_alias": "dev-230",
+  "local_port": 44147,
+  "remote_port": 44147,
+  "status": "closed_verified",
+  "closed_utc": "2026-09-08T16:43:28.7605863Z"
+}

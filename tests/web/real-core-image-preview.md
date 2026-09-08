@@ -17,10 +17,12 @@
 node --check tests/web/real-core-image-preview.mjs
 node --test tests/web/real-core-image-input-check.mjs
 node tests/web/real-core-image-preview.mjs --help
-node tests/web/real-core-image-preview.mjs --execute --connection <root提供的私密connection.json> --manifest <协调corpus/manifest.json> --evidence .runtime/real-core-preview/<new-run> [--build-evidence <reviewed-build-evidence.json>]
+node tests/web/real-core-image-preview.mjs --execute --connection <root提供的私密connection.json> --manifest <协调corpus/manifest.json> --evidence .runtime/real-core-preview/<new-run> [--build-evidence <reviewed-build-evidence.json>] [--interaction-only]
 ```
 
 无`--execute`返回77，未执行不算通过。evidence必须是本worktree `.runtime` 下的新目录，拒绝覆盖。最迟5分钟或服务剩余生命期前10秒结束，浏览器总会关闭；fixture生命周期由root独占，不写其stop文件。必要时先把固定Node目录放到当前PATH；不要调用内部固定旧Node的bundled pnpm.cmd。
+
+`--interaction-only`只用于同一fixture上已完成图片断言后的明确续验，仍重新验证TLS、Web静态hash与真实发现，然后检查QuickLook/历史/回焦、退出清URL和404/401账号隔离。receipt标`scope=interaction_continuation`且cases为空，不能声称执行了前16项；完整结论必须以合并索引绑定原case receipt和continuation的原始SHA，保留原失败顶层不改写。`shared_server_lifecycle=coordinator_pending`，只有root最终清理receipt可关闭共享生命周期。
 
 ## TLS、秘密和证据
 
@@ -28,7 +30,9 @@ node tests/web/real-core-image-preview.mjs --execute --connection <root提供的
 
 密码仅在内存从私密JSON读入和填入真实登录表单。不录制含登录请求的trace/视频，不打印原始异常、DOM或HTTP body。截图只在登录成功后的已知合成资产与空权限工作区阶段保存；公开失败记录只有固定阶段/错误类别。connection JSON不会复制到证据目录。
 
-输出`web-real-image.json`记录实际状态、runner/Web来源、manifest摘要、真实HTTP成功尺寸/字节/PNG摘要、错误码、浏览器版本、CSP与账号隔离、截图和浏览器关闭。HTTP错误/未启用503或预览缺失一律使整体失败，不跳过或折算通过。只有真正在生产Host上完成才能记录passed；入口准备和四项输入检查不算真实联调。
+输出`web-real-image.json`记录实际状态、runner/Web来源、manifest摘要、真实HTTP成功尺寸/字节/PNG摘要、错误码、浏览器版本、CSP与账号隔离、截图和浏览器关闭。HTTP错误/未启用503或预览缺失一律使整体失败，不跳过或折算通过。只有真正在生产Host上完成才能记录相应scope的passed；入口准备和七项输入检查不算真实联调。
+
+Playwright的取消请求不一定完成`Response.finished()`，不能据此无限等待图片证据。主用例先确认真正UI缩略/预览可见、自然尺寸与像素，再在预览打开（已暂停其他缩略图）时依次发同源真实GET，以20秒和编码字节上限核对原始wire PNG/头/摘要；不会向UI注入响应或图像。虚拟列表由真实Home/ArrowRight定位，关闭时原trigger仍在则回原行，响应式重挂卸载trigger则验证逻辑工作区回焦。每阶段写固定安全progress，整体硬截止和关闭确认均有界。
 
 ## 验证行为
 

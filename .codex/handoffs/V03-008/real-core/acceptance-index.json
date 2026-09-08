@@ -1,0 +1,51 @@
+{
+  "task_id": "V03-008",
+  "status": "client_checks_passed",
+  "completion": "two_stages_same_fixture",
+  "origin": "https://localhost:44147",
+  "core_source": "874fb6a",
+  "worker_source": "40d2d69",
+  "web_source_commit": "77271e05c176d9b461f0baf71951dd800b63703c",
+  "corpus_manifest_sha256": "981953e67768eea08cfb7cf187475c7c4369977d7a5348150407128ba923c4c8",
+  "cases_phase": {
+    "receipt": "cases-before-interaction.json",
+    "sha256": "84fd9c37b4b671b085a70c755c80ed6ec5b9f498245a9985c765630fb902e72f",
+    "original_status": "failed",
+    "completed_image_and_error_checks": 16,
+    "remaining_failure_stage": "real_quick_look",
+    "receipt_bytes_preserved": true
+  },
+  "interaction_phase": {
+    "receipt": "interaction-final.json",
+    "sha256": "fe106a357eb5cc12a7699f4b2f43a22fadec0c1fa2de783850d3ff4e5afaebad",
+    "original_status": "passed",
+    "scope": "interaction_continuation",
+    "image_cases_executed": 0,
+    "quick_look_history": "unchanged",
+    "quick_look_focus": "returned_to_trigger",
+    "invisible_identity_status": 404,
+    "anonymous_status": 401
+  },
+  "csp_blob_rendering": "verified_without_bypass",
+  "tls": "exact_leaf_sha256_localhost_validity_verified_before_credentials",
+  "reviewed_web_assets": "matched_exact_sha256",
+  "browser_cleanup": "both_closed",
+  "shared_server_lifecycle": "coordinator_verified",
+  "shared_server_note": "Final shared lifecycle is supported by the root canonical cleanup receipt; historical responsibility labels alone were not completion evidence.",
+  "forwarding_lifecycle": "closed_verified; see forward-cleanup.json",
+  "screenshots": [
+    "real-preview-desktop.png",
+    "real-preview-mobile-alpha.png",
+    "real-preview-mobile-text200.png",
+    "real-invisible-identity.png"
+  ],
+  "asset_and_permission_writes_by_consumer": "none; normal authentication uses the existing public API",
+  "server_cleanup_receipt": {
+    "path": ".codex/handoffs/V03-005/real-core-cleanup.json",
+    "sha256": "751cc658fef1eb608d247f4842be68b359cdf9c10f344b00693ae0b8e2aaa04b",
+    "status": "passed",
+    "resource_cleanup": "verified",
+    "sample_file_count": 148,
+    "sample_hashes_and_mtimes": "unchanged"
+  }
+}

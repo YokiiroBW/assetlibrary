@@ -26,8 +26,8 @@
     }
   ],
   "bundle_budget_gate": "passed for 77271e0 keyboard-focus correction; coordinator 23ad33d policy retained",
-  "real_core_integration": "pending_coordinator",
+  "real_core_integration": "client_checks_passed_by_two_stages_same_fixture; see real-core/acceptance-index.json",
   "nas_deployment": "not_performed",
   "personal_asset_access": "not_performed",
-  "fixture_cleanup": "temporary HTTP servers and Playwright processes ended; port 4173 not listening"
+  "fixture_cleanup": "both browsers closed; root canonical server cleanup verified; owned SSH PID20820 identity-checked and closed, port44147 released"
 }

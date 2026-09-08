@@ -29,7 +29,7 @@ const { values } = parseArgs({
 });
 if (values.help || !values.execute) {
   process.stdout.write(
-    "Real Core image acceptance: --execute --connection <private connection.json> --manifest <coordinator manifest.json> --evidence <new .runtime directory> [--build-evidence <reviewed build-evidence.json>]\n",
+    "Real Core image acceptance: --execute --connection <private connection.json> --manifest <coordinator manifest.json> --evidence <new .runtime directory> [--build-evidence <reviewed build-evidence.json>] [--interaction-only]\n",
   );
   process.exit(values.help ? 0 : 77);
 }
@@ -42,7 +42,7 @@ const receipt = {
   cases: [],
   screenshots: [],
   browser_closed: false,
-  shared_server_lifecycle: "owned_and_verified_by_coordinator",
+  shared_server_lifecycle: "coordinator_pending",
 };
 let stage = "validate_inputs";
 let evidence;
@@ -379,7 +379,9 @@ try {
       assert.deepEqual(foreignRequests, [], "the acceptance flow must stay on its exact fixture origin");
       receipt.browser_version = browser.version();
       receipt.csp_blob_rendering = "verified_without_bypass";
-      receipt.wire_evidence = "sequential_real_GET_revalidation_after_UI_render_no_response_replacement";
+      receipt.wire_evidence = values["interaction-only"]
+        ? "interaction_only_no_image_case_revalidation"
+        : "sequential_real_GET_revalidation_after_UI_render_no_response_replacement";
       assert.ok(!timedOut, "bounded run deadline reached");
       receipt.status = "passed";
     })(),

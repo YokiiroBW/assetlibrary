@@ -1,0 +1,186 @@
+{
+  "status": "failed",
+  "source": "real_core_https",
+  "cases": [
+    {
+      "case": "landscape.jpg",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 512,
+      "height": 341,
+      "bytes": 2283,
+      "sha256": "911b2be99f3273cbb99933886af29e1dfbbd049d78f2516f11163e3723c11fc4"
+    },
+    {
+      "case": "landscape.jpg",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 1600,
+      "height": 1066,
+      "bytes": 13553,
+      "sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb"
+    },
+    {
+      "case": "landscape.png",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 512,
+      "height": 341,
+      "bytes": 1677,
+      "sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057"
+    },
+    {
+      "case": "landscape.png",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 1600,
+      "height": 1066,
+      "bytes": 9592,
+      "sha256": "e4e069cf8c1e75ed8e642369f89cce22a524967452be654ca4d1db33d8e66c82"
+    },
+    {
+      "case": "landscape.webp",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 512,
+      "height": 341,
+      "bytes": 1677,
+      "sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057"
+    },
+    {
+      "case": "landscape.webp",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 1600,
+      "height": 1066,
+      "bytes": 9592,
+      "sha256": "e4e069cf8c1e75ed8e642369f89cce22a524967452be654ca4d1db33d8e66c82"
+    },
+    {
+      "case": "rotate-six.jpg",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 341,
+      "height": 512,
+      "bytes": 2607,
+      "sha256": "9a6c5a97d20aef7d0fa2bd1397e8692d24d1e823df9b1c690392c0cc8d2ffb9b"
+    },
+    {
+      "case": "rotate-six.jpg",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 1066,
+      "height": 1600,
+      "bytes": 14878,
+      "sha256": "0c9a143d7145f91269ebe787c06c6175573b157a0511ad8d06c301fa91556eac"
+    },
+    {
+      "case": "transparent.png",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 384,
+      "height": 512,
+      "bytes": 9952,
+      "sha256": "6ffee20bc18401c288e3a0a674f8a7de0441013801c06aa64dd9938c919b37dc"
+    },
+    {
+      "case": "transparent.png",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 900,
+      "height": 1200,
+      "bytes": 10270,
+      "sha256": "9b49bec9b32752244002629759752cc6c417bdcbb30b43406de272dc03fc4290",
+      "alpha": {
+        "corner": 0,
+        "center": 160
+      }
+    },
+    {
+      "case": "中文目录/重复内容.dat",
+      "variant": "thumbnail",
+      "http_status": 200,
+      "width": 512,
+      "height": 341,
+      "bytes": 2283,
+      "sha256": "911b2be99f3273cbb99933886af29e1dfbbd049d78f2516f11163e3723c11fc4"
+    },
+    {
+      "case": "中文目录/重复内容.dat",
+      "variant": "preview",
+      "http_status": 200,
+      "width": 1600,
+      "height": 1066,
+      "bytes": 13553,
+      "sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb"
+    },
+    {
+      "case": "active.svg",
+      "variant": "preview",
+      "http_status": 415,
+      "code": "preview_unsupported",
+      "l0_retained": true
+    },
+    {
+      "case": "not-an-image.png",
+      "variant": "preview",
+      "http_status": 415,
+      "code": "preview_unsupported",
+      "l0_retained": true
+    },
+    {
+      "case": "truncated.jpg",
+      "variant": "preview",
+      "http_status": 422,
+      "code": "preview_invalid",
+      "l0_retained": true
+    },
+    {
+      "case": "oversized-header.png",
+      "variant": "preview",
+      "http_status": 422,
+      "code": "preview_limit_exceeded",
+      "l0_retained": true
+    }
+  ],
+  "screenshots": [
+    "real-preview-desktop.png",
+    "real-preview-mobile-alpha.png",
+    "real-preview-mobile-text200.png"
+  ],
+  "browser_closed": true,
+  "shared_server_lifecycle": "owned_and_verified_by_coordinator",
+  "runner_commit": "f86df9d5e0725e5b4d5ae33b0ee7000ce7ecf941",
+  "web_source_commit": "77271e05c176d9b461f0baf71951dd800b63703c",
+  "corpus_manifest_sha256": "981953e67768eea08cfb7cf187475c7c4369977d7a5348150407128ba923c4c8",
+  "origin": "https://localhost:44147",
+  "tls": "exact_leaf_sha256_localhost_validity_verified_before_credentials",
+  "reviewed_web_assets": "matched_exact_sha256",
+  "discovery": {
+    "total_hits": 12,
+    "corpus_files": 10
+  },
+  "last_wire": {
+    "case": "中文目录/重复内容.dat",
+    "variant": "preview",
+    "status": 200,
+    "content_type": "image/png",
+    "declared_length": 13553,
+    "received_bytes": 13553,
+    "cache_control": "private, no-store",
+    "nosniff": "nosniff",
+    "resource_policy": "same-origin",
+    "width": 1600,
+    "height": 1066,
+    "bit_depth": 8
+  },
+  "last_focus": {
+    "case": "oversized-header.png",
+    "trigger_survived": true,
+    "active_id": ""
+  },
+  "failure": {
+    "stage": "real_quick_look",
+    "reason": "execution_failed"
+  }
+}

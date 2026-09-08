@@ -7,10 +7,18 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v03-008-web-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
-  "commit": "badf942ab520a0be093761a30f5ecf93b25ae543",
+  "commit": "cb4f66e3217a1b23f6426de3d8c6dda061b875e7",
   "changed_files": [
     ".codex/handoffs/V03-008/build-evidence.json",
     ".codex/handoffs/V03-008/implementation-plan.md",
+    ".codex/handoffs/V03-008/real-core/acceptance-index.json",
+    ".codex/handoffs/V03-008/real-core/cases-before-interaction.json",
+    ".codex/handoffs/V03-008/real-core/forward-cleanup.json",
+    ".codex/handoffs/V03-008/real-core/interaction-final.json",
+    ".codex/handoffs/V03-008/real-core/real-invisible-identity.png",
+    ".codex/handoffs/V03-008/real-core/real-preview-desktop.png",
+    ".codex/handoffs/V03-008/real-core/real-preview-mobile-alpha.png",
+    ".codex/handoffs/V03-008/real-core/real-preview-mobile-text200.png",
     ".codex/handoffs/V03-008/result.json",
     ".codex/handoffs/V03-008/screenshots/preview-desktop.png",
     ".codex/handoffs/V03-008/screenshots/preview-mobile-dark.png",
@@ -45,14 +53,16 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 72,
+    "passed": 73,
     "failed": 0,
     "skipped": 0,
-    "report": "tests.md"
+    "report": "tests.md",
+    "real_core_acceptance": "16 image/error assertions plus separately scoped interaction continuation passed on the same fixture; see SHA-bound acceptance-index.json, not counted as 16 extra unit tests"
   },
   "risks": [
-    "Real Core/PG/HTTPS/CSP and cross-client integration remain with V03-005; browser fixtures are not server decoder evidence.",
-    "No 500k-asset or long-running browser process memory stress evidence; Blob/pixel caps do not measure total browser RSS."
+    "No NAS deployment, full V0.3/Explorer or production file-write release claim.",
+    "No 500k-asset or long-running total-browser-memory stress evidence; client Blob/pixel bounds are not an RSS measurement.",
+    "Real browser evidence is deliberately two-stage: original top-level failed receipt retained and remaining interaction scope resolved by a distinct SHA-bound continuation."
   ],
   "blocked_by": [],
   "recommended_merge_order": 3,
@@ -74,13 +84,11 @@
     "new_major_dependencies": [],
     "contract_changes": [],
     "architecture_tests": [
-      "validate_architecture_baseline.py passed for final d944300 source",
-      "validate_web_source.py passed for final source",
-      "validate_web_dependencies.py --require-build-artifacts passed with coordinator 23ad33d policy for final source",
-      "65 unique Playwright cases passed; no skipped tests",
-      "verify_repository baseline passed; later old bundle budget failure closed by original targeted check; aggregate was not unnecessarily rerun",
-      "Real Core CLI preparation: syntax/format passed, four Node input checks passed, default Playwright collection remains 65; live server run awaits coordinator READY",
-      "Runner discovery correction: validates every raw hit before selecting the exact 10 corpus files; actual wire name confirmed; seven Node input checks and syntax passed, no product regression rerun or live service run"
+      "Final format/TypeScript build/Web source/dependency-size gates passed for product77271e0",
+      "66 unique browser regressions passed including an initially failing mounted-row keyboard focus regression; no unchanged full-suite rerun",
+      "Seven Node runner-input checks passed; explicit real runner excluded from default mock suite",
+      "Actual Core874fb6a/worker40d2d69/Web77271e0 TLS/CSP/static hashes, 16 image/error assertions and interaction continuation verified with two original receipt SHA bindings",
+      "Root canonical cleanup receipt and local SSH ownership/port cleanup independently read back"
     ],
     "technical_debt": []
   }

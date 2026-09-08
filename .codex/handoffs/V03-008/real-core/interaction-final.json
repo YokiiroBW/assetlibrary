@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "source": "real_core_https",
+  "scope": "interaction_continuation",
+  "cases": [],
+  "screenshots": [
+    "real-invisible-identity.png"
+  ],
+  "browser_closed": true,
+  "shared_server_lifecycle": "owned_and_verified_by_coordinator",
+  "runner_commit": "cb4f66e3217a1b23f6426de3d8c6dda061b875e7",
+  "web_source_commit": "77271e05c176d9b461f0baf71951dd800b63703c",
+  "corpus_manifest_sha256": "981953e67768eea08cfb7cf187475c7c4369977d7a5348150407128ba923c4c8",
+  "origin": "https://localhost:44147",
+  "tls": "exact_leaf_sha256_localhost_validity_verified_before_credentials",
+  "reviewed_web_assets": "matched_exact_sha256",
+  "discovery": {
+    "total_hits": 12,
+    "corpus_files": 10
+  },
+  "quick_look_history": "unchanged",
+  "quick_look_focus": "returned_to_trigger",
+  "permission_checks": {
+    "invisible_identity": 404,
+    "anonymous": 401,
+    "live_grant_mutation": "not_performed_client_never_writes_database"
+  },
+  "browser_version": "151.0.7922.34",
+  "csp_blob_rendering": "verified_without_bypass",
+  "wire_evidence": "sequential_real_GET_revalidation_after_UI_render_no_response_replacement"
+}

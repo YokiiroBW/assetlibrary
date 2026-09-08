@@ -1,37 +1,31 @@
 # V03-008 — Web 服务端缩略图与基础图片预览
 
-实现提交 **4e633e8 + d944300**；分支 `codex/v03-008-web-image-preview`，独立工作区 `C:/Users/Administrator/.codex/worktrees/a25c/AssetLibrary`。状态 **ready_for_review**：客户端实现/构建及65个不同浏览器用例通过；根级产物预算已由协调23ad33d修正并定向复验通过。真实后端联调由V03-005统一执行，未部署NAS。
+状态 **ready_for_review**。产品提交4e633e8、d944300、77271e0；最后一项修复真实联调发现的已挂载行键盘焦点不同步。分支`codex/v03-008-web-image-preview`，独立工作区`C:/Users/Administrator/.codex/worktrees/a25c/AssetLibrary`。66个不同浏览器回归、7个工具输入检查通过；真实Core客户端验收由同一fixture的16项图片/错误证据和独立交互收尾共同完成，见[两阶段索引](real-core/acceptance-index.json)。未部署NAS。
 
-## 已实现的用户行为
+## 用户行为与边界
 
-真实目录列表/网格仅为可见普通文件读取服务器派生缩略图；单击保留信息，双击/Enter进入图片预览，Space快速查看不改变URL/history。Escape、Tab/Shift+Tab焦点循环、前进/后退及回到条目焦点均已验证。预览保持图片比例、透明、长文件名、手机/桌面、浅深色与200%文字可操作。
+可见目录列表/网格读取真实服务端派生缩略图；单击保留信息，双击/Enter打开图片，Space快速查看不改历史，Escape关闭并返回焦点。真实Core验证JPEG/PNG/WebP、EXIF6方向、透明、中文路径下同内容.dat、SVG/非图片/截断/超限安全L0。图片保持比例；手机暗色、桌面及200%文字可用。没有原图下载、编辑、写回或扩展名判定真实格式。
 
-图片格式由服务端内容识别，前端不以扩展名断言格式，也不取原图。目录/重解析项不取图片；图片服务离线/未启用、不支持、损坏、超限、源变化和失败保留明确L0信息与安全提示。服务端GET即使404也不尝试其他原图端点。PNG代理最长边1600，不宣称原图色彩/分辨率无损。
+复用既有React/TypeScript/生成SDK、唯一fetch、Cookie/内存CSRF、原JSON5秒期限、分页/虚拟化、History/Modal和CSS语义颜色。图片20秒涵盖排队、最多2次429重试、正文和解码；并发2，47缩略图+1预览，活动Blob32MiB、解码1200万像素。PNG/MIME/Content-Length/块/尺寸/8位/浏览器解码均校验。离屏/关闭/切导航/身份/后台释放Object URL；pagehide同步卸下图片，前台核验后重新请求。401清会话、403/404（含L0详情）清该库派生内容。核心权限、路径、源身份和缓存仍由服务端负责，没有新前端依赖或业务复制。
 
-## 复用、安全和资源边界
+50万资产下新图片工作仅与可见范围有关，调度扫描最多48项，每页仍100条；没有全库取图。活动预算不等同浏览器RSS，未宣称50万压力或长时进程内存验证。
 
-消费协调冻结的 `contracts/assetlink/image-preview-v1.md` / ADR-0019；38aedca在本分支cherry-pick为3f3cfba。该共享基线的契约、SDK来源摘要及Skia中央pins均由协调单写；本窗口仅修改Web、Web测试和自身交接，没有手改共享文件。
+## 验证、真实来源和失败保留
 
-复用现有React/TypeScript、生成SDK、同源Cookie/内存CSRF、统一fetch、JSON5秒总期限、分页/虚拟化、History、Modal和CSS语义颜色。图片单独使用20秒期限、2并发、47缩略图及1预览租约；排队/重试/正文/解码共享总期限，入队与启动时都检查过期。仅429最多2次按Retry-After重试，其余不自动循环。
+[tests.md](tests.md)保留每轮失败、诊断和修正；[build-evidence.json](build-evidence.json)固定产品77271e0。最终JS302093 B/SHA256 b248f3ac02a29f82a795bf4716ca5604f67c5e556089cf2bc08810ce192866ea，CSS27768 B/SHA256 c4b01b9d4517d1e554e5508b0764981a6fe45d30cf622f5fdf195c52a4bdf4a1。格式、TS/build、Web源、架构及协调23ad33d预算门禁通过；未为预算跳过检查。初期verify_repository在旧预算中止的记录保留，失败由原检查定向复验关闭。
 
-有界流读取校验Content-Length/MIME、PNG签名/块/动画标记/8位/尺寸/像素，再核对浏览器解码结果。活动Blob预算32MiB、解码像素1200万；离屏/关闭/导航/身份变化释放URL。失焦/后台/pagehide同步卸下画面并释放租约，重新前台会话核验后重新取图，不用旧缓存跳过服务器授权与源核对。401清空会话，403/404清该库派生图片并核对库权限，显式刷新解除失败状态。没有持久图片缓存、原资产写操作或新增前端依赖。业务权限、路径与源一致性仍由服务端负责。
+真实服务为root管理的Linux Core874fb6a、worker40d2d69、PG和148合成文件，localhost同端口转发；只读TLS先核精确叶SHA、localhost与有效期，浏览器仅使用该SPKI且不忽略全部HTTPS错误/不绕过CSP。实际HTTP JS/CSS哈希与77271e0完全一致。
 
-新图片工作与总库规模无关：每页仍100条，浏览器只请求当前可见项，队列/扫描集合至多48项；不拉全库、不预生成全库缩略图。浏览器自身解码临时副本/进程峰值不等同活动像素预算，50万资产或浏览器长时内存压力未在本窗口宣称通过。
+第一份最终产品receipt完成16项图片/错误检查，但顶层在QuickLook定位处failed，**原文件不改写**。后续interaction_continuation重新核对同一TLS/Webhash/发现，实际Space打开、Escape关闭、历史与原行焦点返回、退出URL清空、普通账号已知ID404/匿名401、CSP/无脚本/无跨源通过，case数组明确为空。合并索引绑定两份原SHA并分别描述范围，不把续验冒充重跑16项。
 
-## 验证与证据边界
+此前执行环境切换导致首轮无receipt、转发断开导致TLS前置失败，不计产品结论。后续明确修正了runner等待取消Response.finished、浏览器headers属性访问、虚拟列表定位方式；真实键盘焦点问题另以会失败的最小产品回归复现后修复，未用测试放宽掩盖。
 
-[测试记录](tests.md)与[产物证据](build-evidence.json)。22个新增图片回归和既有43个Web回归全部各自有通过证据；不同阶段的重复用例不重复求和。最终格式、TS编译/生产构建、Web源码边界通过；SDK生成/源码/依赖及架构检查通过。verify_repository曾在旧Web预算处中止，该失败已通过协调修正及原检查定向复验关闭；没有再次执行未变的全部聚合检查或浏览器用例。最终调用方审查补齐L0详情403/404也清空缩略图的共享清理路径，d944300的新增例与原图片拒权共4/4通过。
+真实截图：[桌面](real-core/real-preview-desktop.png)、[手机透明图](real-core/real-preview-mobile-alpha.png)、[200%文字](real-core/real-preview-mobile-text200.png)、[无权限账号](real-core/real-invisible-identity.png)；均为生产Host返回的合成输入，已查看。旧screenshots目录是明确的mock证据。
 
-最终JS302081 B（gzip约93.64kB）、CSS27768 B（gzip约6.28kB）。V01-024不可变证据的既有290457/25942 B已超过旧阈值，本轮最终增量11624/1826 B且无新依赖。协调23ad33d将policy限值改为JS327680/CSS32768/合计360448，本分支合为f6fecae；`validate_web_dependencies.py --require-build-artifacts`通过。原产物检查未跳过，未通过改变产物规避预算。
+## 所有权与清理
 
-已查看合成样例截图：[桌面浅色](screenshots/preview-desktop.png)、[手机深色](screenshots/preview-mobile-dark.png)、[手机200%文字](screenshots/preview-mobile-text200.png)。它们是Playwright fixture，不是NAS或真实Core验收。自有临时HTTP/Vite/Chromium已结束，4173无监听；未读个人账号/资产或改NAS。
+共享契约38aedca、根预算23ad33d、Core/Worker/fixture均由root单写，本窗口只改Web/tests/web及自身交接。实际权限表/资产内容未由本窗口修改，只用正常公开登录/退出API。root在同一fixture中独立保留旧Webdist备份后切换审查产物；没有NAS更新。
 
-## 合并与后续
+root显式stop完成148原hash/mtime不变、6LOGIN/runtime/Host/PG/HTTPS/容器清理。已只读核对其公开real-core-cleanup.json，SHA751cc658fef1eb608d247f4842be68b359cdf9c10f344b00693ae0b8e2aaa04b；最终索引引用此canonical receipt并标coordinator_verified。本任务SSH20820经PID、创建时间和可执行路径核对后关闭，44147无监听，见[forward-cleanup.json](real-core/forward-cleanup.json)。所有本任务浏览器已关闭，私密connection由root清理，没有复制到交接。
 
-真实Core浏览器验收入口已另在9bf074e准备：`tests/web/real-core-image-preview.mjs`及说明/支持模块/4项输入检查，严格在tests/web范围内。复用5edf25c共享fixture的私密connection.json和十项corpus，不改共享fixture、不设置route、不混入默认Playwright自测。先校验localhost/叶指纹/有效期，再使用特定SPKI启动未绕过CSP的Chromium，匹配真实Host上的审查产物；原生测试账号登录/发现entry均走生产API。覆盖真实派生PNG/方向/透明/中文.dat、错误L0、截图和普通账号404/匿名401。脚本/格式/4项输入边界通过，默认仍收集65项原自测；**真实服务运行待root READY，没有真实联调通过声明**。无需重复65项未变用例。
-
-发现逻辑已按root审查收敛：接受搜索里的物理目录，先校验每条hit的库/entry关联，再挑选10个精确路径普通文件并拒绝重复/缺失；确认name为实际wire字段而非UI派生。新增3个发现边界用例后，工具输入检查为7/7通过；产品65项证据不变。后续manifest使用root f1e0dd9内固定的`tests/integration/native-clients/fixtures/image-preview-v1/manifest.json`。
-
-真实首轮遇到执行会话/转发丢失，未留下receipt；补阶段记录与硬截止后的诊断复验在TLS前置检查处失败，没有启动浏览器或发送凭据。root已确认原SSH转发消失并要求暂停，当前等待恢复后的新READY；不将这两次计为真实图片通过或产品功能失败。详见tests.md。
-
-先合root38aedca与23ad33d，准备文档238c61c可合，再合本实现4e633e8、拒权补充d944300及最终交接提交。不要重复合3f3cfba/f6fecae（对应同一协调基线）。由主协调统一真实Core/PG/HTTPS与跨端合成资产验收、包来源和部署。Provider、文件写入、Explorer、完整Alpha/V0.3门禁均保持独立。
+交付顺序以root已合入提交为准：消费者主实现→d944300拒权补充→77271e0键盘修复/产物证据→真实runner修正与最终交接。不重复合root已有共享契约/预算。Provider、Explorer、写入及完整Alpha/V0.3门禁独立，不宣告里程碑完成。
