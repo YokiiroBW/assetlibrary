@@ -37,3 +37,5 @@ NAS打包d18b224：现有server构建层单独发布linux-x64 AOT，使用已提
 Windows owner的53bc455继承Modify目录兼容修复已合为39ce06d；其原始7/7结果由V03-006持有，不重复计入本任务本地总数。
 
 root开发Linux检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2已补新NAS包11/11（含POSIX2项、38ms、0skip）；当前143过/0失败/1本机源叶symlink缺证据。真实同提交Docker builder正在运行，不能把测试通过当作镜像或NAS目标验收完成。
+
+首次实际NAS Docker构建在image-preview publish出现NETSDK1112（restore与publish SelfContained不一致）。已提交00b03b1补齐restore属性，同步文档并增加真实Docker参数一致性回归；新NAS组本地10过/2POSIX未执行，任务144逻辑测试过/0测试失败/1源平台缺口。实际镜像重建仍待root，不能把该静态回归当作构建已恢复。

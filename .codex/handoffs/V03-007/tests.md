@@ -80,3 +80,9 @@ Host与WebGateway fixture均重新Release构建0警告0错误，避免no-build f
 NAS代码、Windows39ce06d及交接组合后verify_repository通过：425份C#、21迁移、14架构；发布审计仍blocked。此后仅追加本执行事实。
 
 root补证：NAS实现d18b224合为9b72499后，dev-230干净Git检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2对新test_nas_image_preview_package.py实际11/11通过，38ms、0skip，包含本机缺失的POSIX读取与执行权限2项。因此当前任务相同逻辑例累计143通过/0失败/1本机源叶symlink缺证据；历史Windows新组9/11与整release47/52记录保留。root同提交真实builder已启动，镜像/manifest/目标平台结果尚待报告，没有生产NAS操作。root另报告Windows53目录兼容在同一失败目录7/7通过，独立owner证据不重复累加。
+
+## 首次真实镜像构建失败与属性一致性修正
+
+root实际0f4d0c6 Docker Step26中，image-preview restore35.29秒成功，但publish NETSDK1112失败：未下载Microsoft.NETCore.App.Runtime.linux-x64。原因是restore未显式SelfContained，而publish使用--self-contained true；开发机已有runtime pack缓存不能证明干净镜像依赖恢复完整。此真实构建失败保留，不因文件/清单测试通过而抹去。
+
+00b03b176a65e18655e8886ad183d785c9559661仅在NAS worker restore补-p:SelfContained=true，并同步自有Worker README/packaging-review/Windows transfer命令，保持locked restore和--no-restore publish；锁未改变。新增测试从实际Docker指令解析恢复/发布参数，对RID、AOT、SelfContained、release-lock及locked/no-restore边界做一致性断言，避免再次出现跨阶段依赖图漂移。精确新NAS测试命令执行12项：10通过、0失败、2POSIX本机缺平台，70ms；旧POSIX2项已有root同源码Linux证据，不重复算缺口。任务逻辑测试汇总144通过/0测试失败/1本机叶symlink缺证据，但实际镜像build在修复后仍待root重新执行。

@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "d18b2246858f8aa735ba46baa6c6c0d5c414b034",
+  "commit": "00b03b176a65e18655e8886ad183d785c9559661",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -97,7 +97,7 @@
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 143,
+    "passed": 144,
     "failed": 0,
     "skipped": 1,
     "report": "tests.md"
@@ -105,7 +105,8 @@
   "risks": [
     "Windows lifecycle helpers and StartAsync are integrated and tested; the separate native fault/resource/COM boundary matrix remains owned by V03-006.",
     "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance.",
-    "NAS Worker packaging is implemented but actual same-commit Docker/target-kernel evidence remains with root; generic Docker/native/Windows trial packaging gaps remain explicitly open."
+    "NAS Worker packaging is implemented but actual same-commit Docker/target-kernel evidence remains with root; generic Docker/native/Windows trial packaging gaps remain explicitly open.",
+    "First real NAS image build failed NETSDK1112 due to restore/publish SelfContained mismatch; fix00b03b1 is committed and targeted configuration regression passes, but real image rebuild remains pending root."
   ],
   "blocked_by": [
     "V03-006 remaining Windows native fault/resource/COM boundary evidence.",
@@ -139,7 +140,8 @@
       "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests).",
       "Windows source/link combination and StartAsync25a7bed: format passed, Core/Host/WebGateway Release zero warnings, related21/21 and realHTTPS2/2 passed with no skip and verified fixture cleanup.",
       "NAS packaging: dedicated9 passed/2 POSIX platform gaps; affected release suite47 passed/0 failed/5 explicit platform/environment gaps. Actual Docker build stays pending root.",
-      "Root dev-230 clean checkpoint0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2: new NAS packaging11/11 passed,38ms,no skip; actual image builder started but not yet accepted."
+      "Root dev-230 clean checkpoint0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2: new NAS packaging11/11 passed,38ms,no skip; actual image builder started but not yet accepted.",
+      "00b03b1 adds actual Docker restore/publish graph-parity regression: local NAS10 passed/2 POSIX unavailable; first real image NETSDK1112 failure remains recorded pending root rebuild."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
