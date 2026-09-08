@@ -77,7 +77,8 @@ public sealed class LiveImageEndpointTests
         }
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         Assert.AreEqual("image/png", response.Content.Headers.ContentType?.MediaType);
-        Assert.AreEqual("private, no-store", response.Headers.CacheControl?.ToString());
+        Assert.IsTrue(response.Headers.CacheControl?.Private);
+        Assert.IsTrue(response.Headers.CacheControl?.NoStore);
         Assert.IsFalse(response.Headers.Contains("ETag"));
         var bytes = await response.Content.ReadAsByteArrayAsync();
         Assert.IsTrue(bytes.Length > 33 && bytes.Length <= maximumBytes);
