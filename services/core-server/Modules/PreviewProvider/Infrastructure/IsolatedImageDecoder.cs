@@ -63,7 +63,7 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
 
     private async ValueTask<IImageChildProcess> StartBoundedAsync(CancellationToken token)
     {
-        var startup = Task.Run(() => Start(token), CancellationToken.None);
+        var startup = StartAsync(token);
         try { return await startup.WaitAsync(token).ConfigureAwait(false); }
         catch (OperationCanceledException)
         {
@@ -85,9 +85,12 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         catch (ImageChildCleanupPendingException pending) { await pending.Completion.ConfigureAwait(false); }
     }
 
-    private IImageChildProcess Start(CancellationToken token)
+    private async Task<IImageChildProcess> StartAsync(CancellationToken token)
     {
-        if (OperatingSystem.IsWindows()) return WindowsImageProcess.Start(executable, profileDirectory, token);
+        if (OperatingSystem.IsWindows())
+        {
+            return await WindowsImageProcess.StartAsync(executable, profileDirectory, token).ConfigureAwait(false);
+        }
         if (!OperatingSystem.IsLinux()) throw new ImagePreviewException(ImagePreviewFailure.Unavailable);
         var start = new ProcessStartInfo(executable)
         {
@@ -101,6 +104,6 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         start.Environment.Clear();
         start.Environment["DOTNET_EnableDiagnostics"] = "0";
         start.Environment["LANG"] = "C";
-        return ImageChildProcess.Start(start, token);
+        return await Task.Run(() => ImageChildProcess.Start(start, token), CancellationToken.None).ConfigureAwait(false);
     }
 }
