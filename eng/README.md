@@ -22,6 +22,13 @@ Roslyn analyzers run with warnings as errors. The code-metrics analyzer reads `e
 
 Repository and architecture checks run with `python -I -B scripts/verify_repository.py`. The complete cross-stack commands, exact runtimes and platform requirements are recorded in `tests/architecture/ci-tiers.json` and `.github/workflows/handoff-quality.yml`; Web commands also live in `apps/web/package.json`, and SDK commands in `packages/sdk/assetlink/README.md`. Use the pinned SDK and package-manager versions, not the machine's default runtime. A missing tool or skipped platform test is missing evidence.
 
+The V03-007 `AssetLibrary.Preview.Tests` project participates in the same solution
+and Windows/Ubuntu merge matrix. Its first tests exercise the exact linked
+internal source-read boundary in repository-owned synthetic storage. A Windows
+token without symbolic-link creation may lack that single leaf-link case; Linux
+execution must provide its own actual evidence. These source tests do not prove
+the decoder sandbox, image HTTP endpoint or a client preview.
+
 ## Native Android platform checks
 
 `apps/android/README.md` records the exact SDK packages, Gradle/AGP/Kotlin versions,
