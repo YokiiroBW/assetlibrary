@@ -127,13 +127,22 @@ def validate_png(png, dimensions, maximum):
     raise CheckFailed("missing_png_end")
 
 
-async def bounded_read(stream, limit):
+async def bounded_read(stream, limit, stderr_audit=None):
     result = bytearray()
+    hashed = hashlib.sha256()
+    if stderr_audit is not None:
+        stderr_audit.update({"stderr_bytes": 0, "stderr_sha256": hashed.hexdigest(), "stderr_complete": False})
     while True:
         chunk = await stream.read(min(65536, limit + 1 - len(result)))
         if not chunk:
+            if stderr_audit is not None:
+                stderr_audit["stderr_complete"] = True
             return bytes(result)
         result.extend(chunk)
+        if stderr_audit is not None:
+            hashed.update(chunk)
+            stderr_audit.update({"stderr_bytes": len(result), "stderr_sha256": hashed.hexdigest(),
+                                 "stderr_limit_exceeded": len(result) > limit})
         require(len(result) <= limit, "pipe_output_limit")
 
 
@@ -267,9 +276,17 @@ class Runner:
         require(self.current_id is not None, "container_create_unconfirmed")
         self.verify_container_policy(await self.inspect(self.current_id), probe)
 
-    async def send_image(self, process, name, profile):
+    async def record_state(self, record):
+        state = (await self.inspect(self.current_id))["State"]
+        record.update({"container_id": self.current_id, "exit_code": state["ExitCode"], "oom_killed": state["OOMKilled"],
+                       "worker_running": state["Running"], "started_at": state["StartedAt"], "finished_at": state["FinishedAt"]})
+        return state
+
+    async def send_image(self, process, name, profile, record):
         ready = await asyncio.wait_for(process.stdout.readexactly(24), 10)
-        require(HEADER.unpack(ready) == (MAGIC, 1, 0, 0, 0, 0), "worker_not_ready")
+        frame = HEADER.unpack(ready)
+        record["ready_frame"] = list(frame)
+        require(frame == (MAGIC, 1, 0, 0, 0, 0), "worker_not_ready")
         path = self.args.corpus.joinpath(*name.split("/"))
         length = self.snapshot[name]["bytes"]
         process.stdin.write(HEADER.pack(MAGIC, 2, profile, length, 0, 0))
@@ -302,19 +319,16 @@ class Runner:
                 process.stdin.close()
                 stdout = bounded_read(process.stdout, 16384)
             else:
-                stdout = self.send_image(process, name, profile)
-            tasks = [asyncio.ensure_future(stdout), asyncio.ensure_future(bounded_read(process.stderr, 16384)),
+                stdout = self.send_image(process, name, profile, record)
+            tasks = [asyncio.ensure_future(stdout), asyncio.ensure_future(bounded_read(process.stderr, 16384, record)),
                      asyncio.ensure_future(process.wait())]
             try:
                 output, errors, cli_exit = await asyncio.wait_for(asyncio.gather(*tasks), 25)
             except asyncio.TimeoutError:
                 record["parent_timed_out"] = True
                 raise CheckFailed("worker_parent_deadline")
-            info = await self.inspect(self.current_id)
-            state = info["State"]
-            record.update({"container_id": self.current_id, "exit_code": state["ExitCode"], "oom_killed": state["OOMKilled"],
-                           "started_at": state["StartedAt"], "finished_at": state["FinishedAt"],
-                           "docker_cli_exit": cli_exit, "stdout_bytes": len(output), "stderr_bytes": len(errors),
+            state = await self.record_state(record)
+            record.update({"docker_cli_exit": cli_exit, "stdout_bytes": len(output), "stderr_bytes": len(errors),
                            "stderr_sha256": hashlib.sha256(errors).hexdigest()})
             require(not state["Running"] and not state["OOMKilled"], "worker_running_or_oom_killed")
             if probe == "cpu":
@@ -359,6 +373,19 @@ class Runner:
             record["passed"] = True
         except Exception as error:
             record["error"] = str(error) if isinstance(error, CheckFailed) else type(error).__name__
+            if process is not None:
+                process.stdin.close()
+                try:
+                    record["docker_cli_exit"] = await asyncio.wait_for(process.wait(), 2)
+                    if tasks:
+                        await asyncio.wait_for(asyncio.shield(tasks[1]), 2)
+                except (Exception, asyncio.CancelledError) as observation:
+                    record["failure_stream_observation"] = type(observation).__name__
+            if self.current_id is not None:
+                try:
+                    await self.record_state(record)
+                except Exception as observation:
+                    record["failure_state_observation"] = str(observation) if isinstance(observation, CheckFailed) else type(observation).__name__
             raise
         finally:
             try:
