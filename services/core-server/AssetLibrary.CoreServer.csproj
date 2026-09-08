@@ -13,5 +13,6 @@
 
   <ItemGroup>
     <Compile Remove="Host\**\*.cs" />
+    <Compile Include="../worker-supervisor/ImagePreview/ImageWorkerProtocol.cs" Link="Infrastructure/ReadOnlyWorkers/ImageWorkerProtocol.cs" />
   </ItemGroup>
 </Project>

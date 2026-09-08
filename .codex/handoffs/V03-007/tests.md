@@ -18,3 +18,15 @@
 通过内容：Unicode字节/原hash与mtime不变、陈旧长度/mtime/容量拒绝且不写副本、取消、真实Windows目录junction/库根junction拒绝、并发写删拒绝、ADS/设备名/路径深度、句柄释放。首次两个symlink fixture因缺SeCreateSymbolicLinkPrivilege失败；目录改复用既有SandboxDirectoryLink（Windows真实junction），文件symlink单列真实缺口，未改系统权限且没有算通过。Linux安全打开/源变化分支以及Windows文件symlink仍需对应平台证据。
 
 阶段测试Compile链接同一内部生产源而不改Core friend API；Core独立编译同样成功，HTTP/隔离实际进程集成不能由此替代。所有样例在本独立worktree内由RepositorySandbox生成的GUID路径，退出清理，没有真实NAS资产。
+
+## 独立decoder技术验证点（未启用）
+
+独立worker Release build成功，win-x64 NativeAOT publish成功；后续新增notices/锁隔离的完整发布尚待复核。Skia绑定API/AOT告警未压制。正常无参数二进制请求：stdin为6个little-endian int32的24-byte header（magic=0x31495041,status=2,profile=0或1,length=输入字节数,width=height=0）+输入，随后关闭stdin；stdout先ready(status1)24-byte，再result header(status3)+PNG。未建立sandbox时只能返回status7退出1，不读取输入。NativeAOT Linux须在同机发布后运行；JIT Linux明确拒绝进入decoder。
+
+Windows LPAC阶段实际失败已记录在.runtime/preview-tests/windows/windows-image.trx。203来自CreateProcess，显式保留Windows原始LOCALAPPDATA/WINDIR后消失；现在进程在ready前退出0xFFFFFFFF、stderr空。非隔离、相同最小环境的AOT可信warmup控制运行正常：exit1、24-byte Unavailable。说明不能只凭可编译或零caps guard称LPAC验证通过。当前该测试1失败，不转换为跳过。
+
+持久时间精度修正：新增100ns余数7的源按Npgsql微秒索引被接受，随后变化到余数8仍被当前全精度stamp拒绝，单项通过；另有真实PG SELECT timestamptz二进制往返回归（包含2000年前时间）等待ASSETLIBRARY_TRIAL_TEST_CONNECTION的现有私有fixture运行，尚未计通过。
+
+root于2026-09-08报告dev-230独立非root容器已对f580b15安全源执行locked restore/format/Release零警告与9/9测试，无skip（含叶symlink）。证据为其私有Linux目录/tmp/assetlibrary-v03-005-linux-izfgezzr/source-read-boundary/.runtime/preview-source-results及source-boundary.log；仅安全源，不代表decoder/NAS隔离。
+
+Native Win32/Linux.NoDependencies包的THIRD-PARTY-NOTICES均为139775B、SHA256 21504C46C4C58AA64C1055BD2DCBC5F9A136B4B8C412ED3CC6740E22C5B127F5。Skia与Win32 MIT LICENSE的SHA256为89101E35A8C66FD4D6DFFC1763259161D35CB564C169714EC227A768C89F2938。worker csproj使用GeneratePathProperty复用精确package路径，构建时核验并发布这两份声明；PDB/dbg留构建目录，新的干净候选目录尚待发布核验。

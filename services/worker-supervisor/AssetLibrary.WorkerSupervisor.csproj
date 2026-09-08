@@ -4,4 +4,7 @@
     <RootNamespace>AssetLibrary.WorkerSupervisor</RootNamespace>
     <Description>Build-only foundation for the isolated AssetLibrary worker supervisor.</Description>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="ImagePreview\**\*.cs" />
+  </ItemGroup>
 </Project>

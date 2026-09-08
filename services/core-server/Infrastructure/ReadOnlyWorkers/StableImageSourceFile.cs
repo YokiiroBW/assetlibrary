@@ -39,7 +39,7 @@ internal sealed class StableImageSourceFile : IDisposable
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(maximumBytes, 32 * 1024 * 1024);
         var initial = stamps[^1];
-        if (initial.Length != expectedLength || initial.ModifiedAt != expectedModified)
+        if (initial.Length != expectedLength || !MatchesIndexedTime(initial.ModifiedAt, expectedModified))
         {
             throw new ReadOnlyWorkerException("preview_source_changed");
         }
@@ -55,6 +55,16 @@ internal sealed class StableImageSourceFile : IDisposable
         VerifyCurrent(token);
         verifiedHash = copiedHash;
         return Convert.ToHexStringLower(copiedHash);
+    }
+
+    private static bool MatchesIndexedTime(DateTimeOffset current, DateTimeOffset indexed)
+    {
+        if (current == indexed) return true;
+        // The frozen Npgsql timestamptz encoding truncates signed microseconds since 2000.
+        // Only the persisted observation is quantized; all current-handle comparisons stay exact.
+        var epoch = new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero).Ticks;
+        var encoded = (current.UtcTicks - epoch) / TimeSpan.TicksPerMicrosecond;
+        return encoded * TimeSpan.TicksPerMicrosecond + epoch == indexed.UtcTicks;
     }
 
     public void VerifyCurrent(CancellationToken token)

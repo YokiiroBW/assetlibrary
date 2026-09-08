@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>AssetLibrary.ImagePreview.Worker</AssemblyName>
+    <RootNamespace>AssetLibrary.ImagePreview.Worker</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsAotCompatible Condition="'$(PublishAot)' == 'true'">true</IsAotCompatible>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" GeneratePathProperty="true" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs" Link="Isolation/WindowsWorkerJob.cs" />
+    <Compile Include="../../core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs" Link="Isolation/ReadOnlyWorkerProtocol.cs" />
+    <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimit" Value="134217728" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(PkgSkiaSharp)/LICENSE.txt" Link="LICENSE.SkiaSharp.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+    <Content Include="$(PkgSkiaSharp_NativeAssets_Linux_NoDependencies)/THIRD-PARTY-NOTICES.txt" Link="THIRD-PARTY-NOTICES.SkiaSharp.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+  <Target Name="ValidateImageNotices" BeforeTargets="PrepareForBuild">
+    <GetFileHash Files="$(PkgSkiaSharp)/LICENSE.txt" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_ImageLicense" />
+    </GetFileHash>
+    <GetFileHash Files="$(PkgSkiaSharp_NativeAssets_Linux_NoDependencies)/THIRD-PARTY-NOTICES.txt" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_ImageNativeNotices" />
+    </GetFileHash>
+    <Error Condition="'%(_ImageLicense.FileHash)' != '89101E35A8C66FD4D6DFFC1763259161D35CB564C169714EC227A768C89F2938'" Text="The locked image engine license changed; dependency review is required." />
+    <Error Condition="'%(_ImageNativeNotices.FileHash)' != '21504C46C4C58AA64C1055BD2DCBC5F9A136B4B8C412ED3CC6740E22C5B127F5'" Text="The locked native image notices changed; dependency review is required." />
+  </Target>
+  <Target Name="KeepImageSymbolsInBuildArtifacts" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.pdb' or '%(Extension)' == '.dbg'" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -57,9 +57,10 @@ internal static class ReadOnlyWorkerProtocol
     }
 }
 
-internal sealed class ReadOnlyWorkerException(string code) : IOException("The isolated read-only worker failed.")
+internal sealed class ReadOnlyWorkerException(string code, int? nativeError = null) : IOException("The isolated read-only worker failed.")
 {
     public string Code { get; } = code;
+    public int? NativeError { get; } = nativeError;
 }
 
 internal sealed class BoundedNdjsonReader(TextReader input, int maximumBytes)
