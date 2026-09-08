@@ -11,6 +11,7 @@
   "changed_files": [
     ".codex/handoffs/V03-008/build-evidence.json",
     ".codex/handoffs/V03-008/implementation-plan.md",
+    ".codex/handoffs/V03-008/real-core/.gitattributes",
     ".codex/handoffs/V03-008/real-core/acceptance-index.json",
     ".codex/handoffs/V03-008/real-core/cases-before-interaction.json",
     ".codex/handoffs/V03-008/real-core/forward-cleanup.json",

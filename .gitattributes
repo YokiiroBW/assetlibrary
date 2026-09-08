@@ -11,4 +11,3 @@ apps/web/** text eol=lf
 tests/web/** text eol=lf
 eng/web-dependency-policy.json text eol=lf
 .codex/handoffs/V03-005/real-core-cleanup.json text eol=lf
-.codex/handoffs/V03-008/real-core/*.json text eol=lf
