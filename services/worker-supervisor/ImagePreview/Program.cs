@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using AssetLibrary.ImagePreview.Protocol;
 using AssetLibrary.ImagePreview.Worker;
+using Microsoft.Win32.SafeHandles;
 
 return ImageWorkerEntry.Run(args);
 
@@ -11,8 +12,14 @@ internal static class ImageWorkerEntry
         var probeMode = arguments.Length == 1 && OperatingSystem.IsLinux()
             && arguments[0] is "--probe-isolation" or "--probe-memory" or "--probe-cpu" or "--probe-threads";
         if (arguments.Length != 0 && !probeMode) return 2;
-        using var input = Console.OpenStandardInput();
-        using var output = Console.OpenStandardOutput();
+        // Unix Console streams duplicate their descriptors and lazily initialize Console.Out.
+        // The sandbox deliberately allows only the original fd 0/1, never arbitrary dup/open.
+        using var input = OperatingSystem.IsLinux()
+            ? new FileStream(new SafeFileHandle(0, ownsHandle: false), FileAccess.Read, 1, isAsync: false)
+            : Console.OpenStandardInput();
+        using var output = OperatingSystem.IsLinux()
+            ? new FileStream(new SafeFileHandle(1, ownsHandle: false), FileAccess.Write, 1, isAsync: false)
+            : Console.OpenStandardOutput();
         try
         {
             using var probe = probeMode && OperatingSystem.IsLinux() ? LinuxImageProbe.Prepare(arguments[0]) : null;
@@ -86,7 +93,7 @@ internal static class ImageWorkerEntry
             output.Write(ImageWorkerProtocol.Header((int)status, 0, 0));
             output.Flush();
         }
-        catch (IOException)
+        catch (Exception failure) when (failure is IOException or UnauthorizedAccessException or ObjectDisposedException)
         {
             // The parent can close the pipe as part of cancellation; the worker still terminates.
         }
