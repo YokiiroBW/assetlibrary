@@ -6,6 +6,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <IsAotCompatible Condition="'$(PublishAot)' == 'true'">true</IsAotCompatible>
     <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="SkiaSharp" GeneratePathProperty="true" />

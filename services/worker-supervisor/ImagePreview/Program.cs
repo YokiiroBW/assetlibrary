@@ -8,16 +8,20 @@ internal static class ImageWorkerEntry
 {
     public static int Run(string[] arguments)
     {
-        if (arguments.Length != 0) return 2;
+        var probeMode = arguments.Length == 1 && OperatingSystem.IsLinux()
+            && arguments[0] is "--probe-isolation" or "--probe-memory" or "--probe-cpu" or "--probe-threads";
+        if (arguments.Length != 0 && !probeMode) return 2;
         using var input = Console.OpenStandardInput();
         using var output = Console.OpenStandardOutput();
         try
         {
+            using var probe = probeMode && OperatingSystem.IsLinux() ? LinuxImageProbe.Prepare(arguments[0]) : null;
             // No host configuration, environment credentials or original paths are read here.
             Warmup();
             var confined = OperatingSystem.IsLinux() ? LinuxImageIsolation.Enter()
                 : OperatingSystem.IsWindows() && WindowsImageIsolation.IsEnforced();
             if (!confined) throw new ImageDecodeException(ImageWorkerStatus.Unavailable);
+            if (OperatingSystem.IsLinux() && probe is not null) return probe.Run(output);
             output.Write(ImageWorkerProtocol.Header((int)ImageWorkerStatus.Ready, 0, 0));
             output.Flush();
             var headerBytes = new byte[ImageWorkerProtocol.HeaderBytes];

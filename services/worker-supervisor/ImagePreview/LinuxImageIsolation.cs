@@ -13,14 +13,14 @@ internal static class LinuxImageIsolation
     public static bool Enter()
     {
         // Only the fixed NativeAOT executable has a small, measurable address-space budget.
-        if (RuntimeFeature.IsDynamicCodeSupported || RuntimeInformation.ProcessArchitecture != Architecture.X64)
+        if (RuntimeFeature.IsDynamicCodeSupported || RuntimeInformation.ProcessArchitecture != Architecture.X64 || !Unprivileged())
         {
             return false;
         }
 
         var parentId = Native.GetParentPid();
         if (Native.Prctl(1, 9, 0, 0, 0) != 0 || Native.GetParentPid() != parentId
-            || !Limit(9, 512UL * 1024 * 1024) || !Limit(0, 3) || !Limit(1, 0) || !Limit(4, 0)
+            || !Limit(9, 512UL * 1024 * 1024) || !Limit(0, 3) || !Limit(1, 0) || !Limit(4, 0) || !Limit(6, 256)
             || Native.Prctl(38, 1, 0, 0, 0) != 0)
         {
             return false;
@@ -38,6 +38,18 @@ internal static class LinuxImageIsolation
         {
             pinned.Free();
         }
+    }
+
+    internal static int CurrentMode() => Native.Prctl(21, 0, 0, 0, 0);
+    internal static int NoNewPrivileges() => Native.Prctl(39, 0, 0, 0, 0);
+
+    private static bool Unprivileged()
+    {
+        if (Native.GetUserId() == 0 || Native.GetEffectiveUserId() == 0) return false;
+        var header = new CapabilityHeader { Version = 0x20080522 };
+        return Native.Capabilities(125, ref header, out var capabilities) == 0
+            && (capabilities.EffectiveLow | capabilities.PermittedLow | capabilities.InheritableLow
+                | capabilities.EffectiveHigh | capabilities.PermittedHigh | capabilities.InheritableHigh) == 0;
     }
 
     private static bool Limit(int resource, ulong ceiling)
@@ -62,6 +74,7 @@ internal static class LinuxImageIsolation
         OnlyArgument(rules, 8, 16, [0, 1, 2]);
         OnlyArgument(rules, 62, 16, [checked((uint)processId)]); // kill(self)
         OnlyArgument(rules, 234, 16, [checked((uint)processId)]); // tgkill(self group, thread)
+        OnlyArgument(rules, 157, 16, [21, 39]); // Read back seccomp/no_new_privs, never change process policy.
         DescriptorControl(rules);
         AnonymousMemoryOnly(rules);
         QueryLimitsOnly(rules, processId);
@@ -169,6 +182,24 @@ internal static class LinuxImageIsolation
         public ulong Maximum;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CapabilityHeader
+    {
+        public uint Version;
+        public int ProcessId;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct CapabilityData
+    {
+        public uint EffectiveLow;
+        public uint PermittedLow;
+        public uint InheritableLow;
+        public uint EffectiveHigh;
+        public uint PermittedHigh;
+        public uint InheritableHigh;
+    }
+
     private static class Native
     {
         [DllImport("libc", EntryPoint = "getpid", ExactSpelling = true)]
@@ -178,6 +209,18 @@ internal static class LinuxImageIsolation
         [DllImport("libc", EntryPoint = "getppid", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int GetParentPid();
+
+        [DllImport("libc", EntryPoint = "getuid", ExactSpelling = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern uint GetUserId();
+
+        [DllImport("libc", EntryPoint = "geteuid", ExactSpelling = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern uint GetEffectiveUserId();
+
+        [DllImport("libc", EntryPoint = "syscall", ExactSpelling = true, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern nint Capabilities(nint number, ref CapabilityHeader header, out CapabilityData capabilities);
 
         [DllImport("libc", EntryPoint = "prctl", ExactSpelling = true, SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
