@@ -334,7 +334,9 @@ try {
       assert.deepEqual(await page.evaluate(() => ({ href: location.href, length: history.length })), previousHistory);
       await page.keyboard.press("Escape");
       await expect(quick).toHaveCount(0);
+      await expect(option(transparent)).toBeFocused();
       receipt.quick_look_history = "unchanged";
+      receipt.quick_look_focus = "returned_to_trigger";
 
       await checkpoint("logout_and_invisible_identity");
       await signOut(page);
