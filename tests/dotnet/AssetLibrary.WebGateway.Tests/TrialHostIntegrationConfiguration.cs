@@ -64,6 +64,14 @@ internal static class TrialHostIntegrationConfiguration
         var configurationPath = Path.Combine(state, "trial.json");
         await File.WriteAllTextAsync(configurationPath,
             JsonSerializer.Serialize(configuration, TrialHostIntegrationSettings.Serialization));
+        if (!OperatingSystem.IsWindows())
+        {
+            // The parent is already private; set explicit file permissions without relying on the caller's umask.
+            foreach (var file in paths.Values.Append(certificateFile).Append(passwordFile).Append(configurationPath))
+            {
+                File.SetUnixFileMode(file, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
+        }
         return await TrialConfiguration.LoadAsync(configurationPath, CancellationToken.None);
     }
 }
