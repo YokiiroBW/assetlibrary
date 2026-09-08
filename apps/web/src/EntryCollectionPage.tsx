@@ -10,6 +10,7 @@ import type { Entry, Library, PagedState } from "./types";
 import type { useEntrySelection } from "./hooks/useEntrySelection";
 import type { useLibraryScan } from "./hooks/useLibraryScan";
 import type { WorkspacePosition } from "./hooks/useWorkspaceNavigation";
+import type { ImageRequests } from "./imageRequests";
 
 export function EntryCollectionPage({
   route,
@@ -25,6 +26,9 @@ export function EntryCollectionPage({
   reload,
   reconnect,
   open,
+  quickLook,
+  images,
+  imagesAllowed,
   position,
   remember,
 }: {
@@ -41,6 +45,9 @@ export function EntryCollectionPage({
   reload: () => void;
   reconnect: () => void;
   open: (row: EntryRow) => void;
+  quickLook: (row: EntryRow) => void;
+  images: ImageRequests;
+  imagesAllowed: boolean;
   position: WorkspacePosition;
   remember: (value: WorkspacePosition) => void;
 }) {
@@ -200,6 +207,9 @@ export function EntryCollectionPage({
             restoring={restoring}
             remember={remember}
             onOpen={open}
+            onQuickLook={quickLook}
+            images={images}
+            imagesAllowed={imagesAllowed}
           />
         </>
       )}
@@ -214,7 +224,7 @@ export function EntryCollectionPage({
         </span>
       )}
       <p className="keyboard-help" id="entry-keyboard-help">
-        单击选择 · Ctrl / ⌘ 多选 · Shift 连选 · 方向键移动 · Enter 打开 · Esc 取消
+        单击选择 · Ctrl / ⌘ 多选 · Shift 连选 · 方向键移动 · Space 快速查看 · Enter 打开 · Esc 取消
       </p>
     </section>
   );

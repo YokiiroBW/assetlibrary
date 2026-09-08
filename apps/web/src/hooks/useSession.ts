@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { AssetLinkApiError, AssetLinkClient } from "../assetLinkClient";
 import type { BrowserSession } from "../types";
 import { failure, isAbort, isAccessFailure } from "./queryState";
@@ -7,7 +8,13 @@ type SessionState =
   | { status: "checking" }
   | { status: "anonymous"; expired: boolean }
   | { status: "unavailable"; message: string }
-  | { status: "authenticated"; session: BrowserSession; generation: number; notice: string | null }
+  | {
+      status: "authenticated";
+      session: BrowserSession;
+      generation: number;
+      notice: string | null;
+      imagesAllowed: boolean;
+    }
   | { status: "signing_out" | "sign_out_failed"; session: BrowserSession; message: string | null };
 
 export function useSession() {
@@ -45,6 +52,7 @@ export function useSession() {
         session,
         generation: sameSession ? previous.generation : nextGeneration,
         notice: null,
+        imagesAllowed: !document.hidden && document.hasFocus(),
       };
     });
   }, []);
@@ -57,6 +65,10 @@ export function useSession() {
       const controller = new AbortController();
       active.current = controller;
       if (clear) setState({ status: "checking" });
+      else
+        setState((previous) =>
+          previous.status === "authenticated" ? { ...previous, imagesAllowed: false } : previous,
+        );
       void client
         .getSession(controller.signal)
         .then((session) => {
@@ -89,13 +101,23 @@ export function useSession() {
       if (event.data === "session-changed") check(true);
     };
     const onFocus = () => check();
+    // Finish sensitive-image teardown before pagehide can freeze the document into BFCache.
+    const hideImages = () =>
+      flushSync(() =>
+        setState((previous) =>
+          previous.status === "authenticated" ? { ...previous, imagesAllowed: false } : previous,
+        ),
+      );
     const onVisibility = () => {
       if (!document.hidden) check();
+      else hideImages();
     };
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) check(true);
     };
     window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", hideImages);
+    window.addEventListener("pagehide", hideImages);
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("pageshow", onPageShow);
     check();
@@ -103,6 +125,8 @@ export function useSession() {
       ++revision.current;
       active.current?.abort();
       window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", hideImages);
+      window.removeEventListener("pagehide", hideImages);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pageshow", onPageShow);
       changes.close();

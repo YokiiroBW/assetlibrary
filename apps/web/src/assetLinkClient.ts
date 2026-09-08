@@ -9,6 +9,9 @@ import {
   string,
 } from "./assetLinkResponses";
 import { decodeScan, decodeSession, decodeSources } from "./trialResponses";
+import { AssetLinkApiError } from "./assetLinkError";
+import { imageFailure, readImageResponse, type DerivedImage, type ImageVariant } from "./imageResponses";
+export { AssetLinkApiError } from "./assetLinkError";
 import type {
   BrowserSession,
   BrowseOptions,
@@ -27,17 +30,6 @@ import type {
 const endpoint = "/assetlink/v1/control";
 const pageSize = 100;
 const timeoutMilliseconds = 5_000;
-
-export class AssetLinkApiError extends Error {
-  public constructor(
-    public readonly status: number,
-    public readonly code: string,
-    message: string,
-  ) {
-    super(message);
-    this.name = "AssetLinkApiError";
-  }
-}
 
 export class AssetLinkClient {
   public constructor(private readonly csrfToken = "") {}
@@ -76,6 +68,28 @@ export class AssetLinkClient {
   public getEntry(libraryId: string, entryId: string, signal: AbortSignal): Promise<EntryDetail> {
     return this.request("entries.get", { library_id: libraryId, entry_id: entryId }, signal, (body) =>
       decodeEntryDetail(body, libraryId, entryId),
+    );
+  }
+
+  public getImage(
+    libraryId: string,
+    entryId: string,
+    variant: ImageVariant,
+    signal: AbortSignal,
+  ): Promise<DerivedImage> {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (
+      ![libraryId, entryId].every((id) => uuid.test(id) && id !== "00000000-0000-0000-0000-000000000000") ||
+      (variant !== "thumbnail" && variant !== "preview")
+    )
+      return Promise.reject(imageFailure(400, "invalid_request"));
+    return this.transport(
+      `/assetlink/v1/libraries/${libraryId}/entries/${entryId}/image?variant=${variant}`,
+      "GET",
+      undefined,
+      signal,
+      (response, transportSignal) => readImageResponse(response, transportSignal, variant),
+      true,
     );
   }
 
@@ -196,7 +210,8 @@ export class AssetLinkClient {
       timeout_ms: timeoutMilliseconds,
       ...(idempotencyKey === undefined ? {} : { idempotency_key: idempotencyKey }),
     };
-    return this.transport(endpoint, "POST", encodeAssetLinkMessage(request), signal, (text, response) => {
+    return this.transport(endpoint, "POST", encodeAssetLinkMessage(request), signal, async (response) => {
+      const text = await response.text();
       const message = parseAssetLinkMessage(text);
       if (message.request_id !== request.request_id) throw invalidResponse(response.status);
       if (message.message_type === "error") {
@@ -225,7 +240,8 @@ export class AssetLinkClient {
       method,
       body === undefined ? undefined : JSON.stringify(body),
       signal,
-      (text, response) => {
+      async (response) => {
+        const text = await response.text();
         const result = response.status === 204 ? {} : record(JSON.parse(text), "session response");
         if (!response.ok)
           throw new AssetLinkApiError(response.status, string(result.code, "code"), string(result.message, "message"));
@@ -239,39 +255,73 @@ export class AssetLinkClient {
     method: "GET" | "POST",
     body: string | undefined,
     signal: AbortSignal,
-    decode: (text: string, response: Response) => T,
+    decode: (response: Response, signal: AbortSignal) => Promise<T>,
+    imageRequest = false,
   ): Promise<T> {
     signal.throwIfAborted();
     const controller = new AbortController();
     const cancelFromCaller = () => controller.abort(signal.reason);
     signal.addEventListener("abort", cancelFromCaller, { once: true });
-    const timeout = window.setTimeout(() => controller.abort(), timeoutMilliseconds);
+    const timeout = window.setTimeout(() => controller.abort(), imageRequest ? 20_000 : timeoutMilliseconds);
     try {
-      const response = await fetch(path, {
-        method,
-        credentials: "same-origin",
-        cache: "no-store",
-        headers: { "content-type": "application/json", "X-AssetLibrary-CSRF": this.csrfToken },
-        body,
-        signal: controller.signal,
-      });
-      try {
-        return decode(await response.text(), response);
-      } catch (error: unknown) {
-        // HTTP rejection remains authoritative even when its body stalls or is malformed.
-        if (!response.ok && !(error instanceof AssetLinkApiError)) throw invalidResponse(response.status);
-        throw error;
+      for (let attempt = 0; ; attempt++) {
+        const response = await fetch(path, {
+          method,
+          credentials: "same-origin",
+          cache: "no-store",
+          redirect: "error",
+          headers: { "content-type": "application/json", "X-AssetLibrary-CSRF": this.csrfToken },
+          body,
+          signal: controller.signal,
+        });
+        if (imageRequest && [401, 403, 404].includes(response.status)) {
+          void response.body?.cancel().catch(() => undefined);
+          throw imageFailure(response.status);
+        }
+        if (imageRequest && response.status === 429 && attempt < 2) {
+          void response.body?.cancel().catch(() => undefined);
+          await waitForRetry(response.headers.get("retry-after"), controller.signal);
+          continue;
+        }
+        try {
+          return await decode(response, controller.signal);
+        } catch (error: unknown) {
+          // HTTP rejection remains authoritative even when its body stalls or is malformed.
+          if (!response.ok && !(error instanceof AssetLinkApiError)) throw invalidResponse(response.status);
+          throw error;
+        }
       }
     } catch (error: unknown) {
       if (signal.aborted) throw signal.reason;
       if (error instanceof AssetLinkApiError) throw error;
-      if (controller.signal.aborted) throw new AssetLinkApiError(504, "timeout", "读取超时，请重试。");
+      if (controller.signal.aborted)
+        throw imageRequest
+          ? imageFailure(504, "preview_timeout")
+          : new AssetLinkApiError(504, "timeout", "读取超时，请重试。");
       throw error;
     } finally {
       window.clearTimeout(timeout);
+      controller.abort();
       signal.removeEventListener("abort", cancelFromCaller);
     }
   }
+}
+
+function waitForRetry(value: string | null, signal: AbortSignal): Promise<void> {
+  const seconds = value !== null && /^\d+$/.test(value) ? Number(value) * 1000 : Date.parse(value ?? "") - Date.now();
+  const delay = Number.isFinite(seconds) ? Math.max(0, Math.min(seconds, 20_000)) : 1000;
+  return new Promise((resolve, reject) => {
+    signal.throwIfAborted();
+    const cancel = () => {
+      window.clearTimeout(timer);
+      reject(signal.reason);
+    };
+    const timer = window.setTimeout(() => {
+      signal.removeEventListener("abort", cancel);
+      resolve();
+    }, delay);
+    signal.addEventListener("abort", cancel, { once: true });
+  });
 }
 
 function pageBody(cursor: string | null): Record<string, unknown> {

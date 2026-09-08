@@ -34,6 +34,13 @@ export const browserSession = {
 };
 
 export async function mockSession(page, session = browserSession) {
+  await page.route("**/assetlink/v1/libraries/*/entries/*/image?variant=*", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ code: "preview_unavailable", message: "Fixture has no image engine." }),
+    }),
+  );
   await page.route("**/assetlink/v1/auth/session", (route) =>
     route.fulfill({
       contentType: "application/json",

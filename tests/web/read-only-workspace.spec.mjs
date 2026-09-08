@@ -172,7 +172,9 @@ test("search opens an unloaded library and locates a file beyond the first page"
   await page.getByRole("searchbox").fill("late");
   await entryOption(page, "late.jpg").dblclick();
   await expect(page).toHaveURL(/entry_library=44444444/);
-  await page.locator(".detail-pane").getByRole("button", { name: "定位所在目录" }).click();
+  const preview = page.getByRole("dialog", { name: "图片预览" });
+  await preview.locator("summary").click();
+  await preview.getByRole("button", { name: "定位所在目录" }).click();
   await expect(page).toHaveURL(new RegExp(`path=Archive&anchor=${archiveFile.entry_id}`));
   await expect(entryOption(page, "late.jpg")).toBeVisible();
   expect(browseRequests[0]).toMatchObject({
@@ -311,7 +313,7 @@ test("multi-selection, keyboard, grid and mobile details share real entry inform
   await page.screenshot({ path: testInfo.outputPath("workspace-grid-details.png"), animations: "disabled" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
-  const drawer = page.getByRole("dialog", { name: "资产详情" });
+  const drawer = page.getByRole("dialog", { name: "图片预览" });
   await expect(drawer.getByRole("heading", { name: items[0].name })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
   await page.screenshot({ path: testInfo.outputPath("workspace-mobile-details-dark.png"), animations: "disabled" });

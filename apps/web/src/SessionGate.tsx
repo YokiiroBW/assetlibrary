@@ -12,6 +12,7 @@ export function SessionGate() {
         key={state.generation}
         session={state.session}
         sessionNotice={state.notice}
+        imagesAllowed={state.imagesAllowed}
         onReconnect={session.reconnect}
         onSessionExpired={session.expire}
         onSignOut={() => void session.signOut(state.session)}

@@ -87,6 +87,7 @@ export function Modal({
     return () => {
       element?.close();
       if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      else document.querySelector<HTMLElement>('[data-entry-row][tabindex="0"], #workspace-content')?.focus();
     };
   }, []);
   return (
@@ -94,6 +95,32 @@ export function Modal({
       ref={ref}
       className={className}
       aria-label={label}
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const targets = Array.from(
+          event.currentTarget.querySelectorAll<HTMLElement>(
+            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((target) => {
+          const collapsed = target.closest("details:not([open])");
+          return (
+            target.getClientRects().length > 0 && (!collapsed || target === collapsed.querySelector(":scope > summary"))
+          );
+        });
+        const first = targets[0];
+        const last = targets.at(-1);
+        if (!first || !last) {
+          event.preventDefault();
+          return;
+        }
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === event.currentTarget)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }}
       onCancel={(event) => {
         event.preventDefault();
         close();

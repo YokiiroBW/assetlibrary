@@ -5,6 +5,8 @@ import type { useEntrySelection } from "./hooks/useEntrySelection";
 import type { WorkspacePosition } from "./hooks/useWorkspaceNavigation";
 import { entryType, formatBytes, formatDate } from "./libraryMetadata";
 import { WorkspaceIcon } from "./WorkspaceIcon";
+import { DerivedImage } from "./DerivedImage";
+import type { ImageRequests } from "./imageRequests";
 
 export interface EntryRow {
   entry: Entry;
@@ -20,6 +22,9 @@ export function VirtualEntryList({
   restoring,
   remember,
   onOpen,
+  onQuickLook,
+  images,
+  imagesAllowed,
 }: {
   rows: EntryRow[];
   view: EntryView;
@@ -27,6 +32,9 @@ export function VirtualEntryList({
   position: WorkspacePosition;
   remember: (position: WorkspacePosition) => void;
   onOpen: (row: EntryRow) => void;
+  onQuickLook: (row: EntryRow) => void;
+  images: ImageRequests;
+  imagesAllowed: boolean;
   restoring: boolean;
 }) {
   const scroll = useRef<HTMLDivElement>(null);
@@ -94,7 +102,8 @@ export function VirtualEntryList({
       selection.selectAllLoaded();
     } else if (event.key === " ") {
       event.preventDefault();
-      selection.select(row.entry.entry_id, event, true);
+      if (event.ctrlKey || event.metaKey || event.shiftKey) selection.select(row.entry.entry_id, event, true);
+      else if (!event.repeat) onQuickLook(row);
     } else if (event.key === "Enter") {
       event.preventDefault();
       onOpen(row);
@@ -108,6 +117,7 @@ export function VirtualEntryList({
       className={`entry-scroll ${view === "grid" ? "grid-view" : "list-view"}`}
       ref={scroll}
       role="listbox"
+      tabIndex={-1}
       aria-label="资产列表"
       aria-multiselectable="true"
       aria-describedby="entry-keyboard-help"
@@ -172,8 +182,18 @@ export function VirtualEntryList({
                     {selected && <WorkspaceIcon name="check" />}
                   </span>
                   <span className={`entry-kind ${directory ? "is-folder" : ""}`} aria-hidden="true">
-                    <WorkspaceIcon name={directory ? "folder" : "file"} />
-                    {view === "grid" && !directory && <span>{entryType(row.entry)}</span>}
+                    {row.entry.kind === "file" ? (
+                      <DerivedImage
+                        value={row}
+                        requests={images}
+                        variant="thumbnail"
+                        enabled={imagesAllowed}
+                        scrollRoot={scroll}
+                      />
+                    ) : (
+                      <WorkspaceIcon name={directory ? "folder" : "file"} />
+                    )}
+                    {view === "grid" && row.entry.kind !== "file" && !directory && <span>{entryType(row.entry)}</span>}
                   </span>
                   <span className="entry-primary">
                     <strong title={row.entry.name}>{row.entry.name}</strong>

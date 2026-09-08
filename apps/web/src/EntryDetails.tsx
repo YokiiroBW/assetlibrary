@@ -39,7 +39,7 @@ export function EntryDetails({
           <CopyRelativePaths rows={selectedRows} />
         </div>
       )}
-      {detail.value && <Details value={detail.value} locate={locate} openDirectory={openDirectory} />}
+      {detail.value && <EntryInformation value={detail.value} locate={locate} openDirectory={openDirectory} />}
     </>
   );
   if (narrow)
@@ -63,7 +63,7 @@ export function EntryDetails({
   );
 }
 
-function Details({
+export function EntryInformation({
   value: { library, entry },
   locate,
   openDirectory,
@@ -128,7 +128,9 @@ function Details({
           <dd>{entry.relative_path}</dd>
         </div>
       </dl>
-      <p className="safety-note">当前仅显示索引中的文件信息，尚未提供内容预览。首次索引为固定快照，原文件保持不变。</p>
+      <p className="safety-note">
+        文件信息来自首次扫描的索引快照。图片预览由服务端只读生成；不支持或暂不可用时保留文件信息。
+      </p>
     </div>
   );
 }

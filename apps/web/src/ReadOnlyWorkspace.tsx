@@ -21,16 +21,20 @@ import { browseRoute, collectionKey } from "./workspaceRoutes";
 import { parentPath } from "./libraryMetadata";
 import type { BrowserSession, BrowseOptions, EntryDetail, Library, SearchOptions } from "./types";
 import type { EntryRow } from "./VirtualEntryList";
+import { ImageRequests } from "./imageRequests";
+import { ImagePreview } from "./ImagePreview";
 
 export function ReadOnlyWorkspace({
   session,
   sessionNotice,
+  imagesAllowed,
   onReconnect,
   onSessionExpired,
   onSignOut,
 }: {
   session: BrowserSession;
   sessionNotice: string | null;
+  imagesAllowed: boolean;
   onReconnect: () => void;
   onSessionExpired: () => void;
   onSignOut: () => void;
@@ -43,6 +47,22 @@ export function ReadOnlyWorkspace({
   const [mobileNavigation, setMobileNavigation] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Library | null>(null);
+  const [quickLook, setQuickLook] = useState<{ row: EntryRow; route: typeof route } | null>(null);
+  const quick = quickLook?.route === route ? quickLook.row : null;
+  const [imageRevision, setImageRevision] = useState(0);
+  const [imageAccessLoss, setImageAccessLoss] = useState<{ libraryId: string } | null>(null);
+  const imageAccessLost = useCallback(
+    (status: number, libraryId: string) => {
+      if (status === 401) onSessionExpired();
+      else setImageAccessLoss({ libraryId });
+    },
+    [onSessionExpired],
+  );
+  const images = useMemo(
+    () => new ImageRequests(client, imageAccessLost),
+    [client, imageAccessLost, imageRevision, scope],
+  );
+  useEffect(() => () => images.dispose(), [images]);
   const libraries = useLibraries(client, route.page === "libraries" ? (route.category ?? undefined) : undefined);
   const catalogDenied = isAccessFailure(libraries.state.statusCode);
   const currentId =
@@ -103,22 +123,29 @@ export function ReadOnlyWorkspace({
   const selection = useEntrySelection(scope, rows, navigation.position.focusedId);
   const openedId = route.page === "browse" || route.page === "search" ? route.entryId : null;
   const selectedRow = selection.ids.size === 1 ? rows.find((row) => selection.ids.has(row.entry.entry_id)) : undefined;
-  const detailLibraryId = openedId
-    ? route.page === "browse"
-      ? route.libraryId
-      : route.page === "search"
-        ? route.entryLibraryId
-        : null
-    : !narrow
-      ? (selectedRow?.library.library_id ?? null)
-      : null;
-  const detailId = openedId ?? (!narrow ? (selectedRow?.entry.entry_id ?? null) : null);
+  const detailLibraryId = quick
+    ? quick.library.library_id
+    : openedId
+      ? route.page === "browse"
+        ? route.libraryId
+        : route.page === "search"
+          ? route.entryLibraryId
+          : null
+      : !narrow
+        ? (selectedRow?.library.library_id ?? null)
+        : null;
+  const detailId = quick?.entry.entry_id ?? openedId ?? (!narrow ? (selectedRow?.entry.entry_id ?? null) : null);
   const detail = useEntry(client, accessFailed ? null : detailLibraryId, accessFailed ? null : detailId);
   const sessionExpired = [libraries.state, resource, browse.state, search.state, scan, detail].some(
     (item) => item.statusCode === 401,
   );
   const lastScan = useRef<{ id: string; state: string } | null>(null);
   const adoptedAnchor = useRef<string | null>(null);
+  useEffect(() => {
+    if (!imageAccessLoss) return;
+    libraries.reload();
+    if (imageAccessLoss.libraryId === currentId) resource.reload();
+  }, [imageAccessLoss]);
   useEffect(() => {
     if (sessionExpired) onSessionExpired();
   }, [sessionExpired, onSessionExpired]);
@@ -168,6 +195,10 @@ export function ReadOnlyWorkspace({
   }, [onReconnect]);
   if (sessionExpired) return null;
   const closeDetails = () => {
+    if (quick) {
+      setQuickLook(null);
+      return;
+    }
     if (route.page === "browse" || route.page === "search") navigate({ ...route, entryId: null }, true);
   };
   const selectionControls = {
@@ -204,6 +235,7 @@ export function ReadOnlyWorkspace({
       }),
     );
   const reload = () => {
+    setImageRevision((value) => value + 1);
     selection.clear();
     closeDetails();
     active.reload();
@@ -289,12 +321,15 @@ export function ReadOnlyWorkspace({
                   reload={reload}
                   reconnect={onReconnect}
                   open={openEntry}
+                  quickLook={(row) => setQuickLook({ row, route })}
+                  images={images}
+                  imagesAllowed={imagesAllowed && !accessFailed && !openedId && !quick}
                   position={navigation.position}
                   remember={navigation.remember}
                 />
               </div>
             )}
-            {collection && (
+            {collection && (!narrow || (!openedId && !quick)) && (
               <EntryDetails
                 detail={detail}
                 selectedRows={rows.filter((row) => selection.ids.has(row.entry.entry_id))}
@@ -318,6 +353,19 @@ export function ReadOnlyWorkspace({
           </div>
         </div>
       </div>
+      {collection && (openedId !== null || quick !== null) && (
+        <ImagePreview
+          detail={detail}
+          requests={images}
+          enabled={imagesAllowed && !accessFailed}
+          quick={quick !== null}
+          close={closeDetails}
+          locate={locate}
+          openDirectory={({ library: target, entry }) =>
+            navigate(browseRoute(target.library_id, entry.relative_path, { view: route.view }))
+          }
+        />
+      )}
       {registering && (
         <RegisterLibraryForm
           client={client}
