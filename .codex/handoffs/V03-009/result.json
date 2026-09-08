@@ -3,18 +3,23 @@
   "task_id": "V03-009",
   "title": "android-image-preview",
   "milestone": "V0.3",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "android-client-owner",
   "branch": "codex/v03-009-android-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\85ca\\AssetLibrary",
   "commit": "1838b96e47338398be8c168a273799990f237df0",
   "changed_files": [
     ".codex/handoffs/V03-009/android-dependency-audit.json",
+    ".codex/handoffs/V03-009/real-core-integration.json",
     ".codex/handoffs/V03-009/result.json",
     ".codex/handoffs/V03-009/screenshots/phone-font200-preview.png",
     ".codex/handoffs/V03-009/screenshots/phone-font200-thumbnails.png",
     ".codex/handoffs/V03-009/screenshots/phone-preview.png",
     ".codex/handoffs/V03-009/screenshots/phone-thumbnails.png",
+    ".codex/handoffs/V03-009/screenshots/real-core-phone-preview.png",
+    ".codex/handoffs/V03-009/screenshots/real-core-phone-thumbnails.png",
+    ".codex/handoffs/V03-009/screenshots/real-core-tablet-preview.png",
+    ".codex/handoffs/V03-009/screenshots/real-core-tablet-thumbnails.png",
     ".codex/handoffs/V03-009/screenshots/tablet-dark-preview.png",
     ".codex/handoffs/V03-009/screenshots/tablet-dark-thumbnails.png",
     ".codex/handoffs/V03-009/summary.md",
@@ -40,27 +45,24 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 77,
+    "passed": 79,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
     "jvm": 37,
-    "distinct_instrumented_tests": 5,
+    "distinct_instrumented_tests": 7,
     "instrumented_viewports": 3,
     "repository_regressions": 35,
-    "not_run": [
-      "RealCoreUiTest",
-      "RealCoreImageUiTest"
-    ],
-    "dependency_audit": "passed exact-inventory same-day OSV response, 101 runtime and 475 verification components"
+    "not_run": [],
+    "dependency_audit": "passed exact-inventory same-day OSV response, 101 runtime and 475 verification components",
+    "real_core_distinct_tests": 2,
+    "real_core_actual_runs": 3
   },
   "risks": [
-    "RealCoreUiTest and RealCoreImageUiTest are compiled but not yet executed for this task; synthetic Compose PNG tests are not real-server image acceptance.",
-    "Trial debug signing; HyperOS/Android11 physical devices and 500k client performance remain open."
+    "Trial debug signing; HyperOS/Android11 physical devices and 500k client performance remain open.",
+    "Owned emulator exited unexpectedly after successful tablet test; recovered and verified private file/port/device cleanup. Root owns final shared-server source-integrity and cleanup evidence."
   ],
-  "blocked_by": [
-    "V03-007 isolated preview engine and coordinator real Core/PostgreSQL image fixture for actual integration"
-  ],
+  "blocked_by": [],
   "recommended_merge_order": 3,
   "handoff_summary": ".codex/handoffs/V03-009/summary.md",
   "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
@@ -84,10 +86,10 @@
       "Final verify_repository.py passed, including 21 migration and 14 architecture regressions; Alpha remains blocked",
       "37 JVM and 5 distinct instrumentation cases passed across three real emulator viewports",
       "Debug/Release builds and Android Lint passed with strict locking and verification",
-      "101 runtime license/OSV and 475 component integrity audit passed; APK v2 signature and copied SHA256 verified"
+      "101 runtime license/OSV and 475 component integrity audit passed; APK v2 signature and copied SHA256 verified",
+      "RealCoreUiTest and RealCoreImageUiTest passed against actual Linux Core/PostgreSQL/isolated decoder; phone 2/2 and tablet image 1/1; screenshots inspected, client private data and reverse ports cleaned"
     ],
     "technical_debt": [
-      "Await actual isolated Core/PostgreSQL image integration; do not claim V03-009 or full V0.3 complete before that evidence",
       "Existing physical HyperOS/Android11, 500k native performance and production signing gates remain"
     ]
   },
@@ -96,13 +98,17 @@
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
     "bytes": 30278429,
     "signing": "Android debug trial; APK v2 verified",
-    "screenshots": "screenshots/; explicitly synthetic image UI evidence",
-    "dependency_audit": "android-dependency-audit.json"
+    "screenshots": "screenshots/: six explicit synthetic UI screenshots and four real-Core-derived image screenshots",
+    "dependency_audit": "android-dependency-audit.json",
+    "real_core_integration": "real-core-integration.json"
   },
   "runtime_cleanup": {
-    "emulator": "v03-009-api36 / emulator-5584 explicitly stopped; adb devices empty",
-    "private_connection_created": false,
-    "reverse_ports_created": false,
-    "heavy_builds_finished": true
+    "emulator": "v03-009-api36 / emulator-5584 recovered for cleanup, explicitly stopped; adb devices empty and 5584/5585 listeners zero",
+    "private_connection_created": true,
+    "private_connection_removed_verified": true,
+    "reverse_ports_created": true,
+    "reverse_empty_verified": true,
+    "heavy_builds_finished": true,
+    "shared_server_cleanup_owner": "V03-005 coordinator"
   }
 }

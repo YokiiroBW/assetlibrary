@@ -42,10 +42,21 @@ Bundled Python3.12使用绝对入口。最终仓库验证通过（日志`.runtim
 
 完整依赖审计通过：475验证组件，101 runtime许可与OSV，无新增依赖。OSV回执来自同日V03-001真实TLS查询，现有验证器再次核验24小时时效、精确inventory SHA256与完整查询集合；无已报告advisory。APK30,278,429 bytes，SHA256 `8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b`；复制交付副本后重读一致。apksigner verify --verbose通过v2签名，明确为前序调试试用签名。Release unsigned23,486,407 bytes。
 
-不同已通过用例总计77（37 JVM+5仪器+35仓库回归），不重复累计基线/视口/重跑。其他脚本按通过命令记录，不混算测试数。
+不同已通过用例总计79（37 JVM+5原生样例仪器+2真实Core仪器+35仓库回归），不重复累计基线/视口/重跑。其他脚本按通过命令记录，不混算测试数。
 
-## 尚未运行与清理
+## 真实Core图片联调与清理（2026-09-08补充）
 
-既有 `RealCoreUiTest` 和新增 `RealCoreImageUiTest`（均已编译）等待root启动实际受限引擎+Core/PostgreSQL与10项合成图片fixture；没有执行、没有记为跳过通过。真实服务端图片、源不变/权限撤销联调证据仍待补齐。后者需同样的私密 `/data/local/tmp/assetlibrary-native-connection.json` 和对应adb reverse；本轮未创建连接文件或reverse。
+主协调READY实例：真实Linux Core874fb6a/Worker40d2d69、PostgreSQL、148个合成文件、固定仓库fixtures/image-preview-v1。经协调SSH转发与本设备adb reverse连接同一localhost HTTPS，仍执行精确叶证书/主机名/有效期校验。连接JSON只在模拟器临时私密路径，未打印内容、写源码或命令参数；未改共享样例/服务器。
 
-自有模拟器已显式emu kill，重型构建均结束；实际Core联调就绪后再按所有权重启该AVD。没有NAS部署、个人资产访问或真实凭据操作。缺HyperOS/Android11实机、50万资产压力、正式签名与完整V0.3发布证据。
+```text
+apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.RealCoreUiTest,app.assetlibrary.android.RealCoreImageUiTest
+apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.RealCoreImageUiTest
+```
+
+第一项在手机实际font_scale=2.0、1080×2400px/density420/浅色执行2/2通过，第二项在2560×1600px/density320（1280×800dp）/字体1.0/深色执行1/1通过，全部零失败/错误/跳过。Gradle分别65秒和33秒，源码/APK相关任务UP-TO-DATE；没有重跑37JVM/5样例仪器等未变自测。原始结果在`.runtime/evidence/real-core-phone/test-results`和`real-core-tablet/test-results`，公开摘要、类名与报告SHA256见handoff `real-core-integration.json`。
+
+实际网络PNG检查：JPEG/PNG/WebP的两个variant、EXIF6方向、alpha、中文.dat同内容派生字节一致；SVG、非图PNG、超大头PNG、截断JPEG返回415/422；不可见账号对已知图片返回404。真实控件完成登录/分页/目录/搜索/详情/退出、实际缩略图/全屏图、放大/复位/关闭以及Activity.recreate后的重新会话/库权限验证和图片加载。4张截图 `screenshots/real-core-*` 已逐张实看。源码/APK完全未修改，SHA仍为8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b。
+
+平板测试成功后、清理前模拟器与adb连接意外消失；未把当次失败清理记作成功。仅重启本任务AVD恢复截图与私密文件清理，2026-09-08T15:57:10Z确认设备connection文件不存在、reverse列表为空，再显式emu kill。15:57:29Z确认adb devices为空及5584/5585监听为0。退出原因未确定，不猜作产品问题或已验证系统稳定；没有关闭共享Core/SSH或改样例，root负责服务器侧原文件hash/mtime和资源最终清理。
+
+本次仅增真实联调证据与handoff状态为ready_for_review，已通过的源码自测/构建不重复。缺HyperOS/Android11实机、50万资产压力、正式签名与完整V0.3发布证据；这些门禁不由本任务解除。

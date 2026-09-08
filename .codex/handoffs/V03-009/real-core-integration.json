@@ -1,0 +1,82 @@
+{
+  "task_id": "V03-009",
+  "result": "passed",
+  "android_implementation_commit": "1838b96e47338398be8c168a273799990f237df0",
+  "coordinator_reported_runtime": {
+    "core": "874fb6a",
+    "worker": "40d2d69",
+    "transport": "Linux Core/PostgreSQL HTTPS through coordinator localhost SSH forward and owned adb reverse",
+    "fixture": "tests/integration/native-clients/fixtures/image-preview-v1",
+    "fixture_files": 148
+  },
+  "distinct_real_core_tests": 2,
+  "actual_runs": 3,
+  "reports": [
+    {
+      "viewport": "phone",
+      "raw_report": ".runtime/evidence/real-core-phone/test-results/TEST-v03-009-api36(AVD) - 16-_app-.xml",
+      "raw_sha256": "79f32d3b305fca5491f1ee0aae65828ee7e67dea773be0c85c76a4addbe398a3",
+      "suites": [
+        {
+          "name": "app.assetlibrary.android.RealCoreUiTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "26.47",
+          "timestamp": "2026-09-08T15:51:59"
+        },
+        {
+          "name": "app.assetlibrary.android.RealCoreImageUiTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "14.035",
+          "timestamp": "2026-09-08T15:51:59"
+        }
+      ]
+    },
+    {
+      "viewport": "tablet",
+      "raw_report": ".runtime/evidence/real-core-tablet/test-results/TEST-v03-009-api36(AVD) - 16-_app-.xml",
+      "raw_sha256": "4b81dfb49ac7a0c75a3571cd291058395559098bae0e428d7205796a09c9040e",
+      "suites": [
+        {
+          "name": "app.assetlibrary.android.RealCoreImageUiTest",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "15.601",
+          "timestamp": "2026-09-08T15:53:21"
+        }
+      ]
+    }
+  ],
+  "viewports": {
+    "phone": "1080x2400px density420, actual font_scale=2.0, light",
+    "tablet": "2560x1600px density320, font_scale=1.0, dark"
+  },
+  "verified_behaviors": [
+    "Actual JPEG/PNG/WebP-derived thumbnails and preview dimensions",
+    "EXIF6 portrait orientation and transparency through Android decoder",
+    "Same source content under Unicode .dat filename produces identical derived PNG",
+    "SVG, non-image, oversized header and truncated JPEG rejected with 415/422",
+    "Invisible account cannot read previously known image (404)",
+    "Native browse/search/page/detail/logout and actual image opening/zoom/close",
+    "Activity recreation revalidates session/library and reacquires images"
+  ],
+  "client_cleanup": {
+    "private_file_absent": true,
+    "reverse_empty": true,
+    "checked_at": "2026-09-08T15:57:10.3767492Z",
+    "recovered_after_unexpected_emulator_exit": true,
+    "adb_devices_empty": true,
+    "listening_5584_5585": 0,
+    "final_emulator_stop_verified_at": "2026-09-08T15:57:29Z",
+    "shared_service_cleanup": "coordinator-owned; client did not stop or alter shared server, SSH or sample files"
+  },
+  "apk_sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
+  "source_and_apk_changed": false
+}
