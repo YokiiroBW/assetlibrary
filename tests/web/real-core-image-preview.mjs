@@ -208,7 +208,13 @@ try {
         const entry = entries.get(`图片样例/${sample.path}`);
         await checkpoint(`case:${sample.path}`);
         const row = option(sample);
-        await row.scrollIntoViewIfNeeded();
+        // Drive the application's virtual-list keyboard navigation; generic DOM scrolling can detach its target.
+        await page.getByRole("listbox", { name: "资产列表" }).locator('[data-entry-row][tabindex="0"]').focus();
+        await page.keyboard.press("Home");
+        const rowIndex = searchResult.body.items.findIndex((hit) => hit.entry.entry_id === entry.entry_id);
+        assert.ok(rowIndex >= 0 && rowIndex < 100);
+        for (let index = 0; index < rowIndex; index++) await page.keyboard.press("ArrowRight");
+        await expect(row).toBeFocused();
         const trigger = await row.elementHandle();
         let thumbnailDimensions;
         if (sample.result === "image") {
