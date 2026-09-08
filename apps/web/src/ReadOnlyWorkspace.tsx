@@ -142,6 +142,10 @@ export function ReadOnlyWorkspace({
   const lastScan = useRef<{ id: string; state: string } | null>(null);
   const adoptedAnchor = useRef<string | null>(null);
   useEffect(() => {
+    if (detailLibraryId && (detail.statusCode === 403 || detail.statusCode === 404))
+      images.rejectAccess(detail.statusCode, detailLibraryId);
+  }, [detail.statusCode, detailLibraryId, images]);
+  useEffect(() => {
     if (!imageAccessLoss) return;
     libraries.reload();
     if (imageAccessLoss.libraryId === currentId) resource.reload();

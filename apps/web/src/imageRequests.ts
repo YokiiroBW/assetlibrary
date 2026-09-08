@@ -79,6 +79,19 @@ export class ImageRequests {
     this.denied.clear();
   }
 
+  public rejectAccess(status: number, libraryId: string) {
+    if (this.denied.get(libraryId) === status) return;
+    this.denied.set(libraryId, status);
+    const error = imageFailure(status);
+    for (const affected of this.jobs) {
+      if (status === 401 || affected.libraryId === libraryId) {
+        this.free(affected);
+        affected.notify(errorState(error));
+      }
+    }
+    this.accessLost(status, libraryId);
+  }
+
   private pump() {
     // A freed slot may run before another job's due timer callback. Check elapsed time at admission too.
     for (const job of this.jobs) {
@@ -120,14 +133,7 @@ export class ImageRequests {
     } catch (error: unknown) {
       if (!job.released) {
         if (error instanceof AssetLinkApiError && [401, 403, 404].includes(error.status)) {
-          this.denied.set(job.libraryId, error.status);
-          for (const affected of this.jobs) {
-            if (error.status === 401 || affected.libraryId === job.libraryId) {
-              this.free(affected);
-              affected.notify(errorState(error));
-            }
-          }
-          this.accessLost(error.status, job.libraryId);
+          this.rejectAccess(error.status, job.libraryId);
         } else if (!job.controller.signal.aborted) {
           this.free(job);
           job.notify(errorState(error));

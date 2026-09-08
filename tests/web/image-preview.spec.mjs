@@ -1,5 +1,17 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
-import { browserSession, browsePath, entry, entryOption, mockSession, visibleLibrary } from "./assetlink-fixtures.mjs";
+import {
+  browserSession,
+  browsePath,
+  entry,
+  entryOption,
+  mockSession,
+  visibleLibrary,
+  browsePage,
+  libraryPage,
+  libraryDetail,
+  failure,
+  mockAssetLink,
+} from "./assetlink-fixtures.mjs";
 import { imagePattern, imageWorkspace, png, servePng, startImageServer } from "./image-fixtures.mjs";
 
 test("derived thumbnails use only the visible range, cancel on scroll, and reacquire on return", async ({ page }) => {
@@ -267,6 +279,23 @@ test("directories and reparse entries never request images", async ({ page }) =>
   await entryOption(page, items[1].name).dblclick();
   await expect(page.getByRole("dialog").getByText("此条目仅提供文件信息。")).toBeVisible();
   expect(reads).toBe(0);
+});
+
+test("a rejected L0 detail clears thumbnails even when the image endpoint has not rejected yet", async ({ page }) => {
+  const item = entry(94);
+  await imageWorkspace(page, [item]);
+  await mockAssetLink(page, (request) => {
+    if (request.operation === "libraries.list") return libraryPage(request);
+    if (request.operation === "libraries.get") return libraryDetail(request);
+    if (request.operation === "entries.get") return failure(request, 404, "not_found", "unavailable");
+    return browsePage(request, [item]);
+  });
+  await page.route(imagePattern, (route) => servePng(route));
+  await page.goto(browsePath);
+  await expect(page.locator(".image-thumbnail img")).toBeVisible();
+  await entryOption(page, item.name).click();
+  await expect(page.locator(".image-thumbnail img")).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => window.liveImageUrls.size)).toBe(0);
 });
 
 for (const status of [401, 403, 404]) {
