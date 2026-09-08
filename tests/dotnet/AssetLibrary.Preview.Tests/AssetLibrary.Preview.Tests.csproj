@@ -36,6 +36,7 @@
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceWorker.cs" Link="Boundary/ImageSourceWorker.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceParentLifetime.cs" Link="Boundary/ImageSourceParentLifetime.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ProcessImageSourceReader.cs" Link="Boundary/ProcessImageSourceReader.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/IsolatedImageDecoder.cs" Link="Boundary/IsolatedImageDecoder.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ImageWorkerTransport.cs" Link="Boundary/ImageWorkerTransport.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs" Link="Boundary/PngDerivativeValidator.cs" />
   </ItemGroup>

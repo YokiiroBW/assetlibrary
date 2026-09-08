@@ -71,11 +71,16 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         }
     }
 
-    private static async Task ReapLateStartupAsync(Task<IImageChildProcess> startup)
+    internal static async Task ReapLateStartupAsync(Task<IImageChildProcess> startup)
     {
         IImageChildProcess child;
         try { child = await startup.ConfigureAwait(false); }
         catch (OperationCanceledException) { return; }
+        catch (ImageChildCleanupPendingException pending)
+        {
+            await pending.Completion.ConfigureAwait(false);
+            return;
+        }
         try { await child.DisposeAsync().ConfigureAwait(false); }
         catch (ImageChildCleanupPendingException pending) { await pending.Completion.ConfigureAwait(false); }
     }
