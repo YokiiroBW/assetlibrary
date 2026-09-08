@@ -45,3 +45,15 @@ Windows x64，产品基线 70ce45c，本窗口独立 worktree。此节仅记录�
 PNG是Node标准库生成的有限RGBA合成渐变/透明数据，图片内容由fixture返回，明确不是实际服务器解码或NAS验收。HTTP fixture均finally关闭，Playwright/Vite已退出且4173无监听。未部署NAS、扫描个人资产或执行原资产写操作。
 
 服务端原图hash/mtime、真实Core/PG/HTTPS/CSP、共享权限编排、引擎隔离和跨端验收由V03-005/V03-007负责。没有50万资产或长时浏览器进程总内存压力证据；解码像素/Blob预算不能等同整个浏览器进程峰值。未晋级任何Provider/Explorer/写入或完整发布门禁。
+
+## 真实Core入口准备（9bf074e）
+
+按root后续委派新增tests/web内独立CLI，消费root5edf25c共享fixture。未修改apps/web、root serve.py/测试程序集或生成corpus，没有启动/停止共享服务。说明与命令见`tests/web/real-core-image-preview.md`。
+
+- `node --check tests/web/real-core-image-preview.mjs`、`node --check tests/web/real-core-image-support.mjs`通过。
+- `node --test tests/web/real-core-image-input-check.mjs`：4/4通过、0skip，131.6ms；仅覆盖入口origin/秘密字段/寿命/148样例约束、十项manifest和PNG规格/方向/截断断言，不是实际TLS或Core图片执行。
+- 新增4文件Prettier检查通过，最终diff审查及`git diff --check`通过。
+- `pnpm --dir apps/web exec playwright test --list`只收集65项/6文件，证明显式真实CLI和Node输入检查未进入默认假数据套件；没有重复执行65项。
+- CLI `--help`返回0；无`--execute`返回77且不执行，符合显式准入约定。
+
+真实CLI须等root报告同一fixture READY后用私密connection文件执行。凭据不进命令/输出/trace，失败只报固定阶段。PNG与HTML/JS/CSS全部从真实HTTPS Host读取，不拦截/替换route；产物hash与审查build-evidence核对。普通无权限账号拒权不直写DB；同账号动态撤权和原件/进程/DB清理由root控制。此阶段总计新增4项工具检查，消费者65项证据保持，真实运行尚无通过或失败记录。

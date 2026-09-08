@@ -28,4 +28,6 @@
 
 ## 合并与后续
 
+真实Core浏览器验收入口已另在9bf074e准备：`tests/web/real-core-image-preview.mjs`及说明/支持模块/4项输入检查，严格在tests/web范围内。复用5edf25c共享fixture的私密connection.json和十项corpus，不改共享fixture、不设置route、不混入默认Playwright自测。先校验localhost/叶指纹/有效期，再使用特定SPKI启动未绕过CSP的Chromium，匹配真实Host上的审查产物；原生测试账号登录/发现entry均走生产API。覆盖真实派生PNG/方向/透明/中文.dat、错误L0、截图和普通账号404/匿名401。脚本/格式/4项输入边界通过，默认仍收集65项原自测；**真实服务运行待root READY，没有真实联调通过声明**。无需重复65项未变用例。
+
 先合root38aedca与23ad33d，准备文档238c61c可合，再合本实现4e633e8、拒权补充d944300及最终交接提交。不要重复合3f3cfba/f6fecae（对应同一协调基线）。由主协调统一真实Core/PG/HTTPS与跨端合成资产验收、包来源和部署。Provider、文件写入、Explorer、完整Alpha/V0.3门禁均保持独立。

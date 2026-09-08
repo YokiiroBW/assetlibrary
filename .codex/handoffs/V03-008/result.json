@@ -7,7 +7,7 @@
   "owner": "web-gateway-owner",
   "branch": "codex/v03-008-web-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
-  "commit": "d9443009853e4ad057037efcfa700dc1c5ad68a4",
+  "commit": "9bf074e2273f2ecc03cfaa96b2f7cc800eca379e",
   "changed_files": [
     ".codex/handoffs/V03-008/build-evidence.json",
     ".codex/handoffs/V03-008/implementation-plan.md",
@@ -37,11 +37,15 @@
     "tests/web/assetlink-fixtures.mjs",
     "tests/web/image-fixtures.mjs",
     "tests/web/image-preview.spec.mjs",
-    "tests/web/read-only-workspace.spec.mjs"
+    "tests/web/read-only-workspace.spec.mjs",
+    "tests/web/real-core-image-input-check.mjs",
+    "tests/web/real-core-image-preview.md",
+    "tests/web/real-core-image-preview.mjs",
+    "tests/web/real-core-image-support.mjs"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 65,
+    "passed": 69,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
@@ -74,7 +78,8 @@
       "validate_web_source.py passed for final source",
       "validate_web_dependencies.py --require-build-artifacts passed with coordinator 23ad33d policy for final source",
       "65 unique Playwright cases passed; no skipped tests",
-      "verify_repository baseline passed; later old bundle budget failure closed by original targeted check; aggregate was not unnecessarily rerun"
+      "verify_repository baseline passed; later old bundle budget failure closed by original targeted check; aggregate was not unnecessarily rerun",
+      "Real Core CLI preparation: syntax/format passed, four Node input checks passed, default Playwright collection remains 65; live server run awaits coordinator READY"
     ],
     "technical_debt": []
   }
