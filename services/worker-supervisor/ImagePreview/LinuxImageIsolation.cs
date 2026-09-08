@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Globalization;
 
 namespace AssetLibrary.ImagePreview.Worker;
 
@@ -19,7 +20,7 @@ internal static class LinuxImageIsolation
         }
 
         var parentId = Native.GetParentPid();
-        if (Native.Prctl(1, 9, 0, 0, 0) != 0 || Native.GetParentPid() != parentId
+        if (Native.Prctl(1, 9, 0, 0, 0) != 0 || Native.GetParentPid() != parentId || !AddressSpaceFits()
             || !Limit(9, 512UL * 1024 * 1024) || !Limit(0, 3) || !Limit(1, 0) || !Limit(4, 0) || !Limit(6, 256)
             || Native.Prctl(38, 1, 0, 0, 0) != 0)
         {
@@ -38,6 +39,17 @@ internal static class LinuxImageIsolation
         {
             pinned.Free();
         }
+    }
+
+    private static bool AddressSpaceFits()
+    {
+        // setrlimit does not revoke existing reservations; reject an already oversized runtime.
+        using var input = File.OpenRead("/proc/self/statm");
+        Span<byte> data = stackalloc byte[256];
+        var count = input.ReadAtLeast(data, data.Length, throwOnEndOfStream: false);
+        var end = data[..count].IndexOf((byte)' ');
+        return end > 0 && long.TryParse(System.Text.Encoding.ASCII.GetString(data[..end]), NumberStyles.None,
+            CultureInfo.InvariantCulture, out var pages) && pages <= (512L * 1024 * 1024) / Environment.SystemPageSize;
     }
 
     internal static int CurrentMode() => Native.Prctl(21, 0, 0, 0, 0);

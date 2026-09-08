@@ -19,11 +19,12 @@ internal static class StaticImageDecoder
         }
 
         var info = codec.Info;
+        if (info.Width <= 0 || info.Height <= 0) throw new ImageDecodeException(ImageWorkerStatus.Invalid);
         ImageInputPolicy.ValidateDimensions(checked((ulong)info.Width), checked((ulong)info.Height));
         using var srgb = SKColorSpace.CreateSrgb();
         var rgba = new SKImageInfo(info.Width, info.Height, SKColorType.Rgba8888, SKAlphaType.Premul, srgb);
-        using var bitmap = new SKBitmap(rgba);
-        if (bitmap.GetPixels() == nint.Zero) throw new ImageDecodeException(ImageWorkerStatus.Limit);
+        using var bitmap = new SKBitmap();
+        if (!bitmap.TryAllocPixels(rgba)) throw new ImageDecodeException(ImageWorkerStatus.Limit);
         if (codec.GetPixels(rgba, bitmap.GetPixels()) != SKCodecResult.Success)
         {
             throw new ImageDecodeException(ImageWorkerStatus.Invalid);
@@ -40,8 +41,11 @@ internal static class StaticImageDecoder
         var scale = Math.Min(1d, (double)ImageWorkerProtocol.MaximumEdge(profile) / Math.Max(width, height));
         var targetWidth = Math.Max(1, (int)Math.Floor(width * scale));
         var targetHeight = Math.Max(1, (int)Math.Floor(height * scale));
-        using var target = new SKBitmap(new SKImageInfo(targetWidth, targetHeight,
-            SKColorType.Rgba8888, SKAlphaType.Premul, srgb));
+        using var target = new SKBitmap();
+        if (!target.TryAllocPixels(new SKImageInfo(targetWidth, targetHeight, SKColorType.Rgba8888, SKAlphaType.Premul, srgb)))
+        {
+            throw new ImageDecodeException(ImageWorkerStatus.Limit);
+        }
         using (var canvas = new SKCanvas(target))
         using (var image = SKImage.FromBitmap(bitmap))
         {
@@ -54,7 +58,7 @@ internal static class StaticImageDecoder
 
         using var rendered = SKImage.FromBitmap(target);
         using var encoded = rendered.Encode(SKEncodedImageFormat.Png, 100)
-            ?? throw new ImageDecodeException(ImageWorkerStatus.Invalid);
+            ?? throw new ImageDecodeException(ImageWorkerStatus.Limit);
         if (encoded.Size > ImageWorkerProtocol.MaximumOutput(profile)) throw new ImageDecodeException(ImageWorkerStatus.Limit);
         return new DecodedImage(encoded.ToArray(), targetWidth, targetHeight);
     }

@@ -14,10 +14,24 @@ internal static class WindowsImageIsolation
         using (token)
         {
             return FirstInteger(token, 29) == 1 // TokenIsAppContainer
-                && FirstInteger(token, 30) == 0 // No declared network or other capabilities
+                && HasExactCompatibilityCapability(token) // Only lpacCom for .NET's mandatory finalizer initialization.
                 && FirstInteger(token, 46) == 1 // TokenIsLessPrivilegedAppContainer
                 && WindowsWorkerJob.CurrentProcessHasLimits(512U * 1024 * 1024, TimeSpan.FromSeconds(3).Ticks, 1);
         }
+    }
+
+    private static bool HasExactCompatibilityCapability(SafeAccessTokenHandle token)
+    {
+        _ = Native.GetTokenInformation(token, 30, nint.Zero, 0, out var required);
+        if (required is < 24 or > 16384) return false;
+        var buffer = Marshal.AllocHGlobal(checked((int)required));
+        try
+        {
+            if (!Native.GetTokenInformation(token, 30, buffer, required, out _) || Marshal.ReadInt32(buffer) != 1) return false;
+            using var expected = WindowsImageCapability.Create();
+            return expected.Matches(Marshal.ReadIntPtr(buffer, 8)) && (Marshal.ReadInt32(buffer, 16) & 4) != 0;
+        }
+        finally { Marshal.FreeHGlobal(buffer); }
     }
 
     private static int FirstInteger(SafeAccessTokenHandle token, int informationClass)

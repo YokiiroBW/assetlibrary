@@ -63,4 +63,5 @@ internal enum ImageWorkerStatus
     Unsupported = 5,
     Limit = 6,
     Unavailable = 7,
+    SourceChanged = 8,
 }
