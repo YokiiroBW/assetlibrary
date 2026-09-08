@@ -650,6 +650,58 @@
       "handoff": ".codex/handoffs/V01-026/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.1"
+    },
+    {
+      "id": "V03-001",
+      "title": "native-client-first-delivery",
+      "module": "native-client-first-delivery",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-024",
+        "V03-002",
+        "V03-003"
+      ],
+      "owner": "architecture-coordinator",
+      "branch": "codex/v03-001-native-client-first-delivery",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-001",
+      "task_file": ".codex/tasks/V03-001.md",
+      "handoff": ".codex/handoffs/V03-001/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.3"
+    },
+    {
+      "id": "V03-002",
+      "title": "windows-native-read-client",
+      "module": "windows-native-read-client",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-024",
+        "V01-002"
+      ],
+      "owner": "windows-client-owner",
+      "branch": "codex/v03-002-windows-native-read-client",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-002",
+      "task_file": ".codex/tasks/V03-002.md",
+      "handoff": ".codex/handoffs/V03-002/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.3"
+    },
+    {
+      "id": "V03-003",
+      "title": "android-native-read-client",
+      "module": "android-native-read-client",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-024",
+        "V01-002"
+      ],
+      "owner": "android-client-owner",
+      "branch": "codex/v03-003-android-native-read-client",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-003",
+      "task_file": ".codex/tasks/V03-003.md",
+      "handoff": ".codex/handoffs/V03-003/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.3"
     }
   ]
 }

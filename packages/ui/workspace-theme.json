@@ -1,0 +1,37 @@
+{
+  "generated_by": "scripts/export_native_theme.py; do not edit",
+  "sources": {
+    "light": "apps/web/src/styles/base.css",
+    "dark": "apps/web/src/styles/responsive.css"
+  },
+  "themes": {
+    "light": {
+      "ink": "#25334a",
+      "muted": "#69768b",
+      "line": "#dfe5ed",
+      "surface": "#f5f7fb",
+      "surface-strong": "#ffffff",
+      "accent": "#2365cc",
+      "accent-soft": "#eaf2ff",
+      "on-accent": "#ffffff",
+      "danger": "#b03637",
+      "positive": "#2b8664",
+      "folder": "#bb872c",
+      "focus": "#3175dc"
+    },
+    "dark": {
+      "ink": "#e0e7f2",
+      "muted": "#a0acc0",
+      "line": "#343f52",
+      "surface": "#1b2331",
+      "surface-strong": "#222c3b",
+      "accent": "#8bb8ff",
+      "accent-soft": "#2b4262",
+      "on-accent": "#142236",
+      "danger": "#ffb1b1",
+      "positive": "#84caae",
+      "folder": "#deba77",
+      "focus": "#a4c5ff"
+    }
+  }
+}
