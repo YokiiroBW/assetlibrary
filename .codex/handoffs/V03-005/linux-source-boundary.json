@@ -1,0 +1,86 @@
+{
+  "exit_code": 0,
+  "source_commit": "4b878965fa0caefd9e7d1735186c53d3fbce5f7c",
+  "archive_sha256": "94b72b1d7fe25d42143df2b5e1729ccee4e5de341218ed7fb8e2f76945252919",
+  "scope": "Linux development source-read boundary only, not decoder confinement or NAS acceptance",
+  "platform": "Linux6.14 development machine; non-root isolated build/test container",
+  "dotnet_sdk": "10.0.111",
+  "format": "passed",
+  "release_build": "zero warnings and zero errors",
+  "counters": {
+    "total": "9",
+    "executed": "9",
+    "passed": "9",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "cases": [
+    {
+      "name": "LeafSymbolicLinkIsRejected",
+      "outcome": "Passed"
+    },
+    {
+      "name": "CancelledOpenAndCopyDoNotReadOrWriteContent",
+      "outcome": "Passed"
+    },
+    {
+      "name": "StaleIndexAndSizeLimitFailBeforeWritingTheCopy",
+      "outcome": "Passed"
+    },
+    {
+      "name": "DisposalReleasesAllDirectoryAndFileHandles",
+      "outcome": "Passed"
+    },
+    {
+      "name": "StreamsStableBytesAndRetainsOriginalMetadata",
+      "outcome": "Passed"
+    },
+    {
+      "name": "LibraryRootDirectoryLinkIsRejected",
+      "outcome": "Passed"
+    },
+    {
+      "name": "ReadBoundaryRejectsDirectoryLinksAndPlainDirectories",
+      "outcome": "Passed"
+    },
+    {
+      "name": "ChangesAreDeniedOrDetectedUsingTheOpenFileIdentity",
+      "outcome": "Passed"
+    },
+    {
+      "name": "WindowsAliasesAreRejectedAndPathDepthIsBounded",
+      "outcome": "Passed"
+    }
+  ],
+  "cleanup": {
+    "owned_container_absent": true,
+    "sandbox_children": 0,
+    "tooling_and_source_archive_retained": "task-only temporary build context"
+  },
+  "artifact_sha256": {
+    "source-boundary-result.json": "9fc9ec57ccb8a5c556e683d7964154afe82cbde5e8fb67003dd29f01bb106531",
+    "source-boundary.log": "0561d930327d99d777aadb4f3a44331ab6c1a6979eea483d722c742238439981",
+    "source-boundary.trx": "b63034a43c6880fe24fde2db3a2553912aae5a726c81b864cbf3f1a3930fd9d1",
+    "toolchain-result.json": "cc4721efd29003f19caaaab1f4253259d65bb28804fa2ba74a3d6cace8cfa19d"
+  },
+  "toolchain": {
+    "directory": "/tmp/assetlibrary-v03-005-linux-izfgezzr",
+    "image_tag": "assetlibrary/v03-005-aot-tools:izfgezzr",
+    "base_image": "sha256:12900e746efb517c3291516ef8b7cd0000936b8dc870f94aac67970648bd2faa",
+    "sdk": "10.0.111",
+    "scope": "development machine only; no asset/state mounts; no production deployment",
+    "exit_code": 0,
+    "image_id": "sha256:6637af43221d16bcad07c04ddb47421b42cbdbcba642f4d8c52a53fa61e03ad5"
+  }
+}

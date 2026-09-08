@@ -33,3 +33,13 @@ Python 8项通过，.NET 6项通过，均0失败/跳过；其中新增图片输�
 随后实际运行README的真实服务器入口，增加 `--image-fixtures .runtime/sandbox-storage/V03-005/preview-fixtures --lifetime-seconds 2`，未设置worker：真实PG16.15、21迁移、6个LOGIN、HTTPS及首次扫描成功，文件数148，READY后按期限退出。原hash/mtime保持不变，Host/PG退出、HTTPS端口关闭、6个LOGIN移除、私密runtime删除均verified，非敏感原始结果见image-fixture-lifecycle.json。这是一个真实新增图片样例生命周期用例，不是图片端点或客户端图片显示验收。
 
 这10项输入随后按manifest强hash核对并逐字节复制进 `tests/integration/native-clients/fixtures/image-preview-v1`，方便其他worktree和CI复用；没有引入Pillow运行时依赖或修改图片内容。
+
+## Linux 安全读取基础
+
+f580b15经代码审查后合入，4b87896将Preview.Tests加入既有solution/Windows+Ubuntu CI矩阵和依赖缓存，不新增测试层级。该不可变集成源码tar为34,693,120B，SHA256 94b72b1d7fe25d42143df2b5e1729ccee4e5de341218ed7fb8e2f76945252919；传至dev-230自有临时目录后重新验证，再以安全tar过滤解包，未写远端工作仓库或NAS210生产。
+
+复用已核实10.0.111 SDK镜像，仅在自有构建镜像添加clang/zlib开发包。测试容器非root、2CPU/3GiB/512进程限制、去全部capability和no-new-privileges，仅挂本任务源码；执行Preview.Tests的locked restore、format verify、Release build和StableImageSourceTests，全部通过，0warning/0error、9/9测试、0skip。原始TRX逐项读回含真实叶文件symlink拒绝；JSON索引、hash与工具镜像来源见linux-source-boundary.json，原始日志/TRX在本worktree.runtime/linux-source-evidence。
+
+结束读回自有容器不存在，测试sandbox子目录为0。构建镜像和自有临时源码保留供后续NativeAOT测试；没有启动decoder、修改NAS、或用Docker外层拒绝冒充worker自身隔离。SDK首次提示workload验证诊断，但实际restore/format/Release和测试通过；未因此更新全局workload或忽略警告。
+
+审查另发现数据库timestamptz与文件100ns时间精度潜在不一致，已交V03-007在实际索引接线前复现并修正；上述9项只覆盖物理读取基础，不能替代持久索引/解码/HTTP联调。
