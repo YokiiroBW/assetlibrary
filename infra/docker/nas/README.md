@@ -1,6 +1,6 @@
 # NAS Docker 与第一版 Web
 
-此部署沿用现有只读试用核心：登录、登记物理目录、首次扫描、浏览和名称/路径搜索。Web由同一个Core容器通过HTTPS提供。只运行Core与PostgreSQL两个长期服务；初始化、迁移和管理员操作使用执行完即退出的setup容器。它不开放资产写入、预览、下载原文件、通用重扫、Windows Service或Explorer功能，也不替代完整Alpha门禁。
+此部署沿用现有只读试用核心：登录、登记物理目录、首次扫描、浏览和名称/路径搜索。Web由同一个Core容器通过HTTPS提供。只运行Core与PostgreSQL两个长期服务；初始化、迁移和管理员操作使用执行完即退出的setup容器。图片引擎随包提供，默认关闭，只有通过目标平台验收后才显式启用。它不开放资产写入、下载原文件、通用重扫、Windows Service或Explorer功能，也不替代完整Alpha门禁。
 
 构建清单记录镜像来源；目标环境的部署验收见`.codex/handoffs/V01-021/`交接。构建成功本身不代表部署通过。
 
@@ -66,6 +66,14 @@ operator在一次性容器中隐藏读取口令，再以UID1654调用同一个Ho
 
 ## 停止、保留和恢复
 
+图片预览采用同一提交的独立 linux-x64 NativeAOT 引擎，位于只读镜像的 `/app/workers/image-preview/`，不把解码库加载进 Core。目标 NAS 的内核隔离、资源限制、实际出图与回收验证通过后，协调人员可在受控启动时显式设置：
+
+```sh
+ASSETLIBRARY_IMAGE_PREVIEW_WORKER=/app/workers/image-preview/AssetLibrary.ImagePreview.Worker ./nasctl.sh start
+```
+
+Compose 仅透传此可选环境变量；未设置或为空时仍关闭，图片请求返回 `503 preview_unavailable`。镜像包含引擎、容器健康或开发机测试通过不代表目标 NAS 已验收。后续每次重建 Core 的启动应使用经确认的同一设置；关闭时明确以 `ASSETLIBRARY_IMAGE_PREVIEW_WORKER= ./nasctl.sh start` 重建 Core。不要替换成来源未绑定的外部可执行文件。此设置不改变资产只读挂载、非 root、cap_drop、no-new-privileges、init、临时空间或内存限制。
+
 ```sh
 ./nasctl.sh stop
 ./nasctl.sh start
@@ -89,6 +97,8 @@ python3 -I -B scripts/build_nas_deployment.py --output-root .runtime/sandbox-sto
 ```
 
 构建工具复用现有Git快照/路径边界/流式hash工具。Base images在本次构建前解析为不可变digest，Core/setup使用同一source revision；.NET10.0.111 SDK由官方Linux归档及固定SHA512获取，避免依赖不存在的MCR feature-band镜像标签。Runtime来自该固定SDK的shared目录；Node24.20.0、pnpm11.19.0、PG16.15不降级。Python仅为3.12+的一次性工具，当前选择3.13 bookworm并记录具体digest。
+
+独立图片构建层复用同一 SDK 和已提交的 linux-x64 AOT 发布锁，仅在构建层增加 clang/zlib 开发工具。Core 运行层仅复制图片可执行文件、`libSkiaSharp.so`、MIT 与第三方声明、`SHA256SUMS` 和 `SOURCE_REVISION`，不包含编译器或符号。打包工具创建一个从不启动的临时检查容器，提取这六个文件；校验完整文件集合、提交一致、SHA256、Linux x86-64 ELF 格式和 Linux 可执行权限，随后移除所属检查容器。检查失败不会生成交付归档。`build-manifest.json` 的 `image_preview` 记录实际镜像 ID、提交、RID、发布锁哈希、文件长度/哈希、默认关闭及平台尚未执行状态。
 
 需要把同一源码送到另一台构建机时可先执行`--context-only`，输出Git source-context.tar和source.bundle及SHA256。验证传输hash后，构建机从bundle克隆并checkout记录的source commit，再执行同一build命令；不要在解包源码上伪造新的源码commit或改版本以利用缓存。
 

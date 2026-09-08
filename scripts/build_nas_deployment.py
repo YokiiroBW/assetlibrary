@@ -12,9 +12,11 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tarfile
+import uuid
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +30,76 @@ BASE_IMAGES = {
     "PYTHON_IMAGE": "python:3.13-slim-bookworm",
     "POSTGRES_IMAGE": "postgres:16.15-bookworm",
 }
+IMAGE_PREVIEW_PATH = "/app/workers/image-preview"
+IMAGE_PREVIEW_FILES = (
+    "AssetLibrary.ImagePreview.Worker", "libSkiaSharp.so",
+    "LICENSE.SkiaSharp.txt", "THIRD-PARTY-NOTICES.SkiaSharp.txt",
+)
+
+
+def image_preview_manifest(package: Path, revision: str, source: Path, image_id: str) -> dict:
+    """Verify the actual image payload without executing the decoder or enabling it."""
+    RELEASE.assert_no_link_components(package, package)
+    if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+        raise RELEASE.ReleaseBuildError("invalid image preview source revision")
+    if re.fullmatch(r"sha256:[0-9a-f]{64}", image_id) is None:
+        raise RELEASE.ReleaseBuildError("invalid image preview container image identity")
+    expected = {*IMAGE_PREVIEW_FILES, "SHA256SUMS", "SOURCE_REVISION"}
+    files = {relative.as_posix(): path for path, relative in RELEASE.iter_artifact_files(package)}
+    if set(files) != expected or {path.name for path in package.iterdir()} != expected:
+        raise RELEASE.ReleaseBuildError("image preview payload has missing or unexpected files")
+    if files["SOURCE_REVISION"].stat().st_size != 41 or files["SOURCE_REVISION"].read_text(encoding="ascii") != revision + "\n":
+        raise RELEASE.ReleaseBuildError("image preview source revision differs from the image")
+    if files["SHA256SUMS"].stat().st_size > 1024:
+        raise RELEASE.ReleaseBuildError("image preview checksum list exceeds its bound")
+    checksums = {}
+    for line in files["SHA256SUMS"].read_text(encoding="ascii").splitlines():
+        match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_.-]+)", line)
+        if match is None or match[2] in checksums:
+            raise RELEASE.ReleaseBuildError("invalid image preview checksum list")
+        checksums[match[2]] = match[1]
+    if set(checksums) != set(IMAGE_PREVIEW_FILES):
+        raise RELEASE.ReleaseBuildError("image preview checksum list must cover every payload file")
+    for name in IMAGE_PREVIEW_FILES:
+        path = files[name]
+        if not 0 < path.stat().st_size <= 256 * 1024 * 1024:
+            raise RELEASE.ReleaseBuildError("image preview file is empty or exceeds its bound")
+        if RELEASE.sha256_file(path) != checksums[name]:
+            raise RELEASE.ReleaseBuildError("image preview content checksum differs")
+    for name in IMAGE_PREVIEW_FILES[:2]:
+        with files[name].open("rb") as stream:
+            header = stream.read(64)
+        if (len(header) != 64 or header[:7] != b"\x7fELF\x02\x01\x01"
+                or header[16:18] not in (b"\x02\x00", b"\x03\x00") or header[18:20] != b"\x3e\x00"):
+            raise RELEASE.ReleaseBuildError("image preview requires native Linux x86-64 ELF artifacts")
+    if os.name != "nt":
+        if any(not path.stat().st_mode & 0o004 for path in files.values()):
+            raise RELEASE.ReleaseBuildError("image preview payload is not readable by the non-root runtime")
+        if not files[IMAGE_PREVIEW_FILES[0]].stat().st_mode & 0o001:
+            raise RELEASE.ReleaseBuildError("image preview worker is not executable by the non-root runtime")
+    lock = source / "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.linux-x64.lock.json"
+    RELEASE.assert_no_link_components(lock, source)
+    return {
+        "source_revision": revision, "runtime_identifier": "linux-x64", "image_id": image_id,
+        "executable": IMAGE_PREVIEW_PATH + "/" + IMAGE_PREVIEW_FILES[0],
+        "release_lock_sha256": RELEASE.sha256_file(lock),
+        "files": [{"path": name, "length": path.stat().st_size, "sha256": RELEASE.sha256_file(path)}
+                  for name, path in sorted(files.items())],
+        "enabled_by_default": False, "platform_validation": "not_executed_by_builder",
+    }
+
+
+def inspect_image_preview(docker: str, image_id: str, destination: Path, source: Path, revision: str) -> dict:
+    name = "assetlibrary-preview-inspect-" + uuid.uuid4().hex
+    command([docker, "create", "--name", name, "--network", "none", "--read-only",
+             "--entrypoint", "/bin/false", image_id], cwd=source, capture=True)
+    try:
+        destination.mkdir()
+        command([docker, "cp", name + ":" + IMAGE_PREVIEW_PATH + "/.", str(destination)], cwd=source)
+        return image_preview_manifest(destination, revision, source, image_id)
+    finally:
+        # This exact, newly created inspection container was never started.
+        command([docker, "rm", name], cwd=source)
 
 
 def command(arguments: list[str], *, cwd: Path, capture: bool = False) -> str:
@@ -92,6 +164,7 @@ def build(args: argparse.Namespace) -> dict:
         if info["Config"]["Labels"].get("org.opencontainers.image.revision") != revision:
             raise RELEASE.ReleaseBuildError("built image source label mismatch")
         image_ids[stage] = info["Id"]
+    preview = inspect_image_preview(docker, image_ids["core"], output / "image-preview-inspection", source, revision)
     command([docker, "tag", resolved["POSTGRES_IMAGE"]["digest"], tags["postgres"]], cwd=source)
     image_ids["postgres"] = resolved["POSTGRES_IMAGE"]["id"]
     bundle = output / "assetlibrary-nas"
@@ -106,7 +179,8 @@ def build(args: argparse.Namespace) -> dict:
     save_images_archive(docker, list(tags.values()), bundle / "images.tar", source)
     manifest = {"format_version": 1, "product": "AssetLibrary/NAS/read-only/v1", "source_revision": revision,
                 "source_tree": tree, "base_images": resolved, "images": tags, "image_ids": image_ids,
-                "asset_writes": False, "native_deployment_validation": "not_executed_by_builder"}
+                "asset_writes": False, "native_deployment_validation": "not_executed_by_builder",
+                "image_preview": preview}
     RELEASE.write_json(bundle / "build-manifest.json", manifest)
     lines = [f"{RELEASE.sha256_file(path)}  {relative.as_posix()}" for path, relative in RELEASE.iter_artifact_files(bundle)]
     (bundle / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="ascii", newline="\n")

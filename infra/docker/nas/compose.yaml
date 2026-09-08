@@ -62,6 +62,8 @@ services:
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    environment:
+      ASSETLIBRARY_IMAGE_PREVIEW_WORKER: "${ASSETLIBRARY_IMAGE_PREVIEW_WORKER:-}"
     volumes:
       - core-state:/var/lib/assetlibrary
     # assets.compose.json adds only read_only bind mounts at /assets/<source_key>.

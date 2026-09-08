@@ -45,6 +45,31 @@ RUN test "${#SOURCE_REVISION}" -eq 40 \
        -p:PathMap=/src=/_/src -p:UseSharedCompilation=false -p:DebugType=None -p:DebugSymbols=false \
        --output /out
 
+FROM server AS image-preview
+ARG SOURCE_REVISION
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends clang zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj \
+       --locked-mode -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true \
+       -p:AssetLibraryReleaseLockRoot=/src/services/worker-supervisor/ImagePreview/locks \
+    && dotnet publish services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj \
+       --configuration Release --self-contained true --no-restore \
+       -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true \
+       -p:AssetLibraryReleaseLockRoot=/src/services/worker-supervisor/ImagePreview/locks \
+       -p:ContinuousIntegrationBuild=true -p:SourceRevisionId="$SOURCE_REVISION" \
+       -p:PathMap=/src=/_/src -p:UseSharedCompilation=false -p:DebugType=None -p:DebugSymbols=false \
+       --output /out-image-preview \
+    && mkdir /image-preview-package \
+    && cp /out-image-preview/AssetLibrary.ImagePreview.Worker /out-image-preview/libSkiaSharp.so \
+       /out-image-preview/LICENSE.SkiaSharp.txt /out-image-preview/THIRD-PARTY-NOTICES.SkiaSharp.txt /image-preview-package/ \
+    && cd /image-preview-package \
+    && test -x AssetLibrary.ImagePreview.Worker && test -s libSkiaSharp.so \
+    && sha256sum AssetLibrary.ImagePreview.Worker libSkiaSharp.so LICENSE.SkiaSharp.txt THIRD-PARTY-NOTICES.SkiaSharp.txt > SHA256SUMS \
+    && printf '%s\n' "$SOURCE_REVISION" > SOURCE_REVISION \
+    && chmod 0555 AssetLibrary.ImagePreview.Worker \
+    && chmod 0444 libSkiaSharp.so LICENSE.SkiaSharp.txt THIRD-PARTY-NOTICES.SkiaSharp.txt SHA256SUMS SOURCE_REVISION
+
 FROM native-base AS core
 ARG SOURCE_REVISION
 ENV DOTNET_ROOT=/opt/dotnet PATH=/opt/dotnet:$PATH \
@@ -55,6 +80,7 @@ COPY --from=server /opt/dotnet/host/ /opt/dotnet/host/
 COPY --from=server /opt/dotnet/shared/ /opt/dotnet/shared/
 WORKDIR /app
 COPY --from=server /out/ ./
+COPY --from=image-preview /image-preview-package/ ./workers/image-preview/
 COPY --from=web /src/apps/web/dist/ ./wwwroot/
 COPY infra/docker/nas/entrypoint.sh /app/entrypoint.sh
 RUN chmod 0555 /app/entrypoint.sh && mkdir -p /var/lib/assetlibrary /etc/dotnet \
