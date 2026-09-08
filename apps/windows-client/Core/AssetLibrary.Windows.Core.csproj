@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>AssetLibrary.Windows.Client</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../../packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj" />
+  </ItemGroup>
+</Project>
