@@ -50,6 +50,7 @@ internal static class WindowsImageOwnerJournal
             || !int.TryParse(fields[2], CultureInfo.InvariantCulture, out var phase) || phase is < 0 or > 4
             || !uint.TryParse(fields[3], CultureInfo.InvariantCulture, out var pid)
             || !long.TryParse(fields[4], CultureInfo.InvariantCulture, out var creation)
+            || creation < 0
             || fields[2] != phase.ToString(CultureInfo.InvariantCulture)
             || fields[3] != pid.ToString(CultureInfo.InvariantCulture)
             || fields[4] != creation.ToString(CultureInfo.InvariantCulture)
