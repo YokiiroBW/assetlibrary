@@ -86,6 +86,24 @@ public sealed class WindowsImageLifecycleTests
     }
 
     [TestMethod]
+    public void RecoveryToleratesAlreadyDeletedOwnedProfileBeforeJournalUpdate()
+    {
+        using var sandbox = new RepositorySandbox();
+        var state = Path.Combine(sandbox.Root, "profiles");
+        var profile = WindowsImageProfile.Create(Worker(), state);
+        var staging = profile.DirectoryPath;
+        var systemProfile = SystemProfilePath(profile.Sid);
+        Assert.AreEqual(0, Native.DeleteAppContainerProfile(profile.Name));
+        Assert.IsFalse(Directory.Exists(systemProfile));
+        Assert.AreEqual(0, Native.DeleteAppContainerProfile(profile.Name));
+        // Preserve the older Created record, as a crash between the API and journal update would.
+        profile.ReleaseForRecovery();
+        Assert.AreEqual(1, WindowsImageProfile.Recover(state));
+        Assert.IsFalse(Directory.Exists(staging));
+        AssertNoPendingRecords(state);
+    }
+
+    [TestMethod]
     public void RecoveryDoesNotAdoptLegacyOrMalformedRecords()
     {
         using var sandbox = new RepositorySandbox();
@@ -129,6 +147,10 @@ public sealed class WindowsImageLifecycleTests
 
     private static class Native
     {
+        [DllImport("userenv.dll", ExactSpelling = true, CharSet = CharSet.Unicode)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        public static extern int DeleteAppContainerProfile(string name);
+
         [DllImport("userenv.dll", ExactSpelling = true, CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern int GetAppContainerFolderPath(string sid, out nint path);
