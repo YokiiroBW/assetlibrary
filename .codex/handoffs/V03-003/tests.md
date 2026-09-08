@@ -39,6 +39,8 @@ RealCoreUiTest 单独对 V03-004 创建的真实 HTTPS + Core + PostgreSQL 隔�
 
 `python -I -B scripts/generate_assetlink_sdks.py --check`、`python -I -B scripts/export_native_theme.py --check`、`python -I -B scripts/validate_architecture_baseline.py` 与完整 `python -I -B scripts/verify_repository.py` 通过；使用 bundled Python 的绝对入口，未安装全局Python。仓库验证另执行21个迁移、14个架构回归（全部通过），因此含原生23项后为58个不同测试。Alpha审计保持合法blocked，不表示版本已发布。
 
-协调 owner 负责根级 CI/依赖审计。runtime inventory、完整 inventory 与 Gradle cache POM 已提供；本地许可证/metadata/锁/30MB体积检查完成。OSV 外部服务 TLS 连接重置，在线漏洞审计 **pending**，绝不记通过。
+V03-001 协调 owner 于 2026-09-08 09:27:05 UTC 完成根级依赖审计：475 个解析组件的 SHA256 metadata、101 个实际 runtime 依赖的 POM 许可证和在线 OSV、锁与 30,064,814 字节 APK 大小/哈希均通过，查询未发现已知 advisory。公开结果复制为本目录 `android-dependency-audit.json`。
+
+初次 100 条批量 TLS 被重置，协调 owner 改用保持 TLS 验证的 Node fetch 每 10 条查询，保存完整 queries/results、UTC 和 inventory SHA256 到其 `.runtime/android-osv-response.json`。协调验证脚本的 `--osv-response` 检查时效不超过 24 小时、查询集合完整及 inventory 哈希一致，5 个拒绝异常输入的脚本测试由协调线程通过；它们不重复计入本任务 58 个测试。没有绕过 TLS 或将缺失查询当作通过。本次只补公开审计报告与交接元数据，未重建 APK 或重跑已通过测试。
 
 无 HyperOS/Android11 真机、50万资产客户端压力或正式签名证据；生产预览/同步/文件写入不在可用能力中。平台缺证据与全版本发布仍保留开放状态。

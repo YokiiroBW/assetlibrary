@@ -45,7 +45,8 @@
     ".codex/handoffs/V03-003/screenshots/phone-real-core.png",
     ".codex/handoffs/V03-003/screenshots/phone-detail.png",
     ".codex/handoffs/V03-003/screenshots/tablet-dark.png",
-    ".codex/handoffs/V03-003/screenshots/phone-font200.png"
+    ".codex/handoffs/V03-003/screenshots/phone-font200.png",
+    ".codex/handoffs/V03-003/android-dependency-audit.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -55,11 +56,10 @@
     "report": "tests.md",
     "jvm": 21,
     "distinct_instrumented_tests": 2,
-    "osv_audit": "pending_external_tls_reset",
+    "osv_audit": "passed_by_V03-001_2026-09-08T09:27:05Z_101_runtime_coordinates",
     "repository_regressions": 35
   },
   "risks": [
-    "OSV在线漏洞审计因外部TLS连接重置等待，由协调线程继续；未记为通过。",
     "APK使用明确调试试用签名；正式签名、HyperOS/Android11真机与50万资产原生压测证据仍开放。",
     "当前仅单HTTPS源只读浏览；正式预览/传输/同步/设备配对与主备切换未开放。"
   ],
@@ -93,10 +93,10 @@
       "export_native_theme.py --check passed",
       "21 JVM protocol/state tests plus two actual instrumented test classes passed",
       "Gradle strict locks/verification; Debug/Release builds; Android Lint passed",
-      "verify_repository.py passed including 21 migration and 14 architecture tests; Alpha remains blocked"
+      "verify_repository.py passed including 21 migration and 14 architecture tests; Alpha remains blocked",
+      "V03-001 dependency audit passed: 475 verified components; 101 runtime POM licenses and online OSV results; APK size/hash confirmed"
     ],
     "technical_debt": [
-      "V03-001: complete OSV online audit after upstream TLS connectivity recovers",
       "Later Android platform task: HyperOS and Android11 physical devices; 500k client performance; target37 and production signing",
       "Follow V0.3 service contracts for previews, transfers, sync, pairing and redundant endpoints"
     ]
@@ -106,6 +106,7 @@
     "sha256": "AFD7CBD3F387AEBC1F2D00EC34C3F824909673615546404B81AFD2A24A79B8CB",
     "bytes": 30064814,
     "signing": "Android debug trial, APK v2 signature verified",
-    "screenshots": "screenshots/"
+    "screenshots": "screenshots/",
+    "dependency_audit": ".codex/handoffs/V03-003/android-dependency-audit.json"
   }
 }

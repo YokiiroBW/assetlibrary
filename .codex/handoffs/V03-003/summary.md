@@ -27,7 +27,7 @@
 
 ## 风险、技术债与合并
 
-协调线程已完成 runtime POM 许可证、验证元数据覆盖、锁和包体检查；**OSV 在线漏洞审计仍因外部 TLS 连接重置等待，未记为通过**，由 V03-001 集成时继续完成。
+V03-001 协调线程已于 2026-09-08 09:27:05 UTC 完成依赖审计：475 个解析组件的 SHA256 验证元数据、101 个 runtime 依赖的 POM 许可证及在线 OSV 查询、锁、APK 大小和哈希均通过；此次查询未发现已知 advisory。公开报告为 [android-dependency-audit.json](android-dependency-audit.json)。初次大批请求遇到 TLS 重置后，协调线程使用保持 TLS 验证的 Node fetch 每 10 条查询，并验证回复时效、完整查询集合和 inventory SHA256；没有跳过验证。此次收尾只更新交接元数据，APK 保持原哈希。
 
 没有 HyperOS 真机、Android 11 真机或 50 万资产原生端压测证据；API 36 模拟器/WHPX 证据不替代这些门禁。target 37 行为与正式签名待对应任务。内容预览/下载、同步、写操作、设备配对、主备切换未开放，完整 V0.3 与 Alpha 不在本任务宣告完成。
 
