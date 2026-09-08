@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "a2771786e2b51d39b69cad203fb3a71b8814e0ef",
+  "commit": "de83a3c",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -79,25 +79,25 @@
     "tests/dotnet/AssetLibrary.Preview.Tests/StableImageSourceTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProcessTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json",
-    ".codex/handoffs/V03-007/decoder-dependencies.json"
+    ".codex/handoffs/V03-007/decoder-dependencies.json",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageDecoderCleanupTests.cs"
   ],
   "changed_contracts": [
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 123,
-    "failed": 1,
+    "passed": 126,
+    "failed": 0,
     "skipped": 1,
     "report": "tests.md"
   },
   "risks": [
     "Windows cleanup helpers and their approved Compile links must be integrated together; V03-006 owns Windows-specific source.",
-    "Shared DatabaseReadinessTests expects migration18 while the frozen manifest is21; coordinator correction pending.",
     "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance."
   ],
   "blocked_by": [
     "Awaiting V03-006 Windows lifecycle helper commit matching approved test links.",
-    "Coordinator-owned stale migration assertion and final unified acceptance."
+    "Coordinator final unified acceptance."
   ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V03-007/summary.md",
@@ -122,7 +122,8 @@
     "architecture_tests": [
       "verify_repository baseline:21 migration+14 architecture tests passed.",
       "validate_architecture_baseline and validate_dotnet_source passed after Core implementation.",
-      "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md."
+      "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md.",
+      "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests)."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",

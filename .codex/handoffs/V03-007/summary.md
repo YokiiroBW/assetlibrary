@@ -1,6 +1,6 @@
 # V03-007 — 服务端真实派生图片（partial）
 
-工作区 C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary，分支 codex/v03-007-image-preview-server。Core审查点0a746e2，严格sBIT修正4275815，源清理/名额隔离a277178。真实出图已通过；当前等待Windows清理源码与其测试链接成组完成、共享基线测试修正和root最终集成，不宣告完整V0.3或NAS发布。
+工作区 C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary，分支 codex/v03-007-image-preview-server。Core审查点0a746e2，严格sBIT修正4275815，源清理/名额隔离a277178。真实出图已通过；当前等待Windows清理源码与其测试链接成组完成、root最终集成，不宣告完整V0.3或NAS发布。
 
 ## 已实现
 
@@ -14,7 +14,7 @@
 
 本地真实Core/PostgreSQL/HTTPS→source broker→LPAC NativeAOT→PNG校验的图片与信任2/2通过，PREVIEW_EXPECT_AVAILABLE=1：实际PNG缩略图、JPEG/WebP/EXIF6/透明预览、损坏/超限/非图降级，401差异、Origin/POST-CSRF和invisible404。没有以503或假服务算出图。显式stop后148合成原件hash/mtime、Host/PG/角色/证书/临时目录按原fixture清理verified。见core-integration.md和tests.md。
 
-真实PG精度1/1、真实Host source进程1/1、PNG及变异3/3、Core容量/清理7/7、前后授权3/3均有独立结果。Windows源组原8/9及新微秒例通过，叶symlink本机缺权限；root在开发Linux对老源组9/9补证。Host/Auth包62/63，唯一现存失败是共享DatabaseReadinessTests硬编码18而生产manifest21；未改数据库/迁移来迁就断言。
+真实PG精度1/1、真实Host source进程1/1、PNG及变异3/3、Core容量/清理7/7、前后授权3/3均有独立结果。Windows源组原8/9及新微秒例通过，叶symlink本机缺权限；root在开发Linux对老源组9/9补证。Host/Auth包62/63，当时唯一失败是共享DatabaseReadinessTests硬编码18而生产manifest21；root后以66b25ce修正陈旧断言并验证5/5，本分支合入为f9b7eb7，数据库/迁移未改。历史失败证据保留。
 
 root在dev-230非root、cap0、无GC覆盖的默认Linux NativeAOT验证完整corpus、TSYNC文件/网络/跨进程/exec拒绝、native内存拒绝、CPU约3秒内核终止；既有低权限身份实际创建253线程后NPROC256封顶并回收。这是开发Linux证据，不替代NAS目标内核。root另已完成Linux真实Core图片2/2，并进行Web/Android联合验收；统一服务清理由root持有。
 
@@ -24,4 +24,6 @@ SkiaSharp及Linux.NoDependencies固定4.151.2，正常lock与两RID发布lock分
 
 Windows在ca1d235后交V03-006单写，已提供真实LPAC出图guard；追加journal/取消/恢复3文件待与本任务csproj链接合组。共享Startup Task/清理名额语义由V03-007负责。无生产新语言/第二框架/数据库或跨模块写表；获准临时C++ COM观察器仅作平台定位，不进入产品。
 
-末阶段仍需转交源码组合后的StartAsync/故障回归、最终format/affected checks、root修正共享18断言及最终平台/包/客户端验收。Provider、Explorer、资产写入和完整发布门禁保持原状。合并顺序：root wire/pins/ADR → 本Core/Worker/共享清理 → Windows专属收尾 → root跨端与目标平台证据。
+末阶段仍需转交源码组合后的StartAsync/故障回归、最终format/affected checks、root最终平台/包/客户端验收。Provider、Explorer、资产写入和完整发布门禁保持原状。合并顺序：root wire/pins/ADR → 本Core/Worker/共享清理 → Windows专属收尾 → root跨端与目标平台证据。
+
+2026-09-09后续审查：de83a3c修复延迟startup本身抛出嵌套cleanup-pending时外层reaper提前失败的问题；现在等待内层实际Completion，成功才能归还名额，真实清理失败继续隔离。新增2项回归，Core Release零警告构建通过；root以433ad01集成此最小提交后实际编译并执行2/2通过（27ms、0skip），未引入尚缺源的Windows链接。没有变更公开接口、wire或依赖。

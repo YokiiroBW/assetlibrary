@@ -48,3 +48,11 @@ Core测试命令沿原Preview.Tests csproj，Release/no-restore，分别filter I
 root独立Linux当前默认40d2d69：无GC覆盖、Vm约424736KiB、AS512MiB，完整corpus与isolation/native memory/CPU已通过；低权限现有身份实际创建253线程后NPROC256封顶并join，普通繁忙UID因既有492线程保守EAGAIN，不能用0容量冒充正常线程测试。root已完成Linux真实Core图片2/2及部分移动UI联调，原始统一证据和服务清理由root持有，不计入本窗口重复总数、不当NAS目标核证据。
 
 Windows在ca1d235后由V03-006单写；其a06d3f有效LPAC access-check guard已集成，并支撑上述本地200。追加3个cleanup helper的匹配提交尚待到来，csproj链接已获批；此组合及StartAsync适配完成前不跑缺文件的项目，不宣告最终故障/平台门禁通过。
+
+## 2026-09-09延迟清理审查与共享基线修正
+
+root以66b25ce修正DatabaseReadinessTests陈旧18断言，报告相关5/5通过；本分支合为f9b7eb7。root此时完整solution格式、Release零告警及340通过/0失败/34明确平台或环境未执行，不把跳过视为平台证据，不与本任务不同阶段计数重复相加。上述62/63保留为历史实际结果。
+
+de83a3c修复ReapLateStartupAsync等待startup时的嵌套ImageChildCleanupPendingException：真正Completion成功后reaper才成功，失败继续传播。新增ImageDecoderCleanupTests两例；Core Release --no-restore构建0警告0错误。当前本机测试工程三个Windows已批准Compile链接的源尚待V03-006提交，未临时删除链接或假装组合已通过；root现有完整源组合可独立验证此最小提交。
+
+root随后将de83a3c合为433ad01，在未引入a497缺源链接的完整测试组合上实际编译并执行ImageDecoderCleanupTests：2/2通过、27ms、0skip。源broker实际1/1与扫描子进程取消1/1亦补证（不重复累计已有源broker测试）。本地最新verify_repository通过：420份C#源、21迁移测试、14架构测试；Alpha发布仍blocked。当前不同逻辑用例汇总126通过/0当前失败/1本机叶symlink缺证据（原123通过，加已修正的旧基线1项及新增reaper2项），历史失败记录保留。
