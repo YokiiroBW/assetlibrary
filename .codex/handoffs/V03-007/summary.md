@@ -1,6 +1,6 @@
 # V03-007 — 服务端真实派生图片（partial）
 
-工作区 C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary，分支 codex/v03-007-image-preview-server。Core审查点0a746e2，严格sBIT修正4275815，源清理/名额隔离a277178。真实出图已通过；当前等待Windows清理源码与其测试链接成组完成、root最终集成，不宣告完整V0.3或NAS发布。
+工作区 C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary，分支 codex/v03-007-image-preview-server。Core审查点0a746e2，严格sBIT修正4275815，源清理/名额隔离a277178，嵌套迟到清理de83a3c，Windows异步启动适配25a7bed。Windows清理源码与测试链接已成组，真实出图已通过；当前等待Windows剩余原生故障矩阵及root打包/最终集成，不宣告完整V0.3或NAS发布。
 
 ## 已实现
 
@@ -22,8 +22,12 @@ root在dev-230非root、cap0、无GC覆盖的默认Linux NativeAOT验证完整co
 
 SkiaSharp及Linux.NoDependencies固定4.151.2，正常lock与两RID发布lock分开。4个正常NuGet包官方签名/内容hash、现有许可证政策和transitive已知漏洞查询通过；完整139775B native notices与MIT随Worker发布且固定hash验证。详见decoder-dependencies.json；NuGet查询不等于证明所有native漏洞不存在。
 
-Windows在ca1d235后交V03-006单写，已提供真实LPAC出图guard；追加journal/取消/恢复3文件待与本任务csproj链接合组。共享Startup Task/清理名额语义由V03-007负责。无生产新语言/第二框架/数据库或跨模块写表；获准临时C++ COM观察器仅作平台定位，不进入产品。
+Windows在ca1d235后交V03-006单写，已提供真实LPAC出图guard；追加journal/取消/恢复3文件已以a21a145交付，本分支合为0e6027d并与本任务csproj链接合组。共享Startup Task/清理名额语义由V03-007负责。无生产新语言/第二框架/数据库或跨模块写表；获准临时C++ COM观察器仅作平台定位，不进入产品。
 
-末阶段仍需转交源码组合后的StartAsync/故障回归、最终format/affected checks、root最终平台/包/客户端验收。Provider、Explorer、资产写入和完整发布门禁保持原状。合并顺序：root wire/pins/ADR → 本Core/Worker/共享清理 → Windows专属收尾 → root跨端与目标平台证据。
+StartAsync组装、format/affected checks与实际HTTPS已验证；末阶段仍需V03-006原生故障/资源/COM矩阵、root最终平台/包/客户端验收。Provider、Explorer、资产写入和完整发布门禁保持原状。合并顺序：root wire/pins/ADR → 本Core/Worker/共享清理 → Windows专属收尾 → root跨端与目标平台证据。
 
 2026-09-09后续审查：de83a3c修复延迟startup本身抛出嵌套cleanup-pending时外层reaper提前失败的问题；现在等待内层实际Completion，成功才能归还名额，真实清理失败继续隔离。新增2项回归，Core Release零警告构建通过；root以433ad01集成此最小提交后实际编译并执行2/2通过（27ms、0skip），未引入尚缺源的Windows链接。没有变更公开接口、wire或依赖。
+
+Windows完整源组装后，本地format通过、Preview/Core/Host/WebGateway Release零告警；核心/授权/PNG/reaper/Windows生命周期及真实LPAC共21/21，HTTPS实际2/2、0skip。新fixture停止后CLEANUP verified。不同逻辑用例更新为132通过/0失败/1本机叶symlink缺证据，Windows新5生命周期及1直接AOT用例计入，其余重复运行不重复计数。
+
+只读发行检查发现现有NAS/通用Docker、原生及Windows trial只发布Host，既未打包独立Worker，也未设置其显式环境变量；现有包不能宣称已交付图片。最小受控方案、来源绑定和真实验证命令见packaging-review.md，交root裁决；本任务未修改根发行脚本或生产NAS。

@@ -7,7 +7,7 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "de83a3c",
+  "commit": "25a7bed",
   "changed_files": [
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -80,24 +80,30 @@
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProcessTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json",
     ".codex/handoffs/V03-007/decoder-dependencies.json",
-    "tests/dotnet/AssetLibrary.Preview.Tests/ImageDecoderCleanupTests.cs"
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageDecoderCleanupTests.cs",
+    ".codex/handoffs/V03-007/packaging-review.md",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageArtifact.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageOwnerJournal.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcessIdentity.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs"
   ],
   "changed_contracts": [
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 126,
+    "passed": 132,
     "failed": 0,
     "skipped": 1,
     "report": "tests.md"
   },
   "risks": [
-    "Windows cleanup helpers and their approved Compile links must be integrated together; V03-006 owns Windows-specific source.",
-    "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance."
+    "Windows lifecycle helpers and StartAsync are integrated and tested; the separate native fault/resource/COM boundary matrix remains owned by V03-006.",
+    "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance.",
+    "Existing native/Docker/trial release scripts omit the independent Worker and its enablement; root packaging integration remains required."
   ],
   "blocked_by": [
-    "Awaiting V03-006 Windows lifecycle helper commit matching approved test links.",
-    "Coordinator final unified acceptance."
+    "V03-006 remaining Windows native fault/resource/COM boundary evidence.",
+    "Coordinator-owned packaging and final unified acceptance."
   ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V03-007/summary.md",
@@ -123,11 +129,12 @@
       "verify_repository baseline:21 migration+14 architecture tests passed.",
       "validate_architecture_baseline and validate_dotnet_source passed after Core implementation.",
       "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md.",
-      "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests)."
+      "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests).",
+      "Windows source/link combination and StartAsync25a7bed: format passed, Core/Host/WebGateway Release zero warnings, related21/21 and realHTTPS2/2 passed with no skip and verified fixture cleanup."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
-      "Windows lifecycle completion belongs to V03-006; NAS and full V0.3 remain separately gated."
+      "Windows native boundary matrix belongs to V03-006; root must integrate Worker into actual release artifacts; NAS and full V0.3 remain separately gated."
     ]
   }
 }

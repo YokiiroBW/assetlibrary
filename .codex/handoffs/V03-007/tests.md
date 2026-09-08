@@ -56,3 +56,15 @@ root以66b25ce修正DatabaseReadinessTests陈旧18断言，报告相关5/5通过
 de83a3c修复ReapLateStartupAsync等待startup时的嵌套ImageChildCleanupPendingException：真正Completion成功后reaper才成功，失败继续传播。新增ImageDecoderCleanupTests两例；Core Release --no-restore构建0警告0错误。当前本机测试工程三个Windows已批准Compile链接的源尚待V03-006提交，未临时删除链接或假装组合已通过；root现有完整源组合可独立验证此最小提交。
 
 root随后将de83a3c合为433ad01，在未引入a497缺源链接的完整测试组合上实际编译并执行ImageDecoderCleanupTests：2/2通过、27ms、0skip。源broker实际1/1与扫描子进程取消1/1亦补证（不重复累计已有源broker测试）。本地最新verify_repository通过：420份C#源、21迁移测试、14架构测试；Alpha发布仍blocked。当前不同逻辑用例汇总126通过/0当前失败/1本机叶symlink缺证据（原123通过，加已修正的旧基线1项及新增reaper2项），历史失败记录保留。
+
+## Windows最终源码组合与真实HTTPS（25a7bed）
+
+a21a145匹配源已合为0e6027d，与a497三个链接完整组装。共享decoder直接await WindowsImageProcess.StartAsync原任务，并在deadline到期后由late reaper持有真实完成语义；Linux仍原Task.Run进程启动。
+
+`dotnet format tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj --verify-no-changes --no-restore`通过。Release/no-restore实际编译并执行ImageDecoderCleanupTests、ImagePreviewServiceTests、AuthorizedImagePreviewTests、PngDerivativeValidationTests、WindowsImageLifecycleTests、WindowsImageProcessTests共21/21、0skip，429ms；明确ASSETLIBRARY_IMAGE_WORKER_TEST_EXECUTABLE指向本工作区已发布win-x64-live候选。证据.runtime/preview-tests/assembled/assembled-cleanup.trx。新增Windows5 lifecycle加1真实AOT测试计入本任务逻辑汇总，当前132过/0失败/1叶symlink本机缺证据。
+
+Host与WebGateway fixture均重新Release构建0警告0错误，避免no-build fixture误用旧Core。现有serve.py启动实际临时PostgreSQL/Core/HTTPS，使用新launcher和相同已验证NativeAOT Worker；fixture为.runtime/preview-live-assembled/20260908T162756Z-034e0f1c。ASSETLIBRARY_PREVIEW_EXPECT_AVAILABLE=1，LiveImageEndpointTests 2/2、8秒、0skip；客户端证据.runtime/preview-tests/assembled-live/live-images.trx。主动写入自有stop后父fixture退出0并报告NATIVE_CLIENT_CLEANUP verified，合成原件hash/mtime、Host/PG/角色/证书与运行目录已按原fixture核验清理。此重复完整HTTP验证用于新启动/回收实现，未重复计入逻辑总数。
+
+打包只读检查见packaging-review.md：现有发行尚不包括Worker，未运行新的发行构建或NAS部署。Windows完整资源/故障/COM边界仍由V03-006继续，不以这些生命周期测试替代。
+
+最终源组装与交接更新后verify_repository再次通过：424份C#源码、21迁移与14架构测试；Alpha有效性审计继续blocked。后续仅追加此执行事实与任务检查点，无运行代码变更。
