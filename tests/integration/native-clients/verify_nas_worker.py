@@ -200,6 +200,7 @@ class Runner:
         remaining = await command(self.args.docker, ["container", "ls", "--all", "--quiet", "--no-trunc", "--filter", "id=" + identifier])
         require(not remaining.strip(), "container_cleanup_unconfirmed")
         self.current_id = None
+        self.creation_unconfirmed = False
 
     def verify_container_policy(self, info, probe):
         config, host = info["Config"], info["HostConfig"]
@@ -262,7 +263,7 @@ class Runner:
                 self.report["owned_container_ids"].append(identifier)
                 self.save()
                 await self.inspect(identifier)
-            self.creation_unconfirmed = False
+                self.creation_unconfirmed = False
         require(self.current_id is not None, "container_create_unconfirmed")
         self.verify_container_policy(await self.inspect(self.current_id), probe)
 
