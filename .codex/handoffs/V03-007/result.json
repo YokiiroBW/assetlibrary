@@ -97,9 +97,9 @@
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 141,
+    "passed": 143,
     "failed": 0,
-    "skipped": 3,
+    "skipped": 1,
     "report": "tests.md"
   },
   "risks": [
@@ -138,7 +138,8 @@
       "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md.",
       "Late-startup cleanup de83a3c: local Core Release zero warnings; root integration 433ad01 built and passed both new regression cases with no skip; local verify_repository passed (420 C# files, 21 migration tests, 14 architecture tests).",
       "Windows source/link combination and StartAsync25a7bed: format passed, Core/Host/WebGateway Release zero warnings, related21/21 and realHTTPS2/2 passed with no skip and verified fixture cleanup.",
-      "NAS packaging: dedicated9 passed/2 POSIX platform gaps; affected release suite47 passed/0 failed/5 explicit platform/environment gaps. Actual Docker build stays pending root."
+      "NAS packaging: dedicated9 passed/2 POSIX platform gaps; affected release suite47 passed/0 failed/5 explicit platform/environment gaps. Actual Docker build stays pending root.",
+      "Root dev-230 clean checkpoint0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2: new NAS packaging11/11 passed,38ms,no skip; actual image builder started but not yet accepted."
     ],
     "technical_debt": [
       "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",

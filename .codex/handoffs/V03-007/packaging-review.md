@@ -50,3 +50,5 @@ dotnet publish services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview
 root以f673a12授权NAS Dockerfile/Compose/README、build_nas_deployment.py及专属测试。d18b224已补NAS同源码/RID锁AOT发布、固定6文件、镜像内源/hash记录和默认空env透传；builder创建不启动的临时检查容器，用实际core image ID提取并验证内容，清单绑定commit/image/锁/产物。故本报告前述NAS缺引擎的源码接线已修正，但实际Docker构建与目标NAS隔离/启用尚待root完成。通用Docker、原生/Windows trial以及它们的issuance policy保持未修改。
 
 当前Windows机器没有Docker CLI。新测试11项中9通过、2POSIX权限缺本机平台；真实root Linux runner需补11/11。整个既有tests/release suite52项，47通过/0失败/5未执行：新增2POSIX及既有3原生试用包/PG环境。未把合成ELF夹具当成实际NativeAOT或镜像构建成功。
+
+root后续平台补证：开发Linux干净检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2执行本新增包测试11/11、0skip（38ms），已覆盖POSIX权限；实际同提交builder已启动，结果仍待root验收。

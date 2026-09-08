@@ -35,3 +35,5 @@ Windows完整源组装后，本地format通过、Preview/Core/Host/WebGateway Re
 NAS打包d18b224：现有server构建层单独发布linux-x64 AOT，使用已提交RID锁和同一SDK/source；仅构建层加入clang/zlib。运行镜像固定6个图片产物（exe、Skia、2声明、checksum、source revision），按0555/0444提供nonroot读/执行。Compose仅透传显式变量，默认空。打包工具创建从不启动的所属检查容器，提取并严格检查文件集合、commit/SHA/ELF/权限，finally删除检查容器；清单绑定image ID、commit、锁与文件hash，平台状态仍not_executed。新增打包组本机9过/2POSIX未执行，发行整组47过/0失败/5明确环境缺口。当前任务逻辑汇总141过/0失败/3本机平台缺证据；其他既有发行测试单独记录不重复累计。
 
 Windows owner的53bc455继承Modify目录兼容修复已合为39ce06d；其原始7/7结果由V03-006持有，不重复计入本任务本地总数。
+
+root开发Linux检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2已补新NAS包11/11（含POSIX2项、38ms、0skip）；当前143过/0失败/1本机源叶symlink缺证据。真实同提交Docker builder正在运行，不能把测试通过当作镜像或NAS目标验收完成。

@@ -78,3 +78,5 @@ Host与WebGateway fixture均重新Release构建0警告0错误，避免no-build f
 本机无Docker CLI，未伪称Compose解析、Docker构建或NAS目标内核已过；root收到d18b224精确SHA后负责Linux11项和同提交镜像/平台验收。任务当前计入新增9个逻辑用例，总141过/0失败/3本机平台缺证据；已有整发行suite单独报告不与旧逻辑汇总相加。
 
 NAS代码、Windows39ce06d及交接组合后verify_repository通过：425份C#、21迁移、14架构；发布审计仍blocked。此后仅追加本执行事实。
+
+root补证：NAS实现d18b224合为9b72499后，dev-230干净Git检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2对新test_nas_image_preview_package.py实际11/11通过，38ms、0skip，包含本机缺失的POSIX读取与执行权限2项。因此当前任务相同逻辑例累计143通过/0失败/1本机源叶symlink缺证据；历史Windows新组9/11与整release47/52记录保留。root同提交真实builder已启动，镜像/manifest/目标平台结果尚待报告，没有生产NAS操作。root另报告Windows53目录兼容在同一失败目录7/7通过，独立owner证据不重复累加。
