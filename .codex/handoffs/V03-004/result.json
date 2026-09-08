@@ -3,7 +3,7 @@
   "task_id": "V03-004",
   "title": "native-client-real-integration",
   "milestone": "V0.3",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "integration-test-owner",
   "branch": "codex/v03-004-native-client-real-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-004",
@@ -28,20 +28,19 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 45,
+    "passed": 46,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "execution_status": "code_and_completed_regressions_passed_live_client_fixture_still_running",
-    "suites": { "runner_boundaries": 5, "tls_fixture": 3, "native_deadline": 1, "original_real_trial": 1, "migration_manifest": 21, "architecture": 14 },
+    "execution_status": "code_regressions_and_both_native_fixture_stop_paths_passed",
+    "suites": { "runner_boundaries": 5, "tls_fixture": 3, "native_deadline": 1, "native_explicit_stop": 1, "original_real_trial": 1, "migration_manifest": 21, "architecture": 14 },
     "deadline_evidence": ".runtime/native-clients-evidence/20260908T085311Z-adf0d3a3",
     "original_trial_evidence": ".runtime/real-trial-regression/20260908T085618Z-963768ae",
-    "active_client_fixture": ".runtime/native-clients-evidence/20260908T085431Z-e77b23d2",
+    "explicit_stop_evidence": ".runtime/native-clients-evidence/20260908T085431Z-e77b23d2",
     "completed_runs_cleanup": "verified",
-    "active_run_cleanup": "pending_explicit_stop_or_deadline"
+    "active_run_cleanup": "verified_no_active_fixture"
   },
   "risks": [
-    "Live two-hour client fixture remains active; its cleanup is not yet accepted.",
     "Native UI/device/TLS negative acceptance belongs to each client task.",
     "Temporary PostgreSQL fsync optimizations are not power-loss durability evidence.",
     "GC/finalizer handling is confined to the test fixture and is not production crash-lifecycle proof."
@@ -67,8 +66,8 @@
     "architecture_tests": [
       "Exact SDK locked restore and warning-free Release build; dotnet format passed",
       "verify_repository.py passed including 358-file .NET source gate, SDK/contracts, manifest and architecture regressions",
-      "Real native deadline fixture and original HTTPS/PostgreSQL/worker/browser integration both passed with verified cleanup"
+      "Real native deadline, explicit-stop fixture and original HTTPS/PostgreSQL/worker/browser integration passed with verified cleanup"
     ],
-    "technical_debt": ["Complete and record cleanup of the still-running native client fixture before final task acceptance."]
+    "technical_debt": []
   }
 }

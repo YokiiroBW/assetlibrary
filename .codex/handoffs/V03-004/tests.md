@@ -1,6 +1,6 @@
 # V03-004 测试记录
 
-当前交接为 partial：已完成 45 项独立检查通过，当前供客户端交互的两小时实例尚未停止，未计为通过或已清理。
+最终交接为 ready_for_review：46 项独立检查通过，失败0、跳过0；短生命周期截止、原真实E2E、两端联调后的显式停止均完成清理。历史失败保留在下文；同一成功检查不重复计数。
 
 ## 环境与真实命令
 
@@ -29,7 +29,9 @@ python -I -B tests/integration/native-clients/serve.py --execute --dotnet <dotne
 
 20260908T085618Z-963768ae：原 tests/integration/read-only-trial/run_e2e.py --execute 回归，使用上述dotnet/PG与原已验证Web/Playwright，Node为 C:/YOKI/Codex/worktrees/V01-006/.runtime/toolchains/node-v24.20.0-win-x64/node.exe。真正Chromium登录/登记/扫描/浏览/搜索、Host重启、普通账号/隐藏库/Origin/CSRF拒绝、故障恢复与源不变全程完成。TRX 1/1、22.689秒、零跳过；acceptance resource_cleanup=verified。用于验证改变的共享fixture默认参数及Restart/Dispose路径。
 
-20260908T085431Z-e77b23d2：当前两小时实例，READY后提供给V03-002/V03-003实际HTTP/设备联调。截止UTC10:54:41或明确stop文件。当前尚未停止，不计为通过或清理；结束后另补证据。
+20260908T085431Z-e77b23d2：配置两小时上限的交互实例，READY后提供给V03-002/V03-003实际HTTP/设备联调。两端owner确认完成后创建私密stop文件，2026-09-08 17:20:44 +08:00停止。TRX outcome=Passed、1/1、26分7.7256405秒；host-cleanup.status=disposed，acceptance.stop_reason=explicit_stop、resource_cleanup=verified。138合成文件hash/mtime不变，数据库及六角色删除、Host/PG进程退出、61180监听关闭、私密临时目录删除。另行回读文件系统确认runtime不存在、Host PID23872不存在。Android owner已确认删除本次reverse及设备内私密连接JSON。此显式停止生命周期计1项，消费者自己的协议/UI测试在各自任务统计。
+
+所有真实运行在稳定源码提交前执行，run.json保留工作区dirty=true与基线提交；0296df89e572814085cde2a8105bb4ad5992bad5包含同一已验证代码，后续仅交接与状态更新。没有把服务READY当作验收完成。
 
 ## 历史失败与修正
 
@@ -39,4 +41,4 @@ python -I -B tests/integration/native-clients/serve.py --execute --dotnet <dotne
 
 ## 尚未覆盖与限制
 
-本支架不代表Android/Windows的UI、设备、TLS负向、无障碍或50万资产性能通过；由消费者独立记录。测试PG沿用既有fixture的fsync等优化，不是断电耐久证据。没重跑不受改动影响的整个仓库平台矩阵；原生成SDK/迁移仍通过仓库门禁。当前交互实例的最终资源清理是剩余工作。
+本支架不代表Android/Windows的UI、设备、TLS负向、无障碍或50万资产性能通过；由消费者独立记录。测试PG沿用既有fixture的fsync等优化，不是断电耐久证据。没重跑不受改动影响的整个仓库平台矩阵；原生成SDK/迁移仍通过仓库门禁。没有仍运行的本任务实例或清理剩余项。
