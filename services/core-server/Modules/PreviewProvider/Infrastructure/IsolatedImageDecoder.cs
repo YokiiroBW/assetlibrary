@@ -14,7 +14,7 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         deadline.CancelAfter(TimeSpan.FromSeconds(8));
         try
         {
-            await using var child = Start(deadline.Token);
+            await using var child = await StartBoundedAsync(deadline.Token).ConfigureAwait(false);
             var diagnostics = ImageWorkerTransport.DrainErrorsAsync(child.Error, deadline.Token);
             var ready = await ImageWorkerTransport.ReadHeaderAsync(child.Output, deadline.Token).ConfigureAwait(false);
             ImageWorkerTransport.RequireStatus(ready, ImageWorkerStatus.Ready);
@@ -42,6 +42,10 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
             if (child.ExitCode != 0) throw new ImagePreviewException(ImagePreviewFailure.Unavailable);
             return png;
         }
+        catch (ImageDecoderCleanupPendingException)
+        {
+            throw;
+        }
         catch (Exception) when (cancellationToken.IsCancellationRequested)
         {
             throw new OperationCanceledException(cancellationToken);
@@ -52,14 +56,35 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         }
     }
 
+    private async ValueTask<IImageChildProcess> StartBoundedAsync(CancellationToken token)
+    {
+        var startup = Task.Run(() => Start(token), CancellationToken.None);
+        try { return await startup.WaitAsync(token).ConfigureAwait(false); }
+        catch (OperationCanceledException)
+        {
+            throw new ImageDecoderCleanupPendingException(ReapLateStartupAsync(startup));
+        }
+    }
+
+    private static async Task ReapLateStartupAsync(Task<IImageChildProcess> startup)
+    {
+        IImageChildProcess child;
+        try { child = await startup.ConfigureAwait(false); }
+        catch (OperationCanceledException) { return; }
+        await child.DisposeAsync().ConfigureAwait(false);
+    }
+
     private IImageChildProcess Start(CancellationToken token)
     {
         if (OperatingSystem.IsWindows()) return WindowsImageProcess.Start(executable, profileDirectory, token);
         if (!OperatingSystem.IsLinux()) throw new ImagePreviewException(ImagePreviewFailure.Unavailable);
         var start = new ProcessStartInfo(executable)
         {
-            UseShellExecute = false, CreateNoWindow = true,
-            RedirectStandardInput = true, RedirectStandardOutput = true, RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
             WorkingDirectory = Path.GetDirectoryName(executable)!,
         };
         start.Environment.Clear();

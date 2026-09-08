@@ -2,14 +2,18 @@ using AssetLibrary.ImagePreview.Protocol;
 using AssetLibrary.Modules.AssetIdentity.Contracts;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.PreviewProvider.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace AssetLibrary.Modules.PreviewProvider.Application;
 
-internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageSourceReader sourceReader, IImageDecoder decoder)
+internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageSourceReader sourceReader, IImageDecoder decoder,
+    ILogger<ImagePreviewService> logger)
     : IImagePreviewQuery, IDisposable
 {
     private readonly SemaphoreSlim capacity = new(2, 2);
     private readonly ImagePreviewCache cache = new();
+    private readonly object lifecycle = new();
+    private bool disposed;
 
     public async ValueTask<IImagePreviewLease> PrepareAsync(ImagePreviewSource source, ImagePreviewVariant variant, CancellationToken cancellationToken)
     {
@@ -36,24 +40,57 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
                 await physical.VerifyAsync(cancellationToken).ConfigureAwait(false);
                 cache.Store(key, png);
             }
-            return new ImagePreviewLease(png, physical, capacity);
+            return new ImagePreviewLease(png, physical, Release);
+        }
+        catch (ImageDecoderCleanupPendingException pending)
+        {
+            // A timed-out native startup cannot be cancelled by abandoning its managed Task.
+            // Release the source promptly, but quarantine this admission until startup is really reaped.
+            _ = ReleaseAfterCleanupAsync(pending.Completion, physical);
+            cancellationToken.ThrowIfCancellationRequested();
+            throw new ImagePreviewException(pending.Failure);
         }
         catch
         {
             try { if (physical is not null) await physical.DisposeAsync().ConfigureAwait(false); }
-            finally { capacity.Release(); }
+            finally { Release(); }
             throw;
         }
     }
 
     public void Dispose()
     {
-        capacity.Dispose();
+        lock (lifecycle)
+        {
+            disposed = true;
+            capacity.Dispose();
+            cache.Clear();
+        }
         GC.SuppressFinalize(this);
+    }
+
+    private async Task ReleaseAfterCleanupAsync(Task startup, IImageSourceLease? physical)
+    {
+        try
+        {
+            var sourceCleanup = physical?.DisposeAsync().AsTask() ?? Task.CompletedTask;
+            await Task.WhenAll(sourceCleanup, startup).ConfigureAwait(false);
+            Release();
+        }
+        catch (Exception failure)
+        {
+            // Keep the finite slot quarantined if resource cleanup failed; do not admit infinite retries.
+            ImagePreviewLog.CleanupFailed(logger, failure.GetType().Name);
+        }
+    }
+
+    private void Release()
+    {
+        lock (lifecycle) { if (!disposed) capacity.Release(); }
     }
 }
 
-internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, SemaphoreSlim capacity) : IImagePreviewLease
+internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, Action release) : IImagePreviewLease
 {
     private bool disposed;
     public ReadOnlyMemory<byte> Png => png;
@@ -63,6 +100,12 @@ internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, Se
         if (disposed) return;
         disposed = true;
         try { await source.DisposeAsync().ConfigureAwait(false); }
-        finally { capacity.Release(); }
+        finally { release(); }
     }
+}
+
+internal static partial class ImagePreviewLog
+{
+    [LoggerMessage(4601, LogLevel.Error, "A bounded image startup cleanup failed ({FailureType}); its admission remains quarantined.")]
+    public static partial void CleanupFailed(ILogger logger, string failureType);
 }

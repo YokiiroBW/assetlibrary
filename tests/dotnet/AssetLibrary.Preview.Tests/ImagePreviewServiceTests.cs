@@ -2,6 +2,7 @@ using AssetLibrary.Modules.AssetIdentity.Contracts;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.PreviewProvider.Application;
 using AssetLibrary.Modules.PreviewProvider.Contracts;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AssetLibrary.Preview.Tests;
 
@@ -68,6 +69,37 @@ public sealed class ImagePreviewServiceTests
         Assert.IsNotNull(cache.Find("0"));
         Assert.IsNull(cache.Find("1"));
     }
+
+    [TestMethod]
+    public async Task ExpiredStartupKeepsItsAdmissionUntilItsActualCleanupCompletes()
+    {
+        var cleanup = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var scenario = new ImageServiceScenario { PendingCleanup = cleanup.Task };
+        using var service = scenario.Service();
+        var expired = await Assert.ThrowsExactlyAsync<ImagePreviewException>(async () =>
+            await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None));
+        Assert.AreEqual(ImagePreviewFailure.Timeout, expired.Failure);
+        Assert.AreEqual(1, scenario.Disposed);
+        scenario.PendingCleanup = null;
+        await using var active = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        var busy = await Assert.ThrowsExactlyAsync<ImagePreviewException>(async () =>
+            await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None));
+        Assert.AreEqual(ImagePreviewFailure.Busy, busy.Failure);
+        cleanup.SetResult();
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+        while (true)
+        {
+            try
+            {
+                await using var recovered = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, deadline.Token);
+                break;
+            }
+            catch (ImagePreviewException failure) when (failure.Failure == ImagePreviewFailure.Busy)
+            {
+                await Task.Delay(10, deadline.Token);
+            }
+        }
+    }
 }
 
 internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSourceReader, IImageDecoder
@@ -79,7 +111,8 @@ internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSour
     public int Disposed { get; set; }
     public bool Changed { get; set; }
     public bool Offline { get; init; }
-    public ImagePreviewService Service() => new(this, this, this);
+    public Task? PendingCleanup { get; set; }
+    public ImagePreviewService Service() => new(this, this, this, NullLogger<ImagePreviewService>.Instance);
     public ValueTask<LibraryScanTarget?> FindAsync(LibraryId libraryId, CancellationToken cancellationToken) =>
         ValueTask.FromResult<LibraryScanTarget?>(new(libraryId, StorageSourceId.New(),
             new CanonicalLibraryRoot(Path.GetTempPath(), RootPathComparison.CaseSensitive), Offline ? StorageAvailability.Offline : StorageAvailability.Online));
@@ -91,6 +124,7 @@ internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSour
     public ValueTask<byte[]> DecodeAsync(IImageSourceLease source, ImagePreviewVariant variant, CancellationToken cancellationToken)
     {
         Decoded++;
+        if (PendingCleanup is not null) return ValueTask.FromException<byte[]>(new ImageDecoderCleanupPendingException(PendingCleanup));
         return ValueTask.FromResult<byte[]>([1, 2, 3]);
     }
 }

@@ -10,9 +10,9 @@ internal static class TrialImagePreviewConfiguration
     public static void Configure(IServiceCollection services, TrialConfiguration configuration,
         ILibraryScanTargetQuery roots, ReadOnlyWorkerProcessOptions workers)
     {
-        services.AddSingleton<IImagePreviewQuery>(_ => ImagePreviewRuntime.Create(roots, workers,
+        services.AddSingleton<IImagePreviewQuery>(provider => ImagePreviewRuntime.Create(roots, workers,
             Environment.GetEnvironmentVariable("ASSETLIBRARY_IMAGE_PREVIEW_WORKER"),
-            Path.Combine(configuration.StatePath, "image-preview-profiles")));
+            Path.Combine(configuration.StatePath, "image-preview-profiles"), provider.GetRequiredService<ILoggerFactory>()));
         services.AddSingleton<AuthorizedImagePreviewService>();
     }
 }

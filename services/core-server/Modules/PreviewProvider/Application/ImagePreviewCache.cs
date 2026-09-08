@@ -9,6 +9,11 @@ internal sealed class ImagePreviewCache
     private readonly LinkedList<CacheEntry> recent = [];
     private long bytes;
 
+    public void Clear()
+    {
+        lock (guard) { entries.Clear(); recent.Clear(); bytes = 0; }
+    }
+
     public byte[]? Find(string key)
     {
         lock (guard)

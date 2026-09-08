@@ -73,8 +73,11 @@ public static class ImageSourceWorker
         var path = Path.Combine(Path.GetTempPath(), "assetlibrary-image-source-" + Guid.NewGuid().ToString("N"));
         var options = new FileStreamOptions
         {
-            Mode = FileMode.CreateNew, Access = FileAccess.ReadWrite, Share = FileShare.None,
-            Options = FileOptions.DeleteOnClose, BufferSize = 64 * 1024,
+            Mode = FileMode.CreateNew,
+            Access = FileAccess.ReadWrite,
+            Share = FileShare.None,
+            Options = FileOptions.DeleteOnClose,
+            BufferSize = 64 * 1024,
         };
         if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
         var stream = new FileStream(path, options);

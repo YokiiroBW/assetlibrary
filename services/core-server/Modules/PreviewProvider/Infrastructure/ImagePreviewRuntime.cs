@@ -1,13 +1,14 @@
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.PreviewProvider.Application;
 using AssetLibrary.Modules.PreviewProvider.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace AssetLibrary.Modules.PreviewProvider.Infrastructure;
 
 public static class ImagePreviewRuntime
 {
     public static IImagePreviewQuery Create(ILibraryScanTargetQuery roots, ReadOnlyWorkerProcessOptions sourceWorkers,
-        string? workerExecutable, string profileDirectory)
+        string? workerExecutable, string profileDirectory, ILoggerFactory logs)
     {
         if (string.IsNullOrWhiteSpace(workerExecutable)) return new UnavailableImagePreviewQuery();
         if (!Path.IsPathFullyQualified(workerExecutable) || !File.Exists(workerExecutable)
@@ -16,7 +17,7 @@ public static class ImagePreviewRuntime
             return new UnavailableImagePreviewQuery();
         }
         return new ImagePreviewService(roots, new ProcessImageSourceReader(sourceWorkers),
-            new IsolatedImageDecoder(workerExecutable, profileDirectory));
+            new IsolatedImageDecoder(workerExecutable, profileDirectory), logs.CreateLogger<ImagePreviewService>());
     }
 
     private sealed class UnavailableImagePreviewQuery : IImagePreviewQuery

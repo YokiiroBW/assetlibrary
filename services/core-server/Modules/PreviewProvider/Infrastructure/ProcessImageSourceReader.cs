@@ -13,7 +13,12 @@ internal sealed class ProcessImageSourceReader(ReadOnlyWorkerProcessOptions opti
 {
     public async ValueTask<IImageSourceLease> OpenAsync(LibraryScanTarget target, AssetObservation entry, CancellationToken cancellationToken)
     {
-        var process = ImageChildProcess.Start(ReadOnlyWorkerProcess.CreateStartInfo(options, "preview-source"), cancellationToken);
+        ImageChildProcess process;
+        try { process = ImageChildProcess.Start(ReadOnlyWorkerProcess.CreateStartInfo(options, "preview-source"), cancellationToken); }
+        catch (ImageChildCleanupPendingException pending)
+        {
+            throw new ImageDecoderCleanupPendingException(pending.Completion, ImagePreviewFailure.Unavailable);
+        }
         var diagnostics = ImageWorkerTransport.DrainErrorsAsync(process.Error, cancellationToken);
         try
         {

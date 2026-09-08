@@ -21,3 +21,10 @@ internal interface IImageDecoder
 {
     ValueTask<byte[]> DecodeAsync(IImageSourceLease source, ImagePreviewVariant variant, CancellationToken cancellationToken);
 }
+
+internal sealed class ImageDecoderCleanupPendingException(Task completion, ImagePreviewFailure failure = ImagePreviewFailure.Timeout)
+    : Exception("An image startup still owns bounded resources.")
+{
+    public Task Completion { get; } = completion;
+    public ImagePreviewFailure Failure { get; } = failure;
+}
