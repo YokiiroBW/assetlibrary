@@ -15,6 +15,7 @@ internal static class PngDerivativeValidator
         var header = false;
         var data = false;
         var srgb = false;
+        var significantBits = false;
         while (offset < png.Length)
         {
             if (++chunks > 4096 || !ValidChunk(png[offset..], out var count)) return false;
@@ -29,6 +30,11 @@ internal static class PngDerivativeValidator
                 if (!ValidSrgb(png.Slice(offset + 8, count), header, data, srgb)) return false;
                 srgb = true;
             }
+            else if (kind.SequenceEqual("sBIT"u8))
+            {
+                if (!ValidSignificantBits(png.Slice(offset + 8, count), header, data, significantBits, png[25])) return false;
+                significantBits = true;
+            }
             else if (kind.SequenceEqual("IDAT"u8))
             {
                 if (!header || count == 0) return false;
@@ -36,7 +42,7 @@ internal static class PngDerivativeValidator
             }
             else if (kind.SequenceEqual("IEND"u8))
             {
-                return header && data && count == 0 && offset + 12 == png.Length;
+                return ValidEnd(header, data, count, offset, png.Length);
             }
             else
             {
@@ -63,6 +69,13 @@ internal static class PngDerivativeValidator
 
     private static bool ValidSrgb(ReadOnlySpan<byte> data, bool hasHeader, bool hasPixels, bool hasSrgb) =>
         hasHeader && !hasPixels && !hasSrgb && data.Length == 1 && data[0] <= 3;
+
+    private static bool ValidSignificantBits(ReadOnlySpan<byte> data, bool hasHeader, bool hasPixels, bool alreadyPresent, byte colorType) =>
+        hasHeader && !hasPixels && !alreadyPresent && data.Length == (colorType == 6 ? 4 : 3)
+        && data.IndexOfAnyExcept((byte)8) < 0;
+
+    private static bool ValidEnd(bool header, bool data, int count, int offset, int length) =>
+        header && data && count == 0 && offset + 12 == length;
 
     private static uint Crc(ReadOnlySpan<byte> bytes)
     {

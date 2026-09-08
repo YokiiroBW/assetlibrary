@@ -39,4 +39,7 @@
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ImageWorkerTransport.cs" Link="Boundary/ImageWorkerTransport.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs" Link="Boundary/PngDerivativeValidator.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Fixtures/skia-rgba8-sbit.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

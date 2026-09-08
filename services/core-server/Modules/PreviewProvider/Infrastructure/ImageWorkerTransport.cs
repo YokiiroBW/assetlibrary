@@ -16,14 +16,14 @@ internal static class ImageWorkerTransport
     public static void RequireStatus(ImageWorkerHeader frame, ImageWorkerStatus expected)
     {
         if (frame.Status == (int)expected) return;
-        throw new ImagePreviewException((ImageWorkerStatus)frame.Status switch
+        throw Rejected((ImageWorkerStatus)frame.Status switch
         {
             ImageWorkerStatus.Invalid => ImagePreviewFailure.Invalid,
             ImageWorkerStatus.Unsupported => ImagePreviewFailure.Unsupported,
             ImageWorkerStatus.Limit => ImagePreviewFailure.LimitExceeded,
             ImageWorkerStatus.SourceChanged => ImagePreviewFailure.SourceChanged,
             _ => ImagePreviewFailure.Unavailable,
-        });
+        }, "decoder_status");
     }
 
     public static async Task DrainErrorsAsync(Stream errors, CancellationToken token)
@@ -46,9 +46,17 @@ internal static class ImageWorkerTransport
             || png.Length != frame.Length || !png.StartsWith(ImageWorkerProtocol.PngSignature)
             || BinaryPrimitives.ReadInt32BigEndian(png[8..]) != 13 || !png.Slice(12, 4).SequenceEqual("IHDR"u8)
             || BinaryPrimitives.ReadInt32BigEndian(png[16..]) != frame.Width || BinaryPrimitives.ReadInt32BigEndian(png[20..]) != frame.Height
-            || png[24] != 8 || png[25] is not (2 or 6) || !PngDerivativeValidator.Valid(png))
+            || png[24] != 8 || png[25] is not (2 or 6))
         {
-            throw new ImagePreviewException(ImagePreviewFailure.Invalid);
+            throw Rejected(ImagePreviewFailure.Invalid, "png_header");
         }
+        if (!PngDerivativeValidator.Valid(png)) throw Rejected(ImagePreviewFailure.Invalid, "png_chunks");
+    }
+
+    private static ImagePreviewException Rejected(ImagePreviewFailure failure, string stage)
+    {
+        var exception = new ImagePreviewException(failure);
+        exception.Data["preview_stage"] = stage;
+        return exception;
     }
 }

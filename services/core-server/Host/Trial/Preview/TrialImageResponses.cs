@@ -4,6 +4,17 @@ namespace AssetLibrary.CoreServer.Hosting.Trial.Preview;
 
 internal static class TrialImageResponses
 {
+    public static async Task WritePngAsync(HttpContext context, ReadOnlyMemory<byte> png)
+    {
+        context.Response.StatusCode = StatusCodes.Status200OK;
+        context.Response.ContentType = "image/png";
+        context.Response.ContentLength = png.Length;
+        context.Response.Headers.CacheControl = "private, no-store";
+        context.Response.Headers.XContentTypeOptions = "nosniff";
+        context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
+        await context.Response.Body.WriteAsync(png, context.RequestAborted).ConfigureAwait(false);
+    }
+
     public static IResult Unauthenticated(HttpContext context) =>
         TrialAuthenticationResponses.Error(401, "unauthenticated", "请登录后继续。", context);
 

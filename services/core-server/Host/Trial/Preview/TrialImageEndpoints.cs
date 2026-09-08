@@ -43,16 +43,11 @@ internal static class TrialImageEndpoints
                 return;
             }
             await lease.VerifySourceAsync(context.RequestAborted).ConfigureAwait(false);
-            context.Response.StatusCode = StatusCodes.Status200OK;
-            context.Response.ContentType = "image/png";
-            context.Response.ContentLength = lease.Png.Length;
-            context.Response.Headers.CacheControl = "private, no-store";
-            context.Response.Headers.XContentTypeOptions = "nosniff";
-            context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
-            await context.Response.Body.WriteAsync(lease.Png, context.RequestAborted).ConfigureAwait(false);
+            await TrialImageResponses.WritePngAsync(context, lease.Png).ConfigureAwait(false);
         }
         catch (ImagePreviewException failure) when (!context.Response.HasStarted)
         {
+            TrialImageLog.Record(context, failure);
             await TrialImageResponses.Failure(context, failure.Failure).ExecuteAsync(context).ConfigureAwait(false);
         }
         catch (TimeoutException) when (!context.Response.HasStarted)
@@ -65,4 +60,14 @@ internal static class TrialImageEndpoints
         }
     }
 
+}
+
+internal static partial class TrialImageLog
+{
+    public static void Record(HttpContext context, ImagePreviewException failure) =>
+        Rejected(context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("AssetLibrary.Preview"),
+            failure.Failure, failure.Data["preview_stage"] as string ?? "application");
+
+    [LoggerMessage(4610, LogLevel.Warning, "Derived image rejected: {Failure}; stage={Stage}.")]
+    public static partial void Rejected(ILogger logger, ImagePreviewFailure failure, string stage);
 }

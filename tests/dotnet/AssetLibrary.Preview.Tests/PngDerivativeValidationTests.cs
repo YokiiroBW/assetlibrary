@@ -1,10 +1,26 @@
 using AssetLibrary.Modules.PreviewProvider.Infrastructure;
+using System.Buffers.Binary;
+using System.Security.Cryptography;
 
 namespace AssetLibrary.Preview.Tests;
 
 [TestClass]
 public sealed class PngDerivativeValidationTests
 {
+    [TestMethod]
+    public void RealSkiaOutputAllowsOnlyExactEightBitSignificanceBeforePixels()
+    {
+        var png = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Fixtures", "skia-rgba8-sbit.png"));
+        Assert.AreEqual("F67FE31590B54D36A47870FBDDDF748BBBDB4C4155196AAB25568254F8443057", Convert.ToHexString(SHA256.HashData(png)));
+        Assert.IsTrue(PngDerivativeValidator.Valid(png));
+        var wrongBits = (byte[])png.Clone();
+        wrongBits[41] = 7;
+        BinaryPrimitives.WriteUInt32BigEndian(wrongBits.AsSpan(45), 0x246b74de);
+        Assert.IsFalse(PngDerivativeValidator.Valid(wrongBits));
+        Assert.IsFalse(PngDerivativeValidator.Valid([.. png.AsSpan(0, 49), .. png.AsSpan(33, 16), .. png.AsSpan(49)]));
+        Assert.IsFalse(PngDerivativeValidator.Valid([.. png.AsSpan(0, png.Length - 12), .. png.AsSpan(33, 16), .. png.AsSpan(png.Length - 12)]));
+    }
+
     [TestMethod]
     public void CompletePngRequiresValidCrcAndTerminalIendAtEof()
     {

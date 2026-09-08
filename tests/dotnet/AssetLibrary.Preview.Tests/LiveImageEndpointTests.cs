@@ -60,7 +60,7 @@ public sealed class LiveImageEndpointTests
         foreach (var file in new[] { "landscape.jpg", "landscape.webp", "rotate-six.jpg", "transparent.png" })
         {
             using var image = await client.SendAsync(client.ImagePath(images[file], "variant=preview"));
-            await AssertPngAsync(image, 1600, ImageWorkerProtocol.PreviewBytes);
+            await AssertPngAsync(image, 1600, ImageWorkerProtocol.PreviewBytes, file);
         }
         foreach (var item in new[] { ("active.svg", 415), ("not-an-image.png", 415), ("truncated.jpg", 422), ("oversized-header.png", 422) })
         {
@@ -69,8 +69,12 @@ public sealed class LiveImageEndpointTests
         }
     }
 
-    private static async Task AssertPngAsync(HttpResponseMessage response, int edge, int maximumBytes)
+    private static async Task AssertPngAsync(HttpResponseMessage response, int edge, int maximumBytes, string sample = "landscape.png")
     {
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            Assert.Fail($"Synthetic input {sample}: HTTP {(int)response.StatusCode}, code {await LivePreviewConnection.ErrorCodeAsync(response)}.");
+        }
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         Assert.AreEqual("image/png", response.Content.Headers.ContentType?.MediaType);
         Assert.AreEqual("private, no-store", response.Headers.CacheControl?.ToString());
