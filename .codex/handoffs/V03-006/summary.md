@@ -41,3 +41,7 @@ computer-use 重新列举时只能得到 Codex 窗口；启动 Explorer 的受�
 读取HKCU/HKLM、Registry64/Registry32四种组合中的精确值：`Software\Microsoft\Windows\CurrentVersion\Policies\Explorer` 与 `Software\Policies\Microsoft\Windows\Explorer` 均未设置EnforceShellExtensionSecurity；`Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved` 和Blocked中均无本任务CLSID值。原始记录区分key_absent/value_absent。未观察到这些显式策略，但Approved缺失本身不能证明被阻止，也不能把缺失策略值扩张为全部Shell策略允许。
 
 为准确读取加载观察器本身的创建身份，使用原哈希EXE创建一个隐藏、挂起的自有进程，仅查询身份与会话，从未恢复其主线程执行；随后终止并在3秒内确认退出、关闭句柄，EXE哈希不变。没有加载DLL、COM调用、GUI/CLSID重试、Explorer变更、注册键写入或全量日志读取。没有修改测试源代码，不重跑原成功构建/加载矩阵；仅补证据及交接校验，状态继续partial。
+
+## 协助V03-007的静态审查
+
+主协调另委派的[Windows解码启动静态复核](v03-007-windows-startup-static-review.md)已独立记录五个源码快照hash、官方依据和最小验证建议。没有启动AppContainer或安全探针、修改V03-007源代码，也未证实203根因。该文档不增加原loader测试计数；Explorer继续partial等待桌面恢复。

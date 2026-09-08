@@ -19,7 +19,8 @@
     ".codex/handoffs/V03-006/result.json",
     ".codex/handoffs/V03-006/loader-evidence.json",
     ".codex/handoffs/V03-006/environment-evidence.json",
-    ".codex/handoffs/V03-006/shell-policy-evidence.json"
+    ".codex/handoffs/V03-006/shell-policy-evidence.json",
+    ".codex/handoffs/V03-006/v03-007-windows-startup-static-review.md"
   ],
   "changed_contracts": [],
   "tests": {
@@ -35,11 +36,11 @@
   "handoff_summary": ".codex/handoffs/V03-006/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "architecture_review": {
-    "module": "Test-only Windows Shell loader diagnostics",
+    "module": "Test-only Windows Shell loader diagnostics and read-only Windows decoder startup review",
     "dependency_direction_ok": true,
     "reused_existing_logic": ["Existing CMake/MSVC and frozen Windows SDK", "Immutable V03-002 proof DLL and COM factory", "Win32 DLL search, process mitigation and token query APIs"],
     "duplicated_logic": [],
-    "cross_module_access": ["Read-only prior handoff and DLL; execution uses a verified copy inside the owned worktree"],
+    "cross_module_access": ["Read-only prior handoff and DLL; execution uses a verified copy inside the owned worktree", "Coordinator-requested read-only review of V03-007 Windows decoder startup source; no source mutations or runtime probes"],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [],
