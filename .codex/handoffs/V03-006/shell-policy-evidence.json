@@ -1,0 +1,209 @@
+{
+  "RecordedAtUtc": "2026-09-08T12:29:00.2086807+00:00",
+  "Processes": [
+    {
+      "Role": "command-observer",
+      "PID": 27284,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    },
+    {
+      "Role": "explorer",
+      "PID": 6284,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    },
+    {
+      "Role": "explorer",
+      "PID": 17944,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    },
+    {
+      "Role": "explorer",
+      "PID": 24644,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    },
+    {
+      "Role": "explorer",
+      "PID": 26128,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    },
+    {
+      "Role": "loader-observer-suspended-before-entry",
+      "PID": 2848,
+      "SessionId": 2,
+      "SessionStateCode": 4,
+      "TokenIsAppContainer": 0,
+      "PackageQueryStatus": 15700,
+      "PackageFullName": null
+    }
+  ],
+  "Registry": [
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Key": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Key": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Key": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Key": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+      "Name": "EnforceShellExtensionSecurity",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "value_absent",
+      "Kind": null,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Key": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "Name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "State": "key_absent",
+      "Kind": null,
+      "Value": null
+    }
+  ],
+  "ObserverExecutableSha256": "0526F024BA101FBD73866D6B0BC2BA130B8EA7F55FD77BA9DE8C4B1D405775F0",
+  "ObserverExecutableUnchanged": true,
+  "OwnedSuspendedObserverTerminated": true,
+  "Method": "Read-only process/token/package/WTS and exact registry value queries. Loader observer created suspended with CREATE_NO_WINDOW, never resumed, terminated and waited within 3 seconds. No DLL, COM, GUI or Explorer activation; no registry writes."
+}

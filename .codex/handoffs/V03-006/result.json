@@ -18,7 +18,8 @@
     ".codex/handoffs/V03-006/tests.md",
     ".codex/handoffs/V03-006/result.json",
     ".codex/handoffs/V03-006/loader-evidence.json",
-    ".codex/handoffs/V03-006/environment-evidence.json"
+    ".codex/handoffs/V03-006/environment-evidence.json",
+    ".codex/handoffs/V03-006/shell-policy-evidence.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -29,7 +30,7 @@
     "scope": "Four isolated loader matrix cases passed. One native desktop availability scenario failed with access denied. Repository baseline's 35 regressions are reported separately; real Explorer G1 was not retried."
   },
   "risks": ["No usable Explorer client or installer; root activation cause remains undetermined.", "Direct loading success is not target Explorer loader evidence.", "Bounded event query and three mitigation policies do not cover every system restriction."],
-  "blocked_by": ["Native computer-use input still returns GetCursorPos 0x80070005; no targetable Explorer window.", "Actual Explorer loader/COM observation and G1 remain missing.", "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven."],
+  "blocked_by": ["Session 2 is WTSDisconnected; native computer-use input returned GetCursorPos 0x80070005 and no targetable Explorer window.", "Actual Explorer loader/COM observation and G1 remain missing; queried package/AppContainer and explicit Shell policies did not establish a root cause.", "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven."],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V03-006/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",

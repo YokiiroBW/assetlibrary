@@ -44,3 +44,13 @@ computer-use列举只有Codex可定位；launch_app(Microsoft.Windows.Explorer)�
 ## 最终收敛
 
 实现和交接完整后最终diff审查/空白校验通过；verify_repository再次通过（交接、架构、契约/SDK、依赖/源码及同一35项回归），Alpha仍blocked。另运行 `python -B tests/architecture/check_release_gates.py --target explorer-v0.5`，按预期退出1，明确列出M0-002-G1..G4阻断。该负向发布检查不是新增业务测试失败，也未改门禁。之后仅记录本检查结果，没有再重复构建或回归。
+
+## 追加只读判断（2026-09-08T12:29:00Z）
+
+按主协调请求查询GetTokenInformation(TokenIsAppContainer)、GetPackageFullName、ProcessIdToSessionId、WTSQuerySessionInformation(WTSConnectState)，以及HKCU/HKLM两视图共16项精确注册值。未枚举其他CLSID、账号信息、用户资产或日志。
+
+六个进程（四个Explorer、当前命令观察器、原哈希加载观察器）的AppContainer均0、包查询均15700/无包，Session2的连接状态均4/Disconnected。所查EnforceShellExtensionSecurity及自有CLSID Approved/Blocked值均不存在。这里只记录API实际观察，不认定G1根因或新增通过的产品测试。
+
+原加载观察器使用CREATE_SUSPENDED|CREATE_NO_WINDOW创建，仅读进程创建时身份，不恢复主线程；TerminateProcess后WaitForSingleObject(3000)确认退出并关闭双句柄。没有运行加载矩阵、加载DLL、发起COM/GUI操作或修改Explorer。原EXE SHA256保持0526f024…，完整原始JSON含退出/哈希证据。
+
+本追加只改交接文件；仓库既有 `python -I -B scripts/validate_handoff.py` 与 `git diff --check` 均通过，不重复输入未变的构建、矩阵或完整仓库回归。
