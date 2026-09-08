@@ -77,3 +77,17 @@ Web真实联调暴露已挂载虚拟列表方向键改变selection却未更新DO
 a21a145 Windows生命周期源与a497权限测试链接按顺序合为fa45ce2/2e29fc2，StartAsync共享适配25a7bed合为7c8b58a。Windows窗口6/6与后端组合21/21+真实HTTPS2/2均通过；root独立复验9项为4通过/5失败：失败全在新目录首次设置Owner+DACL，未创建AppContainer或启动decoder。root父目录仅提供当前普通token Modify，原窗口父目录另有显式用户FullControl；同一root私有新对象先设严格DACL、再设Owner均成功，已交Windows单写修复此兼容性边界，未改workspace ACL或降低保护。自有探针和测试目录已清理；这5个真实失败保留，待修复复验。
 
 当前共享服务尚在供Web后续验收使用，最终原件hash/mtime及Host/PG/临时角色/私密目录清理待root显式stop后记录。不得提前把客户端字段中的协调清理责任当作已经完成的事实。NAS包缺独立worker已查明，f673a12限定授权V03-007接入NAS镜像/离线包，缺省不开启，实际目标内核验收及部署仍由root负责。
+
+## 2026-09-09共同验收完成及NAS目标阻断
+
+上述共享生命周期随后显式stop并最终通过，原始real-core-cleanup.json确认148源hash/mtime不变、6角色移除、Host/PG/HTTPS/runtime清理；Web绑定原16项与最终interaction continuation两份原始SHA，Space/Escape、回焦、历史、404/401、URL和CSP均通过。所有浏览器/转发已关闭，root独立确认44147无监听。两个客户端scope已在注册表验收完成，整批仍partial。
+
+Root带明确Host/Python/原生Worker的最新整solution格式、Release零告警，360通过/0失败/25明确PG或平台NotExecuted，TRX汇总见.runtime/v03-005-final-tests/solution-with-native-summary.json。随后新增已删除profile恢复1/1、负/非规范creation与合法边界14/14通过，未再重复整套；NAS失败不被这些通过抵消。
+
+NAS打包d18首次0f4d0c6在NativeAOT发布遇NETSDK1112；00b03b1统一restore/publish的SelfContained后，同提交a12b0d1实际构建成功，Linux包测试12/12零skip。783892992B images.tar SHA5951b75d46b46c14124885bb71f0cdf7b1c4b3713d495d312861085836bf0626；core image2dd1f17c…、setup5c3bee00…、PG5f71c21b…均写入原始nas-image-build.json。传NAS后7项交付文件逐个SHA复核，载入三image并查identity；没有替换生产服务。
+
+同一实际包在开发Linux6.14的20项corpus/错误/隔离/资源场景全部通过，source unchanged、cleanup verified，原始linux-package-worker.json。这里Docker外层seccomp存在，io_uring前后均EPERM不能单独证明内层新拒绝；先前40d2d69在Docker外的独立策略证据继续保留，两者不混算。包中同Worker字节的父退出验证使用setup镜像Python，保留stdin写端、只杀middle、收养并回收worker SIGKILL，10.385ms；linux-package-parent-death.json及逐字节临时helper归档parent-death-probe.py.txt。此结果仍是Linux6.14，不是NAS。
+
+NAS5.10.55+第一image-0-0在Ready前受控失败（status7、零stderr、未发图、非parent timeout），其余19项未执行，所有自有容器回收、源hash/mtime不变，见nas-worker-first-failure.json。宿主只读查询PR_GET_SECCOMP=-1/EINVAL22，seccomp GET_ACTION_AVAIL=-1/ENOSYS38，proc/status无Seccomp，Docker仅apparmor；同策略临时容器cap0/NNP/AS/CPU/FSIZE/CORE/NPROC均成功，但TSYNC仍ENOSYS。禁止据此放宽隔离或启用图片。nas-kernel-capability.json与nas-platform-decision.md记录证据及待用户确认的部署方向。
+
+Windows已恢复过真实桌面并收到用户明确恢复授权，随后在新鲜Ctrl+L前遇0x80070005，2026-09-08T17:16:27Z又读到WTSDisconnected。授权保留，但要保持RDP连接/解锁才能继续；已撤销本轮注册且两键false，不盲重复。无GUI边界测试仍在推进，普通token/普通AC/LPAC的LAN对照待精确端点回执；Windows整体和Explorer不宣告完成。

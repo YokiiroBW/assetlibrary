@@ -1,0 +1,45 @@
+{
+  "kind": "nas_worker_verification",
+  "status": "failed",
+  "source_revision": "a12b0d139765357b1e33437a4c7a34823dd556ad",
+  "image_id": "sha256:2dd1f17c28be1969b6488c5afe14499c71f7f26aa5d36c179b09768056cf54f0",
+  "corpus_identity": "eca30895b0ccfe4f9333334f6b67ddd258b476e5be0acab2795491e4f71c10df",
+  "cases": [
+    {
+      "case": "image-0-0",
+      "passed": false,
+      "parent_timed_out": false,
+      "error": "worker_not_ready",
+      "elapsed_seconds": 0.605,
+      "cleanup_verified": true
+    }
+  ],
+  "owned_container_ids": [
+    "fd82a85fdf3b5febf084c1c197d4879f5680fd6dca4403b05f795519622a6aa2"
+  ],
+  "harness_sha256": "c0d8fa455646ac236ac5d5d788ef0fcdfe7d6b0b1e5a959e33ca7fcddc852f93",
+  "build_manifest_sha256": "13aa5e74ab37d264311e01ab57f2765e1a570ee6ec470f00f25554883f5354be",
+  "source_unchanged": true,
+  "cleanup_verified": true,
+  "production_deployment": false,
+  "docker_kernel": "5.10.55+",
+  "container_policy": {
+    "user": "1654:1654",
+    "memory_bytes": 1073741824,
+    "cpu_shares": 1024,
+    "cpu_quota": 0,
+    "pids_limit": null,
+    "network": "none",
+    "readonly": true,
+    "init": true,
+    "cap_drop": [
+      "ALL"
+    ],
+    "no_new_privileges": true,
+    "tmpfs": {
+      "/tmp": "rw,noexec,nosuid,nodev,size=64m,mode=1777"
+    },
+    "seccomp_override": false
+  },
+  "error": "worker_not_ready"
+}

@@ -1,0 +1,17 @@
+{
+  "scope": "read_only_host_kernel_capability",
+  "kernel": "5.10.55+",
+  "architecture": "x86_64",
+  "get_seccomp_result": -1,
+  "get_seccomp_errno": 22,
+  "get_action_avail_result": -1,
+  "get_action_avail_errno": 38,
+  "proc_status": [
+    "NoNewPrivs:\t0"
+  ],
+  "kernel_config": [],
+  "docker_security_options": [
+    "name=apparmor"
+  ],
+  "host_policy_changed": false
+}

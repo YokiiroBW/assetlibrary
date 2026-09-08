@@ -1,0 +1,428 @@
+#!/usr/bin/env python3
+"""Bounded test-only Linux parent-death observation; no images or worker options.
+
+The only signal in a successful test goes to an unreaped, directly owned middle
+process. Its child is observed and reaped by a subreaper while stdin remains open.
+The immutable worker's default environment is empty, including all GC overrides.
+"""
+
+from __future__ import annotations
+
+import ctypes
+import hashlib
+import json
+import os
+import platform
+import select
+import selectors
+import signal
+import stat
+import struct
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+
+WORKER = "/app/workers/image-preview/AssetLibrary.ImagePreview.Worker"
+WORKER_SHA256 = "7f86a4b1af89d5280145a36a467958b7ef03faeaa731ae52f2b1aba54181d8a3"
+EXPECTED_READY = struct.pack("<6I", 0x31495041, 1, 0, 0, 0, 0)
+STARTUP_SECONDS = 20.0
+PARENT_DEATH_SECONDS = 10.0
+OVERALL_SECONDS = 45.0
+MAX_DIAGNOSTIC_BYTES = 4096
+
+
+class ProbeError(Exception):
+    pass
+
+
+def demand(condition: bool, code: str) -> None:
+    if not condition:
+        raise ProbeError(code)
+
+
+def read_limited(path: str | Path, limit: int) -> bytes:
+    with open(path, "rb", buffering=0) as stream:
+        value = stream.read(limit + 1)
+    demand(len(value) <= limit, "read_limit_exceeded")
+    return value
+
+
+def parse_stat(value: str) -> dict:
+    # comm may contain spaces and parentheses; starttime is field 22.
+    opening = value.index("(")
+    closing = value.rindex(")")
+    fields = value[closing + 1 :].split()
+    demand(len(fields) >= 20, "invalid_proc_stat")
+    return {
+        "pid": int(value[:opening].strip()),
+        "state": fields[0],
+        "ppid": int(fields[1]),
+        "start_ticks": int(fields[19]),
+    }
+
+
+def identity(pid: int) -> dict:
+    demand(pid > 1, "invalid_child_pid")
+    value = parse_stat(read_limited(f"/proc/{pid}/stat", 8192).decode("ascii"))
+    demand(value["pid"] == pid, "proc_pid_mismatch")
+    return value
+
+
+def same_process(actual: dict, expected: dict) -> bool:
+    return (actual["pid"], actual["start_ticks"]) == (
+        expected["pid"],
+        expected["start_ticks"],
+    )
+
+
+def status_fields(pid: int) -> dict:
+    wanted = {"Uid", "CapInh", "CapPrm", "CapEff", "NoNewPrivs", "Seccomp"}
+    result = {}
+    for line in read_limited(f"/proc/{pid}/status", 32768).decode("ascii").splitlines():
+        key, separator, value = line.partition(":")
+        if separator and key in wanted:
+            result[key] = value.split()
+    return result
+
+
+def validate_ready(value: bytes) -> None:
+    demand(value == EXPECTED_READY, "invalid_actual_ready_header")
+
+
+def enable_subreaper() -> None:
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.prctl.restype = ctypes.c_int
+    libc.prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+    demand(libc.prctl(36, 1, 0, 0, 0) == 0, "set_subreaper_failed")
+    value = ctypes.c_int(0)
+    demand(libc.prctl(37, ctypes.addressof(value), 0, 0, 0) == 0 and value.value == 1,
+           "verify_subreaper_failed")
+
+
+def write_bounded(fd: int, value: bytes, deadline: float) -> None:
+    os.set_blocking(fd, False)
+    offset = 0
+    while offset < len(value):
+        remaining = deadline - time.monotonic()
+        demand(remaining > 0, "write_deadline_exceeded")
+        demand(bool(select.select([], [fd], [], remaining)[1]), "write_deadline_exceeded")
+        try:
+            offset += os.write(fd, value[offset:])
+        except BlockingIOError:
+            continue
+
+
+def middle(args: list[str]) -> None:
+    """Private mode: report child identity, then stay alive without ever reaping it."""
+    demand(len(args) == 5, "invalid_middle_arguments")
+    input_fd, output_fd, error_fd, expected_parent = map(int, args[:4])
+    nonce = args[4]
+    demand(os.getppid() == expected_parent and len(nonce) == 32, "invalid_middle_parent")
+    demand(all(fd > 2 for fd in (input_fd, output_fd, error_fd)), "invalid_middle_fds")
+    child = subprocess.Popen(
+        [WORKER], stdin=input_fd, stdout=output_fd, stderr=error_fd,
+        close_fds=True, env={},
+    )
+    observed = identity(child.pid)
+    demand(observed["ppid"] == os.getpid(), "invalid_worker_parent")
+    message = {
+        "schema": "al-nas-parent-death-middle-v1",
+        "nonce": nonce,
+        "middle": identity(os.getpid()),
+        "worker": observed,
+        "worker_arguments": [],
+        "worker_environment_keys": [],
+    }
+    encoded = json.dumps(message, separators=(",", ":")).encode("ascii") + b"\n"
+    demand(len(encoded) <= MAX_DIAGNOSTIC_BYTES, "middle_report_limit")
+    write_bounded(1, encoded, time.monotonic() + 2.0)
+    for fd in (input_fd, output_fd, error_fd):
+        os.close(fd)
+    # Do not use child.poll/wait or a Popen context manager here: that could reap
+    # the worker before the subreaper adopts it. SIGKILL is the expected exit.
+    select.select([], [], [], OVERALL_SECONDS)
+    os._exit(91)
+
+
+def read_startup(meta_fd: int, ready_fd: int, error_fd: int, deadline: float) -> tuple[dict, bytes, bytes]:
+    collected = {"metadata": bytearray(), "ready": bytearray(), "stderr": bytearray()}
+    limits = {"metadata": MAX_DIAGNOSTIC_BYTES, "ready": 24, "stderr": MAX_DIAGNOSTIC_BYTES}
+    with selectors.DefaultSelector() as selected:
+        for fd, kind in ((meta_fd, "metadata"), (ready_fd, "ready"), (error_fd, "stderr")):
+            os.set_blocking(fd, False)
+            selected.register(fd, selectors.EVENT_READ, kind)
+        while b"\n" not in collected["metadata"] or len(collected["ready"]) < 24:
+            remaining = deadline - time.monotonic()
+            demand(remaining > 0, "startup_deadline_exceeded")
+            events = selected.select(remaining)
+            demand(bool(events), "startup_deadline_exceeded")
+            for key, _ in events:
+                kind = key.data
+                try:
+                    chunk = os.read(key.fd, limits[kind] - len(collected[kind]) + 1)
+                except BlockingIOError:
+                    continue
+                if not chunk:
+                    selected.unregister(key.fd)
+                    demand(kind == "stderr" or
+                           (kind == "metadata" and b"\n" in collected[kind]) or
+                           (kind == "ready" and len(collected[kind]) == 24), "startup_pipe_closed")
+                    continue
+                collected[kind].extend(chunk)
+                demand(len(collected[kind]) <= limits[kind], f"{kind}_limit_exceeded")
+    metadata = bytes(collected["metadata"])
+    demand(metadata.count(b"\n") == 1 and metadata.endswith(b"\n"), "invalid_middle_report")
+    return json.loads(metadata), bytes(collected["ready"]), bytes(collected["stderr"])
+
+
+def pending_exit(pid: int):
+    # WNOWAIT pins the identity: no PID can be reused while our child is unreaped.
+    return os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+
+
+def signal_owned_child(expected: dict, report: dict, purpose: str) -> None:
+    demand(pending_exit(expected["pid"]) is None, "owned_child_already_exited")
+    current = identity(expected["pid"])
+    demand(same_process(current, expected) and current["ppid"] == os.getpid(),
+           "owned_child_identity_changed")
+    # No reaping occurs between waitid and kill; this is a directly owned child,
+    # so there is no check-then-kill PID reuse window even without pidfd support.
+    os.kill(expected["pid"], signal.SIGKILL)
+    report["signals_sent"].append({"pid": expected["pid"], "signal": "SIGKILL", "purpose": purpose})
+
+
+def reap_owned(expected: dict, deadline: float, require_adopted: bool) -> tuple[int, dict]:
+    while True:
+        demand(time.monotonic() < deadline, "reap_deadline_exceeded")
+        pending = pending_exit(expected["pid"])
+        if pending is not None:
+            observed = identity(expected["pid"])
+            demand(same_process(observed, expected), "reap_identity_changed")
+            demand(observed["ppid"] == os.getpid(), "not_direct_adopted_child" if require_adopted else "not_direct_child")
+            pid, status = os.waitpid(expected["pid"], os.WNOHANG)
+            demand(pid == expected["pid"], "reap_status_missing")
+            return status, observed
+        time.sleep(0.01)
+
+
+def cleanup_one(expected: dict | None, already_reaped: bool, report: dict, label: str) -> bool:
+    if expected is None or already_reaped:
+        return already_reaped
+    try:
+        pending = pending_exit(expected["pid"])
+        if pending is None:
+            signal_owned_child(expected, report, "failure_cleanup_" + label)
+        status, _ = reap_owned(expected, time.monotonic() + 3.0, label == "worker")
+        report["cleanup"][label] = {"reaped": True, "exit_code": os.waitstatus_to_exitcode(status)}
+        return True
+    except ChildProcessError:
+        report["cleanup"][label] = {"reaped": False, "error": "not_owned_unreaped_child_no_signal_sent"}
+    except (ProbeError, OSError) as error:
+        report["cleanup"][label] = {"reaped": False, "error": type(error).__name__,
+                                   "errno": getattr(error, "errno", None)}
+    return False
+
+
+def probe() -> tuple[dict, int]:
+    started = time.monotonic()
+    report = {
+        "schema": "al-nas-image-parent-death-v1", "status": "failed",
+        "helper_sha256": hashlib.sha256(read_limited(Path(__file__), 131072)).hexdigest(),
+        "worker": WORKER, "expected_worker_sha256": WORKER_SHA256,
+        "kernel": platform.release(), "machine": platform.machine(),
+        "python": platform.python_version(), "uid": os.getuid(), "euid": os.geteuid(),
+        "startup_deadline_seconds": STARTUP_SECONDS,
+        "parent_death_deadline_seconds": PARENT_DEATH_SECONDS,
+        "worker_arguments": [], "worker_environment_keys": [],
+        "stdin_bytes_sent": 0, "signals_sent": [], "cleanup": {},
+        "stdin_writer_held_until_after_worker_reap": False,
+    }
+    descriptors: list[int] = []
+    parent = None
+    parent_identity = worker_identity = None
+    parent_reaped = worker_reaped = False
+    original_handler = signal.getsignal(signal.SIGALRM)
+
+    def alarm_handler(_signum, _frame):
+        raise ProbeError("overall_deadline_exceeded")
+
+    signal.signal(signal.SIGALRM, alarm_handler)
+    signal.setitimer(signal.ITIMER_REAL, OVERALL_SECONDS)
+    try:
+        demand(sys.platform == "linux" and platform.machine() == "x86_64", "linux_x64_required")
+        demand(os.getuid() == 1654 and os.geteuid() == 1654, "isolated_uid_1654_required")
+        with open(WORKER, "rb", buffering=0) as executable:
+            executable_stat = os.fstat(executable.fileno())
+            demand(stat.S_ISREG(executable_stat.st_mode) and 0 < executable_stat.st_size <= 16 * 1024 * 1024,
+                   "invalid_worker_file")
+            digest = hashlib.sha256()
+            remaining = executable_stat.st_size
+            while remaining:
+                chunk = executable.read(min(65536, remaining))
+                demand(bool(chunk), "worker_truncated_during_hash")
+                digest.update(chunk)
+                remaining -= len(chunk)
+            demand(not executable.read(1), "worker_grew_during_hash")
+        report["actual_worker_sha256"] = digest.hexdigest()
+        demand(digest.hexdigest() == WORKER_SHA256, "worker_sha256_mismatch")
+        enable_subreaper()
+        report["subreaper_verified"] = True
+        input_r, input_w = os.pipe()
+        descriptors.extend((input_r, input_w))
+        ready_r, ready_w = os.pipe()
+        descriptors.extend((ready_r, ready_w))
+        error_r, error_w = os.pipe()
+        descriptors.extend((error_r, error_w))
+        meta_r, meta_w = os.pipe()
+        descriptors.extend((meta_r, meta_w))
+        pipe_identity = os.fstat(input_w)
+        demand(stat.S_ISFIFO(pipe_identity.st_mode), "stdin_not_pipe")
+        nonce = os.urandom(16).hex()
+        parent = subprocess.Popen(
+            [sys.executable, "-I", "-B", str(Path(__file__).resolve()), "--middle",
+             str(input_r), str(ready_w), str(error_w), str(os.getpid()), nonce],
+            stdin=subprocess.DEVNULL, stdout=meta_w, stderr=error_w,
+            pass_fds=(input_r, ready_w, error_w), close_fds=True, env={},
+        )
+        parent_identity = identity(parent.pid)
+        demand(parent_identity["ppid"] == os.getpid(), "middle_not_direct_child")
+        for fd in (input_r, ready_w, error_w, meta_w):
+            os.close(fd)
+            descriptors.remove(fd)
+        meta, ready, stderr = read_startup(meta_r, ready_r, error_r, started + STARTUP_SECONDS)
+        demand(meta.get("schema") == "al-nas-parent-death-middle-v1" and meta.get("nonce") == nonce,
+               "middle_report_identity_mismatch")
+        demand(same_process(meta["middle"], parent_identity), "middle_start_identity_mismatch")
+        worker_identity = meta["worker"]
+        demand(worker_identity["pid"] != parent.pid and worker_identity["ppid"] == parent.pid,
+               "worker_report_parent_mismatch")
+        actual = identity(worker_identity["pid"])
+        demand(same_process(actual, worker_identity) and actual["ppid"] == parent.pid and actual["state"] != "Z",
+               "worker_start_identity_mismatch")
+        actual_exe = os.stat(f"/proc/{actual['pid']}/exe")
+        demand((actual_exe.st_dev, actual_exe.st_ino, actual_exe.st_size) ==
+               (executable_stat.st_dev, executable_stat.st_ino, executable_stat.st_size), "worker_executable_identity_mismatch")
+        actual_input = os.stat(f"/proc/{actual['pid']}/fd/0")
+        demand(stat.S_ISFIFO(actual_input.st_mode) and
+               (actual_input.st_dev, actual_input.st_ino) == (pipe_identity.st_dev, pipe_identity.st_ino),
+               "worker_stdin_pipe_identity_mismatch")
+        validate_ready(ready)
+        report["ready_header_hex"] = ready.hex()
+        report["ready_header_validated"] = True
+        report["middle_identity"] = parent_identity
+        report["worker_identity_before_parent_death"] = actual
+        report["worker_stdin_matches_retained_pipe"] = True
+        report["worker_status_at_ready"] = status_fields(actual["pid"])
+        report["stderr_at_ready"] = {"bytes": len(stderr), "sha256": hashlib.sha256(stderr).hexdigest()}
+        isolation = report["worker_status_at_ready"]
+        demand(isolation.get("Uid") == ["1654"] * 4 and isolation.get("NoNewPrivs") == ["1"] and
+               isolation.get("Seccomp") == ["2"] and
+               all(isolation.get(key) == ["0000000000000000"] for key in ("CapInh", "CapPrm", "CapEff")),
+               "worker_ready_isolation_mismatch")
+        # Demonstrate a live, blocked worker with an open input writer before the
+        # parent is killed. No payload or synthetic image ever enters its stdin.
+        time.sleep(0.15)
+        before_signal = identity(actual["pid"])
+        demand(same_process(before_signal, actual) and before_signal["ppid"] == parent.pid and
+               before_signal["state"] not in ("Z", "X"), "worker_exited_before_parent_signal")
+        demand(pending_exit(parent.pid) is None, "middle_exited_before_signal")
+        signal_started = time.monotonic()
+        signal_owned_child(parent_identity, report, "test_parent_death")
+        parent_status, _ = reap_owned(parent_identity, signal_started + PARENT_DEATH_SECONDS, False)
+        parent_reaped = True
+        parent.returncode = os.waitstatus_to_exitcode(parent_status)
+        demand(os.WIFSIGNALED(parent_status) and os.WTERMSIG(parent_status) == signal.SIGKILL,
+               "middle_did_not_exit_by_sigkill")
+        report["middle_exit_signal"] = "SIGKILL"
+        worker_status, adopted_identity = reap_owned(worker_identity, signal_started + PARENT_DEATH_SECONDS, True)
+        worker_reaped = True
+        report["parent_signal_to_worker_reap_ms"] = round((time.monotonic() - signal_started) * 1000, 3)
+        report["worker_identity_after_adoption"] = adopted_identity
+        retained = os.fstat(input_w)
+        demand((retained.st_dev, retained.st_ino) == (pipe_identity.st_dev, pipe_identity.st_ino),
+               "retained_input_writer_identity_changed")
+        report["stdin_writer_held_until_after_worker_reap"] = True
+        report["worker_exit_code"] = os.waitstatus_to_exitcode(worker_status)
+        demand(os.WIFSIGNALED(worker_status) and os.WTERMSIG(worker_status) == signal.SIGKILL,
+               "worker_did_not_exit_by_sigkill")
+        report["worker_exit_signal"] = "SIGKILL"
+        demand(len(report["signals_sent"]) == 1 and report["signals_sent"][0]["pid"] == parent.pid,
+               "unexpected_signal_sent")
+        report["status"] = "passed"
+    except (Exception, KeyboardInterrupt) as error:
+        report["failure"] = {"type": type(error).__name__, "code": str(error) if isinstance(error, ProbeError) else "probe_execution_error",
+                             "errno": getattr(error, "errno", None)}
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        parent_reaped = cleanup_one(parent_identity, parent_reaped, report, "middle")
+        worker_reaped = cleanup_one(worker_identity, worker_reaped, report, "worker")
+        if parent is not None and parent_reaped and parent.returncode is None:
+            parent.returncode = -signal.SIGKILL
+        report["cleanup"]["middle_reaped"] = parent_reaped
+        report["cleanup"]["worker_reaped"] = worker_reaped
+        report["cleanup"]["worker_forcibly_signalled"] = any(
+            item["purpose"] == "failure_cleanup_worker" for item in report["signals_sent"])
+        for fd in descriptors:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        signal.signal(signal.SIGALRM, original_handler)
+        report["elapsed_ms"] = round((time.monotonic() - started) * 1000, 3)
+        if not parent_reaped or not worker_reaped or report["cleanup"]["worker_forcibly_signalled"]:
+            report["status"] = "failed"
+            report["cleanup"]["container_removal_required"] = not (parent_reaped and worker_reaped)
+    return report, 0 if report["status"] == "passed" else 1
+
+
+def self_test() -> dict:
+    count = 0
+    sample = "777 (child (name) ) " + " ".join(["S", "100"] + ["0"] * 17 + ["123456"])
+    parsed = parse_stat(sample)
+    demand(parsed == {"pid": 777, "state": "S", "ppid": 100, "start_ticks": 123456}, "self_test_proc_stat")
+    count += 1
+    demand(same_process(parsed, {**parsed, "ppid": 200}), "self_test_adoption_identity")
+    count += 1
+    demand(not same_process(parsed, {**parsed, "start_ticks": 123457}), "self_test_pid_reuse")
+    count += 1
+    validate_ready(EXPECTED_READY)
+    count += 1
+    for invalid in (EXPECTED_READY[:-1], EXPECTED_READY + b"\0", b"\0" * 24,
+                    struct.pack("<6I", 0x31495041, 7, 0, 0, 0, 0),
+                    struct.pack("<6I", 0x31495041, 1, 0, 1, 0, 0)):
+        try:
+            validate_ready(invalid)
+        except ProbeError:
+            count += 1
+        else:
+            raise ProbeError("self_test_invalid_header_accepted")
+    return {"schema": "al-nas-parent-death-helper-self-test-v1", "status": "passed", "checks": count,
+            "scope": "pure_parser_checks_only_no_linux_or_nas_execution"}
+
+
+def main() -> int:
+    if sys.argv[1:2] == ["--middle"]:
+        try:
+            middle(sys.argv[2:])
+        except BaseException:
+            os._exit(92)
+    if sys.argv[1:] == ["--self-test"]:
+        print(json.dumps(self_test(), sort_keys=True))
+        return 0
+    if sys.argv[1:]:
+        print('{"status":"failed","failure":"unsupported_arguments"}')
+        return 2
+    if sys.platform != "linux":
+        print('{"status":"not_executed","failure":"linux_required"}')
+        return 2
+    report, code = probe()
+    payload = json.dumps(report, sort_keys=True, separators=(",", ":")).encode("ascii") + b"\n"
+    demand(len(payload) <= 32768, "final_report_limit_exceeded")
+    write_bounded(1, payload, time.monotonic() + 2.0)
+    return code
+
+
+if __name__ == "__main__":
+    sys.exit(main())
