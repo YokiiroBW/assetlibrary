@@ -32,8 +32,9 @@ internal static class WindowsImageProcessIdentity
             {
                 return Marshal.GetLastPInvokeError() == 87;
             }
+            if (Native.WaitForSingleObject(handle, 0) == 0) return true;
             return Native.GetProcessTimes(handle.DangerousGetHandle(), out var created, out _, out _, out _)
-                && (created != processCreation || Native.WaitForSingleObject(handle, 0) == 0);
+                && created != processCreation && IsDifferentContainer(handle, sid);
         }
         // A crash can occur after native creation but before journaling the PID. Only inspect
         // bounded matching worker processes, compare their package SID, and never terminate them.
@@ -50,26 +51,31 @@ internal static class WindowsImageProcessIdentity
                     return false;
                 }
                 if (Native.WaitForSingleObject(handle, 0) == 0) continue;
-                if (!Native.OpenProcessToken(handle, 8, out var token)) return false;
-                using (token)
-                {
-                    _ = Native.GetTokenInformation(token, 31, nint.Zero, 0, out var size);
-                    if (size < nint.Size || size > 16384) return false;
-                    var buffer = Marshal.AllocHGlobal(checked((int)size));
-                    try
-                    {
-                        if (!Native.GetTokenInformation(token, 31, buffer, size, out _)) return false;
-                        var candidate = Marshal.ReadIntPtr(buffer);
-                        if (candidate != nint.Zero && Native.EqualSid(sid, candidate)) return false;
-                    }
-                    finally { Marshal.FreeHGlobal(buffer); }
-                }
+                if (!IsDifferentContainer(handle, sid)) return false;
             }
             return true;
         }
         finally { foreach (var worker in workers) worker.Dispose(); }
     }
 
+    private static bool IsDifferentContainer(SafeProcessHandle handle, nint sid)
+    {
+        // A damaged positive timestamp must not turn a still-live owned worker into a reused PID.
+        if (sid == nint.Zero || !Native.OpenProcessToken(handle, 8, out var token)) return false;
+        using (token)
+        {
+            _ = Native.GetTokenInformation(token, 31, nint.Zero, 0, out var size);
+            if (size < nint.Size || size > 16384) return false;
+            var buffer = Marshal.AllocHGlobal(checked((int)size));
+            try
+            {
+                if (!Native.GetTokenInformation(token, 31, buffer, size, out _)) return false;
+                var candidate = Marshal.ReadIntPtr(buffer);
+                return candidate == nint.Zero || !Native.EqualSid(sid, candidate);
+            }
+            finally { Marshal.FreeHGlobal(buffer); }
+        }
+    }
 
     private static class Native
     {
