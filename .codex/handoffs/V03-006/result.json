@@ -7,16 +7,18 @@
   "owner": "windows-shell-owner",
   "branch": "codex/v03-006-windows-explorer-native-integration",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary",
-  "commit": "a06d3f37dcaeea8791da0963787d9b00ebe27a6d",
+  "commit": "d152a80781442e9e1e21416649b5f469a99d6485",
   "loader_implementation_commit": "453e10b5173f0b9b516fa5eabcb561c6f4ace1e2",
   "windows_image_checkpoint": {
-    "status": "guard_verified_remaining_confinement_pending",
+    "status": "guard_and_basic_lifecycle_verified_full_native_matrix_pending",
     "report": "windows-image-guard.md",
     "production_image_tests_passed": 1,
     "production_image_tests_failed": 0,
     "production_image_tests_skipped": 0,
     "trusted_native_control_variants": 2,
-    "feature_enabled": false
+    "feature_enabled": false,
+    "lifecycle_and_acl_distinct_tests_passed": 7,
+    "lifecycle_report": "windows-image-lifecycle.md"
   },
   "changed_files": [
     "tests/windows-shell/CMakeLists.txt",
@@ -40,7 +42,20 @@
     ".codex/handoffs/V03-006/windows-image-guard/AccessParent.csproj.txt",
     ".codex/handoffs/V03-006/windows-image-guard/lpac-result.txt",
     ".codex/handoffs/V03-006/windows-image-guard/normal-result.txt",
-    ".codex/handoffs/V03-006/windows-image-guard/evidence.json"
+    ".codex/handoffs/V03-006/windows-image-guard/evidence.json",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcess.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProfile.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageStartup.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageArtifact.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageOwnerJournal.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcessIdentity.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs",
+    ".codex/handoffs/V03-006/windows-image-lifecycle.md",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/profile-delete-idempotence.json",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/session-latest.json",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/tests.json",
+    ".codex/handoffs/V03-006/explorer-20260909-interruption.md"
   ],
   "changed_contracts": [],
   "tests": {
@@ -50,21 +65,59 @@
     "report": "tests.md",
     "scope": "Original Explorer scope: four isolated loader cases passed; one desktop availability scenario failed. Repository regressions and the separately recorded windows_image_checkpoint are not added to this original count. Explorer G1 was not retried."
   },
-  "risks": ["No usable Explorer client or installer; root activation cause remains undetermined.", "Direct loading success is not target Explorer loader evidence.", "Bounded event query and three mitigation policies do not cover every system restriction."],
-  "blocked_by": ["Session 2 is WTSDisconnected; native computer-use input returned GetCursorPos 0x80070005 and no targetable Explorer window.", "Actual Explorer loader/COM observation and G1 remain missing; queried package/AppContainer and explicit Shell policies did not establish a root cause.", "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven.", "Windows image startup cleanup/recovery and complete file/network/COM/handle/resource/cancellation evidence remain pending; guard success alone does not enable the feature."],
+  "risks": [
+    "No usable Explorer client or installer; root activation cause remains undetermined.",
+    "Direct loading success is not target Explorer loader evidence.",
+    "Bounded event query and three mitigation policies do not cover every system restriction."
+  ],
+  "blocked_by": [
+    "Session 2 and real input recovered, but the user stopped Computer Use with physical Escape before namespace navigation; await explicit resumption. Owned test window 2229954 requires fresh ownership before action.",
+    "Actual Explorer loader/COM observation and G1 remain missing; queried package/AppContainer and explicit Shell policies did not establish a root cause.",
+    "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven.",
+    "Full Windows image file/network/COM/handle/resource/parent-exit matrix remains pending; guard and basic lifecycle success alone do not enable the feature."
+  ],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V03-006/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "architecture_review": {
     "module": "Windows Shell diagnostics and transferred Windows image worker isolation",
     "dependency_direction_ok": true,
-    "reused_existing_logic": ["Existing CMake/MSVC and frozen Windows SDK", "Immutable V03-002 proof DLL and COM factory", "Win32 DLL search, process mitigation and token query APIs", "Existing NativeAOT image worker, exact lpacCom capability, Job and pipe startup", "Win32 effective AccessCheck with own-token impersonation copy"],
+    "reused_existing_logic": [
+      "Existing CMake/MSVC and frozen Windows SDK",
+      "Immutable V03-002 proof DLL and COM factory",
+      "Win32 DLL search, process mitigation and token query APIs",
+      "Existing NativeAOT image worker, exact lpacCom capability, Job and pipe startup",
+      "Win32 effective AccessCheck with own-token impersonation copy",
+      "Shared ImageChildCleanupPendingException/Completion and bounded Core admission ownership",
+      "Win32 AppContainer APIs and versioned private owner journal with verified artifact copying"
+    ],
     "duplicated_logic": [],
-    "cross_module_access": ["Read-only prior handoff and DLL; execution uses a verified copy inside the owned worktree", "Earlier V03-007 source review was read-only; root later transferred exact Windows isolation source ownership through 57d1578 and ca1d235", "Worker guard uses OS token/access APIs only; no Core application/database/asset access"],
+    "cross_module_access": [
+      "Read-only prior handoff and DLL; execution uses a verified copy inside the owned worktree",
+      "Earlier V03-007 source review was read-only; root later transferred exact Windows isolation source ownership through 57d1578 and ca1d235",
+      "Worker guard uses OS token/access APIs only; no Core application/database/asset access"
+    ],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [],
-    "architecture_tests": ["verify_repository.py architecture/contract/source/dependency audit", "MSVC /W4 /WX /analyze Release target build", "dumpbin confirms observer has no dynamic CRT import", "Four independent bounded loader cases including failure control", "NativeAOT locked publish, targeted format verify and 397-file source policy", "LPAC versus ordinary AppContainer effective-access and real private-marker controls", "Real uninstrumented NativeAOT thumbnail/exit/owner-cleanup test 1 of 1 passed"],
-    "technical_debt": ["V03-006 / windows-shell-owner: obtain actual Explorer loader/COM observation after desktop access recovers", "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1", "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak", "V03-005 / coordinator: re-identify and clean prior owned desktop windows using fresh ownership evidence", "V03-006 / windows-shell-owner: finish Windows image StartAsync, error preservation, owned recovery and full confinement failure/resource evidence"]
+    "architecture_tests": [
+      "verify_repository.py architecture/contract/source/dependency audit",
+      "MSVC /W4 /WX /analyze Release target build",
+      "dumpbin confirms observer has no dynamic CRT import",
+      "Four independent bounded loader cases including failure control",
+      "NativeAOT locked publish, targeted format verify and 397-file source policy",
+      "LPAC versus ordinary AppContainer effective-access and real private-marker controls",
+      "Real uninstrumented NativeAOT thumbnail/exit/owner-cleanup test 1 of 1 passed",
+      "Core and Preview.Tests Release build with no warnings",
+      "Six basic lifecycle and one Modify-only ACL regression passed; original PNG test remains separate",
+      "424-file source policy and targeted format/diff verification"
+    ],
+    "technical_debt": [
+      "V03-006 / windows-shell-owner: obtain actual Explorer loader/COM observation after desktop access recovers",
+      "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
+      "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
+      "V03-005 / coordinator: re-identify and clean prior owned desktop windows using fresh ownership evidence",
+      "V03-006 / windows-shell-owner: complete native file/network/COM/handle/resource/parent-exit matrix; uncertain Prepared journals remain fail closed for operator recovery"
+    ]
   }
 }

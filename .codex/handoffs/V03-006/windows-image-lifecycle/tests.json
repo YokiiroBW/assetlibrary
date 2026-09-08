@@ -1,0 +1,90 @@
+[
+  {
+    "File": "lifecycle-checkpoint.trx",
+    "Sha256": "D28F675B0C513E573FC1B1514C9E8A0074B63F0078913C764EE6993995AB7F46",
+    "Tests": [
+      {
+        "Name": "CleanupFailureRetainsOwnershipForRecovery",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0430098"
+      },
+      {
+        "Name": "CancellationBeforeStartupCreatesNoState",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0144806"
+      },
+      {
+        "Name": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0990005"
+      },
+      {
+        "Name": "RecoveryDoesNotAdoptLegacyOrMalformedRecords",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0478795"
+      },
+      {
+        "Name": "StartupCancellationKeepsItsErrorWhenCleanupAlsoFails",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0439497"
+      },
+      {
+        "Name": "SuccessfulProfileDisposalRemovesBothOwnedDirectories",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0550754"
+      }
+    ]
+  },
+  {
+    "File": "lifecycle-acl.trx",
+    "Sha256": "F2BC7F4BB72412D798F86FB8844D67FDF045086208CA06345F2BA3E51584A32B",
+    "Tests": [
+      {
+        "Name": "SuccessfulProfileDisposalRemovesBothOwnedDirectories",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0531246"
+      },
+      {
+        "Name": "CancellationBeforeStartupCreatesNoState",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0076410"
+      },
+      {
+        "Name": "StartupCancellationKeepsItsErrorWhenCleanupAlsoFails",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0430405"
+      },
+      {
+        "Name": "CleanupFailureRetainsOwnershipForRecovery",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0424714"
+      },
+      {
+        "Name": "RecoveryDoesNotAdoptLegacyOrMalformedRecords",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0436054"
+      },
+      {
+        "Name": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1051698"
+      },
+      {
+        "Name": "OwnedDirectoryWithInheritedModifyCanBecomeStrictlyPrivate",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.0105793"
+      }
+    ]
+  },
+  {
+    "File": "deleted-profile-recovery.trx",
+    "Sha256": "100791496FF890492E5DE16AD89AD9E5D676EDA786577D8A44C8ACA6DD007DB7",
+    "Tests": [
+      {
+        "Name": "RecoveryToleratesAlreadyDeletedOwnedProfileBeforeJournalUpdate",
+        "Outcome": "Passed",
+        "Duration": "00:00:00.1110987"
+      }
+    ]
+  }
+]

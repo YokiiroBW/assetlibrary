@@ -4,6 +4,8 @@
 
 后续按root冻结57d1578和V03-007转交ca1d235接手Windows图片隔离。新[LPAC guard检查点](windows-image-guard.md)实现提交 `a06d3f3`：完成有效访问双控制/真实文件对照，以及无trace生产NativeAOT首张PNG生成；完整拒权/资源/启动取消/清理恢复仍待收尾，Windows预览尚不启用。下述Explorer诊断仍作为独立partial保留，不被图片进展替代。
 
+后续[启动/清理检查点](windows-image-lifecycle.md)为a21a145、53bc455、d152a80，累计八个不同Windows逻辑用例通过，完整原生矩阵仍在继续。[09日Explorer新观测](explorer-20260909-interruption.md)确认会话/输入恢复并创建自有窗口，但导航前被用户Escape主动停止；注册已撤销，CU暂停等待明确恢复，不再将旧Disconnected当当前阻断。
+
 ## 新证据与判断
 
 旧 DLL SHA256 `0174db9b1b4ccd4925d3a28470930fa6faebd4070348cc374a7cb87313e2fd15` 与 V03-002 记录一致。实际导入包括 MSVCP140、VCRUNTIME140、VCRUNTIME140_1、UCRT 和系统 COM/Shell DLL。
