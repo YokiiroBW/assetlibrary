@@ -21,3 +21,19 @@ pwsh -NoProfile -File tests/windows-shell/verify.ps1 -BuildDirectory .runtime/ex
 `proof-calls.log` 仅为验证诊断，位于构建 DLL 同目录，上限1MiB；含操作、接口GUID、PID、单调时钟，未包含用户路径或资产名称。`QueryInterface` 行记录请求，`CreateDefView.result` 记录返回HRESULT。不得将此文件I/O移入生产 Shell。
 
 参考：[Microsoft NSE implementation](https://learn.microsoft.com/en-us/windows/win32/shell/nse-implement)、[ExplorerDataProvider sample](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider)、[Shell notifications](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify)。
+
+## V03-006 加载器诊断
+
+`ExplorerLoaderProbe` 使用静态 CRT，启动时确认被测动态 CRT 尚未加载；不注册 COM，直接加载
+指定 proof DLL 并调用其类工厂。此观察器不改变 Shell DLL 的 CRT 或生产依赖决策。
+
+```powershell
+cmake --build .runtime/explorer-proof --config Release --target ExplorerLoaderProbe --parallel 2
+pwsh -NoProfile -File tests/windows-shell/diagnose-loader.ps1 -BuildDirectory .runtime/explorer-proof -DllPath <existing-proof-dll>
+```
+
+脚本把被测 DLL 复制到本构建目录中的独立诊断目录并核对 SHA256，避免 proof trace 修改旧任务目录。
+各探针进程使用空工作目录、10 秒上限，分别验证继承 PATH、仅 System32 PATH、限制 DLL 搜索目录，
+以及不存在 DLL 的失败控制。输出运行库是否来自 System32、实际加载和类工厂结果；不打印 PATH 或凭据。
+搜索受限的成功只能说明当前机器上的该 DLL 无需开发 PATH，不能替代真实 Explorer 进程的加载证据，
+也不能排除系统完整性策略、桌面/会话或入口层面的其他阻断。诊断文件保留在 `.runtime` 供复核。
