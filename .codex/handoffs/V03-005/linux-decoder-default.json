@@ -1,0 +1,346 @@
+{
+  "source_commit": "40d2d69c4e6e4a3de28bae51b69d7a9c9254be5f",
+  "gc_environment_override": false,
+  "outside_docker": true,
+  "runtime": {
+    "status": {
+      "Uid": "1000\t1000\t1000\t1000",
+      "VmPeak": "424888 kB",
+      "VmSize": "424736 kB",
+      "VmRSS": "10900 kB",
+      "Threads": "2",
+      "CapEff": "0000000000000000",
+      "NoNewPrivs": "1",
+      "Seccomp": "2",
+      "Seccomp_filters": "1"
+    },
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              3                    3                    seconds   \nMax file size             0                    0                    bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        0                    0                    bytes     \nMax resident set          unlimited            unlimited            bytes     \nMax processes             256                  256                  processes \nMax open files            1024                 1048576              files     \nMax locked memory         2080989184           2080989184           bytes     \nMax address space         536870912            536870912            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       62831                62831                signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         0                    0                    \nMax realtime priority     0                    0                    \nMax realtime timeout      unlimited            unlimited            us        \n"
+  },
+  "cases": [
+    {
+      "case": "landscape.png",
+      "profile": 0,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        0,
+        1677,
+        512,
+        341
+      ],
+      "output_bytes": 1701,
+      "stderr_bytes": 0,
+      "elapsed_ms": 33,
+      "png_sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+      "png_dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "case": "landscape.jpg",
+      "profile": 1,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        1,
+        13553,
+        1600,
+        1066
+      ],
+      "output_bytes": 13577,
+      "stderr_bytes": 0,
+      "elapsed_ms": 176,
+      "png_sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb",
+      "png_dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "case": "landscape.webp",
+      "profile": 0,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        0,
+        1677,
+        512,
+        341
+      ],
+      "output_bytes": 1701,
+      "stderr_bytes": 0,
+      "elapsed_ms": 34,
+      "png_sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+      "png_dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "case": "rotate-six.jpg",
+      "profile": 1,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        1,
+        14878,
+        1066,
+        1600
+      ],
+      "output_bytes": 14902,
+      "stderr_bytes": 0,
+      "elapsed_ms": 156,
+      "png_sha256": "0c9a143d7145f91269ebe787c06c6175573b157a0511ad8d06c301fa91556eac",
+      "png_dimensions": [
+        1066,
+        1600
+      ]
+    },
+    {
+      "case": "transparent.png",
+      "profile": 1,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        1,
+        10270,
+        900,
+        1200
+      ],
+      "output_bytes": 10294,
+      "stderr_bytes": 0,
+      "elapsed_ms": 80,
+      "png_sha256": "9b49bec9b32752244002629759752cc6c417bdcbb30b43406de272dc03fc4290",
+      "png_dimensions": [
+        900,
+        1200
+      ]
+    },
+    {
+      "case": "中文目录/重复内容.dat",
+      "profile": 1,
+      "expected_status": 3,
+      "passed": true,
+      "exit_code": 0,
+      "result_header": [
+        826888257,
+        3,
+        1,
+        13553,
+        1600,
+        1066
+      ],
+      "output_bytes": 13577,
+      "stderr_bytes": 0,
+      "elapsed_ms": 153,
+      "png_sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb",
+      "png_dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "case": "active.svg",
+      "profile": 1,
+      "expected_status": 5,
+      "passed": true,
+      "exit_code": 1,
+      "result_header": [
+        826888257,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_bytes": 24,
+      "stderr_bytes": 0,
+      "elapsed_ms": 6
+    },
+    {
+      "case": "not-an-image.png",
+      "profile": 1,
+      "expected_status": 5,
+      "passed": true,
+      "exit_code": 1,
+      "result_header": [
+        826888257,
+        5,
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_bytes": 24,
+      "stderr_bytes": 0,
+      "elapsed_ms": 5
+    },
+    {
+      "case": "truncated.jpg",
+      "profile": 1,
+      "expected_status": 4,
+      "passed": true,
+      "exit_code": 1,
+      "result_header": [
+        826888257,
+        4,
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_bytes": 24,
+      "stderr_bytes": 0,
+      "elapsed_ms": 6
+    },
+    {
+      "case": "oversized-header.png",
+      "profile": 1,
+      "expected_status": 6,
+      "passed": true,
+      "exit_code": 1,
+      "result_header": [
+        826888257,
+        6,
+        0,
+        0,
+        0,
+        0
+      ],
+      "output_bytes": 24,
+      "stderr_bytes": 0,
+      "elapsed_ms": 6
+    }
+  ],
+  "probes": [
+    {
+      "mode": "--probe-isolation",
+      "exit_code": 0,
+      "stdout": "{\"probe\":\"isolation\",\"passed\":true,\"initial_seccomp\":0,\"seccomp\":2,\"no_new_privileges\":1,\"file_denied\":true,\"socket_denied\":true,\"connect_denied\":true,\"other_process_signal_denied\":true,\"cross_process_memory_denied\":true,\"fork_denied\":true,\"clone_denied\":true,\"exec_denied\":true,\"initial_io_uring_error\":14,\"io_uring_denied\":true,\"created_threads\":0}",
+      "stderr_bytes": 0,
+      "elapsed_ms": 6,
+      "parent_timeout": false
+    },
+    {
+      "mode": "--probe-memory",
+      "exit_code": 0,
+      "stdout": "{\"probe\":\"memory\",\"passed\":true,\"initial_seccomp\":0,\"seccomp\":0,\"no_new_privileges\":0,\"file_denied\":false,\"socket_denied\":false,\"connect_denied\":false,\"other_process_signal_denied\":false,\"cross_process_memory_denied\":false,\"fork_denied\":false,\"clone_denied\":false,\"exec_denied\":false,\"initial_io_uring_error\":0,\"io_uring_denied\":false,\"created_threads\":0}",
+      "stderr_bytes": 0,
+      "elapsed_ms": 6,
+      "parent_timeout": false
+    },
+    {
+      "mode": "--probe-threads",
+      "exit_code": 0,
+      "stdout": "{\"probe\":\"threads\",\"passed\":true,\"initial_seccomp\":0,\"seccomp\":0,\"no_new_privileges\":0,\"file_denied\":false,\"socket_denied\":false,\"connect_denied\":false,\"other_process_signal_denied\":false,\"cross_process_memory_denied\":false,\"fork_denied\":false,\"clone_denied\":false,\"exec_denied\":false,\"initial_io_uring_error\":0,\"io_uring_denied\":false,\"created_threads\":0}",
+      "stderr_bytes": 0,
+      "elapsed_ms": 6,
+      "parent_timeout": false
+    },
+    {
+      "mode": "--probe-cpu",
+      "exit_code": -9,
+      "stdout": "",
+      "stderr_bytes": 0,
+      "elapsed_ms": 3001,
+      "parent_timeout": false
+    }
+  ],
+  "core_endpoint_acceptance": false,
+  "build": {
+    "exit_code": 0,
+    "source_commit": "40d2d69c4e6e4a3de28bae51b69d7a9c9254be5f",
+    "archive_sha256": "8735397c178f1b39aa1073aa93cc594ae13f400948f69602a819435eee2ad87b",
+    "locked_restore": true,
+    "scope": "Linux NativeAOT compilation; no GC override in the pending execution",
+    "artifacts": [
+      {
+        "path": ".runtime/published/linux-x64/LICENSE.SkiaSharp.txt",
+        "bytes": 1129,
+        "sha256": "89101e35a8c66fd4d6dffc1763259161d35cb564c169714ec227a768c89f2938"
+      },
+      {
+        "path": ".runtime/published/linux-x64/libSkiaSharp.so",
+        "bytes": 11756440,
+        "sha256": "dc4dfcc90d319e9fd9edf42106bf1a9c5d9f438d5008c53ddcb4daf8e2340ad1"
+      },
+      {
+        "path": ".runtime/published/linux-x64/AssetLibrary.ImagePreview.Worker",
+        "bytes": 2190392,
+        "sha256": "747cdbcc328f1ec0ea4f90aa14b3bd79b246fbc27e7a996923434dd365e18936"
+      },
+      {
+        "path": ".runtime/published/linux-x64/THIRD-PARTY-NOTICES.SkiaSharp.txt",
+        "bytes": 139775,
+        "sha256": "21504c46c4c58aa64c1055bd2dcbc5f9a136b4b8c412ed3cc6740e22c5b127f5"
+      }
+    ]
+  },
+  "thread_capacity": {
+    "source_commit": "40d2d69c4e6e4a3de28bae51b69d7a9c9254be5f",
+    "existing_test_uid": 65534,
+    "uid_threads_before": 0,
+    "new_accounts_created": false,
+    "gc_override": false,
+    "run_directory": "/tmp/assetlibrary-v03-005-nproc-ws70dk1p",
+    "exit_code": 0,
+    "stdout": "{\"probe\":\"threads\",\"passed\":true,\"initial_seccomp\":0,\"seccomp\":0,\"no_new_privileges\":0,\"file_denied\":false,\"socket_denied\":false,\"connect_denied\":false,\"other_process_signal_denied\":false,\"cross_process_memory_denied\":false,\"fork_denied\":false,\"clone_denied\":false,\"exec_denied\":false,\"initial_io_uring_error\":0,\"io_uring_denied\":false,\"created_threads\":253}",
+    "stderr": "",
+    "elapsed_ms": 50,
+    "cleanup": {
+      "test_uid_threads_after": 0,
+      "owned_directory_removed": true
+    }
+  },
+  "uid_saturation_diagnostic": {
+    "source_commit": "40d2d69c4e6e4a3de28bae51b69d7a9c9254be5f",
+    "real_uid": 1000,
+    "uid_process_count_before": 88,
+    "uid_threads_before": 492,
+    "configured_nproc": 256,
+    "exit_code": 0,
+    "stdout": "{\"probe\":\"threads\",\"passed\":true,\"initial_seccomp\":0,\"seccomp\":0,\"no_new_privileges\":0,\"file_denied\":false,\"socket_denied\":false,\"connect_denied\":false,\"other_process_signal_denied\":false,\"cross_process_memory_denied\":false,\"fork_denied\":false,\"clone_denied\":false,\"exec_denied\":false,\"initial_io_uring_error\":0,\"io_uring_denied\":false,\"created_threads\":0}",
+    "stderr_bytes": 0,
+    "trace_after_filter": [
+      "3666624 seccomp(SECCOMP_SET_MODE_FILTER, SECCOMP_FILTER_FLAG_TSYNC, {len=172, filter=0x79067a0046a8}) = 0",
+      "3666624 mmap(NULL, 69632, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_STACK, -1, 0) = 0x79069375f000",
+      "3666624 mprotect(0x790693760000, 65536, PROT_READ|PROT_WRITE) = 0",
+      "3666624 rt_sigprocmask(SIG_BLOCK, ~[], [], 8) = 0",
+      "3666624 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x79069376f990, parent_tid=0x79069376f990, exit_signal=0, stack=0x79069375f000, stack_size=0xfe80, tls=0x79069376f6c0}, 88) = -1 ENOSYS (Function not implemented)",
+      "3666624 clone(child_stack=0x79069376ee70, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=0x79069376f990, tls=0x79069376f6c0, child_tidptr=0x79069376f990) = -1 EAGAIN (Resource temporarily unavailable)",
+      "3666624 rt_sigprocmask(SIG_SETMASK, [], NULL, 8) = 0",
+      "3666625 +++ exited with 0 +++",
+      "3666624 +++ exited with 0 +++"
+    ]
+  },
+  "parent_death": {
+    "source_commit": "40d2d69c4e6e4a3de28bae51b69d7a9c9254be5f",
+    "ready_before_parent_crash": true,
+    "stdin_writer_retained_by_outer_controller": true,
+    "middle_parent_sigkill": true,
+    "decoder_reaped": true,
+    "decoder_signal": 9,
+    "elapsed_ms": 11,
+    "parent_initiated_decoder_kill": false,
+    "passed": true
+  },
+  "stage": "Linux development default worker verified; NAS and real HTTP/client integration still pending",
+  "passed_cases": 15,
+  "not_counted_twice": "10 corpus cases,4 same-code confinement/resource cases (thread positive used),1 retained-stdin parent-death case; diagnostics/repetitions excluded"
+}

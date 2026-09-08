@@ -13,6 +13,7 @@
     ".codex/handoffs/V03-005/decisions.md",
     ".codex/handoffs/V03-005/image-fixture-lifecycle.json",
     ".codex/handoffs/V03-005/integration-checkpoint.json",
+    ".codex/handoffs/V03-005/linux-decoder-default.json",
     ".codex/handoffs/V03-005/linux-decoder-progress.json",
     ".codex/handoffs/V03-005/linux-source-boundary.json",
     ".codex/handoffs/V03-005/result.json",
@@ -148,11 +149,11 @@
     "contracts/assetlink/image-preview-v1.md"
   ],
   "tests": {
-    "passed": 59,
-    "failed": 1,
+    "passed": 74,
+    "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "scope": "Coordinator previously verified59 checks; current reviewed default Linux decoder nominal case fails memory admission, with successful64MiB diagnostic kept separate. No Core image endpoint acceptance."
+    "scope": "Coordinator59 earlier verified checks plus15 actual Linux default worker cases. No GC override; NAS/HTTP/client image acceptance pending."
   },
   "risks": [
     "Actual Explorer discovery remains unresolved; Windows Session 2 is disconnected and no usable Windows package exists.",

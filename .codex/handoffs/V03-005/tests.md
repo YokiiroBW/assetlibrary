@@ -53,3 +53,13 @@ f580b15经代码审查后合入，4b87896将Preview.Tests加入既有solution/Wi
 同44ab的隔离probe实际从seccomp0进入2/NNP1，文件、创建socket、预存socket连接、跨进程信号/内存、fork、非线程clone、exec、io_uring均拒绝；io_uring前置EFAULT与后置EPERM区分外层策略。CPU探针由内核在约3.001秒SIGKILL，非parent timeout。native内存/线程探针虽报告拒绝，但在已过量保留VM下的失败不能单独证明目标预算；未把它们当最终通过。
 
 只降低子进程GC至64MiB的单变量诊断使Ready VmSize424728KiB，10个合成正常/异常样例全部符合预期，方向/尺寸、相同JPEG改名派生hash一致，透明图corner alpha0/center160、只有标准srgb元数据，派生图已实看。该覆盖用于指导owner固化预算，不能代替无环境覆盖的正式配置验收。原始文件索引与摘要见linux-decoder-progress.json，当前等待新默认/VM admission guard与Host接线稳定提交后复测。
+
+## 默认Linux引擎已完成的边界（40d2d69）
+
+40d2d69固化64MiB GC与进入前VM检查，使用提交的独立RID锁做实际locked restore/NativeAOT publish。**未设置任何GC环境覆盖**，仍在非root、父进程无cap/seccomp且Docker外执行：Ready VmSize424736KiB，AS512MiB/CPU3秒/NPROC256/FSIZE0/CORE0读回；10项corpus全部符合真实派生或拒绝预期。标准Png/Jpeg/Webp、方向6、透明和改名一致性均通过，结果字节与前述诊断匹配。
+
+隔离、768MiB native分配拒绝和3.001秒CPU SIGKILL全部通过。UID1000已有492线程时thread probe创建0，有限trace证实栈分配成功、clone3按设计回退、thread clone因UID NPROC返回EAGAIN。为验证正向边界，同发布字节复制到仅含程序/库/声明的自有临时目录，使用现有nobody身份（初始0线程），实际创建253线程后封顶、全部join、exit0/空stderr；身份线程回到0且目录完整移除，没有创建账号或改系统策略。
+
+另用任务自有中间父进程验证parent-death：实际worker Ready后SIGKILL中间父进程，外层仍保留stdin写端排除EOF自行退出，worker在11ms内收到SIGKILL并由任务subreaper回收，未由外层主动杀decoder。独立子进程与无新权限边界均保持。
+
+上述统计为15个独立默认配置场景（10输入、4隔离/资源、1父退出），不累计诊断/重复。详细结果、原始限额/输出和精确包hash见linux-decoder-default.json。它们是Linux6.14开发机证据；NAS5.10.55、真实Core端点、Web/Android跨端与Windows仍分别待验收，不关闭通用Provider或版本门禁。
