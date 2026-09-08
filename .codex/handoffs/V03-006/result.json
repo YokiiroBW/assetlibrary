@@ -7,10 +7,10 @@
   "owner": "windows-shell-owner",
   "branch": "codex/v03-006-windows-explorer-native-integration",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary",
-  "commit": "d152a80781442e9e1e21416649b5f469a99d6485",
+  "commit": "c6649c5d70b4f2d966d9ecdb02c7f71aed4ee55b",
   "loader_implementation_commit": "453e10b5173f0b9b516fa5eabcb561c6f4ace1e2",
   "windows_image_checkpoint": {
-    "status": "guard_and_basic_lifecycle_verified_full_native_matrix_pending",
+    "status": "agreed_native_platform_evidence_submitted_for_coordinator_review",
     "report": "windows-image-guard.md",
     "production_image_tests_passed": 1,
     "production_image_tests_failed": 0,
@@ -18,7 +18,13 @@
     "trusted_native_control_variants": 2,
     "feature_enabled": false,
     "lifecycle_and_acl_distinct_tests_passed": 7,
-    "lifecycle_report": "windows-image-lifecycle.md"
+    "lifecycle_report": "windows-image-lifecycle.md",
+    "native_report": "windows-native-matrix.md",
+    "native_tests_passed": 12,
+    "canonical_identity_rows_passed": 14,
+    "distinct_image_mstest_rows_passed": 34,
+    "lan_control_variants": 6,
+    "network_scope": "Nonlocal normal-token TCP/HTTP succeed; ordinary AppContainer no-network connect denies 10013; LPAC stops earlier with Winsock10107/WinHTTP12004. Do not equate the stages."
   },
   "changed_files": [
     "tests/windows-shell/CMakeLists.txt",
@@ -55,7 +61,27 @@
     ".codex/handoffs/V03-006/windows-image-lifecycle/profile-delete-idempotence.json",
     ".codex/handoffs/V03-006/windows-image-lifecycle/session-latest.json",
     ".codex/handoffs/V03-006/windows-image-lifecycle/tests.json",
-    ".codex/handoffs/V03-006/explorer-20260909-interruption.md"
+    ".codex/handoffs/V03-006/explorer-20260909-interruption.md",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsComBoundaryTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageBoundaryTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageIdentityTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageNetworkTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageParentExitTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProbe.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageResourceTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageOwnerJournalTests.cs",
+    ".codex/handoffs/V03-006/windows-native-matrix.md",
+    ".codex/handoffs/V03-006/windows-native/CrashParent.cs.txt",
+    ".codex/handoffs/V03-006/windows-native/CrashParent.csproj.txt",
+    ".codex/handoffs/V03-006/windows-native/evidence.json",
+    ".codex/handoffs/V03-006/windows-native/explorer-disconnected-again.json",
+    ".codex/handoffs/V03-006/windows-native/lan-confirmed-controls.json",
+    ".codex/handoffs/V03-006/windows-native/lan-first-positive-failed.json",
+    ".codex/handoffs/V03-006/windows-native/NativeCMakeLists.txt",
+    ".codex/handoffs/V03-006/windows-native/NativeProbe.cpp.txt",
+    ".codex/handoffs/V03-006/windows-native/NetworkControl.cs.txt",
+    ".codex/handoffs/V03-006/windows-native/NetworkControl.csproj.txt",
+    ".codex/handoffs/V03-006/windows-native/NormalStartup.cs.txt"
   ],
   "changed_contracts": [],
   "tests": {
@@ -68,13 +94,15 @@
   "risks": [
     "No usable Explorer client or installer; root activation cause remains undetermined.",
     "Direct loading success is not target Explorer loader evidence.",
-    "Bounded event query and three mitigation policies do not cover every system restriction."
+    "Bounded event query and three mitigation policies do not cover every system restriction.",
+    "Windows Job CPU time is periodically checked and measured overshoot is documented; no hard three-second promise",
+    "LPAC network initialization failure is distinct from ordinary AppContainer direct LAN denial; untested raw-network or other COM classes are not asserted safe"
   ],
   "blocked_by": [
-    "Session 2 and real input recovered, but the user stopped Computer Use with physical Escape before namespace navigation; await explicit resumption. Owned test window 2229954 requires fresh ownership before action.",
+    "Desktop authorization was renewed; the latest attempt again failed GetCursorPos 0x80070005 and contemporaneous Session2 was WTSDisconnected. Await an actually usable RDP state, not another permission question.",
     "Actual Explorer loader/COM observation and G1 remain missing; queried package/AppContainer and explicit Shell policies did not establish a root cause.",
     "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven.",
-    "Full Windows image file/network/COM/handle/resource/parent-exit matrix remains pending; guard and basic lifecycle success alone do not enable the feature."
+    "Agreed Windows native matrix is submitted; broader Provider/network/COM/platform and release gates remain independent and are not closed by this task."
   ],
   "recommended_merge_order": 1,
   "handoff_summary": ".codex/handoffs/V03-006/summary.md",
@@ -110,14 +138,19 @@
       "Real uninstrumented NativeAOT thumbnail/exit/owner-cleanup test 1 of 1 passed",
       "Core and Preview.Tests Release build with no warnings",
       "Six basic lifecycle and one Modify-only ACL regression passed; original PNG test remains separate",
-      "424-file source policy and targeted format/diff verification"
+      "424-file source policy and targeted format/diff verification",
+      "Final native matrix 12 of 12 with scoped network initialization outcomes",
+      "Negative/signed/noncanonical owner identity rows 14 of 14",
+      "Nonlocal LAN normal/AC/LPAC six-control comparison with coordinator server receipt",
+      "Final verify_repository: 432 C# files, architecture/contracts and existing 35 regressions passed; Alpha blocked"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: obtain actual Explorer loader/COM observation after desktop access recovers",
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
       "V03-005 / coordinator: re-identify and clean prior owned desktop windows using fresh ownership evidence",
-      "V03-006 / windows-shell-owner: complete native file/network/COM/handle/resource/parent-exit matrix; uncertain Prepared journals remain fail closed for operator recovery"
+      "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
+      "V03-006 / windows-shell-owner: resume actual Explorer observation only when RDP is usable; authorization already persists"
     ]
   }
 }

@@ -6,6 +6,8 @@
 
 后续[启动/清理检查点](windows-image-lifecycle.md)为a21a145、53bc455、d152a80，累计八个不同Windows逻辑用例通过，完整原生矩阵仍在继续。[09日Explorer新观测](explorer-20260909-interruption.md)确认会话/输入恢复并创建自有窗口，但导航前被用户Escape主动停止；注册已撤销，CU暂停等待明确恢复，不再将旧Disconnected当当前阻断。
 
+最新[原生矩阵与SID检查点](windows-native-matrix.md)源码c6649c5：12项本机native测试通过（其中两项只代表初始化阻断），LAN6组控制与root服务器回执一致，正creation损坏不再隐藏活worker。负creation等14项回归为5bce4cd。原始失败、nominal CPU周期检查overshoot、普通AC网络拒绝与LPAC早期阻断均分别保留。后续桌面授权已恢复，但第二次实际Ctrl+L又遇输入拒绝，同期Session2再次Disconnected；两键已清理，等待可操作RDP。通用Provider/Explorer与整体版本门禁不关闭，不再扩展本批工作范围。
+
 ## 新证据与判断
 
 旧 DLL SHA256 `0174db9b1b4ccd4925d3a28470930fa6faebd4070348cc374a7cb87313e2fd15` 与 V03-002 记录一致。实际导入包括 MSVCP140、VCRUNTIME140、VCRUNTIME140_1、UCRT 和系统 COM/Shell DLL。

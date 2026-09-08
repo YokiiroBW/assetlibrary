@@ -1,0 +1,24 @@
+using System.Diagnostics;
+using System.IO.Pipes;
+using System.Reflection;
+using System.Text;
+
+if (args.Length != 3) return 2;
+var assembly = Assembly.LoadFrom(args[0]);
+var type = assembly.GetType("AssetLibrary.Infrastructure.ReadOnlyWorkers.WindowsImageProcess", true)!;
+using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+var startup = (Task)type.GetMethod("StartAsync", BindingFlags.Static | BindingFlags.Public)!.Invoke(null, [args[1], args[2], deadline.Token])!;
+await startup;
+var instance = startup.GetType().GetProperty("Result")!.GetValue(startup)!;
+await using var owned = (IAsyncDisposable)instance;
+var input = (AnonymousPipeServerStream)type.GetProperty("Input")!.GetValue(instance)!;
+var output = (Stream)type.GetProperty("Output")!.GetValue(instance)!;
+var process = (Process)type.GetProperty("Process")!.GetValue(instance)!;
+await input.WriteAsync(new byte[] { (byte)'S' }, deadline.Token);
+await input.FlushAsync(deadline.Token);
+using var reader = new StreamReader(output, Encoding.ASCII, false, 1024, true);
+if (await reader.ReadLineAsync(deadline.Token) != "ready=1") return 3;
+Console.WriteLine($"child={process.Id};stdin={input.SafePipeHandle.DangerousGetHandle().ToInt64()}");
+Console.Out.Flush();
+await Task.Delay(Timeout.InfiniteTimeSpan, deadline.Token);
+return 0;

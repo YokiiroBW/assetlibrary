@@ -1,0 +1,50 @@
+using System.Buffers.Binary;
+using System.Diagnostics;
+using System.Globalization;
+using System.Net;
+using AssetLibrary.Infrastructure.ReadOnlyWorkers;
+
+if (!OperatingSystem.IsWindows() || args.Length != 6) return 2;
+var argument = new byte[9];
+argument[0] = checked((byte)args[5][0]);
+BinaryPrimitives.WriteUInt32LittleEndian(argument.AsSpan(1), uint.Parse(args[3], CultureInfo.InvariantCulture));
+var address = IPAddress.Parse(args[2]).GetAddressBytes();
+if (address.Length != 4) return 2;
+address.CopyTo(argument, 5);
+using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+if (args[4] == "normal-token")
+{
+    var start = new ProcessStartInfo(args[0])
+    {
+        UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,
+        RedirectStandardOutput = true, RedirectStandardError = true, WorkingDirectory = args[1],
+    };
+    start.Environment.Clear();
+    start.Environment["SystemRoot"] = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+    start.Environment["WINDIR"] = start.Environment["SystemRoot"];
+    start.Environment["LOCALAPPDATA"] = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+    start.Environment["TEMP"] = args[1]; start.Environment["TMP"] = args[1];
+    Directory.CreateDirectory(args[1]);
+    using var process = Process.Start(start)!;
+    try
+    {
+        await process.StandardInput.BaseStream.WriteAsync(argument, deadline.Token);
+        process.StandardInput.Dispose();
+        await process.WaitForExitAsync(deadline.Token);
+        var buffer = new char[2049];
+        var count = await process.StandardOutput.ReadBlockAsync(buffer, deadline.Token);
+        if (count == buffer.Length) return 3;
+        Console.Write(new string(buffer, 0, count));
+        return process.ExitCode;
+    }
+    finally { if (!process.HasExited) { process.Kill(); process.WaitForExit(2000); } }
+}
+await using var worker = await WindowsImageProcess.StartAsync(args[0], args[1], deadline.Token);
+await worker.Input.WriteAsync(argument, deadline.Token);
+worker.Input.Dispose();
+await worker.WaitForExitAsync(deadline.Token);
+var bytes = new byte[2049];
+var length = await worker.Output.ReadAtLeastAsync(bytes, bytes.Length, false, deadline.Token);
+if (length == bytes.Length) return 3;
+Console.Write(System.Text.Encoding.ASCII.GetString(bytes, 0, length));
+return worker.ExitCode;

@@ -1,0 +1,511 @@
+{
+  "RecordedAtUtc": "2026-09-09T02:58:55.020497+08:00",
+  "SourceCommit": "c6649c5d70b4f2d966d9ecdb02c7f71aed4ee55b",
+  "NativeProbeSha256": "DADE2F45F34DB1C271BE6BC8EB756DA4D830D68D20FE0E1B2BBA00E6CDD272EC",
+  "CrashParentSha256": "92C3B4F875BC1CF1A9273DE8E7CB3F61F3D2D7310B9F92122812AA5FF07B907F",
+  "NormalAcControllerSha256": "770406B5ADE3B5E6FA2FF005D61DB07462AC17D9ECFAD00676D0C09D4D688131",
+  "LpacControllerSha256": "A9AECFDBD372493D1E448585FA2426803931DCE0C308C1B51D6F4C6553202595",
+  "ToolOwnerRecordsRemaining": 0,
+  "Artifacts": [
+    {
+      "File": "lan-first-positive-failed.json",
+      "WorkingFileSha256": "2071227C28C220853DB9F9509824080E551D5DE2C21CB422B40BB9BA44BD4D1A",
+      "LfSha256": "B2E4A3E61B424A1F7BB621FB36DCD00CFD1A0B5996D229D56B7D8162EA576BBE"
+    },
+    {
+      "File": "NativeProbe.cpp.txt",
+      "WorkingFileSha256": "86596A3E59B3B1B079556EB4B84CDED776B61500364733ECDB0879EAD2B7320B",
+      "LfSha256": "86596A3E59B3B1B079556EB4B84CDED776B61500364733ECDB0879EAD2B7320B"
+    },
+    {
+      "File": "NetworkControl.cs.txt",
+      "WorkingFileSha256": "FDC24021BE571ACA1064FD5963684EF759E9E57A1BAAAC4B33E6136FF0DCE6FC",
+      "LfSha256": "FDC24021BE571ACA1064FD5963684EF759E9E57A1BAAAC4B33E6136FF0DCE6FC"
+    },
+    {
+      "File": "CrashParent.csproj.txt",
+      "WorkingFileSha256": "485E171E44EE6360533652433989D3B90AB763B8F7CEBF63EE46FD066E074996",
+      "LfSha256": "485E171E44EE6360533652433989D3B90AB763B8F7CEBF63EE46FD066E074996"
+    },
+    {
+      "File": "lan-confirmed-controls.json",
+      "WorkingFileSha256": "5C5ECE61870313D26B9B15EA5A21195E2933DB5E43A470E114A72F76191E0A04",
+      "LfSha256": "DF40344E35EE7565D36814F7F6896410796862BCA1D8D6E6515749E6C8F064F3"
+    },
+    {
+      "File": "NetworkControl.csproj.txt",
+      "WorkingFileSha256": "969668BBC81B655F90EF2C0BF24676E9B1FAC00B55AF1A2DCFA6F001732326F3",
+      "LfSha256": "969668BBC81B655F90EF2C0BF24676E9B1FAC00B55AF1A2DCFA6F001732326F3"
+    },
+    {
+      "File": "NativeCMakeLists.txt",
+      "WorkingFileSha256": "2B2BBFFC92536570DAD66CEC087C9A9719C2B75CE06763FD5E46BF0100BAA2BF",
+      "LfSha256": "2B2BBFFC92536570DAD66CEC087C9A9719C2B75CE06763FD5E46BF0100BAA2BF"
+    },
+    {
+      "File": "explorer-disconnected-again.json",
+      "WorkingFileSha256": "AEA18E100AD6D264387E1B5D764E53E686D7B1065C89AD660BC2940B083C6282",
+      "LfSha256": "7E597DBAC8929B35170739A3DAA81FF7B541245BCE909301D58BEAF4F4AD3A21"
+    },
+    {
+      "File": "NormalStartup.cs.txt",
+      "WorkingFileSha256": "97C4E968BFD3992E285EBCCC9F6F0C12B9D1487A54FE03B5A4866269BDE7344A",
+      "LfSha256": "A2F18FBE4C1A222516A451207892BCA82BE7B90608089A2A1544728E02479043",
+      "ArchiveNormalization": "LF line endings and exactly one terminal newline; WorkingFileSha256 retains the unmodified original runtime source hash."
+    },
+    {
+      "File": "CrashParent.cs.txt",
+      "WorkingFileSha256": "A0F1A64D22999090DDAB2E05AAEB26F2342520310EAFE7F1DD0ECB2739908D6B",
+      "LfSha256": "A0F1A64D22999090DDAB2E05AAEB26F2342520310EAFE7F1DD0ECB2739908D6B"
+    }
+  ],
+  "Reports": [
+    {
+      "File": "native-confinement-first.trx",
+      "Sha256": "D86E647A9BDE2BAC9F4DFE7B344BE23695E98DE495F745BCBFDF6C1598948FD4",
+      "Tests": [
+        {
+          "Name": "KernelTerminatesCpuBoundWorkerWithoutCallerTimeout",
+          "Outcome": "Failed",
+          "Duration": "00:00:08.2502905",
+          "Message": "Assert.IsLessThan 失败。实际值 <8.2013531> 不小于预期值 <7>。‘upperBound’表达式:‘7.0’,‘value’表达式:‘timer.Elapsed.TotalSeconds’。",
+          "Output": null
+        },
+        {
+          "Name": "WorkerCannotConnectToOwnedLoopbackListener",
+          "Outcome": "Failed",
+          "Duration": "00:00:00.0701207",
+          "Message": "Assert.IsTrue 失败。‘condition’表达式:‘result[\"socket_error\"] == \"10013\" || result[\"connect_error\"] == \"10013\"’。",
+          "Output": null
+        },
+        {
+          "Name": "JobRejectsAnotherProcess",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0645046",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "CancellationTerminatesSleepingWorkerAndReaps",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0680264",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "WorkerCannotReadHostFileOrWriteItsRxDirectory",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0977363",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Failed",
+          "Duration": "00:00:11.9976235",
+          "Message": "测试方法 AssetLibrary.Preview.Tests.WindowsImageBoundaryTests。InheritableEventOutsideStdioWhitelistIsNotShared 引发了异常: \r\nSystem.Threading.Tasks.TaskCanceledException: A task was canceled.",
+          "Output": null
+        },
+        {
+          "Name": "CommittedMemoryIsBoundedByJobRatherThanGc",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1609035",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-confinement-details.trx",
+      "Sha256": "122EFECD83B4C2CDBD3718296CE743D90E846CC9DF82A5119F05340659B52B2B",
+      "Tests": [
+        {
+          "Name": "WorkerCannotConnectToOwnedLoopbackListener",
+          "Outcome": "Failed",
+          "Duration": "00:00:00.1022785",
+          "Message": "Assert.IsTrue 失败。‘condition’表达式:‘result[\"socket_error\"] == \"10013\" || result[\"connect_error\"] == \"10013\"’。 socket_error=10107;connect_error=0;accepted=False",
+          "Output": null
+        },
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Failed",
+          "Duration": "00:00:12.0123223",
+          "Message": "Assert.Fail 失败。Probe did not finish; native exit=0x00000001.",
+          "Output": null
+        },
+        {
+          "Name": "KernelTerminatesCpuBoundWorkerWithoutCallerTimeout",
+          "Outcome": "Failed",
+          "Duration": "00:00:06.2501407",
+          "Message": "Assert.IsLessThan 失败。实际值 <5.953125> 不小于预期值 <4.5>。‘upperBound’表达式:‘4.5’,‘value’表达式:‘probe.Child.Process.UserProcessorTime.TotalSeconds’。 User CPU=5.953125; wall=5.9844",
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-handle-diagnostic.trx",
+      "Sha256": "8BE417F09A303C0904C4B1B8BCC59B0DD342EF73AB78C53B1EE454B97B070F9A",
+      "Tests": [
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Failed",
+          "Duration": "00:00:12.0230299",
+          "Message": "Assert.Fail 失败。Probe did not finish; native exit=0x00000001; output=handle_stage=1\r\nhandle_stage=2\r\n.",
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-controlled.trx",
+      "Sha256": "036E40E182254E4AB8491F341BFC1E4537C4ACCC0E9F10C2CA230053955E88C7",
+      "Tests": [
+        {
+          "Name": "KernelTerminatesCpuBoundWorkerWithoutCallerTimeout",
+          "Outcome": "Passed",
+          "Duration": "00:00:07.0090874",
+          "Message": null,
+          "Output": "TestContext 消息:\r\nConfiguredCPUSeconds=3;UserCPUSeconds=5.078125;WallSeconds=6.9601626;Exit=C0000044"
+        },
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Failed",
+          "Duration": "00:00:00.0834565",
+          "Message": "测试方法 AssetLibrary.Preview.Tests.WindowsImageBoundaryTests。InheritableEventOutsideStdioWhitelistIsNotShared 引发了异常: \r\nSystem.ArgumentException: An item with the same key has already been added. Key: handle_stage",
+          "Output": null
+        },
+        {
+          "Name": "WorkerCannotConnectToOwnedLoopbackListener",
+          "Outcome": "Failed",
+          "Duration": "00:00:00.1223011",
+          "Message": "Assert.IsTrue 失败。‘condition’表达式:‘result[\"socket_error\"] == \"10013\" || result[\"connect_error\"] == \"10013\"’。 socket_error=10107;connect_error=0;accepted=False",
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-http-control.trx",
+      "Sha256": "B58DEF2DC0DDFF5535186305CC90810AD0E88C6CB6CDE8AAA9CAC24E9F3BB2C6",
+      "Tests": [
+        {
+          "Name": "NativeHttpCannotReachOwnedListener",
+          "Outcome": "Failed",
+          "Duration": "00:00:00.1332838",
+          "Message": "Assert.AreEqual 失败。字符串长度应为 1，但为 5。 ‘expected’表达式:‘\"5\"’,‘actual’表达式:‘result[\"http_error\"]’。\r\n应为:  \"5\"\r\n但却是: \"12004\"\r\n------^",
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-parent-exit.trx",
+      "Sha256": "D26C6C58D27E5DE0AB5CB1A376C128DAD7CF7215CD8ED1C567694B6B0DE69953",
+      "Tests": [
+        {
+          "Name": "ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1390022",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-com-broker.trx",
+      "Sha256": "D3CA28B2E77EC21EF5C02A865D4338B873D6ACA1349FCE9E0B906C6FFD04ABD0",
+      "Tests": [
+        {
+          "Name": "OutOfProcessTransferBrokerCannotCreateAJob",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1606219",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "live-identity-recovery.trx",
+      "Sha256": "E89B0DBF24C3DC174DCD008D8BADC62112B6A7212F8D8AB748A43CC65B5673E5",
+      "Tests": [
+        {
+          "Name": "ChangedPositiveTimestampDoesNotHideLiveOwnedWorker",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0912157",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-confirmed-matrix.trx",
+      "Sha256": "C3C683D79232F15AF2778F006B923CCFD6F82E745D8FD856B714F34FF20D4C57",
+      "Tests": [
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0787873",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "ChangedPositiveTimestampDoesNotHideLiveOwnedWorker",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0588639",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "WorkerCannotReadHostFileOrWriteItsRxDirectory",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0593407",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "InProcessComCannotReadHostOnlyMarker",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0940926",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "CommittedMemoryIsBoundedByJobRatherThanGc",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1066062",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "OutOfProcessTransferBrokerCannotCreateAJob",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1329944",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "KernelCpuQuotaTerminatesWithMeasuredPeriodicOvershoot",
+          "Outcome": "Passed",
+          "Duration": "00:00:08.6210613",
+          "Message": null,
+          "Output": "TestContext 消息:\r\nConfiguredCPUSeconds=3;UserCPUSeconds=8.546875;WallSeconds=8.5734371;Exit=C0000044"
+        },
+        {
+          "Name": "CancellationTerminatesSleepingWorkerAndReaps",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0573400",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "JobRejectsAnotherProcess",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0574056",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1236069",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "native-final-matrix.trx",
+      "Sha256": "7A966A5DEF329143BAF6F024EEF1BAE028C520046EF5308933D6AF33EAE1BDCF",
+      "Tests": [
+        {
+          "Name": "ChangedPositiveTimestampDoesNotHideLiveOwnedWorker",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0595080",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "InheritableEventOutsideStdioWhitelistIsNotShared",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0800095",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "KernelCpuQuotaTerminatesWithMeasuredPeriodicOvershoot",
+          "Outcome": "Passed",
+          "Duration": "00:00:06.0547159",
+          "Message": null,
+          "Output": "TestContext 消息:\r\nConfiguredCPUSeconds=3;UserCPUSeconds=6;WallSeconds=6.0077342;Exit=C0000044"
+        },
+        {
+          "Name": "OutOfProcessTransferBrokerCannotCreateAJob",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1313107",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "InProcessComCannotReadHostOnlyMarker",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0968470",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "LpacWinsockInitializationBlocksThisTestedPath",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0740547",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "CommittedMemoryIsBoundedByJobRatherThanGc",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1083414",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "CancellationTerminatesSleepingWorkerAndReaps",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0751341",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "LpacWinHttpInitializationBlocksThisTestedPath",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0779331",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.1239331",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "JobRejectsAnotherProcess",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0575354",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "WorkerCannotReadHostFileOrWriteItsRxDirectory",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0601250",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    },
+    {
+      "File": "journal-canonical-identity.trx",
+      "Sha256": "8E53BDB41E19BC9FE0DD21BBB5158F61557DD4024021321C2B0B773E38434528",
+      "Tests": [
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"+3\",\"123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005615",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"1 \")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005248",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "AcceptsValidCreatedAndStartedIdentity (\"1\",\"0\",\"0\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0007950",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"0\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005452",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"-1\",\"123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0006322",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "AcceptsValidCreatedAndStartedIdentity (\"3\",\"123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0006574",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"+1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0008972",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"03\",\"123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005423",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"01\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005609",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"+123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005225",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"-1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0092915",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"0123\",\"1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005273",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"0\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0005307",
+          "Message": null,
+          "Output": null
+        },
+        {
+          "Name": "RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\" 1\")",
+          "Outcome": "Passed",
+          "Duration": "00:00:00.0006370",
+          "Message": null,
+          "Output": null
+        }
+      ]
+    }
+  ],
+  "FeatureEnabled": false,
+  "ProviderGateClosed": false,
+  "ExplorerGateClosed": false
+}

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><EnableDefaultCompileItems>false</EnableDefaultCompileItems></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="$(StartupSource)" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcess.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProfile.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageCapability.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageArtifact.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageOwnerJournal.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcessIdentity.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/ImageChildProcess.cs" />
+    <Compile Include="$(RepositoryRoot)/services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs" />
+  </ItemGroup>
+</Project>

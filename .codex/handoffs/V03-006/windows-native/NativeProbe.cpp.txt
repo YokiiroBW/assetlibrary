@@ -1,0 +1,251 @@
+#include <winsock2.h>
+#include <windows.h>
+#include <objbase.h>
+#include <oaidl.h>
+#include <winhttp.h>
+#include <bits.h>
+#include <psapi.h>
+#include <cstdio>
+#include <cstdint>
+#include <cwchar>
+
+static bool readExact(void* target, DWORD bytes) {
+    auto next = static_cast<BYTE*>(target);
+    while (bytes != 0) {
+        DWORD read = 0;
+        if (!ReadFile(GetStdHandle(STD_INPUT_HANDLE), next, bytes, &read, nullptr) || read == 0) return false;
+        next += read; bytes -= read;
+    }
+    return true;
+}
+
+static bool readPath(wchar_t (&path)[1024]) {
+    DWORD characters = 0;
+    return readExact(&characters, 4) && characters > 0 && characters < 1024
+        && readExact(path, characters * sizeof(wchar_t));
+}
+
+static DWORD checkedSignal(HANDLE event, BOOL* signaled, DWORD* error) {
+    __try { *signaled = SetEvent(event); *error = *signaled ? 0 : GetLastError(); return 0; }
+    __except (GetExceptionCode() == 0xC0000008 ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) { return GetExceptionCode(); }
+}
+
+static int signalControl() {
+    SECURITY_ATTRIBUTES security{sizeof(security), nullptr, TRUE};
+    const HANDLE event = CreateEventW(&security, TRUE, FALSE, nullptr);
+    if (!event) return 2;
+    wchar_t executable[1024]{}, command[1200]{};
+    GetModuleFileNameW(nullptr, executable, 1024);
+    swprintf_s(command, L"\"%ls\" --event-control %llu", executable, static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(event)));
+    STARTUPINFOW startup{}; startup.cb = sizeof(startup); startup.dwFlags = STARTF_USESTDHANDLES;
+    startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE); startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE); startup.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+    PROCESS_INFORMATION child{};
+    const BOOL created = CreateProcessW(executable, command, nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, nullptr, &startup, &child);
+    bool signaled = false;
+    if (created) {
+        const DWORD waited = WaitForSingleObject(child.hProcess, 5000);
+        signaled = waited == WAIT_OBJECT_0 && WaitForSingleObject(event, 0) == WAIT_OBJECT_0;
+        if (waited != WAIT_OBJECT_0) { TerminateProcess(child.hProcess, 1); WaitForSingleObject(child.hProcess, 2000); }
+        CloseHandle(child.hThread); CloseHandle(child.hProcess);
+    }
+    CloseHandle(event);
+    std::printf("control_created=%u;control_signaled=%u\n", created ? 1u : 0u, signaled ? 1u : 0u);
+    return signaled ? 0 : 3;
+}
+
+static int memoryProbe() {
+    void* blocks[80]{};
+    unsigned count = 0;
+    DWORD error = 0;
+    for (; count < 80; ++count) {
+        blocks[count] = VirtualAlloc(nullptr, 8 * 1024 * 1024, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+        if (!blocks[count]) { error = GetLastError(); break; }
+        auto memory = static_cast<volatile BYTE*>(blocks[count]);
+        for (size_t page = 0; page < 8 * 1024 * 1024; page += 4096) memory[page] = 1;
+    }
+    JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+    PROCESS_MEMORY_COUNTERS_EX usage{}; usage.cb = sizeof(usage);
+    const bool measured = QueryInformationJobObject(nullptr, JobObjectExtendedLimitInformation, &limits, sizeof(limits), nullptr)
+        && K32GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&usage), sizeof(usage));
+    std::printf("blocks=%u;error=%lu;measured=%u;job_memory=%llu;private_bytes=%llu\n", count, error, measured ? 1u : 0u,
+        static_cast<unsigned long long>(limits.ProcessMemoryLimit), static_cast<unsigned long long>(usage.PrivateUsage));
+    for (unsigned index = 0; index < count; ++index) VirtualFree(blocks[index], 0, MEM_RELEASE);
+    return 0;
+}
+
+static int processProbe() {
+    wchar_t path[1024]{};
+    if (!GetModuleFileNameW(nullptr, path, 1024)) return 2;
+    STARTUPINFOW startup{}; startup.cb = sizeof(startup);
+    PROCESS_INFORMATION child{};
+    const BOOL created = CreateProcessW(path, nullptr, nullptr, nullptr, FALSE, CREATE_NO_WINDOW | CREATE_SUSPENDED,
+        nullptr, nullptr, &startup, &child);
+    const DWORD error = created ? 0 : GetLastError();
+    std::printf("created=%u;error=%lu\n", created ? 1u : 0u, error);
+    if (created) {
+        TerminateProcess(child.hProcess, 1); WaitForSingleObject(child.hProcess, 2000);
+        CloseHandle(child.hThread); CloseHandle(child.hProcess);
+    }
+    return 0;
+}
+
+static int fileProbe() {
+    wchar_t path[1024]{};
+    if (!readPath(path)) return 2;
+    HANDLE file = CreateFileW(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    const DWORD readError = file == INVALID_HANDLE_VALUE ? GetLastError() : 0;
+    if (file && file != INVALID_HANDLE_VALUE) CloseHandle(file);
+    file = CreateFileW(L"untrusted-created.txt", GENERIC_WRITE, 0, nullptr, CREATE_NEW, 0, nullptr);
+    const DWORD writeError = file == INVALID_HANDLE_VALUE ? GetLastError() : 0;
+    if (file && file != INVALID_HANDLE_VALUE) CloseHandle(file);
+    std::printf("read_error=%lu;write_error=%lu\n", readError, writeError);
+    return 0;
+}
+
+static int networkProbe() {
+    DWORD port = 0;
+    BYTE destination[4]{};
+    if (!readExact(&port, 4) || !readExact(destination, 4) || port > 65535) return 2;
+    WSADATA data{};
+    const int initialized = WSAStartup(MAKEWORD(2, 2), &data);
+    if (initialized != 0) { std::printf("socket_error=%d;connect_error=0\n", initialized); return 0; }
+    SOCKET connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    const int socketError = connection == INVALID_SOCKET ? WSAGetLastError() : 0;
+    int connectError = 0;
+    if (connection != INVALID_SOCKET) {
+        sockaddr_in address{}; address.sin_family = AF_INET; address.sin_port = htons(static_cast<u_short>(port));
+        memcpy(&address.sin_addr.s_addr, destination, 4);
+        if (connect(connection, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == SOCKET_ERROR) connectError = WSAGetLastError();
+        closesocket(connection);
+    }
+    WSACleanup();
+    std::printf("socket_error=%d;connect_error=%d\n", socketError, connectError);
+    return 0;
+}
+
+static int comFileProbe() {
+    wchar_t path[1024]{};
+    if (!readPath(path)) return 2;
+    HRESULT result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(result)) { std::printf("com_init=%08lX\n", static_cast<unsigned long>(result)); return 0; }
+    CLSID clsid{};
+    result = CLSIDFromString(L"{0D43FE01-F093-11CF-8940-00A0C9054228}", &clsid);
+    IDispatch* scripting = nullptr;
+    if (SUCCEEDED(result)) result = CoCreateInstance(clsid, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&scripting));
+    std::printf("com_create=%08lX\n", static_cast<unsigned long>(result));
+    if (scripting) {
+        wchar_t method[] = L"OpenTextFile"; LPOLESTR names[] = {method}; DISPID member = 0;
+        result = scripting->GetIDsOfNames(IID_NULL, names, 1, LOCALE_INVARIANT, &member);
+        if (SUCCEEDED(result)) {
+            VARIANT values[3]{};
+            values[0].vt = VT_BOOL; values[0].boolVal = VARIANT_FALSE;
+            values[1].vt = VT_I4; values[1].lVal = 1;
+            values[2].vt = VT_BSTR; values[2].bstrVal = SysAllocString(path);
+            if (!values[2].bstrVal) { scripting->Release(); CoUninitialize(); return 3; }
+            DISPPARAMS parameters{values, nullptr, 3, 0}; VARIANT output{}; EXCEPINFO exception{};
+            result = scripting->Invoke(member, IID_NULL, LOCALE_INVARIANT, DISPATCH_METHOD, &parameters, &output, &exception, nullptr);
+            std::printf("com_open=%08lX;com_exception=%08lX\n", static_cast<unsigned long>(result), static_cast<unsigned long>(exception.scode));
+            VariantClear(&output); VariantClear(&values[2]);
+            if (exception.bstrSource) SysFreeString(exception.bstrSource);
+            if (exception.bstrDescription) SysFreeString(exception.bstrDescription);
+            if (exception.bstrHelpFile) SysFreeString(exception.bstrHelpFile);
+        }
+        scripting->Release();
+    }
+    CoUninitialize();
+    return 0;
+}
+
+static int httpProbe() {
+    DWORD port = 0;
+    BYTE destination[4]{};
+    if (!readExact(&port, 4) || !readExact(destination, 4) || port > 65535) return 2;
+    wchar_t host[16]{};
+    swprintf_s(host, L"%u.%u.%u.%u", destination[0], destination[1], destination[2], destination[3]);
+    HINTERNET session = WinHttpOpen(L"OwnedBoundaryProbe", WINHTTP_ACCESS_TYPE_NO_PROXY, nullptr, nullptr, 0);
+    DWORD error = session ? 0 : GetLastError();
+    HINTERNET connection = nullptr, request = nullptr;
+    bool sent = false;
+    if (session) {
+        WinHttpSetTimeouts(session, 1000, 1000, 1000, 1000);
+        connection = WinHttpConnect(session, host, static_cast<INTERNET_PORT>(port), 0);
+        if (!connection) error = GetLastError();
+        else {
+            request = WinHttpOpenRequest(connection, L"GET", L"/owned-probe", nullptr, nullptr, nullptr, 0);
+            if (!request) error = GetLastError();
+            else {
+                sent = WinHttpSendRequest(request, nullptr, 0, nullptr, 0, 0, 0) && WinHttpReceiveResponse(request, nullptr);
+                error = sent ? 0 : GetLastError();
+            }
+        }
+    }
+    if (request) WinHttpCloseHandle(request);
+    if (connection) WinHttpCloseHandle(connection);
+    if (session) WinHttpCloseHandle(session);
+    std::printf("http_sent=%u;http_error=%lu\n", sent ? 1u : 0u, error);
+    return 0;
+}
+
+static int backgroundTransferProbe() {
+    const HRESULT initialized = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    if (FAILED(initialized)) { std::printf("bits_init=%08lX\n", static_cast<unsigned long>(initialized)); return 0; }
+    IBackgroundCopyManager* manager = nullptr;
+    HRESULT result = CoCreateInstance(__uuidof(BackgroundCopyManager), nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&manager));
+    std::printf("bits_create=%08lX\n", static_cast<unsigned long>(result));
+    HRESULT cancelled = S_OK;
+    if (manager) {
+        GUID id{}; IBackgroundCopyJob* job = nullptr;
+        result = manager->CreateJob(L"AssetLibrary owned boundary probe", BG_JOB_TYPE_DOWNLOAD, &id, &job);
+        std::printf("bits_job=%08lX\n", static_cast<unsigned long>(result));
+        if (job) {
+            // No URL/file is ever added. Cancel only the new object returned by our own CreateJob.
+            cancelled = job->Cancel();
+            std::printf("bits_cancel=%08lX\n", static_cast<unsigned long>(cancelled));
+            job->Release();
+        }
+        manager->Release();
+    }
+    CoUninitialize();
+    return FAILED(cancelled) ? 4 : 0;
+}
+
+int wmain(int argc, wchar_t** argv) {
+    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
+    if (argc == 3 && wcscmp(argv[1], L"--event-control") == 0) {
+        wchar_t* end = nullptr; const auto raw = wcstoull(argv[2], &end, 10);
+        if (!end || *end != 0 || raw == 0) return 2;
+        BOOL signaled = FALSE; DWORD error = 0;
+        const DWORD exception = checkedSignal(reinterpret_cast<HANDLE>(static_cast<uintptr_t>(raw)), &signaled, &error);
+        std::printf("control_set=%u;control_error=%lu;control_exception=%08lX\n", signaled ? 1u : 0u, error, exception);
+        return signaled ? 0 : 3;
+    }
+    if (argc != 1) return 2;
+    BYTE mode = 0;
+    if (!readExact(&mode, 1)) return 2;
+    std::puts("ready=1"); std::fflush(stdout);
+    switch (mode) {
+    case 'C': {
+        JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
+        if (!QueryInformationJobObject(nullptr, JobObjectExtendedLimitInformation, &limits, sizeof(limits), nullptr)) return 3;
+        std::printf("cpu_ticks=%lld;limit_flags=%lu\n", limits.BasicLimitInformation.PerProcessUserTimeLimit.QuadPart, limits.BasicLimitInformation.LimitFlags);
+        std::fflush(stdout);
+        volatile uint64_t work = 0; for (;;) work = work + 1;
+    }
+    case 'M': return memoryProbe();
+    case 'P': return processProbe();
+    case 'F': return fileProbe();
+    case 'N': return networkProbe();
+    case 'O': return comFileProbe();
+    case 'W': return httpProbe();
+    case 'T': return backgroundTransferProbe();
+    case 'B': return signalControl();
+    case 'S': Sleep(INFINITE); return 0;
+    case 'H': {
+        uint64_t raw = 0; if (!readExact(&raw, 8)) return 2;
+        BOOL set = FALSE; DWORD error = 0;
+        const DWORD exception = checkedSignal(reinterpret_cast<HANDLE>(static_cast<uintptr_t>(raw)), &set, &error);
+        std::printf("set=%u;error=%lu;exception=%08lX\n", set ? 1u : 0u, error, exception); return 0;
+    }
+    default: return 2;
+    }
+}

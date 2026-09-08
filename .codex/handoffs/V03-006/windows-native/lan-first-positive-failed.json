@@ -1,0 +1,65 @@
+[
+  {
+    "Mode": "normal-token",
+    "Operation": "N",
+    "Started": "2026-09-08T18:35:02.3372716+00:00",
+    "Ended": "2026-09-08T18:35:14.7617908+00:00",
+    "Exit": -532462766,
+    "Output": []
+  },
+  {
+    "Mode": "normal-token",
+    "Operation": "W",
+    "Started": "2026-09-08T18:35:14.7645733+00:00",
+    "Ended": "2026-09-08T18:35:18.8330130+00:00",
+    "Exit": 0,
+    "Output": [
+      "ready=1",
+      "http_sent=0;http_error=12002"
+    ]
+  },
+  {
+    "Mode": "appcontainer",
+    "Operation": "N",
+    "Started": "2026-09-08T18:35:18.8344099+00:00",
+    "Ended": "2026-09-08T18:35:18.9578350+00:00",
+    "Exit": 0,
+    "Output": [
+      "ready=1",
+      "socket_error=0;connect_error=10013"
+    ]
+  },
+  {
+    "Mode": "appcontainer",
+    "Operation": "W",
+    "Started": "2026-09-08T18:35:18.9582571+00:00",
+    "Ended": "2026-09-08T18:35:19.0861133+00:00",
+    "Exit": 0,
+    "Output": [
+      "ready=1",
+      "http_sent=0;http_error=12029"
+    ]
+  },
+  {
+    "Mode": "lpac",
+    "Operation": "N",
+    "Started": "2026-09-08T18:35:19.0865293+00:00",
+    "Ended": "2026-09-08T18:35:19.2052474+00:00",
+    "Exit": 0,
+    "Output": [
+      "ready=1",
+      "socket_error=10107;connect_error=0"
+    ]
+  },
+  {
+    "Mode": "lpac",
+    "Operation": "W",
+    "Started": "2026-09-08T18:35:19.2056594+00:00",
+    "Ended": "2026-09-08T18:35:19.3266480+00:00",
+    "Exit": 0,
+    "Output": [
+      "ready=1",
+      "http_sent=0;http_error=12004"
+    ]
+  }
+]

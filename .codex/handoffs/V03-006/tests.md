@@ -58,3 +58,9 @@ computer-use列举只有Codex可定位；launch_app(Microsoft.Windows.Explorer)�
 ## 转交后的Windows图片guard检查点
 
 详见[独立记录](windows-image-guard.md)与[证据索引](windows-image-guard/evidence.json)。合入root57d1578、V03-007 ca1d235的新基线后verify_repository通过（397个C#文件及既有35项回归，Alpha blocked）。仅guard和测试诊断修改后，两个文件format whitespace verify、NativeAOT实际publish、validate_dotnet_source及diff检查通过。生产Ready→PNG→退出/owner清理用例1/1通过，0skip；另有可信native LPAC/普通AC两个对照，四项访问/文件结果各自一致。此为新Windows图片证据，不改原4项loader计数，不将4次诊断失败日志当4个独立产品测试。其余故障、网络/COM旁路、资源与恢复仍待完成。
+
+## 后续已完成的约定原生矩阵
+
+详见[Windows原生矩阵](windows-native-matrix.md)与[完整安全摘要/hash](windows-native/evidence.json)。c6649c5的native-final-matrix为12/12、零skip；其中10项为文件/RX、COM、句柄、Job/CPU/memory/child、取消/父退出和SID恢复，另外2项准确表示LPAC初始化阶段阻断的本机路径。之前预期10013/5的失败不被删掉或等同于最终网络层通过。LAN第二轮6组以非本机dev-230 listener补证，由root确认普通token TCP/HTTP被接收，AC/LPAC无连接；普通AC connect10013与LPAC10107/12004分别记录。第一轮正控因服务器端口不开放而失败，不计隔离证据。
+
+Windows图片MSTest不同逻辑行累计34项：生命周期/ACL/PNG8项、负值与规范数字14项、native12项；另列AAP2个控制与LAN6个控制，不与重复执行或root独立重测累计。最终verify_repository通过（432 C#文件与同一35项已有回归，Alpha blocked），Core/Tests零告警、目标格式和diff通过。更广泛原始network/其他COM/Windows版本及通用Provider门禁仍独立，Explorer实际入口未完成。
