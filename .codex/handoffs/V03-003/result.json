@@ -1,0 +1,111 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-003",
+  "title": "android-native-read-client",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "android-client-owner",
+  "branch": "codex/v03-003-android-native-read-client",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-003",
+  "commit": "e24331afc7c8fc4806e172ba200342eed2895637",
+  "changed_files": [
+    ".codex/tasks/V03-003.md",
+    "apps/android/.gitignore",
+    "apps/android/README.md",
+    "apps/android/app/build.gradle.kts",
+    "apps/android/app/gradle.lockfile",
+    "apps/android/app/src/androidTest/kotlin/app/assetlibrary/android/RealCoreUiTest.kt",
+    "apps/android/app/src/androidTest/kotlin/app/assetlibrary/android/WorkspaceUiTest.kt",
+    "apps/android/app/src/main/AndroidManifest.xml",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/MainActivity.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/AssetLinkClient.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/HttpsTransport.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/protocol/Models.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/ui/WorkspaceApp.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/ui/WorkspaceTheme.kt",
+    "apps/android/app/src/main/kotlin/app/assetlibrary/android/workspace/WorkspaceModel.kt",
+    "apps/android/app/src/main/res/drawable/ic_library.xml",
+    "apps/android/app/src/main/res/values/strings.xml",
+    "apps/android/app/src/main/res/values/styles.xml",
+    "apps/android/app/src/main/res/xml/data_extraction_rules.xml",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/protocol/ProtocolTest.kt",
+    "apps/android/app/src/test/kotlin/app/assetlibrary/android/workspace/WorkspaceModelTest.kt",
+    "apps/android/build.gradle.kts",
+    "apps/android/buildscript-gradle.lockfile",
+    "apps/android/gradle.properties",
+    "apps/android/gradle/verification-metadata.xml",
+    "apps/android/gradle/wrapper/gradle-wrapper.jar",
+    "apps/android/gradle/wrapper/gradle-wrapper.properties",
+    "apps/android/gradlew",
+    "apps/android/gradlew.bat",
+    "apps/android/settings.gradle.kts",
+    ".codex/handoffs/V03-003/summary.md",
+    ".codex/handoffs/V03-003/tests.md",
+    ".codex/handoffs/V03-003/result.json",
+    ".codex/handoffs/V03-003/screenshots/phone-real-core.png",
+    ".codex/handoffs/V03-003/screenshots/phone-detail.png",
+    ".codex/handoffs/V03-003/screenshots/tablet-dark.png",
+    ".codex/handoffs/V03-003/screenshots/phone-font200.png"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 58,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "jvm": 21,
+    "distinct_instrumented_tests": 2,
+    "osv_audit": "pending_external_tls_reset",
+    "repository_regressions": 35
+  },
+  "risks": [
+    "OSV在线漏洞审计因外部TLS连接重置等待，由协调线程继续；未记为通过。",
+    "APK使用明确调试试用签名；正式签名、HyperOS/Android11真机与50万资产原生压测证据仍开放。",
+    "当前仅单HTTPS源只读浏览；正式预览/传输/同步/设备配对与主备切换未开放。"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/V03-003/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "apps/android native presentation, lifecycle state and AssetLink HTTPS adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Unmodified generated Kotlin AssetLink SDK sourceSet",
+      "Existing read-only-trial Cookie/CSRF public operations and server authorization",
+      "Shared generated packages/ui/workspace-theme.json",
+      "Existing SDK Gradle9.3.1 wrapper and checksum"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Public AssetLink HTTPS contract only; no internal server classes/database/filesystem access"
+    ],
+    "new_language_or_framework": [
+      "Activates already approved Kotlin2.3/Compose/AGP9 Android budget under ADR0012/0017"
+    ],
+    "new_major_dependencies": [
+      "AGP9.1.1; Kotlin/ComposeCompiler2.3.20; ComposeBOM2026.08.00; Activity1.13.0; Lifecycle2.11.0; coroutines1.10.2; existing serialization1.11.0"
+    ],
+    "contract_changes": [],
+    "architecture_tests": [
+      "validate_architecture_baseline.py passed",
+      "generate_assetlink_sdks.py --check passed",
+      "export_native_theme.py --check passed",
+      "21 JVM protocol/state tests plus two actual instrumented test classes passed",
+      "Gradle strict locks/verification; Debug/Release builds; Android Lint passed",
+      "verify_repository.py passed including 21 migration and 14 architecture tests; Alpha remains blocked"
+    ],
+    "technical_debt": [
+      "V03-001: complete OSV online audit after upstream TLS connectivity recovers",
+      "Later Android platform task: HyperOS and Android11 physical devices; 500k client performance; target37 and production signing",
+      "Follow V0.3 service contracts for previews, transfers, sync, pairing and redundant endpoints"
+    ]
+  },
+  "artifacts": {
+    "apk": ".runtime/releases/android/AssetLibrary-Android-0.3.0-readonly.1.apk",
+    "sha256": "AFD7CBD3F387AEBC1F2D00EC34C3F824909673615546404B81AFD2A24A79B8CB",
+    "bytes": 30064814,
+    "signing": "Android debug trial, APK v2 signature verified",
+    "screenshots": "screenshots/"
+  }
+}
