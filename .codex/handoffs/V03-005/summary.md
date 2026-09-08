@@ -18,12 +18,12 @@
 
 ## 当前接续与分工
 
-1. Windows会话已恢复WTSActive，真实“此电脑”可操作；随后新建任务测试窗口2229954并完成临时注册，但导航前收到用户物理Esc停止信号。已停止全部CU、终止watchdog、unregister并确认两键均false；原窗口1247028未改导航，新窗口留待后续新鲜核验。用户随后明确回复“可以继续桌面实机验收，我现在不用了”，root已恢复原任务授权；先重新读取并核对自有窗口实际状态，不沿用旧ID。实际Explorer入口尚未验收，没有Windows安装包；独立出图和loader成功不等于G1..G4。
-2. NAS旧包只带Host，缺图片引擎。f673a12限定授权V03-007接入NAS Docker/离线包及负例，d18b224已集成；Linux包验证11/11通过。root已从同提交0f4d0c6实际构建，首次AOT publish报NETSDK1112，原因是restore与publish的SelfContained属性不一致，正由所有者修正后重建。NAS5.10.55、Docker24.0.2和agent-210只读访问已核；实际目标平台测试、备份/回滚/受控启用归root，缺省图片仍关闭。其他通用/原生包缺口独立记录。
+1. Windows会话已恢复WTSActive，真实“此电脑”可操作；随后新建任务测试窗口2229954并完成临时注册，但导航前收到用户物理Esc停止信号。已停止全部CU、终止watchdog、unregister并确认两键均false；原窗口1247028未改导航，新窗口留待后续新鲜核验。用户随后明确回复“可以继续桌面实机验收，我现在不用了”，root已恢复原任务授权；先重新读取并核对自有窗口实际状态，不沿用旧ID。实际Explorer入口尚未验收，没有Windows安装包；独立出图和loader成功不等于G1..G4。 后续新尝试又遇GetCursorPos 0x80070005，17:16:27Z读WTSDisconnected；再次撤销所属注册，两键false。操作授权保留，需用户保持RDP连接/解锁，当前问题是桌面可用性。
+2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 
 ## 验证口径
 
-ad5d316整solution格式和Release零告警，常规dotnet test 340通过/0失败/34明确NotExecuted；其后补实际Host/Python的源broker1、扫描取消1和故障回收6，新增嵌套reaper2及授权3均通过，Windows修复后7/7通过。后端完整组装21/21与真实Windows Host/PG/HTTPS2/2通过。不同阶段/平台和重复执行不直接相加，历史失败及原始TRX在tests.md与.runtime/v03-005-final-tests。
+最新带Host/Python/原生Worker的整solution格式和Release零告警，360通过/0失败/25明确NotExecuted。随后删除profile恢复1/1、负/非规范身份14/14通过。NAS平台Ready失败1项单列，后续19项未执行；开发Linux实际包20/20与父退出1/1不能抵消NAS失败。Windows最新native和LAN证据正在按稳定提交集成。详细原始结果见tests.md及.runtime/v03-005-final-tests。
 
 线程/路径见windows.json与注册表，模块按任务包单写；共享wire、中央依赖/CI、版本、迁移和最终集成由root维护。

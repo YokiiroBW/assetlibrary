@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2",
+  "commit": "ae224053351641397674fc694bf3ee3e36f11479",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/decisions.md",
@@ -15,13 +15,22 @@
     ".codex/handoffs/V03-005/integration-checkpoint.json",
     ".codex/handoffs/V03-005/linux-decoder-default.json",
     ".codex/handoffs/V03-005/linux-decoder-progress.json",
+    ".codex/handoffs/V03-005/linux-package-parent-death.json",
+    ".codex/handoffs/V03-005/linux-package-worker.json",
     ".codex/handoffs/V03-005/linux-source-boundary.json",
+    ".codex/handoffs/V03-005/nas-image-build.json",
+    ".codex/handoffs/V03-005/nas-kernel-capability.json",
+    ".codex/handoffs/V03-005/nas-platform-decision.md",
+    ".codex/handoffs/V03-005/nas-worker-first-failure.json",
+    ".codex/handoffs/V03-005/parent-death-probe.py.txt",
     ".codex/handoffs/V03-005/real-core-cleanup.json",
     ".codex/handoffs/V03-005/result.json",
     ".codex/handoffs/V03-005/summary.md",
     ".codex/handoffs/V03-005/tests.md",
+    ".codex/handoffs/V03-005/windows-lan-control.json",
     ".codex/handoffs/V03-005/windows.json",
     ".codex/handoffs/V03-006/environment-evidence.json",
+    ".codex/handoffs/V03-006/explorer-20260909-interruption.md",
     ".codex/handoffs/V03-006/loader-evidence.json",
     ".codex/handoffs/V03-006/result.json",
     ".codex/handoffs/V03-006/shell-policy-evidence.json",
@@ -36,6 +45,10 @@
     ".codex/handoffs/V03-006/windows-image-guard/evidence.json",
     ".codex/handoffs/V03-006/windows-image-guard/lpac-result.txt",
     ".codex/handoffs/V03-006/windows-image-guard/normal-result.txt",
+    ".codex/handoffs/V03-006/windows-image-lifecycle.md",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/profile-delete-idempotence.json",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/session-latest.json",
+    ".codex/handoffs/V03-006/windows-image-lifecycle/tests.json",
     ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/decoder-dependencies.json",
     ".codex/handoffs/V03-007/isolation-plan.md",
@@ -205,6 +218,7 @@
     "tests/dotnet/AssetLibrary.Preview.Tests/StableImageSourceTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageLifecycleTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageOwnerJournalTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProcessTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json",
     "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientImageFixtureTests.cs",
@@ -225,6 +239,7 @@
     "tests/integration/native-clients/fixtures/image-preview-v1/中文目录/重复内容.dat",
     "tests/integration/native-clients/serve.py",
     "tests/integration/native-clients/test_serve.py",
+    "tests/integration/native-clients/verify_nas_worker.py",
     "tests/release/test_nas_image_preview_package.py",
     "tests/web/assetlink-fixtures.mjs",
     "tests/web/image-fixtures.mjs",
@@ -243,11 +258,11 @@
     "contracts/assetlink/image-preview-v1.md"
   ],
   "tests": {
-    "passed": 340,
-    "failed": 0,
-    "skipped": 34,
+    "passed": 360,
+    "failed": 1,
+    "skipped": 25,
     "report": "tests.md",
-    "scope": "Full solution invocation at ad5d316; supplemental native and new regression runs are separately recorded, not summed with repeated cases.",
+    "scope": "Primary full solution360/0/25 plus one separately recorded actual target NAS readiness failure; supported-Linux and client evidence never replace missing NAS evidence.",
     "supplemental": {
       "source_broker": 1,
       "scan_cancel": 1,
@@ -255,13 +270,18 @@
       "nested_reaper": 2,
       "authorization": 3,
       "windows_after_acl_fix": 7,
-      "linux_nas_package": 11
+      "linux_nas_package": 12,
+      "windows_deleted_profile_recovery": 1,
+      "windows_owner_journal": 14,
+      "actual_package_linux_cases": 20,
+      "actual_package_linux_parent_death": 1
     },
     "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified."
   },
   "risks": [
-    "Actual Explorer entry/IPC and remaining Windows platform matrix are not complete; Session2 is now active and observation resumed.",
-    "NAS image package first actual build failed with NETSDK1112; matching NativeAOT restore/publish correction and target-kernel proof remain pending.",
+    "Actual Explorer entry/IPC and remaining Windows matrix are incomplete; desktop authorization persists but the latest RDP connection is unavailable.",
+    "NAS kernel does not provide required seccomp; image package remains disabled/not deployed pending the user/ADR deployment decision.",
+    "Windows Job CPU configuration is checked periodically and measured overshoot must not be presented as a strict three-second execution bound.",
     "Physical Android11/HyperOS, production signing, scale/soak and full release gates remain independent."
   ],
   "blocked_by": [],
@@ -294,9 +314,9 @@
       "Exact f580b15 source boundary linked into shared solution/CI: Linux locked restore/format/Release and9 tests passed, including actual leaf symlink denial with no skip; no decoder/NAS conclusion"
     ],
     "technical_debt": [
-      "Complete actual Explorer/IPC and remaining Windows confinement evidence.",
-      "Finish real NAS image package, target-kernel checks and controlled upgrade/rollback verification.",
-      "Physical native devices, production signing, scale/soak and other release gates remain open."
+      "Complete native Explorer/IPC and current Windows controls with a usable desktop.",
+      "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
+      "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]
   }
 }

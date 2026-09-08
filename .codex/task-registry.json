@@ -757,13 +757,13 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "user_explicitly_resumed_desktop_native_explorer_acceptance"
+      "execution_status": "native_matrix_integration_running_desktop_permission_granted_rdp_connection_pending"
     },
     {
       "id": "V03-007",
       "title": "image-preview-server",
       "module": "image-preview-server",
-      "status": "in_progress",
+      "status": "blocked",
       "depends_on": [
         "V01-017",
         "V01-024"
@@ -776,7 +776,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
       "thread_id": "01a0808b-de90-7183-a946-04b2010ce5db",
       "milestone": "V0.3",
-      "execution_status": "nas_packaging_integrated_first_actual_build_fix_in_progress"
+      "execution_status": "nas_package_built_target_seccomp_unavailable_user_platform_decision_pending"
     },
     {
       "id": "V03-008",

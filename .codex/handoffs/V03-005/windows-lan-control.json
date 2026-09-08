@@ -1,0 +1,50 @@
+{
+  "ready": {
+    "address": "192.168.31.230",
+    "port": 39420,
+    "pid": 4120108,
+    "start_ticks": "97176615",
+    "expires_at": "2026-09-08T18:44:16.278950+00:00"
+  },
+  "listener_result": {
+    "accepted": [
+      {
+        "kind": "http-owned-probe",
+        "bytes_received": 70,
+        "time_utc": "2026-09-08T18:40:34.125840+00:00"
+      },
+      {
+        "kind": "tcp-control",
+        "bytes_received": 0,
+        "time_utc": "2026-09-08T18:41:52.629450+00:00"
+      },
+      {
+        "kind": "http-owned-probe",
+        "bytes_received": 113,
+        "time_utc": "2026-09-08T18:41:52.686341+00:00"
+      }
+    ],
+    "rejected_peers": 0,
+    "finished": true
+  },
+  "root_positive_control": {
+    "kind": "http-owned-probe",
+    "bytes_received": 70,
+    "time_utc": "2026-09-08T18:40:34.125840+00:00"
+  },
+  "worker_control_connections": [
+    {
+      "kind": "tcp-control",
+      "bytes_received": 0,
+      "time_utc": "2026-09-08T18:41:52.629450+00:00"
+    },
+    {
+      "kind": "http-owned-probe",
+      "bytes_received": 113,
+      "time_utc": "2026-09-08T18:41:52.686341+00:00"
+    }
+  ],
+  "port_closed": true,
+  "checked_utc": "2026-09-08T18:46:48.589550+00:00",
+  "firewall_modified": false
+}

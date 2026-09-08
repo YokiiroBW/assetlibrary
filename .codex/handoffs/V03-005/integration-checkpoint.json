@@ -1,19 +1,11 @@
 {
-  "checkpoint": "38907931bc03047d0cb23c0e395de89ad1176736",
-  "recorded_at": "2026-09-08T13:05:18.501083+00:00",
+  "checkpoint": "ae224053351641397674fc694bf3ee3e36f11479",
   "module_provenance": [
     {
       "path": "apps/web",
-      "worker_commit": "d11085e2dbbb31dba240d3158f4a20a7f1eb19ea",
-      "worker_tree": "b875ded28e9e97969d4b1bc5e76e416d490b7139",
-      "integrated_tree": "b875ded28e9e97969d4b1bc5e76e416d490b7139",
-      "identical": true
-    },
-    {
-      "path": "tests/web",
-      "worker_commit": "d11085e2dbbb31dba240d3158f4a20a7f1eb19ea",
-      "worker_tree": "b763b06e23016671b7b083d09d03c1627a3af9e5",
-      "integrated_tree": "b763b06e23016671b7b083d09d03c1627a3af9e5",
+      "worker_commit": "77271e05c176d9b461f0baf71951dd800b63703c",
+      "worker_tree": "5f775be040de0a0302196a37ca9fbbae137ecc34",
+      "integrated_tree": "5f775be040de0a0302196a37ca9fbbae137ecc34",
       "identical": true
     },
     {
@@ -22,31 +14,30 @@
       "worker_tree": "c8edb9de9d82501320cdcd8dbf0cc96e657c6cff",
       "integrated_tree": "c8edb9de9d82501320cdcd8dbf0cc96e657c6cff",
       "identical": true
-    },
-    {
-      "path": "tests/windows-shell",
-      "worker_commit": "453e10b5173f0b9b516fa5eabcb561c6f4ace1e2",
-      "worker_tree": "d6f96be93d26221091ed6072cd73fa5203c560f2",
-      "integrated_tree": "d6f96be93d26221091ed6072cd73fa5203c560f2",
-      "identical": true
     }
   ],
-  "repository_verification": "passed;21 migration and14 architecture regressions;Alpha decision remains blocked",
-  "coordinator_fixture_tests": {
-    "python": 8,
-    "dotnet": 6,
-    "failed": 0,
-    "skipped": 0
-  },
   "android_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
     "bytes": 30278429,
-    "signing": "Existing trial debug signature validated by Android owner; copy hash independently verified",
-    "acceptance": "real Core images pending"
+    "signing": "existing debug trial signature",
+    "acceptance": "real Core phone/tablet images passed; client and shared cleanup verified"
   },
-  "web_self_test_cases": 65,
-  "android_owner_distinct_cases": 77,
-  "actual_core_image_acceptance": "not_executed",
-  "windows_explorer_entry": "not_completed"
+  "web_acceptance": ".codex/handoffs/V03-008/real-core/acceptance-index.json",
+  "shared_cleanup": ".codex/handoffs/V03-005/real-core-cleanup.json",
+  "solution_validation": {
+    "passed": 360,
+    "failed": 0,
+    "not_executed": 25,
+    "scope": "exact completed solution-with-native invocation; later narrow regression runs listed in tests.md"
+  },
+  "nas_package": {
+    "source_revision": "a12b0d139765357b1e33437a4c7a34823dd556ad",
+    "built": true,
+    "deployed": false,
+    "target_kernel": "5.10.55+",
+    "target_worker_status": "failed_before_ready_seccomp_unavailable",
+    "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
+  },
+  "windows_explorer_entry": "not_completed; permission granted, latest RDP disconnected; keep session active for actual UI acceptance"
 }

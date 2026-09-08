@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：Web/Android已在同一真实Core/PG/受限图片引擎验收通过，共享148原件不变及资源清理已验证。Windows桌面此前收到Esc停止后，用户已明确回复“可以继续桌面实机验收，我现在不用了”；已恢复原Explorer任务，先取新鲜自有窗口状态，不沿用旧ID或旧暂停结论。NAS包接线已实现，正修复实际AOT构建暴露的restore/publish属性差异并做目标平台验收。先读docs/releases/PARALLEL_BROWSE_PREVIEW_PLAN.md与.codex/handoffs/V03-005/summary.md，复用现有窗口，不重复初始化或重跑未变成功测试。
+   当前接续V03-005：Web/Android真实图片与共同清理已验收；Windows操作授权已明确，但最新RDP再断开，需新鲜连接/解锁后做Explorer实机验收，继续无GUI矩阵。NAS包a12b0d1已构建并暂存，实测内核缺少seccomp，图片未启用；nas-platform-decision.md中的内部Linux解码服务方案待用户/ADR确认，不自行改安全策略。复用已有窗口与summary/tests，不重建任务或把开发Linux成功当NAS通过。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

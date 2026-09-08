@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "parallel_browse_preview_real_integration_in_progress",
-  "next_action": "Continue V03-005 NAS same-commit image build/target-kernel validation and Windows native Explorer acceptance. The user explicitly resumed desktop testing after the physical Esc stop; acquire fresh owned-window state before GUI actions. Real Web/Android image acceptance and shared cleanup passed. Preserve release gates; do not substitute standalone app evidence for Explorer.",
+  "status": "native_acceptance_and_nas_platform_decision_pending",
+  "next_action": "Continue the existing Windows task; permission to operate its test window is granted but the latest RDP state disconnected again, so require fresh active/unlocked desktop before UI actions. Web/Android real image and cleanup scopes are accepted. NAS package a12b0d1 is built and staged, not deployed; target kernel lacks seccomp, and the proposed authenticated Linux compute endpoint requires the pending user/ADR decision before implementation. Do not weaken isolation or alter NAS host policy.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
