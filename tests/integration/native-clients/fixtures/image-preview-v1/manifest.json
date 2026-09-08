@@ -1,0 +1,76 @@
+{
+  "kind": "synthetic_preview_integration_inputs",
+  "generated_with": "tool-only Pillow 12.3.0; not a product dependency",
+  "source_count": 10,
+  "files": [
+    {
+      "path": "active.svg",
+      "bytes": 71,
+      "sha256": "3f67c8be987aa1db0ef99ce330286efe1929e729f5f9d1695b5fd0b987246244",
+      "mtime_ns": 1788865754487101300
+    },
+    {
+      "path": "landscape.jpg",
+      "bytes": 112959,
+      "sha256": "b4a84fb026e89621a68bfd121a8b5212a823ee4a062b5b4121d1bb429a77cb61",
+      "mtime_ns": 1788865754409259500
+    },
+    {
+      "path": "landscape.png",
+      "bytes": 8585,
+      "sha256": "245fd5e6f6ae43cd8da0990674697356dc04e8fb0b00e138c837153692ef4bc9",
+      "mtime_ns": 1788865754393561800
+    },
+    {
+      "path": "landscape.webp",
+      "bytes": 514,
+      "sha256": "14aa59a3809086c34612baaed4b6d7e966078416f134a8fb16f10024d5ad9d2c",
+      "mtime_ns": 1788865754462490400
+    },
+    {
+      "path": "not-an-image.png",
+      "bytes": 26,
+      "sha256": "c975eaa427b559637c189d8dde79051feb11af88094ed479d910dc882f3eeead",
+      "mtime_ns": 1788865754487101300
+    },
+    {
+      "path": "oversized-header.png",
+      "bytes": 45,
+      "sha256": "084d245564f6dc389962cc294c6f56d7c51a6279697b9fa2840b2ef8edafe23c",
+      "mtime_ns": 1788865754487101300
+    },
+    {
+      "path": "rotate-six.jpg",
+      "bytes": 112995,
+      "sha256": "d25c242d078a0024e6dda5ffc3c4c977ca81d011e246edd5316f237aa1205052",
+      "mtime_ns": 1788865754470497900
+    },
+    {
+      "path": "transparent.png",
+      "bytes": 8041,
+      "sha256": "ab8bee54abb1df79376c223a0a3d7ec72076019ba2be65d5330cf4c40bf88471",
+      "mtime_ns": 1788865754487101300
+    },
+    {
+      "path": "truncated.jpg",
+      "bytes": 120,
+      "sha256": "6e7cdb489a929e95987b34c99baa5fb3e5aee67186301729e647c512ac9b2345",
+      "mtime_ns": 1788865754487101300
+    },
+    {
+      "path": "中文目录/重复内容.dat",
+      "bytes": 112959,
+      "sha256": "b4a84fb026e89621a68bfd121a8b5212a823ee4a062b5b4121d1bb429a77cb61",
+      "mtime_ns": 1788865754487101300
+    }
+  ],
+  "expected_cases": [
+    "JPEG/PNG/WebP actual decode",
+    "EXIF orientation 6",
+    "alpha preservation",
+    "same content under another name",
+    "Unicode path",
+    "truncated/invalid/active/huge-dimension inputs fail safely"
+  ],
+  "acceptance_status": "not_run"
+}

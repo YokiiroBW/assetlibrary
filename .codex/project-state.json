@@ -73,7 +73,8 @@
     "On 2026-09-08 the user explicitly requested Windows and Android first native clients following the visual and architecture documents. V03-001 coordinates shared semantics and platform evidence; V03-002 owns WinUI, V03-003 owns Compose phone/tablet, and V03-004 provides the existing real Core/PostgreSQL test fixture in bounded temporary storage. Single-origin in-memory Cookie/CSRF adaptation is approved by ADR-0017; implementation and verification are in progress, not a full V0.3 or Alpha release.",
     "The user corrected the Windows requirement during V03-001: it must be embedded in native Explorer, not a separately opened application. ADR-0018 selects native DefView/IShellFolder2 plus out-of-process C# AssetHost for the first supported view. Real HKCU discovery, fault and stability evidence are required; independent COM/hidden browser probes do not close Explorer gates.",
     "V03-003 Android and V03-004 real Core/PostgreSQL fixture are delivered. Android APK is 30064814 bytes/SHA256 afd7cbd3f387aebc1f2d00ec34c3f824909673615546404b81afd2a24a79b8cb, with real phone/tablet/API36/large-font and runtime dependency evidence. V03-002 remains partial: 22 unit cases and real HTTPS Core passed, but real Explorer reports no association before invoking the extension factory; cause undetermined. HKCU registration is clean. Native input is denied (0x80070005), with owned diagnostic windows awaiting verified UI access. No Windows installer or production Shell is enabled. NAS /readyz was read-only verified with its existing public certificate, without credentials or asset access.",
-    "User explicitly authorized distinct development windows with final unified acceptance. V03-005 created four native Codex worktrees/threads for Windows (V03-006), image preview server (V03-007), Web (V03-008), Android (V03-009). Worktrees were verified against the same git-common-dir and assigned unique branches; task scaffolds reuse codex-new-task.py. Native window initial command approvals differ from this coordinator permission profile; startup analysis is in progress, preview contract not yet frozen, and no new product feature or release gate has been completed by this planning step."
+    "User explicitly authorized distinct development windows with final unified acceptance. V03-005 created four native Codex worktrees/threads for Windows (V03-006), image preview server (V03-007), Web (V03-008), Android (V03-009). Worktrees were verified against the same git-common-dir and assigned unique branches; task scaffolds reuse codex-new-task.py. Native window initial command approvals differ from this coordinator permission profile; startup analysis is in progress, preview contract not yet frozen, and no new product feature or release gate has been completed by this planning step.",
+    "V03-005 checkpoint3890793 integrates Android1838b96/815e2f6, Web238c61c/4e633e8/d944300/d11085e, and Windows diagnostics453e10b/ba9fcbb/046dbde. Frozen wire/ADR0019/pins38aedca and bounded real image fixture5edf25c are committed. Web65 distinct browser cases and Android77 distinct client/repository cases passed in owned worktrees; coordinator reviewed code and representative screenshots. Root fixture Python8 and .NET6/Release passed. Real Core image consumer acceptance, Windows LPAC/Linux sandbox validation, Explorer entry and production packaging/deployment remain uncompleted. Existing NAS and release gates unchanged."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
   "active_work": {
@@ -86,8 +87,10 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "initial_analysis_and_contract_freeze",
+    "stage": "client_implementations_integrated_preview_isolation_and_real_acceptance_pending",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
-    "command_approvals": "New native windows use their own workspace-write/on-request settings; current tool approvals must be resolved in those windows."
+    "command_approvals": "Native worker execution resumed. Windows UI still needs its disconnected Session 2 restored; no new approval workaround was introduced.",
+    "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
+    "integration_checkpoint": "3890793"
   }
 }

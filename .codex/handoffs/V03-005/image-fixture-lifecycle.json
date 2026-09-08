@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "stop_reason": "lifetime_elapsed",
+  "sample_file_count": 148,
+  "sample_hashes_and_mtimes": "unchanged",
+  "resource_cleanup": "verified",
+  "postgres_roles_removed": 6,
+  "runtime_removed": true,
+  "https_listener_closed": true,
+  "host_and_postgres_processes_exited": true,
+  "native_client_acceptance": "not asserted by this server fixture",
+  "source_checkpoint": "38907931bc03047d0cb23c0e395de89ad1176736",
+  "recorded_at": "2026-09-08T13:06:23Z",
+  "image_endpoint_acceptance": "not_executed; source fixture lifecycle only"
+}

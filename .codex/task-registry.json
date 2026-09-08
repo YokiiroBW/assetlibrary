@@ -737,13 +737,14 @@
       "task_file": ".codex/tasks/V03-005.md",
       "handoff": ".codex/handoffs/V03-005/summary.md",
       "thread_deep_link": "",
-      "milestone": "V0.3"
+      "milestone": "V0.3",
+      "execution_status": "integrating_and_preparing_real_image_acceptance"
     },
     {
       "id": "V03-006",
       "title": "windows-explorer-native-integration",
       "module": "windows-explorer-native-integration",
-      "status": "in_progress",
+      "status": "partial",
       "depends_on": [
         "V01-002",
         "V01-024"
@@ -756,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "waiting_on_native_command_approval"
+      "execution_status": "diagnostics_integrated_waiting_for_connected_desktop"
     },
     {
       "id": "V03-007",
@@ -775,7 +776,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
       "thread_id": "01a0808b-de90-7183-a946-04b2010ce5db",
       "milestone": "V0.3",
-      "execution_status": "waiting_on_native_command_approval"
+      "execution_status": "implementing_isolated_decoder_and_real_host_endpoint"
     },
     {
       "id": "V03-008",
@@ -793,13 +794,13 @@
       "thread_deep_link": "codex://threads/01a0808d-7174-7900-a2d6-9ee4ecc89779",
       "thread_id": "01a0808d-7174-7900-a2d6-9ee4ecc89779",
       "milestone": "V0.3",
-      "execution_status": "waiting_on_native_command_approval"
+      "execution_status": "consumer_integrated_preparing_real_core_browser_tests"
     },
     {
       "id": "V03-009",
       "title": "android-image-preview",
       "module": "android-image-preview",
-      "status": "in_progress",
+      "status": "partial",
       "depends_on": [
         "V03-003"
       ],
@@ -811,7 +812,7 @@
       "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
       "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
       "milestone": "V0.3",
-      "execution_status": "waiting_on_native_command_approval"
+      "execution_status": "consumer_integrated_waiting_for_real_core_image_fixture"
     }
   ]
 }

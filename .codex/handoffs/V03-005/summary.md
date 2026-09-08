@@ -1,13 +1,23 @@
 # V03-005 — 并行浏览与预览协调
 
-当前 **partial / 开发进行中**，不是本批验收完成。用户已授权四个独立窗口并行开发，并由主线程最终统一验收。
+状态 **partial / 统一集成进行中**。用户要求的四个独立窗口已实际开发；Web、Android和Windows诊断已合入协调分支 `codex/v03-005-parallel-browse-preview-integration`，当前检查点3890793。没有宣称整批、Windows入口或完整版本完成。
 
-已完成：复核70ce45c基线；建立V03-005协调worktree；通过Codex App创建V03-006 Windows、V03-007服务端预览、V03-008 Web、V03-009 Android独立窗口；核对4个git-common-dir、绑定独立分支并复用codex-new-task.py生成任务包/交接。实际线程ID/路径见windows.json及注册表。主工作目录未用于并行写实现。
+## 已冻结与已集成
 
-所有权、依赖、受控部署、统一验收、并发和后续路线见docs/releases/PARALLEL_BROWSE_PREVIEW_PLAN.md。共享contracts/ADR/根依赖/CI由协调唯一拥有；服务端提案冻结后客户端才写新端点。单次重型构建最多两项，模拟器独占。
+- 38aedca冻结 `contracts/assetlink/image-preview-v1.md`、ADR0019与独立decoder的SkiaSharp4.151.2精确版本；既有生成器更新SDK指纹，无手改生成执行代码。共享端口/Host/读取broker的细项授权见decisions.md。
+- Android实现1838b96/交接815e2f6已集成。手机/平板Compose图片预览、2并发、可见项/内存边界、20秒总期限和身份/前后台清理已交付可审查代码，原窗口77项不同测试通过；真实Core图片用例尚未执行。
+- Web实现4e633e8、拒权补充d944300、准备238c61c与交接d11085e已集成。原窗口65项不同浏览器用例通过，最终302081B JS/27768B CSS在批准预算内；CSP和真实Core图片联调尚未执行。
+- Windows453e10b/ba9fcbb/046dbde诊断及证据已集成。旧DLL在隔离加载矩阵4项通过；实际Explorer入口未完成。Session2的WTSDisconnected解释当前UI无法操作，不能作为历史加载失败根因。
+- 5edf25c扩展既有真实Core/PostgreSQL/HTTPS测试入口：仅显式开启10项合成图片和真实已发布worker；默认138文件与连接JSON不变，无decoder/隔离测试绕过。Python8、.NET6及locked restore/format/Release通过。
 
-新窗口使用独立workspace-write/on-request执行权限，最初等待命令审批，已告知用户。已批准的只读检查可继续；后续实际审批以各窗口为准，不能从本线程绕过。初始创建仅返回clientThreadId；通过对应本次创建日志解析真实ID，再用read_thread确认标题、cwd和状态，未将clientThreadId错误传给线程API。没有修改应用设置、账户或审批策略。
+协调已审查请求、取消、身份代际、图片内存、平台生命周期与既有调用方，实看Android手机缩略/平板深色预览和Web桌面/200%文字截图，合并无冲突。消费者源码与各自验收提交一致；未重复运行未改动的客户端套件。各任务准确范围、测试/失败修正和截图保留在自身handoff。
 
-目前各窗口在前期梳理，预览接口/解码隔离/依赖尚待V03-007提案与协调冻结。没有宣称新增预览或Explorer可用。已有Android APK/NAS服务保留，生产Shell/Provider/写入和完整版本门禁未变。每个窗口的具体提案、阻断、完成信息回报本协调线程，随后继续代码/契约裁决、合并与统一真实验收。
+## 当前工作和边界
 
-后续请复用已经建立的四个窗口，不重复创建。完成必须是同一集成分支上的真实端到端行为、包/来源/hash、权限/失败路径与清理证据，不能以各窗口自报或单测通过替代。
+V03-007继续实现真实受限decoder、稳定读取broker与Host端点。Windows NativeAOT编译已取得首证据，但LPAC/Job/零capability、Linux NativeAOT/TSYNC/RLIMIT和实际攻击/资源探针仍需验证。root在现有dev-230开发机准备自有临时Linux编译环境，复用已核实10.0.111缓存；没有在NAS210生产内安装工具或部署。开发机内核6.14的结果不能代替NAS5.10.55。
+
+Web窗口继续准备独立真实Core浏览器runner，Android的真实Core图片仪器用例已编译等待同一私密连接文件；自有模拟器保持关闭、无转发残留。待decoder隔离成立后，root启动同一真实服务供消费者验收，最后核验源hash/mtime、进程/端口/账号/私密临时目录完整清理。
+
+Windows需要用户恢复原RDP Session2并保持解锁，之后仅在新鲜窗口所有权和实际观测基础上继续一次原生入口验证；不改系统策略、重启用户Explorer或用独立客户端替代。当前无Windows安装包。生产Shell和全部既有平台/Provider/写入/版本门禁保持开放，现有NAS和原Android包保留。
+
+实际线程、分支、目录见windows.json与注册表，所有写实现仍在自己的worktree；共享契约、根依赖/CI、最终集成及部署由root单写。复用这些窗口，从上述未完成项接续，不重复初始化或将等待联调记录成开发已完成。
