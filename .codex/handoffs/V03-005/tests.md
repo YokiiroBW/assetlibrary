@@ -52,7 +52,7 @@ f580b15经代码审查后合入，4b87896将Preview.Tests加入既有solution/Wi
 
 同44ab的隔离probe实际从seccomp0进入2/NNP1，文件、创建socket、预存socket连接、跨进程信号/内存、fork、非线程clone、exec、io_uring均拒绝；io_uring前置EFAULT与后置EPERM区分外层策略。CPU探针由内核在约3.001秒SIGKILL，非parent timeout。native内存/线程探针虽报告拒绝，但在已过量保留VM下的失败不能单独证明目标预算；未把它们当最终通过。
 
-只降低子进程GC至64MiB的单变量诊断使Ready VmSize424728KiB，10个合成正常/异常样例全部符合预期，方向/尺寸、相同JPEG改名派生hash一致，透明图corner alpha0/center160、只有标准srgb元数据，派生图已实看。该覆盖用于指导owner固化预算，不能代替无环境覆盖的正式配置验收。原始文件索引与摘要见linux-decoder-progress.json，当前等待新默认/VM admission guard与Host接线稳定提交后复测。
+只降低子进程GC至64MiB的单变量诊断使Ready VmSize424728KiB，10个合成正常/异常样例全部符合预期，方向/尺寸、相同JPEG改名派生hash一致，透明图corner alpha0/center160，派生图已实看。最初Pillow.info仅显示sRGB，不能据此断言完整PNG块清单；后续真实HTTP解析确认输出还包含固定8位sBIT，已补严格允许与变异拒绝回归。该覆盖用于指导owner固化预算，不能代替无环境覆盖的正式配置验收。原始文件索引与摘要见linux-decoder-progress.json；默认配置的后续结果见下节。
 
 ## 默认Linux引擎已完成的边界（40d2d69）
 
@@ -63,3 +63,17 @@ f580b15经代码审查后合入，4b87896将Preview.Tests加入既有solution/Wi
 另用任务自有中间父进程验证parent-death：实际worker Ready后SIGKILL中间父进程，外层仍保留stdin写端排除EOF自行退出，worker在11ms内收到SIGKILL并由任务subreaper回收，未由外层主动杀decoder。独立子进程与无新权限边界均保持。
 
 上述统计为15个独立默认配置场景（10输入、4隔离/资源、1父退出），不累计诊断/重复。详细结果、原始限额/输出和精确包hash见linux-decoder-default.json。它们是Linux6.14开发机证据；NAS5.10.55、真实Core端点、Web/Android跨端与Windows仍分别待验收，不关闭通用Provider或版本门禁。
+
+## 2026-09-09真实Core与客户端集成检查点
+
+实际Linux Core874fb6a、默认Worker40d2d69、PostgreSQL16.15和148个合成文件已在dev-230独立临时checkout运行。LiveImageEndpointTests设置PREVIEW_EXPECT_AVAILABLE=1后2/2、0skip，通过真实PNG/JPEG/WebP/方向/透明及损坏/超限、身份/请求边界；原始TRX复制至.runtime/linux-real-core-evidence/live-linux-images.trx。已修复fixture在Linux创建配置文件时依赖umask的问题，显式0600，不降低产品私密文件校验。
+
+Android1838b96在同一服务上手机2/2、平板图片1/1通过（两个不同用例，不按视口重复累计），记录已合入11a9167；root逐张实看4截图，并重新核对两份JUnit原始SHA及候选APK8461631c…6158b。设备私密文件、reverse、模拟器及5584/5585端口均已由原窗口核验清理。
+
+Web真实联调暴露已挂载虚拟列表方向键改变selection却未更新DOM焦点的问题；77271e0以单点effect依赖修正，新回归先失败后通过，并连同QuickLook两视口/多选共4/4通过。root审查合为f116f48，核新JS302093B/SHA b248f3ac…2866ea和CSS27768B/SHA c4b01b9d…f4a1。归档9d1316c7…578f06重新验hash后，仅切换临时Core的Web目录，旧d944产物保留；Core/PG/资产未变。77271e0真实运行已通过16项图片/错误检查，QuickLook后续交互仍待独立接续，原failed顶层receipt不改写、不冒充整项通过。
+
+协调分支ad5d316的整solution格式、Release构建0警告0错误；完整dotnet test为340通过/0失败/34 NotExecuted。后续提供真实Host/Python后补source broker1/1、原生扫描取消1/1、六种故障回收6/6，均0skip；与完整suite相同测试不重复累计。新增de83嵌套迟到清理修复合为433ad01，2/2回归通过。原始TRX和按实际UnitTestResult outcome汇总在.runtime/v03-005-final-tests；不可将MSTest缺失的counter字段当0跳过。
+
+a21a145 Windows生命周期源与a497权限测试链接按顺序合为fa45ce2/2e29fc2，StartAsync共享适配25a7bed合为7c8b58a。Windows窗口6/6与后端组合21/21+真实HTTPS2/2均通过；root独立复验9项为4通过/5失败：失败全在新目录首次设置Owner+DACL，未创建AppContainer或启动decoder。root父目录仅提供当前普通token Modify，原窗口父目录另有显式用户FullControl；同一root私有新对象先设严格DACL、再设Owner均成功，已交Windows单写修复此兼容性边界，未改workspace ACL或降低保护。自有探针和测试目录已清理；这5个真实失败保留，待修复复验。
+
+当前共享服务尚在供Web后续验收使用，最终原件hash/mtime及Host/PG/临时角色/私密目录清理待root显式stop后记录。不得提前把客户端字段中的协调清理责任当作已经完成的事实。NAS包缺独立worker已查明，f673a12限定授权V03-007接入NAS镜像/离线包，缺省不开启，实际目标内核验收及部署仍由root负责。
