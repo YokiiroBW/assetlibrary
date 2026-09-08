@@ -1,0 +1,97 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-002",
+  "title": "Explorer native entry proof and read-only adapter",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "windows-client-owner",
+  "branch": "codex/v03-002-windows-native-read-client",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-002",
+  "commit": "765235743ad2eac64836c9e09b8c169625b01387",
+  "changed_files": [
+    ".codex/tasks/V03-002.md",
+    "apps/windows-client/AssetLibrary.Windows.slnx",
+    "apps/windows-client/Core/AssetLibrary.Windows.Core.csproj",
+    "apps/windows-client/Core/ClientModels.cs",
+    "apps/windows-client/Core/ClientTransport.cs",
+    "apps/windows-client/Core/OriginHttpSession.cs",
+    "apps/windows-client/Core/ReadOnlyClient.cs",
+    "apps/windows-client/Core/ResponseReader.cs",
+    "apps/windows-client/Core/ServerProfile.cs",
+    "apps/windows-client/Core/WorkspaceState.cs",
+    "apps/windows-client/Core/packages.lock.json",
+    "apps/windows-client/README.md",
+    "tests/windows-client/AssemblyInfo.cs",
+    "tests/windows-client/AssetLibrary.Windows.Tests.csproj",
+    "tests/windows-client/CertificateTests.cs",
+    "tests/windows-client/LiveCoreTests.cs",
+    "tests/windows-client/ProtocolFixture.cs",
+    "tests/windows-client/QueryContractTests.cs",
+    "tests/windows-client/README.md",
+    "tests/windows-client/SessionBoundaryTests.cs",
+    "tests/windows-client/TransportTests.cs",
+    "tests/windows-client/WorkspaceTests.cs",
+    "tests/windows-client/packages.lock.json",
+    "tests/windows-shell/CMakeLists.txt",
+    "tests/windows-shell/DirectNavigation.cpp",
+    "tests/windows-shell/ExplorerProof.cpp",
+    "tests/windows-shell/ExplorerProof.def",
+    "tests/windows-shell/Probe.cpp",
+    "tests/windows-shell/README.md",
+    "tests/windows-shell/registration.ps1",
+    "tests/windows-shell/verify.ps1",
+    ".codex/handoffs/V03-002/summary.md",
+    ".codex/handoffs/V03-002/result.json",
+    ".codex/handoffs/V03-002/tests.md",
+    ".codex/handoffs/V03-002/explorer-proof-evidence.json"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 23,
+    "failed": 1,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "22 automated unit cases and one real HTTPS Core case passed. One manual real Explorer entry scenario failed. A redundant later live retry could not execute after normal fixture cleanup; this is not a business regression and does not erase its earlier valid evidence."
+  },
+  "risks": [
+    "No usable Windows/Explorer client or installer has been delivered; test proof must not activate production Shell.",
+    "Real Explorer entry fails before observed class factory calls; cause remains undetermined.",
+    "Owned diagnostic and Desktop windows await coordinator cleanup after native input access returns."
+  ],
+  "blocked_by": [
+    "M0-002-G1 real Explorer discovery/view entry has not passed.",
+    "Native UI input and screenshot access currently unavailable.",
+    "M0-002-G2/G3/G4 and Host-to-Shell projection remain unproven."
+  ],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V03-002/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows client read adapter and test-only Explorer namespace proof",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "AssetLink generated .NET codecs and canonical uint64 conversion",
+      "Existing core-authorized libraries/list/detail/browse/search and Cookie/CSRF endpoints",
+      "Windows COM IShellFolder2/IPersistFolder2 and system DefView"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Public generated AssetLink SDK only; no core internals or database"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "Expanded validate_dotnet_source.py scanned 373 C# files",
+      "Locked restore/format/Release build/MSTest",
+      "NuGet integrity/license/vulnerability policy",
+      "MSVC /W4 /WX /analyze with pinned Windows SDK10.0.26100.0 plus isolated native probe and owned HKCU cleanup"
+    ],
+    "technical_debt": [
+      "V03-002 / windows-shell-owner: resolve actual Explorer G1 before production activation",
+      "V03-002 / windows-shell-owner: implement tested default child command/parsing-name round-trip and bounded Host projection after G1",
+      "V03-002 / windows-shell-owner: G2/G3/G4 fault, cancellation and soak evidence",
+      "V03-001 / coordinator: close owned test windows once supported native input returns"
+    ]
+  }
+}

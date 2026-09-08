@@ -1,0 +1,52 @@
+{
+  "recorded_at_utc": "2026-09-08T09:28:54.7509529+00:00",
+  "status": "partial",
+  "implementation_commit": "31803b1ada5c1d9becec4308024387c2b28f0812",
+  "windows_sdk": "10.0.26100.0",
+  "msvc": "19.44.35228.0",
+  "cmake": "3.31.6-msvc6",
+  "dotnet_sdk": "10.0.111",
+  "isolated_probe": {
+    "create_defview": "S_OK",
+    "association_array": "S_OK",
+    "open_association": "S_OK",
+    "root_attributes": "0xA8000000",
+    "initialize": "S_OK",
+    "desktop_enumerates": true,
+    "cocreate": "S_OK",
+    "bind_child": "S_OK",
+    "parse": "S_OK"
+  },
+  "real_explorer": {
+    "class_factory_calls_observed": false,
+    "same_user_session": true,
+    "non_elevated": true,
+    "message": "No application is associated with this operation",
+    "trace_positive_control": true,
+    "cause": "undetermined",
+    "entry": "not_activated",
+    "parent_updatedir_sent": true
+  },
+  "native_input": {
+    "capture_error": "0x80070057",
+    "state_read": "available",
+    "input_error": "0x80070005",
+    "owned_window_cleanup": "pending_coordinator_after_input_restored"
+  },
+  "registry_cleanup": {
+    "namespace_present": false,
+    "class_present": false
+  },
+  "release_gate_changed": false,
+  "real_core_test": "passed",
+  "artifacts": [
+    {
+      "file": "AssetLibraryExplorerProof.dll",
+      "sha256": "0174db9b1b4ccd4925d3a28470930fa6faebd4070348cc374a7cb87313e2fd15"
+    },
+    {
+      "file": "ExplorerProofProbe.exe",
+      "sha256": "179415e15c3c8684bea04b142deb1d32e22e9a43507380a7751def2a46530658"
+    }
+  ]
+}
