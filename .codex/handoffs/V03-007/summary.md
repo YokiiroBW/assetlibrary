@@ -1,47 +1,31 @@
-# V03-007 — 服务端真实派生图片（partial）
+# V03-007 — 服务端图片、NAS打包与平台验证（partial）
 
-工作区 C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary，分支 codex/v03-007-image-preview-server。Core审查点0a746e2，严格sBIT修正4275815，源清理/名额隔离a277178，嵌套迟到清理de83a3c，Windows异步启动适配25a7bed。Windows清理源码与测试链接已成组，真实出图已通过；当前等待Windows剩余原生故障矩阵及root打包/最终集成，不宣告完整V0.3或NAS发布。
+当前阻断已经明确：目标NAS内核没有提供本实现需要的seccomp接口，图片保持关闭/503。现有Core、隔离Worker、NAS包与诊断交接已完成到可审查检查点；不继续增加服务、改变NAS策略或宣告目标平台通过。平台方向由主协调195afc82e9b3ab30de39f29fbe9c75eaba485596中的决策问题等待用户确认和相应ADR。
 
-## 已实现
+## 已交付实现
 
-- 冻结GET按稳定库/entry UUID和固定variant返回服务端重编码PNG：thumbnail最长边512/2MiB，preview1600/12MiB，无放大、方向归一、保留alpha。JPEG/PNG/WebP静态图；动画、16bit PNG、SVG/其他格式诚实降级。
-- GatewayAuth初始/末次库授权、Host末次session复核、写首字节前源核验；不可见与缺失统一404。精确图片endpoint metadata为15秒，旧JSON仍5秒；图片401为unauthenticated，旧JSON保持authentication_required。
-- 独立可回收source broker逐层no-follow句柄、流式稳定副本、strong hash与当前文件身份/mtime复核。Windows拒绝ADS/设备别名/重解析，Linux openat/statx拒绝链接和特殊文件。仅持久观察按Npgsql微秒编码比较，当前stamp仍全精度，原文件不改。
-- Core不引用Skia程序集；独立NativeAOT只接有界稳定字节。源32MiB/40MP，GC64MiB单一配置。内容hash+renderer/规格缓存64MiB/256项；2名额保持到响应及实际清理结束，迟到/未reap或清理失败隔离名额，不积无限worker/queue。
-- 完整PNG每块CRC、单一首IHDR、固定8bit RGB/RGBA、至少IDAT、IEND恰好EOF；只允许已实测sRGB与固定每通道8的sBIT，拒绝文本/EXIF/ICC/动画/未知块，Host不做媒体解码。
+分支codex/v03-007-image-preview-server，工作区C:/Users/Administrator/.codex/worktrees/021c/AssetLibrary。Core/Worker接线0a746e2；sBIT严格PNG修正4275815；源清理名额a277178；迟到嵌套清理de83a3c；Windows StartAsync25a7bed；NAS打包d18b224及实际恢复/发布图一致性00b03b1；最终test-only诊断808eb3a。Windows专属生命周期与journal由V03-006单写，最新5bce4cd已合为bfc5fc1。
 
-## 验证与真实范围
+- 冻结GET使用库/entry稳定ID和variant，同源鉴权、前后授权/索引/实际源复核，返回重编码PNG。thumbnail512px/2MiB、preview1600px/12MiB，不放大、处理EXIF方向并保留alpha；格式/损坏/超限/权限/源变化都有明确失败。
+- Source broker复用规范路径和只读worker边界，逐层no-follow、强hash与全精度当前身份/mtime核验。原文件不修改。Core不加载Skia，独立NativeAOT只接有界字节。
+- 2并发名额保持到实际清理完成，未知清理失败保留有限名额；内容hash+renderer缓存64MiB/256项。PNG全块CRC和严格8bit/sRGB/sBIT集合，拒绝未知或原源元数据。
+- NAS固定SDK/RID锁发布独立Worker，运行层只含6个明确产物；构建清单绑定实际镜像、提交、锁和每文件hash。Compose仅透传显式路径，默认关闭；没有改变非root、capdrop、NNP、只读根/资产、init或资源上限。
+- Python3.8兼容的verify_nas_worker.py只测试显式已验证包、固定corpus与canary，顺序12图片变体/4拒绝/4探针，pipe/过程/全组都有界。ID记账、身份核验、清理存在性确认以及失败前就绪帧/退出/OOM/有限stderr摘要均保留；未知create结果不能冒充cleanup完成。
 
-本地真实Core/PostgreSQL/HTTPS→source broker→LPAC NativeAOT→PNG校验的图片与信任2/2通过，PREVIEW_EXPECT_AVAILABLE=1：实际PNG缩略图、JPEG/WebP/EXIF6/透明预览、损坏/超限/非图降级，401差异、Origin/POST-CSRF和invisible404。没有以503或假服务算出图。显式stop后148合成原件hash/mtime、Host/PG/角色/证书/临时目录按原fixture清理verified。见core-integration.md和tests.md。
+## 已验证与明确失败
 
-真实PG精度1/1、真实Host source进程1/1、PNG及变异3/3、Core容量/清理7/7、前后授权3/3均有独立结果。Windows源组原8/9及新微秒例通过，叶symlink本机缺权限；root在开发Linux对老源组9/9补证。Host/Auth包62/63，当时唯一失败是共享DatabaseReadinessTests硬编码18而生产manifest21；root后以66b25ce修正陈旧断言并验证5/5，本分支合入为f9b7eb7，数据库/迁移未改。历史失败证据保留。
+本地真实Core/PostgreSQL/HTTPS→source broker→LPAC NativeAOT图片2/2，后续Windows完整清理源码组合的相关21/21及真实HTTPS2/2均无skip；原样例hash/mtime、Host/PG/账号/证书/临时状态由fixture确认清理。源边界、容量、授权、PNG与真实PG精度见tests.md；单项Windows叶symlink仍缺本机权限，开发Linux另有源边界证据。
 
-root在dev-230非root、cap0、无GC覆盖的默认Linux NativeAOT验证完整corpus、TSYNC文件/网络/跨进程/exec拒绝、native内存拒绝、CPU约3秒内核终止；既有低权限身份实际创建253线程后NPROC256封顶并回收。这是开发Linux证据，不替代NAS目标内核。root另已完成Linux真实Core图片2/2，并进行Web/Android联合验收；统一服务清理由root持有。
+root同提交a12b0d139765357b1e33437a4c7a34823dd556ad的NAS包已实际built_not_deployed；Core image sha256:2dd1f17c28be1969b6488c5afe14499c71f7f26aa5d36c179b09768056cf54f0，images.tar为783892992B，SHA256 5951b75d46b46c14124885bb71f0cdf7b1c4b3713d495d312861085836bf0626。包已由root传输、重算hash并载入镜像，未替换线上服务。原NETSDK1112是恢复/发布SelfContained不一致，00b03b1后实际完整构建已验证修复；新NAS包测试Linux12/12无skip。
 
-## 依赖、边界与后续
+同一镜像在开发Linux6.14能Ready，NAS5.10.55+首image-0-0在发图前返回status7、stderr空，随后19项未执行。宿主只读查询PR_GET_SECCOMP=-1/EINVAL22、GET_ACTION_AVAIL=-1/ENOSYS38、/proc/status无Seccomp，Docker安全模块仅AppArmor；同限制临时容器cap0/NNP/rlimits可设置，但TSYNC syscall317返回ENOSYS。原始证据由root持有，路径.runtime/nas-image-evidence-a12b0d1/kernel-capability.json、worker-first-failure.json。所有测试容器及原件不变检查均已完成。这是环境硬阻断，不是通过放宽检查修复的临时参数问题。
 
-SkiaSharp及Linux.NoDependencies固定4.151.2，正常lock与两RID发布lock分开。4个正常NuGet包官方签名/内容hash、现有许可证政策和transitive已知漏洞查询通过；完整139775B native notices与MIT随Worker发布且固定hash验证。详见decoder-dependencies.json；NuGet查询不等于证明所有native漏洞不存在。
+开发Linux额外parent-death1/1：保留stdin，仅杀中间父进程，同包Worker由SIGKILL终止并在10.385ms回收；这只属于开发Linux，不替代NAS证据。当前记录的144逻辑测试通过、1实际NAS失败、1既有本机源平台缺口保持分开；其他root/owner平台用例不重复计数。
 
-Windows在ca1d235后交V03-006单写，已提供真实LPAC出图guard；追加journal/取消/恢复3文件已以a21a145交付，本分支合为0e6027d并与本任务csproj链接合组。共享Startup Task/清理名额语义由V03-007负责。无生产新语言/第二框架/数据库或跨模块写表；获准临时C++ COM观察器仅作平台定位，不进入产品。
+## 边界、风险与后续
 
-StartAsync组装、format/affected checks与实际HTTPS已验证；末阶段仍需V03-006原生故障/资源/COM矩阵、root最终平台/包/客户端验收。Provider、Explorer、资产写入和完整发布门禁保持原状。合并顺序：root wire/pins/ADR → 本Core/Worker/共享清理 → Windows专属收尾 → root跨端与目标平台证据。
+复用既有Core端口、权限/路径/worker协议与Git快照/锁/来源清单，无跨模块写表、第二解码框架或生产新服务。Skia4.151.2已审核正常/RID锁、4包签名/内容hash与MIT/native notices；声明随包且固定hash，详见decoder-dependencies.json。
 
-2026-09-09后续审查：de83a3c修复延迟startup本身抛出嵌套cleanup-pending时外层reaper提前失败的问题；现在等待内层实际Completion，成功才能归还名额，真实清理失败继续隔离。新增2项回归，Core Release零警告构建通过；root以433ad01集成此最小提交后实际编译并执行2/2通过（27ms、0skip），未引入尚缺源的Windows链接。没有变更公开接口、wire或依赖。
+AppArmor+NPROC=1未被接受为现结构的等价替代。仅把解码部署到现有dev-230的内部TLS入口仍是待用户与ADR确认的提案，没有实现或传输真实图片。当前既有浏览继续，NAS图片关闭/503；通用Docker、原生/Windows trial打包缺口与Windows剩余原生边界、Explorer、Provider、资产写入和完整版本门禁保持独立。
 
-Windows完整源组装后，本地format通过、Preview/Core/Host/WebGateway Release零告警；核心/授权/PNG/reaper/Windows生命周期及真实LPAC共21/21，HTTPS实际2/2、0skip。新fixture停止后CLEANUP verified。不同逻辑用例更新为132通过/0失败/1本机叶symlink缺证据，Windows新5生命周期及1直接AOT用例计入，其余重复运行不重复计数。
-
-只读发行检查后，root通过f673a12精确授权NAS的5文件接线，已由d18b224实现。通用Docker/原生/Windows trial的独立Worker打包仍未修改。NAS同提交镜像构建和目标平台验收仍交root；本任务没有部署或启用生产NAS。最初检查及后续范围见packaging-review.md。
-
-NAS打包d18b224：现有server构建层单独发布linux-x64 AOT，使用已提交RID锁和同一SDK/source；仅构建层加入clang/zlib。运行镜像固定6个图片产物（exe、Skia、2声明、checksum、source revision），按0555/0444提供nonroot读/执行。Compose仅透传显式变量，默认空。打包工具创建从不启动的所属检查容器，提取并严格检查文件集合、commit/SHA/ELF/权限，finally删除检查容器；清单绑定image ID、commit、锁与文件hash，平台状态仍not_executed。新增打包组本机9过/2POSIX未执行，发行整组47过/0失败/5明确环境缺口。当前任务逻辑汇总141过/0失败/3本机平台缺证据；其他既有发行测试单独记录不重复累计。
-
-Windows owner的53bc455继承Modify目录兼容修复已合为39ce06d；其原始7/7结果由V03-006持有，不重复计入本任务本地总数。
-
-root开发Linux检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2已补新NAS包11/11（含POSIX2项、38ms、0skip）；当前143过/0失败/1本机源叶symlink缺证据。真实同提交Docker builder正在运行，不能把测试通过当作镜像或NAS目标验收完成。
-
-首次实际NAS Docker构建在image-preview publish出现NETSDK1112（restore与publish SelfContained不一致）。已提交00b03b1补齐restore属性，同步文档并增加真实Docker参数一致性回归；新NAS组本地10过/2POSIX未执行，任务144逻辑测试过/0测试失败/1源平台缺口。实际镜像重建仍待root，不能把该静态回归当作构建已恢复。
-
-root实际a12b0d139765357b1e33437a4c7a34823dd556ad已完成NAS built_not_deployed，NETSDK1112修复已通过真实AOT与完整包验证。Core image为sha256:2dd1f17c28be1969b6488c5afe14499c71f7f26aa5d36c179b09768056cf54f0；images.tar 783892992B，SHA256 5951b75d46b46c14124885bb71f0cdf7b1c4b3713d495d312861085836bf0626。root还核验传输包并load三镜像，未启动生产服务。
-
-按root新增精确授权，c5495f7提供单文件test-only NAS harness verify_nas_worker.py，兼容Python3.8语法。仅针对显式已验证manifest的固定image/commit、固定corpus和只读canary，顺序12图片变体、4拒绝、4现有probe；所有命令/进程/pipe/总时间有界，创建容器实际政策核对、记录ID再仅清理所属ID并核不存在，CPU保留退出与OOM状态，来源hash/mtime前后比对。harness语法/固定corpus/实际Skia PNG正例与5负例/pipe边界以及真实小进程正常、输出溢出、超时与回收自检通过，不等于NAS实际隔离通过。实际执行只由root负责；parent-death单独后续，README未改。
-
-目标NAS实际主组首项image-0-0出现worker_not_ready（0.605s、非父超时、未发送图），Docker政策、原样例不变和全部测试容器清理均已核验；余项未执行，目标隔离仍未通过。808eb3a增加清理前六整数就绪帧、Exit/OOM/Running及有界stderr长度/hash，诊断自检通过；root继续定位产品平台条件。当前任务累计144逻辑通过/1目标NAS测试失败/1既有本机源平台缺口，失败未被其他通过结果覆盖。
+后续顺序：主协调确认平台方向与ADR → 精确更新任务/契约 → 获准实现与目标平台验收。现有诊断和交接完整，不启动新的架构分支来绕过阻断。

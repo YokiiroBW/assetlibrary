@@ -52,3 +52,7 @@ root以f673a12授权NAS Dockerfile/Compose/README、build_nas_deployment.py及�
 当前Windows机器没有Docker CLI。新测试11项中9通过、2POSIX权限缺本机平台；真实root Linux runner需补11/11。整个既有tests/release suite52项，47通过/0失败/5未执行：新增2POSIX及既有3原生试用包/PG环境。未把合成ELF夹具当成实际NativeAOT或镜像构建成功。
 
 root后续平台补证：开发Linux干净检查点0f4d0c68cf693a854b4dde1932cbe1c623b1b6c2执行本新增包测试11/11、0skip（38ms），已覆盖POSIX权限；实际同提交builder已启动，结果仍待root验收。
+
+## 最终已知平台边界
+
+实际a12整NAS包已经built_not_deployed并由root核验传输/加载；打包缺引擎与NETSDK1112已修复。NAS本地执行却被缺失seccomp接口硬阻断（宿主PR_GET_SECCOMP EINVAL、GET_ACTION_AVAIL ENOSYS、临时容器TSYNC ENOSYS）。平台决策见root195afc8；AppArmor替换未被接受为等价方案，内部TLS解码仍待用户和ADR批准。当前不启用NAS图片，不能以包成功或dev6.14 parent-death1/1称NAS已通过。

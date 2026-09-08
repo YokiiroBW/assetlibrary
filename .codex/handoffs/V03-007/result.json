@@ -105,14 +105,14 @@
     "report": "tests.md"
   },
   "risks": [
-    "Windows lifecycle helpers and StartAsync are integrated and tested; the separate native fault/resource/COM boundary matrix remains owned by V03-006.",
-    "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance.",
-    "NAS actual image packaging a12b0d1 is built_not_deployed; target-kernel harness and parent-death evidence remain with root; generic Docker/native/Windows trial packaging gaps remain explicitly open.",
-    "Target NAS first actual image-0-0 failed worker_not_ready at0.605s without parent timeout or sending image bytes; policy/corpus/cleanup passed, remaining19 cases not executed. Safe failure diagnostics808eb3a committed; root investigates Linux.Enter conditions."
+    "Target NAS kernel lacks required seccomp interfaces: host EINVAL/ENOSYS and actual constrained-container TSYNC ENOSYS; first image fails before input, and preview remains disabled/503.",
+    "Development Linux isolation, real HTTPS and parent-death1/1 are separate evidence and cannot satisfy target-NAS acceptance.",
+    "AppArmor substitution is not approved as equivalent; a dev-230 internal TLS decoder remains only a user/ADR decision proposal and has not been implemented.",
+    "Windows native fault/resource/COM acceptance and generic Docker/native/Windows trial packaging gaps remain separately owned and open."
   ],
   "blocked_by": [
-    "V03-006 remaining Windows native fault/resource/COM boundary evidence.",
-    "Coordinator actual target-NAS worker corpus/isolation/parent-death evidence and final unified acceptance."
+    "Target NAS seccomp capability is unavailable; await the user/coordinator platform decision and approved ADR before any new implementation.",
+    "V03-006 remaining Windows native boundary evidence and coordinator final unified acceptance."
   ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V03-007/summary.md",
@@ -146,11 +146,13 @@
       "00b03b1 adds actual Docker restore/publish graph-parity regression: local NAS10 passed/2 POSIX unavailable; first real image NETSDK1112 failure remains recorded pending root rebuild.",
       "Root a12b0d1: Linux NAS12/12 and actual AOT/full image package passed, built_not_deployed. Test-only harness c5495f7 Python3.8 syntax, PNG/pipe negatives and real bounded subprocess/reap self-checks passed; actual NAS20 cases pending root.",
       "Integrated Windows owner5bce4cd as bfc5fc1; owner14/14 identity cases reported, local Core Release build zero warnings; no NAS harness/package changes.",
-      "Actual target NAS first case failed readiness with verified cleanup/source integrity;808eb3a safe diagnostic path validated using a real synthetic CLI child, with zero stdin bytes and exit/stderr evidence retained before cleanup."
+      "Actual target NAS first case failed readiness with verified cleanup/source integrity;808eb3a safe diagnostic path validated using a real synthetic CLI child, with zero stdin bytes and exit/stderr evidence retained before cleanup.",
+      "Root195afc8 establishes hard target-NAS seccomp absence with host/container capability probes; all test cleanup and source integrity verified. Same-package dev6.14 parent-death1/1,reap10.385ms is separate platform evidence, not NAS success."
     ],
     "technical_debt": [
-      "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
-      "Target NAS isolation and parent-death evidence remain with root; generic Docker/native/Windows trial worker packaging is still absent and outside the authorized NAS change."
+      "Quarantined capacity remains unavailable after genuinely unresolved cleanup until resources are confirmed or Host restarts.",
+      "Target NAS needs an approved supported-platform design; no AppArmor bypass or new TLS service is implemented while the decision is pending.",
+      "Generic Docker/native/Windows trial worker packaging and remaining platform gates are outside this completed NAS packaging/diagnostic checkpoint."
     ]
   }
 }

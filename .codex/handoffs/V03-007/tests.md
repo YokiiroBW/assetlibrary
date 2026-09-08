@@ -108,3 +108,11 @@ root实际NAS首case image-0-0在0.605秒失败worker_not_ready，未parent time
 808eb3a25d9e709c3ac2b1ed27ed8022158c8d27仅改harness诊断：先保存24-byte ready的六个整数再判断；stderr增量保存长度/hash/complete/超限标志，失败前仍有部分流摘要；启动失败关闭stdin不发原件，最多2秒等CLI退出、2秒观察有界stderr，并在清理前记录实际State.ExitCode/OOM/Running/开始结束时间。观察失败仅保存安全类型/代码，不输出原始未知字节、stack或body；成功case判断不改。
 
 自检用真实本机Python子进程模拟CLI：先发status7 header与synthetic stderr，随后确认stdin严格空，再退出1；六int、Exit1/OOMfalse和stderr长度/hash在清理前均保存，source未发送、无raw诊断落入JSON，子进程reap确认；另stderr越界只记录限额+1探测字节的长度/hash并拒绝。Python3.8语法/diff通过；未复跑未变化的主组。实际NAS诊断重跑与产品Linux.Enter定位由root进行。
+
+## NAS硬平台结论（root195afc8）
+
+root已以195afc82e9b3ab30de39f29fbe9c75eaba485596提交nas-platform-decision.md。只读宿主查询PR_GET_SECCOMP=-1/EINVAL22、GET_ACTION_AVAIL=-1/ENOSYS38、/proc/status无Seccomp、Docker仅apparmor；同策略临时容器cap0/NNP/rlimits可设置，但TSYNC syscall317返回ENOSYS。同一2dd core镜像在dev6.14实际Ready，在NAS只status7/0stderr，诊断禁用控制也同结果。kernel-capability.json与worker-first-failure.json由root持有；所有测试容器清理，未改变host策略。不是harness或临时参数问题，不继续通过降低检查尝试启用。
+
+同包a12的parent-death另由root在dev6.14执行1/1：retained stdin，仅杀middle，Worker SIGKILL/reap10.385ms。该证据严格标记开发Linux，不用于抵消NAS首例失败/19项未执行，不重复计入本任务逻辑汇总。root已向用户提交是否迁移仅解码到dev-230内部TLS的决策；回答及ADR前不扩服务、不改变NAS隔离策略，图片保持关闭/503。
+
+现有诊断/平台交接最终verify_repository通过：426份C#源、21迁移、14架构；Alpha有效性审计继续blocked。此后仅记录执行事实，没有新增服务或运行代码修改。
