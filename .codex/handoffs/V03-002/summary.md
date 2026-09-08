@@ -26,3 +26,4 @@ Core只引用生成AssetLink SDK及BCL；测试使用现有MSTest。原生Shell�
 下一步先在可交互桌面关闭自有诊断窗口，再定位真实Explorer入口；实际进入DefView后补齐子项默认Folder命令、完整parsing-name round-trip、进程外有界只读投影IPC和真实用户闭环。当前proof不能直接作为生产协议。随后才验证Host故障/取消/重连、20轮循环和8小时Explorer soak。不得把原生列表当前页的本地排序当成服务端完整范围排序。
 
 建议在协调ADR0018/共享门禁之后合并此partial证据与组件，保持生产Shell关闭。不存在可供用户试用的Windows应用包；C#Core DLL为54,272字节，test DLL为25,088字节，仅组件/实验体积，不是发行包大小。
+构建冻结补充：765235743ad2eac64836c9e09b8c169625b01387显式固定test proof Windows SDK10.0.26100.0；重新configure选中值与既有实测一致。

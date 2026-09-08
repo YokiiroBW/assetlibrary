@@ -41,3 +41,4 @@ UIA读状态成功，输入/截图分别0x80070005/0x80070057，停止GUI输入�
 当前没有生产Windows安装包/Host-to-Shell IPC/真嵌入用户闭环，不能进行发行可用性或50万资产体验声明。分页/响应/客户端内存上限是结构与回归证据，非容量实测；20轮和8小时Explorer稳定性保持开放。
 
 最终标准用例为原20项通过 + 新增SessionBoundaryTests 2项通过；没有重跑输入未变的成功用例。最终仓库verify_repository通过，包含14个架构回归与21个迁移清单回归，Alpha保持blocked，SDK生成/源码/依赖和主题一致性通过。
+CMakeLists在project之前显式固定Windows SDK10.0.26100.0（7652357）；重新configure后两个vcxproj均确认WindowsTargetPlatformVersion=10.0.26100.0，与此前实际构建值一致，未重复运行输入未变的C++行为测试。

@@ -7,7 +7,7 @@
   "owner": "windows-client-owner",
   "branch": "codex/v03-002-windows-native-read-client",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-002",
-  "commit": "5464f101cc7db11a3e4915b77a5252fe36df8e7a",
+  "commit": "765235743ad2eac64836c9e09b8c169625b01387",
   "changed_files": [
     ".codex/tasks/V03-002.md",
     "apps/windows-client/AssetLibrary.Windows.slnx",
@@ -85,7 +85,7 @@
       "Expanded validate_dotnet_source.py scanned 373 C# files",
       "Locked restore/format/Release build/MSTest",
       "NuGet integrity/license/vulnerability policy",
-      "MSVC /W4 /WX /analyze plus isolated native probe and owned HKCU cleanup"
+      "MSVC /W4 /WX /analyze with pinned Windows SDK10.0.26100.0 plus isolated native probe and owned HKCU cleanup"
     ],
     "technical_debt": [
       "V03-002 / windows-shell-owner: resolve actual Explorer G1 before production activation",
