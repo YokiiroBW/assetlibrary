@@ -1,0 +1,59 @@
+{
+  "scope": "V03-007 normal decoder NuGet integrity and license audit",
+  "packages": [
+    {
+      "id": "SkiaSharp",
+      "version": "4.151.2",
+      "archive_sha512_matches_cache": true,
+      "official_nuget_content_hash_matches_lock": true,
+      "official_signature_verification": "passed",
+      "license": "MIT",
+      "repository_commit": "a0a2142b86627ec1a9c90b9beff0068ce567ee77"
+    },
+    {
+      "id": "SkiaSharp.NativeAssets.Linux.NoDependencies",
+      "version": "4.151.2",
+      "archive_sha512_matches_cache": true,
+      "official_nuget_content_hash_matches_lock": true,
+      "official_signature_verification": "passed",
+      "license": "MIT",
+      "repository_commit": "a0a2142b86627ec1a9c90b9beff0068ce567ee77"
+    },
+    {
+      "id": "SkiaSharp.NativeAssets.macOS",
+      "version": "4.151.2",
+      "archive_sha512_matches_cache": true,
+      "official_nuget_content_hash_matches_lock": true,
+      "official_signature_verification": "passed",
+      "license": "MIT",
+      "repository_commit": "a0a2142b86627ec1a9c90b9beff0068ce567ee77"
+    },
+    {
+      "id": "SkiaSharp.NativeAssets.Win32",
+      "version": "4.151.2",
+      "archive_sha512_matches_cache": true,
+      "official_nuget_content_hash_matches_lock": true,
+      "official_signature_verification": "passed",
+      "license": "MIT",
+      "repository_commit": "a0a2142b86627ec1a9c90b9beff0068ce567ee77"
+    }
+  ],
+  "native_notices": [
+    {
+      "package": "skiasharp.nativeassets.win32",
+      "bytes": 139775,
+      "sha256": "21504c46c4c58aa64c1055bd2dcbc5f9a136b4b8c412ed3cc6740e22c5b127f5"
+    },
+    {
+      "package": "skiasharp.nativeassets.linux.nodependencies",
+      "bytes": 139775,
+      "sha256": "21504c46c4c58aa64c1055bd2dcbc5f9a136b4b8c412ed3cc6740e22c5b127f5"
+    }
+  ],
+  "nuget_audit": "Actual pinned-dotnet transitive audit returned no known vulnerable packages.",
+  "content_hash_semantics": "Signed NuGet contentHash excludes the signature; verified with the official NuGet verifier, not a whole-archive SHA512 comparison.",
+  "limits": [
+    "NuGet advisory coverage does not prove absence of all native-code vulnerabilities.",
+    "RID NativeAOT tool locks and final packages have separate publication evidence."
+  ]
+}

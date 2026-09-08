@@ -7,58 +7,98 @@
   "owner": "preview-provider-owner",
   "branch": "codex/v03-007-image-preview-server",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
-  "commit": "37ef0df74d8bca568a0d962627932240761588d1",
+  "commit": "a2771786e2b51d39b69cad203fb3a71b8814e0ef",
   "changed_files": [
+    ".codex/handoffs/V03-007/core-integration.md",
     ".codex/handoffs/V03-007/isolation-plan.md",
     ".codex/handoffs/V03-007/proposal.md",
     ".codex/handoffs/V03-007/result.json",
     ".codex/handoffs/V03-007/summary.md",
     ".codex/handoffs/V03-007/tests.md",
+    ".codex/handoffs/V03-007/windows-transfer.md",
     ".codex/tasks/V03-007.md",
     "services/core-server/AssetLibrary.CoreServer.csproj",
+    "services/core-server/Host/Trial/Authentication/TrialAuthenticationMiddleware.cs",
+    "services/core-server/Host/Trial/Preview/TrialImageEndpoints.cs",
+    "services/core-server/Host/Trial/Preview/TrialImagePreviewConfiguration.cs",
+    "services/core-server/Host/Trial/Preview/TrialImageRequest.cs",
+    "services/core-server/Host/Trial/Preview/TrialImageResponses.cs",
+    "services/core-server/Host/Trial/Preview/TrialImageSession.cs",
+    "services/core-server/Host/Trial/ReadOnlyWorkerCommand.cs",
+    "services/core-server/Host/Trial/TrialHostFactory.cs",
+    "services/core-server/Host/Trial/TrialWebEndpoints.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ImageChildProcess.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceParentLifetime.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourcePath.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceStamp.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceWorker.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/LinuxImageSourceHandle.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProcess.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProtocol.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/StableImageSourceFile.cs",
+    "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageCapability.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcess.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProfile.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageSourceHandle.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageStartup.cs",
     "services/core-server/Infrastructure/ReadOnlyWorkers/WindowsWorkerJob.cs",
     "services/core-server/Modules/GatewayAuth/Application/AuthorizedImagePreviewService.cs",
+    "services/core-server/Modules/PreviewProvider/Application/ImagePreviewCache.cs",
+    "services/core-server/Modules/PreviewProvider/Application/ImagePreviewPorts.cs",
+    "services/core-server/Modules/PreviewProvider/Application/ImagePreviewService.cs",
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/ImagePreviewRuntime.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/ImageWorkerTransport.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/IsolatedImageDecoder.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/ProcessImageSourceReader.cs",
     "services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj",
     "services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj",
     "services/worker-supervisor/ImagePreview/ImageInputPolicy.cs",
     "services/worker-supervisor/ImagePreview/ImageWorkerProtocol.cs",
     "services/worker-supervisor/ImagePreview/LinuxImageIsolation.cs",
+    "services/worker-supervisor/ImagePreview/LinuxImageProbe.cs",
     "services/worker-supervisor/ImagePreview/Program.cs",
+    "services/worker-supervisor/ImagePreview/README.md",
     "services/worker-supervisor/ImagePreview/StaticImageDecoder.cs",
     "services/worker-supervisor/ImagePreview/WindowsImageIsolation.cs",
+    "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.linux-x64.lock.json",
+    "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.win-x64.lock.json",
     "services/worker-supervisor/ImagePreview/packages.lock.json",
     "tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj",
+    "tests/dotnet/AssetLibrary.Preview.Tests/AuthorizedImagePreviewTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/Fixtures/skia-rgba8-sbit.png",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImagePreviewServiceTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageSourceBrokerTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageTimestampIntegrationTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/LiveImageEndpointTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/LivePreviewConnection.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/LivePreviewTls.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/MSTestSettings.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/PngDerivativeValidationTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/StableImageSourceTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageProcessTests.cs",
-    "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json"
+    "tests/dotnet/AssetLibrary.Preview.Tests/packages.lock.json",
+    ".codex/handoffs/V03-007/decoder-dependencies.json"
   ],
   "changed_contracts": [
     "services/core-server/Modules/PreviewProvider/Contracts/ImagePreviewContracts.cs"
   ],
   "tests": {
-    "passed": 44,
+    "passed": 123,
     "failed": 1,
     "skipped": 1,
     "report": "tests.md"
   },
   "risks": [
-    "Windows LPAC startup fails before readiness with exit 0xFFFFFFFF; no production decoder activation.",
-    "Linux decoder/seccomp and real PostgreSQL precision test have not yet run.",
-    "Startup cancellation coverage, profile failure/crash recovery, RID release locks, final notice package and HTTP/broker/cache integration remain incomplete."
+    "Windows cleanup helpers and their approved Compile links must be integrated together; V03-006 owns Windows-specific source.",
+    "Shared DatabaseReadinessTests expects migration18 while the frozen manifest is21; coordinator correction pending.",
+    "Developer-Linux confinement and local real HTTPS success do not replace NAS target-kernel or complete release acceptance."
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "Awaiting V03-006 Windows lifecycle helper commit matching approved test links.",
+    "Coordinator-owned stale migration assertion and final unified acceptance."
+  ],
   "recommended_merge_order": 0,
   "handoff_summary": ".codex/handoffs/V03-007/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
@@ -80,10 +120,13 @@
       "Coordinator-approved PreviewProvider.Contracts.ImagePreviewContracts.cs; no wire/DB/schema modification."
     ],
     "architecture_tests": [
-      "python -I -B scripts/verify_repository.py: baseline passed; 21 migration and 14 architecture cases"
+      "verify_repository baseline:21 migration+14 architecture tests passed.",
+      "validate_architecture_baseline and validate_dotnet_source passed after Core implementation.",
+      "Host Release zero warnings; scoped Core/real PG/HTTPS results in tests.md."
     ],
     "technical_debt": [
-      "Partial platform runtime and transport implementation; production stays disabled until verified confinement and integration."
+      "Quarantined capacity remains unavailable until unresolved OS cleanup finishes or the Host restarts.",
+      "Windows lifecycle completion belongs to V03-006; NAS and full V0.3 remain separately gated."
     ]
   }
 }

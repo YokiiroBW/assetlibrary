@@ -30,3 +30,21 @@ Windows LPAC阶段实际失败已记录在.runtime/preview-tests/windows/windows
 root于2026-09-08报告dev-230独立非root容器已对f580b15安全源执行locked restore/format/Release零警告与9/9测试，无skip（含叶symlink）。证据为其私有Linux目录/tmp/assetlibrary-v03-005-linux-izfgezzr/source-read-boundary/.runtime/preview-source-results及source-boundary.log；仅安全源，不代表decoder/NAS隔离。
 
 Native Win32/Linux.NoDependencies包的THIRD-PARTY-NOTICES均为139775B、SHA256 21504C46C4C58AA64C1055BD2DCBC5F9A136B4B8C412ED3CC6740E22C5B127F5。Skia与Win32 MIT LICENSE的SHA256为89101E35A8C66FD4D6DFFC1763259161D35CB564C169714EC227A768C89F2938。worker csproj使用GeneratePathProperty复用精确package路径，构建时核验并发布这两份声明；PDB/dbg留构建目录，新的干净候选目录尚待发布核验。
+
+## 最终Core路径阶段（2026-09-08晚至09日）
+
+上述早期失败用于说明修正来源，不代表当前出图仍失败。当前Core模块用例分组：源边界10项中Windows9过/1叶symlink缺本机权限；服务容量/late startup/source disposal7/7；授权初查/末查/索引变化3/3；完整PNG3/3；真实Host source broker1/1；真实PG时间往返1/1；真实HTTPS图片与信任2/2。另基线21迁移+14架构，受影响Host/Auth包62/63。结果字段123通过/1共享基线失败/1本机平台缺证据按不同逻辑用例计，不累加重复跑或root异平台相同用例。
+
+Core测试命令沿原Preview.Tests csproj，Release/no-restore，分别filter ImagePreviewServiceTests、AuthorizedImagePreviewTests、PngDerivativeValidationTests、ImageSourceBrokerTests、ImageTimestampIntegrationTests、LiveImageEndpointTests；TRX在.runtime/preview-tests/core、live、live-final。新增source late/failure场景确保只有实际reap才能放回名额，失败记录且有限隔离；不以Task被取消当native资源已释放。
+
+真实200运行 `.runtime/preview-live-final/20260908T153904Z-b1b0437f` 使用现有serve.py、21迁移、6临时LOGIN、已审计合成corpus和本地实际LPAC/AOT。PREVIEW_EXPECT_AVAILABLE=1时2/2、0skip通过。PNG512、JPEG/WebP/EXIF6/alpha1600为真实200；SVG/非图415，截断/超大头422；私密连接只进入测试环境，TLS验证精确SHA256+主机名+有效期。显式stop后NATIVE_CLIENT_CLEANUP verified，148源文件hash/mtime、Host/PG/角色/证书/目录都由原fixture核验。最终client TRX为.runtime/preview-tests/live-final/live-images.trx。
+
+此前422源于严格PNG集合漏了Skia的标准sBIT，不是放宽源元数据要求来绕过：来自Windows owner的真实1677B PNG（F67FE315...3057）有IHDR/sBIT08080808/sRGB/IDAT/IEND；现仅允许一次、IDAT前、RGB3/RGBA4个精确8值并验证CRC。正例及正确CRC但bit7/重复/顺序错误负例通过。CacheControl测试也改断言Private和NoStore的语义，避免.NET ToString重排导致虚假失败；HTTP本身未改。
+
+受影响包装/认证回归实际命令：dotnet test tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj -c Release --no-restore，TRX .runtime/preview-tests/host-regression/host-auth-regression.trx。63项中62过/1失败/0skip，唯一DatabaseReadinessTests.EmbeddedManifestMatchesCurrentProductionContract仍期待18而真实manifest21，是既有共享陈旧断言；已交root，未动DB/迁移或该共享测试。
+
+依赖额外使用精确SDK dotnet nuget verify --all逐个验证4包作者/仓库签名及NuGet contentHash，均匹配正常锁；signed contentHash排除签名，与完整nupkg SHA512不同，完整归档也单独匹配cache.sha512。transitive vulnerable查询无已报告包，现有validate_dotnet_dependencies用临时单项目scope通过（4 locked packages），无政策变更。公开摘要decoder-dependencies.json，原始日志.runtime/preview-tests/signature-*.txt及decoder-vulnerabilities.json；NuGet覆盖不是所有native漏洞不存在的证明。
+
+root独立Linux当前默认40d2d69：无GC覆盖、Vm约424736KiB、AS512MiB，完整corpus与isolation/native memory/CPU已通过；低权限现有身份实际创建253线程后NPROC256封顶并join，普通繁忙UID因既有492线程保守EAGAIN，不能用0容量冒充正常线程测试。root已完成Linux真实Core图片2/2及部分移动UI联调，原始统一证据和服务清理由root持有，不计入本窗口重复总数、不当NAS目标核证据。
+
+Windows在ca1d235后由V03-006单写；其a06d3f有效LPAC access-check guard已集成，并支撑上述本地200。追加3个cleanup helper的匹配提交尚待到来，csproj链接已获批；此组合及StartAsync适配完成前不跑缺文件的项目，不宣告最终故障/平台门禁通过。
