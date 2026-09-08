@@ -29,5 +29,14 @@
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageStartup.cs" Link="Boundary/WindowsImageStartup.cs" />
     <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/WindowsImageProcess.cs" Link="Boundary/WindowsImageProcess.cs" />
     <Compile Include="../../../services/worker-supervisor/ImagePreview/ImageWorkerProtocol.cs" Link="Boundary/ImageWorkerProtocol.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Application/ImagePreviewPorts.cs" Link="Application/ImagePreviewPorts.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Application/ImagePreviewService.cs" Link="Application/ImagePreviewService.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Application/ImagePreviewCache.cs" Link="Application/ImagePreviewCache.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ReadOnlyWorkerProcess.cs" Link="Boundary/ReadOnlyWorkerProcess.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceWorker.cs" Link="Boundary/ImageSourceWorker.cs" />
+    <Compile Include="../../../services/core-server/Infrastructure/ReadOnlyWorkers/ImageSourceParentLifetime.cs" Link="Boundary/ImageSourceParentLifetime.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ProcessImageSourceReader.cs" Link="Boundary/ProcessImageSourceReader.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ImageWorkerTransport.cs" Link="Boundary/ImageWorkerTransport.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs" Link="Boundary/PngDerivativeValidator.cs" />
   </ItemGroup>
 </Project>

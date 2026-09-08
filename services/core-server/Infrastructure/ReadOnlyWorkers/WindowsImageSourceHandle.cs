@@ -13,8 +13,9 @@ internal static class WindowsImageSourceHandle
         var handle = Native.Open(path, 0x80000000, 1, nint.Zero, 3, 0x02200000, nint.Zero);
         if (handle.IsInvalid)
         {
+            var error = Marshal.GetLastPInvokeError();
             handle.Dispose();
-            throw new ReadOnlyWorkerException("preview_source_unavailable");
+            throw new ReadOnlyWorkerException(error is 2 or 3 or 32 ? "preview_source_changed" : "preview_source_unavailable", error);
         }
 
         try
@@ -22,7 +23,7 @@ internal static class WindowsImageSourceHandle
             var stamp = Observe(handle);
             if (stamp.IsDirectory != directory)
             {
-                throw new ReadOnlyWorkerException("preview_source_unavailable");
+                throw new ReadOnlyWorkerException("preview_source_changed");
             }
 
             return handle;
@@ -36,11 +37,11 @@ internal static class WindowsImageSourceHandle
 
     public static ImageSourceStamp Observe(SafeFileHandle handle)
     {
-        if (!Native.Information(handle, out var information) || Native.Type(handle) != 1
-            || (information.Attributes & (uint)FileAttributes.ReparsePoint) != 0)
+        if (!Native.Information(handle, out var information) || Native.Type(handle) != 1)
         {
             throw new ReadOnlyWorkerException("preview_source_unavailable");
         }
+        if ((information.Attributes & (uint)FileAttributes.ReparsePoint) != 0) throw new ReadOnlyWorkerException("preview_source_changed");
 
         return new ImageSourceStamp(information.Volume, Join(information.IndexHigh, information.IndexLow),
             checked((long)Join(information.LengthHigh, information.LengthLow)),

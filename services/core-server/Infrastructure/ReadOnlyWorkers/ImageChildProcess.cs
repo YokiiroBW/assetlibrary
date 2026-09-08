@@ -18,6 +18,7 @@ internal sealed class ImageChildProcess : IImageChildProcess
     private readonly WindowsWorkerJob? job;
     private readonly CancellationTokenRegistration cancellation;
     private bool disposed;
+    private int? terminationError;
     public Stream Input => process.StandardInput.BaseStream;
     public Stream Output => process.StandardOutput.BaseStream;
     public Stream Error => process.StandardError.BaseStream;
@@ -61,7 +62,7 @@ internal sealed class ImageChildProcess : IImageChildProcess
         }
         try { if (!process.HasExited) process.Kill(entireProcessTree: true); }
         catch (InvalidOperationException) { /* The original owned process can already have exited. */ }
-        catch (Win32Exception) { /* Disposal rechecks exit under its own bound; callbacks must not crash Host. */ }
+        catch (Win32Exception failure) { terminationError = failure.NativeErrorCode; }
     }
 
     public async ValueTask DisposeAsync()
@@ -72,6 +73,10 @@ internal sealed class ImageChildProcess : IImageChildProcess
         Terminate();
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try { await process.WaitForExitAsync(deadline.Token).ConfigureAwait(false); }
+        catch (OperationCanceledException) when (terminationError is not null)
+        {
+            throw new ReadOnlyWorkerException("preview_termination_failed", terminationError);
+        }
         finally { process.Dispose(); job?.Dispose(); }
     }
 }

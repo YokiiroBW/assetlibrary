@@ -17,13 +17,17 @@ internal static class LinuxImageSourceHandle
         var flags = noFollowCloseOnExec | (directory ? 0x10000 : 0x800);
         var descriptor = Native.OpenAt(parent is null ? -100 : parent.DangerousGetHandle().ToInt32(),
             PathEncoding.GetBytes(component + '\0'), flags);
-        if (descriptor < 0) throw new ReadOnlyWorkerException("preview_source_unavailable");
+        if (descriptor < 0)
+        {
+            var error = Marshal.GetLastPInvokeError();
+            throw new ReadOnlyWorkerException(error is 2 or 20 or 40 ? "preview_source_changed" : "preview_source_unavailable", error);
+        }
         var handle = new SafeFileHandle(descriptor, ownsHandle: true);
         try
         {
             if (Observe(handle).IsDirectory != directory)
             {
-                throw new ReadOnlyWorkerException("preview_source_unavailable");
+                throw new ReadOnlyWorkerException("preview_source_changed");
             }
 
             return handle;
