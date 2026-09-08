@@ -1,0 +1,42 @@
+{
+  "base_commit": "70ce45c743ba6d026e695c118d1927d291b37918",
+  "stage": "initial_analysis_contract_pending",
+  "windows": [
+    {
+      "id": "V03-006",
+      "title": "windows-explorer-native-integration",
+      "owner": "windows-shell-owner",
+      "branch": "codex/v03-006-windows-explorer-native-integration",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary",
+      "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+      "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0"
+    },
+    {
+      "id": "V03-007",
+      "title": "image-preview-server",
+      "owner": "preview-provider-owner",
+      "branch": "codex/v03-007-image-preview-server",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
+      "thread_id": "01a0808b-de90-7183-a946-04b2010ce5db",
+      "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db"
+    },
+    {
+      "id": "V03-008",
+      "title": "web-image-preview",
+      "owner": "web-gateway-owner",
+      "branch": "codex/v03-008-web-image-preview",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
+      "thread_id": "01a0808d-7174-7900-a2d6-9ee4ecc89779",
+      "thread_deep_link": "codex://threads/01a0808d-7174-7900-a2d6-9ee4ecc89779"
+    },
+    {
+      "id": "V03-009",
+      "title": "android-image-preview",
+      "owner": "android-client-owner",
+      "branch": "codex/v03-009-android-image-preview",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\85ca\\AssetLibrary",
+      "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
+      "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60"
+    }
+  ]
+}

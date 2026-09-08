@@ -2,7 +2,7 @@
   "generator": "scripts/generate_assetlink_sdks.py",
   "generator_version": 1,
   "contract_root": "contracts/assetlink",
-  "contract_sha256": "a126d81336b362e19af477921fca8bfff1eb90972ccd8c39685e838904eddf83",
+  "contract_sha256": "90a1427c8d6c70614f8e329d69d2cfa4f0c8d9c09d857bbce929ed241a807d9c",
   "schema_count": 21,
   "message_count": 20,
   "messages": [
@@ -1010,11 +1010,11 @@
     }
   ],
   "generated_files": {
-    "dotnet/.contract-source.sha256": "f61ef83cc05d7862dafadae701b818ba6c61f1f64a6ea7c4fb3cb22fa97d81b7",
-    "dotnet/AssetLink.Generated.cs": "0cd851fda60461c1410d40e464800e0f4809e78bf95741017a2d4f6087f4e28b",
-    "kotlin/.contract-source.sha256": "f61ef83cc05d7862dafadae701b818ba6c61f1f64a6ea7c4fb3cb22fa97d81b7",
-    "kotlin/src/main/kotlin/app/assetlibrary/assetlink/AssetLink.Generated.kt": "c2b11c6cb0c258f7d6c5f537f1816de645ff1890770516fc2abbb7e603e14d94",
-    "typescript/.contract-source.sha256": "f61ef83cc05d7862dafadae701b818ba6c61f1f64a6ea7c4fb3cb22fa97d81b7",
-    "typescript/src/generated.ts": "77ed8d7165369870892b1e5f4ae09a19592efec3496897c9ffcdeafa8e2e9e4a"
+    "dotnet/.contract-source.sha256": "a344d5797e5e7c453f8b38efd317d19525c7a9782c2f443651f1a7ea885cdce5",
+    "dotnet/AssetLink.Generated.cs": "dd7f1ae6e921dba1c0dc13fb273ec8680984e0ea563c366f813db4e2c4a9e23d",
+    "kotlin/.contract-source.sha256": "a344d5797e5e7c453f8b38efd317d19525c7a9782c2f443651f1a7ea885cdce5",
+    "kotlin/src/main/kotlin/app/assetlibrary/assetlink/AssetLink.Generated.kt": "044e3e9b420b86fac575a5fa7e7fcade17f9b9405dfb41b56842c35956651973",
+    "typescript/.contract-source.sha256": "a344d5797e5e7c453f8b38efd317d19525c7a9782c2f443651f1a7ea885cdce5",
+    "typescript/src/generated.ts": "0918add6cd57027aa8de3547def3bc1aab3d731140c0c1696aea081115bfbf6f"
   }
 }

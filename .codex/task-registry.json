@@ -719,6 +719,99 @@
       "handoff": ".codex/handoffs/V03-004/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3"
+    },
+    {
+      "id": "V03-005",
+      "title": "parallel-browse-preview-integration",
+      "module": "parallel-browse-preview-integration",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-006",
+        "V03-007",
+        "V03-008",
+        "V03-009"
+      ],
+      "owner": "architecture-coordinator",
+      "branch": "codex/v03-005-parallel-browse-preview-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
+      "task_file": ".codex/tasks/V03-005.md",
+      "handoff": ".codex/handoffs/V03-005/summary.md",
+      "thread_deep_link": "",
+      "milestone": "V0.3"
+    },
+    {
+      "id": "V03-006",
+      "title": "windows-explorer-native-integration",
+      "module": "windows-explorer-native-integration",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-002",
+        "V01-024"
+      ],
+      "owner": "windows-shell-owner",
+      "branch": "codex/v03-006-windows-explorer-native-integration",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary",
+      "task_file": ".codex/tasks/V03-006.md",
+      "handoff": ".codex/handoffs/V03-006/summary.md",
+      "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
+      "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+      "milestone": "V0.3",
+      "execution_status": "waiting_on_native_command_approval"
+    },
+    {
+      "id": "V03-007",
+      "title": "image-preview-server",
+      "module": "image-preview-server",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-017",
+        "V01-024"
+      ],
+      "owner": "preview-provider-owner",
+      "branch": "codex/v03-007-image-preview-server",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\021c\\AssetLibrary",
+      "task_file": ".codex/tasks/V03-007.md",
+      "handoff": ".codex/handoffs/V03-007/summary.md",
+      "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
+      "thread_id": "01a0808b-de90-7183-a946-04b2010ce5db",
+      "milestone": "V0.3",
+      "execution_status": "waiting_on_native_command_approval"
+    },
+    {
+      "id": "V03-008",
+      "title": "web-image-preview",
+      "module": "web-image-preview",
+      "status": "in_progress",
+      "depends_on": [
+        "V01-025"
+      ],
+      "owner": "web-gateway-owner",
+      "branch": "codex/v03-008-web-image-preview",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\a25c\\AssetLibrary",
+      "task_file": ".codex/tasks/V03-008.md",
+      "handoff": ".codex/handoffs/V03-008/summary.md",
+      "thread_deep_link": "codex://threads/01a0808d-7174-7900-a2d6-9ee4ecc89779",
+      "thread_id": "01a0808d-7174-7900-a2d6-9ee4ecc89779",
+      "milestone": "V0.3",
+      "execution_status": "waiting_on_native_command_approval"
+    },
+    {
+      "id": "V03-009",
+      "title": "android-image-preview",
+      "module": "android-image-preview",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-003"
+      ],
+      "owner": "android-client-owner",
+      "branch": "codex/v03-009-android-image-preview",
+      "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\85ca\\AssetLibrary",
+      "task_file": ".codex/tasks/V03-009.md",
+      "handoff": ".codex/handoffs/V03-009/summary.md",
+      "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
+      "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
+      "milestone": "V0.3",
+      "execution_status": "waiting_on_native_command_approval"
     }
   ]
 }
