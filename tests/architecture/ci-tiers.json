@@ -80,7 +80,8 @@
       "artifacts": [
         "platform-unittest-windows",
         "platform-unittest-ubuntu",
-        "android-native-evidence"
+        "android-native-evidence",
+        "windows-read-adapter-evidence"
       ],
       "failure_policy": "A failure blocks the affected platform; a missing required runner or platform skip leaves its release evidence open.",
       "commands": [
@@ -90,7 +91,15 @@
         "python -I -B scripts/export_native_theme.py --check",
         "bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:assembleDebug :app:assembleRelease :app:testDebugUnitTest :app:lintDebug :app:dependencyInventory",
         "python -I -B scripts/validate_android_dependencies.py --inventory apps/android/app/build/reports/runtime-dependency-inventory.tsv --gradle-cache .runtime/gradle-home --apk apps/android/app/build/outputs/apk/debug/app-debug.apk --audit-output .runtime/android-dependency-audit.json",
-        "bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.WorkspaceUiTest"
+        "bash apps/android/gradlew -p apps/android --no-daemon --dependency-verification strict :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=app.assetlibrary.android.WorkspaceUiTest",
+        "dotnet restore apps/windows-client/AssetLibrary.Windows.slnx --locked-mode",
+        "dotnet format apps/windows-client/AssetLibrary.Windows.slnx --verify-no-changes --no-restore",
+        "dotnet build apps/windows-client/AssetLibrary.Windows.slnx --configuration Release --no-restore",
+        "dotnet test apps/windows-client/AssetLibrary.Windows.slnx --configuration Release --no-build --no-restore --filter \"TestCategory!=NativeLive\"",
+        "dotnet package list --project apps/windows-client/AssetLibrary.Windows.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/windows-vulnerabilities.json",
+        "python scripts/validate_dotnet_dependencies.py --solution apps/windows-client/AssetLibrary.Windows.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/windows-vulnerabilities.json",
+        "cmake -S tests/windows-shell -B .runtime/explorer-proof -G \"Visual Studio 17 2022\" -A x64",
+        "cmake --build .runtime/explorer-proof --config Release --parallel 2"
       ],
       "skip_policy": "A platform skip is evidence of a missing gate, never a pass for that platform."
     },
@@ -122,7 +131,7 @@
     "dotnet": "Active in V01-001: fixed SDK, locked restore, format, Release build, non-empty MSTest, vulnerability, license, duplicate-code, Roslyn complexity and sensitive-log gates run in fast-merge. Integration, contract and migration suites must join the same solution when their owning production tasks activate them.",
     "typescript": "Active for the generated AssetLink SDK in V01-002 and the authenticated read-only Web consumer in V01-006: exact Node.js 24 LTS, pnpm and TypeScript versions; frozen installs, generator formatting/drift, lint, typecheck, production build, Node unit tests, Chromium browser regressions, audit, license, integrity, size and sensitive-log gates run in fast-merge.",
     "android": "Active in V03-003: fixed AGP/Kotlin/Compose and SDK packages, Gradle strict locks/verification, Debug/Release compile, Android lint, JVM protocol/state tests, selected real API36 Compose instrumentation, runtime POM-license/OSV/integrity/APK-size audit. Real Core/PostgreSQL client evidence is provided separately by V03-003/004; missing devices or skipped platform runs do not count as passing evidence.",
-    "cpp": "Production Shell activation remains blocked by M0-002 gates; its first approved build must add MSVC/CMake formatting/static analysis, ABI/export, forbidden-link, dependency vulnerability/license and fault tests.",
+    "cpp": "Production Shell activation remains blocked by M0-002-G1..G4. V03-002 activates a test-only C++17/Windows SDK10.0.26100.0 DefView build with MSVC warnings/errors/static analysis and owner-guarded HKCU probes. CI compiles the probe but does not register or claim real Explorer discovery, UI or soak evidence.",
     "database": "Active in V01-003: the production manifest and PostgreSQL 16.15 job enforce forward migration, verified pre-migration backup, empty-database restore/replay, checksum drift, serialized ownership and least privilege. Business data access libraries remain owned by their first real infrastructure use case.",
     "release_labs": "Capacity, sudden-power-loss, administrator SCM, Docker hardening, Provider hard-sandbox and soak commands may be added only after their task names an approved runner, fixed sandbox boundary, cleanup and artifact retention policy."
   }

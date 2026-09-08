@@ -1,5 +1,9 @@
 # 客户端功能矩阵
 
+下表描述完整目标能力。2026-09-08 原生首版实际交付见 `docs/releases/NATIVE_CLIENT_TRIAL.md`：
+Android 已交付只读 APK；Windows 用户入口按 ADR-0018 必须位于原生 Explorer，当前只有
+进程外协议组件和测试验证，实际 Explorer 加载未完成，不能把“独立客户端”列当作已交付入口。
+
 | 能力 | Web | Windows独立客户端 | Windows Explorer | Android/平板 | 浏览器扩展 |
 |---|---|---|---|---|---|
 | 资源库浏览 | 完整 | 完整 | 完整 | 完整 | 仅目标选择 |

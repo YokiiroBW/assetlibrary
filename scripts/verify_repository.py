@@ -40,6 +40,7 @@ def main() -> int:
         [sys.executable, '-B', str(ROOT / 'scripts/validate_web_dependencies.py')],
         [sys.executable, '-B', str(ROOT / 'scripts/validate_web_source.py')],
         [sys.executable, '-I', '-B', str(ROOT / 'scripts/export_native_theme.py'), '--check'],
+        [sys.executable, '-I', '-B', str(ROOT / 'scripts/validate_android_dependencies.py')],
         [
             sys.executable,
             '-B',

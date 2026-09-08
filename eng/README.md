@@ -50,3 +50,14 @@ actual response fetched by another TLS-verifying client. It must record the fixe
 OSV endpoint, exact query list, runtime-inventory SHA256, UTC `checked_at` and
 corresponding `results`; mismatched, incomplete or older-than-24-hour data fails.
 This transport option cannot replace missing results with a clean audit.
+
+## Windows adapter and Explorer evidence
+
+`apps/windows-client/README.md` records the separate all-net10.0 solution commands;
+it uses the same central test dependencies and existing dependency validator.
+The platform workflow builds and tests this read adapter and compiles the
+test-only C++17 DefView project with Windows SDK 10.0.26100.0. It does not register
+Shell extensions on a CI runner or turn its build into Windows 11 Explorer evidence.
+The owner-guarded local registration/probe command is documented in
+`tests/windows-shell/README.md`. Real Explorer discovery, fault/latency and soak
+remain explicitly blocked by M0-002-G1..G4; no Windows installer is published.

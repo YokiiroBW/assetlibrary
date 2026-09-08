@@ -106,3 +106,5 @@
 M0-009 已冻结架构，当前处于 V0.1 受控实现。先运行 `python -I -B scripts/verify_repository.py`；`python -I -B scripts/validate_v0_1_alpha.py` 应通过有效性审计并保持发布 blocked，`python -B tests/architecture/check_release_gates.py --target v0.1-start` 允许受控开发。
 
 原生 .NET 使用 `global.json` 的精确 SDK：`dotnet restore AssetLibrary.slnx --locked-mode`、`dotnet format AssetLibrary.slnx --verify-no-changes --no-restore`、`dotnet build AssetLibrary.slnx --configuration Release --no-restore`、`dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore`。Web/SDK、依赖、数据库和平台的真实命令统一见 `tests/architecture/ci-tiers.json`、对应 workflow 及 `eng/README.md`，不得自造测试层级或将平台缺证据记为通过。
+
+Android 原生只读首版的实际 Gradle/SDK、lint、协议、仪器与依赖审计命令见 `apps/android/README.md`；Windows 只读适配的独立 solution 命令见 `apps/windows-client/README.md`，test-only C++ 验证见 `tests/windows-shell/README.md`。用户已明确 Windows 必须以原生 Explorer 为入口（ADR-0018），独立适配测试不能宣称内嵌完成；当前真实入口阻断与 M0-002-G1..G4 仍须解决。Android 的 API36 模拟器证据不能替代 HyperOS/Android11 真机或完整 V0.3 发布证据。

@@ -35,8 +35,8 @@ def check_source(root: Path) -> set[tuple[str, str, str]]:
             selected = lambda path: [line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith(keys)]
             if selected(native) != selected(baseline):
                 raise ValueError("Android Gradle distribution differs from the pinned SDK distribution")
-    if not (app / "app/gradle.lockfile").is_file():
-        raise ValueError("Android resolved dependency lock is missing")
+    if any(not (app / name).is_file() for name in ("app/gradle.lockfile", "buildscript-gradle.lockfile")):
+        raise ValueError("Android application or plugin dependency lock is missing")
     metadata = ET.parse(app / "gradle/verification-metadata.xml").getroot()
     if metadata.findtext("v:configuration/v:verify-metadata", namespaces=NS) != "true":
         raise ValueError("Gradle metadata verification must stay enabled")
