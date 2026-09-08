@@ -98,11 +98,13 @@ internal sealed class ImageChildProcess : IImageChildProcess
         Terminate();
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try { await process.WaitForExitAsync(deadline.Token).ConfigureAwait(false); }
-        catch (OperationCanceledException) when (terminationError is not null)
+        catch (OperationCanceledException failure)
         {
-            throw new ReadOnlyWorkerException("preview_termination_failed", terminationError);
+            Exception cause = terminationError is null ? failure : new ReadOnlyWorkerException("preview_termination_failed", terminationError);
+            throw new ImageChildCleanupPendingException(ReapUnassignedAsync(process, job), cause);
         }
-        finally { process.Dispose(); job?.Dispose(); }
+        process.Dispose();
+        job?.Dispose();
     }
 }
 

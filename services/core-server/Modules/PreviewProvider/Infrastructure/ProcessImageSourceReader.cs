@@ -39,9 +39,14 @@ internal sealed class ProcessImageSourceReader(ReadOnlyWorkerProcessOptions opti
             await process.Output.ReadExactlyAsync(digest, cancellationToken).ConfigureAwait(false);
             return new ProcessImageSourceLease(process, ready.Length, digest, diagnostics);
         }
-        catch
+        catch (Exception primary)
         {
-            await process.DisposeAsync().ConfigureAwait(false);
+            try { await process.DisposeAsync().ConfigureAwait(false); }
+            catch (ImageChildCleanupPendingException pending)
+            {
+                throw new ImageDecoderCleanupPendingException(pending.Completion,
+                    primary is ImagePreviewException known ? known.Failure : ImagePreviewFailure.Unavailable);
+            }
             throw;
         }
     }
@@ -96,7 +101,11 @@ internal sealed class ProcessImageSourceLease(ImageChildProcess process, long le
     {
         if (disposed) return;
         disposed = true;
-        await process.DisposeAsync().ConfigureAwait(false);
+        try { await process.DisposeAsync().ConfigureAwait(false); }
+        catch (ImageChildCleanupPendingException pending)
+        {
+            throw new ImageDecoderCleanupPendingException(pending.Completion, ImagePreviewFailure.Unavailable);
+        }
         try { await diagnostics.ConfigureAwait(false); }
         catch (Exception failure) when (failure is IOException or ObjectDisposedException or OperationCanceledException)
         {

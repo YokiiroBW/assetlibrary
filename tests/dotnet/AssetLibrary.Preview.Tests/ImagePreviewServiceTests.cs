@@ -86,6 +86,42 @@ public sealed class ImagePreviewServiceTests
             await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None));
         Assert.AreEqual(ImagePreviewFailure.Busy, busy.Failure);
         cleanup.SetResult();
+        await AssertAdmissionReturnsAsync(service, scenario);
+    }
+
+    [TestMethod]
+    public async Task SourceReapDelayRetainsItsSlotAfterTheResponseHasFinished()
+    {
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var scenario = new ImageServiceScenario { SourceCleanup = completion.Task };
+        using var service = scenario.Service();
+        var first = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        await first.DisposeAsync();
+        scenario.SourceCleanup = null;
+        await using var second = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        var busy = await Assert.ThrowsExactlyAsync<ImagePreviewException>(async () =>
+            await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None));
+        Assert.AreEqual(ImagePreviewFailure.Busy, busy.Failure);
+        completion.SetResult();
+        await AssertAdmissionReturnsAsync(service, scenario);
+    }
+
+    [TestMethod]
+    public async Task FailedSourceCleanupQuarantinesCapacityInsteadOfAdmittingUnboundedWorkers()
+    {
+        var scenario = new ImageServiceScenario { SourceCleanupFails = true };
+        using var service = scenario.Service();
+        var first = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        var second = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        await first.DisposeAsync();
+        await second.DisposeAsync();
+        var busy = await Assert.ThrowsExactlyAsync<ImagePreviewException>(async () =>
+            await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None));
+        Assert.AreEqual(ImagePreviewFailure.Busy, busy.Failure);
+    }
+
+    private static async Task AssertAdmissionReturnsAsync(ImagePreviewService service, ImageServiceScenario scenario)
+    {
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(1));
         while (true)
         {
@@ -112,6 +148,8 @@ internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSour
     public bool Changed { get; set; }
     public bool Offline { get; init; }
     public Task? PendingCleanup { get; set; }
+    public Task? SourceCleanup { get; set; }
+    public bool SourceCleanupFails { get; init; }
     public ImagePreviewService Service() => new(this, this, this, NullLogger<ImagePreviewService>.Instance);
     public ValueTask<LibraryScanTarget?> FindAsync(LibraryId libraryId, CancellationToken cancellationToken) =>
         ValueTask.FromResult<LibraryScanTarget?>(new(libraryId, StorageSourceId.New(),
@@ -136,5 +174,11 @@ internal sealed class ScenarioSourceLease(ImageServiceScenario scenario) : IImag
     public ValueTask CopyToAsync(Stream output, CancellationToken cancellationToken) => throw new NotSupportedException();
     public ValueTask VerifyAsync(CancellationToken cancellationToken) => scenario.Changed
         ? ValueTask.FromException(new ImagePreviewException(ImagePreviewFailure.SourceChanged)) : ValueTask.CompletedTask;
-    public ValueTask DisposeAsync() { scenario.Disposed++; return ValueTask.CompletedTask; }
+    public ValueTask DisposeAsync()
+    {
+        scenario.Disposed++;
+        if (scenario.SourceCleanupFails) return ValueTask.FromException(new IOException("Synthetic source cleanup failure."));
+        return scenario.SourceCleanup is null ? ValueTask.CompletedTask
+            : ValueTask.FromException(new ImageDecoderCleanupPendingException(scenario.SourceCleanup));
+    }
 }

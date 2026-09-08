@@ -42,6 +42,11 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
             if (child.ExitCode != 0) throw new ImagePreviewException(ImagePreviewFailure.Unavailable);
             return png;
         }
+        catch (ImageChildCleanupPendingException pending)
+        {
+            throw new ImageDecoderCleanupPendingException(pending.Completion,
+                deadline.IsCancellationRequested ? ImagePreviewFailure.Timeout : ImagePreviewFailure.Unavailable);
+        }
         catch (ImageDecoderCleanupPendingException)
         {
             throw;
@@ -71,7 +76,8 @@ internal sealed class IsolatedImageDecoder(string executable, string profileDire
         IImageChildProcess child;
         try { child = await startup.ConfigureAwait(false); }
         catch (OperationCanceledException) { return; }
-        await child.DisposeAsync().ConfigureAwait(false);
+        try { await child.DisposeAsync().ConfigureAwait(false); }
+        catch (ImageChildCleanupPendingException pending) { await pending.Completion.ConfigureAwait(false); }
     }
 
     private IImageChildProcess Start(CancellationToken token)

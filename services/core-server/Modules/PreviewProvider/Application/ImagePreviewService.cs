@@ -40,7 +40,7 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
                 await physical.VerifyAsync(cancellationToken).ConfigureAwait(false);
                 cache.Store(key, png);
             }
-            return new ImagePreviewLease(png, physical, Release);
+            return new ImagePreviewLease(png, physical, CloseSourceAsync);
         }
         catch (ImageDecoderCleanupPendingException pending)
         {
@@ -52,8 +52,8 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
         }
         catch
         {
-            try { if (physical is not null) await physical.DisposeAsync().ConfigureAwait(false); }
-            finally { Release(); }
+            if (physical is null) Release();
+            else await CloseSourceAsync(physical).ConfigureAwait(false);
             throw;
         }
     }
@@ -73,7 +73,7 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
     {
         try
         {
-            var sourceCleanup = physical?.DisposeAsync().AsTask() ?? Task.CompletedTask;
+            var sourceCleanup = physical is null ? Task.CompletedTask : WaitForSourceCleanupAsync(physical);
             await Task.WhenAll(sourceCleanup, startup).ConfigureAwait(false);
             Release();
         }
@@ -84,13 +84,36 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
         }
     }
 
+    private async ValueTask CloseSourceAsync(IImageSourceLease source)
+    {
+        try
+        {
+            await source.DisposeAsync().ConfigureAwait(false);
+            Release();
+        }
+        catch (ImageDecoderCleanupPendingException pending)
+        {
+            _ = ReleaseAfterCleanupAsync(pending.Completion, null);
+        }
+        catch (Exception failure)
+        {
+            ImagePreviewLog.CleanupFailed(logger, failure.GetType().Name);
+        }
+    }
+
+    private static async Task WaitForSourceCleanupAsync(IImageSourceLease source)
+    {
+        try { await source.DisposeAsync().ConfigureAwait(false); }
+        catch (ImageDecoderCleanupPendingException pending) { await pending.Completion.ConfigureAwait(false); }
+    }
+
     private void Release()
     {
         lock (lifecycle) { if (!disposed) capacity.Release(); }
     }
 }
 
-internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, Action release) : IImagePreviewLease
+internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, Func<IImageSourceLease, ValueTask> cleanup) : IImagePreviewLease
 {
     private bool disposed;
     public ReadOnlyMemory<byte> Png => png;
@@ -99,8 +122,7 @@ internal sealed class ImagePreviewLease(byte[] png, IImageSourceLease source, Ac
     {
         if (disposed) return;
         disposed = true;
-        try { await source.DisposeAsync().ConfigureAwait(false); }
-        finally { release(); }
+        await cleanup(source).ConfigureAwait(false);
     }
 }
 
