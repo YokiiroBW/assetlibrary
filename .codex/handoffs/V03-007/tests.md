@@ -86,3 +86,13 @@ root补证：NAS实现d18b224合为9b72499后，dev-230干净Git检查点0f4d0c6
 root实际0f4d0c6 Docker Step26中，image-preview restore35.29秒成功，但publish NETSDK1112失败：未下载Microsoft.NETCore.App.Runtime.linux-x64。原因是restore未显式SelfContained，而publish使用--self-contained true；开发机已有runtime pack缓存不能证明干净镜像依赖恢复完整。此真实构建失败保留，不因文件/清单测试通过而抹去。
 
 00b03b176a65e18655e8886ad183d785c9559661仅在NAS worker restore补-p:SelfContained=true，并同步自有Worker README/packaging-review/Windows transfer命令，保持locked restore和--no-restore publish；锁未改变。新增测试从实际Docker指令解析恢复/发布参数，对RID、AOT、SelfContained、release-lock及locked/no-restore边界做一致性断言，避免再次出现跨阶段依赖图漂移。精确新NAS测试命令执行12项：10通过、0失败、2POSIX本机缺平台，70ms；旧POSIX2项已有root同源码Linux证据，不重复算缺口。任务逻辑测试汇总144通过/0测试失败/1本机叶symlink缺证据，但实际镜像build在修复后仍待root重新执行。
+
+## 实际包通过与test-only NAS harness
+
+root新的干净a12b0d139765357b1e33437a4c7a34823dd556ad先Linux12/12无skip，随后实际AOT发布/out-image-preview与整NAS包built_not_deployed成功；此前NETSDK1112已被实际复验解决。Core image SHA2dd1f17c28be1969b6488c5afe14499c71f7f26aa5d36c179b09768056cf54f0，离线images.tar 783892992B/SHA5951b75d46b46c14124885bb71f0cdf7b1c4b3713d495d312861085836bf0626。原失败中间容器aaad47755157由root核身份/退出状态后清理。root完整solution360通过/0失败/25明确平台/PG未执行、零告警，单独报告不累计到本任务重叠逻辑例。
+
+c5495f7308903aabe2a356ca496c777f5b9287b0新增tests/integration/native-clients/verify_nas_worker.py，目标系统Python3.8.15；ast.parse(feature_version=(3,8))和--help通过，本机原生Python可导入运行。固定manifest10输入内容身份通过；已有真实Skia sBIT PNG正例及截断/尾随/错尺寸/长度上限/CRC五坏例全部按预期；有界reader精确上限与超限两分支通过。实际本机Python子进程三场景：正常输出、300000B超过262144B stdout限额、20秒sleep被0.2秒deadline中止，全部子进程确认returncode非None；这些为harness单项自检，不计NAS原生用例通过数。
+
+脚本每Docker control20秒、ready10秒、worker25秒、全组600秒；stderr16KiB、PNG按2MiB/12MiB+24-byte header、probe16KiB。Core镜像身份/commit/固定Worker path核对；每新容器设置并inspect校验1654:1654、cap_drop ALL、NNP、init、readonly、networknone、1GiB、cpu-shares1024、tmpfs64m，不设置CFS/PID上限或seccomp覆盖。原样例不挂载，只ready后发有界字节。CPU必须137/OOMfalse/非parent timeout；threads必须真实created>0且内部passed（含join）；保存initial seccomp/io_uring而不把外层拒绝冒充新增隔离证据。输出仅安全JSON/派生PNG，完整ID ledger与逐项cleanup verification，失败也finally核身份后删除并查询不存在。
+
+运行入口：python3 -I -B verify_nas_worker.py --build-manifest <verified-bundle>/build-manifest.json --corpus <fixed-image-preview-v1> --marker <existing-daemon-visible-readonly-canary> --evidence <new-directory-under-owned-parent>。Target NAS kernel5.10.55+/Docker24.0.2/Python3.8.15由root执行，本窗口未连接NAS。实际20项仍待root结果，parent-death后续单列。
