@@ -209,6 +209,7 @@ try {
         await checkpoint(`case:${sample.path}`);
         const row = option(sample);
         await row.scrollIntoViewIfNeeded();
+        const trigger = await row.elementHandle();
         let thumbnailDimensions;
         if (sample.result === "image") {
           await expect(row.locator(".image-thumbnail img")).toBeVisible({ timeout: 25_000 });
@@ -293,7 +294,16 @@ try {
         await page.keyboard.press("Escape");
         await expect(dialog).toHaveCount(0);
         await expect(page).toHaveURL(before);
-        await expect(row).toBeFocused();
+        await checkpoint(`close_and_focus:${sample.path}`);
+        const triggerSurvived = await trigger.evaluate((element) => element.isConnected);
+        receipt.last_focus = {
+          case: sample.path,
+          trigger_survived: triggerSurvived,
+          active_id: await page.evaluate(() => document.activeElement?.id ?? ""),
+        };
+        if (triggerSurvived) await expect(row).toBeFocused();
+        else await expect(page.locator("#workspace-content")).toBeFocused();
+        await trigger.dispose();
       }
       const jpeg = receipt.cases.find((item) => item.case === "landscape.jpg" && item.variant === "preview");
       const renamed = receipt.cases.find((item) => item.case === "中文目录/重复内容.dat" && item.variant === "preview");
