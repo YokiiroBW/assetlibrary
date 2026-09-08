@@ -7,7 +7,7 @@ namespace AssetLibrary.WebGateway.Tests;
 
 internal static class TrialHostIntegrationConfiguration
 {
-    public static async Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings)
+    public static async Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null)
     {
         var state = Path.Combine(settings.RuntimeRoot, "state");
         TrialHostIntegrationPrivateDirectory.Create(state);
@@ -16,7 +16,7 @@ internal static class TrialHostIntegrationConfiguration
         var password = Convert.ToBase64String(RandomNumberGenerator.GetBytes(24));
         var certificateFile = Path.Combine(state, "tls.pfx");
         var passwordFile = Path.Combine(state, "tls-password");
-        var certificate = TrialTestTls.CreatePkcs12(password);
+        var certificate = TrialTestTls.CreatePkcs12(password, certificateValidity);
         try
         {
             await File.WriteAllBytesAsync(certificateFile, certificate);

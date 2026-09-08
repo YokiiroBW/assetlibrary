@@ -14,6 +14,12 @@ internal static class TrialHostIntegrationCertificateContainer
     {
         if (path is not null)
         {
+            if (File.Exists(path))
+            {
+                // Data Protection retains certificate copies until the disposed host graph is collected.
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
             Assert.IsFalse(File.Exists(path), "The owned Windows TLS key container was removed on disposal.");
         }
     }

@@ -7,20 +7,23 @@ namespace AssetLibrary.IntegrationTestSupport;
 
 internal static class TrialTestTls
 {
-    public static byte[] CreatePkcs12(string? password = null)
+    public static byte[] CreatePkcs12(string? password = null, TimeSpan? validity = null)
     {
-        using var generated = CreateSelfSigned();
+        using var generated = CreateSelfSigned(validity: validity);
         return generated.Export(X509ContentType.Pkcs12, password);
     }
 
-    public static X509Certificate2 CreateSelfSigned(string hostname = "localhost")
+    public static X509Certificate2 CreateSelfSigned(string hostname = "localhost", TimeSpan? validity = null)
     {
+        var duration = validity ?? TimeSpan.FromHours(1);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(duration, TimeSpan.Zero);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(duration, TimeSpan.FromHours(3));
         using var rsa = RSA.Create(2048);
         var request = new CertificateRequest($"CN={hostname}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var names = new SubjectAlternativeNameBuilder();
         names.AddDnsName(hostname);
         request.CertificateExtensions.Add(names.Build());
-        return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.AddHours(1));
+        return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-1), DateTimeOffset.UtcNow.Add(duration));
     }
 
     public static X509Certificate2 Certificate()

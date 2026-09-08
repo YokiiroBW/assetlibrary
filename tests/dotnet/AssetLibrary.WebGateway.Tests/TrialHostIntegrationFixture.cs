@@ -38,12 +38,12 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
     public TrialHostIntegrationAuthentication Authentication { get; }
     public HttpClient Client { get; }
     public X509Certificate2 Certificate => certificate;
-    public GatewayAuthenticationRuntime Runtime => application.Services.GetRequiredService<GatewayAuthenticationRuntime>();
+    public GatewayAuthenticationRuntime Runtime => Services.GetRequiredService<GatewayAuthenticationRuntime>();
     public IServiceProvider Services => application.Services;
 
-    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings)
+    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null)
     {
-        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings);
+        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings, certificateValidity);
         var certificate = await TrialCertificate.LoadAsync(configuration, CancellationToken.None);
         TrialDatabaseConnections? connections = null;
         PostgresDatabaseReadinessProbe? readiness = null;
@@ -72,8 +72,7 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
 
     public async Task RestartAsync()
     {
-        await application.StopAsync();
-        await application.DisposeAsync();
+        await ReleaseApplicationAsync();
         application = BuildApplication();
         await application.StartAsync();
     }
@@ -82,8 +81,7 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
     {
         try
         {
-            await application.StopAsync();
-            await application.DisposeAsync();
+            await ReleaseApplicationAsync();
         }
         finally
         {
@@ -93,6 +91,17 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
             await connections.DisposeAsync();
             certificate.Dispose();
             TrialHostIntegrationCertificateContainer.AssertRemoved(ownedTlsKeyContainer);
+        }
+    }
+
+    private async Task ReleaseApplicationAsync()
+    {
+        var previous = application;
+        application = null!;
+        if (previous is not null)
+        {
+            await previous.StopAsync();
+            await previous.DisposeAsync();
         }
     }
 
