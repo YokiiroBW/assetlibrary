@@ -744,7 +744,7 @@
       "id": "V03-006",
       "title": "windows-explorer-native-integration",
       "module": "windows-explorer-native-integration",
-      "status": "partial",
+      "status": "in_progress",
       "depends_on": [
         "V01-002",
         "V01-024"
@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "diagnostics_integrated_waiting_for_connected_desktop"
+      "execution_status": "owning_windows_image_confinement_completion_explorer_desktop_pending"
     },
     {
       "id": "V03-007",
@@ -776,7 +776,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de90-7183-a946-04b2010ce5db",
       "thread_id": "01a0808b-de90-7183-a946-04b2010ce5db",
       "milestone": "V0.3",
-      "execution_status": "implementing_isolated_decoder_and_real_host_endpoint"
+      "execution_status": "core_broker_cache_host_integration_with_linux_and_windows_validation_delegated"
     },
     {
       "id": "V03-008",
