@@ -1,0 +1,9 @@
+{
+  "Label": "clsid",
+  "Utc": "2026-09-09T15:34:46.0464701+00:00",
+  "Pid": 13720,
+  "ExitCode": 0,
+  "TimedOut": false,
+  "Stdout": "{\"stage\":\"parse.before\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132328,\"proofLoaded\":false,\"proofPathMatches\":false}\r\n{\"stage\":\"parse.after\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132328,\"proofLoaded\":false,\"proofPathMatches\":false}\r\n{\"parsedPidlBytes\":22}\r\n{\"stage\":\"desktop\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132328,\"proofLoaded\":false,\"proofPathMatches\":false}\r\n{\"stage\":\"bind.before\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132328,\"proofLoaded\":false,\"proofPathMatches\":false}\r\n{\"stage\":\"bind.after\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"stage\":\"classId\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"classId\":\"{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}\"}\r\n{\"stage\":\"currentFolder\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"currentPidlBytes\":22,\"currentMatchesParsed\":true}\r\n{\"stage\":\"enum.begin\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"childIndex\":0,\"attributeHr\":\"00000000\",\"attributes\":\"a8040000\"}\r\n{\"stage\":\"enum.end\",\"hr\":\"00000001\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"childCount\":1,\"limitReached\":false}\r\n{\"stage\":\"parentAttributes\",\"hr\":\"00000000\",\"pid\":13720,\"tick\":207132343,\"proofLoaded\":true,\"proofPathMatches\":true}\r\n{\"rootAttributes\":\"a8040000\"}\r\n",
+  "Stderr": ""
+}

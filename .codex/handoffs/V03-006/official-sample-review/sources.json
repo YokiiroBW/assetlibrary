@@ -1,0 +1,219 @@
+{
+  "recordedUtc": "2026-09-09T15:42:30.923114+00:00",
+  "pinnedRevision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+  "revisionMethod": "git ls-remote then fetched commit/tree; selected raw bytes verified against git ls-tree blob SHA1",
+  "localHead": "81e86dc8de5fbe1e850910a4bad6d3c3dea723c9",
+  "officialSampleBuildPerformed": false,
+  "officialSampleRegistrationOrExecutionPerformed": false,
+  "officialFiles": [
+    {
+      "file": "LICENSE",
+      "status": "downloaded_verified",
+      "gitBlob": "02a131eabfe560723b3a70efc5ac2a150eac967a",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/LICENSE",
+      "sha256": "3645a237b872306e4955bc2ce75783537bd7123bcb57332f8819e4cfbcf50b45",
+      "bytes": 1231,
+      "lines": 24,
+      "runtimePath": ".runtime/explorer-official-review/LICENSE"
+    },
+    {
+      "file": "Category.cpp",
+      "status": "unavailable",
+      "gitBlob": "91ddae4a51fff46b316fce46eeb8b9ddaddbe8c3",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Category.cpp",
+      "reason": "Pinned source unavailable after bounded network requests; no substitute text used"
+    },
+    {
+      "file": "Category.h",
+      "status": "downloaded_verified",
+      "gitBlob": "380d5105ced43c45183c44a049a8c3efa5f6198e",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Category.h",
+      "sha256": "9a68a36f44d2aef1a9c3c9a7b090a843b0c9117f199b4f0c68e8753293c81f03",
+      "bytes": 5511,
+      "lines": 166,
+      "runtimePath": ".runtime/explorer-official-review/Category.h"
+    },
+    {
+      "file": "ContextMenu.cpp",
+      "status": "downloaded_verified",
+      "gitBlob": "983e6dc45b10331db1c26001f2ca39a67bd5206b",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ContextMenu.cpp",
+      "sha256": "171e89abc348e2b613216573f5419afde73f137e75e2cc87f353e93c362f8408",
+      "bytes": 7080,
+      "lines": 261,
+      "runtimePath": ".runtime/explorer-official-review/ContextMenu.cpp"
+    },
+    {
+      "file": "Dll.cpp",
+      "status": "cached_verified",
+      "gitBlob": "24b66f35fe8794f2fe3d6b719b5936fd493526b1",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Dll.cpp",
+      "sha256": "d9d89fa1c3288e4957426af49a61d6c31b90cd00aed8f6924c6eed1ef2630c19",
+      "bytes": 13575,
+      "lines": 376,
+      "runtimePath": ".runtime/explorer-official-review/Dll.cpp"
+    },
+    {
+      "file": "ExplorerDataProvider.cpp",
+      "status": "cached_verified",
+      "gitBlob": "95c3449bfd1b93a489469e350371e42031ad2e24",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.cpp",
+      "sha256": "52d60bc4a5c21a131d4ea87d6c492edf815a813cd4e8dfb4d8be064f1259588b",
+      "bytes": 45981,
+      "lines": 1428,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.cpp"
+    },
+    {
+      "file": "ExplorerDataProvider.def",
+      "status": "cached_verified",
+      "gitBlob": "bd0ac476da3792e6e72f1ffc6fd38a263b0a0756",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.def",
+      "sha256": "2359c19000e74b0fd3ff35761946c3acbad44f7ff0ac321c1f81e7b3f3c39f96",
+      "bytes": 126,
+      "lines": 5,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.def"
+    },
+    {
+      "file": "ExplorerDataProvider.propdesc",
+      "status": "downloaded_verified",
+      "gitBlob": "a6d07710622f238c47fe3b82686dc6926c875cfb",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.propdesc",
+      "sha256": "637860f5efdc5ae1eedeb5628bda3ba937916e25a9e65fc3038b04b46e020245",
+      "bytes": 1845,
+      "lines": 31,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.propdesc"
+    },
+    {
+      "file": "ExplorerDataProvider.rc",
+      "status": "downloaded_verified",
+      "gitBlob": "629b31b1c0f680e09fffd8b640ed427c8599a49d",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.rc",
+      "sha256": "601492e508241b3bece37bcdd4646b18147181a4ba47979a7938979523ee2d85",
+      "bytes": 1843,
+      "lines": 59,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.rc"
+    },
+    {
+      "file": "ExplorerDataProvider.sln",
+      "status": "downloaded_verified",
+      "gitBlob": "a9d5f4ccd12f08f30b823acaa89d2aed2b2fedd7",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.sln",
+      "sha256": "907f6482f87861c23afd4aab75112de0b3e32303370941adb1bc8de3bf03383c",
+      "bytes": 1229,
+      "lines": 25,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.sln"
+    },
+    {
+      "file": "ExplorerDataProvider.vcproj",
+      "status": "cached_verified",
+      "gitBlob": "3249bbbbaa7b3ee59d1b054ad81c0f9ba9d389e2",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/ExplorerDataProvider.vcproj",
+      "sha256": "69dfb080752304d62037c16b223bca6e3c2f47776e43cbd51692d6b239d4abad",
+      "bytes": 9730,
+      "lines": 438,
+      "runtimePath": ".runtime/explorer-official-review/ExplorerDataProvider.vcproj"
+    },
+    {
+      "file": "FVCommands.cpp",
+      "status": "downloaded_verified",
+      "gitBlob": "bf9f2f2254862db5b3d4d53ed3ed85468b678e15",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/FVCommands.cpp",
+      "sha256": "30b960444e807140fb8b70838e8cbc04f49cd3d4a0d34fafa5a5029f850cfc79",
+      "bytes": 6942,
+      "lines": 242,
+      "runtimePath": ".runtime/explorer-official-review/FVCommands.cpp"
+    },
+    {
+      "file": "FVCommands.h",
+      "status": "downloaded_verified",
+      "gitBlob": "2b5d304cefd88a7c6175bd441881e00156ab0e5f",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/FVCommands.h",
+      "sha256": "2d7838440f354be0783aa82bbd689f7675d58e956f7a24b5034d6b97a2e0be52",
+      "bytes": 5757,
+      "lines": 187,
+      "runtimePath": ".runtime/explorer-official-review/FVCommands.h"
+    },
+    {
+      "file": "Guid.h",
+      "status": "downloaded_verified",
+      "gitBlob": "ca13cd1d3d8b6c257899e648e61e056b4f938939",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Guid.h",
+      "sha256": "c209223fb560b1758614153840796ae0eb2868121b13c16f6756485554c5561d",
+      "bytes": 1610,
+      "lines": 36,
+      "runtimePath": ".runtime/explorer-official-review/Guid.h"
+    },
+    {
+      "file": "README.md",
+      "status": "cached_verified",
+      "gitBlob": "1f013de2be801889081a47122029bbf02ea8a91d",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/README.md",
+      "sha256": "2e1f4e2e09969bf9071d8e0d6f756ab8407daf065b12ca90a2fe76d92aafbf72",
+      "bytes": 2108,
+      "lines": 63,
+      "runtimePath": ".runtime/explorer-official-review/README.md"
+    },
+    {
+      "file": "Utils.cpp",
+      "status": "cached_verified",
+      "gitBlob": "1c3628e42a662ab2616b1da7cd8eb06877b4574e",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Utils.cpp",
+      "sha256": "45fe38cf1bc3e6c3cd936a7987d9fe1dab189f47afff9b966f2660718bd56d4b",
+      "bytes": 3093,
+      "lines": 126,
+      "runtimePath": ".runtime/explorer-official-review/Utils.cpp"
+    },
+    {
+      "file": "Utils.h",
+      "status": "downloaded_verified",
+      "gitBlob": "c64767983c58b22455e3820c8b09e320b90f51e1",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/Utils.h",
+      "sha256": "959f3135b75735fda1a920099362cb95970a469a90155d8cdd25a97334a0ad52",
+      "bytes": 1157,
+      "lines": 32,
+      "runtimePath": ".runtime/explorer-official-review/Utils.h"
+    },
+    {
+      "file": "resource.h",
+      "status": "downloaded_verified",
+      "gitBlob": "d55ebd7752fb47d530c034af946b0d19a21d363f",
+      "url": "https://github.com/microsoft/Windows-classic-samples/blob/434f6002bdf9cf9829406c3ff2b33387982d6168/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider/resource.h",
+      "sha256": "5f43cfd5a29f5ed6f112074e2ae9328047c7308226ea56dd7d0092153d534576",
+      "bytes": 1862,
+      "lines": 44,
+      "runtimePath": ".runtime/explorer-official-review/resource.h"
+    }
+  ],
+  "localSources": [
+    {
+      "path": "tests/windows-shell/ExplorerProof.cpp",
+      "sha256": "45212f0247fa02d5a1f7c9c2fb068ea85b1c56b1197ca76ac2a1e5550a0b0bf5"
+    },
+    {
+      "path": "tests/windows-shell/registration.ps1",
+      "sha256": "3c0d50327838fd2d69dfa34e000f0c55768e9137bf072e87ca93265a0cf8d7d9"
+    },
+    {
+      "path": "tests/windows-shell/Probe.cpp",
+      "sha256": "ff8d2784c49a43c74c4e7ee96611171238c6a85a8164f2149a1e59eaa1eff1b8"
+    },
+    {
+      "path": "tests/windows-shell/DirectNavigation.cpp",
+      "sha256": "efd2d05c719998c95201f4141fef893d529c62191601ab7ab4a2eed5eade50ff"
+    },
+    {
+      "path": "tests/windows-shell/verify.ps1",
+      "sha256": "f36bf4d2f01bb69ce93d085b07684c26ebb4f363f96c46dec25a38d70a331cef"
+    },
+    {
+      "path": "tests/windows-shell/CMakeLists.txt",
+      "sha256": "49fd7182eb1e217f8cd5b54129f6f3034c3c493fd4aa89781cb3c2b607659f44"
+    }
+  ],
+  "retrievalLimitations": [
+    "GitHub REST API unauthenticated rate limit",
+    "Some PowerShell raw requests and filtered Git blob checkout reset",
+    "Category.cpp unavailable; remaining 17 files have exact pinned Git blob identities",
+    "Legacy .doc excluded from build-source retrieval"
+  ]
+}

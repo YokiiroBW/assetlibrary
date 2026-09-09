@@ -1,0 +1,64 @@
+{
+  "RecordedAtUtc": "2026-09-09T15:42:31.2289807+00:00",
+  "SourceCommit": "81e86dc8de5fbe1e850910a4bad6d3c3dea723c9",
+  "ProbeSha256": "021F3CDB6792A422C9C05D58CA5C46C8E836554A4CEC94587F10948952075D5C",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "Sdk": "10.0.26100.0",
+  "Compiler": "MSVC19.44.35228",
+  "BuildResult": "Release x64 /MD /W4 /WX /analyze, zero warnings/errors",
+  "CaseCount": 2,
+  "OwnClassBoundCases": 2,
+  "GuiActions": 0,
+  "AdditionalVariants": 0,
+  "PidlEqualityLimit": "ILIsEqual is documented as binary comparison; 920 then882 bytes were sampled at different stages. Cause unresolved; no semantic-equivalence or normalization claim.",
+  "Artifacts": [
+    {
+      "File": "build.log.txt",
+      "Sha256": "F9C25547FD7A3DD95D66B1EDC391930166CA9AC4F8F3F289BDB9FA815DD6CFC3"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "D48D5EB98E237D8906E6358563B1480D54D56F4BB5B68BC8A4D991FE21E2CFF2"
+    },
+    {
+      "File": "clsid-result.json",
+      "Sha256": "1E5E5DB788540458F7AC7F0769132EC6A0A7A0050F09E75109A6A4780450AA63"
+    },
+    {
+      "File": "CMakeLists.txt",
+      "Sha256": "9480ADB0D650E3DB537DE21C596009BA1A6579B8E7EEC979A7C1E1FDF5C1A13C"
+    },
+    {
+      "File": "filesystem-result.json",
+      "Sha256": "3DA2DDEEC3C0EC94F2D98CCCA66F2A029F0FA6A6CE7EEC042A64441076005902"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "8E18B674E5D86B2BF2E37CC060C47BADF119C9EEA5A5A2CF51862EB053200CC2"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "B01AF1205518673573D9A0711A9D7C1233CF467B5CB27D3DACC41B76DA804129"
+    },
+    {
+      "File": "PathBind.cpp.txt",
+      "Sha256": "AAAC7ADDD34B13FE869BE319487E5E921FF5655B8FCD30DF1452D94B5F752E36"
+    },
+    {
+      "File": "proof-calls.log",
+      "Sha256": "F9FDCE9AB5442F12DBC3C39D3E8644B5564A67328D4FC3D1599B2FACD7D2F857"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "DCE3FA5CE4AEEEC892795F37C548017D064C00D1B215EF661FA73156C59C85F4"
+    },
+    {
+      "File": "run.ps1.txt",
+      "Sha256": "C9120FF67ECE78A0FBED2EE8250A6FBE4B64B50B9E6577B27462D3AC043EE330"
+    },
+    {
+      "File": "validation.json",
+      "Sha256": "CBD6B7E7286CAA53F4D057A130B8FAA6600791205F8BB97D6D79D8B3EE14C4D0"
+    }
+  ]
+}

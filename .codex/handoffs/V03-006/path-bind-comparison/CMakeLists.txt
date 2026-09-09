@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_SYSTEM_VERSION "10.0.26100.0")
+project(ExplorerPathBind LANGUAGES CXX)
+add_executable(ExplorerPathBind PathBind.cpp)
+target_compile_features(ExplorerPathBind PRIVATE cxx_std_17)
+target_compile_definitions(ExplorerPathBind PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(ExplorerPathBind PRIVATE /W4 /WX /permissive- /analyze /utf-8)
+target_link_libraries(ExplorerPathBind PRIVATE ole32 shell32 shlwapi uuid)

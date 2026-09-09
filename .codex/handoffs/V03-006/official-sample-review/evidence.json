@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "file": "Dll.cpp.original.txt",
+      "sha256": "d9d89fa1c3288e4957426af49a61d6c31b90cd00aed8f6924c6eed1ef2630c19"
+    },
+    {
+      "file": "ExplorerDataProvider.def.original.txt",
+      "sha256": "2359c19000e74b0fd3ff35761946c3acbad44f7ff0ac321c1f81e7b3f3c39f96"
+    },
+    {
+      "file": "ExplorerDataProvider.vcproj.original.txt",
+      "sha256": "69dfb080752304d62037c16b223bca6e3c2f47776e43cbd51692d6b239d4abad"
+    },
+    {
+      "file": "LICENSE-Microsoft.txt",
+      "sha256": "3645a237b872306e4955bc2ce75783537bd7123bcb57332f8819e4cfbcf50b45"
+    },
+    {
+      "file": "sources.json",
+      "sha256": "d73b7840e91765a2b9ae37901bbd5bbdc42882b7aaec28dd90ad9fda0dfe8ca3"
+    }
+  ],
+  "sourceManifest": "sources.json",
+  "officialBuildPerformed": false
+}

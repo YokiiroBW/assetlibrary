@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+本轮最新：[官方固定提交对照研究](official-sample-review.md)已完成，[相同注册下的两路径绑定](path-bind-comparison.md)均实际绑定原CLSID并枚举1项，DLL均在Bind阶段出现。原注册/目录已清理，未运行GUI；下一优先项是E0真实活动view的Folder/PIDL身份，不继续猜测接口或属性。官方源17份通过Git blob核验，缺Category.cpp，官方样例未构建/注册/运行。G1仍partial。
+
 最新：[第五轮用户态ETW对齐](explorer-user-trace-aligned.md)进行了两次GUI提交，首次晚于捕获结束、第二次最终Return有效对齐（预填除外）。两次均为空目录，三个计划进程无proof DLL/trace；主协调报告有效捕获仅见control、无目标COM/UserLoader失败事件，不能据此断定未尝试加载。注册/空目录/测试窗口已清理，原窗口和管理员控制台保留。G1仍未完成，不继续接口/注册试探。
 
 此前[四轮ETW前置准备](explorer-etw-preparations.md)均未提交GUI入口，分别经历scope结束、UAC取消、Kernel-Registry PID异常及用户态候选UAC取消，全部已撤销现场。未导航的准备态不计G1结果；随后用户批准的确认会话才支持上述第五轮。

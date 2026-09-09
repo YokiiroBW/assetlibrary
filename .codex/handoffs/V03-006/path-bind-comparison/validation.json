@@ -1,0 +1,9 @@
+{
+  "utc": "2026-09-09T15:48:43.596987+00:00",
+  "checked": [
+    "clsid",
+    "filesystem"
+  ],
+  "scope": "Readback assertions on original two runs; no additional execution",
+  "passed": 2
+}

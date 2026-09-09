@@ -1,0 +1,41 @@
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260909-path-bind'
+$probe=Join-Path $PSScriptRoot 'build/Release/ExplorerPathBind.exe'
+$dll=Join-Path $run 'AssetLibraryExplorerProof.dll'
+$folder=Join-Path $repo '.runtime/sandbox-storage/AssetLibraryProof.{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
+if((Get-FileHash -LiteralPath $probe).Hash -ne '021F3CDB6792A422C9C05D58CA5C46C8E836554A4CEC94587F10948952075D5C') {throw 'Unexpected probe hash'}
+if((Get-FileHash -LiteralPath $dll).Hash -ne '0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15') {throw 'Unexpected DLL hash'}
+if((Get-Item -LiteralPath $folder).Attributes.HasFlag([IO.FileAttributes]::ReparsePoint) -or @(Get-ChildItem -LiteralPath $folder -Force).Count -ne 0) {throw 'Owned folder must be empty and not a reparse point'}
+function Invoke-OwnedBind([string]$label,[string]$name) {
+  $start=[Diagnostics.ProcessStartInfo]::new($probe)
+  $start.UseShellExecute=$false
+  $start.CreateNoWindow=$true
+  $start.RedirectStandardOutput=$true
+  $start.RedirectStandardError=$true
+  $start.ArgumentList.Add($name)
+  $start.ArgumentList.Add($dll)
+  $child=[Diagnostics.Process]::new()
+  $child.StartInfo=$start
+  try {
+    if(-not $child.Start()) {throw 'Probe failed to start'}
+    $childId=$child.Id
+    $stdout=$child.StandardOutput.ReadToEndAsync()
+    $stderr=$child.StandardError.ReadToEndAsync()
+    $timeout=-not $child.WaitForExit(10000)
+    if($timeout) {$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Own probe failed to exit'}}
+    $output=$stdout.GetAwaiter().GetResult()
+    $errorOutput=$stderr.GetAwaiter().GetResult()
+    $record=[ordered]@{Label=$label;Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$childId;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$output;Stderr=$errorOutput}
+    $record | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 (Join-Path $run "$label-result.json")
+    Write-Output ($record | ConvertTo-Json -Depth 5)
+  } finally {$child.Dispose()}
+}
+try {
+  $registration=& (Join-Path $repo 'tests/windows-shell/registration.ps1') -Action verify | ConvertFrom-Json
+  if(-not $registration.ClassPresent -or -not $registration.NamespacePresent) {throw 'Guard registration not active'}
+  Invoke-OwnedBind 'clsid' '::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
+  Invoke-OwnedBind 'filesystem' $folder
+} finally {
+  New-Item -ItemType File -Path (Join-Path $run 'stop') -ErrorAction Stop | Out-Null
+}

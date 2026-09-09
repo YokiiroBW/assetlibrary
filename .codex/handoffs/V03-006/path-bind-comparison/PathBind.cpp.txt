@@ -1,0 +1,109 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <shlwapi.h>
+#include <wrl/client.h>
+#include <cstdio>
+#include <cwchar>
+
+using Microsoft::WRL::ComPtr;
+constexpr SFGAOF kAttributes = SFGAO_FOLDER | SFGAO_BROWSABLE | SFGAO_HASSUBFOLDER |
+    SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR | SFGAO_READONLY;
+
+void Stage(const char* name, HRESULT hr, const wchar_t* expectedDll) {
+  HMODULE module = GetModuleHandleW(L"AssetLibraryExplorerProof.dll");
+  wchar_t loaded[MAX_PATH]{};
+  bool matches = false;
+  if (module && GetModuleFileNameW(module, loaded, MAX_PATH)) matches = _wcsicmp(loaded, expectedDll) == 0;
+  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"pid\":%lu,\"tick\":%llu,\"proofLoaded\":%s,\"proofPathMatches\":%s}\n",
+      name, static_cast<unsigned long>(hr), GetCurrentProcessId(), GetTickCount64(),
+      module ? "true" : "false", matches ? "true" : "false");
+}
+
+int Inspect(const wchar_t* name, const wchar_t* expectedDll) {
+  PIDLIST_ABSOLUTE parsed = nullptr;
+  Stage("parse.before", S_OK, expectedDll);
+  HRESULT hr = SHParseDisplayName(name, nullptr, &parsed, 0, nullptr);
+  Stage("parse.after", hr, expectedDll);
+  if (FAILED(hr) || !parsed) { CoTaskMemFree(parsed); return 1; }
+  std::printf("{\"parsedPidlBytes\":%u}\n", ILGetSize(parsed));
+  ComPtr<IShellFolder> desktop;
+  hr = SHGetDesktopFolder(&desktop);
+  Stage("desktop", hr, expectedDll);
+  ComPtr<IShellFolder> folder;
+  if (SUCCEEDED(hr)) {
+    Stage("bind.before", S_OK, expectedDll);
+    hr = desktop->BindToObject(parsed, nullptr, IID_PPV_ARGS(&folder));
+    Stage("bind.after", hr, expectedDll);
+  }
+  if (FAILED(hr) || !folder) { CoTaskMemFree(parsed); return 1; }
+
+  ComPtr<IPersist> persist;
+  hr = folder.As(&persist);
+  CLSID clsid{};
+  if (SUCCEEDED(hr)) hr = persist->GetClassID(&clsid);
+  Stage("classId", hr, expectedDll);
+  if (SUCCEEDED(hr)) {
+    wchar_t value[40]{};
+    if (StringFromGUID2(clsid, value, ARRAYSIZE(value)) > 0) std::printf("{\"classId\":\"%ls\"}\n", value);
+  }
+  const bool classOk = SUCCEEDED(hr);
+
+  ComPtr<IPersistFolder2> persistFolder;
+  hr = folder.As(&persistFolder);
+  PIDLIST_ABSOLUTE current = nullptr;
+  if (SUCCEEDED(hr)) hr = persistFolder->GetCurFolder(&current);
+  Stage("currentFolder", hr, expectedDll);
+  if (SUCCEEDED(hr) && current) {
+    std::printf("{\"currentPidlBytes\":%u,\"currentMatchesParsed\":%s}\n", ILGetSize(current), ILIsEqual(current, parsed) ? "true" : "false");
+  }
+  const bool currentOk = SUCCEEDED(hr) && current;
+  CoTaskMemFree(current);
+
+  ComPtr<IEnumIDList> entries;
+  hr = folder->EnumObjects(nullptr, SHCONTF_FOLDERS | SHCONTF_NONFOLDERS, &entries);
+  if (hr == S_OK && !entries) hr = E_UNEXPECTED;
+  Stage("enum.begin", hr, expectedDll);
+  unsigned int count = 0;
+  if (SUCCEEDED(hr) && entries) {
+    for (; count < 16;) {
+      PITEMID_CHILD child = nullptr;
+      ULONG fetched = 0;
+      hr = entries->Next(1, &child, &fetched);
+      if (hr != S_OK || !child || fetched != 1) {
+        if (hr == S_OK) hr = E_UNEXPECTED;
+        CoTaskMemFree(child); break;
+      }
+      SFGAOF attributes = kAttributes;
+      PCUITEMID_CHILD childView = child;
+      const HRESULT attrHr = folder->GetAttributesOf(1, &childView, &attributes);
+      std::printf("{\"childIndex\":%u,\"attributeHr\":\"%08lx\",\"attributes\":\"%08lx\"}\n",
+          count, static_cast<unsigned long>(attrHr), static_cast<unsigned long>(attributes));
+      ++count;
+      CoTaskMemFree(child);
+    }
+  }
+  Stage("enum.end", hr, expectedDll);
+  std::printf("{\"childCount\":%u,\"limitReached\":%s}\n", count, count == 16 ? "true" : "false");
+  const bool enumOk = SUCCEEDED(hr);
+
+  ComPtr<IShellFolder> parent;
+  PCUITEMID_CHILD child = nullptr;
+  hr = SHBindToParent(parsed, IID_PPV_ARGS(&parent), &child);
+  SFGAOF attributes = kAttributes;
+  if (SUCCEEDED(hr) && (!parent || !child)) hr = E_UNEXPECTED;
+  if (SUCCEEDED(hr) && parent && child) hr = parent->GetAttributesOf(1, &child, &attributes);
+  Stage("parentAttributes", hr, expectedDll);
+  std::printf("{\"rootAttributes\":\"%08lx\"}\n", static_cast<unsigned long>(attributes));
+  CoTaskMemFree(parsed);
+  return classOk && currentOk && enumOk && SUCCEEDED(hr) ? 0 : 2;
+}
+
+int wmain(int argc, wchar_t** argv) {
+  setvbuf(stdout, nullptr, _IONBF, 0);
+  if (argc != 3) return 3;
+  HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+  if (FAILED(hr)) return 4;
+  const int result = Inspect(argv[1], argv[2]);
+  CoUninitialize();
+  return result;
+}

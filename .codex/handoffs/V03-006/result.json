@@ -167,7 +167,30 @@
     ".codex/handoffs/V03-006/explorer-user-trace-aligned/ready.json",
     ".codex/handoffs/V03-006/explorer-user-trace-aligned/register.json",
     ".codex/handoffs/V03-006/explorer-user-trace-aligned/ui-observation.json",
-    ".codex/handoffs/V03-006/explorer-user-trace-aligned/window-cleanup.json"
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/window-cleanup.json",
+    ".codex/handoffs/V03-006/official-sample-review.md",
+    ".codex/handoffs/V03-006/path-bind-comparison.md",
+    ".codex/handoffs/V03-006/official-sample-review/.gitattributes",
+    ".codex/handoffs/V03-006/official-sample-review/Dll.cpp.original.txt",
+    ".codex/handoffs/V03-006/official-sample-review/ExplorerDataProvider.def.original.txt",
+    ".codex/handoffs/V03-006/official-sample-review/ExplorerDataProvider.vcproj.original.txt",
+    ".codex/handoffs/V03-006/official-sample-review/LICENSE-Microsoft.txt",
+    ".codex/handoffs/V03-006/official-sample-review/sources.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/.gitattributes",
+    ".codex/handoffs/V03-006/path-bind-comparison/build.log.txt",
+    ".codex/handoffs/V03-006/path-bind-comparison/cleanup.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/clsid-result.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/CMakeLists.txt",
+    ".codex/handoffs/V03-006/path-bind-comparison/evidence.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/filesystem-result.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/final-cleanup.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/guard.ps1.txt",
+    ".codex/handoffs/V03-006/path-bind-comparison/PathBind.cpp.txt",
+    ".codex/handoffs/V03-006/path-bind-comparison/proof-calls.log",
+    ".codex/handoffs/V03-006/path-bind-comparison/register.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/run.ps1.txt",
+    ".codex/handoffs/V03-006/official-sample-review/evidence.json",
+    ".codex/handoffs/V03-006/path-bind-comparison/validation.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -232,7 +255,8 @@
       "Nonlocal LAN normal/AC/LPAC six-control comparison with coordinator server receipt",
       "Final verify_repository: 432 C# files, architecture/contracts and existing 35 regressions passed; Alpha blocked",
       "Strict ExplorerProofProbe target build and registered/unregistered root-bind controls passed; real GUI activation remains failed",
-      "Isolated test-only /MT build with unchanged source/SDK; import and compiler-setting comparison; independent root bind passed; single actual Explorer folder entry still failed"
+      "Isolated test-only /MT build with unchanged source/SDK; import and compiler-setting comparison; independent root bind passed; single actual Explorer folder entry still failed",
+      "Independent bounded native CLSID/actual filesystem-path bind controls both return original class and one item; no tracked runtime source change or GUI actions"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -260,5 +284,22 @@
     "etw_state": "Fifth preparation had two GUI submissions, one outside capture and one final Return aligned; empty view remains; own cleanup complete; root administrator console preserved",
     "etw_aligned_report": "explorer-user-trace-aligned.md",
     "etw_gui_entries_capture_covered": 1
+  },
+  "official_sample_review": {
+    "report": "official-sample-review.md",
+    "revision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+    "verified_files": 17,
+    "missing_build_source": "Category.cpp",
+    "official_sample_built": false,
+    "official_sample_registered_or_run": false
+  },
+  "path_bind_checkpoint": {
+    "report": "path-bind-comparison.md",
+    "cases": 2,
+    "own_class_bound": 2,
+    "probe_timeouts": 0,
+    "gui_actions": 0,
+    "cleanup_verified": true,
+    "next": "E0 actual active Explorer view identity; proposed only"
   }
 }
