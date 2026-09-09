@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / 统一集成与交付收尾**。继续使用四个既有独立窗口、分支和worktree。Web与Android已在同一真实Core/PostgreSQL/受限解码引擎上通过图片验收；Windows原生Explorer入口仍在排查，NAS实际图片发行受目标内核阻断，不宣告整批或完整版本完成。
+状态 **partial / 客户端集成与Windows入口排查**。继续使用四个既有独立窗口、分支和worktree。Web与Android已在同一真实Core/PostgreSQL/受限解码引擎上通过图片验收；Windows原生Explorer入口仍在排查，NAS实际图片发行受目标内核阻断，不宣告整批或完整版本完成。
 
 ## 已集成与已验收
 
@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. 2026-09-09用户重新连接后，实际GUI输入已经恢复。attempt3的裸CLSID报找不到、attempt4完整shell URI报无关联应用；注册生命周期和时间已核对，Desktop列表有系统虚拟项但无本项目入口，Explorer模块观察未见proof DLL。4780629的独立`--root-bind`不预先CoCreate，注册时SHParse→Desktop.Bind→DefView全S_OK，注销时解析80070057/无PIDL；已合入0f56068，只是诊断对照，不关闭G1。Root只读采样显示全部5个Explorer与执行进程均同用户/会话、原生x64、中完整性/非提升，三类已查加载mitigation为0，本CLSID的Approved/Blocked及Enforce策略未配置，详见explorer-process-context.json。当前继续同GUID/DLL的自有sandbox文件系统namespace入口对照；不重启用户Explorer。已有attempt3/4窗口和注册已清理，后续每次仍须新鲜核验、限时与清理。没有Windows安装包，G1..G4未完成。
+1. Windows真实GUI已恢复，但Desktop/URI/文件夹三类入口和同源码静态CRT对照均未观察到扩展激活；独立Desktop根绑定正控成功。全部自有测试窗口、空目录和注册已清理，用户原窗口保留。root核对三目录39项receipt与Git blob、两份实际DLL强hash；图像重复来源已限定为外观参考，时序以独立窗口/UI/UTC记录为准。详见V03-006的explorer-entry-20260909.md、explorer-folder-entry.md、explorer-mt-control.md与本目录explorer-diagnostics.json。当前准备有期限的精确注册/加载跟踪工具及必要系统跟踪授权，原桌面操作授权保持有效。根因尚未确定，没有Windows安装包，G1..G4未完成。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

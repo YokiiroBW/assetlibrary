@@ -1,0 +1,317 @@
+{
+  "scope": "Three actual Explorer entry routes remain unactivated; independent root bind succeeds. Read-only existing logs and loaded-runtime context, not a new trace or security-policy change.",
+  "entry_evidence": [
+    ".codex/handoffs/V03-006/explorer-entry-20260909/evidence.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/evidence.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/evidence.json"
+  ],
+  "archive_verification": {
+    "working_files_and_git_blobs": 39,
+    "all_match_original_sha256": true,
+    "portable_byte_fix_commit": "2e21ecf"
+  },
+  "process_context": ".codex/handoffs/V03-005/explorer-process-context.json",
+  "read_only_samples": [
+    {
+      "file": ".runtime/v03-005-final-tests/explorer-existing-events.json",
+      "raw_sha256": "5149f77cd61e1649d312b51304466f9c66430a9be7fe5957ad53f4cb4aa4d9ad",
+      "sample": {
+        "utc": "2026-09-09T02:10:53.0999099+00:00",
+        "since_utc": "2026-09-09T01:00:00.0000000Z",
+        "scope": "Existing event channels only; no trace session or driver started, only exact proof CLSID/DLL matches retained.",
+        "channels": [
+          {
+            "channel": "Microsoft-Windows-CodeIntegrity/Operational",
+            "enabled": true,
+            "events_examined": 480,
+            "matching": []
+          },
+          {
+            "channel": "Microsoft-Windows-AppLocker/EXE and DLL",
+            "enabled": true,
+            "events_examined": 0,
+            "matching": []
+          },
+          {
+            "channel": "Microsoft-Windows-Sysmon/Operational",
+            "query_error": "NoMatchingLogsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+          },
+          {
+            "channel": "System",
+            "enabled": true,
+            "events_examined": 0,
+            "matching": []
+          }
+        ]
+      }
+    },
+    {
+      "file": ".runtime/v03-005-final-tests/explorer-existing-shell-events.json",
+      "raw_sha256": "a16bca4e047b0f74076b7c6b8fb35499ef0366411796287202af34421eea166c",
+      "sample": {
+        "utc": "2026-09-09T02:13:46.9236528+00:00",
+        "scope": "Read-only existing Shell-Core events since01:00Z; only own proof markers retained.",
+        "channels": [
+          {
+            "channel": "Microsoft-Windows-Shell-Core/Operational",
+            "events_examined": 0,
+            "matching": []
+          },
+          {
+            "channel": "Microsoft-Windows-Shell-Core/AppDefaults",
+            "events_examined": 0,
+            "matching": []
+          }
+        ]
+      }
+    },
+    {
+      "file": ".runtime/v03-005-final-tests/explorer-codeintegrity-context.json",
+      "raw_sha256": "71f9ba5e4ca808a5306a0f085d9574d355aa47b5191899071f31292e956b1ac5",
+      "sample": {
+        "utc": "2026-09-09T02:15:13.1056367+00:00",
+        "scope": "Existing CodeIntegrity events only; process-filtered to explorer.exe to look for dependency rejection.",
+        "schemas": [
+          {
+            "id": "3033",
+            "count": 254,
+            "fields": [
+              "FileNameLength",
+              "FileNameBuffer",
+              "ProcessNameLength",
+              "ProcessNameBuffer",
+              "RequestedPolicy",
+              "ValidatedPolicy",
+              "Status"
+            ]
+          },
+          {
+            "id": "3089",
+            "count": 254,
+            "fields": [
+              "TotalSignatureCount",
+              "Signature",
+              "CacheState",
+              "Hash Size",
+              "Hash",
+              "PageHash",
+              "SignatureType",
+              "ValidatedSigningLevel",
+              "VerificationError",
+              "Flags",
+              "PolicyBits",
+              "NotValidBefore",
+              "NotValidAfter",
+              "PublisherNameLength",
+              "PublisherName",
+              "IssuerNameLength",
+              "IssuerName",
+              "PublisherTBSHashSize",
+              "PublisherTBSHash",
+              "IssuerTBSHashSize",
+              "IssuerTBSHash",
+              "OPUSInfoLength",
+              "OPUSInfo",
+              "EKUsSize",
+              "EKUs",
+              "KnownRoot"
+            ]
+          }
+        ],
+        "explorer_events": []
+      }
+    },
+    {
+      "file": ".runtime/v03-005-final-tests/explorer-loaded-crt.json",
+      "raw_sha256": "ef2394a8d3070574d0e827a4c8356cd929c4a77cc9c1fb22ca81fe232ca026d3",
+      "sample": {
+        "utc": "2026-09-09T02:17:07.6939585+00:00",
+        "scope": "Only known MSVC/UCRT module identities; on-disk version is not asserted to identify unchanged loaded bytes.",
+        "modules": [
+          {
+            "pid": 6284,
+            "name": "ucrtbase.dll",
+            "system32": true,
+            "file_version": "10.0.26100.7623 (WinBuild.160101.0800)",
+            "module_size": 1355776,
+            "file_modified_utc": "2026-03-12T06:00:51.6112949Z"
+          },
+          {
+            "pid": 6284,
+            "name": "MSVCP140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 573440,
+            "file_modified_utc": "2026-03-12T06:01:02.5868872Z"
+          },
+          {
+            "pid": 6284,
+            "name": "VCRUNTIME140_1_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 49152,
+            "file_modified_utc": "2026-03-12T06:01:02.0020385Z"
+          },
+          {
+            "pid": 6284,
+            "name": "VCRUNTIME140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 118784,
+            "file_modified_utc": "2026-03-12T06:01:01.9878965Z"
+          },
+          {
+            "pid": 17944,
+            "name": "ucrtbase.dll",
+            "system32": true,
+            "file_version": "10.0.26100.7623 (WinBuild.160101.0800)",
+            "module_size": 1355776,
+            "file_modified_utc": "2026-03-12T06:00:51.6112949Z"
+          },
+          {
+            "pid": 17944,
+            "name": "VCRUNTIME140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 118784,
+            "file_modified_utc": "2026-03-12T06:01:01.9878965Z"
+          },
+          {
+            "pid": 17944,
+            "name": "MSVCP140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 573440,
+            "file_modified_utc": "2026-03-12T06:01:02.5868872Z"
+          },
+          {
+            "pid": 17944,
+            "name": "VCRUNTIME140_1_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 49152,
+            "file_modified_utc": "2026-03-12T06:01:02.0020385Z"
+          },
+          {
+            "pid": 24644,
+            "name": "ucrtbase.dll",
+            "system32": true,
+            "file_version": "10.0.26100.7623 (WinBuild.160101.0800)",
+            "module_size": 1355776,
+            "file_modified_utc": "2026-03-12T06:00:51.6112949Z"
+          },
+          {
+            "pid": 24644,
+            "name": "VCRUNTIME140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 118784,
+            "file_modified_utc": "2026-03-12T06:01:01.9878965Z"
+          },
+          {
+            "pid": 24644,
+            "name": "MSVCP140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 573440,
+            "file_modified_utc": "2026-03-12T06:01:02.5868872Z"
+          },
+          {
+            "pid": 24644,
+            "name": "VCRUNTIME140_1_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 49152,
+            "file_modified_utc": "2026-03-12T06:01:02.0020385Z"
+          },
+          {
+            "pid": 24772,
+            "name": "ucrtbase.dll",
+            "system32": true,
+            "file_version": "10.0.26100.7623 (WinBuild.160101.0800)",
+            "module_size": 1355776,
+            "file_modified_utc": "2026-03-12T06:00:51.6112949Z"
+          },
+          {
+            "pid": 24772,
+            "name": "VCRUNTIME140_1_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 49152,
+            "file_modified_utc": "2026-03-12T06:01:02.0020385Z"
+          },
+          {
+            "pid": 24772,
+            "name": "VCRUNTIME140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 118784,
+            "file_modified_utc": "2026-03-12T06:01:01.9878965Z"
+          },
+          {
+            "pid": 24772,
+            "name": "MSVCP140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 573440,
+            "file_modified_utc": "2026-03-12T06:01:02.5868872Z"
+          },
+          {
+            "pid": 26128,
+            "name": "ucrtbase.dll",
+            "system32": true,
+            "file_version": "10.0.26100.7623 (WinBuild.160101.0800)",
+            "module_size": 1355776,
+            "file_modified_utc": "2026-03-12T06:00:51.6112949Z"
+          },
+          {
+            "pid": 26128,
+            "name": "VCRUNTIME140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 118784,
+            "file_modified_utc": "2026-03-12T06:01:01.9878965Z"
+          },
+          {
+            "pid": 26128,
+            "name": "MSVCP140_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 573440,
+            "file_modified_utc": "2026-03-12T06:01:02.5868872Z"
+          },
+          {
+            "pid": 26128,
+            "name": "VCRUNTIME140_1_APP.dll",
+            "system32": false,
+            "file_version": "14.39.33519.0",
+            "module_size": 49152,
+            "file_modified_utc": "2026-03-12T06:01:02.0020385Z"
+          }
+        ]
+      }
+    }
+  ],
+  "tool_lookup": {
+    "procmon_on_path_or_checked_common_locations": false,
+    "cdb_or_windbg_in_checked_sdk_debugger_location": false,
+    "system_wpr_and_logman_present": true,
+    "current_token_administrators_enabled": false,
+    "current_token_performance_log_users_enabled": false,
+    "scope": "PATH and explicitly checked locations only; not a whole-disk inventory."
+  },
+  "interpretation": [
+    "No own CLSID/DLL record was found in the sampled existing channels; absence does not prove that loading was never attempted.",
+    "All sampled Explorer processes contain UCRT and *_APP CRT modules but no ordinary MSVCP140/VCRUNTIME140 module. Different basenames do not establish a CRT conflict; file versions describe disk metadata, not proven unchanged in-memory bytes.",
+    "No documented guarantee of a new Explorer host PID was established without restarting user Explorer or changing persistent settings; process cache is not claimed as the cause.",
+    "The same-source static-CRT control also stayed an ordinary empty folder in actual Explorer. Its independent root-bind passed, but the DLL/module/factory was not observed in Explorer. No production build/source change or CRT/cache root cause is claimed. Precise tracing requires a prepared bounded tool and the necessary system-trace permission."
+  ],
+  "static_crt": {
+    "root_bind_passed": true,
+    "actual_gui_activated": false,
+    "cleanup_verified": true,
+    "source_and_options_reviewed": true,
+    "actual_static_and_dynamic_dll_digests_verified": true,
+    "screenshot_scope": "Appearance reference only: duplicate image payloads were independently audited; separate window/UI/timeline records carry temporal evidence."
+  }
+}

@@ -101,3 +101,11 @@ Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验
 4780629/集成0f56068增加独立`--root-bind`，不预先CoCreate；owner以既有MSVC严格选项构建成功。root读回2026-09-09T01:49:06Z两份原始输出：注册态四阶段全S_OK/exit0，注销态RootParse80070057、PIDL absent/exit1，stderr均空。两种注册状态符合预期；没有重跑无变化的整solution，也不计为真实Explorer G1。
 
 02:00:26Z root只读采样见explorer-process-context.json与对应ps1.txt，全部查询成功。当前executor和5个Explorer同用户/Session2/native x64，IL8192、Limited/elevated0；signature/extension-point/image-load flags全部0。两种registry view的HKCU/HKLM仅本CLSID Approved/Blocked及EnforceShellExtensionSecurity均未配置。它只排除这一组可观察差异，不是所有策略或缓存的证明。首版诊断给TokenElevation传4096字节收到ERROR_BAD_LENGTH24，改精确4字节后成功；首稿输出仍在.runtime/v03-005-final-tests/explorer-context-initial.json，未将失败查询计为成功。整个采样不操作GUI、不修改注册表或进程。
+
+## 三类真实入口与归档复核
+
+真实文件夹CLSID入口1969d0f合入0672dde，README72e7621合入5629738；截图显示普通空目录，非扩展视图。原注册/窗口/空目录已由owner清理并记录；root独立验两目录19项原SHA同时匹配working和HEAD blob。最初trace因自动CRLF转换不匹配，2e21ecf使该子目录按原始字节存档，CRLF作为合法行尾且保留其它空白检查；显式renormalize后已核实Git blob。未修改receipt字段来迎合错误hash。
+
+现有系统日志、进程运行库和工具权限的只读结果见explorer-diagnostics.json；无本扩展的相关记录不等于未尝试加载。未启动driver/ETW、未提权或改策略。静态CRT后续结果单列于下段，不将诊断计划记为通过。上一稳定源/协调检查点c46aea5的verify_repository通过，记录repository-explorer-controls.log；未为后续纯证据更新重跑无变化的业务/图片套件。
+
+静态CRT对照b9cdf5e及图像来源限定4240ae3已合8d7dcea/163da1b。root审查唯一RuntimeLibrary差异、导入表和源码规范化比较；20项新receipt与Git blob、原/新两份实际DLL强hash一致，三目录合计39项。独立根绑定1次通过、真实GUI未激活，现场清理已确认。两轮PNG完全同SHA；owner只读核对为不同WindowState/不同UI tree但API图像payload相同，已明确作为外观参考，不以图片证明独立采集时间。默认CMake与生产源没有变动，不再做DLL/注册试探。

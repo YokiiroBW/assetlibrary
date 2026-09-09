@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "native_acceptance_and_nas_platform_decision_pending",
-  "next_action": "RDP GUI input is usable. Actual Explorer still fails before factory load while the registered independent Desktop-root Bind and DefView control succeeds. Continue the owned-window filesystem namespace-junction comparison with the same CLSID/DLL; do not repeat permission questions or restart user Explorer. Android image404 fallback source and candidate are accepted. NAS internal decoder architecture remains pending user/ADR choice.",
+  "status": "native_entry_trace_preparation_and_nas_platform_decision_pending",
+  "next_action": "All prior task-owned Explorer windows, empty folders and proof registration are clean; the original user window is preserved. Three actual entry routes plus the same-source static-CRT control remain unactivated; independent root bind works. Prepare and review a bounded PID-scoped Windows ETW observer, obtain only the necessary system-trace authorization, then capture real namespace registry/load behavior. Desktop authorization persists; do not repeat blind registration or change policies. Android fallback candidate is accepted; NAS internal decoder architecture still awaits user/ADR decision.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -91,6 +91,6 @@
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "Desktop authorization persists and actual RDP input works; operations remain scoped to owned test windows and reversible proof registration.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
-    "integration_checkpoint": "0f56068"
+    "integration_checkpoint": "163da1b"
   }
 }
