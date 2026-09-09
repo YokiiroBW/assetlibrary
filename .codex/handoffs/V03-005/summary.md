@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / 统一集成与交付收尾**。继续使用四个既有独立窗口、分支和worktree。Web与Android已在同一真实Core/PostgreSQL/受限解码引擎上通过图片验收；Windows原生Explorer入口和剩余平台矩阵、NAS实际图片发行验证仍在进行，不宣告整批或完整版本完成。
+状态 **partial / 统一集成与交付收尾**。继续使用四个既有独立窗口、分支和worktree。Web与Android已在同一真实Core/PostgreSQL/受限解码引擎上通过图片验收；Windows原生Explorer入口仍在排查，NAS实际图片发行受目标内核阻断，不宣告整批或完整版本完成。
 
 ## 已集成与已验收
 
@@ -10,6 +10,8 @@
 - Web真实联调发现并修复已挂载虚拟列表的键盘焦点问题，77271e0已合入，新有效回归与相关QuickLook/多选4/4通过；不同浏览器用例现66。真实16项图片/错误检查与独立interaction continuation完成：JPEG/PNG/WebP、方向、alpha、中文同内容改名、损坏/超限、Space/Escape/回焦/历史、404/401、对象URL释放和真实CSP。两份原receipt和索引SHA已重算一致，保留原failed顶层记录，不声称一次全跑。见V03-008/real-core/acceptance-index.json。
 - Windows a21a145生命周期源、a497权限测试与25a7bed共享StartAsync已组装。root复现普通可写目录一次设置Owner+DACL失败后，53bc455先写严格私有DACL再核Owner，原失败目录独立7/7通过、0skip、零告警。历史5失败保留；未修改workspace ACL或放松保护。
 
+- Android f143292的图片404兼容补丁与fb562bc候选证据已合入：只将图片不可用与条目删除区分，11状态测试及1相关API36界面用例通过，列表/会话与文件信息保留。新APK为30,425,593B，SHA256 `6d959b5ac000b6a7a932c9d50298b51a25c9992d92ed748c9371e7b710444ddb`；旧1838b96真实图片验收不冒充新候选全量重跑。
+
 ## 真实共同服务与清理
 
 临时开发环境使用干净Core874fb6a、Worker40d2d69、PG16.15与148个固定合成文件。实际Linux图片接口2/2通过；Android和Web共用此生命周期。Web焦点修复后，仅替换经源码/强hash核对的静态产物并保留旧副本，Core/数据库/资产未变。
@@ -18,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows会话已恢复WTSActive，真实“此电脑”可操作；随后新建任务测试窗口2229954并完成临时注册，但导航前收到用户物理Esc停止信号。已停止全部CU、终止watchdog、unregister并确认两键均false；原窗口1247028未改导航，新窗口留待后续新鲜核验。用户随后明确回复“可以继续桌面实机验收，我现在不用了”，root已恢复原任务授权；先重新读取并核对自有窗口实际状态，不沿用旧ID。实际Explorer入口尚未验收，没有Windows安装包；独立出图和loader成功不等于G1..G4。 后续新尝试又遇GetCursorPos 0x80070005，17:16:27Z读WTSDisconnected；再次撤销所属注册，两键false。操作授权保留，需用户保持RDP连接/解锁，当前问题是桌面可用性。
+1. 2026-09-09用户重新连接后，实际GUI输入已经恢复。attempt3的裸CLSID报找不到、attempt4完整shell URI报无关联应用；注册生命周期和时间已核对，Desktop列表有系统虚拟项但无本项目入口，Explorer模块观察未见proof DLL。4780629的独立`--root-bind`不预先CoCreate，注册时SHParse→Desktop.Bind→DefView全S_OK，注销时解析80070057/无PIDL；已合入0f56068，只是诊断对照，不关闭G1。Root只读采样显示全部5个Explorer与执行进程均同用户/会话、原生x64、中完整性/非提升，三类已查加载mitigation为0，本CLSID的Approved/Blocked及Enforce策略未配置，详见explorer-process-context.json。当前继续同GUID/DLL的自有sandbox文件系统namespace入口对照；不重启用户Explorer。已有attempt3/4窗口和注册已清理，后续每次仍须新鲜核验、限时与清理。没有Windows安装包，G1..G4未完成。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

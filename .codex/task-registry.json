@@ -738,7 +738,7 @@
       "handoff": ".codex/handoffs/V03-005/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3",
-      "execution_status": "integrating_and_preparing_real_image_acceptance"
+      "execution_status": "real_clients_integrated_explorer_entry_diagnosis_and_nas_decision_pending"
     },
     {
       "id": "V03-006",
@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "rdp_reconnected_real_navigation_error_observed_uri_and_registration_lifetime_check"
+      "execution_status": "actual_uri_failures_root_bind_positive_context_equal_filesystem_junction_comparison"
     },
     {
       "id": "V03-007",
@@ -812,7 +812,7 @@
       "thread_deep_link": "codex://threads/01a0808d-7173-7722-86f0-91726c322f60",
       "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
       "milestone": "V0.3",
-      "execution_status": "reviewed_real_core_client_acceptance_and_shared_cleanup_passed"
+      "execution_status": "real_core_acceptance_and_image404_fallback_candidate_reviewed"
     }
   ]
 }

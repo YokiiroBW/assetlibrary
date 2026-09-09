@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
   "status": "native_acceptance_and_nas_platform_decision_pending",
-  "next_action": "User reconnected RDP on 2026-09-09; Windows task confirmed actual GUI input and reproduced a namespace navigation error before factory load. Continue bounded URI/Desktop-item discovery with registration-lifetime evidence, then implement the native entry/IPC; desktop authorization already persists. Android owner separately fixes image-only404 fallback wording and verifies retained L0. NAS deployment architecture remains pending user/ADR choice; do not change NAS security or add the internal service without that decision.",
+  "next_action": "RDP GUI input is usable. Actual Explorer still fails before factory load while the registered independent Desktop-root Bind and DefView control succeeds. Continue the owned-window filesystem namespace-junction comparison with the same CLSID/DLL; do not repeat permission questions or restart user Explorer. Android image404 fallback source and candidate are accepted. NAS internal decoder architecture remains pending user/ADR choice.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,10 +87,10 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "client_implementations_integrated_preview_isolation_and_real_acceptance_pending",
+    "stage": "real_clients_accepted_explorer_entry_diagnosis_and_nas_decision_pending",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
-    "command_approvals": "Native worker execution resumed. Windows UI still needs its disconnected Session 2 restored; no new approval workaround was introduced.",
+    "command_approvals": "Desktop authorization persists and actual RDP input works; operations remain scoped to owned test windows and reversible proof registration.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
-    "integration_checkpoint": "3890793"
+    "integration_checkpoint": "0f56068"
   }
 }

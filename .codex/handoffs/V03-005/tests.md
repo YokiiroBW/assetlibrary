@@ -95,3 +95,9 @@ Windows已恢复过真实桌面并收到用户明确恢复授权，随后在新�
 Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验实际进程的精确AppContainer SID，不能只凭时间不符就把活Worker视为已退出。Root审查生产diff及相关测试，affected format/Release零告警；以原窗口已核hash的可信native probe DADE2F45F34DB1C271BE6BC8EB756DA4D830D68D20FE0E1B2BBA00E6CDD272EC实际执行新身份回归1/1通过，101ms、0skip。后续仓库/架构/契约验证通过；未重复完整360项。
 
 原窗口稳定native矩阵12/12通过，范围包括宿主marker/RX、非stdio事件、FSO/BITS COM、真实内存、3秒CPU配置与周期性overshoot、子进程拒绝、取消、持stdin的父退出和身份；网络用例准确记为LPAC初始化阻断，不能改称直接connect EACCES。另一次LAN6对照在root短时端点完成：普通token TCP0/HTTP成功，普通AC solelpacCom且零network的connect10013/WinHTTP12029，LPAC WSAStartup10107/WinHTTP12004。Root服务端仅见自己先验1连接和普通token的2连接，无AC/LPAC连接，零源过滤拒绝，端点已关闭。windows-lan-control.json保存原始时刻与清理。第一轮59249被既有防火墙挡住的正控失败保留；第二轮选既有允许区间内空闲39420，没有修改防火墙。所有这些证据不代替真实Explorer入口或通用Provider门禁。
+
+## RDP恢复后的Explorer入口对照
+
+4780629/集成0f56068增加独立`--root-bind`，不预先CoCreate；owner以既有MSVC严格选项构建成功。root读回2026-09-09T01:49:06Z两份原始输出：注册态四阶段全S_OK/exit0，注销态RootParse80070057、PIDL absent/exit1，stderr均空。两种注册状态符合预期；没有重跑无变化的整solution，也不计为真实Explorer G1。
+
+02:00:26Z root只读采样见explorer-process-context.json与对应ps1.txt，全部查询成功。当前executor和5个Explorer同用户/Session2/native x64，IL8192、Limited/elevated0；signature/extension-point/image-load flags全部0。两种registry view的HKCU/HKLM仅本CLSID Approved/Blocked及EnforceShellExtensionSecurity均未配置。它只排除这一组可观察差异，不是所有策略或缓存的证明。首版诊断给TokenElevation传4096字节收到ERROR_BAD_LENGTH24，改精确4字节后成功；首稿输出仍在.runtime/v03-005-final-tests/explorer-context-initial.json，未将失败查询计为成功。整个采样不操作GUI、不修改注册表或进程。

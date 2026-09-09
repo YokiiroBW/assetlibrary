@@ -1,0 +1,88 @@
+$ErrorActionPreference = 'Stop'
+Add-Type -TypeDefinition @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+public static class ExplorerReadContext {
+ [DllImport("kernel32.dll", SetLastError=true)] static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+ [DllImport("kernel32.dll", SetLastError=true)] static extern bool CloseHandle(IntPtr handle);
+ [DllImport("kernel32.dll", SetLastError=true)] static extern bool GetProcessMitigationPolicy(IntPtr process, int policy, out uint flags, UIntPtr length);
+ [DllImport("kernel32.dll", SetLastError=true)] static extern bool IsWow64Process2(IntPtr process, out ushort machine, out ushort native);
+ [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenProcessToken(IntPtr process, uint access, out IntPtr token);
+ [DllImport("advapi32.dll", SetLastError=true)] static extern bool GetTokenInformation(IntPtr token, int info, IntPtr buffer, int length, out int returned);
+ [DllImport("advapi32.dll")] static extern IntPtr GetSidSubAuthorityCount(IntPtr sid);
+ [DllImport("advapi32.dll")] static extern IntPtr GetSidSubAuthority(IntPtr sid, uint index);
+ public static Dictionary<string,object> Read(int pid) {
+  var row = new Dictionary<string,object>(); row["pid"] = pid;
+  IntPtr process = OpenProcess(0x1400, false, pid);
+  if(process == IntPtr.Zero) { row["open_error"] = Marshal.GetLastWin32Error(); return row; }
+  try {
+   ushort machine, native;
+   if(IsWow64Process2(process, out machine, out native)) { row["process_machine"] = machine; row["native_machine"] = native; }
+   else row["machine_error"] = Marshal.GetLastWin32Error();
+   var policies = new Dictionary<string,object>();
+   foreach(var item in new[]{Tuple.Create(6,"extension_point"),Tuple.Create(8,"signature"),Tuple.Create(10,"image_load")}) {
+    uint flags;
+    if(GetProcessMitigationPolicy(process, item.Item1, out flags, (UIntPtr)4)) policies[item.Item2] = flags;
+    else policies[item.Item2+"_error"] = Marshal.GetLastWin32Error();
+   }
+   row["mitigation_flags"] = policies;
+   IntPtr token;
+   if(!OpenProcessToken(process, 8, out token)) { row["token_error"] = Marshal.GetLastWin32Error(); return row; }
+   try {
+    using(var identity = new WindowsIdentity(token)) using(var current = WindowsIdentity.GetCurrent())
+      row["same_user_as_executor"] = identity.User.Equals(current.User);
+    IntPtr buffer = Marshal.AllocHGlobal(4096);
+    try {
+     foreach(var item in new[]{Tuple.Create(18,"elevation_type"),Tuple.Create(20,"elevated"),Tuple.Create(23,"virtualization_allowed"),Tuple.Create(24,"virtualization_enabled"),Tuple.Create(26,"ui_access"),Tuple.Create(29,"app_container")}) {
+      int returned;
+      if(GetTokenInformation(token,item.Item1,buffer,4,out returned)) row[item.Item2] = Marshal.ReadInt32(buffer);
+      else row[item.Item2+"_error"] = Marshal.GetLastWin32Error();
+     }
+     int size;
+     if(GetTokenInformation(token,25,buffer,4096,out size)) {
+      IntPtr sid = Marshal.ReadIntPtr(buffer);
+      byte count = Marshal.ReadByte(GetSidSubAuthorityCount(sid));
+      row["integrity_rid"] = Marshal.ReadInt32(GetSidSubAuthority(sid, (uint)(count-1)));
+     } else row["integrity_error"] = Marshal.GetLastWin32Error();
+    } finally { Marshal.FreeHGlobal(buffer); }
+   } finally { CloseHandle(token); }
+  } finally { CloseHandle(process); }
+  return row;
+ }
+}
+'@
+$sampled = @()
+foreach ($process in @(Get-Process -Id $PID) + @(Get-Process -Name explorer -ErrorAction SilentlyContinue)) {
+  $row = [ExplorerReadContext]::Read($process.Id)
+  $row['role'] = if ($process.Id -eq $PID) { 'executor' } else { 'explorer' }
+  $row['session'] = $process.SessionId
+  $row['creation_utc'] = $process.StartTime.ToUniversalTime().ToString('o')
+  $sampled += $row
+}
+$proofClsid = '{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
+$registry = @()
+foreach ($view in @([Microsoft.Win32.RegistryView]::Registry64,[Microsoft.Win32.RegistryView]::Registry32)) {
+  foreach ($hive in @([Microsoft.Win32.RegistryHive]::CurrentUser,[Microsoft.Win32.RegistryHive]::LocalMachine)) {
+    $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey($hive, $view)
+    try {
+      $checks = @(
+        @('Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved',$proofClsid),
+        @('Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked',$proofClsid),
+        @('Software\Microsoft\Windows\CurrentVersion\Policies\Explorer','EnforceShellExtensionSecurity')
+      )
+      foreach ($check in $checks) {
+        $key = $base.OpenSubKey($check[0], $false)
+        try {
+          $present = $null -ne $key -and $check[1] -in $key.GetValueNames()
+          $registry += [ordered]@{hive=$hive.ToString();view=$view.ToString();path=$check[0];name=$check[1];present=$present;value=$(if($present -and $check[1] -ne $proofClsid){$key.GetValue($check[1])}else{$null})}
+        } finally { if ($key) { $key.Dispose() } }
+      }
+    } finally { $base.Dispose() }
+  }
+}
+$report = [ordered]@{utc=[DateTimeOffset]::UtcNow.ToString('o');scope='Read-only process/token metadata and exact proof CLSID/policy values. No GUI, registry writes, impersonation or process changes.';processes=$sampled;registry=$registry}
+$outPath = Join-Path $PSScriptRoot 'explorer-context.json'
+$report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $outPath -Encoding utf8NoBOM
+$report | ConvertTo-Json -Depth 8 -Compress

@@ -1,5 +1,5 @@
 {
-  "checkpoint": "ae224053351641397674fc694bf3ee3e36f11479",
+  "checkpoint": "0f56068",
   "module_provenance": [
     {
       "path": "apps/web",
@@ -40,12 +40,13 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "User reconnected; real GUI input succeeds but custom namespace navigation failed while registration still existed. URI/Desktop discovery/root-binding diagnosis in progress.",
+  "windows_explorer_entry": "Actual bare CLSID and shell URI fail with registration alive; independent root-bind positive and unregistered negative behave correctly. Current readonly process/context comparison finds no difference in sampled bitness/integrity/mitigations. Owned filesystem junction comparison is pending; G1 remains open.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
     "bytes": 30278429,
     "signing": "existing debug trial signature",
     "acceptance": "real Core phone/tablet images passed; client and shared cleanup verified"
-  }
+  },
+  "windows_context_evidence": ".codex/handoffs/V03-005/explorer-process-context.json"
 }

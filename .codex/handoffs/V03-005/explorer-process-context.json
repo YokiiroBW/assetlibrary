@@ -1,0 +1,230 @@
+{
+  "utc": "2026-09-09T02:00:26.7023605+00:00",
+  "scope": "Read-only process/token metadata and exact proof CLSID/policy values. No GUI, registry writes, impersonation or process changes.",
+  "processes": [
+    {
+      "pid": 388,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "executor",
+      "session": 2,
+      "creation_utc": "2026-09-09T02:00:26.0616131Z"
+    },
+    {
+      "pid": 6284,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "explorer",
+      "session": 2,
+      "creation_utc": "2026-09-07T06:03:44.7029344Z"
+    },
+    {
+      "pid": 17944,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "explorer",
+      "session": 2,
+      "creation_utc": "2026-09-07T06:58:11.2285511Z"
+    },
+    {
+      "pid": 24644,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "explorer",
+      "session": 2,
+      "creation_utc": "2026-09-08T09:06:00.1588876Z"
+    },
+    {
+      "pid": 24772,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "explorer",
+      "session": 2,
+      "creation_utc": "2026-09-09T01:23:15.0391334Z"
+    },
+    {
+      "pid": 26128,
+      "process_machine": 0,
+      "native_machine": 34404,
+      "mitigation_flags": {
+        "extension_point": 0,
+        "signature": 0,
+        "image_load": 0
+      },
+      "same_user_as_executor": true,
+      "elevation_type": 3,
+      "elevated": 0,
+      "virtualization_allowed": 1,
+      "virtualization_enabled": 0,
+      "ui_access": 0,
+      "app_container": 0,
+      "integrity_rid": 8192,
+      "role": "explorer",
+      "session": 2,
+      "creation_utc": "2026-09-08T09:05:14.3343303Z"
+    }
+  ],
+  "registry": [
+    {
+      "hive": "CurrentUser",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "CurrentUser",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "CurrentUser",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "EnforceShellExtensionSecurity",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry64",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "EnforceShellExtensionSecurity",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "CurrentUser",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "CurrentUser",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "CurrentUser",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "EnforceShellExtensionSecurity",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Blocked",
+      "name": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "present": false,
+      "value": null
+    },
+    {
+      "hive": "LocalMachine",
+      "view": "Registry32",
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+      "name": "EnforceShellExtensionSecurity",
+      "present": false,
+      "value": null
+    }
+  ]
+}

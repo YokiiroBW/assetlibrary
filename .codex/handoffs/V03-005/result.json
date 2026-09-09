@@ -7,10 +7,12 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "249fed9",
+  "commit": "0f56068",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/decisions.md",
+    ".codex/handoffs/V03-005/explorer-process-context.json",
+    ".codex/handoffs/V03-005/explorer-process-context.ps1.txt",
     ".codex/handoffs/V03-005/image-fixture-lifecycle.json",
     ".codex/handoffs/V03-005/integration-checkpoint.json",
     ".codex/handoffs/V03-005/linux-decoder-default.json",
@@ -152,6 +154,7 @@
     "apps/web/src/styles/images.css",
     "contracts/assetlink/image-preview-v1.md",
     "docs/adr/ADR-0019_首批图片预览契约与隔离要求.md",
+    "docs/releases/NATIVE_CLIENT_TRIAL.md",
     "docs/releases/PARALLEL_BROWSE_PREVIEW_PLAN.md",
     "eng/README.md",
     "eng/web-dependency-policy.json",
@@ -273,6 +276,7 @@
     "tests/web/real-core-image-support.mjs",
     "tests/windows-shell/CMakeLists.txt",
     "tests/windows-shell/LoaderProbe.cpp",
+    "tests/windows-shell/Probe.cpp",
     "tests/windows-shell/README.md",
     "tests/windows-shell/diagnose-loader.ps1"
   ],
@@ -299,7 +303,8 @@
       "actual_package_linux_parent_death": 1,
       "windows_live_positive_identity": 1,
       "android_image404_state": 11,
-      "android_image404_ui": 1
+      "android_image404_ui": 1,
+      "windows_root_bind_states": 2
     },
     "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified."
   },
@@ -338,10 +343,11 @@
       "Merged repository verification passed: handoffs/module architecture/contracts/source/SDK/theme/dependencies,21 migration and14 architecture regressions;Alpha remains blocked",
       "Exact f580b15 source boundary linked into shared solution/CI: Linux locked restore/format/Release and9 tests passed, including actual leaf symlink denial with no skip; no decoder/NAS conclusion",
       "Final Windows identity/native-test integration: affected format/Release zero warnings; root positive-timestamp/live-SID regression1/1; repository architecture/contracts/source gates passed. See tests.md for distinct native and LAN evidence limits.",
-      "Windows final fe9530c evidence archive integrated and its 10 normalized snapshot digests independently verified; native12/12 and LAN6 scoped results retain original failures and limits."
+      "Windows final fe9530c evidence archive integrated and its 10 normalized snapshot digests independently verified; native12/12 and LAN6 scoped results retain original failures and limits.",
+      "4780629 root-bind diagnostic reviewed and merged as0f56068: registered/unregistered controls match expected stages; this is not real Explorer acceptance. Root read-only process-context evidence is separately recorded."
     ],
     "technical_debt": [
-      "Complete native Explorer/IPC and current Windows controls with a usable desktop.",
+      "Resolve actual Explorer entry discovery/loading before implementing IPC and closing any G1..G4 gate; usable desktop authorization already persists.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]
