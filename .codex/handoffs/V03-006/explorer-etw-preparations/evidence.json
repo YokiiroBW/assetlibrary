@@ -1,0 +1,56 @@
+{
+  "RecordedAtUtc": "2026-09-09T04:48:37.5233149+00:00",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "GuiEntriesSubmitted": 0,
+  "BothGuardsExitCode": 0,
+  "RegistryCleanupVerified": true,
+  "OwnWindowsClosed": [
+    1376478,
+    4196070,
+    2754052
+  ],
+  "OriginalWindowPreserved": 1247028,
+  "CollectorDetailsSource": "Coordinator reports; this task owns GUI preparations and cleanup only",
+  "Artifacts": [
+    {
+      "File": "attempt1-cleanup.json",
+      "Sha256": "B82CEFFB9E19BFA9912430E4939F656C23CEF785F36945ECE9043E82C1B23E71"
+    },
+    {
+      "File": "attempt1-final-cleanup.json",
+      "Sha256": "F08D6B6A500801269AB346028DA471A150F6525522086D990017AED4C64821CE"
+    },
+    {
+      "File": "attempt1-preparation.json",
+      "Sha256": "22BB2B1E625FCC2DABB064DEC82242B3F0B55A3CA037C11147234040A78773AD"
+    },
+    {
+      "File": "attempt1-ready.json",
+      "Sha256": "DD7059D408518A467DFA4A40142424707C00729F901CDE021506D19B780ED834"
+    },
+    {
+      "File": "attempt1-register.json",
+      "Sha256": "D71CFCDF91A1DD147AA3A38D0D393D842BE91C6FE9FADA859F11DCA72D7E9C2F"
+    },
+    {
+      "File": "attempt2-cleanup.json",
+      "Sha256": "5B932C47015C88A6A7E0E8934D0EB3A58EE28A97A75655C3AD120A70E5CC104E"
+    },
+    {
+      "File": "attempt2-final-cleanup.json",
+      "Sha256": "481A86FF25D18C317D92BF520A8DAC35696B7ECDF144ABDC6DDE0C0F4CC2EBBF"
+    },
+    {
+      "File": "attempt2-ready.json",
+      "Sha256": "EB4D4DC2CC2E0DD5EFDFD896DE8BE25EBDF5CB7DFB6D31CDCDCCA74308C69C5D"
+    },
+    {
+      "File": "attempt2-register.json",
+      "Sha256": "CF661AC201137021495CABA06A047DCFABE08BD69033759C650B52C06D8E60C3"
+    },
+    {
+      "File": "attempt2-window-cleanup.json",
+      "Sha256": "8BAB2952EC6D50357BB80623D55A3EA411B29DE04C7F6AF76E582EB2ED897DDE"
+    }
+  ]
+}

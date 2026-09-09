@@ -1,0 +1,13 @@
+{
+  "Utc": "2026-09-09T04:47:11.4830625+00:00",
+  "EntrySubmitted": false,
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "CoordinatorReportedOutcome": "Windows UAC launch returned operation cancelled by user; no successful collector/guardian launch, no collector JSONL, no ready signal",
+  "AutomaticRetryStopped": true
+}

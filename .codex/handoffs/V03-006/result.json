@@ -130,7 +130,20 @@
     ".codex/handoffs/V03-006/explorer-mt-control/root-bind.ps1.txt",
     ".codex/handoffs/V03-006/explorer-mt-control/source-comparison.json",
     ".codex/handoffs/V03-006/explorer-mt-control/static-imports.txt",
-    ".codex/handoffs/V03-006/explorer-mt-control/screenshot-source-audit.json"
+    ".codex/handoffs/V03-006/explorer-mt-control/screenshot-source-audit.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations.md",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt1-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt1-final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt1-preparation.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt1-ready.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt1-register.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-ready.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-register.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-window-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/evidence.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -216,6 +229,9 @@
     "static_crt_report": "explorer-mt-control.md",
     "static_crt_root_bind_controls_passed": 1,
     "static_crt_gui_outcome": "ordinary_empty_folder_without_observed_extension_activation",
-    "static_crt_screenshot_scope": "Appearance reference only; duplicate API image bytes are not independent temporal evidence"
+    "static_crt_screenshot_scope": "Appearance reference only; duplicate API image bytes are not independent temporal evidence",
+    "etw_preparation_report": "explorer-etw-preparations.md",
+    "etw_gui_entries_submitted": 0,
+    "etw_state": "Both preparations cleaned; second UAC launch cancelled; automatic retry stopped pending user readiness for OS prompt"
   }
 }

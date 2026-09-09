@@ -1,0 +1,15 @@
+{
+  "Utc": "2026-09-09T12:32:03.6300184+08:00",
+  "EntrySubmitted": false,
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "Reason": "Coordinator reported ETW scope guard stopped collector before GUI ready; no entry navigation occurred.",
+  "OwnWindowClosed": 4196070,
+  "OriginalWindowPreserved": 1247028,
+  "InputInterruption": "First close input was rejected with user input detected; fresh get_window_state confirmed same owned SDK-folder window, subsequent close succeeded and final list confirms absence."
+}

@@ -1,0 +1,46 @@
+{
+  "Utc": "2026-09-09T04:22:31.5797937+00:00",
+  "Processes": [
+    {
+      "Id": 6284,
+      "SessionId": 2,
+      "MainWindowTitle": "",
+      "MainWindowHandle": 2426440
+    },
+    {
+      "Id": 8364,
+      "SessionId": 2,
+      "MainWindowTitle": "C:\\Program Files (x86)\\Windows Kits\\10 - 文件资源管理器",
+      "MainWindowHandle": 4196070
+    },
+    {
+      "Id": 17944,
+      "SessionId": 2,
+      "MainWindowTitle": "此电脑 - 文件资源管理器",
+      "MainWindowHandle": 1247028
+    },
+    {
+      "Id": 24644,
+      "SessionId": 2,
+      "MainWindowTitle": "",
+      "MainWindowHandle": 0
+    },
+    {
+      "Id": 24772,
+      "SessionId": 2,
+      "MainWindowTitle": "",
+      "MainWindowHandle": 0
+    },
+    {
+      "Id": 26128,
+      "SessionId": 2,
+      "MainWindowTitle": "",
+      "MainWindowHandle": 0
+    }
+  ],
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  }
+}

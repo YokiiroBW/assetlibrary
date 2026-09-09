@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新运行状态：[两轮ETW前置准备](explorer-etw-preparations.md)均未提交GUI入口，首轮采集器scope guard结束、第二轮UAC启动被取消（均由主协调报告）。本任务两轮guard正常撤销注册、自有窗口/空目录全部清理，原用户窗口保留；停止自动重试，待用户准备处理系统提示后由协调重新安排。授权持续，不将未导航的准备态计作G1新结果。
+
 最新状态 **partial**，源码提交 `47806297fe6989e3cd04e83e692f78ae7ed4bce2`。本轮[真实入口与根绑定证据](explorer-entry-20260909.md)已覆盖重新可用的桌面：已知 `shell:Desktop` 正控成功，包含虚拟项目的Desktop视图未发现自有项，裸CLSID与完整shell URI均实际报错；注册在导航和报错期间仍有效，所有Explorer模块查询均成功但未见proof DLL。独立进程不预先CoCreate的Desktop根绑定/View正控成功，卸载负控在parse阶段失败。G1..G4仍开放；当前阻断是实际Explorer发现/激活差异，以下Disconnected/Escape记录仅为历史。
 
 本轮只新增test-only Probe根绑定模式与证据，不改DLL、GUID、注册语义、生产接口或依赖方向。复用系统Shell API与既有owner保护注册脚本；无真实资产写入，十秒probe上限。自有注册、模态及窗口已清理，用户原窗口保留。两项新根绑定控制单列，不累计为原四项loader或图片矩阵。后续经主协调批准的官方文件夹CLSID入口对照也未激活扩展，详见下文；不重复策略采样或已通过的图片测试。
