@@ -7,9 +7,12 @@
   "owner": "android-client-owner",
   "branch": "codex/v03-009-android-image-preview",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\85ca\\AssetLibrary",
-  "commit": "1838b96e47338398be8c168a273799990f237df0",
+  "commit": "f1432924b99f00796d9a76210d5282edfa40f1d1",
   "changed_files": [
+    ".codex/handoffs/V03-009/android-dependency-audit-404-fallback.json",
     ".codex/handoffs/V03-009/android-dependency-audit.json",
+    ".codex/handoffs/V03-009/image-404-candidate.json",
+    ".codex/handoffs/V03-009/image-404-fallback.md",
     ".codex/handoffs/V03-009/real-core-integration.json",
     ".codex/handoffs/V03-009/result.json",
     ".codex/handoffs/V03-009/screenshots/phone-font200-preview.png",
@@ -45,22 +48,29 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 79,
+    "passed": 80,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "jvm": 37,
+    "jvm": 38,
     "distinct_instrumented_tests": 7,
     "instrumented_viewports": 3,
     "repository_regressions": 35,
     "not_run": [],
     "dependency_audit": "passed exact-inventory same-day OSV response, 101 runtime and 475 verification components",
     "real_core_distinct_tests": 2,
-    "real_core_actual_runs": 3
+    "real_core_actual_runs": 3,
+    "last_change_verification": {
+      "jvm_executed": 11,
+      "instrumented_executed": 1,
+      "new_distinct_cases": 1,
+      "scope": "Only image404 change; previous full/native/Core evidence retained, not rerun"
+    }
   },
   "risks": [
     "Trial debug signing; HyperOS/Android11 physical devices and 500k client performance remain open.",
-    "Owned emulator exited unexpectedly after successful tablet test; recovered and verified private file/port/device cleanup. Root owns final shared-server source-integrity and cleanup evidence."
+    "Owned emulator exited unexpectedly after successful tablet test; recovered and verified private file/port/device cleanup. Root owns final shared-server source-integrity and cleanup evidence.",
+    "Current candidate f143292 only changes image404 fallback; prior real-Core evidence is retained, not a new NAS compatibility/live test. Old NAS preview remains unavailable until separately enabled safely."
   ],
   "blocked_by": [],
   "recommended_merge_order": 3,
@@ -87,28 +97,43 @@
       "37 JVM and 5 distinct instrumentation cases passed across three real emulator viewports",
       "Debug/Release builds and Android Lint passed with strict locking and verification",
       "101 runtime license/OSV and 475 component integrity audit passed; APK v2 signature and copied SHA256 verified",
-      "RealCoreUiTest and RealCoreImageUiTest passed against actual Linux Core/PostgreSQL/isolated decoder; phone 2/2 and tablet image 1/1; screenshots inspected, client private data and reverse ports cleaned"
+      "RealCoreUiTest and RealCoreImageUiTest passed against actual Linux Core/PostgreSQL/isolated decoder; phone 2/2 and tablet image 1/1; screenshots inspected, client private data and reverse ports cleaned",
+      "f143292 image404 change: 11 targeted state and 1 existing UI case passed; Debug/Release, Lint/strict, candidate APK v2/hash/101-runtime audit passed; prior Core evidence retained"
     ],
     "technical_debt": [
       "Existing physical HyperOS/Android11, 500k native performance and production signing gates remain"
     ]
   },
   "artifacts": {
-    "apk": ".runtime/releases/android/AssetLibrary-Android-0.3.0-preview.1.apk",
-    "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
-    "bytes": 30278429,
+    "apk": ".runtime/releases/android/AssetLibrary-Android-0.3.0-preview.1-404-fallback.apk",
+    "sha256": "6d959b5ac000b6a7a932c9d50298b51a25c9992d92ed748c9371e7b710444ddb",
+    "bytes": 30425593,
     "signing": "Android debug trial; APK v2 verified",
     "screenshots": "screenshots/: six explicit synthetic UI screenshots and four real-Core-derived image screenshots",
-    "dependency_audit": "android-dependency-audit.json",
-    "real_core_integration": "real-core-integration.json"
+    "dependency_audit": "android-dependency-audit-404-fallback.json",
+    "real_core_integration": "real-core-integration.json",
+    "candidate_provenance": "image-404-candidate.json",
+    "real_core_scope": "real-core-integration.json validates prior1838b96 APK; current candidate only has image404 fallback change"
   },
   "runtime_cleanup": {
-    "emulator": "v03-009-api36 / emulator-5584 recovered for cleanup, explicitly stopped; adb devices empty and 5584/5585 listeners zero",
+    "emulator": "Latest fallback regression AVD explicitly stopped; adb devices empty and 5584/5585 listeners zero",
     "private_connection_created": true,
     "private_connection_removed_verified": true,
     "reverse_ports_created": true,
     "reverse_empty_verified": true,
     "heavy_builds_finished": true,
-    "shared_server_cleanup_owner": "V03-005 coordinator"
-  }
+    "shared_server_cleanup_owner": "V03-005 coordinator",
+    "last_run_private_connection_created": false,
+    "last_run_reverse_created": false,
+    "last_run_checked_at": "2026-09-09T01:13:11Z"
+  },
+  "previous_artifacts": [
+    {
+      "implementation_commit": "1838b96e47338398be8c168a273799990f237df0",
+      "apk": ".runtime/releases/android/AssetLibrary-Android-0.3.0-preview.1.apk",
+      "bytes": 30278429,
+      "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
+      "real_core_evidence": "real-core-integration.json"
+    }
+  ]
 }

@@ -60,3 +60,11 @@ apps/android/gradlew.bat -p apps/android --no-daemon --dependency-verification s
 平板测试成功后、清理前模拟器与adb连接意外消失；未把当次失败清理记作成功。仅重启本任务AVD恢复截图与私密文件清理，2026-09-08T15:57:10Z确认设备connection文件不存在、reverse列表为空，再显式emu kill。15:57:29Z确认adb devices为空及5584/5585监听为0。退出原因未确定，不猜作产品问题或已验证系统稳定；没有关闭共享Core/SSH或改样例，root负责服务器侧原文件hash/mtime和资源最终清理。
 
 本次仅增真实联调证据与handoff状态为ready_for_review，已通过的源码自测/构建不重复。缺HyperOS/Android11实机、50万资产压力、正式签名与完整V0.3发布证据；这些门禁不由本任务解除。
+
+## 图片404兼容降级修订（2026-09-09）
+
+源码f143292仅修改图片专用404文案，另新增已载rows/session保留与恢复L0状态用例、增强现有UI“查看文件信息”点击断言。11项WorkspaceModelTest及1项相关原生UI在自有headless手机默认视口通过，0失败/跳过；Lint、strict lock/verification通过。先提交修复与测试结果，再执行Debug/Release候选构建通过。命令/原始JUnit摘要与哈希详见image-404-fallback.md和image-404-candidate.json。
+
+新候选30,425,593 bytes、SHA256 `6d959b5ac000b6a7a932c9d50298b51a25c9992d92ed748c9371e7b710444ddb`，APK v2调试试用签名通过；versionCode=2和versionName=0.3.0-preview.1保持不变。101 runtime/475组件及候选体积哈希审计见android-dependency-audit-404-fallback.json，复用仍有效的同inventory OSV回执；原1838b96 APK与真实Core874/Worker40d2d69验收证据均保留，未重复执行不变全套或真实Linux图片/未做NAS实测。
+
+累计不同用例80（此前79+新增状态用例1）；当前修订实际执行12项（含11个既有逻辑用例），不把累计数说成此候选全量重跑。自有AVD已关闭，01:13:11Z确认adb设备为空/5584和5585监听0，本次未创建私密连接文件或reverse，未触碰Explorer桌面或外部服务。
