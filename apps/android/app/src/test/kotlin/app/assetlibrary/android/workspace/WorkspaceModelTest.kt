@@ -30,6 +30,7 @@ class WorkspaceModelTest {
     @After fun cleanup() { model.cancel(); Dispatchers.resetMain() }
     private inner class FakeApi : AssetApi {
         var error: ApiFailure? = null
+        var imageError = ApiFailure(415, "preview_unsupported")
         var cleared = false
         var query = ""
         var options: BrowseOptions? = null
@@ -50,7 +51,7 @@ class WorkspaceModelTest {
         }
         override suspend fun detail(libraryId: String, entryId: String): AssetRow { error?.let { throw it }; return AssetRow(library, entry) }
         override suspend fun scan(libraryId: String): Scan? = null
-        override suspend fun image(libraryId: String, entryId: String, variant: ImageVariant): ImagePayload = throw ApiFailure(415, "preview_unsupported")
+        override suspend fun image(libraryId: String, entryId: String, variant: ImageVariant): ImagePayload = throw imageError
     }
     private fun login() { model.connect("https://localhost", "", "sample", "fixture") }
     @Test fun `paging replaces bounded page and back restores prior cursor`() = runTest(dispatcher) {
@@ -90,6 +91,28 @@ class WorkspaceModelTest {
         api.error = ApiFailure(404, "missing"); model.refresh(); runCurrent()
         assertTrue(model.state.value.rows.isEmpty())
         assertFalse(model.state.value.stale)
+    }
+    @Test fun `image 404 preserves loaded rows and session and allows L0 detail`() = runTest(dispatcher) {
+        login(); runCurrent(); model.openLibrary(library); runCurrent()
+        val loaded = model.state.value
+        val row = loaded.rows.single()
+        assertNotNull(loaded.session)
+        api.imageError = ApiFailure(404, "access_rejected")
+        model.visibleImages(loaded.rows); runCurrent()
+        assertEquals(loaded.rows, model.state.value.rows)
+        assertEquals(loaded.libraries, model.state.value.libraries)
+        assertEquals(loaded.session, model.state.value.session)
+        assertEquals("图片预览不可用，可查看文件信息", model.images.state.value[ImageKey.of(row, ImageVariant.THUMBNAIL)]?.error)
+        model.openPreview(row); runCurrent()
+        assertEquals(loaded.rows, model.state.value.rows)
+        assertEquals(loaded.session, model.state.value.session)
+        assertEquals("图片预览不可用，可查看文件信息", model.images.state.value[ImageKey.of(row, ImageVariant.PREVIEW)]?.error)
+        assertFalse(api.cleared)
+        model.closePreview(); model.select(row); runCurrent()
+        assertEquals(row, model.state.value.detail)
+        assertEquals(loaded.rows, model.state.value.rows)
+        assertEquals(loaded.session, model.state.value.session)
+        assertNull(model.state.value.error)
     }
     @Test fun `source change destroys history and old contents`() = runTest(dispatcher) {
         login(); runCurrent(); model.openLibrary(library); runCurrent()

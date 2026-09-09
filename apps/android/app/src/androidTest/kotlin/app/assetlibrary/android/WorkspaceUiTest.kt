@@ -155,6 +155,18 @@ class WorkspaceUiTest {
             compose.waitUntil(5000) { model.images.state.value.values.any { it.error != null } }
             compose.onNodeWithText(failure.imageMessage()).assertIsDisplayed()
             compose.onNodeWithText("查看文件信息").assertExists()
+            if (failure.status == 404) {
+                compose.onNodeWithText("图片预览不可用，可查看文件信息").assertIsDisplayed()
+                compose.onNodeWithText("查看文件信息").performClick()
+                compose.waitUntil(5000) { model.state.value.detail != null }
+                compose.onNodeWithText("真实相对路径").assertExists()
+                compose.onNodeWithText(file.path).performScrollTo().assertIsDisplayed()
+                compose.runOnIdle {
+                    assertEquals(row, model.state.value.detail)
+                    assertNotNull(model.state.value.session)
+                }
+                compose.onNodeWithText("关闭").performClick()
+            }
         }
         compose.runOnIdle { model.closePreview(); imageFailure = ApiFailure(403, "denied"); model.openPreview(row) }
         compose.waitUntil(5000) { model.state.value.session == null }

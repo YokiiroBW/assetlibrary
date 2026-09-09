@@ -46,7 +46,8 @@ class ImagePayload private constructor(val bytes: ByteArray, val width: Int, val
 }
 
 internal fun ApiFailure.imageMessage(): String = when {
-    status == 401 || status == 403 || status == 404 -> userMessage
+    status == 401 || status == 403 -> userMessage
+    status == 404 -> "图片预览不可用，可查看文件信息"
     code == "source_changed" || status == 409 -> "源文件已变化，请刷新目录。"
     code == "preview_limit_exceeded" || code == "response_too_large" -> "图片超过安全预览上限。"
     code == "preview_unsupported" || status == 415 -> "此文件暂不支持图片预览。"
