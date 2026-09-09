@@ -111,3 +111,9 @@ Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验
 静态CRT对照b9cdf5e及图像来源限定4240ae3已合8d7dcea/163da1b。root审查唯一RuntimeLibrary差异、导入表和源码规范化比较；20项新receipt与Git blob、原/新两份实际DLL强hash一致，三目录合计39项。独立根绑定1次通过、真实GUI未激活，现场清理已确认。两轮PNG完全同SHA；owner只读核对为不同WindowState/不同UI tree但API图像payload相同，已明确作为外观参考，不以图片证明独立采集时间。默认CMake与生产源没有变动，不再做DLL/注册试探。
 
 限时ETW工具仅在.runtime中准备：零告警Release，49项ABI/12项合成解析与后续9项守护身份检查；root核对19项manifest和实际只读进程计划通过，两项proof注册当前均不存在。没有执行StartTrace、guardian、UAC或终止。真实事件筛选、投递、清理仍待授权实测，不能将这些预检计为Explorer通过。详见explorer-trace-preparation.json。
+
+## 用户授权后的首次实际ETW准备与取消
+
+原d5工具首次实际Start/Open/三个Enable返回0，Kernel-Registry正控104→0并ready；之后PID scope guard失败，自动Stop/Query无丢事件、guardian正常。root独立status4201、两进程退出；未发GUI导航。来源未记录，不能归因provider。新ae1只补7个安全头字段、显式Compile根目录排除历史源；0告警构建、2项不解引用无效payload指针/输出字段检查通过，原19项完整冻结。第二次UAC启动返回系统取消，无采集器日志，独立status4201；Windows两轮自有窗口/目录/注册清理由owner记录并由root核对10项Git blob/文件hash。原始及索引见explorer-first-live-trace、explorer-second-launch、V03-006/explorer-etw-preparations。没有增加G1通过或失败次数，也没有将取消当作第二次捕获测试。
+
+本次集中归档后的verify_repository再次通过（handoff/架构/契约及原35项回归；Alpha仍blocked），日志.runtime/v03-005-final-tests/repository-authorized-trace-checkpoint.log。没有重复无变化的业务或图片套件。

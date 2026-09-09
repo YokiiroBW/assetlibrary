@@ -1,0 +1,4 @@
+{"kind":"guardian_preflight_query_returned","win32":4201}
+{"kind":"guardian_ready","session":"AL-Explorer-10e5e38864d647508cad03c9b0748022","parentPid":21808,"parentCreationFiletime":134334014921854331,"deadlineSeconds":75}
+{"kind":"session_absent","session":"AL-Explorer-10e5e38864d647508cad03c9b0748022"}
+{"kind":"guardian_finished","status":"cleanup_verified","loggingHealthy":true}

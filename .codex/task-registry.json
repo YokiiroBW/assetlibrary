@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "actual_entry_and_static_crt_controls_unactivated_bounded_trace_preparation"
+      "execution_status": "owned_preparations_clean_no_gui_submission_waiting_os_confirmation_readiness"
     },
     {
       "id": "V03-007",

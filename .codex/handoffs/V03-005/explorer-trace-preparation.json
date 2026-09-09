@@ -1,5 +1,5 @@
 {
-  "status": "prepared_awaiting_system_trace_authorization",
+  "status": "first_setup_failed_safely_second_windows_launch_cancelled",
   "validation": {
     "status": "prepared_not_live_validated",
     "sdk": "10.0.111",
@@ -25,6 +25,18 @@
   "coordinator_manifest_entries_verified": 19,
   "coordinator_readonly_plan_check": "passed",
   "proof_registry_currently_absent": true,
-  "no_trace_or_uac_started": true,
-  "approval_note": "explorer-trace-approval.md"
+  "no_trace_or_uac_started": false,
+  "approval_note": "explorer-trace-approval.md",
+  "authorization": "User explicitly replied 允许 to the bounded administrator trace request; NAS architecture decision is not included.",
+  "first_live_evidence": "explorer-first-live-trace/evidence.json",
+  "second_launch_evidence": "explorer-second-launch/evidence.json",
+  "current_tool": {
+    "binary_sha256": "ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62",
+    "manifest_entries": 20,
+    "root_independently_verified": true,
+    "diagnostic_change": "Only seven safe header fields on a PID-scope violation; payload remains unread and capture stops. Root-only Compile glob excludes immutable history source copies.",
+    "targeted_checks_passed": 2,
+    "second_capture_executed": false
+  },
+  "authorization_persists": true
 }

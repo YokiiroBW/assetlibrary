@@ -1,0 +1,38 @@
+{
+  "status": "failed_closed_on_unidentified_pid_scope_event",
+  "source_binary_sha256": "d5a6b73e03f70c88f36c259089b194b9059f79a34eb42cc161350237e2f42e8c",
+  "native_start_open_three_enables_passed": true,
+  "live_registry_positive_control_observed": true,
+  "gui_entry_submitted": false,
+  "pid_violation_payload_retained": false,
+  "cleanup": {
+    "collector": true,
+    "guardian": true,
+    "root_independent_status": {
+      "win32": 4201,
+      "absent": true,
+      "exit": 0
+    },
+    "collector_and_guardian_processes_remaining": 0,
+    "checkedUtc": "2026-09-09T04:27:52.0553344Z"
+  },
+  "artifacts": [
+    {
+      "file": "10e5e38864d647508cad03c9b0748022.plan.json",
+      "sha256": "cd86d8072f8c9d6b315c7cac554cfd468ebdb4c72df795ea11aa6c695531ff0f"
+    },
+    {
+      "file": "10e5e38864d647508cad03c9b0748022.launch.json",
+      "sha256": "420592d72b45c856f25ea13dd81d64322c5120a1097aa3a9529cf8fc9f464853"
+    },
+    {
+      "file": "10e5e38864d647508cad03c9b0748022.jsonl",
+      "sha256": "a75c6202fdba66dec72b8a70364ea54b991a20f2737b4d07c0dbea3c7c831eba"
+    },
+    {
+      "file": "10e5e38864d647508cad03c9b0748022.guard.jsonl",
+      "sha256": "eec262d549a88033f696d34ead4c82bf3b231a996843be934fa892f6d8ef34d7"
+    }
+  ],
+  "next": "Add safe header-only failure provenance; do not infer the provider or relax PID scope from missing evidence."
+}

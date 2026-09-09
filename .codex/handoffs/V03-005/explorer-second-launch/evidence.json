@@ -1,0 +1,26 @@
+{
+  "status": "windows_elevation_launch_cancelled",
+  "windows_error_text": "操作已被用户取消",
+  "source_binary_sha256": "ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62",
+  "collector_log_created": false,
+  "guardian_log_created": false,
+  "gui_entry_submitted": false,
+  "independent_status": {
+    "win32": 4201,
+    "absent": true,
+    "exit": 0,
+    "checkedUtc": "2026-09-09T04:45:59.5602020Z"
+  },
+  "artifacts": [
+    {
+      "file": "083be90e4838467b92a4836b7c3a1aba.plan.json",
+      "sha256": "e402e00c41eab9485e60b89d886fc2d1200f9430e083b4c3cec4431f650c8721"
+    },
+    {
+      "file": "083be90e4838467b92a4836b7c3a1aba.launch.json",
+      "sha256": "dbeddbe7a632a937c9145d941ce34e643cdcc009c89f28c10c86595102e0a1bd"
+    }
+  ],
+  "authorization_persists": true,
+  "automatic_retry_stopped": true
+}

@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "native_entry_trace_authorization_and_nas_platform_decision_pending",
-  "next_action": "The bounded Windows ETW observer is prepared and independently reviewed; its19 manifest entries and readonly current PID plan check pass. Await authorization for the administrator system-trace step in V03-005/explorer-trace-approval.md. Do not start UAC or ETW before that reply. Once authorized, refresh expired plans, coordinate the existing bounded registration/owned window, require live registry-positive ready, then collect60s and independently verify cleanup. Desktop permission persists. NAS internal decoder architecture remains a separate user/ADR decision.",
+  "status": "native_trace_windows_confirmation_cancelled_nas_decision_pending",
+  "next_action": "User administrator-trace authorization persists. First live setup passed Start/Open/three Enables and registry-positive delivery, then stopped on an unidentified PID-scope event; independent4201/process cleanup passed before any GUI submission. Header-only diagnostic fix ae1c1ee1 is prepared. Second UAC launch returned Windows operation-cancelled and no observer started; all task windows/folders/registration are clean. Do not auto-retry UAC. When the user is ready to handle the Windows confirmation, refresh the plan and owned window under the same approved scope and continue. Never infer the failing provider or loosen scope without evidence. NAS architecture decision remains independent.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
