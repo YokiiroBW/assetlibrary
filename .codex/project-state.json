@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
   "status": "native_acceptance_and_nas_platform_decision_pending",
-  "next_action": "Continue the existing Windows task; permission to operate its test window is granted but the latest RDP state disconnected again, so require fresh active/unlocked desktop before UI actions. Web/Android real image and cleanup scopes are accepted. NAS package a12b0d1 is built and staged, not deployed; target kernel lacks seccomp, and the proposed authenticated Linux compute endpoint requires the pending user/ADR decision before implementation. Do not weaken isolation or alter NAS host policy.",
+  "next_action": "User reconnected RDP on 2026-09-09; Windows task confirmed actual GUI input and reproduced a namespace navigation error before factory load. Continue bounded URI/Desktop-item discovery with registration-lifetime evidence, then implement the native entry/IPC; desktop authorization already persists. Android owner separately fixes image-only404 fallback wording and verifies retained L0. NAS deployment architecture remains pending user/ADR choice; do not change NAS security or add the internal service without that decision.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
