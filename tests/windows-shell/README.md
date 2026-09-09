@@ -37,3 +37,15 @@ pwsh -NoProfile -File tests/windows-shell/diagnose-loader.ps1 -BuildDirectory .r
 以及不存在 DLL 的失败控制。输出运行库是否来自 System32、实际加载和类工厂结果；不打印 PATH 或凭据。
 搜索受限的成功只能说明当前机器上的该 DLL 无需开发 PATH，不能替代真实 Explorer 进程的加载证据，
 也不能排除系统完整性策略、桌面/会话或入口层面的其他阻断。诊断文件保留在 `.runtime` 供复核。
+
+## V03-006 Desktop 根绑定对照
+
+`ExplorerProofProbe --root-bind` 在独立STA进程中依次调用SHParseDisplayName、SHGetDesktopFolder、
+Desktop.BindToObject和CreateViewObject，不预先CoCreateInstance。此模式逐阶段无缓冲输出HRESULT；
+parse失败/空PIDL不继续绑定，空view不能报告成功。使用原owner保护注册脚本、十秒外部进程期限和finally卸载，
+不可把裸命令当作有超时保证的完整测试入口。
+
+2026-09-09相同不可变DLL注册正控四阶段S_OK、exit0；卸载负控parse=80070057、PIDL absent、exit1。
+[实际GUI与根绑定证据](../../.codex/handoffs/V03-006/explorer-entry-20260909.md)仍显示Desktop发现和shell URI失败；
+[官方文件夹CLSID入口](../../.codex/handoffs/V03-006/explorer-folder-entry.md)仅显示普通空目录。
+三类实际入口均未观察到Explorer加载proof DLL，独立根绑定/View成功不能计作真实G1。
