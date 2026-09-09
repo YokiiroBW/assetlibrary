@@ -14,7 +14,9 @@
 
 继续使用原SHA90FCC911…的动态probe EXE，未同时更换观察器运行库。02:23:34.2767171Z，独立STA进程23252的RootParse、GetDesktopFolder、DesktopBindRoot、RootBoundCreateView均S_OK、exit0、stderr空、未超时；十秒外层期限与finally适用。root-bind专属DLL副本日志只归属该probe。02:23:34.2969401Z卸载确认两键false。
 
-按新鲜窗口集合确认1575786为自有Ctrl+N窗口。GUI使用另一份相同hash静态DLL以区分日志来源，02:24:33.2900684Z注册成功、600秒guard开始。02:25:19.328Z在该窗口实际输入与前一动态对照完全相同的sandbox FolderName.{固定CLSID}绝对路径；02:25:40.160Z仍显示“此文件夹为空。”和0项，见[裁剪原始视图](explorer-mt-control/gui-empty-view.png)。
+按新鲜窗口集合确认1575786为自有Ctrl+N窗口。GUI使用另一份相同hash静态DLL以区分日志来源，02:24:33.2900684Z注册成功、600秒guard开始。02:25:19.328Z在该窗口实际输入与前一动态对照完全相同的sandbox FolderName.{固定CLSID}绝对路径；02:25:40.160Z本轮UI读取仍为“此文件夹为空。”和0项。[PNG仅作相同外观参考](explorer-mt-control/gui-empty-view.png)，不作为独立的本轮捕获时间证据。
+
+主协调发现两轮PNG同SHA后，只读检查原持久WindowState：本轮mtViewState对应1575786，上轮folderEntryState对应2033652，对象与截图对象引用均不同，UI tree hash也不同。本轮保存代码读取mtViewState.screenshots[0]，原始路径`.runtime/explorer-live/20260909-mt-control/gui/empty-view-raw.jpg`，创建/写入时间02:26:09.1196042Z；它与本轮API返回payload逐字节一致（A018F015…/56562B）。两次API返回的JPEG内容确实相同，裁剪PNG因而也相同。未发现归档变量/路径误用，但不能从截图本身排除捕获层复用；screenshot-0只是调用内编号。时序证据由分别取得的窗口/UI与UTC、注册、模块读回承担。完整核对见[screenshot-source-audit.json](explorer-mt-control/screenshot-source-audit.json)，未为此重跑GUI或修改图像。
 
 02:25:40.6438207Z注册两键仍true；五个Explorer的模块查询均成功且无任何路径的proof DLL，GUI副本旁无trace。独立probe的日志没有被计作Explorer证据；没有开展动态反控或第二次GUI注册。
 

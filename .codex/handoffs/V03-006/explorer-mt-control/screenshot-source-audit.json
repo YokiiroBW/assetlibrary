@@ -1,0 +1,67 @@
+{
+  "auditedUtc": "2026-09-09T02:32:26.620Z",
+  "note": "Existing persistent WindowState objects only; no new GUI capture or image modification",
+  "captures": [
+    {
+      "label": "dynamic",
+      "window": {
+        "app": "process:C:\\Windows\\explorer.exe",
+        "id": 2033652,
+        "title": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof - 文件资源管理器"
+      },
+      "screenshot": {
+        "id": "screenshot-0",
+        "width": 1430,
+        "height": 740,
+        "originX": 7,
+        "originY": 0
+      },
+      "captureSha256": "a018f015393c84afaf917fd1192567e8b8c554da0f17462b9e3c24e69a3e0999",
+      "savedSha256": "a018f015393c84afaf917fd1192567e8b8c554da0f17462b9e3c24e69a3e0999",
+      "savedMatchesCapture": true,
+      "savedPath": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary/.runtime/explorer-live/20260909-folder-entry/empty-view-raw.jpg",
+      "viewItemLines": [
+        "Window: \"C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof - 文件资源管理器\", App: explorer.exe.",
+        "\t\t\t\t\t\t98 文本 0 个项目 Description: 项目总数 ID: PropertyValue",
+        "\t\t\t\t\t\t110 文本 此文件夹为空。 ID: EmptyTextFocusable"
+      ]
+    },
+    {
+      "label": "static",
+      "window": {
+        "app": "process:C:\\Windows\\explorer.exe",
+        "id": 1575786,
+        "title": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof - 文件资源管理器"
+      },
+      "screenshot": {
+        "id": "screenshot-0",
+        "width": 1430,
+        "height": 740,
+        "originX": 7,
+        "originY": 0
+      },
+      "captureSha256": "a018f015393c84afaf917fd1192567e8b8c554da0f17462b9e3c24e69a3e0999",
+      "savedSha256": "a018f015393c84afaf917fd1192567e8b8c554da0f17462b9e3c24e69a3e0999",
+      "savedMatchesCapture": true,
+      "savedPath": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary/.runtime/explorer-live/20260909-mt-control/gui/empty-view-raw.jpg",
+      "viewItemLines": [
+        "Window: \"C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof - 文件资源管理器\", App: explorer.exe.",
+        "\t\t\t\t\t\t98 文本 0 个项目 Description: 项目总数 ID: PropertyValue",
+        "\t\t\t\t\t\t110 文本 此文件夹为空。 ID: EmptyTextFocusable"
+      ]
+    }
+  ],
+  "sameWindowStateObject": false,
+  "sameScreenshotObject": false,
+  "captureCallSources": {
+    "dynamic": "folderEntryState = await sky.get_window_state({window:junctionWindow,include_text:true})",
+    "static": "mtViewState = await sky.get_window_state({window:mtWindow,include_text:true})"
+  },
+  "staticObservedUtc": "2026-09-09T02:25:40.160Z",
+  "dynamicObservedUtc": "2026-09-09T02:07:54.551Z",
+  "uiTreeSha256": {
+    "dynamic": "b173d60cd6aeac73f35d9b2f647e3c47053ca36efa4664cbb7d29ebe05909919",
+    "static": "105e159dae65ea4ea17b32f54383bb8a777de4bab81dc1031e22e68675028eee"
+  },
+  "limitations": "Both API calls returned identical image payload bytes. Screenshot id screenshot-0 is call-local, not a unique capture or timestamp. Independent current-window UI reads and timelines carry the temporal evidence; image payload alone cannot establish freshness or exclude capture-layer reuse."
+}

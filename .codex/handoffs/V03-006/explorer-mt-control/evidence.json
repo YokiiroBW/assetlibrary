@@ -1,5 +1,5 @@
 {
-  "RecordedAtUtc": "2026-09-09T02:27:04.1122832+00:00",
+  "RecordedAtUtc": "2026-09-09T10:27:04.1122832+08:00",
   "SourceCommit": "72e76219cea17bd747560dff85cbe15b0e1f98bb",
   "Configuration": "Release x64",
   "Compiler": "MSVC 19.44.35228.0",
@@ -91,6 +91,11 @@
     {
       "File": "static-imports.txt",
       "Sha256": "F9D17ECE73727AF36EE3CDB3653B33999150C30C0F1537B36A6B3F114BB2C05E"
+    },
+    {
+      "File": "screenshot-source-audit.json",
+      "Sha256": "D0B9656587801B69B9B07A9D81BAB5B65ACD305664E3AE0E5BA68695915CDF6C"
     }
-  ]
+  ],
+  "ImageInterpretation": "Appearance reference only: separate window capture calls returned identical image payload bytes; screenshot alone is not independent temporal evidence. See screenshot-source-audit.json."
 }

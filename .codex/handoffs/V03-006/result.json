@@ -129,7 +129,8 @@
     ".codex/handoffs/V03-006/explorer-mt-control/root-bind-result.json",
     ".codex/handoffs/V03-006/explorer-mt-control/root-bind.ps1.txt",
     ".codex/handoffs/V03-006/explorer-mt-control/source-comparison.json",
-    ".codex/handoffs/V03-006/explorer-mt-control/static-imports.txt"
+    ".codex/handoffs/V03-006/explorer-mt-control/static-imports.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/screenshot-source-audit.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -214,6 +215,7 @@
     "folder_entry_outcome": "ordinary_empty_folder_without_observed_extension_activation",
     "static_crt_report": "explorer-mt-control.md",
     "static_crt_root_bind_controls_passed": 1,
-    "static_crt_gui_outcome": "ordinary_empty_folder_without_observed_extension_activation"
+    "static_crt_gui_outcome": "ordinary_empty_folder_without_observed_extension_activation",
+    "static_crt_screenshot_scope": "Appearance reference only; duplicate API image bytes are not independent temporal evidence"
   }
 }
