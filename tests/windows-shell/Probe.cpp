@@ -4,9 +4,40 @@
 #include <shlwapi.h>
 HRESULT NavigateNewProofWindow(PCIDLIST_ABSOLUTE root);
 
+static int RootBindProof() {
+  // Preserve the last completed stage if the outer ten-second runner must terminate COM.
+  setvbuf(stdout, nullptr, _IONBF, 0);
+  PIDLIST_ABSOLUTE root = nullptr;
+  HRESULT hr = SHParseDisplayName(L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}", nullptr, &root, 0, nullptr);
+  wprintf(L"RootParse=%08lx; Pidl=%ls\n", static_cast<unsigned long>(hr), root ? L"present" : L"absent");
+  if (FAILED(hr) || !root) { CoTaskMemFree(root); return 1; }
+  IShellFolder* desktop = nullptr;
+  hr = SHGetDesktopFolder(&desktop);
+  wprintf(L"GetDesktopFolder=%08lx\n", static_cast<unsigned long>(hr));
+  IShellFolder2* folder = nullptr;
+  if (SUCCEEDED(hr) && desktop) {
+    hr = desktop->BindToObject(root, nullptr, IID_PPV_ARGS(&folder));
+    wprintf(L"DesktopBindRoot=%08lx\n", static_cast<unsigned long>(hr));
+  }
+  if (SUCCEEDED(hr) && folder) {
+    IShellView* view = nullptr;
+    hr = folder->CreateViewObject(nullptr, IID_PPV_ARGS(&view));
+    if (SUCCEEDED(hr) && !view) hr = E_UNEXPECTED;
+    wprintf(L"RootBoundCreateView=%08lx\n", static_cast<unsigned long>(hr));
+    if (view) view->Release();
+  } else if (SUCCEEDED(hr)) hr = E_UNEXPECTED;
+  if (folder) folder->Release();
+  if (desktop) desktop->Release();
+  CoTaskMemFree(root);
+  return FAILED(hr) ? 1 : 0;
+}
+
 int wmain(int argc, wchar_t** argv) {
   HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
   if (FAILED(hr)) return 1;
+  if (argc == 2 && wcscmp(argv[1], L"--root-bind") == 0) {
+    const int result = RootBindProof(); CoUninitialize(); return result;
+  }
   CLSID clsid{}; hr = CLSIDFromString(L"{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}", &clsid);
   if (FAILED(hr)) { CoUninitialize(); return 1; }
   IShellFolder2* folder = nullptr;
@@ -15,6 +46,9 @@ int wmain(int argc, wchar_t** argv) {
   PIDLIST_ABSOLUTE root = nullptr;
   HRESULT parsed = SHParseDisplayName(L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}", nullptr, &root, 0, nullptr);
   wprintf(L"SHParseDisplayName=%08lx\n", static_cast<unsigned long>(parsed));
+  if (FAILED(parsed) || !root) {
+    CoTaskMemFree(root); if (folder) folder->Release(); CoUninitialize(); return 1;
+  }
   if (root) {
     IShellItem* rootItem = nullptr;
     HRESULT itemHr = SHCreateItemFromIDList(root, IID_PPV_ARGS(&rootItem));
