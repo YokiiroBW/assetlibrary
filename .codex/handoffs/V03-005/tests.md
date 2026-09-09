@@ -109,3 +109,5 @@ Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验
 现有系统日志、进程运行库和工具权限的只读结果见explorer-diagnostics.json；无本扩展的相关记录不等于未尝试加载。未启动driver/ETW、未提权或改策略。静态CRT后续结果单列于下段，不将诊断计划记为通过。上一稳定源/协调检查点c46aea5的verify_repository通过，记录repository-explorer-controls.log；未为后续纯证据更新重跑无变化的业务/图片套件。
 
 静态CRT对照b9cdf5e及图像来源限定4240ae3已合8d7dcea/163da1b。root审查唯一RuntimeLibrary差异、导入表和源码规范化比较；20项新receipt与Git blob、原/新两份实际DLL强hash一致，三目录合计39项。独立根绑定1次通过、真实GUI未激活，现场清理已确认。两轮PNG完全同SHA；owner只读核对为不同WindowState/不同UI tree但API图像payload相同，已明确作为外观参考，不以图片证明独立采集时间。默认CMake与生产源没有变动，不再做DLL/注册试探。
+
+限时ETW工具仅在.runtime中准备：零告警Release，49项ABI/12项合成解析与后续9项守护身份检查；root核对19项manifest和实际只读进程计划通过，两项proof注册当前均不存在。没有执行StartTrace、guardian、UAC或终止。真实事件筛选、投递、清理仍待授权实测，不能将这些预检计为Explorer通过。详见explorer-trace-preparation.json。

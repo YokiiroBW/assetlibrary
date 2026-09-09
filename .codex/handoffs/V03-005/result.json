@@ -7,13 +7,15 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "163da1b",
+  "commit": "aeadb528beaab27003a1c86bc1ffa2fe72b8e546",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/decisions.md",
     ".codex/handoffs/V03-005/explorer-diagnostics.json",
     ".codex/handoffs/V03-005/explorer-process-context.json",
     ".codex/handoffs/V03-005/explorer-process-context.ps1.txt",
+    ".codex/handoffs/V03-005/explorer-trace-approval.md",
+    ".codex/handoffs/V03-005/explorer-trace-preparation.json",
     ".codex/handoffs/V03-005/image-fixture-lifecycle.json",
     ".codex/handoffs/V03-005/integration-checkpoint.json",
     ".codex/handoffs/V03-005/linux-decoder-default.json",
@@ -399,9 +401,10 @@
       "Same-source static-CRT control retained product defaults: native build/import/source evidence reviewed, isolated root-bind passed, actual Explorer remained unactivated.39 archive/Git-blob digests and both DLL hashes verified; duplicate image scope explicitly qualified."
     ],
     "technical_debt": [
-      "Resolve actual Explorer entry discovery/loading before implementing IPC and closing any G1..G4 gate; usable desktop authorization already persists.",
+      "Actual Explorer activation remains unresolved; bounded ETW observer is prepared but administrator tracing and live cleanup require the next authorized run.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]
-  }
+  },
+  "trace_preparation": "explorer-trace-preparation.json"
 }

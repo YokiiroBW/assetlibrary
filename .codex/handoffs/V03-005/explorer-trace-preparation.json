@@ -1,0 +1,30 @@
+{
+  "status": "prepared_awaiting_system_trace_authorization",
+  "validation": {
+    "status": "prepared_not_live_validated",
+    "sdk": "10.0.111",
+    "release_build": "passed_0_warnings_0_errors",
+    "original_abi_checks": 49,
+    "original_parser_checks": 12,
+    "original_checks_repeated_after_unchanged_inputs": false,
+    "guardian_identity_checks": 9,
+    "readonly_actual_creator_lookup": "passed",
+    "trace_started": false,
+    "guardian_started": false,
+    "uac_started": false,
+    "termination_called": false,
+    "live_pid_filter_and_delivery": "not_executed",
+    "live_cleanup": "not_executed",
+    "native_layout_sha256": "8cdf07c4f53e0e5b7c56aee18036ea50ca5b277f034001dd6d56a5e222058a13",
+    "binary_sha256": "d5a6b73e03f70c88f36c259089b194b9059f79a34eb42cc161350237e2f42e8c",
+    "plan": "0851cd0f117747749ec1dc300dbf8e20.plan.json",
+    "plan_sha256": "71ec05caa1fdd3f709b27ad858a9d35a91774257cafde2097bdcba14b097e95c"
+  },
+  "runtime_directory": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-etw-owned",
+  "manifest_sha256": "daeb0d0074353a33c171e95a74da0817ad08820d73ea70b85bcf390f12fbdfc2",
+  "coordinator_manifest_entries_verified": 19,
+  "coordinator_readonly_plan_check": "passed",
+  "proof_registry_currently_absent": true,
+  "no_trace_or_uac_started": true,
+  "approval_note": "explorer-trace-approval.md"
+}
