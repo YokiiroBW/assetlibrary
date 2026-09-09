@@ -1,0 +1,26 @@
+{
+  "Utc": "2026-09-09T13:21:33.9223638+00:00",
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  },
+  "Processes": [
+    {
+      "Pid": 6284,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 17944,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 32680,
+      "OwnDllPaths": [],
+      "Error": null
+    }
+  ],
+  "TracePresent": false
+}

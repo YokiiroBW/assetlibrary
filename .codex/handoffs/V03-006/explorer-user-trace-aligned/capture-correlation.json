@@ -1,0 +1,19 @@
+{
+  "RecordedAtUtc": "2026-09-09T13:31:36.1039786+00:00",
+  "Source": "Capture boundaries and collector outcomes reported by V03-005 coordinator; GUI action times recorded by V03-006",
+  "FirstCapturePlanId": "93dd8489558e4edc87bf93c7a6a83314",
+  "FirstCaptureReportedStartUtc": "2026-09-09T13:20:20Z",
+  "FirstCaptureReportedEndUtc": "2026-09-09T13:21:20Z",
+  "FirstGuiSubmitUtc": "2026-09-09T13:21:33.466Z",
+  "FirstGuiCovered": false,
+  "AlignedCapturePlanId": "f2f729be-fdd3-4ae7-b926-e6735bb49141",
+  "AlignedReadyObservedUtc": "2026-09-09T13:25:17.3852141Z",
+  "AlignedCaptureReportedEndUtc": "2026-09-09T13:26:16Z",
+  "AlignedGuiSubmitUtc": "2026-09-09T13:25:38.586Z",
+  "AlignedGuiCovered": true,
+  "Coverage": "Final submission only; prefill/autocomplete before capture excluded",
+  "PrivateControlObserved": true,
+  "TargetComOrUserLoaderFailureReported": false,
+  "CoordinatorReportedDroppedOrSchemaOrPidErrors": false,
+  "InferenceLimit": "No failure event is not proof that loading or activation was never attempted"
+}

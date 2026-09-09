@@ -1,0 +1,2 @@
+# Preserve original action and cleanup receipt bytes.
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

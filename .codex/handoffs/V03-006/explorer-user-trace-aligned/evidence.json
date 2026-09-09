@@ -1,0 +1,57 @@
+{
+  "RecordedAtUtc": "2026-09-09T13:31:36.1286037+00:00",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "GuiEntrySubmissions": 2,
+  "GuiSubmissionsInsideCapture": 1,
+  "GuiActivationObserved": false,
+  "RegistryCleanupVerified": true,
+  "OwnWindowClosed": 1836972,
+  "OriginalWindowPreserved": 1247028,
+  "CoordinatorConsolePreserved": 7209254,
+  "Artifacts": [
+    {
+      "File": "after-entry.json",
+      "Sha256": "237D2A6137241EA28ABDC80899795D2A9C46132750D2BC9569CA616E19F8A2B8"
+    },
+    {
+      "File": "aligned-after-entry.json",
+      "Sha256": "AD8AFDB009CFF9F75099C55526121FF5AEF0A2D7AB2A844DF31C3AF9F2023DE8"
+    },
+    {
+      "File": "aligned-ui-observation.json",
+      "Sha256": "7D827492B40B57CFD60E9DC2EA71F84C72390E692354A57FB37CB85492CBFC83"
+    },
+    {
+      "File": "capture-correlation.json",
+      "Sha256": "12E78C7DAF94F72F23B51BA86F1BDECA0BB086A28134C833D4EAAAC8E900A1ED"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "2B7E311E9E1D1438421E29644A31C21566570D6FAE29D915D64EC6C188775B07"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "DE4D214193F35C64201F3FA2100082FD500236C0DCB35CC0090CDD0015F9882A"
+    },
+    {
+      "File": "prefill.json",
+      "Sha256": "832643DB71B28EACF17AFD16E7B851E70140C4DF39F017A331257CB07AD4F7CB"
+    },
+    {
+      "File": "ready.json",
+      "Sha256": "811F5F6F39B177CDC22E79807BE11B3B0B06AB9AD843DBCC6F3D65479E92B398"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "553B2B68980315F827B67D12748234CAB1AC45651CDCC5AD949183FA5B990F00"
+    },
+    {
+      "File": "ui-observation.json",
+      "Sha256": "3AF382C5F9CD6FD8BDB90DC999FAECB176937BCC7F8968A6229AC9C8D2F55D00"
+    },
+    {
+      "File": "window-cleanup.json",
+      "Sha256": "0348542471050F6CE49F97D7397C9054E9C1B94FB0FABEF8F080062A37B30843"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "submittedUtc": "2026-09-09T13:25:38.586Z",
+  "observedUtc": "2026-09-09T13:25:38.834Z",
+  "ownWindowId": 1836972,
+  "ownExplorerPid": 32680,
+  "capturePlanId": "f2f729be-fdd3-4ae7-b926-e6735bb49141",
+  "action": "One Return on prefilled path",
+  "coverage": "Final submission only; prefill/autocomplete excluded",
+  "viewLines": [
+    "Window: \"AssetLibraryProof.{4FF8301D-2E73-4D49-9FE5-868D5F1EA302} - 文件资源管理器\", App: explorer.exe.",
+    "\t\t\t\t\t\t433 文本 0 个项目 Description: 项目总数 ID: PropertyValue",
+    "\t\t\t\t\t\t445 文本 此文件夹为空。 ID: EmptyTextFocusable",
+    "\t\t\t\t\t\t124 选项卡项目 (selectable) C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof"
+  ],
+  "screenshotUsed": false
+}

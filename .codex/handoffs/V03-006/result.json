@@ -153,7 +153,21 @@
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-final-cleanup.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-ready.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-register.json",
-    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-window-cleanup.json"
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-window-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned.md",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/after-entry.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/aligned-after-entry.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/aligned-ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/capture-correlation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/cleanup.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/evidence.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/prefill.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/ready.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/register.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/window-cleanup.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -168,7 +182,8 @@
     "Direct loading success is not target Explorer loader evidence.",
     "Bounded event query and three mitigation policies do not cover every system restriction.",
     "Windows Job CPU time is periodically checked and measured overshoot is documented; no hard three-second promise",
-    "LPAC network initialization failure is distinct from ordinary AppContainer direct LAN denial; untested raw-network or other COM classes are not asserted safe"
+    "LPAC network initialization failure is distinct from ordinary AppContainer direct LAN denial; untested raw-network or other COM classes are not asserted safe",
+    "Aligned user-mode trace covers final Return only; absent COM/UserLoader error events do not prove no attempted activation or loading"
   ],
   "blocked_by": [
     "Actual GUI is usable: virtual Desktop does not discover the own item and full shell URI reports no association while registration remains valid. Independent Desktop root bind succeeds; actual Explorer activation cause remains unresolved.",
@@ -241,7 +256,9 @@
     "static_crt_gui_outcome": "ordinary_empty_folder_without_observed_extension_activation",
     "static_crt_screenshot_scope": "Appearance reference only; duplicate API image bytes are not independent temporal evidence",
     "etw_preparation_report": "explorer-etw-preparations.md",
-    "etw_gui_entries_submitted": 0,
-    "etw_state": "Four preparations cleaned, zero GUI submissions; user-mode fourth UAC launch cancelled as reported by coordinator; no automatic retry pending OS prompt visibility clarification"
+    "etw_gui_entries_submitted": 2,
+    "etw_state": "Fifth preparation had two GUI submissions, one outside capture and one final Return aligned; empty view remains; own cleanup complete; root administrator console preserved",
+    "etw_aligned_report": "explorer-user-trace-aligned.md",
+    "etw_gui_entries_capture_covered": 1
   }
 }

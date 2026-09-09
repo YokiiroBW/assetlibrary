@@ -1,0 +1,21 @@
+{
+  "Utc": "2026-09-09T13:29:21.7153083+00:00",
+  "EntrySubmissions": 2,
+  "FirstSubmissionUtc": "2026-09-09T13:21:33.466Z",
+  "FirstSubmissionCaptureCovered": false,
+  "AlignedSubmissionUtc": "2026-09-09T13:25:38.586Z",
+  "AlignedSubmissionCaptureCovered": true,
+  "Coverage": "Aligned capture covers final Return only; prefill/autocomplete excluded",
+  "GuardExitCode": 0,
+  "GuardDeadlineUtc": "2026-09-09T21:28:32.3710943+08:00",
+  "StopFileCreatedUtc": "2026-09-09T13:28:33.5405039Z",
+  "StopCreatedBeforeDeadline": false,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "CoordinatorReportedOutcome": "Aligned capture completed cleanly; private control observed, no target COM/UserLoader failure events; not proof that loading was never attempted",
+  "FurtherEntryTestsStopped": true
+}

@@ -1,6 +1,8 @@
 # V03-006 测试记录
 
-最新[ETW前置准备记录](explorer-etw-preparations.md)：四轮均未提交GUI入口，测试数不增加。原动态DLL hash核对、四轮600s guard均正常exit0、两键false、自有窗口/空目录清理；第一轮自动停止、第二轮UAC取消、第三轮Kernel-Registry PID范围异常及第四轮用户态候选UAC取消均由主协调报告。没有重跑源码/业务测试，不把未发生的导航标为成功或失败。
+最新[第五轮用户态捕获](explorer-user-trace-aligned.md)：首次Return13:21:33.466晚于捕获截止；第二次Return13:25:38.586有效对齐，但预填/补全不在范围内。UIA仍空目录，三计划进程无proof DLL/trace；主协调报告只见control、无目标失败事件，不能认定未尝试加载。guard自然到期exit0/两键false，自有窗口目录清理，管理员控制台及原窗口保留。未改代码或重跑既有套件。
+
+此前[四轮ETW准备](explorer-etw-preparations.md)均未提交GUI入口，全部清理，不计新GUI测试；采集器失败或UAC取消由主协调报告。
 
 ## 最新Explorer入口检查点（2026-09-09）
 
