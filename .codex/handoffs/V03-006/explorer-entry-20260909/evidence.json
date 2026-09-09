@@ -1,0 +1,78 @@
+{
+  "RecordedAtUtc": "2026-09-09T10:01:14.7852854+08:00",
+  "SourceCommit": "47806297fe6989e3cd04e83e692f78ae7ed4bce2",
+  "ProbeSha256": "90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "DesktopControlSubmitUtc": "2026-09-09T01:28:24.749Z",
+  "FullUriSubmitUtc": "2026-09-09T01:32:02.001Z",
+  "FullUriErrorObservedUtc": "2026-09-09T01:33:47.873Z",
+  "DesktopContainsVirtualItems": [
+    "This PC",
+    "Network",
+    "Control Panel",
+    "Recycle Bin",
+    "Gallery"
+  ],
+  "GuiParsingNameQueried": false,
+  "DesktopVisibleItemIdsCovered": "0..31",
+  "DesktopItemCount": 32,
+  "OwnDesktopItemObserved": false,
+  "OwnWindowsClosed": [
+    2229954,
+    1968004,
+    1312652
+  ],
+  "OwnErrorDialogClosed": 1443954,
+  "OriginalWindowPreserved": 1247028,
+  "RegistryClassPresent": false,
+  "RegistryNamespacePresent": false,
+  "IpcObserved": false,
+  "ExplorerFactoryObserved": false,
+  "GeneralGateChanged": false,
+  "Artifacts": [
+    {
+      "File": "after-error.json",
+      "Sha256": "41CF460D7977C6BD9BDCFC845CE139D15A27558A749386D227431D7DA78DF56E"
+    },
+    {
+      "File": "after-navigation.json",
+      "Sha256": "0113883FCE06DBC11FD101C80811A4F3FE020B5E4FC248F47DD0A4731B0E0FA4"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "39860E2D9637E4D0EF4A77AB12AD0696B19625CFC67949258D5E69B7050BD6BD"
+    },
+    {
+      "File": "desktop-discovery.json",
+      "Sha256": "8ECDB76CD58AF57FBCDB3753C9A64E134FDB9B51075D26AF907D328B433106B3"
+    },
+    {
+      "File": "processes-at-error.json",
+      "Sha256": "C94D9B34995CFB323E58E9133B9824C6AC455864C48516F1F11800037C9A906A"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "05A3873F7BD85390DD28870AFF313BC48E15131438B4C10E7BF8875C4E973AA9"
+    },
+    {
+      "File": "root-bind-calls.log",
+      "Sha256": "0C93A2DE76FC7AF9043A4FC355FFC393B0C998011838360F35805FE23C6A0681"
+    },
+    {
+      "File": "root-bind-registered.json",
+      "Sha256": "4F5C81F31C478FA65B2CB9AA505E4EDD45113ED2539DE6EEDC8004EAD43D8CCE"
+    },
+    {
+      "File": "root-bind-unregistered.json",
+      "Sha256": "069E283387E341BF2BEB955411C9144688B953AB7AD36A3DD01B1BD48462BBFE"
+    },
+    {
+      "File": "uri-error.jpg",
+      "Sha256": "1B01539C0CCFDDDF2033F715C8C9BEA180363A0F6607FE77B704F15EC61BD025"
+    },
+    {
+      "File": "attempt3-processes-after.json",
+      "Sha256": "4EF12FD3786C9D7EC3EA2C8086A1BD712244AF840B3F6A99D8498598E94CCBA4"
+    }
+  ]
+}

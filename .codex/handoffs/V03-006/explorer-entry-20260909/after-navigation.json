@@ -1,0 +1,11 @@
+{
+  "Utc": "2026-09-09T01:32:02.3699944+00:00",
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  },
+  "Inproc": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260909-attempt4\\AssetLibraryExplorerProof.dll",
+  "ThreadingModel": "Apartment",
+  "Attributes": -1476132864
+}

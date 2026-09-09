@@ -7,7 +7,7 @@
   "owner": "windows-shell-owner",
   "branch": "codex/v03-006-windows-explorer-native-integration",
   "worktree": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary",
-  "commit": "c6649c5d70b4f2d966d9ecdb02c7f71aed4ee55b",
+  "commit": "47806297fe6989e3cd04e83e692f78ae7ed4bce2",
   "loader_implementation_commit": "453e10b5173f0b9b516fa5eabcb561c6f4ace1e2",
   "windows_image_checkpoint": {
     "status": "agreed_native_platform_evidence_submitted_for_coordinator_review",
@@ -81,7 +81,21 @@
     ".codex/handoffs/V03-006/windows-native/NativeProbe.cpp.txt",
     ".codex/handoffs/V03-006/windows-native/NetworkControl.cs.txt",
     ".codex/handoffs/V03-006/windows-native/NetworkControl.csproj.txt",
-    ".codex/handoffs/V03-006/windows-native/NormalStartup.cs.txt"
+    ".codex/handoffs/V03-006/windows-native/NormalStartup.cs.txt",
+    "tests/windows-shell/Probe.cpp",
+    ".codex/handoffs/V03-006/explorer-entry-20260909.md",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/after-error.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/after-navigation.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/cleanup.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/desktop-discovery.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/evidence.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/processes-at-error.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/register.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/root-bind-calls.log",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/root-bind-registered.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/root-bind-unregistered.json",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/uri-error.jpg",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/attempt3-processes-after.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -89,7 +103,7 @@
     "failed": 1,
     "skipped": 0,
     "report": "tests.md",
-    "scope": "Original Explorer scope: four isolated loader cases passed; one desktop availability scenario failed. Repository regressions and the separately recorded windows_image_checkpoint are not added to this original count. Explorer G1 was not retried."
+    "scope": "Historical loader checkpoint: four cases passed and one desktop availability failure. Current GUI failures and two independent root-bind controls are recorded separately in explorer_entry_checkpoint; image matrix remains separate."
   },
   "risks": [
     "No usable Explorer client or installer; root activation cause remains undetermined.",
@@ -99,7 +113,7 @@
     "LPAC network initialization failure is distinct from ordinary AppContainer direct LAN denial; untested raw-network or other COM classes are not asserted safe"
   ],
   "blocked_by": [
-    "Desktop authorization was renewed; the latest attempt again failed GetCursorPos 0x80070005 and contemporaneous Session2 was WTSDisconnected. Await an actually usable RDP state, not another permission question.",
+    "Actual GUI is usable: virtual Desktop does not discover the own item and full shell URI reports no association while registration remains valid. Independent Desktop root bind succeeds; actual Explorer activation cause remains unresolved.",
     "Actual Explorer loader/COM observation and G1 remain missing; queried package/AppContainer and explicit Shell policies did not establish a root cause.",
     "G2/G3/G4 and bounded Host-to-Shell projection remain unimplemented/unproven.",
     "Agreed Windows native matrix is submitted; broader Provider/network/COM/platform and release gates remain independent and are not closed by this task."
@@ -117,7 +131,8 @@
       "Existing NativeAOT image worker, exact lpacCom capability, Job and pipe startup",
       "Win32 effective AccessCheck with own-token impersonation copy",
       "Shared ImageChildCleanupPendingException/Completion and bounded Core admission ownership",
-      "Win32 AppContainer APIs and versioned private owner journal with verified artifact copying"
+      "Win32 AppContainer APIs and versioned private owner journal with verified artifact copying",
+      "Existing owner-protected registration script and SHGetDesktopFolder/BindToObject/CreateViewObject APIs"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -142,15 +157,23 @@
       "Final native matrix 12 of 12 with scoped network initialization outcomes",
       "Negative/signed/noncanonical owner identity rows 14 of 14",
       "Nonlocal LAN normal/AC/LPAC six-control comparison with coordinator server receipt",
-      "Final verify_repository: 432 C# files, architecture/contracts and existing 35 regressions passed; Alpha blocked"
+      "Final verify_repository: 432 C# files, architecture/contracts and existing 35 regressions passed; Alpha blocked",
+      "Strict ExplorerProofProbe target build and registered/unregistered root-bind controls passed; real GUI activation remains failed"
     ],
     "technical_debt": [
-      "V03-006 / windows-shell-owner: obtain actual Explorer loader/COM observation after desktop access recovers",
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
-      "V03-005 / coordinator: re-identify and clean prior owned desktop windows using fresh ownership evidence",
       "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
-      "V03-006 / windows-shell-owner: resume actual Explorer observation only when RDP is usable; authorization already persists"
+      "V03-006 / windows-shell-owner: isolate actual Explorer discovery/activation discrepancy using approved sandbox folder CLSID entry; preserve immutable DLL and registration semantics"
     ]
+  },
+  "explorer_entry_checkpoint": {
+    "status": "actual_explorer_discovery_and_activation_failed_independent_root_bind_passed",
+    "report": "explorer-entry-20260909.md",
+    "root_bind_controls_passed": 2,
+    "desktop_control_passed": true,
+    "own_desktop_item_observed": false,
+    "explorer_factory_observed": false,
+    "registry_cleanup_verified": true
   }
 }

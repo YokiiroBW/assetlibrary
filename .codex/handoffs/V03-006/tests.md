@@ -1,5 +1,11 @@
 # V03-006 测试记录
 
+## 最新Explorer入口检查点（2026-09-09）
+
+源码4780629，详见[现场证据](explorer-entry-20260909.md)。实际执行 `cmake --build .runtime/explorer-proof --config Release --target ExplorerProofProbe --parallel 2`，严格MSVC构建通过。相同不可变DLL注册后，以十秒外部期限执行 `ExplorerProofProbe.exe --root-bind`，Parse/Desktop/Bind/View四阶段均S_OK且exit0；卸载后同命令parse=80070057、PIDL absent、exit1且不继续Bind/View。两个控制通过预期断言；stdout无缓冲，空view不得冒充成功。
+
+真实GUI已恢复操作：shell:Desktop正控成功，完整32项可见列表无自有入口；裸CLSID提示找不到，完整shell URI提示没有关联应用。导航及报错期间注册均有效，Explorer模块读取成功且无proof DLL。真实入口仍失败，不计G1通过；此前桌面拒绝访问是历史环境失败。清理确认两注册键false，仅用户原窗口保留。原始UTC/hash/截图/模块读回见证据索引。未重跑输入未变的loader、图片隔离或全仓库套件。
+
 Windows x64；MSVC19.44.35228.0、Windows SDK10.0.26100.0，CMake来自VS2022 BuildTools；Python使用Codex bundled Python。没有新增安装或重型.NET构建。
 
 ## 实际命令

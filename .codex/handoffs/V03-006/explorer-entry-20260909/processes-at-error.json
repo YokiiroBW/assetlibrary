@@ -1,0 +1,32 @@
+[
+  {
+    "Pid": 6284,
+    "Session": 2,
+    "Query": "ok",
+    "OwnDllPaths": []
+  },
+  {
+    "Pid": 17944,
+    "Session": 2,
+    "Query": "ok",
+    "OwnDllPaths": []
+  },
+  {
+    "Pid": 24644,
+    "Session": 2,
+    "Query": "ok",
+    "OwnDllPaths": []
+  },
+  {
+    "Pid": 24772,
+    "Session": 2,
+    "Query": "ok",
+    "OwnDllPaths": []
+  },
+  {
+    "Pid": 26128,
+    "Session": 2,
+    "Query": "ok",
+    "OwnDllPaths": []
+  }
+]
