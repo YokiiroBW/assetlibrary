@@ -87,7 +87,10 @@
     ".codex/handoffs/V03-008/screenshots/preview-mobile-text200.png",
     ".codex/handoffs/V03-008/summary.md",
     ".codex/handoffs/V03-008/tests.md",
+    ".codex/handoffs/V03-009/android-dependency-audit-404-fallback.json",
     ".codex/handoffs/V03-009/android-dependency-audit.json",
+    ".codex/handoffs/V03-009/image-404-candidate.json",
+    ".codex/handoffs/V03-009/image-404-fallback.md",
     ".codex/handoffs/V03-009/real-core-integration.json",
     ".codex/handoffs/V03-009/result.json",
     ".codex/handoffs/V03-009/screenshots/phone-font200-preview.png",
@@ -294,12 +297,14 @@
       "windows_owner_journal": 14,
       "actual_package_linux_cases": 20,
       "actual_package_linux_parent_death": 1,
-      "windows_live_positive_identity": 1
+      "windows_live_positive_identity": 1,
+      "android_image404_state": 11,
+      "android_image404_ui": 1
     },
     "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified."
   },
   "risks": [
-    "Actual Explorer entry/IPC and remaining Windows matrix are incomplete; desktop authorization persists but the latest RDP connection is unavailable.",
+    "Real Explorer input now works after RDP reconnect, but namespace discovery/navigation before confirmed factory load is still under diagnosis; no Windows installer.",
     "NAS kernel does not provide required seccomp; image package remains disabled/not deployed pending the user/ADR deployment decision.",
     "Windows Job CPU configuration is checked periodically and measured overshoot must not be presented as a strict three-second execution bound.",
     "Physical Android11/HyperOS, production signing, scale/soak and full release gates remain independent."
