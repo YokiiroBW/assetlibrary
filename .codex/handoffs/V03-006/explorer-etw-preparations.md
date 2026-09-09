@@ -1,6 +1,6 @@
-# 两轮ETW前置准备与撤销
+# 三轮ETW前置准备与撤销
 
-状态partial。用户已批准一次有界管理员ETW观察，桌面测试授权持续。V03-005负责采集器、有效期计划、UAC、会话与guardian；本任务仅负责独立测试窗口、原动态proof注册、等待ready后的GUI入口和自有清理。两轮均未收到允许导航的稳定ready，**实际GUI入口提交次数为0**，不计G1复现、通过或失败。
+状态partial。用户已批准一次有界管理员ETW观察，桌面测试授权持续。V03-005负责采集器、有效期计划、UAC、会话与guardian；本任务仅负责独立测试窗口、原动态proof注册、等待ready后的GUI入口和自有清理。三轮均未收到允许导航的稳定ready，**实际GUI入口提交次数为0**，不计G1复现、通过或失败。
 
 原动态DLL SHA256保持0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15。每轮使用新的自有runtime副本、原owner保护HKCU注册脚本、600秒guard及相同sandbox空FolderName.{CLSID}目录。未改DLL、接口、注册语义、生产源或系统策略。
 
@@ -14,4 +14,10 @@
 
 准备、UTC、PID/窗口对应、注册与清理原始记录及hash见[证据索引](explorer-etw-preparations/evidence.json)。复用现有guard/注册和computer-use接口，无新框架、依赖、共享契约或资产I/O；固定规模准备不构成性能/长期稳定性结论。无源码改动，不重跑原有loader、root-bind、图片矩阵或全仓库业务测试。
 
-下一步等待用户准备好处理Windows系统提示后由主协调安排；已有任务授权不需要重问，但本轮取消后不自动重试UAC。继续前须重新建立窗口/进程、注册和有效期计划，不能沿用两轮已清理的ID或ready状态。
+第二轮结束时暂停自动重试，等待用户准备处理Windows系统提示。用户之后明确回复继续，第三轮在同一授权范围重新准备，未再次询问权限。
+
+第三轮一次launch创建唯一2689898，fresh UIA显示SDK目录17项，原生进程主窗口对应PID22932/Session2，创建11:47:49.6084838Z。注册11:48:12.7233043Z，guard600秒；仅提议测试宿主22932、原窗口代理17944和Desktop候选6284，不把全部旧idle Explorer纳入计划。入口未输入。
+
+主协调报告第三轮Kernel-Registry provider的event4/version0/headerPid10716不在计划22932/17944/6284/collector28708集合内，scope guard未保留payload并停止；原生Stop/Query4201及guardian均成功。该来源修正了此前关于image事件的猜测，本任务仅按主协调报告记录，不自行读取事件负载或宣布根因。遵照清理指令，stop使guard正常exit0，finally11:51:58.9926312Z两键false；空目录核验后删除，自有2689898经fresh UI确认关闭，最终仅原1247028及Codex。
+
+当前三轮均已清理且没有GUI入口提交。下一步由主协调核对受支持的系统logger级PID过滤路径，不放宽到全局消费后筛选，也不重复已失败的同配置。继续前必须重新建立窗口/进程、注册和有效期计划，不能沿用已撤销的ID或ready状态；已有授权持续。

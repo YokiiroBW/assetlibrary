@@ -1,0 +1,13 @@
+{
+  "Utc": "2026-09-09T11:52:33.9856472+00:00",
+  "EntrySubmitted": false,
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "CoordinatorReportedOutcome": "Kernel-Registry event4/version0/headerPid10716 outside planned22932/17944/6284/collector28708; payloadRetained=false; scope guard stopped collector; native Stop/Query4201 and guardian successful",
+  "SameConfigurationRetryStopped": true
+}

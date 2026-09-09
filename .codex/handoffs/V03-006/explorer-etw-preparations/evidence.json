@@ -1,13 +1,13 @@
 {
-  "RecordedAtUtc": "2026-09-09T04:48:37.5233149+00:00",
+  "RecordedAtUtc": "2026-09-09T12:48:37.5233149+08:00",
   "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
   "GuiEntriesSubmitted": 0,
-  "BothGuardsExitCode": 0,
   "RegistryCleanupVerified": true,
   "OwnWindowsClosed": [
     1376478,
     4196070,
-    2754052
+    2754052,
+    2689898
   ],
   "OriginalWindowPreserved": 1247028,
   "CollectorDetailsSource": "Coordinator reports; this task owns GUI preparations and cleanup only",
@@ -51,6 +51,28 @@
     {
       "File": "attempt2-window-cleanup.json",
       "Sha256": "8BAB2952EC6D50357BB80623D55A3EA411B29DE04C7F6AF76E582EB2ED897DDE"
+    },
+    {
+      "File": "attempt3-cleanup.json",
+      "Sha256": "EA132C262B75B9112755AC2D6267C02287423D43091E88EE313FAE934F002906"
+    },
+    {
+      "File": "attempt3-final-cleanup.json",
+      "Sha256": "D5E840026DF0F76BAD43E5354A0C18A64A41E941D3CA7F893AF43238C29140A0"
+    },
+    {
+      "File": "attempt3-ready.json",
+      "Sha256": "965AFBC4628575AD4DF10EA59E64DC410199059B6A39CF1EAF26E77395D1870D"
+    },
+    {
+      "File": "attempt3-register.json",
+      "Sha256": "B9BE58F9C345AEEAA636C05CE6D6489AE86C01B8703A31DD15E6F873F2124DD1"
+    },
+    {
+      "File": "attempt3-window-cleanup.json",
+      "Sha256": "6D3C991BAF9A280522E65BDB1FF0C7E5FD81EA5B216D8FF2CA59EDA83BE06AC5"
     }
-  ]
+  ],
+  "AttemptCount": 3,
+  "AllGuardsExitCode": 0
 }

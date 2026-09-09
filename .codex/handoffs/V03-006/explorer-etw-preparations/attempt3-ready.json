@@ -1,0 +1,24 @@
+{
+  "Utc": "2026-09-09T11:48:43.7742810+00:00",
+  "OwnWindowId": 2689898,
+  "OriginalWindowId": 1247028,
+  "OwnProcessId": 22932,
+  "OwnProcessStartTimeUtc": "2026-09-09T11:47:49.6084838Z",
+  "MainWindowTitle": "C:\\Program Files (x86)\\Windows Kits\\10 - 文件资源管理器",
+  "MainWindowHandle": 2689898,
+  "ProposedRelatedPids": [
+    22932,
+    17944,
+    6284
+  ],
+  "EntrySubmitted": false,
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  },
+  "FolderPath": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof.{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+  "FolderAttributes": 16,
+  "FolderLinkType": null,
+  "FolderChildCount": 0
+}

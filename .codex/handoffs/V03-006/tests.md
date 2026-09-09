@@ -1,6 +1,6 @@
 # V03-006 测试记录
 
-最新[ETW前置准备记录](explorer-etw-preparations.md)：两轮均未提交GUI入口，测试数不增加。原动态DLL hash核对、两轮600s guard均正常exit0、两键false、自有窗口/空目录清理；第一轮采集器自动停止、第二轮UAC取消由主协调报告。没有重跑源码/业务测试，不把未发生的导航标为成功或失败。
+最新[ETW前置准备记录](explorer-etw-preparations.md)：三轮均未提交GUI入口，测试数不增加。原动态DLL hash核对、三轮600s guard均正常exit0、两键false、自有窗口/空目录清理；第一轮采集器自动停止、第二轮UAC取消、用户继续后的第三轮Kernel-Registry PID范围异常均由主协调报告。没有重跑源码/业务测试，不把未发生的导航标为成功或失败。
 
 ## 最新Explorer入口检查点（2026-09-09）
 
