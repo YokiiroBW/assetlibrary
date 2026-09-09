@@ -1,0 +1,18 @@
+{"kind":"session_preflight_query_returned","win32":4201}
+{"kind":"initializing","session":"AL-Explorer-bc7c7ebfff2b4e47bec098fb0a94bae7","binarySha256":"ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62","durationSeconds":60,"guardianPid":26460,"targets":[{"pid":22932,"creationFiletime":134334280696084838,"image":"explorer.exe","sessionId":2},{"pid":17944,"creationFiletime":134332378912285511,"image":"explorer.exe","sessionId":2},{"pid":6284,"creationFiletime":134332346247029344,"image":"explorer.exe","sessionId":2},{"pid":28708,"creationFiletime":134334282421979504,"image":"collector","sessionId":2}],"rawEtlFile":false,"sources":[{"name":"COM-class-not-registered","provider":"d4263c98-310c-4d97-ba39-b55354f08584","keywords":16,"eventIds":[1]},{"name":"Kernel-Registry","provider":"70eb4f03-c1de-4f73-a051-33d13d5413bd","keywords":48145,"eventIds":[1,2,4,7,8,9,15]},{"name":"Kernel-Process-Image","provider":"22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716","keywords":64,"eventIds":[5,6]}]}
+{"kind":"start_returned","win32":0}
+{"kind":"open_consumer_returned","win32":0}
+{"kind":"provider_enable_returned","provider":"d4263c98-310c-4d97-ba39-b55354f08584","source":"COM-class-not-registered","win32":0,"pidFilter":true,"eventIdFilter":true}
+{"kind":"provider_enable_returned","provider":"70eb4f03-c1de-4f73-a051-33d13d5413bd","source":"Kernel-Registry","win32":0,"pidFilter":true,"eventIdFilter":true}
+{"kind":"provider_enable_returned","provider":"22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716","source":"Kernel-Process-Image","win32":0,"pidFilter":true,"eventIdFilter":true}
+{"kind":"positive_control_read_returned","marker":"owned_clsid_inproc","operation":"RegOpenKeyExW","win32":0}
+{"kind":"positive_control_read_returned","marker":"owned_clsid_inproc","operation":"RegQueryValueExW_type_size_only","win32":0,"valueType":1}
+{"kind":"matched_event","provider":"70eb4f03-c1de-4f73-a051-33d13d5413bd","source":"Kernel-Registry","eventId":2,"version":0,"opcode":33,"pid":28708,"eventFiletime":134334282424436354,"marker":"owned_clsid","relation":"inproc_server","module":null,"location":null,"status":"0x00000104"}
+{"kind":"matched_event","provider":"70eb4f03-c1de-4f73-a051-33d13d5413bd","source":"Kernel-Registry","eventId":2,"version":0,"opcode":33,"pid":28708,"eventFiletime":134334282424436502,"marker":"owned_clsid","relation":"inproc_server","module":null,"location":null,"status":"0x00000000"}
+{"kind":"ready","registryPositiveControl":"observed_in_consumer","pidScopeFilter":"enabled_without_fallback","remainingSeconds":60,"comCoverage":"fixed_clsid_class_not_registered_only","imageCoverage":"image_load_unload_only_no_failed_search_coverage"}
+{"kind":"pid_filter_violation","provider":"70eb4f03-c1de-4f73-a051-33d13d5413bd","source":"Kernel-Registry","eventId":4,"version":0,"headerPid":10716,"payloadRetained":false}
+{"kind":"capture_failed","failure":"pid_filter_violation_no_payload_retained","hresult":"0x80131501"}
+{"kind":"stop_returned","win32":0,"eventsLost":0,"realtimeBuffersLost":0,"logBuffersLost":0}
+{"kind":"cleanup_verified","absent":true,"queryWin32":4201}
+{"kind":"consumer_close_returned","win32":0}
+{"kind":"finished","status":"failed","cleanupVerified":true,"consumerEnded":true,"guardianEnded":true,"guardianOk":true,"processTraceResult":0,"matchedEvents":2,"discardedEvents":205,"schemaFailures":1,"outOfScopeEvents":1,"callbackFailure":"pid_filter_violation_no_payload_retained","interpretation":"absence_is_not_proof_of_no_operation; COM_and_Image_have_no_active_positive_control"}

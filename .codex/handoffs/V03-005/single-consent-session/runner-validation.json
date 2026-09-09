@@ -1,0 +1,19 @@
+{
+  "kind": "fixed_session_runner_preparation",
+  "sourceFrozenAfterValidation": true,
+  "dotnetPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\V01-014-tooling-and-tests\\tooling\\dotnet\\dotnet.exe",
+  "sdk": "10.0.111",
+  "pinnedObserverRuntime": "10.0.11",
+  "observerSha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+  "executed": [
+    {"step": "restore with cleared package sources in local NuGet.Config", "result": "passed; no package dependencies"},
+    {"command": "dotnet format SessionRunner.csproj --no-restore --verbosity quiet", "result": "passed"},
+    {"command": "dotnet build SessionRunner.csproj -c Release --no-restore -p:UseSharedCompilation=false", "result": "passed", "warnings": 0, "errors": 0},
+    {"command": "dotnet bin/Release/net10.0/SessionRunner.dll --self-test", "result": "passed", "checks": 14, "runnerStarted": false, "captureStarted": false}
+  ],
+  "offlineChecks": ["three allowed requests", "six rejection cases including non-hex nonce and extra command", "pinned runtime sidecar", "64 pending queue accepted", "65 pending queue rejected", "owned input write sharing denied", "owned input delete sharing denied"],
+  "notExecuted": ["--serve", "UAC", "administrator session", "observer child", "ETW capture", "GUI"],
+  "pendingLiveValidation": ["protected staging and ACL creation", "queue and status receipts", "stop and time limits", "fixed observer execution and guardian cleanup"],
+  "scope": {"sessionMaximumSeconds": 1800, "captureCutoffSeconds": 1680, "captureSeconds": 60, "allowedRequests": ["capture", "status", "stop"], "arbitraryCommandAccepted": false, "kernelProviderEnabled": false, "globalTraceFallback": false},
+  "trustedPrerequisite": "The existing fixed installed dotnet/SDK is trusted; this is not a sandbox against same-account malicious replacement of the entire toolchain."
+}

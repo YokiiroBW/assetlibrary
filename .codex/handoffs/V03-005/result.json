@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "d6add808a1d7bb8cc8c63e81e81eb8b6d8442e74",
+  "commit": "f1bc903f25327ffb4f7c9067f3575af8a7aa634d",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/decisions.md",
@@ -18,6 +18,13 @@
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.launch.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.plan.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/evidence.json",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/.gitattributes",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/bc7c7ebfff2b4e47bec098fb0a94bae7.guard.jsonl",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/bc7c7ebfff2b4e47bec098fb0a94bae7.jsonl",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/bc7c7ebfff2b4e47bec098fb0a94bae7.launch.json",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/bc7c7ebfff2b4e47bec098fb0a94bae7.plan.json",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/evidence.json",
+    ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/limitations.md",
     ".codex/handoffs/V03-005/explorer-process-context.json",
     ".codex/handoffs/V03-005/explorer-process-context.ps1.txt",
     ".codex/handoffs/V03-005/explorer-second-launch/.gitattributes",
@@ -26,6 +33,12 @@
     ".codex/handoffs/V03-005/explorer-second-launch/evidence.json",
     ".codex/handoffs/V03-005/explorer-trace-approval.md",
     ".codex/handoffs/V03-005/explorer-trace-preparation.json",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/.gitattributes",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/74a6db21e59448f1aaf8c91062aeed89.launch.json",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/74a6db21e59448f1aaf8c91062aeed89.plan.json",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/evidence.json",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/manifest.json",
+    ".codex/handoffs/V03-005/explorer-user-mode-launch/validation.json",
     ".codex/handoffs/V03-005/image-fixture-lifecycle.json",
     ".codex/handoffs/V03-005/integration-checkpoint.json",
     ".codex/handoffs/V03-005/linux-decoder-default.json",
@@ -40,6 +53,18 @@
     ".codex/handoffs/V03-005/parent-death-probe.py.txt",
     ".codex/handoffs/V03-005/real-core-cleanup.json",
     ".codex/handoffs/V03-005/result.json",
+    ".codex/handoffs/V03-005/single-consent-session/.gitattributes",
+    ".codex/handoffs/V03-005/single-consent-session/README.md",
+    ".codex/handoffs/V03-005/single-consent-session/aligned.guard.jsonl",
+    ".codex/handoffs/V03-005/single-consent-session/aligned.jsonl",
+    ".codex/handoffs/V03-005/single-consent-session/aligned.plan.json",
+    ".codex/handoffs/V03-005/single-consent-session/evidence.json",
+    ".codex/handoffs/V03-005/single-consent-session/first.guard.jsonl",
+    ".codex/handoffs/V03-005/single-consent-session/first.jsonl",
+    ".codex/handoffs/V03-005/single-consent-session/first.plan.json",
+    ".codex/handoffs/V03-005/single-consent-session/runner-manifest.json",
+    ".codex/handoffs/V03-005/single-consent-session/runner-status.jsonl",
+    ".codex/handoffs/V03-005/single-consent-session/runner-validation.json",
     ".codex/handoffs/V03-005/summary.md",
     ".codex/handoffs/V03-005/tests.md",
     ".codex/handoffs/V03-005/windows-lan-control.json",
@@ -72,6 +97,16 @@
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-ready.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-register.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt2-window-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-ready.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-register.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-window-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-ready.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-register.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-window-cleanup.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/evidence.json",
     ".codex/handoffs/V03-006/explorer-folder-entry.md",
     ".codex/handoffs/V03-006/explorer-folder-entry/.gitattributes",
@@ -107,6 +142,20 @@
     ".codex/handoffs/V03-006/explorer-mt-control/screenshot-source-audit.json",
     ".codex/handoffs/V03-006/explorer-mt-control/source-comparison.json",
     ".codex/handoffs/V03-006/explorer-mt-control/static-imports.txt",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned.md",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/after-entry.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/aligned-after-entry.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/aligned-ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/capture-correlation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/cleanup.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/evidence.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/prefill.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/ready.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/register.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-user-trace-aligned/window-cleanup.json",
     ".codex/handoffs/V03-006/loader-evidence.json",
     ".codex/handoffs/V03-006/result.json",
     ".codex/handoffs/V03-006/shell-policy-evidence.json",
@@ -379,9 +428,11 @@
       "android_image404_state": 11,
       "android_image404_ui": 1,
       "windows_root_bind_states": 2,
-      "windows_static_crt_root_bind": 1
+      "windows_static_crt_root_bind": 1,
+      "single_consent_runner_offline": 14
     },
-    "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified."
+    "real_client_acceptance": "Android phone/tablet and Web two-stage real Core acceptance passed; shared source integrity and resource cleanup verified.",
+    "diagnostic_acceptance": "Single UAC launch with two complete user-mode captures and status requests passed; cleanup independently verified. GUI first Return was outside capture and second final Return was inside; both remained ordinary empty folders, so this is not a passed Explorer gate."
   },
   "risks": [
     "Real Explorer input now works after RDP reconnect, but namespace discovery/navigation before confirmed factory load is still under diagnosis; no Windows installer.",
@@ -399,7 +450,8 @@
     "reused_existing_logic": [
       "Existing task graph/worktree scaffolds and handoff validators",
       "Existing real Core/PostgreSQL/HTTPS synthetic fixture, lifecycle cleanup and source hash/mtime verification",
-      "Existing generated SDK, HTTPS authorization/query flows and shared UI theme in consumers"
+      "Existing generated SDK, HTTPS authorization/query flows and shared UI theme in consumers",
+      "Temporary single-consent runner reuses the reviewed fixed user-mode observer and its independent guardian; no production service, framework or global UAC setting was added."
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -421,13 +473,15 @@
       "Windows final fe9530c evidence archive integrated and its 10 normalized snapshot digests independently verified; native12/12 and LAN6 scoped results retain original failures and limits.",
       "4780629 root-bind diagnostic reviewed and merged as0f56068: registered/unregistered controls match expected stages; this is not real Explorer acceptance. Root read-only process-context evidence is separately recorded.",
       "Actual filesystem namespace-junction control remained an ordinary empty folder; owner cleanup verified and root19 receipt/Git-blob digests matched. Existing-log/CRT observations are diagnostics only, not passed Explorer gates.",
-      "Same-source static-CRT control retained product defaults: native build/import/source evidence reviewed, isolated root-bind passed, actual Explorer remained unactivated.39 archive/Git-blob digests and both DLL hashes verified; duplicate image scope explicitly qualified."
+      "Same-source static-CRT control retained product defaults: native build/import/source evidence reviewed, isolated root-bind passed, actual Explorer remained unactivated.39 archive/Git-blob digests and both DLL hashes verified; duplicate image scope explicitly qualified.",
+      "Single-consent runner: 13 frozen manifest entries independently checked, Release zero warnings and 14 offline checks; one actual UAC launch supported two complete 60s captures and status queries without another UAC prompt. Owner 81e86dc raw artifact digests 11/11 verified before integration. Final Return only was inside the second trace; Explorer entry remains unaccepted."
     ],
     "technical_debt": [
-      "Actual Explorer entry unresolved; authorized ETW setup failed closed, safe-header fix prepared, second Windows elevation cancelled. Continue on user OS-confirmation readiness; authorization persists and all owned GUI/registry resources are clean.",
+      "Explorer entry remains unresolved after a final Return aligned with a complete user-mode trace. Private control confirms the trace pipeline only; no selected COM/UserLoader failure event is not proof of no attempt. The dedicated administrator session permits only the fixed observer for 30 minutes; check expiry before reuse. All GUI test resources and trace children are clean.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]
   },
-  "trace_preparation": "explorer-trace-preparation.json"
+  "trace_preparation": "explorer-trace-preparation.json",
+  "single_consent_evidence": "single-consent-session/evidence.json"
 }

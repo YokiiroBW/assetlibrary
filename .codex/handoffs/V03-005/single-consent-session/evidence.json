@@ -1,0 +1,78 @@
+{
+  "status": "single_consent_reuse_live_verified",
+  "runner_sha256": "dca9c53b30a22413e4c624e213dacfc94d59a8f5aac51cdbf0d07e97147e9592",
+  "observer_sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+  "runner_pid": 32932,
+  "runner_startedUtc": "2026-09-09T13:15:58.1058817Z",
+  "runner_expiresUtc": "2026-09-09T13:45:58.1988649Z",
+  "one_uac_launch_for_two_captures": true,
+  "status_request_accepted_without_elevation": true,
+  "initial_noncanonical_guid_request_rejected_without_session_exit": true,
+  "captures": [
+    {
+      "plan": "93dd8489558e4edc87bf93c7a6a83314",
+      "completed": true,
+      "gui_covered": false,
+      "gui_submittedUtc": "2026-09-09T13:21:33.466Z",
+      "reason": "GUI was about13.5s after capture ended; not evidence of GUI behavior within trace."
+    },
+    {
+      "plan": "f2f729befdd34ae7b926e6735bb49141",
+      "completed": true,
+      "gui_covered": true,
+      "gui_submittedUtc": "2026-09-09T13:25:38.586Z",
+      "scope": "Final Return only; prefill/autocomplete excluded."
+    }
+  ],
+  "both_captures": {
+    "events_lost": 0,
+    "schema_failures": 0,
+    "out_of_scope_events": 0,
+    "only_private_control_received": true,
+    "target_com_or_loader_failure_events": 0,
+    "runner_status_after_each": 4201,
+    "root_independent_status_after_each": 4201,
+    "collector_and_guardian_exited": true
+  },
+  "gui_outcome": "Ordinary empty folder, no observed proof DLL/factory; G1 not complete. No event is not proof of no load attempt.",
+  "runner_left_open_for_user_until_deadline": true,
+  "artifacts": [
+    {
+      "file": "runner-manifest.json",
+      "sha256": "96c3c19ac05b131955bbe3cb66249031330b26d30ddaaa38ecfc544806492183"
+    },
+    {
+      "file": "runner-validation.json",
+      "sha256": "573d277a582c68a2c3428775c31763ac4a728ae9924051546af279f66dd4603c"
+    },
+    {
+      "file": "runner-status.jsonl",
+      "sha256": "cb70d693c4be4dfc9b03f2a8a50fc1e05ff3459c10b976e1994be9039bc4f8d2"
+    },
+    {
+      "file": "first.plan.json",
+      "sha256": "c7c44cc16f10db4e4eb6f64effddf044c60c68ab531c06b96cbb86139f31e891"
+    },
+    {
+      "file": "first.jsonl",
+      "sha256": "a6fcfe8db615ac4119242fa0f42e07001f36094186fabc8a5feb427c7b207a57"
+    },
+    {
+      "file": "first.guard.jsonl",
+      "sha256": "d26a700d2a6015d160102b8c428d723c6bb0fdfec5d678e4c0c9b60396a7cf9f"
+    },
+    {
+      "file": "aligned.plan.json",
+      "sha256": "e8fa38113cd4d963407fb0b4f0a588a2fc5542047d0dfd24fb6fdc1a8088d381"
+    },
+    {
+      "file": "aligned.jsonl",
+      "sha256": "dd477f3382032a4a5aa5127962e53d423ed13a8a688780aae9d2cc56a1ef3acb"
+    },
+    {
+      "file": "aligned.guard.jsonl",
+      "sha256": "0a28c64a522d3d84db0d30160d2be091c56601cb2f99b2752f2d4dc9ee658881"
+    }
+  ],
+  "secret_material_excluded": "No session nonce, request queue payload or session.json copied."
+}

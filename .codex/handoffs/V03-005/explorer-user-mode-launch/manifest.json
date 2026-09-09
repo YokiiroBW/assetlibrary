@@ -1,0 +1,102 @@
+[
+  {
+    "path": "Program.cs",
+    "bytes": 18612,
+    "sha256": "7daef70fabf1b69f0aa8736f47ef02776d0659b0287abd38148a7ce991c5c9c8"
+  },
+  {
+    "path": "Native.cs",
+    "bytes": 8309,
+    "sha256": "c8d7b47ac1f94cdd1c00379890434e3f48741ab5156e0d3960f4ed08ee32c816"
+  },
+  {
+    "path": "ScopeParser.cs",
+    "bytes": 4351,
+    "sha256": "4f46ead798a1a255c4428cf178683a4bb976f5b76b5367df7c57958016d134cf"
+  },
+  {
+    "path": "Collector.cs",
+    "bytes": 17650,
+    "sha256": "056b3506371d3e3167494ce0d47218254e52dc74565c1e1d276a532bb7ca8355"
+  },
+  {
+    "path": "SelfTests.cs",
+    "bytes": 9812,
+    "sha256": "4a52727450f248613d22edb80fb6e8de56a627d0a4da0785b19283adbc4c6ade"
+  },
+  {
+    "path": "GuardianIdentity.cs",
+    "bytes": 4399,
+    "sha256": "bc258f1220b22c5463a68ec4db4acb4ab4ec49144bb5ec582eada7a1a7b5fe38"
+  },
+  {
+    "path": "ScopeFailureHeader.cs",
+    "bytes": 1807,
+    "sha256": "607e865c90d963c90d141ded081aaf475b99d0b5ad5208aaad50a02ee38be6de"
+  },
+  {
+    "path": "ExplorerUserEtwOwned.csproj",
+    "bytes": 654,
+    "sha256": "d45e528ca98222c00df43c1bd9496bcdb35227e4c60b29ca1c894c5ee751d89d"
+  },
+  {
+    "path": "Directory.Build.props",
+    "bytes": 12,
+    "sha256": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+  },
+  {
+    "path": "Directory.Build.targets",
+    "bytes": 12,
+    "sha256": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+  },
+  {
+    "path": "NuGet.Config",
+    "bytes": 113,
+    "sha256": "2142cfb2dfa2c7feefbe40fabcc68b0dfecadafa99a1db9b70239d977cf2a7ef"
+  },
+  {
+    "path": "README.md",
+    "bytes": 4191,
+    "sha256": "4a6a034c65dd170d34e8db2ab65309bc5ca7128fdeb6c084972104cd2eae8200"
+  },
+  {
+    "path": "validation.json",
+    "bytes": 732,
+    "sha256": "279577ba1ffa32922f9bd6d8e3b893fca74dd955bb9f5797bb36c8e462e0dea1"
+  },
+  {
+    "path": "native-abi-layout.json",
+    "bytes": 8339,
+    "sha256": "8cdf07c4f53e0e5b7c56aee18036ea50ca5b277f034001dd6d56a5e222058a13"
+  },
+  {
+    "path": "native-abi-evidence.json",
+    "bytes": 1825,
+    "sha256": "e0c29eaada62fbf90dab2bd95d1630625642e6afeb4cf037ff8302e8f85bd336"
+  },
+  {
+    "path": "user-loader-provider-metadata.json",
+    "bytes": 7352,
+    "sha256": "f1764cd961a26b0df5bc7cd29ca51d001abd9d7fa553b3fafba7c12f6f57caaa"
+  },
+  {
+    "path": "455b0b48e6fc42bebf5d0ac1006d9cd4.plan.json",
+    "bytes": 469,
+    "sha256": "b1cc6486b3fa2eb320516e59f834f0e723e0188187a0e93999fc461841169a0b"
+  },
+  {
+    "path": "bin\\Release\\net10.0\\ExplorerUserEtwOwned.dll",
+    "bytes": 103424,
+    "sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded"
+  },
+  {
+    "path": "bin\\Release\\net10.0\\ExplorerUserEtwOwned.deps.json",
+    "bytes": 454,
+    "sha256": "c4a9dc97f9f780b34a47992da2bbb82edfb02fd94c30beb9cc47bfb03d3c5c1c"
+  },
+  {
+    "path": "bin\\Release\\net10.0\\ExplorerUserEtwOwned.runtimeconfig.json",
+    "bytes": 342,
+    "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097"
+  }
+]

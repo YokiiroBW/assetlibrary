@@ -1,0 +1,72 @@
+{
+  "kind": "prepared_fixed_session_runner",
+  "createdUtc": "2026-09-09T13:13:27.7326872Z",
+  "observerSha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+  "files": [
+    {
+      "path": "Program.cs",
+      "length": 12469,
+      "sha256": "bbb2eafd309943321b5cfcaf297ef40ad124aaa3dac596a4e0324057dc673965"
+    },
+    {
+      "path": "Inputs.cs",
+      "length": 7123,
+      "sha256": "6e9db687a2e2d9ba00f3f80c07d3d997ce8639b6594c1818cc8b0f9b568a5284"
+    },
+    {
+      "path": "Requests.cs",
+      "length": 4663,
+      "sha256": "c920b281e66849cef2be1b62b4ca146542c7fa98dbd1dd48674ed4f5dd1d770f"
+    },
+    {
+      "path": "Native.cs",
+      "length": 2913,
+      "sha256": "d75a2685cb1b24098cf89f0cfd1c67b4e43d3514b7dd005afa99f4a3fb4bfa53"
+    },
+    {
+      "path": "SessionRunner.csproj",
+      "length": 507,
+      "sha256": "364aa4773d5116bc8dae0205c24b638aa4b92e7a1be8c283c8da103f2cbaac8e"
+    },
+    {
+      "path": "Directory.Build.props",
+      "length": 12,
+      "sha256": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+    },
+    {
+      "path": "Directory.Build.targets",
+      "length": 12,
+      "sha256": "17284cb74605517cbec8a8153505da71a685b28694b67b5ef80608cd79b1c0ea"
+    },
+    {
+      "path": "NuGet.Config",
+      "length": 113,
+      "sha256": "2142cfb2dfa2c7feefbe40fabcc68b0dfecadafa99a1db9b70239d977cf2a7ef"
+    },
+    {
+      "path": "README.md",
+      "length": 5020,
+      "sha256": "56a07850bd28008ac7d63828aafda70801349dfca6026693877797a6bd3505b8"
+    },
+    {
+      "path": "validation.json",
+      "length": 1873,
+      "sha256": "573d277a582c68a2c3428775c31763ac4a728ae9924051546af279f66dd4603c"
+    },
+    {
+      "path": "bin\\Release\\net10.0\\SessionRunner.dll",
+      "length": 48640,
+      "sha256": "dca9c53b30a22413e4c624e213dacfc94d59a8f5aac51cdbf0d07e97147e9592"
+    },
+    {
+      "path": "bin\\Release\\net10.0\\SessionRunner.deps.json",
+      "length": 433,
+      "sha256": "be0b9f310344857414065e6d7840860505d6f5970e3171b34c9af3c588bd3c16"
+    },
+    {
+      "path": "bin\\Release\\net10.0\\SessionRunner.runtimeconfig.json",
+      "length": 342,
+      "sha256": "c230a317a54dd960bcbeb5f347f52e18dc665a26f7efda2159fced9a5ac7e097"
+    }
+  ]
+}

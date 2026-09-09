@@ -1,0 +1,17 @@
+{
+  "status": "prepared_user_mode_candidate_not_live_tested",
+  "build": "Release_0_warnings_0_errors",
+  "abi_checks": 61,
+  "parser_metadata_checks": 17,
+  "scope_header_checks": 2,
+  "guard_logic": "reused_unchanged",
+  "trace_started": false,
+  "private_event_register_write_called": false,
+  "guardian_started": false,
+  "uac_started": false,
+  "kernel_providers_enabled": false,
+  "binary_sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+  "plan": "455b0b48e6fc42bebf5d0ac1006d9cd4.plan.json",
+  "plan_sha256": "b1cc6486b3fa2eb320516e59f834f0e723e0188187a0e93999fc461841169a0b",
+  "preserved_ae1_binary_sha256": "ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62"
+}

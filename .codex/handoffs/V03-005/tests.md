@@ -117,3 +117,13 @@ Windows稳定c6649c5随后已合为249fed9：正creation损坏时，仍须核验
 原d5工具首次实际Start/Open/三个Enable返回0，Kernel-Registry正控104→0并ready；之后PID scope guard失败，自动Stop/Query无丢事件、guardian正常。root独立status4201、两进程退出；未发GUI导航。来源未记录，不能归因provider。新ae1只补7个安全头字段、显式Compile根目录排除历史源；0告警构建、2项不解引用无效payload指针/输出字段检查通过，原19项完整冻结。第二次UAC启动返回系统取消，无采集器日志，独立status4201；Windows两轮自有窗口/目录/注册清理由owner记录并由root核对10项Git blob/文件hash。原始及索引见explorer-first-live-trace、explorer-second-launch、V03-006/explorer-etw-preparations。没有增加G1通过或失败次数，也没有将取消当作第二次捕获测试。
 
 本次集中归档后的verify_repository再次通过（handoff/架构/契约及原35项回归；Alpha仍blocked），日志.runtime/v03-005-final-tests/repository-authorized-trace-checkpoint.log。没有重复无变化的业务或图片套件。
+
+## 继续后的内核筛选实测与用户态候选
+
+ae1的bc7c7ebf原生启用和注册正控成功，Kernel-Registry event4/version0/headerPid10716不在目标集合，scope guard在读取payload前停止；root独立status4201及两进程退出。确定为Registry来源，不采用image归属猜测；原始四文件已归档。公开契约无所需内核PID过滤入口，停止该配置。新37e984dd仅User-Loader/COM/私有control，零告警、61 ABI/17解析和metadata/2安全头部检查；root审查并核对20项manifest，原ae1不变。新工具UAC启动取消，无实机捕获，独立status4201。Windows四轮准备均0次入口提交、全部清理，20项原件/Git blob hash通过；不增加G1测试通过/失败计数。
+
+## 一次确认复用实测（2026-09-09）
+
+固定runner dca9c53b通过Release零告警、14项离线检查，root独立核对13项manifest；复用37e984dd及原guardian，没有重跑未变更的产品套件。同一管理员会话完成两个60秒捕获和状态请求，无再次UAC；初始非标准GUID请求被拒绝但会话继续，随后标准请求成功。两轮无丢事件、schema或越范围事件，仅收到私有control；停止后runner和root分别确认status4201及采集/guardian退出。首次Return在捕获外，第二次最终Return在捕获内，预填除外。真实Explorer仍空目录，不能将诊断运行成功计为G1通过。Windows第五轮11项原件/git blob SHA一致后合入；guard600秒自然到期清理，稍后的stop不是触发原因，自有窗口目录清理、原窗口及管理员控制台保留。会话自身到期是后续状态，不预先记为已验证。索引见single-consent-session/evidence.json。
+
+本轮最终diff审查后verify_repository通过：handoff、架构、契约、35项迁移/架构回归与源码有效性门禁；Alpha仍blocked。日志.runtime/v03-005-final-tests/repository-single-consent-checkpoint.log。28项本轮原始receipt的工作树/Git index SHA一致，暂存文件未包含活跃会话nonce；没有重跑未变更的产品套件。

@@ -1,0 +1,9 @@
+{
+  "requestedUtc": "2026-09-09T11:49:53.6164952+00:00",
+  "returnedUtc": "2026-09-09T11:50:42.2037309+00:00",
+  "plan": "bc7c7ebfff2b4e47bec098fb0a94bae7.plan.json",
+  "pid": 28708,
+  "requestedElevation": true,
+  "status": "launched",
+  "authorization": "User explicitly allowed the bounded administrator trace."
+}

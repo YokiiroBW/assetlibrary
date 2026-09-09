@@ -738,7 +738,7 @@
       "handoff": ".codex/handoffs/V03-005/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3",
-      "execution_status": "real_clients_integrated_explorer_entry_diagnosis_and_nas_decision_pending"
+      "execution_status": "permission_reuse_verified_explorer_entry_unresolved_nas_decision_pending"
     },
     {
       "id": "V03-006",
@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "owned_preparations_clean_no_gui_submission_waiting_os_confirmation_readiness"
+      "execution_status": "aligned_user_mode_trace_gui_empty_folder_registration_window_clean_g1_open"
     },
     {
       "id": "V03-007",

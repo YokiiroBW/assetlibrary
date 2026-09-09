@@ -1,5 +1,5 @@
 {
-  "status": "first_setup_failed_safely_second_windows_launch_cancelled",
+  "status": "single_consent_live_reuse_verified_explorer_entry_unresolved",
   "validation": {
     "status": "prepared_not_live_validated",
     "sdk": "10.0.111",
@@ -31,12 +31,45 @@
   "first_live_evidence": "explorer-first-live-trace/evidence.json",
   "second_launch_evidence": "explorer-second-launch/evidence.json",
   "current_tool": {
-    "binary_sha256": "ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62",
-    "manifest_entries": 20,
-    "root_independently_verified": true,
-    "diagnostic_change": "Only seven safe header fields on a PID-scope violation; payload remains unread and capture stops. Root-only Compile glob excludes immutable history source copies.",
-    "targeted_checks_passed": 2,
-    "second_capture_executed": false
+    "directory": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-etw-owned\\user-mode",
+    "binary_sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+    "kernel_providers_enabled": false,
+    "sources": [
+      "AssetLibrary-private-control",
+      "COM-class-not-registered",
+      "User-Loader-failures"
+    ],
+    "abi_checks": 61,
+    "parser_metadata_checks": 17,
+    "safe_header_checks": 2,
+    "manifest_entries_verified": 20,
+    "live_capture_executed": true,
+    "frozen_copy": ".runtime/explorer-etw-owned/user-mode/history/37e984dd",
+    "completed_capture_count": 2
   },
-  "authorization_persists": true
+  "authorization_persists": true,
+  "kernel_scope_reproduction": "explorer-kernel-pid-reproduction/evidence.json",
+  "user_mode_launch": "explorer-user-mode-launch/evidence.json",
+  "prompt_visibility_question_pending": false,
+  "single_consent_requested": true,
+  "single_consent_scope": {
+    "minutes": 30,
+    "fixed_observer_sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+    "commands": [
+      "capture",
+      "status",
+      "stop"
+    ],
+    "capture_seconds": 60,
+    "runner_started": true,
+    "uac_policy_changed": false,
+    "runner_sha256": "dca9c53b30a22413e4c624e213dacfc94d59a8f5aac51cdbf0d07e97147e9592",
+    "runner_pid": 32932,
+    "startedUtc": "2026-09-09T13:15:58.1058817Z",
+    "expiresUtc": "2026-09-09T13:45:58.1988649Z",
+    "live_reuse_verified": true,
+    "evidence": "single-consent-session/evidence.json"
+  },
+  "validation_scope": "Original offline preparation snapshot retained below; subsequent live evidence is linked separately.",
+  "single_consent_live_gui_scope": "First Return after capture ended; second final Return inside capture, excluding prefill/autocomplete. Ordinary empty folder remains."
 }

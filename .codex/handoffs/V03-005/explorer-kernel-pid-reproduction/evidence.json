@@ -1,0 +1,47 @@
+{
+  "status": "kernel_registry_pid_scope_failure_identified",
+  "binary_sha256": "ae1c1ee1b66e415f0ed7276d5c7c7fcdb5b53af6640ed0e46ba4a9ea96451e62",
+  "scope_violation": {
+    "provider": "70eb4f03-c1de-4f73-a051-33d13d5413bd",
+    "source": "Kernel-Registry",
+    "event_id": 4,
+    "version": 0,
+    "header_pid": 10716,
+    "selected_pids": [
+      22932,
+      17944,
+      6284,
+      28708
+    ],
+    "payload_retained": false
+  },
+  "registry_positive_observed": true,
+  "gui_entry_submitted": false,
+  "cleanup": {
+    "controller": true,
+    "guardian": true,
+    "independent_status_win32": 4201,
+    "independent_status_absent": true,
+    "collector_and_guardian_remaining": 0,
+    "checkedUtc": "2026-09-09T11:51:38.2207289Z"
+  },
+  "conclusion": "This kernel registry provider delivered a non-selected PID despite successful filter-enable return. The image-PID hypothesis is not the observed cause. Do not repeat this configuration or silently switch to global buffering with consumer-only filtering.",
+  "artifacts": [
+    {
+      "file": "bc7c7ebfff2b4e47bec098fb0a94bae7.plan.json",
+      "sha256": "b9b0e5325220b0dc2569459184f5dfc415fe13a40a35dc2f83d41b182cc40a1c"
+    },
+    {
+      "file": "bc7c7ebfff2b4e47bec098fb0a94bae7.launch.json",
+      "sha256": "9ec8f59b12c215ad51f144097b60d471b43f8885c719b9e6fc1553787b3e771d"
+    },
+    {
+      "file": "bc7c7ebfff2b4e47bec098fb0a94bae7.jsonl",
+      "sha256": "781592644e8860182772d57c094a8597a4acdbe402606b0076b83676bb43d2dd"
+    },
+    {
+      "file": "bc7c7ebfff2b4e47bec098fb0a94bae7.guard.jsonl",
+      "sha256": "7e973d6d3fe27861de3786776ed314ee7f820522b89c405d6cf50aa0cea63389"
+    }
+  ]
+}

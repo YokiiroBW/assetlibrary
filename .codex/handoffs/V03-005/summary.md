@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows真实GUI已恢复，但Desktop/URI/文件夹三类入口和同源码静态CRT对照均未观察到扩展激活；独立Desktop根绑定正控成功。全部自有测试窗口、空目录和注册已清理，用户原窗口保留。root核对三目录39项receipt与Git blob、两份实际DLL强hash；图像重复来源已限定为外观参考，时序以独立窗口/UI/UTC记录为准。详见V03-006的explorer-entry-20260909.md、explorer-folder-entry.md、explorer-mt-control.md与本目录explorer-diagnostics.json。用户已授权系统跟踪。首轮Start/Open/三个Enable/注册正控有效，随后PID筛选保护停止并独立确认清理；尚不知异常事件来自哪个provider，未提交GUI入口。工具已补仅7个头字段的错误诊断并通过2项针对检查；第二轮Windows权限启动返回取消，未启动采集。两轮自有现场均已清理，授权保留，等用户准备好处理系统提示再继续。根因尚未确定，没有Windows安装包，G1..G4未完成。
+1. Windows真实入口仍未激活，G1..G4未完成。先前ae1实测暴露Kernel-Registry PID范围异常，旧配置停止；37e984dd只使用用户态来源。用户要求的一次确认复用已完成：受限30分钟管理员会话用同一个批准令牌执行两轮完整60秒捕获及状态查询，没有新UAC；13项runner manifest、14项离线检查与零告警构建已核验。首次GUI Return晚于捕获，第二次最终Return有效对齐但不含预填；两次仍空目录，三个计划进程无proof DLL/trace。仅私有control不能证明Microsoft来源覆盖或未尝试加载。ETW/子进程与自有注册、空目录、窗口清理，原窗口/管理员控制台保留；会话到期13:45:58Z（北京时间21:45:58），后续复用先查状态。Windows证据81e86dc的11项原件SHA验证后已合入。详见single-consent-session及V03-006/explorer-user-trace-aligned.md；没有Windows安装包。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

@@ -1,0 +1,46 @@
+{
+  "status": "user_mode_candidate_prepared_launch_cancelled",
+  "binary_sha256": "37e984dd325f069ca0c42621a06d89311fab7d8d2ae28f324906abd4b2677ded",
+  "kernel_providers_enabled": false,
+  "sources": [
+    "AssetLibrary-private-control",
+    "COM-class-not-registered",
+    "User-Loader-failures"
+  ],
+  "offline_checks": {
+    "abi": 61,
+    "parser_metadata": 17,
+    "safe_header": 2
+  },
+  "manifest_entries_verified": 20,
+  "gui_entry_submitted": false,
+  "collector_log_present": false,
+  "guardian_log_present": false,
+  "windows_start_message": "操作已被用户取消",
+  "independent_status": {
+    "win32": 4201,
+    "absent": true,
+    "exit": 0,
+    "checkedUtc": "2026-09-09T12:24:47.5594469Z"
+  },
+  "user_visibility_question_pending": true,
+  "authorization_persists": true,
+  "artifacts": [
+    {
+      "file": "74a6db21e59448f1aaf8c91062aeed89.plan.json",
+      "sha256": "6673d5062fd9168b1dfc77a3efe1fafeb22e0ca94c982812a58ee02c2e7bc112"
+    },
+    {
+      "file": "74a6db21e59448f1aaf8c91062aeed89.launch.json",
+      "sha256": "e751dcc1e49f8fba6b7e3071608c2afd6809a1226e3bf02881730c2e40b2e7fc"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "279577ba1ffa32922f9bd6d8e3b893fca74dd955bb9f5797bb36c8e462e0dea1"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "effe177c63f7f3c1dd09b716997d309fdb57dd07fa7339d1a64177f77d4379a5"
+    }
+  ]
+}

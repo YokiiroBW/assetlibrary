@@ -23,3 +23,15 @@
 当前ae1c1ee1工具仅补异常的provider/source/event ID/version/header PID诊断，不改接纳规则或读取越界payload；零告警构建和2项针对检查通过。历史d5a6b73e的19项源/产物已冻结；新版本20项manifest由root核对并冻结于.runtime/explorer-etw-owned/history/ae1c1ee1。第二轮计划083be90e的系统权限启动于04:41:11Z返回“操作已被用户取消”；无collector/guardian日志，root独立status仍4201。两轮测试窗口、空目录、注册已清理，实际GUI入口提交总数0。
 
 现停止自动重试UAC，用户原授权保留；待用户能处理Windows提示再刷新过期计划继续，不再次询问同一授权。不能把首轮异常推定为Image provider或放松PID边界。原准备阶段的“未执行”说明保留为历史，实际首轮证据以上述记录为准；修正后的诊断尚未实跑。
+
+## 用户回复继续后的范围收敛
+
+第三轮bc7c7ebf真正识别Kernel-Registry event4/version0/headerPid10716来自非选定进程；读取payload之前即停止。root独立确认会话4201、collector28708/guardian26460退出，GUI未提交。公开PID/V2/SystemProvider契约不能提供所需内核筛选保证，已停止这条配置，见explorer-kernel-pid-reproduction/limitations.md。
+
+当前改为更窄的用户态候选37e984dd：只启用原COM ClassNotReg、本机User-Loader 3/8/10加载失败和明确属于本工具的私有控制事件。没有两个Kernel来源，不作全局缓冲后筛选；PID保护、60秒和guardian保留。零告警、61 ABI/17解析与metadata/2头部检查通过，root核对20项manifest。源码及产物在.runtime/explorer-etw-owned/user-mode，已冻结history/37e984dd。私有控制只证明采集链路，不代表Microsoft事件覆盖所有失败。
+
+计划74a6db21的Windows启动在12:24:06Z返回取消，用户态采集器和guardian均未开始，root独立status4201；第四轮现场清理。此前四轮未提交GUI入口。当时核对.NET Host提示可见性的问题，已由用户随后要求一次确认复用及实际成功启动取代；不再重复询问原授权。
+
+## 用户要求一次确认
+
+用户两次提出“如何一次性授权，不用每次点”。专用管理员诊断会话已实现并实测：13:15:58Z由Windows一次确认启动，期限至13:45:58Z（北京时间21:45:58）。同一会话完成两次固定37e984dd观察器60秒捕获和状态查询，后续无新UAC；14项离线检查、零告警构建、13项manifest核对通过。仅允许capture/status/stop受限计划，原guardian与清理规则保留；不改UAC、不创建服务/任务、不接受通用管理员命令。固定输入锁定，已安装SDK仍是既有可信前提。用户关闭控制台或期限结束即停止接受请求；本记录保存时控制台仍留给用户，到期清理不得预先记为已验证。nonce和请求队列未归档。见single-consent-session/evidence.json。
