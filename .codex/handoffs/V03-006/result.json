@@ -148,7 +148,12 @@
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-final-cleanup.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-ready.json",
     ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-register.json",
-    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-window-cleanup.json"
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt3-window-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-ready.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-register.json",
+    ".codex/handoffs/V03-006/explorer-etw-preparations/attempt4-window-cleanup.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -237,6 +242,6 @@
     "static_crt_screenshot_scope": "Appearance reference only; duplicate API image bytes are not independent temporal evidence",
     "etw_preparation_report": "explorer-etw-preparations.md",
     "etw_gui_entries_submitted": 0,
-    "etw_state": "All three preparations cleaned with zero GUI submissions; third Kernel-Registry PID scope mismatch reported by coordinator; same-configuration retry stopped pending supported filtering review"
+    "etw_state": "Four preparations cleaned, zero GUI submissions; user-mode fourth UAC launch cancelled as reported by coordinator; no automatic retry pending OS prompt visibility clarification"
   }
 }

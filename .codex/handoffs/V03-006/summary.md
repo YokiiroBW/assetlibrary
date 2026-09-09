@@ -1,6 +1,6 @@
 # V03-006 — Explorer 入口诊断交接
 
-最新运行状态：[三轮ETW前置准备](explorer-etw-preparations.md)均未提交GUI入口；首轮采集器scope guard结束、第二轮UAC启动被取消，用户明确继续后的第三轮报告Kernel-Registry event4/headerPid10716超出计划范围而自动停止（采集器结果均来自主协调）。三轮guard正常撤销注册、自有窗口/空目录全部清理，原用户窗口保留；不重复同配置，转由主协调核对受支持的PID过滤路径。授权持续，不将未导航的准备态计作G1新结果。
+最新运行状态：[四轮ETW前置准备](explorer-etw-preparations.md)均未提交GUI入口；前两轮分别为scope guard结束与UAC取消，第三轮报告Kernel-Registry PID范围异常，改用用户态候选的第四轮也遇UAC启动取消（采集器结果均来自主协调）。四轮guard正常撤销注册、自有窗口/空目录全部清理，原用户窗口保留；不自动重试提示，先由主协调核对.NET Host系统提示可见性。授权持续，不将未导航的准备态计作G1新结果。
 
 最新状态 **partial**，源码提交 `47806297fe6989e3cd04e83e692f78ae7ed4bce2`。本轮[真实入口与根绑定证据](explorer-entry-20260909.md)已覆盖重新可用的桌面：已知 `shell:Desktop` 正控成功，包含虚拟项目的Desktop视图未发现自有项，裸CLSID与完整shell URI均实际报错；注册在导航和报错期间仍有效，所有Explorer模块查询均成功但未见proof DLL。独立进程不预先CoCreate的Desktop根绑定/View正控成功，卸载负控在parse阶段失败。G1..G4仍开放；当前阻断是实际Explorer发现/激活差异，以下Disconnected/Escape记录仅为历史。
 

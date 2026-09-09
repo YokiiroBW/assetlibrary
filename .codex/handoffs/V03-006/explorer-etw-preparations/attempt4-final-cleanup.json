@@ -1,0 +1,14 @@
+{
+  "Utc": "2026-09-09T12:25:36.3831520+00:00",
+  "EntrySubmitted": false,
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "CoordinatorReportedOutcome": "User-mode collector UAC launch returned operation cancelled by user; no collector JSONL/ready and no GUI entry",
+  "AutomaticUacRetryStopped": true,
+  "NextStep": "Coordinator clarifies whether .NET Host Windows confirmation was visible; existing authorization remains unchanged"
+}

@@ -7,7 +7,8 @@
     1376478,
     4196070,
     2754052,
-    2689898
+    2689898,
+    1248182
   ],
   "OriginalWindowPreserved": 1247028,
   "CollectorDetailsSource": "Coordinator reports; this task owns GUI preparations and cleanup only",
@@ -71,8 +72,28 @@
     {
       "File": "attempt3-window-cleanup.json",
       "Sha256": "6D3C991BAF9A280522E65BDB1FF0C7E5FD81EA5B216D8FF2CA59EDA83BE06AC5"
+    },
+    {
+      "File": "attempt4-cleanup.json",
+      "Sha256": "6E8981E2CA9D87DF0BFDE551D779FCA10B68384DB51B181757076F96DA4948CB"
+    },
+    {
+      "File": "attempt4-final-cleanup.json",
+      "Sha256": "D4FF714F1010A9844230A6B3C4F7EA8BCF1AA6AB2E8B549C608BEC92F2A331AD"
+    },
+    {
+      "File": "attempt4-ready.json",
+      "Sha256": "4FC02722F16E6FA9570D6DE6C35B391A392BEBD5EA019B9B2FA1EBB116AFEDD2"
+    },
+    {
+      "File": "attempt4-register.json",
+      "Sha256": "50129660DC480D5CCE12DF5FC83513087C4CDC284EE8DE02DC4A9AB7688FFAB2"
+    },
+    {
+      "File": "attempt4-window-cleanup.json",
+      "Sha256": "5A8FC79C84CF927674A7338AD187B41A03A14A7D1747412E8C320C6928D55D39"
     }
   ],
-  "AttemptCount": 3,
+  "AttemptCount": 4,
   "AllGuardsExitCode": 0
 }

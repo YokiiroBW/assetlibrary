@@ -1,6 +1,6 @@
-# 三轮ETW前置准备与撤销
+# 四轮ETW前置准备与撤销
 
-状态partial。用户已批准一次有界管理员ETW观察，桌面测试授权持续。V03-005负责采集器、有效期计划、UAC、会话与guardian；本任务仅负责独立测试窗口、原动态proof注册、等待ready后的GUI入口和自有清理。三轮均未收到允许导航的稳定ready，**实际GUI入口提交次数为0**，不计G1复现、通过或失败。
+状态partial。用户已批准一次有界管理员ETW观察，桌面测试授权持续。V03-005负责采集器、有效期计划、UAC、会话与guardian；本任务仅负责独立测试窗口、原动态proof注册、等待ready后的GUI入口和自有清理。四轮均未收到允许导航的稳定ready，**实际GUI入口提交次数为0**，不计G1复现、通过或失败。
 
 原动态DLL SHA256保持0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15。每轮使用新的自有runtime副本、原owner保护HKCU注册脚本、600秒guard及相同sandbox空FolderName.{CLSID}目录。未改DLL、接口、注册语义、生产源或系统策略。
 
@@ -20,4 +20,10 @@
 
 主协调报告第三轮Kernel-Registry provider的event4/version0/headerPid10716不在计划22932/17944/6284/collector28708集合内，scope guard未保留payload并停止；原生Stop/Query4201及guardian均成功。该来源修正了此前关于image事件的猜测，本任务仅按主协调报告记录，不自行读取事件负载或宣布根因。遵照清理指令，stop使guard正常exit0，finally11:51:58.9926312Z两键false；空目录核验后删除，自有2689898经fresh UI确认关闭，最终仅原1247028及Codex。
 
-当前三轮均已清理且没有GUI入口提交。下一步由主协调核对受支持的系统logger级PID过滤路径，不放宽到全局消费后筛选，也不重复已失败的同配置。继续前必须重新建立窗口/进程、注册和有效期计划，不能沿用已撤销的ID或ready状态；已有授权持续。
+第三轮之后主协调停止该Kernel配置，未放宽到全局消费后筛选。其后准备用户态候选，仅保留UserLoader、COM和任务私有控制事件，仍有原PID范围、60秒、guardian和越界即停止；工具代码审查/构建验证由主协调负责，本任务未修改采集器或默认生产组件。
+
+第四轮一次launch创建唯一1248182，fresh UIA确认SDK目录17项，原生主窗口对应PID7272/Session2，创建12:19:08.4762088Z。原动态DLLhash匹配，注册12:19:26.2408631Z，guard600秒；提议相关PID仅7272/17944/6284。主协调报告此次用户态工具的UAC启动也返回“操作已被用户取消”，没有collector JSONL或ready；入口未输入。
+
+按协调指令立即清理，stop使guard正常exit0，finally12:25:04.5484541Z两键false；空目录经完整路径、Directory、非reparse及零子项核验后非递归删除。1248182经fresh UI确认关闭，最终list仅原1247028及Codex。该轮准备文件位于自有.runtime/explorer-live/20260909-user-etw-entry，归档以attempt4命名；采集器启动结果仍明确来自主协调报告。
+
+当前四轮均已清理且没有GUI入口提交。主协调正在向用户核对.NET Host系统提示是否可见，这是状态澄清而非重复授权；不自动重试提示。后续必须重新建立窗口/进程、注册和有效期计划，不能沿用已撤销的ID或ready状态；已有授权持续。
