@@ -1,0 +1,150 @@
+{
+  "RecordedAtUtc": "2026-09-09T15:30:58.8316198+00:00",
+  "Scope": "Read-only exact CLSID hidden values, CiTool list policies, bounded existing event records. No registry/policy/GUI changes or new trace.",
+  "Os": {
+    "DisplayVersion": "24H2",
+    "CurrentBuild": "26100",
+    "UBR": 8037,
+    "EditionID": "EnterpriseS",
+    "ExplorerFileVersion": "10.0.26100.7840 (WinBuild.160101.0800)"
+  },
+  "HiddenPolicyQueries": [
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\NonEnum",
+      "KeyPresent": false,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\NonEnum",
+      "KeyPresent": false,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\NonEnum",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry64",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\NonEnum",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "View": "Registry32",
+      "Subkey": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\ClassicStartMenu",
+      "KeyPresent": true,
+      "OwnClsidValuePresent": false,
+      "Value": null
+    }
+  ],
+  "CiTool": {
+    "Command": "CiTool.exe -lp -json",
+    "ExitCode": -2147024891,
+    "ParseStatus": "not_parsed",
+    "Policies": [],
+    "Interpretation": "Access denied (0x80070005); effective policy list unavailable, not empty."
+  },
+  "ExistingEvents": [
+    {
+      "LogName": "Microsoft-Windows-AppLocker/MSI and Script",
+      "EventIds": [
+        8036
+      ],
+      "StartUtc": "2026-09-09T13:18:00Z",
+      "EndUtc": "2026-09-09T13:29:00Z",
+      "ReturnedCount": 0,
+      "Maximum": 128,
+      "PossiblyTruncated": false,
+      "ErrorIds": [
+        "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+      ],
+      "Matches": []
+    },
+    {
+      "LogName": "Microsoft-Windows-CodeIntegrity/Operational",
+      "EventIds": [
+        3077,
+        3033
+      ],
+      "StartUtc": "2026-09-09T13:18:00Z",
+      "EndUtc": "2026-09-09T13:29:00Z",
+      "ReturnedCount": 0,
+      "Maximum": 128,
+      "PossiblyTruncated": false,
+      "ErrorIds": [
+        "NoMatchingEventsFound,Microsoft.PowerShell.Commands.GetWinEventCommand"
+      ],
+      "Matches": []
+    }
+  ],
+  "Limit": "No matching existing event does not prove that activation was attempted or that all policies permit the DLL."
+}

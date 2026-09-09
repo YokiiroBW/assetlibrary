@@ -127,3 +127,9 @@ ae1的bc7c7ebf原生启用和注册正控成功，Kernel-Registry event4/version
 固定runner dca9c53b通过Release零告警、14项离线检查，root独立核对13项manifest；复用37e984dd及原guardian，没有重跑未变更的产品套件。同一管理员会话完成两个60秒捕获和状态请求，无再次UAC；初始非标准GUID请求被拒绝但会话继续，随后标准请求成功。两轮无丢事件、schema或越范围事件，仅收到私有control；停止后runner和root分别确认status4201及采集/guardian退出。首次Return在捕获外，第二次最终Return在捕获内，预填除外。真实Explorer仍空目录，不能将诊断运行成功计为G1通过。Windows第五轮11项原件/git blob SHA一致后合入；guard600秒自然到期清理，稍后的stop不是触发原因，自有窗口目录清理、原窗口及管理员控制台保留。会话自身到期是后续状态，不预先记为已验证。索引见single-consent-session/evidence.json。
 
 本轮最终diff审查后verify_repository通过：handoff、架构、契约、35项迁移/架构回归与源码有效性门禁；Alpha仍blocked。日志.runtime/v03-005-final-tests/repository-single-consent-checkpoint.log。28项本轮原始receipt的工作树/Git index SHA一致，暂存文件未包含活跃会话nonce；没有重跑未变更的产品套件。
+
+## Windows优先的官方研究与相同入口对照
+
+本轮仅新增两个有区分力的独立绑定场景：同一注册/原DLL，GUID根和真实sandbox绝对路径均Parse/Bind/GetClassID/GetCurFolder成功、在Bind阶段加载匹配DLL、各枚举1项，两个进程exit0、无stderr/timeout。root审查PathBind.cpp、固定hash外部10秒脚本和原始输出，不只依赖返回码。未执行真实Explorer导航或官方样例注册；原注册/空目录已清理，不计G1通过。PIDL长度采样差异保留原值，未宣称规范化。另核对12项精确隐藏键值与既有8036/3077/3033时段，无自有值或事件；CiTool列表80070005为缺证据。未修改或重复运行既有产品套件。研究依据见windows-entry-research/report.md。
+
+本轮最终diff审查后verify_repository通过（handoff/架构/契约及35项迁移/架构回归，Alpha仍blocked），日志.runtime/v03-005-final-tests/repository-windows-official-research.log。17份已取官方源的长度/SHA256/Git blob与17项归档原件SHA分别核对一致；初次自写校验脚本误把证据索引当作官方源码，改用各自artifacts清单后通过，未更改原件或期望hash。

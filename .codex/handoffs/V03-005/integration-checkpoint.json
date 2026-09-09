@@ -1,5 +1,5 @@
 {
-  "checkpoint": "f1bc903f25327ffb4f7c9067f3575af8a7aa634d",
+  "checkpoint": "2bd3b02854a25ed3f9d926aaa74fdb1bc0ae83d9",
   "module_provenance": [
     {
       "path": "apps/web",
@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "Single UAC session executed two complete 60s fixed user-mode captures and status queries without another prompt. First GUI Return was late; second final Return was covered, excluding prefill/autocomplete. Both GUI attempts remained ordinary empty folders with no observed proof DLL/factory. Only private control events arrived; absence of selected COM/UserLoader failures does not prove no load attempt. Both ETW sessions and children cleaned; GUI owner registration, empty folder and test window cleaned. G1..G4 remain open.",
+  "windows_explorer_entry": "Official-source investigation found a missing matched-path control; executed two isolated probes under unchanged registration/DLL. Both GUID root and actual filesystem junction bind to the original CLSID and enumerate one item, loading the DLL during Bind. Real Explorer remains unresolved; next read the actual owned active-view handler identity and navigation dispatch. No new GUI, DLL semantics or policy changes. Prior trace absence is not proof of no attempt.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -56,5 +56,6 @@
     "left_open_for_user_until_deadline": true,
     "owner_evidence_commit": "81e86dc8de5fbe1e850910a4bad6d3c3dea723c9",
     "integrated_commit": "f1bc903f25327ffb4f7c9067f3575af8a7aa634d"
-  }
+  },
+  "windows_entry_research": ".codex/handoffs/V03-005/windows-entry-research/evidence.json"
 }

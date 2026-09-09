@@ -1,0 +1,29 @@
+{
+  "status": "official_research_and_matched_path_probe_complete_real_explorer_unresolved",
+  "recordedAtUtc": "2026-09-09T15:40:42.173351+00:00",
+  "official_sample_revision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+  "report": "report.md",
+  "host_readonly_sha256": "652c52473d2156879375780557ff73909dbd79889aa8e110508552cf8e02bbe1",
+  "gui_executed_this_research": false,
+  "dll_or_registration_semantics_changed": false,
+  "new_privilege_prompt": false,
+  "next_discriminating_step": "Read actual owned Explorer active view handler identity and navigation dispatch; no new identical trace retry.",
+  "matched_entry_experiment": {
+    "completed": true,
+    "isolated_processes": 2,
+    "both_bindings_return_own_clsid": true,
+    "both_load_original_dll_during_bind": true,
+    "both_enumerate_one_item": true,
+    "gui_executed": false,
+    "root_reviewed_runtime_observer_and_runner": true,
+    "pidl_size_explanation": "920 before bind versus882 at later current-folder sampling is unexplained; no canonicalization or semantic equivalence claim."
+  },
+  "owner_commit": "38274de",
+  "integrated_commit": "2bd3b02854a25ed3f9d926aaa74fdb1bc0ae83d9",
+  "owner_archive_digest_checks": 17,
+  "official_runtime_source_blob_checks": 17,
+  "official_sample_missing_file": "Category.cpp",
+  "official_sample_build_performed": false,
+  "owner_binding_evidence": "../../V03-006/path-bind-comparison/evidence.json",
+  "owner_official_review": "../../V03-006/official-sample-review.md"
+}

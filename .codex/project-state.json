@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "native_single_consent_verified_explorer_entry_unresolved",
-  "next_action": "User-requested single-consent diagnostic reuse is verified: one UAC launch supported two fixed-observer captures plus status queries. Preserve prior test-window authorization; do not ask it again. Runner session expires 2026-09-09T13:45:58.1988649Z; check current status before reuse and do not assume it persists after expiry. Windows owner 81e86dc evidence integrated: first GUI Return outside capture, second final Return inside, prefill excluded; Explorer remains an ordinary empty folder and G1..G4 are open. All owned GUI registration/window/directory and both ETW sessions/children are clean. Future diagnosis needs new evidence, not another identical entry attempt. NAS deployment architecture remains separately pending.",
+  "status": "windows_priority_official_research_complete_actual_view_identity_pending",
+  "next_action": "Windows is the user's highest priority. Official Microsoft documentation and fixed ExplorerDataProvider revision434f6002 reviewed; no established requirement to replace HKCU with HKLM/MSIX. New same-registration two-path independent probes both bind the original DLL/CLSID and enumerate one item, so prioritize actual owned Explorer active-view handler identity and navigation dispatch next, followed by a controlled official-sample comparison. Do not repeat identical GUI attempts or infer a root cause from absent ETW events. Effective App Control policy list remains unavailable (CiTool access denied); exact hidden-policy values and previous test-window events show no matching own marker. Existing user test authorization persists. Prior limited admin runner is absent; do not assume it can be reused. NAS decision stays separate; Explorer G1..G4 remain open.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
