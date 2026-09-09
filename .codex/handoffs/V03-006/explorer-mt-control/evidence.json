@@ -1,0 +1,96 @@
+{
+  "RecordedAtUtc": "2026-09-09T02:27:04.1122832+00:00",
+  "SourceCommit": "72e76219cea17bd747560dff85cbe15b0e1f98bb",
+  "Configuration": "Release x64",
+  "Compiler": "MSVC 19.44.35228.0",
+  "WindowsSdk": "10.0.26100.0",
+  "SourceCmakeUnmodified": true,
+  "OnlyReleaseClCompilePropertyChanged": "RuntimeLibrary: MultiThreadedDLL -> MultiThreaded",
+  "StaticDllSha256": "37AD9B0ED4B692C593F0974F0CD1DE884AABE680CA5949699C14EE842B8C0B31",
+  "DynamicDllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "StaticDllPath": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260909-mt-control\\gui\\AssetLibraryExplorerProof.dll",
+  "DynamicDllPath": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260909-mt-control\\dynamic\\AssetLibraryExplorerProof.dll",
+  "ProbeSha256": "90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C",
+  "RootBindPassed": true,
+  "GuiFactoryObserved": false,
+  "GuiProofModuleObserved": false,
+  "Outcome": "static_CRT_did_not_restore_actual_Explorer_activation",
+  "Artifacts": [
+    {
+      "File": "AssetLibraryExplorerProof.vcxproj.txt",
+      "Sha256": "2CB61F53F1249D3D2A99B160F83D1FCACCE69D42B119BF820A50AF1FE0E9B5B8"
+    },
+    {
+      "File": "build.log.txt",
+      "Sha256": "08927CECF94CB74D7CA24AAD38A55878764799F1D855DBFD2C3B801E1BF7B3BE"
+    },
+    {
+      "File": "CMakeCache.txt",
+      "Sha256": "2B8CF6D3664075FF1A9E09C8231D9831E6BA147B7646623F9A3A606C2A9BCA2B"
+    },
+    {
+      "File": "compiler-settings-comparison.json",
+      "Sha256": "E45B9F172742CFB4491E2CAC4A2EF61664AE2B3B79FD58FD40AD5215370D5B8A"
+    },
+    {
+      "File": "dynamic-imports.txt",
+      "Sha256": "BA54C01A5424C6808DC96185AB1BA056311F7BA238449BB2AFF3B23484A16E39"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "DB2394D0BC4FE8FBF3C2AF6EE75F4A0CF5D2A0852E961B9826FC2C1290CDC0B4"
+    },
+    {
+      "File": "gui-after-submit.json",
+      "Sha256": "FCE1FC5E0AD03A3C5D53D65B1E7C6D4D2BC780BEA3AEA5CEF7B751216AF57A9A"
+    },
+    {
+      "File": "gui-after-view.json",
+      "Sha256": "1F7F650C49AE60474526AC63B19E8B5DD9970977007580C8C684ECEEC23B8FC9"
+    },
+    {
+      "File": "gui-cleanup.json",
+      "Sha256": "913987C96CC79284A21004B000B35544819B81497D28876C153467F842DCE6B6"
+    },
+    {
+      "File": "gui-empty-view.png",
+      "Sha256": "BC5C342550535A36319A5A0297406210D6E8DBE5FC1D8936D890CEF660AAA59C"
+    },
+    {
+      "File": "gui-guard.ps1.txt",
+      "Sha256": "5062BE313206B7D2A023F41368EFDC3C92962515E342D47CE5D4845CEF879101"
+    },
+    {
+      "File": "gui-register.json",
+      "Sha256": "8E85F72FF7780B49F6F354268118D4B964CBFABB6AB42114D2F3FCB1580BEC0B"
+    },
+    {
+      "File": "gui-ui-observation.json",
+      "Sha256": "15EC88F897EF4984AB88E4CFDA18B1006F6426D976836CE91D8C2398E00BB408"
+    },
+    {
+      "File": "root-bind-calls.log",
+      "Sha256": "590E2C73806600A212431795043ED84793E87E4B13FE1E0E3F9ED374923DCDFB"
+    },
+    {
+      "File": "root-bind-cleanup.json",
+      "Sha256": "390E238E74C32445FE9D04AE8CE7FC3691A732E21454C7679FCD58564104233E"
+    },
+    {
+      "File": "root-bind-result.json",
+      "Sha256": "B34D80065DED4436CA94E4B0EC65BEAC57970805CA484B37BC4A4DEEF5992E55"
+    },
+    {
+      "File": "root-bind.ps1.txt",
+      "Sha256": "5365CF8759DC7C0DF82DF53C3AFF9E920A729F03066B92DBF1C64B4EA9A48060"
+    },
+    {
+      "File": "source-comparison.json",
+      "Sha256": "A857B3CED8C8C266DD3F6965E4611A193F064165D47D72182E83C99407A162E7"
+    },
+    {
+      "File": "static-imports.txt",
+      "Sha256": "F9D17ECE73727AF36EE3CDB3653B33999150C30C0F1537B36A6B3F114BB2C05E"
+    }
+  ]
+}

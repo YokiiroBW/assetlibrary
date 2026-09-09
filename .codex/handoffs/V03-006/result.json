@@ -106,7 +106,30 @@
     ".codex/handoffs/V03-006/explorer-folder-entry/evidence.json",
     ".codex/handoffs/V03-006/explorer-folder-entry/guard.ps1.txt",
     ".codex/handoffs/V03-006/explorer-folder-entry/register.json",
-    ".codex/handoffs/V03-006/explorer-folder-entry/ui-observation.json"
+    ".codex/handoffs/V03-006/explorer-folder-entry/ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-mt-control.md",
+    ".codex/handoffs/V03-006/explorer-entry-20260909/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-mt-control/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-mt-control/AssetLibraryExplorerProof.vcxproj.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/build.log.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/CMakeCache.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/compiler-settings-comparison.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/dynamic-imports.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/evidence.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/final-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-after-submit.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-after-view.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-empty-view.png",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-guard.ps1.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-register.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/gui-ui-observation.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/root-bind-calls.log",
+    ".codex/handoffs/V03-006/explorer-mt-control/root-bind-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/root-bind-result.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/root-bind.ps1.txt",
+    ".codex/handoffs/V03-006/explorer-mt-control/source-comparison.json",
+    ".codex/handoffs/V03-006/explorer-mt-control/static-imports.txt"
   ],
   "changed_contracts": [],
   "tests": {
@@ -169,7 +192,8 @@
       "Negative/signed/noncanonical owner identity rows 14 of 14",
       "Nonlocal LAN normal/AC/LPAC six-control comparison with coordinator server receipt",
       "Final verify_repository: 432 C# files, architecture/contracts and existing 35 regressions passed; Alpha blocked",
-      "Strict ExplorerProofProbe target build and registered/unregistered root-bind controls passed; real GUI activation remains failed"
+      "Strict ExplorerProofProbe target build and registered/unregistered root-bind controls passed; real GUI activation remains failed",
+      "Isolated test-only /MT build with unchanged source/SDK; import and compiler-setting comparison; independent root bind passed; single actual Explorer folder entry still failed"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -187,6 +211,9 @@
     "explorer_factory_observed": false,
     "registry_cleanup_verified": true,
     "folder_entry_report": "explorer-folder-entry.md",
-    "folder_entry_outcome": "ordinary_empty_folder_without_observed_extension_activation"
+    "folder_entry_outcome": "ordinary_empty_folder_without_observed_extension_activation",
+    "static_crt_report": "explorer-mt-control.md",
+    "static_crt_root_bind_controls_passed": 1,
+    "static_crt_gui_outcome": "ordinary_empty_folder_without_observed_extension_activation"
   }
 }

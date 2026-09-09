@@ -1,0 +1,8 @@
+# Preserve original receipt bytes while checking other whitespace.
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.txt -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.log -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# These captured originals contain terminal blank lines; preserve their hashes.
+CMakeCache.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+build.log.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+gui-guard.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

@@ -6,6 +6,8 @@
 
 ## 历史检查点（以下按发生顺序保留）
 
+最新追加[单次静态CRT对照](explorer-mt-control.md)：原源码、原SDK、仅/MT的独立产物构建及root-bind通过，相同真实GUI沙箱入口仍为空目录，无Explorer factory/module。没有改变生产默认CRT或注册语义；600秒guard正常清理，自有窗口/目录撤销。此后停止DLL/注册试探，转由主协调安排所需权限下的精确跟踪。
+
 后续[官方文件夹CLSID入口](explorer-folder-entry.md)已完成单项对照：相同注册/DLL在实际Explorer显示普通空目录，未见Factory或模块加载。注册期间读回有效，600秒guard正常finally卸载；自有窗口与空目录已清理。它没有关闭G1；三类真实入口与独立绑定的差异需要新的精确加载/COM观测。
 
 状态 **partial**。实现提交 `453e10b`，分支 `codex/v03-006-windows-explorer-native-integration`，独立 worktree `C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary`，基线 `70ce45c`。本轮交付可复现的加载器诊断，未交付真实 Explorer 入口、AssetHost IPC 或 Windows 安装包；G1..G4 与生产 Shell 保持开放/禁用。

@@ -1,0 +1,54 @@
+{
+  "changes": {
+    "RuntimeLibrary": {
+      "dynamic": "MultiThreadedDLL",
+      "static": "MultiThreaded"
+    }
+  },
+  "settings": {
+    "dynamic": {
+      "AdditionalOptions": "%(AdditionalOptions) /utf-8",
+      "AssemblerListingLocation": "$(IntDir)",
+      "BasicRuntimeChecks": "Default",
+      "ConformanceMode": "true",
+      "EnablePREfast": "true",
+      "ExceptionHandling": "Sync",
+      "InlineFunctionExpansion": "AnySuitable",
+      "LanguageStandard": "stdcpp17",
+      "MinimalRebuild": null,
+      "Optimization": "MaxSpeed",
+      "PrecompiledHeader": "NotUsing",
+      "RuntimeLibrary": "MultiThreadedDLL",
+      "SupportJustMyCode": null,
+      "TreatWarningAsError": "true",
+      "UseFullPaths": "false",
+      "WarningLevel": "Level4",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"Release\";AssetLibraryExplorerProof_EXPORTS",
+      "ObjectFileName": "$(IntDir)",
+      "DebugInformationFormat": "\n      ",
+      "ScanSourceForModuleDependencies": "false"
+    },
+    "static": {
+      "AdditionalOptions": "%(AdditionalOptions) /utf-8",
+      "AssemblerListingLocation": "$(IntDir)",
+      "BasicRuntimeChecks": "Default",
+      "ConformanceMode": "true",
+      "EnablePREfast": "true",
+      "ExceptionHandling": "Sync",
+      "InlineFunctionExpansion": "AnySuitable",
+      "LanguageStandard": "stdcpp17",
+      "MinimalRebuild": null,
+      "Optimization": "MaxSpeed",
+      "PrecompiledHeader": "NotUsing",
+      "RuntimeLibrary": "MultiThreaded",
+      "SupportJustMyCode": null,
+      "TreatWarningAsError": "true",
+      "UseFullPaths": "false",
+      "WarningLevel": "Level4",
+      "PreprocessorDefinitions": "%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;WIN32_LEAN_AND_MEAN;NOMINMAX;CMAKE_INTDIR=\"Release\";AssetLibraryExplorerProof_EXPORTS",
+      "ObjectFileName": "$(IntDir)",
+      "DebugInformationFormat": "\n      ",
+      "ScanSourceForModuleDependencies": "false"
+    }
+  }
+}

@@ -1,0 +1,148 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file .runtime\explorer-live\20260909-mt-control\root-bind\AssetLibraryExplorerProof.dll
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    ole32.dll
+    OLEAUT32.dll
+    SHELL32.dll
+    SHLWAPI.dll
+    KERNEL32.dll
+
+  Section contains the following imports:
+
+    ole32.dll
+             1800192B8 Import Address Table
+             180024630 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          8C CoTaskMemFree
+                          8B CoTaskMemAlloc
+                         20F StringFromGUID2
+
+    OLEAUT32.dll
+             180019268 Import Address Table
+             1800245E0 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                             Ordinal     8
+                             Ordinal     2
+
+    SHELL32.dll
+             180019280 Import Address Table
+             1800245F8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                             Ordinal   256
+                             Ordinal    16
+                             Ordinal    25
+                             Ordinal    18
+
+    SHLWAPI.dll
+             1800192A8 Import Address Table
+             180024620 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         108 SHStrDupW
+
+    KERNEL32.dll
+             180019000 Import Address Table
+             180024378 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         2DD GetProcAddress
+                         65F WriteConsoleW
+                         225 GetConsoleMode
+                         229 GetConsoleOutputCP
+                         1C8 FlushFileBuffers
+                         383 HeapReAlloc
+                         385 HeapSize
+                         593 SetStdHandle
+                         569 SetFilePointerEx
+                         308 GetStringTypeW
+                          E6 CreateFileW
+                         278 GetFileSizeEx
+                         660 WriteFile
+                          9D CloseHandle
+                         242 GetCurrentProcessId
+                         33D GetTickCount64
+                         2A1 GetModuleFileNameW
+                         2E4 GetProcessHeap
+                         509 RtlCaptureContext
+                         511 RtlLookupFunctionEntry
+                         518 RtlVirtualUnwind
+                         5FB UnhandledExceptionFilter
+                         5B8 SetUnhandledExceptionFilter
+                         241 GetCurrentProcess
+                         5D8 TerminateProcess
+                         3B8 IsProcessorFeaturePresent
+                         481 QueryPerformanceCounter
+                         246 GetCurrentThreadId
+                         31A GetSystemTimeAsFileTime
+                         39A InitializeSListHead
+                         3B0 IsDebuggerPresent
+                         301 GetStartupInfoW
+                         2A5 GetModuleHandleW
+                         513 RtlPcToFileHeader
+                         498 RaiseException
+                         517 RtlUnwindEx
+                         39E InterlockedFlushSList
+                         28D GetLastError
+                         578 SetLastError
+                         153 EncodePointer
+                         157 EnterCriticalSection
+                         3F0 LeaveCriticalSection
+                         12F DeleteCriticalSection
+                         396 InitializeCriticalSectionAndSpinCount
+                         5EA TlsAlloc
+                         5EC TlsGetValue
+                         5EE TlsSetValue
+                         5EB TlsFree
+                         1D4 FreeLibrary
+                         3F6 LoadLibraryExW
+                         186 ExitProcess
+                         2A4 GetModuleHandleExW
+                         380 HeapFree
+                         37C HeapAlloc
+                         303 GetStdHandle
+                         27A GetFileType
+                         19D FindClose
+                         1A3 FindFirstFileExW
+                         1B4 FindNextFileW
+                         3BE IsValidCodePage
+                         1DB GetACP
+                         2C6 GetOEMCP
+                         1EA GetCPInfo
+                         1FF GetCommandLineA
+                         200 GetCommandLineW
+                         423 MultiByteToWideChar
+                         64C WideCharToMultiByte
+                         262 GetEnvironmentStringsW
+                         1D3 FreeEnvironmentStringsW
+                         1C2 FlsAlloc
+                         1C4 FlsGetValue
+                         1C6 FlsSetValue
+                         1C3 FlsFree
+                         397 InitializeCriticalSectionEx
+                         61A VirtualProtect
+                         3E4 LCMapStringW
+
+  Summary
+
+        2000 .data
+        1000 .fptable
+        2000 .pdata
+        C000 .rdata
+        1000 .reloc
+        1000 .rsrc
+       18000 .text

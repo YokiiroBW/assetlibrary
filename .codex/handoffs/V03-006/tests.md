@@ -2,6 +2,8 @@
 
 ## 最新Explorer入口检查点（2026-09-09）
 
+追加[静态CRT对照](explorer-mt-control.md)：独立Release构建零警告/错误、实际/MT与导入表核验通过；原probe的独立root-bind一次正控通过，真实Explorer相同目录入口仍失败。没有更换源码/SDK/接口或生产CRT默认；注册和自有窗口/目录均清理。此控制独立计数，不重跑原有矩阵。
+
 追加的[官方文件夹CLSID入口](explorer-folder-entry.md)只显示普通空目录，0项且无Explorer DLL/trace；注册在观测期间有效。guard正常exit0、finally两键false，自有窗口/目录清理。该真实入口未通过，不混入独立root-bind控制计数；无源码变化，不重复构建。
 
 源码4780629，详见[现场证据](explorer-entry-20260909.md)。实际执行 `cmake --build .runtime/explorer-proof --config Release --target ExplorerProofProbe --parallel 2`，严格MSVC构建通过。相同不可变DLL注册后，以十秒外部期限执行 `ExplorerProofProbe.exe --root-bind`，Parse/Desktop/Bind/View四阶段均S_OK且exit0；卸载后同命令parse=80070057、PIDL absent、exit1且不继续Bind/View。两个控制通过预期断言；stdout无缓冲，空view不得冒充成功。

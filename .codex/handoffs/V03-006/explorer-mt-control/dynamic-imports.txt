@@ -1,0 +1,174 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file .runtime\explorer-live\20260909-mt-control\dynamic\AssetLibraryExplorerProof.dll
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    ole32.dll
+    OLEAUT32.dll
+    SHELL32.dll
+    SHLWAPI.dll
+    KERNEL32.dll
+    MSVCP140.dll
+    VCRUNTIME140.dll
+    VCRUNTIME140_1.dll
+    api-ms-win-crt-runtime-l1-1-0.dll
+    api-ms-win-crt-string-l1-1-0.dll
+    api-ms-win-crt-stdio-l1-1-0.dll
+    api-ms-win-crt-heap-l1-1-0.dll
+
+  Section contains the following imports:
+
+    ole32.dll
+             180004208 Import Address Table
+             180005D08 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          8C CoTaskMemFree
+                          8B CoTaskMemAlloc
+                         20F StringFromGUID2
+
+    OLEAUT32.dll
+             1800040B8 Import Address Table
+             180005BB8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                             Ordinal     8
+                             Ordinal     2
+
+    SHELL32.dll
+             1800040D0 Import Address Table
+             180005BD0 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                             Ordinal    25
+                             Ordinal    16
+                             Ordinal   256
+                             Ordinal    18
+
+    SHLWAPI.dll
+             1800040F8 Import Address Table
+             180005BF8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         108 SHStrDupW
+
+    KERNEL32.dll
+             180004000 Import Address Table
+             180005B00 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         31A GetSystemTimeAsFileTime
+                         3B0 IsDebuggerPresent
+                         509 RtlCaptureContext
+                         511 RtlLookupFunctionEntry
+                         518 RtlVirtualUnwind
+                         5FB UnhandledExceptionFilter
+                         5B8 SetUnhandledExceptionFilter
+                         241 GetCurrentProcess
+                         5D8 TerminateProcess
+                         3B8 IsProcessorFeaturePresent
+                         481 QueryPerformanceCounter
+                         246 GetCurrentThreadId
+                          E6 CreateFileW
+                         278 GetFileSizeEx
+                         660 WriteFile
+                          9D CloseHandle
+                         242 GetCurrentProcessId
+                         33D GetTickCount64
+                         2A1 GetModuleFileNameW
+                         39A InitializeSListHead
+
+    MSVCP140.dll
+             1800040A8 Import Address Table
+             180005BA8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                         28E ?_Xlength_error@std@@YAXPEBD@Z
+
+    VCRUNTIME140.dll
+             180004108 Import Address Table
+             180005C08 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          3C memcpy
+                          25 __std_type_info_destroy_list
+                           8 __C_specific_handler
+                          3E memset
+                          3D memmove
+                          45 wcsrchr
+                           1 _CxxThrowException
+                          22 __std_exception_destroy
+                          21 __std_exception_copy
+
+    VCRUNTIME140_1.dll
+             180004158 Import Address Table
+             180005C58 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           0 __CxxFrameHandler4
+
+    api-ms-win-crt-runtime-l1-1-0.dll
+             180004188 Import Address Table
+             180005C88 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          16 _cexit
+                          3F _seh_filter_dll
+                          37 _initterm_e
+                          22 _execute_onexit_table
+                          36 _initterm
+                          34 _initialize_onexit_table
+                          33 _initialize_narrow_environment
+                          18 _configure_narrow_argv
+                          3A _invoke_watson
+
+    api-ms-win-crt-string-l1-1-0.dll
+             1800041E8 Import Address Table
+             180005CE8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                          A3 wcslen
+                          9E wcscmp
+                          A1 wcscpy_s
+
+    api-ms-win-crt-stdio-l1-1-0.dll
+             1800041D8 Import Address Table
+             180005CD8 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           F __stdio_common_vsprintf_s
+
+    api-ms-win-crt-heap-l1-1-0.dll
+             180004168 Import Address Table
+             180005C68 Import Name Table
+                     0 time date stamp
+                     0 Index of first forwarder reference
+
+                           8 _callnewh
+                          19 malloc
+                          18 free
+
+  Summary
+
+        1000 .data
+        1000 .pdata
+        3000 .rdata
+        1000 .reloc
+        1000 .rsrc
+        3000 .text

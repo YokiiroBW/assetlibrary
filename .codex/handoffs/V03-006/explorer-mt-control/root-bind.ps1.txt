@@ -1,0 +1,36 @@
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
+$registrationScript=Join-Path $repo 'tests/windows-shell/registration.ps1'
+$dll=Join-Path $PSScriptRoot 'root-bind/AssetLibraryExplorerProof.dll'
+$probe=Join-Path $repo '.runtime/explorer-proof/Release/ExplorerProofProbe.exe'
+if((Get-FileHash -LiteralPath $dll).Hash -ne '37AD9B0ED4B692C593F0974F0CD1DE884AABE680CA5949699C14EE842B8C0B31') {throw 'Static DLL hash mismatch'}
+if((Get-FileHash -LiteralPath $probe).Hash -ne '90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C') {throw 'Probe hash mismatch'}
+$registered=$false
+try {
+  $registration = & $registrationScript -Action register -DllPath $dll | ConvertFrom-Json
+  $registered=$true
+  $start=[Diagnostics.ProcessStartInfo]::new($probe)
+  $start.ArgumentList.Add('--root-bind')
+  $start.UseShellExecute=$false
+  $start.CreateNoWindow=$true
+  $start.RedirectStandardOutput=$true
+  $start.RedirectStandardError=$true
+  $process=[Diagnostics.Process]::new()
+  $process.StartInfo=$start
+  try {
+    if(-not $process.Start()) {throw 'Probe start failed'}
+    $stdout=$process.StandardOutput.ReadToEndAsync()
+    $stderr=$process.StandardError.ReadToEndAsync()
+    $timeout=-not $process.WaitForExit(10000)
+    if($timeout) {$process.Kill();if(-not $process.WaitForExit(3000)){throw 'Own probe failed to exit'}}
+    $output=$stdout.GetAwaiter().GetResult()
+    $errorOutput=$stderr.GetAwaiter().GetResult()
+    [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$process.Id;Exit=$process.ExitCode;TimedOut=$timeout;Output=$output;Error=$errorOutput;Registration=$registration} | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'root-bind-result.json')
+    if($timeout -or $process.ExitCode -ne 0 -or $errorOutput -ne '' -or $output -notmatch 'RootBoundCreateView=00000000') {throw 'Root-bind positive failed'}
+  } finally {$process.Dispose()}
+} finally {
+  if($registered) {
+    $cleanup = & $registrationScript -Action unregister | ConvertFrom-Json
+    [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Registration=$cleanup} | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'root-bind-cleanup.json')
+  }
+}

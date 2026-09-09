@@ -1,0 +1,16 @@
+[
+  {
+    "file": "ExplorerProof.cpp",
+    "currentSha256": "45212f0247fa02d5a1f7c9c2fb068ea85b1c56b1197ca76ac2a1e5550a0b0bf5",
+    "priorSha256": "74bd22675e17efa8b496f27f5841754560614dc73bae4c9ac048bf30b325ae20",
+    "normalizedEqual": true,
+    "normalizedSha256": "74bd22675e17efa8b496f27f5841754560614dc73bae4c9ac048bf30b325ae20"
+  },
+  {
+    "file": "ExplorerProof.def",
+    "currentSha256": "e023c5d7047b9bdf4543d1b3875e669c2e63ad1f69766bad1fb34fafc246dd58",
+    "priorSha256": "c61aaa60477184629f8023264d156fc0d0c6b6fc0307671956e4bb058610c13b",
+    "normalizedEqual": true,
+    "normalizedSha256": "c61aaa60477184629f8023264d156fc0d0c6b6fc0307671956e4bb058610c13b"
+  }
+]

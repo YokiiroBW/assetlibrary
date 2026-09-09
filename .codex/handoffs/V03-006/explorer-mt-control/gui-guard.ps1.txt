@@ -1,0 +1,20 @@
+$ErrorActionPreference = 'Stop'
+$run = $PSScriptRoot
+$repo = (Resolve-Path (Join-Path $run '../../../..')).Path
+$script = Join-Path $repo 'tests/windows-shell/registration.ps1'
+$dll = Join-Path $run 'AssetLibraryExplorerProof.dll'
+if ((Get-FileHash -LiteralPath $dll).Hash -ne '37AD9B0ED4B692C593F0974F0CD1DE884AABE680CA5949699C14EE842B8C0B31') { throw 'DLL hash mismatch' }
+$registered = $false
+try {
+  $registration = & $script -Action register -DllPath $dll | ConvertFrom-Json
+  $registered = $true
+  [ordered]@{ Utc=[DateTimeOffset]::UtcNow.ToString('o'); Registration=$registration; DllSha256=(Get-FileHash -LiteralPath $dll).Hash; MaximumSeconds=600 } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 (Join-Path $run 'register.json')
+  $limit = [DateTimeOffset]::UtcNow.AddSeconds(600)
+  while ([DateTimeOffset]::UtcNow -lt $limit -and -not (Test-Path -LiteralPath (Join-Path $run 'stop'))) { Start-Sleep -Milliseconds 250 }
+} finally {
+  if ($registered) {
+    $cleanup = & $script -Action unregister | ConvertFrom-Json
+    [ordered]@{ Utc=[DateTimeOffset]::UtcNow.ToString('o'); Registration=$cleanup } | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 (Join-Path $run 'cleanup.json')
+  }
+}
+

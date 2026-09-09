@@ -1,0 +1,41 @@
+{
+  "Utc": "2026-09-09T02:25:40.6438207+00:00",
+  "Processes": [
+    {
+      "Pid": 6284,
+      "Session": 2,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 17944,
+      "Session": 2,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 24644,
+      "Session": 2,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 24772,
+      "Session": 2,
+      "OwnDllPaths": [],
+      "Error": null
+    },
+    {
+      "Pid": 26128,
+      "Session": 2,
+      "OwnDllPaths": [],
+      "Error": null
+    }
+  ],
+  "TracePresent": false,
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  }
+}
