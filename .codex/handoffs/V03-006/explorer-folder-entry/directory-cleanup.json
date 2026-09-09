@@ -1,0 +1,8 @@
+{
+  "Utc": "2026-09-09T02:09:41.7644661+00:00",
+  "DirectoryRemoved": true,
+  "GuardExitCode": 0,
+  "OwnWindowClosed": 2033652,
+  "OriginalWindowPreserved": 1247028,
+  "CleanupNote": "Combined dynamic-path cleanup command rejected by policy. Independent readback confirmed exact owned directory, Directory attribute, no reparse link, zero children; literal-path nonrecursive removal succeeded."
+}

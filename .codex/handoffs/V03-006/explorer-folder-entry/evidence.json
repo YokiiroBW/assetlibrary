@@ -1,0 +1,41 @@
+{
+  "RecordedAtUtc": "2026-09-09T02:09:41.8906936+00:00",
+  "SourceCommit": "47806297fe6989e3cd04e83e692f78ae7ed4bce2",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "Outcome": "ordinary_empty_folder_without_observed_extension_activation",
+  "OfficialReference": "https://learn.microsoft.com/en-us/windows/win32/shell/nse-junction",
+  "Artifacts": [
+    {
+      "File": "after-submit.json",
+      "Sha256": "AB928496DE3973ED60C971F86C45909313EBB8D8F5553F4870E10696D7CCA8F4"
+    },
+    {
+      "File": "after-view.json",
+      "Sha256": "B5850E4E22C6A7F6893C90897B9E83D82E8F5625F27BDC2D787E7E3EDA38E826"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "C66557B7FFA18A0D25E12D8DA036DFBBD61F183C58B94B1DF4017B8C8DFA03CB"
+    },
+    {
+      "File": "directory-cleanup.json",
+      "Sha256": "E792192329551DE8BCB598AC43531519E8585836EFA4C33E15D1D8FF8E932E86"
+    },
+    {
+      "File": "empty-view.png",
+      "Sha256": "BC5C342550535A36319A5A0297406210D6E8DBE5FC1D8936D890CEF660AAA59C"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "B01AF1205518673573D9A0711A9D7C1233CF467B5CB27D3DACC41B76DA804129"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "1D4A6D37E3EBCBF4184F2838076A379CFA8AEA1F91BF70CF411C0111E4D81364"
+    },
+    {
+      "File": "ui-observation.json",
+      "Sha256": "568E4B626334C0DDB26B3ADB5FE28F2E255D76EF0B324F8956B524FAADD804E0"
+    }
+  ]
+}

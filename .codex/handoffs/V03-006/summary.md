@@ -2,9 +2,11 @@
 
 最新状态 **partial**，源码提交 `47806297fe6989e3cd04e83e692f78ae7ed4bce2`。本轮[真实入口与根绑定证据](explorer-entry-20260909.md)已覆盖重新可用的桌面：已知 `shell:Desktop` 正控成功，包含虚拟项目的Desktop视图未发现自有项，裸CLSID与完整shell URI均实际报错；注册在导航和报错期间仍有效，所有Explorer模块查询均成功但未见proof DLL。独立进程不预先CoCreate的Desktop根绑定/View正控成功，卸载负控在parse阶段失败。G1..G4仍开放；当前阻断是实际Explorer发现/激活差异，以下Disconnected/Escape记录仅为历史。
 
-本轮只新增test-only Probe根绑定模式与证据，不改DLL、GUID、注册语义、生产接口或依赖方向。复用系统Shell API与既有owner保护注册脚本；无真实资产写入，十秒probe上限。自有注册、模态及窗口已清理，用户原窗口保留。两项新根绑定控制单列，不累计为原四项loader或图片矩阵。后续由主协调批准在自有sandbox空目录验证官方文件夹CLSID入口；不重复策略采样或已通过的图片测试。
+本轮只新增test-only Probe根绑定模式与证据，不改DLL、GUID、注册语义、生产接口或依赖方向。复用系统Shell API与既有owner保护注册脚本；无真实资产写入，十秒probe上限。自有注册、模态及窗口已清理，用户原窗口保留。两项新根绑定控制单列，不累计为原四项loader或图片矩阵。后续经主协调批准的官方文件夹CLSID入口对照也未激活扩展，详见下文；不重复策略采样或已通过的图片测试。
 
 ## 历史检查点（以下按发生顺序保留）
+
+后续[官方文件夹CLSID入口](explorer-folder-entry.md)已完成单项对照：相同注册/DLL在实际Explorer显示普通空目录，未见Factory或模块加载。注册期间读回有效，600秒guard正常finally卸载；自有窗口与空目录已清理。它没有关闭G1；三类真实入口与独立绑定的差异需要新的精确加载/COM观测。
 
 状态 **partial**。实现提交 `453e10b`，分支 `codex/v03-006-windows-explorer-native-integration`，独立 worktree `C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary`，基线 `70ce45c`。本轮交付可复现的加载器诊断，未交付真实 Explorer 入口、AssetHost IPC 或 Windows 安装包；G1..G4 与生产 Shell 保持开放/禁用。
 

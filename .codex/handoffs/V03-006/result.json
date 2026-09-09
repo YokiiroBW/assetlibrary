@@ -95,7 +95,18 @@
     ".codex/handoffs/V03-006/explorer-entry-20260909/root-bind-registered.json",
     ".codex/handoffs/V03-006/explorer-entry-20260909/root-bind-unregistered.json",
     ".codex/handoffs/V03-006/explorer-entry-20260909/uri-error.jpg",
-    ".codex/handoffs/V03-006/explorer-entry-20260909/attempt3-processes-after.json"
+    ".codex/handoffs/V03-006/explorer-entry-20260909/attempt3-processes-after.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry.md",
+    ".codex/handoffs/V03-006/explorer-folder-entry/.gitattributes",
+    ".codex/handoffs/V03-006/explorer-folder-entry/after-submit.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/after-view.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/cleanup.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/directory-cleanup.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/empty-view.png",
+    ".codex/handoffs/V03-006/explorer-folder-entry/evidence.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/guard.ps1.txt",
+    ".codex/handoffs/V03-006/explorer-folder-entry/register.json",
+    ".codex/handoffs/V03-006/explorer-folder-entry/ui-observation.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -164,7 +175,7 @@
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
       "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
-      "V03-006 / windows-shell-owner: isolate actual Explorer discovery/activation discrepancy using approved sandbox folder CLSID entry; preserve immutable DLL and registration semantics"
+      "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -174,6 +185,8 @@
     "desktop_control_passed": true,
     "own_desktop_item_observed": false,
     "explorer_factory_observed": false,
-    "registry_cleanup_verified": true
+    "registry_cleanup_verified": true,
+    "folder_entry_report": "explorer-folder-entry.md",
+    "folder_entry_outcome": "ordinary_empty_folder_without_observed_extension_activation"
   }
 }
