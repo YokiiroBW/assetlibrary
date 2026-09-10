@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "reviewed_target_observer_delegated_to_windows_owner",
-  "next_action": "Windows GUI owner executing one new exclusive official-profile Explorer observation with frozen749CD509 observer, exact short-lived plan, ready-before-Browse, cooperative cancellation and complete owned-site cleanup. Root reviews resulting evidence; do not run another GUI actor. Latest ordering control remains failed for entry, with clean site; no production Shell gate closed.",
+  "status": "owner_turn_active_without_new_execution_manual_interrupt_needed",
+  "next_action": "Windows owner turn01a08941 has remained active since02:59UTC without new runtime/plan/GUI test evidence; follow-up messages have not produced execution. No real target attach/result exists. Existing task tools do not expose interrupt; user must stop the stalled turn before controlled resume. Do not start a second GUI actor or repeat synthetic checks.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

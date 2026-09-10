@@ -1,6 +1,6 @@
 {
   "updatedAtUtc": "2026-09-10T03:00:35.710098+00:00",
-  "status": "reviewed_target_observer_delegated_to_windows_owner",
+  "status": "owner_turn_active_without_new_execution_manual_interrupt_needed",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Windows GUI owner executing one new exclusive official-profile Explorer observation with frozen749CD509 observer, exact short-lived plan, ready-before-Browse, cooperative cancellation and complete owned-site cleanup. Root reviews resulting evidence; do not run another GUI actor.",
+  "active_instruction": "Windows owner turn01a08941 has remained active since02:59UTC without new runtime/plan/GUI test evidence; follow-up messages have not produced execution. No real target attach/result exists. Existing task tools do not expose interrupt; user must stop the stalled turn before controlled resume. Do not start a second GUI actor or repeat synthetic checks.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,8 +51,8 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Collect single owner real observation and cleanup results; distinguish capture readiness from product entry success.",
-    "Use actual target API evidence to select next repair; G1..G4 remain open."
+    "Obtain confirmed stop of stalled Windows owner turn, then resume the already-reviewed one-shot observation in the same owner task.",
+    "Preserve frozen749cd509 observer and prior approvals; no new test registry/windows were created by this stalled turn as of inspection."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -96,6 +96,6 @@
     "preparation_evidence": "target-debug-control/evidence.json",
     "observer_sha256": "749cd50985ba51895c410ea1e8fb1d3335c903767dbf87e88b60f846645837e0",
     "synthetic_normal_cancel": "passed; each3 API entries/returns, actual80040154/context1, six breakpoint removals, detach and healthy cooperative exit",
-    "real_result": "pending_owner_execution"
+    "real_result": "not_started_owner_execution_stalled"
   }
 }
