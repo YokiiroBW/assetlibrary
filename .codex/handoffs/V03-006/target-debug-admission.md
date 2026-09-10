@@ -1,0 +1,15 @@
+# 首次目标内观察器准入拒绝
+
+本轮未附加Explorer、未达到capture_ready、未触发Browse；属于观察工具的查询权限前置失败，不是产品激活结果。原749CD509…观察器未修改或重跑。
+
+原F298/四根HKCU/正确STA守护于2026-09-10 03:11:11Z开始。先记录ownershipStartFiletime=134334834961744485，再经CUA新建唯一自有5113776/PID17512，精确creation=134334834964662522，创建03:11:36.4662522Z；SDK和ThisPC实际view正控均成功。原1247028/Chrome8128618保留。
+
+在指定root目录创建严格11行、UTF8无BOM的短效官方plan dadb2a57444244459d7a60001079f6c6，随后启动前重验749CD509…，隐藏/重定向运行。包装仅在身份一致的capture_ready后才发唯一Browse，但该门禁没有通过。实际输出首先为planned_target_has_no_debugger/80004005，随后planned_setup_failed；观察器17836 exit1、stderr空，没有ready或Browse。
+
+此失败发生于CheckRemoteDebuggerPresent前置组合判断。root在同一PID/创建身份上独立只读核对：旧LIMITED_QUERY|SYNCHRONIZE（00101000）查询失败/Win32 5，QUERY_INFORMATION|SYNCHRONIZE（00100400）查询成功且debuggerPresent=false。该根协调诊断没有附加目标；本任务不冒充自己执行了这项对照。
+
+原result中cleanupVerified=false/targetAliveAfterDetach=false是尚未进入捕获与清理分支的默认值，不能据此说目标死亡或留下附加。源码路径及实际失败stage确认未到Attach；根协调也确认全程无附加。没有盲杀debugger或目标，没有提高权限。
+
+stop/finally于03:16:15.5416723Z正常exit0，四HKCU及四HKLM检查均absent、CleanupErrors空，STA清理通知成功。新鲜匹配后关闭自有5113776，最终原1247028和Chrome8128618保留。未等待旧期限或重跑旧工具，后续须使用经过合成回归的新v2和新计划。
+
+[原件索引](target-debug-admission/evidence.json)包含epoch/身份/正控、计划、包装源、原始stdout与默认字段、运行结果和清理。只对新归档做交接/hash校验，不重跑既有业务或观察器合成测试，G1未关闭。

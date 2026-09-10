@@ -329,7 +329,28 @@
     ".codex/handoffs/V03-006/register-first-control/run.ps1.txt",
     ".codex/handoffs/V03-006/register-first-control/sdk-baseline.json",
     ".codex/handoffs/V03-006/register-first-control/thispc-baseline.json",
-    ".codex/handoffs/V03-006/register-first-control/window-cleanup.json"
+    ".codex/handoffs/V03-006/register-first-control/window-cleanup.json",
+    ".codex/handoffs/V03-006/target-debug-admission.md",
+    ".codex/handoffs/V03-006/target-debug-admission/.gitattributes",
+    ".codex/handoffs/V03-006/target-debug-admission/browse-wrapper.ps1.txt",
+    ".codex/handoffs/V03-006/target-debug-admission/capture-launch.json",
+    ".codex/handoffs/V03-006/target-debug-admission/capture-result.json",
+    ".codex/handoffs/V03-006/target-debug-admission/capture.ps1.txt",
+    ".codex/handoffs/V03-006/target-debug-admission/cleanup.json",
+    ".codex/handoffs/V03-006/target-debug-admission/evidence.json",
+    ".codex/handoffs/V03-006/target-debug-admission/final-cleanup.json",
+    ".codex/handoffs/V03-006/target-debug-admission/guard.ps1.txt",
+    ".codex/handoffs/V03-006/target-debug-admission/identity.json",
+    ".codex/handoffs/V03-006/target-debug-admission/observer.jsonl",
+    ".codex/handoffs/V03-006/target-debug-admission/observer.stderr.txt",
+    ".codex/handoffs/V03-006/target-debug-admission/ownership-epoch.json",
+    ".codex/handoffs/V03-006/target-debug-admission/plan-receipt.json",
+    ".codex/handoffs/V03-006/target-debug-admission/plan.txt",
+    ".codex/handoffs/V03-006/target-debug-admission/preflight.json",
+    ".codex/handoffs/V03-006/target-debug-admission/register.json",
+    ".codex/handoffs/V03-006/target-debug-admission/sdk-baseline.json",
+    ".codex/handoffs/V03-006/target-debug-admission/thispc-baseline.json",
+    ".codex/handoffs/V03-006/target-debug-admission/window-cleanup.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -492,5 +513,14 @@
     "native_browse_timed_out": true,
     "cleanup_verified": true,
     "shared_broker_cold_start_proven": false
+  },
+  "target_debug_checkpoint": {
+    "report": "target-debug-admission.md",
+    "tool_sha256": "749CD50985BA51895C410EA1E8FB1D3335C903767DBF87E88B60F846645837E0",
+    "ready": false,
+    "actual_attach": false,
+    "browse_invoked": false,
+    "classification": "tool admission query rights failure",
+    "cleanup_verified": true
   }
 }

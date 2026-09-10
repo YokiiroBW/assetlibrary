@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[目标观察器准入拒绝](target-debug-admission.md)：新目标所有权/SDK/ThisPC正控有效，固定749CD509工具在查询debugger状态前置失败，未附加、未ready、未Browse；不计产品激活测试。root只读证实旧handle mask导致Win32 5，另mask查询成功且无debugger。注册/自有UI已清理，旧合成/业务测试不重跑。
+
 新增[完整注册先行控制](register-first-control.md)：原guard/STA成功后，新PID创建时间严格更晚；SDK/ThisPC actualview正控通过，F5仍2项，唯一Browse产生无关联模态并触发10秒外限。有效注册期间目标匹配拒绝、ThisPC匹配/2项、模块无样例均已读回，正常清理及STA通知成功。没有重跑旧父枚举/源码构建/业务套件，不将原中断项算失败或将本次SDK成功算G1通过。
 
 恢复检查点：[父级标准发现查询](parent-discovery-control.md)含/不含hidden均完整3项匹配官方，匹配项属性20000000；另一直接Bind正控匹配官方类。均外部10秒、无GUI、原样STA注册/清理。未重跑这些结果。旧时序GUI控制只完成注册后新PID和SDK正控，未发生ThisPC/目标导航；恢复时清理已匹配的旧窗口，不标失败。

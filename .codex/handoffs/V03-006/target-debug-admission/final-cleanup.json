@@ -1,0 +1,14 @@
+{
+  "Utc": "2026-09-10T03:16:34.8802815+00:00",
+  "GuardExitCode": 0,
+  "RootsCleaned": true,
+  "StaCleanupNotificationSucceeded": true,
+  "ObserverPid": 17836,
+  "ObserverExited": true,
+  "Ready": false,
+  "BrowseInvoked": false,
+  "ActualAttachPerformed": false,
+  "Classification": "Tool admission/query-rights failure, not product activation result",
+  "DefaultFalseCleanupFields": "No capture/attach cleanup was reached; not evidence of target death",
+  "CoordinatorRightsFinding": "Same target creation: 00101000 query fails Win32 5; 00100400 succeeds and reports no debugger; no attach in that check"
+}

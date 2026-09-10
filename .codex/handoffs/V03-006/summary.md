@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[目标内观察器首次准入](target-debug-admission.md)在CheckRemoteDebuggerPresent检查处拒绝，未附加/ready/Browse，属于工具句柄权限缺陷而非产品激活结果。root已独立确认查询权利差异，旧工具冻结等待v2。自有窗口与注册正常清理，原窗口/Chrome保留。
+
 最新：[注册先于新Explorer的完整控制](register-first-control.md)已完成，02:25:12注册早于新PID24488创建02:25:32，SDK/ThisPC正控均通过，但官方仍缺项、唯一打开无关联模态/超时，实际view仍ThisPC。有效期内模块读回未见样例，现场正常清理，原窗口与Chrome保留。仅此时序改变不足以修复入口，不声称broker冷启动；旧未完成项与父级发现结果继续分别保留。
 
 恢复检查点：[独立父级发现](parent-discovery-control.md)已证明含/不含hidden都3项含官方，匹配项不HIDDEN/NONENUMERATED，独立绑定正控成功。旧“先注册后新进程”只完成SDK正控，ThisPC/目标步骤因额度中断未发生，不能计失败；旧注册已到期清理，旧自有窗在新鲜身份核对后关闭。接下来只完成此唯一未完控制，既有E0/Browse/官方两轮保持原证据。

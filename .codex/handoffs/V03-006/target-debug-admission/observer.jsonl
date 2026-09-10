@@ -1,0 +1,3 @@
+{"kind":"stage","stage":"planned_target_has_no_debugger","hr":"0x80004005","tick":249072031}
+{"kind":"stage","stage":"planned_setup_failed","hr":"0x80004005","tick":249072031}
+{"kind":"result","mode":"plan","passed":false,"matchedEntries":0,"matchedReturns":0,"nonMatchingDiscarded":0,"finiteWaitTimeouts":0,"exitInterruptObserved":false,"attachCompleted":false,"cleanupVerified":false,"targetAliveAfterDetach":false,"existingProcessAttached":false,"tick":249072031}
