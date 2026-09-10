@@ -1,0 +1,28 @@
+param([Parameter(Mandatory)][string]$RunDirectory,[Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$PlanId)
+$ErrorActionPreference='Stop'
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path
+$marker=Join-Path $run 'after-ready-notify-requested'
+$markerHandle=[IO.File]::Open($marker,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);$markerHandle.Dispose()
+$start=[Diagnostics.ProcessStartInfo]::new((Join-Path $PSHOME 'pwsh.exe'))
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+foreach($argument in @('-NoProfile','-File',(Join-Path $PSScriptRoot 'invoke-notify.ps1'),'-RunDirectory',$run,'-PlanId',$PlanId)){$start.ArgumentList.Add($argument)}
+$child=[Diagnostics.Process]::new();$child.StartInfo=$start;$started=$false
+try{
+    $startedUtc=[DateTimeOffset]::UtcNow.ToString('o')
+    if(-not $child.Start()){throw 'Notification sender launch failed'}
+    $started=$true;$childId=$child.Id;$creation=$child.StartTime.ToFileTimeUtc().ToString()
+    $stdout=$child.StandardOutput.ReadToEndAsync();$stderr=$child.StandardError.ReadToEndAsync()
+    $timeout=-not $child.WaitForExit(10000)
+    if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Notification sender exit unconfirmed'}}
+    $output=$stdout.GetAwaiter().GetResult();$errors=$stderr.GetAwaiter().GetResult()
+    [ordered]@{PlanId=$PlanId;StartedUtc=$startedUtc;CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');SenderPid=$childId;SenderCreationFileTime=$creation;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$output;Stderr=$errors;GuardInvoked=$false;DebuggerTerminated=$false} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $run 'after-ready-notify-process.json') -Encoding utf8
+    if($timeout -or $child.ExitCode -ne 0 -or $errors){throw 'Notification sender failed; no retry or navigation'}
+    $report=$output|ConvertFrom-Json
+    if($report.PlanId -cne $PlanId -or -not $report.Notification.Success -or $report.RemainingAfterSeconds -le 0){throw 'Notification report invalid'}
+    [IO.File]::WriteAllText((Join-Path $run 'after-ready-notify.json'),$output,[Text.UTF8Encoding]::new($false))
+    $output
+}finally{
+    # Only this new notification sender is bounded; never terminate the observer or Explorer.
+    if($started -and -not $child.HasExited){$child.Kill();$null=$child.WaitForExit(3000)}
+    $child.Dispose()
+}

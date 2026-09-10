@@ -508,7 +508,9 @@
     ".codex/handoffs/V03-006/cache-reference-first.md",
     ".codex/handoffs/V03-006/cache-reference-first/",
     ".codex/handoffs/V03-006/cache-consumption-v2.md",
-    ".codex/handoffs/V03-006/cache-consumption-v2/"
+    ".codex/handoffs/V03-006/cache-consumption-v2/",
+    ".codex/handoffs/V03-006/notify-trigger-plan.md",
+    ".codex/handoffs/V03-006/notify-trigger-preparation/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -589,7 +591,8 @@
       "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending",
       "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run",
       "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run",
-      "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart"
+      "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart",
+      "Notify-only preparation: fixed guard and literal hashes, PowerShell AST and static single-method invocation reviewed; no native notification, registration, C# compilation or observer execution"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -896,5 +899,20 @@
     "explorer_restarts": 0,
     "debugger_hard_kill_used": false,
     "browse_controller_terminated_on_timeout": true
+  },
+  "notify_trigger_checkpoint": {
+    "report": "notify-trigger-plan.md",
+    "status": "wrapper_prepared_ast_only_not_executed",
+    "guard_csharp_literal_sha256": "5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A",
+    "original_sta_pair_preserved": true,
+    "assoc_events_per_future_invocation": 1,
+    "wrapper_ast_passed": true,
+    "extracted_csharp_compiled": false,
+    "notifications_executed": 0,
+    "registrations": 0,
+    "gui_actions": 0,
+    "attachments": 0,
+    "old_capture_modified": false,
+    "new_stage_driver_pending": true
   }
 }

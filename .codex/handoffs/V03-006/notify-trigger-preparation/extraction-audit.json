@@ -1,0 +1,16 @@
+{
+  "Utc": "2026-09-10T15:24:07.0280463+00:00",
+  "GuardSha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+  "AddTypeCommandCount": 1,
+  "LiteralCount": 1,
+  "LiteralStartLine": 59,
+  "LiteralEndLine": 114,
+  "LiteralSha256": "5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A",
+  "GuardExecuted": false,
+  "GuardDotSourced": false,
+  "CSharpCompiled": false,
+  "NativeNotificationsExecuted": 0,
+  "Registrations": 0,
+  "GuiActions": 0,
+  "DebuggerAttachments": 0
+}

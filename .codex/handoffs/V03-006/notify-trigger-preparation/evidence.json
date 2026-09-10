@@ -1,0 +1,38 @@
+{
+  "RecordedUtc": "2026-09-10T15:31:48.771970+00:00",
+  "Status": "notify_only_wrapper_prepared_not_run",
+  "GuardSourceSha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+  "CSharpLiteralSha256": "5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A",
+  "AstPassed": true,
+  "CSharpCompiled": false,
+  "NotifyCallsExecuted": 0,
+  "Registrations": 0,
+  "GuiActions": 0,
+  "DebuggerAttachments": 0,
+  "Artifacts": [
+    {
+      "File": "invoke-notify.ps1.txt",
+      "Sha256": "8B7C6F3D7701CA637FA9E02D340952B69F9254ED76E191C50B86C24EA216C69D",
+      "OriginalRuntimePath": ".runtime/explorer-notification-trigger-plan/invoke-notify.ps1",
+      "Kind": "preparation_source_or_static_audit_not_execution"
+    },
+    {
+      "File": "run-notify.ps1.txt",
+      "Sha256": "D0FA51C55D9E3A5C4F71609C18B3AC3716F6AE87A120FFC5AF2114483D14F57B",
+      "OriginalRuntimePath": ".runtime/explorer-notification-trigger-plan/run-notify.ps1",
+      "Kind": "preparation_source_or_static_audit_not_execution"
+    },
+    {
+      "File": "guard-csharp-literal.txt",
+      "Sha256": "5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A",
+      "OriginalRuntimePath": ".runtime/explorer-notification-trigger-plan/guard-csharp-literal.txt",
+      "Kind": "preparation_source_or_static_audit_not_execution"
+    },
+    {
+      "File": "extraction-audit.json",
+      "Sha256": "81B0F8FC9FA6CB8E7011F0BA01FF8777DF30B006C3EABED00D8B4077209675AF",
+      "OriginalRuntimePath": ".runtime/explorer-notification-trigger-plan/extraction-audit.json",
+      "Kind": "preparation_source_or_static_audit_not_execution"
+    }
+  ]
+}

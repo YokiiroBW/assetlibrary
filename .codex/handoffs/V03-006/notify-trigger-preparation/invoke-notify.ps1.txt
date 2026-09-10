@@ -1,0 +1,33 @@
+param([Parameter(Mandatory)][string]$RunDirectory,[Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$PlanId)
+$ErrorActionPreference='Stop'
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path
+$guardPath=Join-Path $run 'guard.ps1'
+if((Get-FileHash -LiteralPath $guardPath).Hash -cne '323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76'){throw 'Frozen guard source mismatch'}
+$tokens=$null;$parseErrors=$null
+$guardAst=[System.Management.Automation.Language.Parser]::ParseFile($guardPath,[ref]$tokens,[ref]$parseErrors)
+if($parseErrors.Count){throw 'Guard source syntax invalid'}
+$commands=@($guardAst.FindAll({param($node) $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -ceq 'Add-Type'},$true))
+if($commands.Count -ne 1){throw 'Unexpected guard Add-Type structure'}
+$literals=@($commands[0].CommandElements|Where-Object {$_ -is [System.Management.Automation.Language.StringConstantExpressionAst] -and $_.StringConstantType -eq 'SingleQuotedHereString'})
+if($literals.Count -ne 1){throw 'Expected one literal C# block'}
+$sha=[Security.Cryptography.SHA256]::Create()
+try{$literalHash=[Convert]::ToHexString($sha.ComputeHash([Text.UTF8Encoding]::new($false).GetBytes($literals[0].Value)))}finally{$sha.Dispose()}
+if($literalHash -cne '5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A'){throw 'Frozen C# literal mismatch'}
+# Compile only the verified literal. Never execute or dot-source the guard script.
+# Its registration methods remain uncalled; this sender invokes only NotifyDrives.
+Add-Type -TypeDefinition $literals[0].Value
+$ready=Get-Content -LiteralPath (Join-Path $run 'capture-ready.json') -Raw | ConvertFrom-Json
+$identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw | ConvertFrom-Json
+$registered=Get-Content -LiteralPath (Join-Path $run 'register.json') -Raw | ConvertFrom-Json
+$now=[DateTimeOffset]::UtcNow;$age=($now-[DateTimeOffset]$ready.Utc).TotalSeconds
+$remaining=([DateTimeOffset]$registered.DeadlineUtc-$now).TotalSeconds
+if($ready.PlanId -cne $PlanId -or [string]$ready.Payload.pid -cne [string]$identity.Pid -or
+   [string]$ready.Payload.creationFiletime -cne [string]$identity.CreationFileTime -or
+   $age -lt 0 -or $age -gt 30 -or $remaining -lt 30 -or -not $registered.Notification.Success -or
+   $registered.DllSha256 -cne 'F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96' -or
+   (Test-Path -LiteralPath (Join-Path $run 'stop')) -or (Test-Path -LiteralPath (Join-Path $run 'cleanup.json'))){throw 'Ready identity or live-cycle prerequisite failed'}
+$started=[DateTimeOffset]::UtcNow
+$notification=[OfficialSampleRegistryControl]::NotifyDrives()
+$completed=[DateTimeOffset]::UtcNow
+[ordered]@{PlanId=$PlanId;SenderPid=$PID;TargetPid=$identity.Pid;TargetCreationFileTime=$identity.CreationFileTime;ReadyUtc=$ready.Utc;StartedUtc=$started.ToString('o');CompletedUtc=$completed.ToString('o');RegistrationDeadlineUtc=$registered.DeadlineUtc;RemainingBeforeSeconds=$remaining;RemainingAfterSeconds=([DateTimeOffset]$registered.DeadlineUtc-$completed).TotalSeconds;GuardSourceSha256='323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76';CSharpLiteralSha256=$literalHash;Notification=$notification;RegistryWrites=0;GuardExecuted=$false;CacheRefreshProven=$false} | ConvertTo-Json -Depth 8
+if(-not $notification.Success){exit 1}
