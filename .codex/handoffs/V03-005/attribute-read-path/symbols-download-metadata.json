@@ -1,0 +1,13 @@
+{
+  "sourceUrl": "https://msdl.microsoft.com/download/symbols/Windows.Storage.pdb/FA3BF0701EBD655CD7B3691D3BF1C00A1/Windows.Storage.pdb",
+  "bytes": 26955776,
+  "sha256": "8c111d8c26c1707bde4981bb4d488670b01765b529622d9c838bdc3bda2ffcb7",
+  "elapsedSeconds": 19.781,
+  "codeView": {
+    "pdbGuid": "FA3BF0701EBD655CD7B3691D3BF1C00A",
+    "pdbAge": 1,
+    "pdbName": "Windows.Storage.pdb"
+  },
+  "finalUrlWithoutQuery": "https://vsblobprodscussu5shard82.blob.core.windows.net/b-4712e0edc5a240eabf23330d7df68e77/6A48566CB32D8208EF44AF8956B99BBE407A23C2BF1F9758AAC42EEA4A12108B00.blob",
+  "kind": "derived_download_metadata_redirect_query_omitted"
+}

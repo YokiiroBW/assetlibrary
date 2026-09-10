@@ -1,0 +1,103 @@
+{
+  "sourceSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+  "sourceSize": 8860504,
+  "machine": 34404,
+  "timestamp": 2800646882,
+  "imageBase": 6442450944,
+  "imageSize": 8798208,
+  "sections": [
+    {
+      "name": ".text",
+      "rva": 4096,
+      "virtualSize": 6624332,
+      "rawSize": 6627328,
+      "rawOffset": 4096,
+      "flags": 1610612768
+    },
+    {
+      "name": "fothk",
+      "rva": 6631424,
+      "virtualSize": 4096,
+      "rawSize": 4096,
+      "rawOffset": 6631424,
+      "flags": 1610612768
+    },
+    {
+      "name": ".rdata",
+      "rva": 6635520,
+      "virtualSize": 1639842,
+      "rawSize": 1642496,
+      "rawOffset": 6635520,
+      "flags": 1073741888
+    },
+    {
+      "name": ".data",
+      "rva": 8278016,
+      "virtualSize": 36400,
+      "rawSize": 12288,
+      "rawOffset": 8278016,
+      "flags": 3221225536
+    },
+    {
+      "name": ".pdata",
+      "rva": 8314880,
+      "virtualSize": 331428,
+      "rawSize": 331776,
+      "rawOffset": 8290304,
+      "flags": 1073741888
+    },
+    {
+      "name": ".didat",
+      "rva": 8646656,
+      "virtualSize": 8696,
+      "rawSize": 12288,
+      "rawOffset": 8622080,
+      "flags": 3221225536
+    },
+    {
+      "name": ".rsrc",
+      "rva": 8658944,
+      "virtualSize": 17272,
+      "rawSize": 20480,
+      "rawOffset": 8634368,
+      "flags": 1073741888
+    },
+    {
+      "name": ".reloc",
+      "rva": 8679424,
+      "virtualSize": 118032,
+      "rawSize": 118784,
+      "rawOffset": 8654848,
+      "flags": 1107296320
+    }
+  ],
+  "targetRva": 1149152,
+  "targetPrefix32Sha256": "991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64",
+  "targetRuntimeFunction": {
+    "beginRva": 1149152,
+    "endRva": 1150417,
+    "codeSize": 1265,
+    "unwindRva": 7817612,
+    "unwind": {
+      "version": 1,
+      "flags": 3,
+      "prologSize": 45,
+      "codeCount": 10,
+      "frameByte": 0,
+      "handlerRva": 3545064
+    },
+    "vaBegin": "0x1801188E0",
+    "vaEndExclusive": "0x180118DD1"
+  },
+  "codeView": [
+    {
+      "signature": "RSDS",
+      "guid": "FA3BF070-1EBD-655C-D7B3-691D3BF1C00A",
+      "age": 1,
+      "pdbName": "Windows.Storage.pdb",
+      "symbolKey": "FA3BF0701EBD655CD7B3691D3BF1C00A1"
+    }
+  ],
+  "normalAndDelayImportCount": 1645,
+  "runtimeFunctionCount": 27619
+}

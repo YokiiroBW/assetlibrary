@@ -1,0 +1,52 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file C:\Windows\System32\windows.storage.dll
+
+File Type: DLL
+
+  00000001801E69B0: 48 89 5C 24 20     mov         qword ptr [rsp+20h],rbx
+  00000001801E69B5: 57                 push        rdi
+  00000001801E69B6: 48 81 EC A0 00 00  sub         rsp,0A0h
+                    00
+  00000001801E69BD: 48 8B 05 BC 09 60  mov         rax,qword ptr [00000001807E7380h]
+                    00
+  00000001801E69C4: 48 33 C4           xor         rax,rsp
+  00000001801E69C7: 48 89 84 24 90 00  mov         qword ptr [rsp+0000000000000090h],rax
+                    00 00
+  00000001801E69CF: 49 8B F8           mov         rdi,r8
+  00000001801E69D2: 48 8B D9           mov         rbx,rcx
+  00000001801E69D5: E8 56 2D E8 FF     call        0000000180069730
+  00000001801E69DA: 41 B8 27 00 00 00  mov         r8d,27h
+  00000001801E69E0: 48 8D 54 24 40     lea         rdx,[rsp+40h]
+  00000001801E69E5: 48 8D 4C 24 30     lea         rcx,[rsp+30h]
+  00000001801E69EA: 0F 10 08           movups      xmm1,xmmword ptr [rax]
+  00000001801E69ED: 0F 11 4C 24 30     movups      xmmword ptr [rsp+30h],xmm1
+  00000001801E69F2: 48 FF 15 BF 91 65  call        qword ptr [000000018083FBB8h]
+                    00
+  00000001801E69F9: 0F 1F 44 00 00     nop         dword ptr [rax+rax]
+  00000001801E69FE: 4C 8B 8B 30 01 00  mov         r9,qword ptr [rbx+0000000000000130h]
+                    00
+  00000001801E6A05: 48 8D 44 24 40     lea         rax,[rsp+40h]
+  00000001801E6A0A: 4C 8D 05 BF 79 51  lea         r8,[00000001806FE3D0h]
+                    00
+  00000001801E6A11: 48 89 44 24 20     mov         qword ptr [rsp+20h],rax
+  00000001801E6A16: BA 04 01 00 00     mov         edx,104h
+  00000001801E6A1B: 48 8B CF           mov         rcx,rdi
+  00000001801E6A1E: E8 B1 E6 E8 FF     call        00000001800750D4
+  00000001801E6A23: 48 8B 8C 24 90 00  mov         rcx,qword ptr [rsp+0000000000000090h]
+                    00 00
+  00000001801E6A2B: 48 33 CC           xor         rcx,rsp
+  00000001801E6A2E: E8 1D 75 17 00     call        000000018035DF50
+  00000001801E6A33: 48 8B 9C 24 C8 00  mov         rbx,qword ptr [rsp+00000000000000C8h]
+                    00 00
+  00000001801E6A3B: 48 81 C4 A0 00 00  add         rsp,0A0h
+                    00
+  00000001801E6A42: 5F                 pop         rdi
+  00000001801E6A43: C3                 ret
+  00000001801E6A44: CC                 int         3
+
+  Summary
+
+      652000 .text

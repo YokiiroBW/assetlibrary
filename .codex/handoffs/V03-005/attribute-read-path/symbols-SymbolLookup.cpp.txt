@@ -1,0 +1,62 @@
+#include <windows.h>
+#include <dbghelp.h>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+
+static std::string Json(const char* value) {
+    std::string out="\"";
+    for (const unsigned char c:std::string(value)) {
+        if(c=='\\'||c=='\"')out+='\\';
+        if(c>=32)out+=static_cast<char>(c);
+    }
+    return out+'\"';
+}
+static BOOL CALLBACK DebugMessage(HANDLE,ULONG action,ULONG64 data,ULONG64) {
+    if(action==CBA_DEBUG_INFO)std::printf("{\"symbolDiagnostic\":%s}\n",Json(reinterpret_cast<const char*>(data)).c_str());
+    return FALSE;
+}
+int wmain(int argc,wchar_t** argv) {
+    if(argc<2||argc>33)return 2;
+    // The symbol handler reads this image as data; no target process is opened or attached.
+    HANDLE process=reinterpret_cast<HANDLE>(static_cast<ULONG_PTR>(1));
+    SymSetOptions(SYMOPT_DEFERRED_LOADS|SYMOPT_EXACT_SYMBOLS|
+                  SYMOPT_FAIL_CRITICAL_ERRORS|SYMOPT_NO_PROMPTS|SYMOPT_IGNORE_NT_SYMPATH|SYMOPT_DEBUG);
+    if(!SymInitializeW(process,L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols",FALSE)) {
+        std::printf("{\"stage\":\"initialize\",\"error\":%lu}\n",GetLastError());return 1;
+    }
+    if(!SymRegisterCallback64(process,DebugMessage,0))std::printf("{\"callbackError\":%lu}\n",GetLastError());
+    char libraryPath[MAX_PATH]{};GetModuleFileNameA(GetModuleHandleW(L"dbghelp.dll"),libraryPath,MAX_PATH);
+    std::printf("{\"loadedLibrary\":%s}\n",Json(libraryPath).c_str());
+    HANDLE image=CreateFileW(L"C:\\Windows\\System32\\windows.storage.dll",GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
+    if(image==INVALID_HANDLE_VALUE){SymCleanup(process);return 1;}
+    DWORD64 base=SymLoadModuleExW(process,image,L"C:\\Windows\\System32\\windows.storage.dll",nullptr,0x180000000ull,8798208,nullptr,0);
+    CloseHandle(image);
+    if(!base){std::printf("{\"stage\":\"load_metadata\",\"error\":%lu}\n",GetLastError());SymCleanup(process);return 1;}
+    bool ok=true;
+    for(int i=1;i<argc;++i){
+        wchar_t* end=nullptr;unsigned long long rva=std::wcstoull(argv[i],&end,16);
+        if(!end||*end||end==argv[i]||rva>=8798208){ok=false;break;}
+        alignas(SYMBOL_INFO) unsigned char bytes[sizeof(SYMBOL_INFO)+MAX_SYM_NAME]{};
+        auto* symbol=reinterpret_cast<SYMBOL_INFO*>(bytes);symbol->SizeOfStruct=sizeof(SYMBOL_INFO);symbol->MaxNameLen=MAX_SYM_NAME;
+        DWORD64 displacement=0;
+        if(!SymFromAddr(process,base+rva,&displacement,symbol)){
+            std::printf("{\"rva\":\"%llX\",\"error\":%lu}\n",rva,GetLastError());ok=false;continue;
+        }
+        char signature[4096]{};
+        if(!UnDecorateSymbolName(symbol->Name,signature,sizeof(signature),UNDNAME_COMPLETE))signature[0]=0;
+        std::printf("{\"rva\":\"%llX\",\"symbolRva\":\"%llX\",\"displacement\":%llu,\"name\":%s,\"signature\":%s}\n",rva,symbol->Address-base,displacement,Json(symbol->Name).c_str(),Json(signature).c_str());
+    }
+    IMAGEHLP_MODULE64 info{};info.SizeOfStruct=sizeof(info);
+    if(!SymGetModuleInfo64(process,base,&info)){ok=false;std::printf("{\"stage\":\"module_info\",\"error\":%lu}\n",GetLastError());}
+    else {
+        const auto& g=info.PdbSig70;
+        std::printf("{\"stage\":\"module_info\",\"symbolType\":%u,\"imageSize\":%lu,\"timestamp\":%lu,\"pdbAge\":%lu,\"pdbGuid\":\"%08lX%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X\",\"pdbUnmatched\":%s,\"dbgUnmatched\":%s,\"loadedPdb\":%s}\n",
+            static_cast<unsigned>(info.SymType),info.ImageSize,info.TimeDateStamp,info.PdbAge,g.Data1,g.Data2,g.Data3,
+            g.Data4[0],g.Data4[1],g.Data4[2],g.Data4[3],g.Data4[4],g.Data4[5],g.Data4[6],g.Data4[7],
+            info.PdbUnmatched?"true":"false",info.DbgUnmatched?"true":"false",Json(info.LoadedPdbName).c_str());
+        ok=ok&&info.SymType==SymPdb&&!info.PdbUnmatched&&!info.DbgUnmatched;
+    }
+    if(!SymCleanup(process))ok=false;
+    return ok?0:1;
+}

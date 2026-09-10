@@ -1,0 +1,90 @@
+#define CINTERFACE
+#include "Shared.h"
+#include <Shlobj.h>
+#include <KnownFolders.h>
+#include <cstddef>
+#include <cwchar>
+#include <cstring>
+#include <cstdio>
+#include <initializer_list>
+static_assert(offsetof(IShellFolderVtbl,GetAttributesOf)==9*sizeof(void*));
+static_assert((SFGAO_FOLDER|SFGAO_FILESYSTEM|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED)==RequestedAttributes);
+template<typename T>struct Com{T* value=nullptr;~Com(){if(value)value->lpVtbl->Release(value);}};
+struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}};
+static void Need(bool ok){if(!ok)throw E_FAIL;}
+static void Check(HRESULT hr){if(FAILED(hr))throw hr;}
+static bool OfficialRegistrationAbsent(){
+    constexpr wchar_t key[]=L"Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+    bool absent=true;
+    for(HKEY hive:{HKEY_CURRENT_USER,HKEY_LOCAL_MACHINE})for(REGSAM view:{KEY_WOW64_64KEY,KEY_WOW64_32KEY}) {
+        HKEY opened=nullptr;LSTATUS status=RegOpenKeyExW(hive,key,0,KEY_QUERY_VALUE|view,&opened);
+        if(status==ERROR_SUCCESS){RegCloseKey(opened);absent=false;}
+        else if(status!=ERROR_FILE_NOT_FOUND&&status!=ERROR_PATH_NOT_FOUND)throw HRESULT_FROM_WIN32(status);
+    }
+    return absent;
+}
+static void OfficialChild(PCIDLIST_ABSOLUTE computerPidl,Pidl& child){
+    constexpr wchar_t name[]=L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+    Pidl absolute,parent;
+    Check(SHParseDisplayName(name,nullptr,&absolute.value,0,nullptr));Need(absolute.value!=nullptr);
+    parent.value=ILClone(absolute.value);Need(parent.value&&ILRemoveLastID(parent.value)&&ILIsEqual(parent.value,computerPidl));
+    child.value=ILClone(ILFindLastID(absolute.value));
+    UINT size=child.value?ILGetSize(child.value):0;
+    Need(size>=2&&size<=PidlLimit&&!ILIsEmpty(child.value)&&ILFindLastID(child.value)==child.value);
+}
+static int Preflight(){
+    HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED),result=init;
+    bool absent=false,parsed=false;UINT size=0;
+    if(SUCCEEDED(init)) {
+        try { absent=OfficialRegistrationAbsent();Pidl computer,child;Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computer.value));OfficialChild(computer.value,child);size=ILGetSize(child.value);parsed=true;result=S_OK; }
+        catch(HRESULT hr){result=hr;}catch(...){result=E_FAIL;}
+        CoUninitialize();
+    }
+    printf("{\"kind\":\"official_pidl_preflight\",\"hr\":\"0x%08lX\",\"registrationAbsent\":%s,\"parsed\":%s,\"opaqueSize\":%u,\"debuggerStarted\":false}\n",static_cast<ULONG>(result),absent?"true":"false",parsed?"true":"false",size);fflush(stdout);
+    return SUCCEEDED(result)?0:1;
+}
+static void ExceptionControl(SharedState* state){
+    __try{RaiseException(0xE0424242,0,0,nullptr);}
+    __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+}
+static void Work(SharedState* state,HANDLE start,HANDLE stop){
+    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl,officialPidl;
+    state->registrationAbsentBefore=OfficialRegistrationAbsent()?1:0;
+    Check(SHGetDesktopFolder(&desktop.value));Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value));
+    Check(desktop.value->lpVtbl->BindToObject(desktop.value,computerPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&computer.value)));
+    Com<IPersist> persist;Check(computer.value->lpVtbl->QueryInterface(computer.value,IID_IPersist,reinterpret_cast<void**>(&persist.value)));
+    GUID clsid{};Check(persist.value->lpVtbl->GetClassID(persist.value,&clsid));Need(clsid==ComputerClsid);
+    wchar_t windows[32768]{},root[32768]{};UINT count=GetWindowsDirectoryW(windows,32768);Need(count>0&&count<32768);
+    Need(GetVolumePathNameW(windows,root,32768)&&wcslen(root)==3&&root[1]==L':'&&root[2]==L'\\');
+    ULONG eaten=0,attributes=0;
+    Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,root,&eaten,&rootPidl.value,&attributes));
+    UINT rootSize=ILGetSize(rootPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&!ILIsEmpty(rootPidl.value)&&ILFindLastID(rootPidl.value)==rootPidl.value);
+    OfficialChild(computerPidl.value,officialPidl);UINT officialSize=ILGetSize(officialPidl.value);
+    state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());
+    auto method=computer.value->lpVtbl->GetAttributesOf;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
+    state->expectedPidlLength=officialSize;memcpy(state->expectedPidl,officialPidl.value,officialSize);
+    InterlockedExchange(&state->ready,1);
+    ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+    while(GetTickCount64()<deadline&&WaitForSingleObject(stop,0)==WAIT_TIMEOUT){
+        InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+        if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+            ExceptionControl(state);
+            SFGAOF other=RequestedAttributes;PCUITEMID_CHILD duplicate[]={rootPidl.value,rootPidl.value};
+            state->otherResult=method(computer.value,2,duplicate,&other);state->otherMask=other;
+            SFGAOF matching=RequestedAttributes;PCUITEMID_CHILD single[]={officialPidl.value};
+            state->matchResult=method(computer.value,1,single,&matching);state->matchMask=matching;
+            state->registrationAbsentAfter=OfficialRegistrationAbsent()?1:0;
+            worked=true;InterlockedExchange(&state->callsFinished,1);
+        }
+        if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+    }
+}
+int wmain(int argc,wchar_t** argv){
+    if(argc==2&&wcscmp(argv[1],L"--check-official-pidl")==0)return Preflight();
+    if(argc!=5||wcscmp(argv[1],L"--synthetic-child")!=0)return 2;
+    HANDLE mapping=reinterpret_cast<HANDLE>(_wcstoui64(argv[2],nullptr,16)),start=reinterpret_cast<HANDLE>(_wcstoui64(argv[3],nullptr,16)),stop=reinterpret_cast<HANDLE>(_wcstoui64(argv[4],nullptr,16));
+    auto state=static_cast<SharedState*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedState)));if(!state||state->magic!=SharedMagic)return 3;
+    HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){state->targetError=init;return 4;}
+    bool ok=true;try{Work(state,start,stop);}catch(HRESULT hr){state->targetError=hr;ok=false;}catch(...){state->targetError=E_FAIL;ok=false;}
+    CoUninitialize();UnmapViewOfFile(state);CloseHandle(stop);CloseHandle(start);CloseHandle(mapping);return ok?0:1;
+}

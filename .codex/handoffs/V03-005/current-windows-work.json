@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T11:24:40.729281+00:00",
-  "status": "cold_restart_completed_entry_failure_persists",
+  "updatedAtUtc": "2026-09-10T15:45:46.482371+00:00",
+  "status": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "User-authorized before/after Explorer restarts completed and cleanup verified; entry failure and requested FOLDER absence persist after a new desktop Shell. Next prepare bounded read-only observation of the actual Explorer target CLSID/ShellFolder attribute-reading path. Do not repeat unchanged COM, Bind, PIDL/order or cold-restart controls. Specific root cause remains unknown; this is not proof of a full-system cache reset or a passed Explorer gate.",
+  "active_instruction": "Same registration period: reader HKCU/HKCR values correct before/after, reference normal/cancel cache flags1/A0000020, real four cache snapshots all zero with entry failure. Registry-open cause is unknown. Prepare the reviewed fixed HKCR BA16 ShellFolder RegOpenKeyExW probe, registered positive controls, and ready -> original STA notification pair -> first ThisPC -> one Browse. No new original Explorer restart or system-policy change.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -302,5 +302,52 @@
       "cleanup": "5 breakpoints removed/zero, detach, target alive/no debugger, owned modal/window closed, guard exit0, dual notification,8 roots absent, second restart",
       "limits": "Current-user Explorer restart does not prove all system/shared caches reset. Stop-helper PID/creation was not separately recorded; post-helper ordering relies on completed synchronous tool calls followed by independent desktop snapshots."
     }
+  },
+  "cache_consumption_probe": {
+    "offline_evidence": "attribute-read-path/evidence.json",
+    "registry_plan_commits": [
+      "72e9179",
+      "e2ac218"
+    ],
+    "field_reader_commit": "90e26ad",
+    "field_reader_evidence": "../V03-006/registry-field-readback/evidence.json",
+    "consumer_rva": "0x1194C3",
+    "private_function_rva": "0x119098",
+    "public_function_rva": "0x1188E0",
+    "v1_preparation": "cache-attributes-observer/evidence.json",
+    "v1_reference_result": "failed assertion:2 legitimate nested matched calls each yielded correct cache snapshot/return, but reference condition required exactly1;4 breakpoints removed/detach/reference cooperative exit/registration cleanup verified by owner. Cancel and real Explorer were not run.",
+    "v2_preparation": "cache-attributes-observer-v2/evidence.json",
+    "v2_observer_sha256": "952886d8f483e81345626f5866887c015a81915432bb7fabf5f2293c576792bc",
+    "v2_manifest_sha256": "e8c2896e092bd81dc397c4cb0b28b6b51e483f3c79981601986b51c7d707cc73",
+    "v2_change": "Require one snapshot per matched call, preserving scope/limits/cleanup; new fixed paths.",
+    "v2_runtime_result": {
+      "evidence": "../V03-006/cache-consumption-v2/evidence.json",
+      "worker_commit": "3ec6f1f",
+      "integrated_commit": "29078b5",
+      "artifacts_verified": 59,
+      "raw_sources_verified": 58,
+      "redacted_copies": 7,
+      "reference_modes": "normal/cancel passed; each2 nested calls/unique snapshot+return",
+      "external_fields": "20 before and20 after-real match including REG_DWORD A0000020 in reader HKCU/HKCR",
+      "real_cache_fields": "4 calls each flags/attributes/callFor/restricted=0",
+      "outer_masks": "20000000/40418000/40000000/2044007F ->0/0/0/26; allS_OK",
+      "capture_ms": 59438,
+      "full_sixty_seconds": false,
+      "cleanup": "6 breakpoints removed/zero,detach,target alive/no debugger,owned GUI and8 registry roots clean,20missing,original user windows preserved",
+      "independent_review": "passed; cache data is not registry API evidence"
+    },
+    "limits": "Cache consumption data is not registry status/type/source evidence; only one fixed-version branch is covered.",
+    "v1_reference_evidence": "../V03-006/cache-reference-first/evidence.json",
+    "v1_integrated_commit": "56bca99"
+  },
+  "registry_open_probe": {
+    "runtime": ".runtime/explorer-clsid-key-open-debug",
+    "observer_sha256": "73a3807982d087f7e67e1789d85a02c2f7e588b908bc6faad8c0201dff0ebf81",
+    "manifest_sha256": "268b29e575878d3c711aafa0a4775ac59a710ef064f5a74595213b4d4a9672f4",
+    "api": "KernelBase!RegOpenKeyExW",
+    "rva": "0x2BBF0",
+    "key": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+    "preparation": "Root/independent review and39 pure cases; normal/cancel own-reference missing-key status2/failed PHKEY unread/2BP cleanup/healthy cooperative exit verified; registered positive and real mapping still pending",
+    "notification": "Original STA pair once after ready; wrapper static review passed, capture phase handshake in preparation"
   }
 }

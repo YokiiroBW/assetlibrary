@@ -1,0 +1,85 @@
+{
+  "kind": "offline_symbol_validation",
+  "targetProcessesOpened": 0,
+  "registryWrites": 0,
+  "liveDebuggerAttachments": 0,
+  "symbolSessionHandle": "unique synthetic handle, fInvadeProcess=false",
+  "librarySource": "Visual Studio BuildTools TestPlatform x64 dbghelp.dll10.0.25921.1001, valid Microsoft signature, copied only into task runtime",
+  "librarySourceSha256": "df29a85fb3f06495792180f74cdfbda2aa9d3172b7797b2c478fb4eb4e5371cc",
+  "pdbSha256": "8c111d8c26c1707bde4981bb4d488670b01765b529622d9c838bdc3bda2ffcb7",
+  "pdbCodeViewMatched": true,
+  "exactSymbols": 5,
+  "artifacts": [
+    {
+      "file": "SymbolLookup.cpp",
+      "bytes": 3924,
+      "sha256": "132052d74572353bf187ce424b3acef2fb0b4d19ed7eaa278bc3ce8f4b996e6a"
+    },
+    {
+      "file": "SymbolLookup.exe",
+      "bytes": 155648,
+      "sha256": "43b83ebae6d0561792eb4c3e10d389993e581365d950cdde47bfac021cf7373c"
+    },
+    {
+      "file": "build.ps1",
+      "bytes": 822,
+      "sha256": "c43220e88b8e182bb31b1807b53e66f61b767227bd73456d49d071fe067aa81f"
+    },
+    {
+      "file": "dbghelp.dll",
+      "bytes": 2222016,
+      "sha256": "df29a85fb3f06495792180f74cdfbda2aa9d3172b7797b2c478fb4eb4e5371cc"
+    },
+    {
+      "file": "image-codeview.json",
+      "bytes": 273,
+      "sha256": "35da98d8a36a5fbeca635e558b7b658902533dd56208996cd6eca887d118caf4"
+    },
+    {
+      "file": "download-metadata.json",
+      "bytes": 660,
+      "sha256": "65b4189d9a747015a06918bcfbc73d60b1c41f1f546157c7b7d1707222008780"
+    },
+    {
+      "file": "symbols-signatures.jsonl",
+      "bytes": 2276,
+      "sha256": "63b92050b228c44f1b331052e48e0d0678f90bc241213a3e299996d024b2f570"
+    },
+    {
+      "file": "symbols-main-callees.jsonl",
+      "bytes": 1249,
+      "sha256": "d43bb7aa1e1705cff3ce7bc446702733203a3ba6427b6594269ba94b4c5c0756"
+    },
+    {
+      "file": "symbols-attributes-callees.jsonl",
+      "bytes": 2701,
+      "sha256": "122a064a57f92359c415fc226899c18ba493b2dfb59cf7770144971ea917a422"
+    },
+    {
+      "file": "symbols-initial.jsonl",
+      "bytes": 240,
+      "sha256": "bdb206b12e3d018983fae92485754905a77c249abb59802fc038a0f24166fa48"
+    },
+    {
+      "file": "symbols-local-library.jsonl",
+      "bytes": 240,
+      "sha256": "bdb206b12e3d018983fae92485754905a77c249abb59802fc038a0f24166fa48"
+    },
+    {
+      "file": "symbols-diagnostic.jsonl",
+      "bytes": 358,
+      "sha256": "9126f5b3aad2ac19bbce08866514f54b7fdd525277a6cc85aa8a7e75c90d6d95"
+    },
+    {
+      "file": "symbols-file-handle.jsonl",
+      "bytes": 1149,
+      "sha256": "751ac26f08cb4b74beacc33c6f3a8b06126c1da9b541e3ec6c3de46d67c826bb"
+    }
+  ],
+  "limitations": [
+    "Earlier symbol initialization attempts returned error126 and do not establish names; final file-handle/synthetic-session lookup succeeds.",
+    "Diagnostic symsrv load failure is retained; the matched PDB was downloaded separately over HTTPS and resolved from the task-local symbol directory.",
+    "Function names and signatures from public PDB do not provide private struct layout; field offsets require separate version-pinned instruction evidence.",
+    "PDB and helper binaries remain in runtime, not product dependencies or distribution."
+  ]
+}

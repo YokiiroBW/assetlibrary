@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：Windows最高优先级。用户已授权的前后两次当前用户Explorer重启实际完成：22个原进程及2个后续进程均按持有句柄退出，Windows自动恢复新桌面，两代桌面身份经独立读回保持稳定。冷启动后官方入口仍不出现，唯一打开仍无关联，查询FOLDER仍缺位；普通SDK/此电脑正控通过。具体原因仍未知，本轮不能等同全系统缓存重置。调试断点、窗口和临时登记全部清理，最终桌面无测试模块。下一项是准备受限观察真实Explorer的目标CLSID/ShellFolder属性读取路径，停止重复未改变条件的旧对照。G1..G4仍开放，无Windows安装包。 详见V03-005/current-windows-work.json及V03-006/cold-session-execution.md。
+   当前接续V03-005：Windows最高优先级。同一登记周期内，HKCU及独立reader的HKCR属性在实机前后均为REG_DWORD A0000020；参考normal/cancel各两次嵌套调用均消费flags1/A0000020，真实Explorer四次对应缓存字段全部为0，外层仍返回0/0/0/26并无关联。消费点及配对已经实测，不把缓存0当注册API返回或实际登记值0。59.438秒异常保护后6断点清零、detach、目标健康、窗口及登记清理完整；原用户窗口保留。当前正在准备精确HKCR目标键RegOpenKeyExW返回取证及ready后原STA通知对；没有新重启原Explorer或改变系统策略，具体根因和G1..G4仍未解决。 详见V03-005/current-windows-work.json及V03-006/cache-consumption-v2.md。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

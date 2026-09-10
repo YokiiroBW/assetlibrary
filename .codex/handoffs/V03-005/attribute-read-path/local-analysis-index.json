@@ -1,0 +1,1588 @@
+{
+  "totalDisassembledCodeBytes": 6567,
+  "limitCodeBytes": 16384,
+  "maximumFollowDepth": 2,
+  "functions": [
+    {
+      "beginRva": 1149152,
+      "endRva": 1150417,
+      "codeSize": 1265,
+      "unwindRva": 7817612,
+      "depth": 0,
+      "rawFile": "function-001188e0.raw.txt",
+      "rawSha256": "caca9819a286395c86a6921d2a1da4c43c2eb6bdf46f4355ecc0aaf8ad89d067",
+      "codeSha256": "826e4f9ce0649d7ab3abb95c8461268acb99cd53b214456cb3f43b3921906504",
+      "calls": [
+        {
+          "callRva": 1149254,
+          "callRvaHex": "0x118946",
+          "operand": "qword ptr [00000001806CC568h]",
+          "kind": "indirect_memory",
+          "slotRva": 7128424,
+          "slotRvaHex": "0x6CC568",
+          "importMetadata": {
+            "dll": "api-ms-win-core-heap-l2-1-0.dll",
+            "iatRva": 7128424,
+            "iatVa": "0x1806CC568",
+            "delayImport": false,
+            "hint": 8,
+            "name": "LocalAlloc"
+          }
+        },
+        {
+          "callRva": 1149336,
+          "callRvaHex": "0x118998",
+          "operand": "qword ptr [00000001806CC558h]",
+          "kind": "indirect_memory",
+          "slotRva": 7128408,
+          "slotRvaHex": "0x6CC558",
+          "importMetadata": {
+            "dll": "api-ms-win-core-heap-l2-1-0.dll",
+            "iatRva": 7128408,
+            "iatVa": "0x1806CC558",
+            "delayImport": false,
+            "hint": 10,
+            "name": "LocalFree"
+          }
+        },
+        {
+          "callRva": 1149369,
+          "callRvaHex": "0x1189B9",
+          "operand": "000000018035DF50",
+          "kind": "direct",
+          "targetRva": 3530576,
+          "targetRvaHex": "0x35DF50"
+        },
+        {
+          "callRva": 1149495,
+          "callRvaHex": "0x118A37",
+          "operand": "0000000180119098",
+          "kind": "direct",
+          "targetRva": 1151128,
+          "targetRvaHex": "0x119098"
+        },
+        {
+          "callRva": 1149590,
+          "callRvaHex": "0x118A96",
+          "operand": "0000000180052398",
+          "kind": "direct",
+          "targetRva": 336792,
+          "targetRvaHex": "0x52398"
+        },
+        {
+          "callRva": 1149702,
+          "callRvaHex": "0x118B06",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1149912,
+          "callRvaHex": "0x118BD8",
+          "operand": "00000001801E69B0",
+          "kind": "direct",
+          "targetRva": 1993136,
+          "targetRvaHex": "0x1E69B0"
+        },
+        {
+          "callRva": 1149954,
+          "callRvaHex": "0x118C02",
+          "operand": "qword ptr [00000001806CCA98h]",
+          "kind": "indirect_memory",
+          "slotRva": 7129752,
+          "slotRvaHex": "0x6CCA98",
+          "importMetadata": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 7129752,
+            "iatVa": "0x1806CCA98",
+            "delayImport": false,
+            "hint": 30,
+            "name": "RegOpenKeyExW"
+          }
+        },
+        {
+          "callRva": 1149979,
+          "callRvaHex": "0x118C1B",
+          "operand": "qword ptr [00000001806CCAE0h]",
+          "kind": "indirect_memory",
+          "slotRva": 7129824,
+          "slotRvaHex": "0x6CCAE0",
+          "importMetadata": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 7129824,
+            "iatVa": "0x1806CCAE0",
+            "delayImport": false,
+            "hint": 0,
+            "name": "RegCloseKey"
+          }
+        },
+        {
+          "callRva": 1150190,
+          "callRvaHex": "0x118CEE",
+          "operand": "qword ptr [00000001806CCA98h]",
+          "kind": "indirect_memory",
+          "slotRva": 7129752,
+          "slotRvaHex": "0x6CCA98",
+          "importMetadata": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 7129752,
+            "iatVa": "0x1806CCA98",
+            "delayImport": false,
+            "hint": 30,
+            "name": "RegOpenKeyExW"
+          }
+        },
+        {
+          "callRva": 1150238,
+          "callRvaHex": "0x118D1E",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1150257,
+          "callRvaHex": "0x118D31",
+          "operand": "0000000180069730",
+          "kind": "direct",
+          "targetRva": 431920,
+          "targetRvaHex": "0x69730"
+        }
+      ]
+    },
+    {
+      "beginRva": 1151128,
+      "endRva": 1154890,
+      "codeSize": 3762,
+      "unwindRva": 7817680,
+      "depth": 1,
+      "rawFile": "function-00119098.raw.txt",
+      "rawSha256": "de86c3400fe0f62f7c65d10fc918402e724019d1f67961c4e222e8a38b63fa80",
+      "codeSha256": "982f95725563dc9cc19cf82aee60dd35910758b4941adb871114bbc38966f009",
+      "calls": [
+        {
+          "callRva": 1151595,
+          "callRvaHex": "0x11926B",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1151629,
+          "callRvaHex": "0x11928D",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1151641,
+          "callRvaHex": "0x119299",
+          "operand": "00000001800F3424",
+          "kind": "direct",
+          "targetRva": 996388,
+          "targetRvaHex": "0xF3424"
+        },
+        {
+          "callRva": 1151671,
+          "callRvaHex": "0x1192B7",
+          "operand": "00000001800F3500",
+          "kind": "direct",
+          "targetRva": 996608,
+          "targetRvaHex": "0xF3500"
+        },
+        {
+          "callRva": 1151684,
+          "callRvaHex": "0x1192C4",
+          "operand": "00000001800F3CE8",
+          "kind": "direct",
+          "targetRva": 998632,
+          "targetRvaHex": "0xF3CE8"
+        },
+        {
+          "callRva": 1151743,
+          "callRvaHex": "0x1192FF",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1151777,
+          "callRvaHex": "0x119321",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1151789,
+          "callRvaHex": "0x11932D",
+          "operand": "00000001800F3424",
+          "kind": "direct",
+          "targetRva": 996388,
+          "targetRvaHex": "0xF3424"
+        },
+        {
+          "callRva": 1151819,
+          "callRvaHex": "0x11934B",
+          "operand": "00000001800F3500",
+          "kind": "direct",
+          "targetRva": 996608,
+          "targetRvaHex": "0xF3500"
+        },
+        {
+          "callRva": 1151832,
+          "callRvaHex": "0x119358",
+          "operand": "00000001800F3CE8",
+          "kind": "direct",
+          "targetRva": 998632,
+          "targetRvaHex": "0xF3CE8"
+        },
+        {
+          "callRva": 1151865,
+          "callRvaHex": "0x119379",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1151886,
+          "callRvaHex": "0x11938E",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1151909,
+          "callRvaHex": "0x1193A5",
+          "operand": "qword ptr [00000001806CCE80h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130752,
+          "slotRvaHex": "0x6CCE80",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130752,
+            "iatVa": "0x1806CCE80",
+            "delayImport": false,
+            "hint": 1,
+            "name": "AcquireSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1152022,
+          "callRvaHex": "0x119416",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1152083,
+          "callRvaHex": "0x119453",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1152161,
+          "callRvaHex": "0x1194A1",
+          "operand": "qword ptr [00000001806CCE88h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130760,
+          "slotRvaHex": "0x6CCE88",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130760,
+            "iatVa": "0x1806CCE88",
+            "delayImport": false,
+            "hint": 37,
+            "name": "ReleaseSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1152306,
+          "callRvaHex": "0x119532",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1152384,
+          "callRvaHex": "0x119580",
+          "operand": "qword ptr [00000001806CCE88h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130760,
+          "slotRvaHex": "0x6CCE88",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130760,
+            "iatVa": "0x1806CCE88",
+            "delayImport": false,
+            "hint": 37,
+            "name": "ReleaseSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1152596,
+          "callRvaHex": "0x119654",
+          "operand": "0000000180119F50",
+          "kind": "direct",
+          "targetRva": 1154896,
+          "targetRvaHex": "0x119F50"
+        },
+        {
+          "callRva": 1152641,
+          "callRvaHex": "0x119681",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1152664,
+          "callRvaHex": "0x119698",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1152676,
+          "callRvaHex": "0x1196A4",
+          "operand": "00000001800F3424",
+          "kind": "direct",
+          "targetRva": 996388,
+          "targetRvaHex": "0xF3424"
+        },
+        {
+          "callRva": 1152702,
+          "callRvaHex": "0x1196BE",
+          "operand": "00000001800F3500",
+          "kind": "direct",
+          "targetRva": 996608,
+          "targetRvaHex": "0xF3500"
+        },
+        {
+          "callRva": 1152715,
+          "callRvaHex": "0x1196CB",
+          "operand": "00000001800F3CE8",
+          "kind": "direct",
+          "targetRva": 998632,
+          "targetRvaHex": "0xF3CE8"
+        },
+        {
+          "callRva": 1152738,
+          "callRvaHex": "0x1196E2",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1152759,
+          "callRvaHex": "0x1196F7",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1152782,
+          "callRvaHex": "0x11970E",
+          "operand": "qword ptr [00000001806CCE80h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130752,
+          "slotRvaHex": "0x6CCE80",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130752,
+            "iatVa": "0x1806CCE80",
+            "delayImport": false,
+            "hint": 1,
+            "name": "AcquireSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1152895,
+          "callRvaHex": "0x11977F",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1152956,
+          "callRvaHex": "0x1197BC",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1153034,
+          "callRvaHex": "0x11980A",
+          "operand": "qword ptr [00000001806CCE88h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130760,
+          "slotRvaHex": "0x6CCE88",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130760,
+            "iatVa": "0x1806CCE88",
+            "delayImport": false,
+            "hint": 37,
+            "name": "ReleaseSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1153164,
+          "callRvaHex": "0x11988C",
+          "operand": "000000018035DF50",
+          "kind": "direct",
+          "targetRva": 3530576,
+          "targetRvaHex": "0x35DF50"
+        },
+        {
+          "callRva": 1153203,
+          "callRvaHex": "0x1198B3",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1153224,
+          "callRvaHex": "0x1198C8",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1153247,
+          "callRvaHex": "0x1198DF",
+          "operand": "qword ptr [00000001806CCE80h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130752,
+          "slotRvaHex": "0x6CCE80",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130752,
+            "iatVa": "0x1806CCE80",
+            "delayImport": false,
+            "hint": 1,
+            "name": "AcquireSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1153360,
+          "callRvaHex": "0x119950",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1153416,
+          "callRvaHex": "0x119988",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153453,
+          "callRvaHex": "0x1199AD",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153487,
+          "callRvaHex": "0x1199CF",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153511,
+          "callRvaHex": "0x1199E7",
+          "operand": "qword ptr [000000018083F7E8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648680,
+          "slotRvaHex": "0x83F7E8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648680,
+            "iatVa": "0x18083F7E8",
+            "delayImport": true,
+            "ordinal": 193
+          }
+        },
+        {
+          "callRva": 1153625,
+          "callRvaHex": "0x119A59",
+          "operand": "00000001801181E8",
+          "kind": "direct",
+          "targetRva": 1147368,
+          "targetRvaHex": "0x1181E8"
+        },
+        {
+          "callRva": 1153682,
+          "callRvaHex": "0x119A92",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153719,
+          "callRvaHex": "0x119AB7",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153773,
+          "callRvaHex": "0x119AED",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        },
+        {
+          "callRva": 1153860,
+          "callRvaHex": "0x119B44",
+          "operand": "000000018011CEC0",
+          "kind": "direct",
+          "targetRva": 1167040,
+          "targetRvaHex": "0x11CEC0"
+        },
+        {
+          "callRva": 1153890,
+          "callRvaHex": "0x119B62",
+          "operand": "0000000180115A18",
+          "kind": "direct",
+          "targetRva": 1137176,
+          "targetRvaHex": "0x115A18"
+        },
+        {
+          "callRva": 1153934,
+          "callRvaHex": "0x119B8E",
+          "operand": "0000000180290E00",
+          "kind": "direct",
+          "targetRva": 2690560,
+          "targetRvaHex": "0x290E00"
+        },
+        {
+          "callRva": 1154023,
+          "callRvaHex": "0x119BE7",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154031,
+          "callRvaHex": "0x119BEF",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154046,
+          "callRvaHex": "0x119BFE",
+          "operand": "00000001800F3360",
+          "kind": "direct",
+          "targetRva": 996192,
+          "targetRvaHex": "0xF3360"
+        },
+        {
+          "callRva": 1154062,
+          "callRvaHex": "0x119C0E",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154159,
+          "callRvaHex": "0x119C6F",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154167,
+          "callRvaHex": "0x119C77",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154182,
+          "callRvaHex": "0x119C86",
+          "operand": "00000001800F3360",
+          "kind": "direct",
+          "targetRva": 996192,
+          "targetRvaHex": "0xF3360"
+        },
+        {
+          "callRva": 1154198,
+          "callRvaHex": "0x119C96",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154228,
+          "callRvaHex": "0x119CB4",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154236,
+          "callRvaHex": "0x119CBC",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154251,
+          "callRvaHex": "0x119CCB",
+          "operand": "00000001800F3360",
+          "kind": "direct",
+          "targetRva": 996192,
+          "targetRvaHex": "0xF3360"
+        },
+        {
+          "callRva": 1154267,
+          "callRvaHex": "0x119CDB",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1154290,
+          "callRvaHex": "0x119CF2",
+          "operand": "0000000180069730",
+          "kind": "direct",
+          "targetRva": 431920,
+          "targetRvaHex": "0x69730"
+        },
+        {
+          "callRva": 1154303,
+          "callRvaHex": "0x119CFF",
+          "operand": "0000000180115A18",
+          "kind": "direct",
+          "targetRva": 1137176,
+          "targetRvaHex": "0x115A18"
+        },
+        {
+          "callRva": 1154384,
+          "callRvaHex": "0x119D50",
+          "operand": "00000001801142E8",
+          "kind": "direct",
+          "targetRva": 1131240,
+          "targetRvaHex": "0x1142E8"
+        },
+        {
+          "callRva": 1154429,
+          "callRvaHex": "0x119D7D",
+          "operand": "000000018011B054",
+          "kind": "direct",
+          "targetRva": 1159252,
+          "targetRvaHex": "0x11B054"
+        },
+        {
+          "callRva": 1154462,
+          "callRvaHex": "0x119D9E",
+          "operand": "000000018011B054",
+          "kind": "direct",
+          "targetRva": 1159252,
+          "targetRvaHex": "0x11B054"
+        },
+        {
+          "callRva": 1154496,
+          "callRvaHex": "0x119DC0",
+          "operand": "000000018011A580",
+          "kind": "direct",
+          "targetRva": 1156480,
+          "targetRvaHex": "0x11A580"
+        },
+        {
+          "callRva": 1154511,
+          "callRvaHex": "0x119DCF",
+          "operand": "0000000180289C88",
+          "kind": "direct",
+          "targetRva": 2661512,
+          "targetRvaHex": "0x289C88"
+        },
+        {
+          "callRva": 1154538,
+          "callRvaHex": "0x119DEA",
+          "operand": "0000000180145BD0",
+          "kind": "direct",
+          "targetRva": 1334224,
+          "targetRvaHex": "0x145BD0"
+        },
+        {
+          "callRva": 1154566,
+          "callRvaHex": "0x119E06",
+          "operand": "0000000180290E00",
+          "kind": "direct",
+          "targetRva": 2690560,
+          "targetRvaHex": "0x290E00"
+        },
+        {
+          "callRva": 1154608,
+          "callRvaHex": "0x119E30",
+          "operand": "000000018011A580",
+          "kind": "direct",
+          "targetRva": 1156480,
+          "targetRvaHex": "0x11A580"
+        },
+        {
+          "callRva": 1154623,
+          "callRvaHex": "0x119E3F",
+          "operand": "0000000180289C88",
+          "kind": "direct",
+          "targetRva": 2661512,
+          "targetRvaHex": "0x289C88"
+        },
+        {
+          "callRva": 1154650,
+          "callRvaHex": "0x119E5A",
+          "operand": "0000000180145BD0",
+          "kind": "direct",
+          "targetRva": 1334224,
+          "targetRvaHex": "0x145BD0"
+        },
+        {
+          "callRva": 1154691,
+          "callRvaHex": "0x119E83",
+          "operand": "000000018011A580",
+          "kind": "direct",
+          "targetRva": 1156480,
+          "targetRvaHex": "0x11A580"
+        },
+        {
+          "callRva": 1154706,
+          "callRvaHex": "0x119E92",
+          "operand": "0000000180289C88",
+          "kind": "direct",
+          "targetRva": 2661512,
+          "targetRvaHex": "0x289C88"
+        },
+        {
+          "callRva": 1154733,
+          "callRvaHex": "0x119EAD",
+          "operand": "0000000180145BD0",
+          "kind": "direct",
+          "targetRva": 1334224,
+          "targetRvaHex": "0x145BD0"
+        },
+        {
+          "callRva": 1154780,
+          "callRvaHex": "0x119EDC",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154810,
+          "callRvaHex": "0x119EFA",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154840,
+          "callRvaHex": "0x119F18",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1154880,
+          "callRvaHex": "0x119F40",
+          "operand": "0000000180653010",
+          "kind": "direct",
+          "targetRva": 6631440,
+          "targetRvaHex": "0x653010"
+        }
+      ]
+    },
+    {
+      "beginRva": 1993136,
+      "endRva": 1993285,
+      "codeSize": 149,
+      "unwindRva": 7882596,
+      "depth": 1,
+      "rawFile": "function-001e69b0.raw.txt",
+      "rawSha256": "148f8b4d830ddcd0fa281ed9d57d3f3404b3dceadfead39e1bc99defbfb88f43",
+      "codeSha256": "0b2dc1612c66794d47f53e6263cfd2673adb45aa239ecb4181398f5b54e7a81d",
+      "calls": [
+        {
+          "callRva": 1993173,
+          "callRvaHex": "0x1E69D5",
+          "operand": "0000000180069730",
+          "kind": "direct",
+          "targetRva": 431920,
+          "targetRvaHex": "0x69730"
+        },
+        {
+          "callRva": 1993202,
+          "callRvaHex": "0x1E69F2",
+          "operand": "qword ptr [000000018083FBB8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8649656,
+          "slotRvaHex": "0x83FBB8",
+          "importMetadata": {
+            "dll": "api-ms-win-core-com-l1-1-0.dll",
+            "iatRva": 8649656,
+            "iatVa": "0x18083FBB8",
+            "delayImport": true,
+            "hint": 84,
+            "name": "StringFromGUID2"
+          }
+        },
+        {
+          "callRva": 1993246,
+          "callRvaHex": "0x1E6A1E",
+          "operand": "00000001800750D4",
+          "kind": "direct",
+          "targetRva": 479444,
+          "targetRvaHex": "0x750D4"
+        },
+        {
+          "callRva": 1993262,
+          "callRvaHex": "0x1E6A2E",
+          "operand": "000000018035DF50",
+          "kind": "direct",
+          "targetRva": 3530576,
+          "targetRvaHex": "0x35DF50"
+        }
+      ]
+    },
+    {
+      "beginRva": 1154896,
+      "endRva": 1155601,
+      "codeSize": 705,
+      "unwindRva": 7817644,
+      "depth": 2,
+      "rawFile": "function-00119f50.raw.txt",
+      "rawSha256": "a877876db1fc69e71d29d44e8796f2cc2e581ecb23a71e89954c5081e583661a",
+      "codeSha256": "c48f3e416e96dca0515bd291dcf85589de572ceba3fd890893e17a98a33a35ac",
+      "calls": [
+        {
+          "callRva": 1154968,
+          "callRvaHex": "0x119F98",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1154998,
+          "callRvaHex": "0x119FB6",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1155010,
+          "callRvaHex": "0x119FC2",
+          "operand": "00000001800F3424",
+          "kind": "direct",
+          "targetRva": 996388,
+          "targetRvaHex": "0xF3424"
+        },
+        {
+          "callRva": 1155041,
+          "callRvaHex": "0x119FE1",
+          "operand": "00000001800F3CE8",
+          "kind": "direct",
+          "targetRva": 998632,
+          "targetRvaHex": "0xF3CE8"
+        },
+        {
+          "callRva": 1155064,
+          "callRvaHex": "0x119FF8",
+          "operand": "qword ptr [000000018083F6F8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648440,
+          "slotRvaHex": "0x83F6F8",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648440,
+            "iatVa": "0x18083F6F8",
+            "delayImport": true,
+            "ordinal": 130
+          }
+        },
+        {
+          "callRva": 1155085,
+          "callRvaHex": "0x11A00D",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1155108,
+          "callRvaHex": "0x11A024",
+          "operand": "qword ptr [00000001806CCE80h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130752,
+          "slotRvaHex": "0x6CCE80",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130752,
+            "iatVa": "0x1806CCE80",
+            "delayImport": false,
+            "hint": 1,
+            "name": "AcquireSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1155217,
+          "callRvaHex": "0x11A091",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1155278,
+          "callRvaHex": "0x11A0CE",
+          "operand": "000000018011AA34",
+          "kind": "direct",
+          "targetRva": 1157684,
+          "targetRvaHex": "0x11AA34"
+        },
+        {
+          "callRva": 1155350,
+          "callRvaHex": "0x11A116",
+          "operand": "qword ptr [00000001806CCE88h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130760,
+          "slotRvaHex": "0x6CCE88",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130760,
+            "iatVa": "0x1806CCE88",
+            "delayImport": false,
+            "hint": 37,
+            "name": "ReleaseSRWLockShared"
+          }
+        },
+        {
+          "callRva": 1155376,
+          "callRvaHex": "0x11A130",
+          "operand": "000000018035DF50",
+          "kind": "direct",
+          "targetRva": 3530576,
+          "targetRvaHex": "0x35DF50"
+        },
+        {
+          "callRva": 1155444,
+          "callRvaHex": "0x11A174",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        },
+        {
+          "callRva": 1155452,
+          "callRvaHex": "0x11A17C",
+          "operand": "qword ptr [00000001806CCE70h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130736,
+          "slotRvaHex": "0x6CCE70",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130736,
+            "iatVa": "0x1806CCE70",
+            "delayImport": false,
+            "hint": 0,
+            "name": "AcquireSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1155469,
+          "callRvaHex": "0x11A18D",
+          "operand": "00000001800F3360",
+          "kind": "direct",
+          "targetRva": 996192,
+          "targetRvaHex": "0xF3360"
+        },
+        {
+          "callRva": 1155481,
+          "callRvaHex": "0x11A199",
+          "operand": "qword ptr [00000001806CCE78h]",
+          "kind": "indirect_memory",
+          "slotRva": 7130744,
+          "slotRvaHex": "0x6CCE78",
+          "importMetadata": {
+            "dll": "api-ms-win-core-synch-l1-1-0.dll",
+            "iatRva": 7130744,
+            "iatVa": "0x1806CCE78",
+            "delayImport": false,
+            "hint": 36,
+            "name": "ReleaseSRWLockExclusive"
+          }
+        },
+        {
+          "callRva": 1155517,
+          "callRvaHex": "0x11A1BD",
+          "operand": "000000018011A580",
+          "kind": "direct",
+          "targetRva": 1156480,
+          "targetRvaHex": "0x11A580"
+        },
+        {
+          "callRva": 1155531,
+          "callRvaHex": "0x11A1CB",
+          "operand": "0000000180289C88",
+          "kind": "direct",
+          "targetRva": 2661512,
+          "targetRvaHex": "0x289C88"
+        },
+        {
+          "callRva": 1155554,
+          "callRvaHex": "0x11A1E2",
+          "operand": "0000000180145BD0",
+          "kind": "direct",
+          "targetRva": 1334224,
+          "targetRvaHex": "0x145BD0"
+        },
+        {
+          "callRva": 1155568,
+          "callRvaHex": "0x11A1F0",
+          "operand": "00000001800F3500",
+          "kind": "direct",
+          "targetRva": 996608,
+          "targetRvaHex": "0xF3500"
+        },
+        {
+          "callRva": 1155591,
+          "callRvaHex": "0x11A207",
+          "operand": "000000018011B8F0",
+          "kind": "direct",
+          "targetRva": 1161456,
+          "targetRvaHex": "0x11B8F0"
+        }
+      ]
+    },
+    {
+      "beginRva": 1161456,
+      "endRva": 1162142,
+      "codeSize": 686,
+      "unwindRva": 7818288,
+      "depth": 2,
+      "rawFile": "function-0011b8f0.raw.txt",
+      "rawSha256": "56fc2a816d05322e8a9e3d1baa0ee0473f9b90e2171ce23f08460b8226dbf316",
+      "codeSha256": "15e43b9df82895857505f3d2b6bf1f8b46dd9db50ed4afef113acfcd52be24f3",
+      "calls": [
+        {
+          "callRva": 1161545,
+          "callRvaHex": "0x11B949",
+          "operand": "qword ptr [000000018083F818h]",
+          "kind": "indirect_memory",
+          "slotRva": 8648728,
+          "slotRvaHex": "0x83F818",
+          "importMetadata": {
+            "dll": "SHCORE.dll",
+            "iatRva": 8648728,
+            "iatVa": "0x18083F818",
+            "delayImport": true,
+            "ordinal": 120
+          }
+        },
+        {
+          "callRva": 1161619,
+          "callRvaHex": "0x11B993",
+          "operand": "qword ptr [000000018083FFC8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650696,
+          "slotRvaHex": "0x83FFC8",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-0.dll",
+            "iatRva": 8650696,
+            "iatVa": "0x18083FFC8",
+            "delayImport": true,
+            "hint": 17,
+            "name": "SHQueryValueExW"
+          }
+        },
+        {
+          "callRva": 1161699,
+          "callRvaHex": "0x11B9E3",
+          "operand": "qword ptr [000000018083FFC8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650696,
+          "slotRvaHex": "0x83FFC8",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-0.dll",
+            "iatRva": 8650696,
+            "iatVa": "0x18083FFC8",
+            "delayImport": true,
+            "hint": 17,
+            "name": "SHQueryValueExW"
+          }
+        },
+        {
+          "callRva": 1161789,
+          "callRvaHex": "0x11BA3D",
+          "operand": "qword ptr [000000018083FFC8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650696,
+          "slotRvaHex": "0x83FFC8",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-0.dll",
+            "iatRva": 8650696,
+            "iatVa": "0x18083FFC8",
+            "delayImport": true,
+            "hint": 17,
+            "name": "SHQueryValueExW"
+          }
+        },
+        {
+          "callRva": 1161862,
+          "callRvaHex": "0x11BA86",
+          "operand": "qword ptr [000000018083FFC8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650696,
+          "slotRvaHex": "0x83FFC8",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-0.dll",
+            "iatRva": 8650696,
+            "iatVa": "0x18083FFC8",
+            "delayImport": true,
+            "hint": 17,
+            "name": "SHQueryValueExW"
+          }
+        },
+        {
+          "callRva": 1161923,
+          "callRvaHex": "0x11BAC3",
+          "operand": "qword ptr [000000018083FFC8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650696,
+          "slotRvaHex": "0x83FFC8",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-0.dll",
+            "iatRva": 8650696,
+            "iatVa": "0x18083FFC8",
+            "delayImport": true,
+            "hint": 17,
+            "name": "SHQueryValueExW"
+          }
+        },
+        {
+          "callRva": 1161960,
+          "callRvaHex": "0x11BAE8",
+          "operand": "qword ptr [00000001806CCAE0h]",
+          "kind": "indirect_memory",
+          "slotRva": 7129824,
+          "slotRvaHex": "0x6CCAE0",
+          "importMetadata": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 7129824,
+            "iatVa": "0x1806CCAE0",
+            "delayImport": false,
+            "hint": 0,
+            "name": "RegCloseKey"
+          }
+        },
+        {
+          "callRva": 1161986,
+          "callRvaHex": "0x11BB02",
+          "operand": "qword ptr [000000018083FBB8h]",
+          "kind": "indirect_memory",
+          "slotRva": 8649656,
+          "slotRvaHex": "0x83FBB8",
+          "importMetadata": {
+            "dll": "api-ms-win-core-com-l1-1-0.dll",
+            "iatRva": 8649656,
+            "iatVa": "0x18083FBB8",
+            "delayImport": true,
+            "hint": 84,
+            "name": "StringFromGUID2"
+          }
+        },
+        {
+          "callRva": 1162023,
+          "callRvaHex": "0x11BB27",
+          "operand": "00000001800750D4",
+          "kind": "direct",
+          "targetRva": 479444,
+          "targetRvaHex": "0x750D4"
+        },
+        {
+          "callRva": 1162074,
+          "callRvaHex": "0x11BB5A",
+          "operand": "qword ptr [0000000180840000h]",
+          "kind": "indirect_memory",
+          "slotRva": 8650752,
+          "slotRvaHex": "0x840000",
+          "importMetadata": {
+            "dll": "api-ms-win-shcore-registry-l1-1-1.dll",
+            "iatRva": 8650752,
+            "iatVa": "0x180840000",
+            "delayImport": true,
+            "hint": 23,
+            "name": "SHRegGetValueFromHKCUHKLM"
+          }
+        },
+        {
+          "callRva": 1162089,
+          "callRvaHex": "0x11BB69",
+          "operand": "000000018027E9E0",
+          "kind": "direct",
+          "targetRva": 2615776,
+          "targetRvaHex": "0x27E9E0"
+        },
+        {
+          "callRva": 1162112,
+          "callRvaHex": "0x11BB80",
+          "operand": "000000018035DF50",
+          "kind": "direct",
+          "targetRva": 3530576,
+          "targetRvaHex": "0x35DF50"
+        }
+      ]
+    }
+  ],
+  "referencedStrings": [
+    {
+      "rva": "0x6FC9A8",
+      "value": "ShellFolder"
+    },
+    {
+      "rva": "0x6EF060",
+      "value": "Attributes"
+    },
+    {
+      "rva": "0x72E2A0",
+      "value": "CallForAttributes"
+    },
+    {
+      "rva": "0x72E270",
+      "value": "RestrictedAttributes"
+    },
+    {
+      "rva": "0x6F8370",
+      "value": "FolderValueFlags"
+    },
+    {
+      "rva": "0x72E1E0",
+      "value": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\CLSID\\%s\\ShellFolder"
+    },
+    {
+      "rva": "0x6FE3D0",
+      "value": "%s\\%s"
+    }
+  ],
+  "shellFolderValueFlagTable": [
+    {
+      "index": 0,
+      "flag": "0x00000001",
+      "name": "WantsFORDISPLAY"
+    },
+    {
+      "index": 1,
+      "flag": "0x00000002",
+      "name": "HideFolderVerbs"
+    },
+    {
+      "index": 2,
+      "flag": "0x00000004",
+      "name": "UseDropHandler"
+    },
+    {
+      "index": 3,
+      "flag": "0x00000008",
+      "name": "WantsFORPARSING"
+    },
+    {
+      "index": 4,
+      "flag": "0x00000010",
+      "name": "WantsParseDisplayName"
+    },
+    {
+      "index": 5,
+      "flag": "0x00000020",
+      "name": "QueryForOverlay"
+    },
+    {
+      "index": 6,
+      "flag": "0x00000040",
+      "name": "MapNetDriveVerbs"
+    },
+    {
+      "index": 7,
+      "flag": "0x00000080",
+      "name": "QueryForInfoTip"
+    },
+    {
+      "index": 8,
+      "flag": "0x00000200",
+      "name": "HideOnDesktopPerUser"
+    },
+    {
+      "index": 9,
+      "flag": "0x00000400",
+      "name": "WantsAliasedNotifications"
+    },
+    {
+      "index": 10,
+      "flag": "0x00000800",
+      "name": "WantsUniversalDelegate"
+    },
+    {
+      "index": 11,
+      "flag": "0x00001000",
+      "name": "NoFileFolderJunction"
+    },
+    {
+      "index": 12,
+      "flag": "0x00002000",
+      "name": "PinToNameSpaceTree"
+    },
+    {
+      "index": 13,
+      "flag": "0x00004000",
+      "name": "HasNavigationEnum"
+    },
+    {
+      "index": 14,
+      "flag": "0x00008000",
+      "name": "EnableThumbnails"
+    },
+    {
+      "index": 15,
+      "flag": "0x00010000",
+      "name": "NoDefaultToFS"
+    },
+    {
+      "index": 16,
+      "flag": "0x00020000",
+      "name": "ParseDisplayNameNeedsURL"
+    },
+    {
+      "index": 17,
+      "flag": "0x00040000",
+      "name": "BlockNewFile"
+    },
+    {
+      "index": 18,
+      "flag": "0x00080000",
+      "name": "NoInitRequired"
+    },
+    {
+      "index": 19,
+      "flag": "0x00100000",
+      "name": "SafeRootForMTA"
+    },
+    {
+      "index": 20,
+      "flag": "0x00200000",
+      "name": "WantsSendToTarget"
+    },
+    {
+      "index": 21,
+      "flag": "0x00400000",
+      "name": "NoLocalizedNameInTarget"
+    },
+    {
+      "index": 22,
+      "flag": "0x00800000",
+      "name": "QueryForIconHandler"
+    }
+  ]
+}

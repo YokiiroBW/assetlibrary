@@ -1,0 +1,414 @@
+--- B41/Shared.h
++++ candidate/Shared.h
+@@ -3,15 +3,21 @@
+ #include <objbase.h>
+ #include <cstdint>
+ inline constexpr GUID ComputerClsid{0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
++inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+ inline constexpr DWORD SharedMagic=0x414C4244;
+ inline constexpr ULONG PidlLimit=2048;
+ inline constexpr ULONG AttributesRva=0x1188E0;
++inline constexpr ULONG CacheFunctionRva=0x119098;
++inline constexpr ULONG CacheConsumerRva=0x1194C3;
++inline constexpr ULONG PrivateReturnRva=0x118A3C;
+ inline constexpr ULONG RequestedAttributes=0x68180000;
+ inline constexpr ULONG ExpectedReferenceAttributes=0x60000000;
+ inline constexpr ULONG ExpectedImageSize=8798208;
+ inline constexpr ULONG ExpectedTimestamp=2800646882;
+ inline constexpr char ExpectedFileHash[]="22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b";
+ inline constexpr char ExpectedCodeHash[]="991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64";
++inline constexpr char ExpectedCacheFunctionHash[]="7da157fc48c02cd8b7fdffe306072f75ae567dbd63db481a64fbf17b80c36c40";
++inline constexpr char ExpectedCacheConsumerHash[]="4cf98f2ebd90b4bb2d9a67553a07068ca6fd8870070df4086c745ac32a0c5a8a";
+ struct SharedState {
+     DWORD magic,targetPid;
+     ULONGLONG targetCreation,methodAddress;
+@@ -19,6 +25,7 @@
+     BYTE expectedPidl[PidlLimit];
+     volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult,matchMask,otherMask;
+     volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
++    volatile LONG registrationAbsentBefore,registrationAbsentAfter;
+ };
+ inline ULONGLONG CreationTime(HANDLE process) {
+     FILETIME created{},exited{},kernel{},user{};
+--- B41/Plan.h
++++ candidate/Plan.h
+@@ -7,8 +7,7 @@
+ #include <string_view>
+ #include <vector>
+ 
+-inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug";
+-inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
++inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug";
+ inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ inline constexpr ULONGLONG Second = 10000000;
+ inline ULONGLONG NowFiletime() { FILETIME time{}; GetSystemTimeAsFileTime(&time); return (static_cast<ULONGLONG>(time.dwHighDateTime)<<32)|time.dwLowDateTime; }
+--- B41/Target.cpp
++++ candidate/Target.cpp
+@@ -5,18 +5,51 @@
+ #include <cstddef>
+ #include <cwchar>
+ #include <cstring>
++#include <cstdio>
++#include <initializer_list>
+ static_assert(offsetof(IShellFolderVtbl,GetAttributesOf)==9*sizeof(void*));
+ static_assert((SFGAO_FOLDER|SFGAO_FILESYSTEM|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED)==RequestedAttributes);
+ template<typename T>struct Com{T* value=nullptr;~Com(){if(value)value->lpVtbl->Release(value);}};
+ struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}};
+ static void Need(bool ok){if(!ok)throw E_FAIL;}
+ static void Check(HRESULT hr){if(FAILED(hr))throw hr;}
++static bool OfficialRegistrationAbsent(){
++    constexpr wchar_t key[]=L"Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
++    bool absent=true;
++    for(HKEY hive:{HKEY_CURRENT_USER,HKEY_LOCAL_MACHINE})for(REGSAM view:{KEY_WOW64_64KEY,KEY_WOW64_32KEY}) {
++        HKEY opened=nullptr;LSTATUS status=RegOpenKeyExW(hive,key,0,KEY_QUERY_VALUE|view,&opened);
++        if(status==ERROR_SUCCESS){RegCloseKey(opened);absent=false;}
++        else if(status!=ERROR_FILE_NOT_FOUND&&status!=ERROR_PATH_NOT_FOUND)throw HRESULT_FROM_WIN32(status);
++    }
++    return absent;
++}
++static void OfficialChild(PCIDLIST_ABSOLUTE computerPidl,Pidl& child){
++    constexpr wchar_t name[]=L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
++    Pidl absolute,parent;
++    Check(SHParseDisplayName(name,nullptr,&absolute.value,0,nullptr));Need(absolute.value!=nullptr);
++    parent.value=ILClone(absolute.value);Need(parent.value&&ILRemoveLastID(parent.value)&&ILIsEqual(parent.value,computerPidl));
++    child.value=ILClone(ILFindLastID(absolute.value));
++    UINT size=child.value?ILGetSize(child.value):0;
++    Need(size>=2&&size<=PidlLimit&&!ILIsEmpty(child.value)&&ILFindLastID(child.value)==child.value);
++}
++static int Preflight(){
++    HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED),result=init;
++    bool absent=false,parsed=false;UINT size=0;
++    if(SUCCEEDED(init)) {
++        try { absent=OfficialRegistrationAbsent();Pidl computer,child;Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computer.value));OfficialChild(computer.value,child);size=ILGetSize(child.value);parsed=true;result=S_OK; }
++        catch(HRESULT hr){result=hr;}catch(...){result=E_FAIL;}
++        CoUninitialize();
++    }
++    printf("{\"kind\":\"official_pidl_preflight\",\"hr\":\"0x%08lX\",\"registrationAbsent\":%s,\"parsed\":%s,\"opaqueSize\":%u,\"debuggerStarted\":false}\n",static_cast<ULONG>(result),absent?"true":"false",parsed?"true":"false",size);fflush(stdout);
++    return SUCCEEDED(result)?0:1;
++}
+ static void ExceptionControl(SharedState* state){
+     __try{RaiseException(0xE0424242,0,0,nullptr);}
+     __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+ }
+ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+-    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl;
++    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl,officialPidl;
++    state->registrationAbsentBefore=OfficialRegistrationAbsent()?1:0;
+     Check(SHGetDesktopFolder(&desktop.value));Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value));
+     Check(desktop.value->lpVtbl->BindToObject(desktop.value,computerPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&computer.value)));
+     Com<IPersist> persist;Check(computer.value->lpVtbl->QueryInterface(computer.value,IID_IPersist,reinterpret_cast<void**>(&persist.value)));
+@@ -26,9 +59,10 @@
+     ULONG eaten=0,attributes=0;
+     Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,root,&eaten,&rootPidl.value,&attributes));
+     UINT rootSize=ILGetSize(rootPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&!ILIsEmpty(rootPidl.value)&&ILFindLastID(rootPidl.value)==rootPidl.value);
++    OfficialChild(computerPidl.value,officialPidl);UINT officialSize=ILGetSize(officialPidl.value);
+     state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());
+     auto method=computer.value->lpVtbl->GetAttributesOf;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
+-    state->expectedPidlLength=rootSize;memcpy(state->expectedPidl,rootPidl.value,rootSize);
++    state->expectedPidlLength=officialSize;memcpy(state->expectedPidl,officialPidl.value,officialSize);
+     InterlockedExchange(&state->ready,1);
+     ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+     while(GetTickCount64()<deadline&&WaitForSingleObject(stop,0)==WAIT_TIMEOUT){
+@@ -37,14 +71,16 @@
+             ExceptionControl(state);
+             SFGAOF other=RequestedAttributes;PCUITEMID_CHILD duplicate[]={rootPidl.value,rootPidl.value};
+             state->otherResult=method(computer.value,2,duplicate,&other);state->otherMask=other;
+-            SFGAOF matching=RequestedAttributes;PCUITEMID_CHILD single[]={rootPidl.value};
++            SFGAOF matching=RequestedAttributes;PCUITEMID_CHILD single[]={officialPidl.value};
+             state->matchResult=method(computer.value,1,single,&matching);state->matchMask=matching;
++            state->registrationAbsentAfter=OfficialRegistrationAbsent()?1:0;
+             worked=true;InterlockedExchange(&state->callsFinished,1);
+         }
+         if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+     }
+ }
+ int wmain(int argc,wchar_t** argv){
++    if(argc==2&&wcscmp(argv[1],L"--check-official-pidl")==0)return Preflight();
+     if(argc!=5||wcscmp(argv[1],L"--synthetic-child")!=0)return 2;
+     HANDLE mapping=reinterpret_cast<HANDLE>(_wcstoui64(argv[2],nullptr,16)),start=reinterpret_cast<HANDLE>(_wcstoui64(argv[3],nullptr,16)),stop=reinterpret_cast<HANDLE>(_wcstoui64(argv[4],nullptr,16));
+     auto state=static_cast<SharedState*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedState)));if(!state||state->magic!=SharedMagic)return 3;
+--- B41/Observer.cpp
++++ candidate/Observer.cpp
+@@ -1,6 +1,7 @@
+ #include "Shared.h"
+ #include "Plan.h"
+ #include "Fingerprint.h"
++#include "CacheScope.h"
+ #include <Shlobj.h>
+ #include <KnownFolders.h>
+ #include <dbgeng.h>
+@@ -99,7 +100,7 @@
+         std::wstring targetPath(executable, length);
+         auto slash = targetPath.find_last_of(L'\\');
+         Need(slash != std::wstring::npos, "observer_directory");
+-        targetPath.resize(slash + 1); targetPath += L"AttributesReferenceTarget.exe";
++        targetPath.resize(slash + 1); targetPath += L"CacheAttributesReferenceTarget.exe";
+         Need((GetFileAttributesW(targetPath.c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) == 0, "synthetic_image_not_reparse");
+         imageLock.value = CreateFileW(targetPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+         Need(imageLock.value != INVALID_HANDLE_VALUE, "synthetic_image_lock");
+@@ -200,13 +201,13 @@
+     }
+     ULONG STDMETHODCALLTYPE AddRef() override { return InterlockedIncrement(&refs); }
+     ULONG STDMETHODCALLTYPE Release() override { ULONG count = InterlockedDecrement(&refs); if (!count) delete this; return count; }
+-    HRESULT STDMETHODCALLTYPE GetInterestMask(PULONG mask) override { *mask = DEBUG_EVENT_BREAKPOINT | DEBUG_EVENT_EXCEPTION | DEBUG_EVENT_CREATE_PROCESS | DEBUG_EVENT_EXIT_PROCESS | DEBUG_EVENT_LOAD_MODULE; return S_OK; }
++    HRESULT STDMETHODCALLTYPE GetInterestMask(PULONG mask) override { *mask = DEBUG_EVENT_BREAKPOINT | DEBUG_EVENT_EXCEPTION | DEBUG_EVENT_CREATE_PROCESS | DEBUG_EVENT_EXIT_PROCESS | DEBUG_EVENT_LOAD_MODULE | DEBUG_EVENT_EXIT_THREAD; return S_OK; }
+     HRESULT STDMETHODCALLTYPE Breakpoint(PDEBUG_BREAKPOINT bp) override;
+     HRESULT STDMETHODCALLTYPE Exception(PEXCEPTION_RECORD64 record, ULONG first) override;
+     HRESULT STDMETHODCALLTYPE CreateProcess(ULONG64,ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG,ULONG64,ULONG64,ULONG64) override;
+     HRESULT STDMETHODCALLTYPE ExitProcess(ULONG) override;
+     HRESULT STDMETHODCALLTYPE CreateThread(ULONG64,ULONG64,ULONG64) override { return DEBUG_STATUS_NO_CHANGE; }
+-    HRESULT STDMETHODCALLTYPE ExitThread(ULONG) override { return DEBUG_STATUS_NO_CHANGE; }
++    HRESULT STDMETHODCALLTYPE ExitThread(ULONG) override;
+     HRESULT STDMETHODCALLTYPE LoadModule(ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG) override;
+     HRESULT STDMETHODCALLTYPE UnloadModule(PCSTR,ULONG64) override { return DEBUG_STATUS_NO_CHANGE; }
+     HRESULT STDMETHODCALLTYPE SystemError(ULONG,ULONG) override { return DEBUG_STATUS_NO_CHANGE; }
+@@ -227,13 +228,14 @@
+     ComPtr<IDebugSystemObjects> system;
+     FixedModuleFile fixedModule;
+     Events* events = nullptr;
+-    std::array<PDEBUG_BREAKPOINT,1> entries{};
++    std::array<PDEBUG_BREAKPOINT,2> entries{};
+     struct ReturnSite { ULONG64 address; ULONG thread; PDEBUG_BREAKPOINT bp; };
+-    struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,maskAddress; };
++    struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,maskAddress; ULONG inputMask; bool cacheEligible; };
+     std::vector<ReturnSite> returnSites;
+     std::vector<PendingCall> pending;
+     bool attachRequested = false, createdEvent = false, storageSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+-    ULONG64 candidateAddress=0;
++    ULONG64 candidateAddress=0,moduleBase=0;
++    ULONG consumerHits=0,cacheSnapshots=0,cacheScopesInvalidated=0;
+     ULONG observedOutputMask=0;bool outputMaskValid=false;
+     ULONG multiItemDiscarded=0;
+     ULONG exceptionCount=0;
+@@ -241,7 +243,7 @@
+     std::atomic<bool> cancelled{false};
+     std::atomic<HRESULT> interruptResult{E_PENDING};
+     bool interruptObserved = false, callbackFailed = false, unexpectedExit = false;
+-    ULONG regRsp = 0, regRax = 0, regRdx = 0, regR8 = 0, regR9 = 0;
++    ULONG regRsp = 0, regRax = 0, regRdx = 0, regR8 = 0, regR9 = 0,regRbp=0,regR14=0;
+     ULONG entryCount = 0, unmatched = 0, matched = 0, returns = 0, waitTimeouts = 0;
+     HRESULT observed = E_PENDING;
+     explicit Capture(OwnedTarget& t, bool c) : target(t), cancelMode(c) {}
+@@ -268,6 +270,12 @@
+         Checked(memory->ReadVirtual(address, &value, sizeof(value), &bytes), "bounded_memory_read");
+         Need(bytes == sizeof(value), "bounded_memory_length");
+         return value;
++    }
++    void InvalidateCurrentThreadCacheScope() noexcept {
++        ULONG thread=0;HRESULT hr=system?system->GetCurrentThreadId(&thread):E_FAIL;
++        if(FAILED(hr)) { for(auto& call:pending)call.cacheEligible=false;callbackFailed=true;Record("cache_scope_thread_query_failed",hr);return; }
++        for(auto& call:pending)if(InvalidateCacheScope(call.cacheEligible,call.thread,thread))cacheScopesInvalidated++;
++        // Pending returns and their breakpoints remain owned until normal cleanup.
+     }
+     void Start() {
+         fixedModule.Verify();Record("fixed_system_file_hash_verified_before_attach");
+@@ -319,11 +327,16 @@
+         Checked(registers->GetIndexByName("rdx", &regRdx), "rdx_index");
+         Checked(registers->GetIndexByName("r8", &regR8), "r8_index");
+         Checked(registers->GetIndexByName("r9", &regR9), "r9_index");
++        Checked(registers->GetIndexByName("rbp", &regRbp), "rbp_index");
++        Checked(registers->GetIndexByName("r14", &regR14), "r14_index");
+         Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"attributes_entry_breakpoint_add");
+         Checked(entries[0]->SetOffset(candidateAddress),"attributes_entry_breakpoint_offset");
+         Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"attributes_entry_breakpoint_enable");
++        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,2,&entries[1]),"cache_consumer_breakpoint_add");
++        Checked(entries[1]->SetOffset(moduleBase+CacheConsumerRva),"cache_consumer_breakpoint_offset");
++        Checked(entries[1]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"cache_consumer_breakpoint_enable");
+         armed=true;
+-        Record("single_attributes_breakpoint_installed");
++        Record("attributes_and_single_cache_consumer_breakpoints_installed");
+     }
+     void VerifyModule(ULONG64 base,const char* image) {
+         ValidatePid();Need(fixedModule.MatchesImage(image),"target_fixed_system_image_path");
+@@ -333,15 +346,16 @@
+         Need(nt.FileHeader.NumberOfSections>0&&nt.FileHeader.NumberOfSections<=96&&nt.FileHeader.SizeOfOptionalHeader>=sizeof(IMAGE_OPTIONAL_HEADER64),"target_bounded_sections");
+         ULONG64 sections=base+dos.e_lfanew+offsetof(IMAGE_NT_HEADERS64,OptionalHeader)+nt.FileHeader.SizeOfOptionalHeader;
+         Need(sections-base+nt.FileHeader.NumberOfSections*sizeof(IMAGE_SECTION_HEADER)<=nt.OptionalHeader.SizeOfHeaders,"target_sections_within_headers");
+-        bool code=false;
++        const std::array<ULONG,3> rvas{AttributesRva,CacheFunctionRva,CacheConsumerRva};
++        const std::array<const char*,3> hashes{ExpectedCodeHash,ExpectedCacheFunctionHash,ExpectedCacheConsumerHash};
++        std::array<bool,3> code{};
+         for(WORD i=0;i<nt.FileHeader.NumberOfSections;i++) {
+             auto section=Read<IMAGE_SECTION_HEADER>(sections+i*sizeof(IMAGE_SECTION_HEADER));
+             ULONG64 end=static_cast<ULONG64>(section.VirtualAddress)+section.Misc.VirtualSize;
+-            if(AttributesRva>=section.VirtualAddress&&static_cast<ULONG64>(AttributesRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
+-        }
+-        Need(code,"target_candidate_inside_code_range");
+-        auto bytes=Read<std::array<BYTE,32>>(base+AttributesRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
+-        candidateAddress=base+AttributesRva;
++            for(size_t j=0;j<rvas.size();j++)if(rvas[j]>=section.VirtualAddress&&static_cast<ULONG64>(rvas[j])+32<=end)code[j]=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
++        }
++        for(size_t j=0;j<rvas.size();j++) { Need(code[j],"target_candidate_inside_code_range");auto bytes=Read<std::array<BYTE,32>>(base+rvas[j]);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==hashes[j],"target_candidate_prefix_hash"); }
++        moduleBase=base;candidateAddress=base+AttributesRva;
+         if(target.Synthetic())Need(candidateAddress==target.state->methodAddress,"remote_candidate_matches_reference_vtable");
+         Record("target_candidate_identity_verified");
+     }
+@@ -361,13 +375,35 @@
+         Need(copied==length,"complete_pidl_length");
+         return memcmp(bytes.data(),target.expectedPidl.data(),length)==0;
+     }
+-    bool AllSyntheticReturns() const { return returns>0&&pending.empty()&&observed==S_OK&&outputMaskValid&&observedOutputMask==ExpectedReferenceAttributes; }
++    bool AllSyntheticReturns() const { return returns>0&&pending.empty()&&observed==S_OK&&outputMaskValid&&cacheSnapshots==1; }
+     HRESULT OnBreakpoint(PDEBUG_BREAKPOINT bp) {
+         ValidatePid();
+         ULONG id = 0; Checked(bp->GetId(&id), "breakpoint_id");
+-        if (id==1) {
++        if (id==1||id==2) {
+             entryCount++;
+             Need(entryCount <= 4096, "bounded_entry_count");
++        }
++        if(id==2) {
++            consumerHits++;
++            ULONG thread=0;Checked(system->GetCurrentThreadId(&thread),"cache_consumer_thread");
++            bool active=false;for(const auto& call:pending)if(call.cacheEligible&&call.thread==thread)active=true;
++            if(!active)return DEBUG_STATUS_GO;
++            ULONG64 rsp=Reg(regRsp),rbp=Reg(regRbp);ULONG mask=static_cast<ULONG>(Reg(regR14));
++            for(size_t i=pending.size();i>0;i--) {
++                auto& call=pending[i-1];
++                if(!CacheFrameMatches(call.cacheEligible,call.thread,thread,call.expectedRsp,rsp,rbp,call.inputMask,mask))continue;
++                ULONG64 privateReturn=Read<ULONG64>(rsp+0x128);
++                if(privateReturn!=moduleBase+PrivateReturnRva)return DEBUG_STATUS_GO;
++                GUID clsid=Read<GUID>(rbp-0x79);
++                if(!CacheIdentityMatches(privateReturn,moduleBase,clsid))return DEBUG_STATUS_GO;
++                auto values=Read<std::array<ULONG,4>>(rbp-0x69);
++                call.cacheEligible=false;cacheSnapshots++;
++                printf("{\"kind\":\"matching_cache_attributes\",\"outerCallId\":%lu,\"requestMask\":\"0x%08lX\",\"flags\":\"0x%08lX\",\"attributes\":\"0x%08lX\",\"callForAttributes\":\"0x%08lX\",\"restrictedAttributes\":\"0x%08lX\",\"tick\":%llu}\n",call.callId,call.inputMask,values[0],values[1],values[2],values[3],GetTickCount64());fflush(stdout);
++                break;
++            }
++            return DEBUG_STATUS_GO;
++        }
++        if (id==1) {
+             ULONG cidl=static_cast<ULONG>(Reg(regRdx));
+             if(cidl!=1){unmatched++;if(cidl==2)multiItemDiscarded++;return DEBUG_STATUS_GO;}
+             ULONG64 array=Reg(regR8);
+@@ -388,7 +424,7 @@
+                 Checked(created.bp->AddFlags(DEBUG_BREAKPOINT_ENABLED),"return_breakpoint_enable");
+             }
+             ULONG64 rsp=Reg(regRsp),maskAddress=Reg(regR9);Need(maskAddress!=0,"matched_attribute_mask_pointer_required");
+-            ULONG inputMask=Read<ULONG>(maskAddress);pending.push_back({site,threadId,matched,rsp+8,maskAddress});
++            ULONG inputMask=Read<ULONG>(maskAddress);pending.push_back({site,threadId,matched,rsp+8,maskAddress,inputMask,true});
+             printf("{\"kind\":\"matching_attributes_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"inputMask\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,inputMask,GetTickCount64());fflush(stdout);
+             return DEBUG_STATUS_GO;
+         }
+@@ -446,6 +482,7 @@
+         }
+         SetEvent(timerDone.value); if (timer.joinable()) timer.join();
+         if (cancelled) { Checked(interruptResult, "cancel_exit_interrupt"); Record("cancel_requested"); }
++        printf("{\"kind\":\"cache_scope_summary\",\"totalBudgetHits\":%lu,\"cachePointHits\":%lu,\"cacheSnapshots\":%lu,\"invalidatedScopes\":%lu,\"tick\":%llu}\n",entryCount,consumerHits,cacheSnapshots,cacheScopesInvalidated,GetTickCount64());fflush(stdout);
+     }
+     bool Cleanup() noexcept {
+         cleanupDone = true;
+@@ -497,6 +534,7 @@
+     catch (...) { capture.callbackFailed = true; capture.atEventBreak = true; return DEBUG_STATUS_BREAK; }
+ }
+ HRESULT Events::Exception(PEXCEPTION_RECORD64 record, ULONG firstChance) {
++    capture.InvalidateCurrentThreadCacheScope();
+     if (record->ExceptionCode == EXCEPTION_BREAKPOINT && firstChance) {
+         if(capture.interruptArmed) { capture.interruptArmed=false; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
+     }
+@@ -523,6 +561,7 @@
+     catch (...) { capture.callbackFailed = true; capture.atEventBreak = true; return DEBUG_STATUS_BREAK; }
+ }
+ HRESULT Events::ExitProcess(ULONG) { capture.unexpectedExit = true; return DEBUG_STATUS_BREAK; }
++HRESULT Events::ExitThread(ULONG) { capture.InvalidateCurrentThreadCacheScope();return DEBUG_STATUS_NO_CHANGE; }
+ HRESULT Events::LoadModule(ULONG64,ULONG64 base,ULONG,PCSTR module,PCSTR image,ULONG,ULONG) {
+     if(!capture.armed&&module&&(_stricmp(module,"windows.storage")==0||_stricmp(module,"windows.storage.dll")==0||_stricmp(module,"windows_storage")==0||_stricmp(module,"windows_storage.dll")==0)) {
+         try { capture.VerifyModule(base,image);capture.storageSeen=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK; }
+@@ -561,6 +600,36 @@
+         PlanNeed(cancellation.value!=nullptr&&GetLastError()!=ERROR_ALREADY_EXISTS);
+     }
+ };
++static void CacheChecks() {
++    constexpr ULONG64 rsp=0x10000,rbp=rsp+0xC9,expected=rsp+0x410,base=0x180000000;
++    constexpr ULONG input=RequestedAttributes,thread=7;
++    ULONG passed=0;
++    auto test=[&](bool ok){Need(ok,"pure_cache_scope_control");passed++;};
++    test(CacheFrameMatches(true,thread,thread,expected,rsp,rbp,input,input));
++    test(!CacheFrameMatches(false,thread,thread,expected,rsp,rbp,input,input));
++    test(!CacheFrameMatches(true,thread,thread+1,expected,rsp,rbp,input,input));
++    test(!CacheFrameMatches(true,thread,thread,expected+1,rsp,rbp,input,input));
++    test(!CacheFrameMatches(true,thread,thread,expected,rsp+1,rbp,input,input));
++    test(!CacheFrameMatches(true,thread,thread,expected,rsp,rbp+1,input,input));
++    test(!CacheFrameMatches(true,thread,thread,expected,rsp,rbp,input,input^SFGAO_FOLDER));
++    test(!CacheFrameMatches(true,thread,thread,0,~ULONG64{0}-0x100,0,input,input));
++    test(CacheFrameMatches(true,thread,thread,expected,rsp,rbp,0,0));
++    test(CacheIdentityMatches(base+PrivateReturnRva,base,OfficialClsid));
++    test(!CacheIdentityMatches(base+PrivateReturnRva+1,base,OfficialClsid));
++    test(!CacheIdentityMatches(base+PrivateReturnRva,base,ComputerClsid));
++    test(!CacheIdentityMatches(0,~ULONG64{0}-1,OfficialClsid));
++    GUID changed=OfficialClsid;changed.Data4[7]^=1;
++    test(!CacheIdentityMatches(base+PrivateReturnRva,base,changed));
++    bool eligible=true;
++    test(!InvalidateCacheScope(eligible,thread,thread+1)&&eligible);
++    test(InvalidateCacheScope(eligible,thread,thread)&&!eligible);
++    test(!InvalidateCacheScope(eligible,thread,thread)&&!eligible);
++    test(!CacheFrameMatches(eligible,thread,thread,expected,rsp,rbp,input,input));
++    // A later output overwrite must not replace the saved entry request.
++    ULONG outputMask=input;const ULONG savedInput=outputMask;outputMask=0;
++    test(outputMask==0&&CacheFrameMatches(true,thread,thread,expected,rsp,rbp,savedInput,input));
++    printf("{\"kind\":\"offline_cache_scope_controls\",\"passed\":%lu,\"processOpened\":false,\"memoryRead\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
++}
+ static int PlanChecks() {
+     const std::string id="0123456789abcdef0123456789abcdef";
+     ULONGLONG now=NowFiletime();
+@@ -578,7 +647,7 @@
+     return 0;
+ }
+ int wmain(int argc, wchar_t** argv) {
+-    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { return PlanChecks(); } catch(...) { Record("plan_controls_failed",E_FAIL); return 1; } }
++    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { CacheChecks();return PlanChecks(); } catch(...) { Record("offline_controls_failed",E_FAIL); return 1; } }
+     bool real=argc==3&&wcscmp(argv[1],L"--run-plan")==0;
+     bool cancel = argc==2&&wcscmp(argv[1],L"--cancel")==0;
+     bool normal = argc==2&&wcscmp(argv[1],L"--normal")==0;
+@@ -614,7 +683,8 @@
+         passed = passed && cleaned && detachedAlive && !capture.callbackFailed && !capture.unexpectedExit;
+         if(target.Synthetic()) {
+             passed=passed&&target.state->debuggerObserved&&!target.state->targetError&&target.state->ownExceptionHandled;
+-            passed=passed&&target.state->matchResult==S_OK&&target.state->otherResult==S_OK&&static_cast<ULONG>(target.state->matchMask)==ExpectedReferenceAttributes&&static_cast<ULONG>(target.state->otherMask)==ExpectedReferenceAttributes;
++            passed=passed&&target.state->matchResult==capture.observed&&target.state->otherResult==S_OK&&static_cast<ULONG>(target.state->matchMask)==capture.observedOutputMask&&static_cast<ULONG>(target.state->otherMask)==ExpectedReferenceAttributes;
++            printf("{\"kind\":\"synthetic_registration_observation\",\"absentBefore\":%s,\"absentAfter\":%s,\"registryChangedByTool\":false,\"tick\":%llu}\n",target.state->registrationAbsentBefore?"true":"false",target.state->registrationAbsentAfter?"true":"false",GetTickCount64());fflush(stdout);
+         }
+     } catch (...) { Record(real?"planned_setup_failed":"synthetic_setup_failed", E_FAIL); }
+     stopped = target.StopNormally();
+--- B41/build.ps1
++++ candidate/build.ps1
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference = 'Stop'
+-$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-attributes-debug'
++$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-cache-attributes-debug'
+ if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+ $toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk = 'C:\Program Files (x86)\Windows Kits\10'
+@@ -13,8 +13,8 @@
+ $libraries = @('/link',"/LIBPATH:$toolset\lib\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64",'kernel32.lib','ole32.lib','uuid.lib','user32.lib','advapi32.lib','dwmapi.lib','shell32.lib','bcrypt.lib')
+ Push-Location $taskRoot
+ try {
+-  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\AttributesReferenceTarget.exe" @libraries
++  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\CacheAttributesReferenceTarget.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Synthetic target compilation failed.' }
+-  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\AttributesObserver.exe" @libraries
++  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\CacheAttributesObserver.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Observer compilation failed.' }
+ } finally { Pop-Location }
+--- B41/CacheScope.h
++++ candidate/CacheScope.h
+@@ -0,0 +1,19 @@
++#pragma once
++#include "Shared.h"
++#include <limits>
++
++// Private fixed-build offsets, established by the locked local disassembly.
++// These predicates do not read memory or constitute a public Shell contract.
++inline bool CacheFrameMatches(bool eligible,ULONG ownerThread,ULONG eventThread,
++    ULONG64 expectedRsp,ULONG64 rsp,ULONG64 rbp,ULONG inputMask,ULONG currentMask) {
++    return eligible&&ownerThread==eventThread&&rsp<=std::numeric_limits<ULONG64>::max()-0x410&&
++        rbp==rsp+0xC9&&expectedRsp==rsp+0x410&&inputMask==currentMask;
++}
++inline bool CacheIdentityMatches(ULONG64 returnAddress,ULONG64 moduleBase,const GUID& clsid) {
++    return moduleBase<=std::numeric_limits<ULONG64>::max()-PrivateReturnRva&&
++        returnAddress==moduleBase+PrivateReturnRva&&clsid==OfficialClsid;
++}
++inline bool InvalidateCacheScope(bool& eligible,ULONG ownerThread,ULONG eventThread) {
++    if(!eligible||ownerThread!=eventThread)return false;
++    eligible=false;return true;
++}

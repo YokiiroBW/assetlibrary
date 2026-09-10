@@ -1,0 +1,11 @@
+{
+  "imageSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+  "imageBase": "0x180000000",
+  "codeView": [
+    {
+      "pdbGuid": "FA3BF0701EBD655CD7B3691D3BF1C00A",
+      "pdbAge": 1,
+      "pdbName": "Windows.Storage.pdb"
+    }
+  ]
+}

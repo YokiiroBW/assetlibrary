@@ -1,0 +1,92 @@
+{
+  "status": "source_review_passed_reference_runtime_validation_pending",
+  "observer_sha256": "9192c06013f4d86272bc9f4bbcb03b9fe803c7dd6ce01785ca410af0955eb79d",
+  "target_sha256": "081de6e8de0b061d0d96f2dd2811e8679302a67b5e5b844bfc8e528f170a1b60",
+  "manifest_sha256": "887898a854b755c0ea08931646f95d4e0df97d90505133a873d70f6c0d1ee894",
+  "new_codepoint_rva": "0x1194C3",
+  "pure_scope_cases": 19,
+  "retained_plan_cases": 19,
+  "unregistered_preflight": "SHParseDisplayName80070057/parsed=false; no debugger started",
+  "source_review": "Root and independent review passed; all3 loaded-code spans and file identity, bounded hit count, preserved input mask, frame/GUID checks and invalidation/cleanup verified statically",
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "29b8853188016f2bb3a0aa1cec0845ef50119458fb84909a9dbdd6edc045e160",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\Shared.h",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "24e3339f5392d65f159bef62429361f406fb2e2eea4e7319f9b37403a0e6189b",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\Plan.h",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "Fingerprint.h.txt",
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\Fingerprint.h",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "4103f2d98e155cc6989bf6bf2c7a1ba60eb31d664b9ae31ef9b8ce06fc357820",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\Target.cpp",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "95e9b26cbdb47f5d8aaffa811e61a00ebdc340a4e654c23b10e81292cd98c78b",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\Observer.cpp",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "eea72bbde81ab616cdae9c5f595b5e7d54dbbb55af42959e68c504934dd98f8f",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\build.ps1",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "CacheScope.h.txt",
+      "sha256": "236cc5745d5230f33cd3d898e863064339b6e0ac7693212de843e1018df5c783",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\CacheScope.h",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "candidate.diff.txt",
+      "sha256": "e3f84046a84f501b3eb2f9e7ed0d36e2bd69925f9d625020006445196cd969fe",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\candidate.diff",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "build-01.log",
+      "sha256": "8666ed67cef444cbe1933e7ac8bddcb7b46319fd0ad2278659976e386d3f3767",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\build-01.log",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "preflight-01.jsonl",
+      "sha256": "94dda3b5af1e0f7c816c4ffc44334fdbcd8f764cbf818af0f35d8e6bd4e6c3bc",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\preflight-01.jsonl",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "self-test-01.jsonl",
+      "sha256": "fbf43ad1a0897b9e0390f625d5ad157490537809d1b10a74273534afcc719cfc",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\self-test-01.jsonl",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "README.md",
+      "sha256": "02ac8c88b4c7e46a611b14eabcf5aceeed117993c37a54d654d9897d0d6069a5",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\README.md",
+      "kind": "unmodified_frozen_preparation_file"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "48fdaad0a6b83b3ee1d4e6cc68d28c08c120c6b5f7a0b2c0546ec91c0cccfa44",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug\\validation.json",
+      "kind": "unmodified_frozen_preparation_file"
+    }
+  ],
+  "reference_registration_cycle": "Windows owner authorized to perform registered reference normal/cancel before any actual Explorer use; preparation does not claim those passed."
+}

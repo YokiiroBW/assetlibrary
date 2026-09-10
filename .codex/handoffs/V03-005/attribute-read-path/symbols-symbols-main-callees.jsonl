@@ -1,0 +1,10 @@
+{"loadedLibrary":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\dbghelp.dll"}
+{"symbolDiagnostic":"DBGHELP: No header for C:\\Windows\\System32\\windows.storage.dll.  Searching for image on disk"}
+{"symbolDiagnostic":"DBGHELP: C:\\Windows\\System32\\windows.storage.dll - OK"}
+{"symbolDiagnostic":"DBGHELP: symsrv.dll load failure"}
+{"symbolDiagnostic":"DBGHELP: windows.storage - public symbols          C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}
+{"rva":"35DF50","symbolRva":"35DF50","displacement":0,"name":"_security_check_cookie"}
+{"rva":"52398","symbolRva":"52398","displacement":0,"name":"CRegFolder::_IsDelegate"}
+{"rva":"653010","symbolRva":"653010","displacement":0,"name":"guard_dispatch_icall$thunk$10345483385596137414"}
+{"rva":"69730","symbolRva":"69730","displacement":0,"name":"CRegFolder::_GetPIDLRCLSID"}
+{"stage":"module_info","symbolType":3,"imageSize":8798208,"timestamp":2800646882,"pdbAge":1,"pdbGuid":"FA3BF0701EBD655CD7B3691D3BF1C00A","pdbUnmatched":false,"dbgUnmatched":false,"loadedPdb":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}

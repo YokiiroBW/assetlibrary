@@ -1,0 +1,19 @@
+#pragma once
+#include "Shared.h"
+#include <limits>
+
+// Private fixed-build offsets, established by the locked local disassembly.
+// These predicates do not read memory or constitute a public Shell contract.
+inline bool CacheFrameMatches(bool eligible,ULONG ownerThread,ULONG eventThread,
+    ULONG64 expectedRsp,ULONG64 rsp,ULONG64 rbp,ULONG inputMask,ULONG currentMask) {
+    return eligible&&ownerThread==eventThread&&rsp<=std::numeric_limits<ULONG64>::max()-0x410&&
+        rbp==rsp+0xC9&&expectedRsp==rsp+0x410&&inputMask==currentMask;
+}
+inline bool CacheIdentityMatches(ULONG64 returnAddress,ULONG64 moduleBase,const GUID& clsid) {
+    return moduleBase<=std::numeric_limits<ULONG64>::max()-PrivateReturnRva&&
+        returnAddress==moduleBase+PrivateReturnRva&&clsid==OfficialClsid;
+}
+inline bool InvalidateCacheScope(bool& eligible,ULONG ownerThread,ULONG eventThread) {
+    if(!eligible||ownerThread!=eventThread)return false;
+    eligible=false;return true;
+}

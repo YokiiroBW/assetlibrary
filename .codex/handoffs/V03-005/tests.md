@@ -193,3 +193,11 @@ a118fbe合入1d00321，25份原件SHA独立核对。A20/B26共46query、两来�
 首次22、清理后2个固定身份目标全部确认退出；两代自动恢复的桌面38388/32044各两次创建时间一致、无debugger。唯一Browse在观察器ready后406ms提交，SDK17项/此电脑2项正控通过，但入口缺失、无关联且实际视图仍为此电脑。四组掩码返回0/0/0/26，均S_OK；28.485秒保护退出不是完整60秒成功。5断点清零、detach/目标存活、窗口/8注册根清理、双通知及最终桌面无测试模块均有记录。停止helper身份未单独落盘，先后依赖同步工具完成记录与后续独立快照。
 
 本轮缩小了对长期Explorer进程状态的怀疑范围，不宣称所有共享缓存重置或具体根因确定；无生产代码、依赖、契约及发布门禁变化。最终集成验证日志：.runtime/v03-005-final-tests/repository-cold-execution.log。
+
+## 固定属性消费点与同周期差异
+
+离线匹配Microsoft PDB和本机DLL，0x1194C3字段/固定帧关系经独立复核。root归档16件离线分析，v1/v2候选13/12件，完整二进制留runtime。d2900bb/5c32a1b/9234cc4分别合入72e9179/e2ac218/90e26ad；源审3件和reader5件含原始映射核对通过。reader20项missing-key为实际负控，未冒称全部值类型分支都已测试。
+
+首次参考e169e51合入56bca99，33归档/32来源/5脱敏映射核对：两合法嵌套cache与return正确，exact1计数断言错误导致passed=false；已清理、未cancel/real。V2仅修计数条件及固定路径，38纯检查与独立review通过。3ec6f1f合入29078b5，59归档/58来源/7脱敏映射核对；normal/cancel各2逐call完整配对、cache flags1/attrsA0000020/callFor0/restricted0、S_OK/20000000。real4逐call缓存四字段全0；前后reader20实际类型和值相同，HKCU/readerHKCR均A0000020；最终20missing。ready领先唯一Browse约429ms，59.438秒保护结束非完整60秒；6BP清零、detach、目标健康、UI/8根双通知清理、用户窗保留经独立审查。
+
+下一公开RegOpen候选39纯检查及normal/cancel缺失键参考通过，原生成功路径与真实SHCORE IAT尚待owner验证。该阶段不将API准备当实机根因证据。

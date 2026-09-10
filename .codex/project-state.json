@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "cold_restart_completed_entry_failure_persists",
-  "next_action": "User-authorized before/after Explorer restarts completed and cleanup verified; entry failure and requested FOLDER absence persist after a new desktop Shell. Next prepare bounded read-only observation of the actual Explorer target CLSID/ShellFolder attribute-reading path. Do not repeat unchanged COM, Bind, PIDL/order or cold-restart controls. Specific root cause remains unknown; this is not proof of a full-system cache reset or a passed Explorer gate.",
+  "status": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
+  "next_action": "Same registration period: reader HKCU/HKCR values correct before/after, reference normal/cancel cache flags1/A0000020, real four cache snapshots all zero with entry failure. Registry-open cause is unknown. Prepare the reviewed fixed HKCR BA16 ShellFolder RegOpenKeyExW probe, registered positive controls, and ready -> original STA notification pair -> first ThisPC -> one Browse. No new original Explorer restart or system-policy change.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,7 +87,7 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "cold_restart_completed_entry_failure_persists",
+    "stage": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "User approved and completed before/after current-user Explorer restarts; continued diagnostic work remains scoped and reversible.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",

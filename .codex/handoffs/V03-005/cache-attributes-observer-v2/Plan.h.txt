@@ -1,0 +1,95 @@
+#pragma once
+#include "Shared.h"
+#include <dwmapi.h>
+#include <array>
+#include <charconv>
+#include <string>
+#include <string_view>
+#include <vector>
+
+inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cache-attributes-debug-v2";
+inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+inline constexpr ULONGLONG Second = 10000000;
+inline ULONGLONG NowFiletime() { FILETIME time{}; GetSystemTimeAsFileTime(&time); return (static_cast<ULONGLONG>(time.dwHighDateTime)<<32)|time.dwLowDateTime; }
+inline void PlanNeed(bool ok) { if (!ok) throw E_INVALIDARG; }
+inline bool PlanIdValid(std::string_view id) {
+    if (id.size()!=32) return false;
+    for (char c:id) if (!(c>='0'&&c<='9') && !(c>='a'&&c<='f')) return false;
+    return true;
+}
+struct Plan {
+    std::string id, profile;
+    DWORD pid = 0;
+    ULONGLONG creation = 0, hwnd = 0, ownershipEpoch = 0, issued = 0, expires = 0;
+    GUID Clsid() const { return OfficialClsid; }
+};
+inline Plan ParsePlan(std::string_view text, std::string_view expectedId, ULONGLONG now) {
+    PlanNeed(text.size()>0 && text.size()<=2048 && PlanIdValid(expectedId));
+    for (char c:text) PlanNeed((c>=32&&c<=126)||c=='\r'||c=='\n');
+    std::array<std::string_view,11> lines{}; size_t count=0, start=0;
+    while (start<text.size()) {
+        size_t end=text.find('\n',start); if(end==std::string_view::npos) end=text.size();
+        auto line=text.substr(start,end-start); if(!line.empty()&&line.back()=='\r') line.remove_suffix(1);
+        PlanNeed(count<lines.size()); lines[count++]=line; start=end+1;
+    }
+    PlanNeed(count==lines.size()&&lines[0]=="AssetLibrary.Explorer.DebugPlan.v1");
+    auto field=[&](size_t n,std::string_view key){ PlanNeed(lines[n].starts_with(key)); return lines[n].substr(key.size()); };
+    auto number=[](std::string_view value,int base=10){
+        ULONGLONG result=0; PlanNeed(!value.empty());
+        auto parsed=std::from_chars(value.data(),value.data()+value.size(),result,base);
+        PlanNeed(parsed.ec==std::errc{}&&parsed.ptr==value.data()+value.size()); return result;
+    };
+    Plan p;
+    p.id=field(1,"id="); p.profile=field(2,"profile=");
+    PlanNeed(p.id==expectedId && p.profile=="official");
+    auto pid=number(field(3,"pid=")); PlanNeed(pid>4&&pid<=MAXDWORD); p.pid=static_cast<DWORD>(pid);
+    p.creation=number(field(4,"creationFiletime=")); p.hwnd=number(field(5,"hwndHex="),16);
+    p.ownershipEpoch=number(field(6,"ownershipStartFiletime=")); p.issued=number(field(7,"issuedFiletime=")); p.expires=number(field(8,"expiresFiletime="));
+    PlanNeed(field(9,"durationSeconds=")=="60");
+    PlanNeed(field(10,"purpose=")=="owned-explorer-namespace-diagnostic");
+    PlanNeed(p.hwnd!=0&&p.ownershipEpoch>0&&p.creation>=p.ownershipEpoch&&p.creation<=p.issued&&p.issued<=now);
+    PlanNeed(p.expires>now&&p.expires>p.issued&&p.expires-p.issued<=120*Second&&now-p.ownershipEpoch<=600*Second);
+    return p;
+}
+inline bool FrameEligibility(ULONG frames, ULONG visibleOther, bool matchingVisibleUncloakedRoot, bool desktopProcess) {
+    return frames==1 && visibleOther==0 && matchingVisibleUncloakedRoot && !desktopProcess;
+}
+inline std::vector<BYTE> TokenUserData(HANDLE process) {
+    HANDLE token=nullptr; PlanNeed(OpenProcessToken(process,TOKEN_QUERY,&token)!=FALSE);
+    DWORD size=0; GetTokenInformation(token,TokenUser,nullptr,0,&size);
+    std::vector<BYTE> bytes(size);
+    BOOL ok=GetTokenInformation(token,TokenUser,bytes.data(),size,&size); CloseHandle(token); PlanNeed(ok!=FALSE);
+    return bytes;
+}
+inline bool PinnedProcessIdentity(DWORD pid,ULONGLONG creation,HANDLE process) {
+    return WaitForSingleObject(process,0)==WAIT_TIMEOUT&&CreationTime(process)==creation&&GetProcessId(process)==pid;
+}
+inline void VerifyExplorerPlan(const Plan& p,HANDLE process,bool requireFresh) {
+    PlanNeed(PinnedProcessIdentity(p.pid,p.creation,process));
+    if(requireFresh) PlanNeed(p.expires>NowFiletime());
+    wchar_t image[32768]{}, windows[32768]{}; DWORD length=32768;
+    PlanNeed(QueryFullProcessImageNameW(process,0,image,&length)!=FALSE);
+    UINT windowsLength=GetWindowsDirectoryW(windows,32768); PlanNeed(windowsLength>0&&windowsLength<32768);
+    std::wstring expected=std::wstring(windows)+L"\\explorer.exe";
+    PlanNeed(CompareStringOrdinal(image,-1,expected.c_str(),-1,TRUE)==CSTR_EQUAL);
+    DWORD targetSession=0, ownSession=0;
+    PlanNeed(ProcessIdToSessionId(p.pid,&targetSession)&&ProcessIdToSessionId(GetCurrentProcessId(),&ownSession)&&targetSession==ownSession);
+    auto targetUser=TokenUserData(process), ownUser=TokenUserData(GetCurrentProcess());
+    PlanNeed(EqualSid(reinterpret_cast<TOKEN_USER*>(targetUser.data())->User.Sid,reinterpret_cast<TOKEN_USER*>(ownUser.data())->User.Sid)!=FALSE);
+    HWND hwnd=reinterpret_cast<HWND>(p.hwnd), shell=GetShellWindow(); DWORD desktopPid=0;
+    PlanNeed(shell!=nullptr&&GetWindowThreadProcessId(shell,&desktopPid)!=0&&desktopPid!=0);
+    struct FrameCheck { DWORD pid; HWND chosen; ULONG frames=0, others=0; bool match=false; } check{p.pid,hwnd};
+    PlanNeed(EnumWindows([](HWND item,LPARAM data)->BOOL {
+        auto& c=*reinterpret_cast<FrameCheck*>(data); DWORD owner=0; GetWindowThreadProcessId(item,&owner); if(owner!=c.pid) return TRUE;
+        wchar_t name[64]{}; GetClassNameW(item,name,64);
+        bool frame=wcscmp(name,L"CabinetWClass")==0||wcscmp(name,L"ExploreWClass")==0;
+        if(frame) c.frames++;
+        if(item!=c.chosen&&IsWindowVisible(item)) c.others++;
+        if(item==c.chosen&&frame&&IsWindowVisible(item)&&GetAncestor(item,GA_ROOT)==item) {
+            DWORD cloaked=1;
+            c.match=SUCCEEDED(DwmGetWindowAttribute(item,DWMWA_CLOAKED,&cloaked,sizeof(cloaked)))&&cloaked==0;
+        }
+        return TRUE;
+    },reinterpret_cast<LPARAM>(&check))!=FALSE);
+    PlanNeed(FrameEligibility(check.frames,check.others,check.match,p.pid==desktopPid));
+}

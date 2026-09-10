@@ -1,0 +1,79 @@
+import hashlib
+import json
+from pathlib import Path
+import re
+import struct
+
+ROOT = Path(r"C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-attribute-read-path")
+SOURCE = Path(r"C:\Windows\System32\windows.storage.dll")
+index = json.loads((ROOT / "index.json").read_text(encoding="utf-8"))
+imports = {x["iatRva"]: x for x in json.loads((ROOT / "imports.json").read_text(encoding="utf-8"))}
+functions = json.loads((ROOT / "runtime-functions.json").read_text(encoding="utf-8"))
+data = SOURCE.read_bytes()
+assert hashlib.sha256(data).hexdigest() == index["sourceSha256"]
+base = index["imageBase"]
+SELECTED = [(0x1188E0,0),(0x119098,1),(0x1E69B0,1),(0x119F50,2),(0x11B8F0,2)]
+
+def offset(rva, size=1):
+    for section in index["sections"]:
+        delta = rva-section["rva"]
+        if 0 <= delta and delta+size <= section["rawSize"]:
+            return section["rawOffset"]+delta
+    raise ValueError("RVA not backed by file")
+
+def utf16(rva):
+    off = offset(rva)
+    values = []
+    for n in range(512):
+        char = struct.unpack_from("<H",data,off+2*n)[0]
+        if not char:
+            return bytes().join(struct.pack("<H",x) for x in values).decode("utf-16le")
+        values.append(char)
+    raise ValueError("String bound exceeded")
+
+reports = []
+total = 0
+for rva, depth in SELECTED:
+    entries = [x for x in functions if x["beginRva"] <= rva < x["endRva"]]
+    assert len(entries) == 1 and entries[0]["beginRva"] == rva
+    entry = entries[0]
+    total += entry["codeSize"]
+    path = ROOT / f"function-{rva:08x}.raw.txt"
+    raw = path.read_text(encoding="utf-8-sig")
+    calls = []
+    addresses = []
+    for line in raw.splitlines():
+        loc = re.match(r"\s*([0-9A-Fa-f]{16}):",line)
+        if not loc:
+            continue
+        at = int(loc[1],16)-base
+        assert entry["beginRva"] <= at < entry["endRva"]
+        addresses.append(at)
+        call = re.search(r"\bcall\s+(.+)$",line)
+        if not call:
+            continue
+        operand = call[1].strip()
+        row = dict(callRva=at, callRvaHex=f"0x{at:X}", operand=operand)
+        direct = re.fullmatch(r"([0-9A-Fa-f]{16})",operand)
+        indirect = re.fullmatch(r"qword ptr \[([0-9A-Fa-f]{16})h\]",operand)
+        if direct:
+            target = int(direct[1],16)-base
+            row.update(kind="direct", targetRva=target, targetRvaHex=f"0x{target:X}")
+        elif indirect:
+            iat = int(indirect[1],16)-base
+            row.update(kind="indirect_memory",slotRva=iat,slotRvaHex=f"0x{iat:X}",importMetadata=imports.get(iat))
+        else:
+            row["kind"] = "other_indirect"
+        calls.append(row)
+    assert addresses and addresses[0] == rva
+    reports.append(dict(**entry,depth=depth,rawFile=path.name,rawSha256=hashlib.sha256(path.read_bytes()).hexdigest(),codeSha256=hashlib.sha256(data[offset(rva,entry['codeSize']):offset(rva,entry['codeSize'])+entry['codeSize']]).hexdigest(),calls=calls))
+assert total <= 16384 and max(x["depth"] for x in reports) <= 2
+strings = [dict(rva=f"0x{rva:X}",value=utf16(rva)) for rva in (0x6FC9A8,0x6EF060,0x72E2A0,0x72E270,0x6F8370,0x72E1E0,0x6FE3D0)]
+value_flags = []
+for n in range(23):
+    off = offset(0x6C8320+n*16,16)
+    flag, _, pointer = struct.unpack_from("<IIQ",data,off)
+    value_flags.append(dict(index=n,flag=f"0x{flag:08X}",name=utf16(pointer-base)))
+output = dict(totalDisassembledCodeBytes=total,limitCodeBytes=16384,maximumFollowDepth=2,functions=reports,referencedStrings=strings,shellFolderValueFlagTable=value_flags)
+(ROOT/"local-analysis-index.json").write_text(json.dumps(output,indent=2),encoding="utf-8")
+print(json.dumps(dict(totalCodeBytes=total,referencedStrings=strings,shellFolderValueFlagTable=value_flags,loadValuesImports=[r for r in reports[-1]['calls'] if r['kind']=='indirect_memory'])))

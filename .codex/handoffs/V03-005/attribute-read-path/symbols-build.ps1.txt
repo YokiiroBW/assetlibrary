@@ -1,0 +1,8 @@
+$ErrorActionPreference='Stop'
+$symbolToolset='C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+$symbolSdk='C:\Program Files (x86)\Windows Kits\10'
+Push-Location $PSScriptRoot
+try {
+    & "$symbolToolset\bin\Hostx64\x64\cl.exe" /nologo /std:c++20 /W4 /WX /EHsc /MT /O2 /utf-8 /DUNICODE /D_UNICODE /D_WIN32_WINNT=0x0A00 "/I$symbolToolset\include" "/I$symbolSdk\Include\10.0.26100.0\ucrt" "/I$symbolSdk\Include\10.0.26100.0\shared" "/I$symbolSdk\Include\10.0.26100.0\um" SymbolLookup.cpp /FoSymbolLookup.obj /FeSymbolLookup.exe /link "/LIBPATH:$symbolToolset\lib\x64" "/LIBPATH:$symbolSdk\Lib\10.0.26100.0\ucrt\x64" "/LIBPATH:$symbolSdk\Lib\10.0.26100.0\um\x64" kernel32.lib dbghelp.lib
+    if($LASTEXITCODE -ne 0){throw 'Symbol lookup compilation failed'}
+} finally { Pop-Location }

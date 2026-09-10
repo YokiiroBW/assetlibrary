@@ -1,0 +1,130 @@
+{
+  "status": "offline_analysis_only_candidate_consumer_point_not_live_proven",
+  "system_image_sha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+  "pdb_guid": "FA3BF0701EBD655CD7B3691D3BF1C00A",
+  "pdb_age": 1,
+  "pdb_sha256": "8c111d8c26c1707bde4981bb4d488670b01765b529622d9c838bdc3bda2ffcb7",
+  "signature_archive": "../../V03-006/registry-read-preparation/root-symbols-signatures.jsonl",
+  "signature_sha256": "63b92050b228c44f1b331052e48e0d0678f90bc241213a3e299996d024b2f570",
+  "candidate_rva": "0x1194C3",
+  "candidate_source_function_rva": "0x119098",
+  "outer_rva": "0x1188E0",
+  "frame_constraints": {
+    "rbp_equals_rsp_plus": "0xC9",
+    "private_return_slot_rsp_plus": "0x128",
+    "private_return_rva": "0x118A3C",
+    "outer_expected_rsp_equals_point_rsp_plus": "0x410"
+  },
+  "cache_entry_offsets_from_rbp": {
+    "guid": "-0x79",
+    "flags": "-0x69",
+    "attributes": "-0x65",
+    "callForAttributes": "-0x61",
+    "restrictedAttributes": "-0x5D"
+  },
+  "artifacts": [
+    {
+      "file": "index.json",
+      "sha256": "70197031be495ebea02a8ad2e73d709c152afc77467d6c4210737b27b2e631c3",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\index.json",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "local-analysis-index.json",
+      "sha256": "f27950a66595e8e475ef74e190bbf43987ea284cf4e848168ce278536b949168",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\local-analysis-index.json",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "pe_index.py.txt",
+      "sha256": "6480af5d07c6b668a1d91c0c8893f88bacfe0b0bc6c7a0e08bc3015b6f21450e",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\pe_index.py",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "local_index.py.txt",
+      "sha256": "ee5b08e2de166792b53e43220c98faf11389ed7a3aef05fbc7ff3052bb3afea3",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\local_index.py",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "function-001188e0.raw.txt",
+      "sha256": "caca9819a286395c86a6921d2a1da4c43c2eb6bdf46f4355ecc0aaf8ad89d067",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\function-001188e0.raw.txt",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "function-00119098.raw.txt",
+      "sha256": "de86c3400fe0f62f7c65d10fc918402e724019d1f67961c4e222e8a38b63fa80",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\function-00119098.raw.txt",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "function-00119f50.raw.txt",
+      "sha256": "a877876db1fc69e71d29d44e8796f2cc2e581ecb23a71e89954c5081e583661a",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\function-00119f50.raw.txt",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "function-0011b8f0.raw.txt",
+      "sha256": "56fc2a816d05322e8a9e3d1baa0ee0473f9b90e2171ce23f08460b8226dbf316",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\function-0011b8f0.raw.txt",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "function-001e69b0.raw.txt",
+      "sha256": "148f8b4d830ddcd0fa281ed9d57d3f3404b3dceadfead39e1bc99defbfb88f43",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attribute-read-path\\function-001e69b0.raw.txt",
+      "kind": "unmodified_offline_analysis_file"
+    },
+    {
+      "file": "symbols-image-codeview.json",
+      "sha256": "35da98d8a36a5fbeca635e558b7b658902533dd56208996cd6eca887d118caf4",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\image-codeview.json",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-download-metadata.json",
+      "sha256": "65b4189d9a747015a06918bcfbc73d60b1c41f1f546157c7b7d1707222008780",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\download-metadata.json",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-validation.json",
+      "sha256": "62cffb42fa179319afb93f5fc3330098a96fd1ccfe95cba8288a5f619ee76569",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\validation.json",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-symbols-main-callees.jsonl",
+      "sha256": "d43bb7aa1e1705cff3ce7bc446702733203a3ba6427b6594269ba94b4c5c0756",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols-main-callees.jsonl",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-symbols-attributes-callees.jsonl",
+      "sha256": "122a064a57f92359c415fc226899c18ba493b2dfb59cf7770144971ea917a422",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols-attributes-callees.jsonl",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-SymbolLookup.cpp.txt",
+      "sha256": "132052d74572353bf187ce424b3acef2fb0b4d19ed7eaa278bc3ce8f4b996e6a",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\SymbolLookup.cpp",
+      "kind": "unmodified_offline_symbol_file"
+    },
+    {
+      "file": "symbols-build.ps1.txt",
+      "sha256": "c43220e88b8e182bb31b1807b53e66f61b767227bd73456d49d071fe067aa81f",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\build.ps1",
+      "kind": "unmodified_offline_symbol_file"
+    }
+  ],
+  "limits": [
+    "No new GUI, registration, real debugger attach or restart in these offline artifacts.",
+    "Public PDB supplies exact function names/signatures; field offsets come from this fixed binary instruction flow only.",
+    "Consumer point covers one cache-use branch; zero hits or zero fields are not proof that registry reads did not occur.",
+    "Cache field values are not a live registry read receipt.",
+    "Full PDB, Windows libraries, helper executable and full .pdata/import inventories remain task-local runtime only."
+  ]
+}

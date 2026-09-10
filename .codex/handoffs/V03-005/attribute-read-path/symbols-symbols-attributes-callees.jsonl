@@ -1,0 +1,25 @@
+{"loadedLibrary":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\dbghelp.dll"}
+{"symbolDiagnostic":"DBGHELP: No header for C:\\Windows\\System32\\windows.storage.dll.  Searching for image on disk"}
+{"symbolDiagnostic":"DBGHELP: C:\\Windows\\System32\\windows.storage.dll - OK"}
+{"symbolDiagnostic":"DBGHELP: symsrv.dll load failure"}
+{"symbolDiagnostic":"DBGHELP: windows.storage - public symbols          C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}
+{"rva":"69730","symbolRva":"69730","displacement":0,"name":"CRegFolder::_GetPIDLRCLSID"}
+{"rva":"F3360","symbolRva":"F3360","displacement":0,"name":"CCLSIDInfoCache::_EnsureCacheIsValid"}
+{"rva":"F3424","symbolRva":"F3424","displacement":0,"name":"CCLSIDInfoCache::_IsValid"}
+{"rva":"F3500","symbolRva":"F3500","displacement":0,"name":"CDSA_Base<unsigned int>::Destroy"}
+{"rva":"F3CE8","symbolRva":"F3CE8","displacement":0,"name":"DSA_Create"}
+{"rva":"1142E8","symbolRva":"1142E8","displacement":0,"name":"CRegFolder::ShouldSkipOptionalDelegate"}
+{"rva":"115A18","symbolRva":"115A18","displacement":0,"name":"CRegFolder::_IsDesktop"}
+{"rva":"1181E8","symbolRva":"1181E8","displacement":0,"name":"CRegFolder::_CreateCachedDelegateFolder"}
+{"rva":"119F50","symbolRva":"119F50","displacement":0,"name":"CCLSIDInfoCache::GetPerUserAttributes"}
+{"rva":"11A580","symbolRva":"11A580","displacement":0,"name":"CDSA_Base<CLSID_CACHE_ENTRY>::Search"}
+{"rva":"11AA34","symbolRva":"11AA34","displacement":0,"name":"CCLSIDInfoCache::s_CompareEntries"}
+{"rva":"11B054","symbolRva":"11B054","displacement":0,"name":"CCLSIDInfoCache::_QueryCallForAttributes"}
+{"rva":"11B8F0","symbolRva":"11B8F0","displacement":0,"name":"CCLSIDInfoCache::_LoadValuesFromRegistry"}
+{"rva":"11CEC0","symbolRva":"11CEC0","displacement":0,"name":"IsDelegateRegId"}
+{"rva":"145BD0","symbolRva":"145BD0","displacement":0,"name":"DSA_InsertItem"}
+{"rva":"289C88","symbolRva":"289C88","displacement":0,"name":"CCLSIDInfoCache::_IsEntry"}
+{"rva":"290E00","symbolRva":"290E00","displacement":0,"name":"std::_Find_unchecked<_GUID const * __ptr64,_GUID>"}
+{"rva":"35DF50","symbolRva":"35DF50","displacement":0,"name":"_security_check_cookie"}
+{"rva":"653010","symbolRva":"653010","displacement":0,"name":"guard_dispatch_icall$thunk$10345483385596137414"}
+{"stage":"module_info","symbolType":3,"imageSize":8798208,"timestamp":2800646882,"pdbAge":1,"pdbGuid":"FA3BF0701EBD655CD7B3691D3BF1C00A","pdbUnmatched":false,"dbgUnmatched":false,"loadedPdb":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}

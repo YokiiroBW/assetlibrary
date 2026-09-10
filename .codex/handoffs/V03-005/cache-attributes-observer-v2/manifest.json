@@ -1,0 +1,104 @@
+{
+  "artifacts": [
+    {
+      "path": "Shared.h",
+      "size": 1909,
+      "sha256": "29b8853188016f2bb3a0aa1cec0845ef50119458fb84909a9dbdd6edc045e160"
+    },
+    {
+      "path": "Plan.h",
+      "size": 5962,
+      "sha256": "b0ad1a017e816717e391b127b5bbb2a269c727b53a7ce7af532d4756ef78111c"
+    },
+    {
+      "path": "Fingerprint.h",
+      "size": 3434,
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "path": "Target.cpp",
+      "size": 6629,
+      "sha256": "4103f2d98e155cc6989bf6bf2c7a1ba60eb31d664b9ae31ef9b8ce06fc357820"
+    },
+    {
+      "path": "Observer.cpp",
+      "size": 49754,
+      "sha256": "aa01dfe761876ca473def36960a29ce65ee407e66e2482896148b30aa29705e5"
+    },
+    {
+      "path": "build.ps1",
+      "size": 1587,
+      "sha256": "cf0e3c5b7a1fd13029f4466519aec11f1c669fb03c6f870d2547fde03f1a61fe"
+    },
+    {
+      "path": "CacheScope.h",
+      "size": 969,
+      "sha256": "236cc5745d5230f33cd3d898e863064339b6e0ac7693212de843e1018df5c783"
+    },
+    {
+      "path": "candidate.diff",
+      "size": 3501,
+      "sha256": "d6692e8c982e8fab02d3d9141bd4221316569045c9d52740f72e6c751df88124"
+    },
+    {
+      "path": "build-01.log",
+      "size": 26,
+      "sha256": "8666ed67cef444cbe1933e7ac8bddcb7b46319fd0ad2278659976e386d3f3767"
+    },
+    {
+      "path": "self-test-01.jsonl",
+      "size": 220,
+      "sha256": "f822cdd9f3ea79687e49c1485d294c2757722fb0bd2e1fc2d203196143f9acd5"
+    },
+    {
+      "path": "validation.json",
+      "size": 1838,
+      "sha256": "d2bd6116b083ea4c3a6a129cd9de78b45f6966937b4766be3d9b13f031f43456"
+    },
+    {
+      "path": "README.md",
+      "size": 931,
+      "sha256": "a24acc1031648d170eba5fdf084e74bfce22589bf89b43e53368253e2c87a63f"
+    },
+    {
+      "path": "bin/CacheAttributesObserverV2.exe",
+      "size": 260608,
+      "sha256": "952886d8f483e81345626f5866887c015a81915432bb7fabf5f2293c576792bc"
+    },
+    {
+      "path": "bin/CacheAttributesReferenceTargetV2.exe",
+      "size": 155648,
+      "sha256": "12a6774021b15059c4a1b92f7c22a1aae079f1bac9b8b83793d2c925c923cae4"
+    }
+  ],
+  "v1SourceHashes": [
+    {
+      "path": "Shared.h",
+      "sha256": "29b8853188016f2bb3a0aa1cec0845ef50119458fb84909a9dbdd6edc045e160"
+    },
+    {
+      "path": "Plan.h",
+      "sha256": "24e3339f5392d65f159bef62429361f406fb2e2eea4e7319f9b37403a0e6189b"
+    },
+    {
+      "path": "Fingerprint.h",
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "path": "Target.cpp",
+      "sha256": "4103f2d98e155cc6989bf6bf2c7a1ba60eb31d664b9ae31ef9b8ce06fc357820"
+    },
+    {
+      "path": "Observer.cpp",
+      "sha256": "95e9b26cbdb47f5d8aaffa811e61a00ebdc340a4e654c23b10e81292cd98c78b"
+    },
+    {
+      "path": "build.ps1",
+      "sha256": "eea72bbde81ab616cdae9c5f595b5e7d54dbbb55af42959e68c504934dd98f8f"
+    },
+    {
+      "path": "CacheScope.h",
+      "sha256": "236cc5745d5230f33cd3d898e863064339b6e0ac7693212de843e1018df5c783"
+    }
+  ]
+}
