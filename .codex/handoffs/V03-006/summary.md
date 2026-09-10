@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+恢复复核：[属性报告](attributes-debug-control.md)补充PIDL来源与请求mask差异，独立正控和host结果尚不是同输入对照；已向root提交下一项同对象对照建议，未执行新现场操作。78c0a23的27份原件工作区/HEAD哈希一致，G1仍partial。
+
 最新：[单GetAttributesOf实机](attributes-debug-control.md)取得4对有效输入/输出。call1请求FOLDER→S_OK/0，call4含FOLDER→S_OK/26；call2/3未请求FOLDER不作非folder推断。捕获约33秒提前结束但5断点清零/Detach/存活及注册/UI清理成功。未改mask、接口或注册，根因待root结合真实属性路径裁决。
 
 最新：[完整请求IID元数据](bind-iid-control.md)已补齐，callId1为BC110B6D…/无pbc→80070490/null，callId2为886D8EEB…/有pbc→80004002/null；与旧类别轮一致。仅记录已匹配数据，具体接口由root按主源解释。捕获异常保护提前结束但两断点/Detach/存活清理成功，双通知/四根/自有UI已清理，G1仍partial。

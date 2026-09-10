@@ -22,3 +22,11 @@ ready tick256117531，包装记录05:11:09.6670651Z后自动联动唯一Browse�
 确认脱离后关闭模态，注册有效期内actualview仍ThisPC20D04…/22B，与官方42B不匹配；ThisPC匹配成功/2项，观察器和目标模块快照未见样例。stop/finally于05:15:57.6193927Z正常exit0，4CU/4LM全absent，双通知清理成功。自有3738220及模态已关闭，原1247028和无关Chrome保留。
 
 [原件索引](attributes-debug-control/evidence.json)保留plan、固定hash、包装、4对callId关联、有效性标记、所有早停/清理事件、有效期view/模块及现场清理。未自行解释或修复注册/host，下一步由根协调据这些具体mask结果裁决，G1仍未关闭。
+
+## 恢复后的只读调用链核对
+
+独立普通枚举的属性正控使用 `ParentVisible.cpp` 第42行的 `candidate`：它来自先前 `EnumObjects` 保存的 child；代码通过父级 `CompareIDs(SHCIDS_CANONICALONLY)` 匹配解析所得的 `targetChild` 后，对枚举 child 请求 `28180000`，返回 `20000000`。该控制没有记录两者的完整字节是否相等，也没有对解析 child 查询相同属性。
+
+真实观察器的匹配对象则来自 `Observer.cpp` 第81–87行：按 Browse 的固定绝对路径 `SHParseDisplayName`，核对 MyComputer 父级后克隆最后 child；第362行对目标内 PIDL 做有界完整字节比较。四对已捕获结果针对这个解析所得的 child。Browse 控制器同样使用解析所得的绝对 PIDL。
+
+因此现有对照同时存在 PIDL 来源、输入 mask 和进程上下文的差别，不能把结果直接归为纯宿主进程差异。已向主协调提出下一项低侵入控制：同一独立 MyComputer 对象、同一注册窗口内，对唯一匹配的枚举 child 和解析 child 记录长度/完整字节相等性，并分别查询相同四组输入 mask，逐次保留 HRESULT 和输出有效性。该建议尚未执行，未新建注册、GUI 或调试附加；不解析私有 PIDL 布局、不改属性。

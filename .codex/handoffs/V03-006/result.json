@@ -733,6 +733,7 @@
     "full_sixty_seconds": false,
     "cleanup_verified": true,
     "target_alive_without_debugger": true,
-    "registry_and_ui_cleaned": true
+    "registry_and_ui_cleaned": true,
+    "comparison_scope_audit": "Independent positive used enumerated child and mask 28180000; host matches parsed child and different masks. Same-object same-mask comparison proposed, not executed; not a process-only comparison."
   }
 }
