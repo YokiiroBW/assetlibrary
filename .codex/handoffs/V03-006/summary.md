@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[双模式同条件属性对照](attribute-pidl-control.md)已完成，A20/B26次全部S_OK；枚举/解析child完整22B相等且所有前后SHA不变，两模式及双查询顺序结果一致。20000000→20000000、2044007F→20000024，与旧host差异仍在；未推定根因或扩展变体。原guard双通知/8根及两probe清理确认，GUI0/附加0。
+
 恢复复核：[属性报告](attributes-debug-control.md)补充PIDL来源与请求mask差异，独立正控和host结果尚不是同输入对照；已向root提交下一项同对象对照建议，未执行新现场操作。78c0a23的27份原件工作区/HEAD哈希一致，G1仍partial。
 
 最新：[单GetAttributesOf实机](attributes-debug-control.md)取得4对有效输入/输出。call1请求FOLDER→S_OK/0，call4含FOLDER→S_OK/26；call2/3未请求FOLDER不作非folder推断。捕获约33秒提前结束但5断点清零/Detach/存活及注册/UI清理成功。未改mask、接口或注册，根因待root结合真实属性路径裁决。

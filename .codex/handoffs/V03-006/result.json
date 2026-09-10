@@ -494,7 +494,9 @@
     ".codex/handoffs/V03-006/attributes-debug-control/register.json",
     ".codex/handoffs/V03-006/attributes-debug-control/sdk-baseline.json",
     ".codex/handoffs/V03-006/attributes-debug-control/thispc-baseline.json",
-    ".codex/handoffs/V03-006/attributes-debug-control/window-cleanup.json"
+    ".codex/handoffs/V03-006/attributes-debug-control/window-cleanup.json",
+    ".codex/handoffs/V03-006/attribute-pidl-control.md",
+    ".codex/handoffs/V03-006/attribute-pidl-control/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -532,10 +534,12 @@
       "Win32 effective AccessCheck with own-token impersonation copy",
       "Shared ImageChildCleanupPendingException/Completion and bounded Core admission ownership",
       "Win32 AppContainer APIs and versioned private owner journal with verified artifact copying",
-      "Existing owner-protected registration script and SHGetDesktopFolder/BindToObject/CreateViewObject APIs"
+      "Existing owner-protected registration script and SHGetDesktopFolder/BindToObject/CreateViewObject APIs",
+      "Fixed MyComputer parent enumeration, Browse absolute parse route, opaque IL/CompareIDs APIs and immutable 323CD843/F298 owner guard"
     ],
     "duplicated_logic": [
-      "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication"
+      "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
+      "Temporary independent PIDL attribute diagnostic reuses prior parent-control setup and guard wrapper; archived as evidence text only, no production abstraction or business duplication"
     ],
     "cross_module_access": [
       "Read-only prior handoff and DLL; execution uses a verified copy inside the owned worktree",
@@ -564,7 +568,8 @@
       "Isolated test-only /MT build with unchanged source/SDK; import and compiler-setting comparison; independent root bind passed; single actual Explorer folder entry still failed",
       "Independent bounded native CLSID/actual filesystem-path bind controls both return original class and one item; no tracked runtime source change or GUI actions",
       "Strict native E0 and Browse controller builds; actual-view SDK/target readbacks and creation-time mismatch refusal; original observer hash preserved",
-      "Official unchanged sample control with original per-user fields: initial notification defect isolated, corrected STA notification and field readback precede one timed native navigation; owned cleanup confirmed"
+      "Official unchanged sample control with original per-user fields: initial notification defect isolated, corrected STA notification and field readback precede one timed native navigation; owned cleanup confirmed",
+      "Two bounded independent attribute modes: 20 plus 26 successful queries, identical unchanged opaque PIDLs; strict native build and wrapper sequence/owner/lifetime/cleanup verification; GUI and debugger actions zero"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -735,5 +740,23 @@
     "target_alive_without_debugger": true,
     "registry_and_ui_cleaned": true,
     "comparison_scope_audit": "Independent positive used enumerated child and mask 28180000; host matches parsed child and different masks. Same-object same-mask comparison proposed, not executed; not a process-only comparison."
+  },
+  "attribute_pidl_checkpoint": {
+    "report": "attribute-pidl-control.md",
+    "status": "completed_independent_control_not_product_gate",
+    "modes": 2,
+    "query_counts": [
+      20,
+      26
+    ],
+    "all_query_hresult_success": true,
+    "all_output_valid": true,
+    "opaque_pair_bytes": 22,
+    "opaque_byte_equality": true,
+    "all_fingerprints_unchanged": true,
+    "gui_actions": 0,
+    "debugger_attachments": 0,
+    "cleanup_verified": true,
+    "production_changes": false
   }
 }

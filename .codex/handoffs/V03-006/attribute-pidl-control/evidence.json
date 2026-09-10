@@ -1,0 +1,119 @@
+{
+  "RecordedUtc": "2026-09-10T05:45:23.222150+00:00",
+  "SourceSha256": "96EB432CA0EC5E10D1069519C02FA61427E7475FA616B4642D504328F3A18D83",
+  "WrapperSha256": "3A7362EB3A9FD1346C75382260F325283E183D0AB902998DBD8172A22BEC4F90",
+  "ExecutableSha256": "DB0700310571C6540E3DFE50CB2DCB718C3AE1E63D1CA25B365A04A5DB411E4C",
+  "ModeCounts": {
+    "enum-first": 20,
+    "parse-first": 26
+  },
+  "QueryCount": 46,
+  "AllQueriesSucceeded": true,
+  "OpaquePairEqual": true,
+  "FingerprintsUnchanged": true,
+  "GuiActions": 0,
+  "DebuggerAttachments": 0,
+  "CleanupVerified": true,
+  "Artifacts": [
+    {
+      "File": "AttributePidlControl.cpp.txt",
+      "Sha256": "96EB432CA0EC5E10D1069519C02FA61427E7475FA616B4642D504328F3A18D83"
+    },
+    {
+      "File": "build-first-failure.log.txt",
+      "Sha256": "70C6A8E91583B489F153150AD09067BEAE4D95E2C8E3D503AFC7050DC0D5B0F3"
+    },
+    {
+      "File": "build-single-mode.log.txt",
+      "Sha256": "7663B406C980F7CB273735B7F1E387A6BD93F80F49AD5818EF95809F985C96A0"
+    },
+    {
+      "File": "build.log.txt",
+      "Sha256": "164319B0327F15A98FFDC416B46B98AF7C0BAA38ECCAF5C59903F42FEE975FD4"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "132E88690F2FDFB29A7E28D25AC4B98DFE760E78E2FDE762E2160A1815C70EA6"
+    },
+    {
+      "File": "CMakeLists.txt.txt",
+      "Sha256": "B62DAECE6DE3390151522F16F4502BA1F534E08DFF4D0FDFB2603B7916076601"
+    },
+    {
+      "File": "configure.log.txt",
+      "Sha256": "5BA4F1ED49763414AC19DFFA2087C97770358EFD4690BBC7BFE456252C4B9066"
+    },
+    {
+      "File": "enum-first-after.json",
+      "Sha256": "01EF1CCC405B920BC8D97306B9455A13A27DD4AC3496B4639F85CEA01F31173B"
+    },
+    {
+      "File": "enum-first-before.json",
+      "Sha256": "076EE2CE65F66B9F755966E0EF2C1B878667DFEBB96941B297C6F45486646AB0"
+    },
+    {
+      "File": "enum-first-probe.json",
+      "Sha256": "4F49AED3A6FF59F9BABD2107386D5B659A201EDD9EF02D90E6D4B216856A48B8"
+    },
+    {
+      "File": "enum-first-sequence-validation.json",
+      "Sha256": "E91F9B28E068FEBBE9C3A8D9CA524A933917994CEDE9C192AF6C33EDAB9F9440"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "AD1F6DDBCE149A135A2AE7F125D694FE5D7E0CB3882CD83F36407CCEE9C54BBD"
+    },
+    {
+      "File": "guard-process.json",
+      "Sha256": "BB3DA621808034ACA2C71AEFF719A3F8FFDC71BB3A3A4A5D7BDBBE82B7EDAC21"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76"
+    },
+    {
+      "File": "launch.json",
+      "Sha256": "991354D6F0B423C6ED57FFDE135E3998AA530288F2E8E7DCFF55B10CAFB3C707"
+    },
+    {
+      "File": "parse-first-after.json",
+      "Sha256": "0DC5598EBABAB9F8A125B10902542D3E4A07877A66E9FF80BCDFED2656C0448D"
+    },
+    {
+      "File": "parse-first-before.json",
+      "Sha256": "17DE797AE93588C98F9B497B2A30AA03E59071AC4BD2B4A12EFA66E232D12E74"
+    },
+    {
+      "File": "parse-first-probe.json",
+      "Sha256": "D8CEE150CDA987992AC0912319D480FC7479167FA95E3B999C56C36B6CE25AE7"
+    },
+    {
+      "File": "parse-first-sequence-validation.json",
+      "Sha256": "0DC23EAF424EA7E296C4127DE2D19E4F0FB68F591C3BF1496FBEFB167CA45521"
+    },
+    {
+      "File": "preflight-validation.json",
+      "Sha256": "6E2D17C1D66FC5414C39E53BEAC9C9C6D55BFB4136756C590EB1BAF09B21572C"
+    },
+    {
+      "File": "preflight.json",
+      "Sha256": "17A13270972108588D55852D341CDE83ED5DAD69F63D78510A4B2D700ABDF7B5"
+    },
+    {
+      "File": "query-matrix.json",
+      "Sha256": "508C3FBDB88D4828839D030F51AAFB481D26005AEBC54CD9D92A9E0AA2ED370A"
+    },
+    {
+      "File": "README.md.txt",
+      "Sha256": "F3F489095F77E53A943C9074EB60122205B80C69A3DCD4B06359C4EBAA037467"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "ECC169A0D8A4AB6CCC4B349C21CA5DA5DA5D4983154159E555E7075A91305C39"
+    },
+    {
+      "File": "run.ps1.txt",
+      "Sha256": "3A7362EB3A9FD1346C75382260F325283E183D0AB902998DBD8172A22BEC4F90"
+    }
+  ]
+}

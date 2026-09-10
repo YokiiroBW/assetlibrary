@@ -1,0 +1,183 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <bcrypt.h>
+#include <wrl/client.h>
+#include <array>
+#include <cstdio>
+#include <cstring>
+#include <cwchar>
+#include <memory>
+#include <vector>
+
+using Microsoft::WRL::ComPtr;
+constexpr wchar_t ParentName[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}";
+constexpr wchar_t TargetName[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+constexpr CLSID ComputerClass = {0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
+constexpr UINT PidlLimit = 16384;
+constexpr size_t ItemLimit = 128;
+struct FreePidl { using pointer = PIDLIST_ABSOLUTE; void operator()(pointer value) const { CoTaskMemFree(value); } };
+using Pidl = std::unique_ptr<ITEMIDLIST, FreePidl>;
+const char* Loaded() { return GetModuleHandleW(L"ExplorerDataProvider.dll") ? "true" : "false"; }
+bool Stage(const char* name, HRESULT hr) {
+    std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"pid\":%lu,\"tick\":%llu,\"sampleLoaded\":%s}\n",
+        name, static_cast<unsigned long>(hr), GetCurrentProcessId(), GetTickCount64(), Loaded());
+    return SUCCEEDED(hr);
+}
+bool SingleChild(PCUIDLIST_RELATIVE value) {
+    return value && !ILIsEmpty(value) && ILIsEmpty(ILGetNext(value)) && ILGetSize(value) <= PidlLimit;
+}
+bool Sha256(PCUIDLIST_RELATIVE value, UINT length, std::array<char,65>& hex) {
+    BCRYPT_ALG_HANDLE algorithm = nullptr;
+    NTSTATUS status = BCryptOpenAlgorithmProvider(&algorithm, BCRYPT_SHA256_ALGORITHM, nullptr, 0);
+    if (status < 0) return false;
+    std::array<BYTE,32> digest{};
+    status = BCryptHash(algorithm, nullptr, 0,
+        reinterpret_cast<PUCHAR>(const_cast<ITEMIDLIST*>(value)), length,
+        digest.data(), static_cast<ULONG>(digest.size()));
+    const NTSTATUS closed = BCryptCloseAlgorithmProvider(algorithm, 0);
+    if (status < 0 || closed < 0) return false;
+    constexpr char digits[] = "0123456789abcdef";
+    for (size_t i = 0; i < digest.size(); ++i) {
+        hex[i * 2] = digits[digest[i] >> 4];
+        hex[i * 2 + 1] = digits[digest[i] & 15];
+    }
+    hex.back() = '\0';
+    return true;
+}
+bool ParseChild(PCUIDLIST_RELATIVE parentPidl, Pidl& parsed) {
+    PIDLIST_ABSOLUTE targetRaw = nullptr;
+    const HRESULT hr = SHParseDisplayName(TargetName, nullptr, &targetRaw, 0, nullptr);
+    Pidl target(targetRaw);
+    if (!Stage("target.parse", hr) || !target || ILGetSize(target.get()) > PidlLimit) return false;
+    Pidl parentCopy(ILClone(target.get()));
+    if (!parentCopy || !ILRemoveLastID(parentCopy.get()) || !ILIsEqual(parentCopy.get(), parentPidl)) {
+        Stage("target.parentMismatch", E_INVALIDARG); return false;
+    }
+    parsed.reset(ILClone(ILFindLastID(target.get())));
+    if (!SingleChild(parsed.get())) { Stage("target.childInvalid", E_INVALIDARG); return false; }
+    return true;
+}
+struct Fingerprint { UINT length = 0; std::array<char,65> sha{}; };
+bool Snapshot(const char* phase, const char* source, PCUIDLIST_RELATIVE child, Fingerprint& result) {
+    if (!SingleChild(child)) return false;
+    result.length = ILGetSize(child);
+    if (!Sha256(child, result.length, result.sha)) return false;
+    std::printf("{\"fingerprintPhase\":\"%s\",\"source\":\"%s\",\"pidlBytes\":%u,\"sha256\":\"%s\"}\n",
+        phase, source, result.length, result.sha.data());
+    return true;
+}
+bool Unchanged(const Fingerprint& before, const Fingerprint& after) {
+    return before.length == after.length && before.sha == after.sha;
+}
+bool Query(IShellFolder* parent, PCUITEMID_CHILD child, SFGAOF input, unsigned int& callId,
+    const char* phase, const char* order, unsigned int position, const char* source) {
+    SFGAOF output = input;
+    const HRESULT hr = parent->GetAttributesOf(1, &child, &output);
+    std::printf("{\"callId\":%u,\"phase\":\"%s\",\"order\":\"%s\",\"position\":%u,\"source\":\"%s\",\"inputMask\":\"%08lx\",\"hr\":\"%08lx\",\"outputMask\":\"%08lx\",\"outputMaskValid\":%s,\"sampleLoaded\":%s,\"tick\":%llu}\n",
+        ++callId, phase, order, position, source, static_cast<unsigned long>(input), static_cast<unsigned long>(hr),
+        static_cast<unsigned long>(output), SUCCEEDED(hr) ? "true" : "false", Loaded(), GetTickCount64());
+    return SUCCEEDED(hr);
+}
+int CompareAttributes(bool parseFirst) {
+    std::printf("{\"mode\":\"%s\",\"pid\":%lu}\n", parseFirst ? "parse-first" : "enum-first", GetCurrentProcessId());
+    ComPtr<IShellFolder> desktop;
+    if (!Stage("desktop", SHGetDesktopFolder(&desktop)) || !desktop) return 1;
+    PIDLIST_ABSOLUTE parentRaw = nullptr;
+    HRESULT hr = SHParseDisplayName(ParentName, nullptr, &parentRaw, 0, nullptr);
+    Pidl parentPidl(parentRaw);
+    if (!Stage("stockParent.parse", hr) || !parentPidl) return 1;
+    ComPtr<IShellFolder> parent;
+    if (!Stage("stockParent.bind", desktop->BindToObject(parentPidl.get(), nullptr, IID_PPV_ARGS(&parent))) || !parent) return 1;
+    ComPtr<IPersist> persist;
+    if (!Stage("stockParent.persist", parent.As(&persist))) return 1;
+    CLSID actual{};
+    if (!Stage("stockParent.class", persist->GetClassID(&actual)) || actual != ComputerClass) return 1;
+    Pidl parsed;
+    Fingerprint initialParsed{};
+    unsigned int callId = 0, failedQueries = 0;
+    if (parseFirst) {
+        if (!ParseChild(parentPidl.get(), parsed) || !Snapshot("before-pre-enumeration-queries", "parsed", parsed.get(), initialParsed)) return 1;
+        constexpr std::array<SFGAOF,6> earlyMasks = {0x20000000,0x40418000,0x40000000,0x2044007F,0x28180000,0x20000000};
+        unsigned int position = 0;
+        for (const SFGAOF mask : earlyMasks)
+            if (!Query(parent.Get(), parsed.get(), mask, callId, "pre-enumeration", "parsed-only", ++position, "parsed")) ++failedQueries;
+        Fingerprint afterEarly{};
+        if (!Snapshot("after-pre-enumeration-queries", "parsed", parsed.get(), afterEarly)) return 1;
+        const bool stable = Unchanged(initialParsed, afterEarly);
+        std::printf("{\"preEnumerationInputUnchanged\":%s}\n", stable ? "true" : "false");
+        if (!stable) return 2;
+    }
+    ComPtr<IEnumIDList> enumerator;
+    hr = parent->EnumObjects(nullptr, SHCONTF_FOLDERS | SHCONTF_NONFOLDERS, &enumerator);
+    if (!Stage("enumeration.begin", hr) || (hr != S_OK && hr != S_FALSE) || (hr == S_OK && !enumerator)) return 1;
+    std::vector<Pidl> saved;
+    saved.reserve(ItemLimit);
+    bool complete = hr == S_FALSE;
+    if (!complete) {
+        // One final Next may establish termination at exactly the storage cap.
+        for (size_t attempt = 0; attempt <= ItemLimit; ++attempt) {
+            PITEMID_CHILD raw = nullptr;
+            ULONG fetched = 0;
+            hr = enumerator->Next(1, &raw, &fetched);
+            Pidl child(raw);
+            if (hr == S_FALSE && fetched == 0 && !child) { complete = true; break; }
+            if (hr != S_OK || fetched != 1 || !SingleChild(child.get())) {
+                Stage("enumeration.invalidResult", FAILED(hr) ? hr : E_UNEXPECTED); return 1;
+            }
+            if (saved.size() == ItemLimit) { Stage("enumeration.limit", E_BOUNDS); return 2; }
+            saved.push_back(std::move(child));
+        }
+    }
+    enumerator.Reset();
+    std::printf("{\"enumeratedCount\":%zu,\"enumerationComplete\":%s,\"targetParsedBeforeEnumeration\":%s,\"sampleLoaded\":%s}\n",
+        saved.size(), complete ? "true" : "false", parseFirst ? "true" : "false", Loaded());
+    if (!complete) return 2;
+
+    if (!parseFirst && !ParseChild(parentPidl.get(), parsed)) return 1;
+    unsigned int matches = 0, failures = 0;
+    PCUITEMID_CHILD enumerated = nullptr;
+    for (const auto& candidate : saved) {
+        hr = parent->CompareIDs(SHCIDS_CANONICALONLY, candidate.get(), parsed.get());
+        if (FAILED(hr)) ++failures;
+        else if (HRESULT_CODE(hr) == 0) { ++matches; enumerated = candidate.get(); }
+    }
+    std::printf("{\"canonicalMatches\":%u,\"comparisonFailures\":%u,\"sampleLoaded\":%s}\n", matches, failures, Loaded());
+    if (matches != 1 || failures || !enumerated) return 2;
+    Fingerprint enumBefore{}, parsedBefore{};
+    if (!Snapshot("before-paired-queries", "enum", enumerated, enumBefore) ||
+        !Snapshot("before-paired-queries", "parsed", parsed.get(), parsedBefore)) return 1;
+    const bool equal = enumBefore.length == parsedBefore.length && std::memcmp(enumerated, parsed.get(), enumBefore.length) == 0;
+    const bool parsedStableAcrossEnum = !parseFirst || Unchanged(initialParsed, parsedBefore);
+    std::printf("{\"pairPhase\":\"before\",\"byteEquality\":%s,\"parsedStableAcrossEnumeration\":%s}\n",
+        equal ? "true" : "false", parsedStableAcrossEnum ? "true" : "false");
+    if (!parsedStableAcrossEnum) return 2;
+    constexpr std::array<SFGAOF,5> masks = {0x28180000,0x20000000,0x40418000,0x40000000,0x2044007F};
+    for (const SFGAOF input : masks) {
+        for (unsigned int order = 0; order < 2; ++order) {
+            for (unsigned int position = 0; position < 2; ++position) {
+                const bool useEnum = (order == 0) == (position == 0);
+                PCUITEMID_CHILD child = useEnum ? enumerated : parsed.get();
+                if (!Query(parent.Get(), child, input, callId, "paired", order == 0 ? "enum-parsed" : "parsed-enum",
+                    position + 1, useEnum ? "enum" : "parsed")) ++failedQueries;
+            }
+        }
+    }
+    Fingerprint enumAfter{}, parsedAfter{};
+    if (!Snapshot("after-paired-queries", "enum", enumerated, enumAfter) ||
+        !Snapshot("after-paired-queries", "parsed", parsed.get(), parsedAfter)) return 1;
+    const bool stable = Unchanged(enumBefore, enumAfter) && Unchanged(parsedBefore, parsedAfter);
+    const bool equalAfter = enumAfter.length == parsedAfter.length && std::memcmp(enumerated, parsed.get(), enumAfter.length) == 0;
+    std::printf("{\"pairPhase\":\"after\",\"byteEquality\":%s,\"bothInputsUnchanged\":%s}\n", equalAfter ? "true" : "false", stable ? "true" : "false");
+    std::printf("{\"completedQueries\":%u,\"failedQueries\":%u,\"sameParentObject\":true,\"explicitSampleBindCalls\":0}\n", callId, failedQueries);
+    return failedQueries || !stable ? 1 : 0;
+}
+int wmain(int argc, wchar_t** argv) {
+    setvbuf(stdout, nullptr, _IONBF, 0);
+    static_assert(sizeof(void*) == 8);
+    if (argc != 2 || (wcscmp(argv[1], L"enum-first") && wcscmp(argv[1], L"parse-first"))) return 3;
+    const HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (!Stage("comInit", hr)) return 1;
+    const int result = CompareAttributes(wcscmp(argv[1], L"parse-first") == 0);
+    CoUninitialize();
+    return result;
+}

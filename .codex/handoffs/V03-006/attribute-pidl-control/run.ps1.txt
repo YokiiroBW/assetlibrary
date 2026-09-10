@@ -1,0 +1,144 @@
+param([ValidateSet('validate','run')][string]$Action='validate')
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-attribute-pidl-control'
+$guardSource=Join-Path $repo '.runtime/explorer-live/20260910-attributes-debug/guard.ps1'
+$dll=Join-Path $repo '.runtime/explorer-live/20260910-official-sample/ExplorerDataProvider.dll'
+$probe=Join-Path $PSScriptRoot 'build/Release/OfficialAttributePidlControl.exe'
+$guardHash='323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76'
+$probeHash='DB0700310571C6540E3DFE50CB2DCB718C3AE1E63D1CA25B365A04A5DB411E4C'
+$dllHash='F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96'
+foreach($pair in @(@($guardSource,$guardHash),@($probe,$probeHash),@($dll,$dllHash))){
+    if((Get-FileHash -LiteralPath $pair[0]).Hash -cne $pair[1]){throw 'Frozen input hash mismatch'}
+}
+if(Test-Path -LiteralPath $run){throw 'Single-use run directory already exists; refusing replay'}
+if($Action -eq 'validate'){
+    [ordered]@{Action='validate';HashesMatch=$true;RunDirectoryAbsent=$true;ProbeExecuted=$false;RegistrationStarted=$false} | ConvertTo-Json
+    return
+}
+function Hidden-Start([string]$file,[string[]]$arguments){
+    $start=[Diagnostics.ProcessStartInfo]::new($file)
+    $start.UseShellExecute=$false;$start.CreateNoWindow=$true
+    $start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+    foreach($argument in $arguments){$start.ArgumentList.Add($argument)}
+    $process=[Diagnostics.Process]::new();$process.StartInfo=$start
+    if(-not $process.Start()){$process.Dispose();throw 'Owned child launch failed'}
+    return $process
+}
+function Save-Json([string]$name,$value){
+    $value | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $run $name) -Encoding utf8
+}
+function Read-RegisteredRoots {
+    $roots=@(& (Join-Path $run 'guard.ps1') -Action verify | ConvertFrom-Json)
+    if(@($roots|Where-Object {$_.Hive -eq 'CurrentUser' -and $_.Present -and $_.Owner -ceq 'AssetLibrary.V03-006.OfficialSampleControl.20260910'}).Count -ne 4 -or
+       @($roots|Where-Object {$_.Hive -eq 'LocalMachine' -and $_.Present}).Count -ne 0){throw 'Registration presence changed'}
+    return $roots
+}
+New-Item -ItemType Directory -Path $run -ErrorAction Stop | Out-Null
+Copy-Item -LiteralPath $guardSource -Destination (Join-Path $run 'guard.ps1')
+if((Get-FileHash -LiteralPath (Join-Path $run 'guard.ps1')).Hash -cne $guardHash){throw 'Guard copy mismatch'}
+$guard=$null;$child=$null;$guardExited=$false;$probeCleanupConfirmed=$true
+try{
+    $guard=Hidden-Start (Join-Path $PSHOME 'pwsh.exe') @('-NoProfile','-File',(Join-Path $run 'guard.ps1'),'-Action','run')
+    $guardOutput=$guard.StandardOutput.ReadToEndAsync();$guardErrors=$guard.StandardError.ReadToEndAsync()
+    Save-Json 'launch.json' ([ordered]@{StartedUtc=[DateTimeOffset]::UtcNow.ToString('o');GuardPid=$guard.Id;GuardSha256=$guardHash;ProbeSha256=$probeHash;DllSha256=$dllHash;GuiActions=0;DebuggerAttachments=0})
+    $watch=[Diagnostics.Stopwatch]::StartNew()
+    $registerPath=Join-Path $run 'register.json'
+    while(-not(Test-Path -LiteralPath $registerPath)){
+        if($guard.HasExited -or $watch.ElapsedMilliseconds -ge 45000){throw 'Registration prerequisite unavailable within 45 seconds'}
+        Start-Sleep -Milliseconds 100
+    }
+    # Set-Content is not an atomic publication; wait for a complete JSON record.
+    $registered=$null
+    while($null -eq $registered){
+        try{$registered=Get-Content -LiteralPath $registerPath -Raw | ConvertFrom-Json}catch{
+            if($guard.HasExited -or $watch.ElapsedMilliseconds -ge 45000){throw}
+            Start-Sleep -Milliseconds 100
+        }
+    }
+    if($guard.HasExited -or -not $registered.Notification.Success -or
+       $registered.DllSha256 -cne $dllHash -or $registered.AttributesHex -cne 'A0000020' -or
+       ([DateTimeOffset]$registered.DeadlineUtc - [DateTimeOffset]::UtcNow).TotalSeconds -lt 30){throw 'Invalid notification, fixed fields, liveness or registration time'}
+    foreach($mode in @('enum-first','parse-first')){
+    if($guard.HasExited -or ([DateTimeOffset]$registered.DeadlineUtc - [DateTimeOffset]::UtcNow).TotalSeconds -lt 30){throw 'Insufficient live registration window for next process'}
+    Save-Json "$mode-before.json" ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Roots=@(Read-RegisteredRoots)})
+    $started=[DateTimeOffset]::UtcNow
+    $child=Hidden-Start $probe @($mode)
+    $probeCleanupConfirmed=$false
+    $childId=$child.Id;$childCreation=$child.StartTime.ToFileTimeUtc().ToString()
+    $output=$child.StandardOutput.ReadToEndAsync();$errors=$child.StandardError.ReadToEndAsync()
+    $timeout=-not $child.WaitForExit(10000)
+    # This is our standalone read-only probe, never Explorer or the registry guard.
+    if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned probe exit not confirmed'}}
+    $probeCleanupConfirmed=$true
+    $stdout=$output.GetAwaiter().GetResult();$stderr=$errors.GetAwaiter().GetResult()
+    Save-Json "$mode-probe.json" ([ordered]@{Mode=$mode;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$childId;CreationFileTime=$childCreation;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$stdout;Stderr=$stderr})
+    $afterProbe=[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');GuardAlive=(-not $guard.HasExited);WithinDeadline=([DateTimeOffset]::UtcNow -lt [DateTimeOffset]$registered.DeadlineUtc);Roots=@(Read-RegisteredRoots)}
+    Save-Json "$mode-after.json" $afterProbe
+    if(-not $afterProbe.GuardAlive -or -not $afterProbe.WithinDeadline){throw 'Registration lifetime no longer covers the observation'}
+    if($timeout -or $child.ExitCode -ne 0 -or $stderr){throw 'Probe did not complete successfully; preserve raw result'}
+    $rows=@($stdout -split '\r?\n' | Where-Object {$_} | ForEach-Object {$_ | ConvertFrom-Json})
+    $queries=@($rows|Where-Object {$_.phase -eq 'paired'})
+    $early=@($rows|Where-Object {$_.phase -eq 'pre-enumeration'})
+    $offset=if($mode -eq 'parse-first'){6}else{0}
+    if($early.Count -ne $offset){throw 'Unexpected pre-enumeration query count'}
+    $earlyMasks=@('20000000','40418000','40000000','2044007f','28180000','20000000')
+    for($index=0;$index -lt $offset;$index++){
+        $query=$early[$index]
+        if($query.callId -ne $index+1 -or $query.inputMask -cne $earlyMasks[$index] -or
+           $query.source -cne 'parsed' -or $query.order -cne 'parsed-only' -or $query.position -ne $index+1 -or
+           -not $query.outputMaskValid -or ([Convert]::ToUInt32($query.hr,16) -band 0x80000000L) -ne 0){throw 'Pre-enumeration query sequence or validity mismatch'}
+    }
+    $expectedMasks=@('28180000','20000000','40418000','40000000','2044007f')
+    if($queries.Count -ne 20){throw 'Expected 20 recorded attribute queries'}
+    for($index=0;$index -lt 20;$index++){
+        $query=$queries[$index];$slot=$index%4
+        $expectedSource=if($slot -eq 0 -or $slot -eq 3){'enum'}else{'parsed'}
+        $expectedOrder=if($slot -lt 2){'enum-parsed'}else{'parsed-enum'}
+        if($query.callId -ne $index+1+$offset -or $query.inputMask -cne $expectedMasks[[int][Math]::Floor($index/4)] -or
+           $query.source -cne $expectedSource -or $query.order -cne $expectedOrder -or $query.position -ne ($index%2)+1 -or
+           -not $query.outputMaskValid -or ([Convert]::ToUInt32($query.hr,16) -band 0x80000000L) -ne 0){throw 'Query sequence or HRESULT-validity mismatch'}
+    }
+    $fingerprints=@($rows|Where-Object {$null -ne $_.fingerprintPhase})
+    foreach($source in @('enum','parsed')){
+        $before=@($fingerprints|Where-Object {$_.source -eq $source -and $_.fingerprintPhase -eq 'before-paired-queries'})
+        $after=@($fingerprints|Where-Object {$_.source -eq $source -and $_.fingerprintPhase -eq 'after-paired-queries'})
+        if($before.Count -ne 1 -or $after.Count -ne 1 -or $before[0].pidlBytes -ne $after[0].pidlBytes -or $before[0].sha256 -cne $after[0].sha256){throw 'Paired-query PIDL fingerprint changed or absent'}
+        if($mode -eq 'parse-first' -and $source -eq 'parsed'){
+            $parsedPrints=@($fingerprints|Where-Object {$_.source -eq 'parsed'})
+            if($parsedPrints.Count -ne 4 -or @($parsedPrints|Where-Object {$_.pidlBytes -ne $before[0].pidlBytes -or $_.sha256 -cne $before[0].sha256}).Count){throw 'Parse-first PIDL changed across phases'}
+        }
+    }
+    Save-Json "$mode-sequence-validation.json" ([ordered]@{Queries=20+$offset;InputAndOrderVerified=$true;FingerprintsUnchanged=$true;OutputValuesNotPredetermined=$true})
+    $child.Dispose();$child=$null
+    }
+}finally{
+    if($null -ne $child){
+        try{
+            if(-not $child.HasExited){
+                $child.Kill()
+                $probeCleanupConfirmed=$child.WaitForExit(3000)
+            }else{
+                $probeCleanupConfirmed=$true
+            }
+        }catch{
+            $probeCleanupConfirmed=$false
+            Write-Warning 'Owned probe cleanup failed; registry guard cleanup will still be requested'
+        }finally{$child.Dispose()}
+    }
+    if($null -ne $guard){
+        New-Item -ItemType File -Path (Join-Path $run 'stop') -Force | Out-Null
+        $guardExited=$guard.WaitForExit(10000)
+        if($guardExited){
+            $guardExitCode=$guard.ExitCode
+            Save-Json 'guard-process.json' ([ordered]@{ExitCode=$guardExitCode;Stdout=$guardOutput.GetAwaiter().GetResult();Stderr=$guardErrors.GetAwaiter().GetResult()})
+        }
+        $guard.Dispose()
+        if(-not $guardExited){throw 'Guard cleanup pending; preserve process and inspect, never kill guard'}
+        $cleanup=Get-Content -LiteralPath (Join-Path $run 'cleanup.json') -Raw | ConvertFrom-Json
+        $finalRoots=@(& (Join-Path $run 'guard.ps1') -Action verify | ConvertFrom-Json)
+        $clean=$guardExitCode -eq 0 -and @($finalRoots|Where-Object Present).Count -eq 0 -and @($cleanup.CleanupErrors).Count -eq 0 -and $cleanup.Notification.Success
+        Save-Json 'final-cleanup.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Roots=$finalRoots;GuardExited=$guardExited;CleanupVerified=$clean;ProbeExitConfirmed=$probeCleanupConfirmed;GuiActions=0;DebuggerAttachments=0})
+        if(-not $clean -or -not $probeCleanupConfirmed){throw 'Registry, notification or owned probe cleanup incomplete'}
+    }
+}
