@@ -1,0 +1,35 @@
+--- guard-base.ps1
++++ guard-candidate.ps1
+@@ -80,24 +80,30 @@
+   public string Apartment; public int ApartmentHr; public int ApartmentType;
+   public int CoInitializeHr=unchecked((int)0x8000000A); public int FolderHr=unchecked((int)0x8000000A);
+   public bool PidlPresent; public bool NotifyInvoked; public bool NotifyReturned; public bool Joined;
++  public bool AssocNotifyInvoked; public bool AssocNotifyReturned; public int ManagedThreadId; public uint NativeThreadId;
++  public long AssocStartedElapsedMs; public long AssocReturnedElapsedMs;
+   public string Stage="before-thread"; public string ExceptionType; public long ElapsedMs;
+   public string CoInitializeHex {get{return CoInitializeHr.ToString("X8");}}
+   public string FolderHex {get{return FolderHr.ToString("X8");}}
+-  public bool Success {get{return Joined&&CoInitializeHr>=0&&FolderHr>=0&&PidlPresent&&NotifyReturned&&ExceptionType==null;}}
++  public bool Success {get{return Joined&&CoInitializeHr>=0&&FolderHr>=0&&PidlPresent&&NotifyReturned&&AssocNotifyInvoked&&AssocNotifyReturned&&ExceptionType==null;}}
+   public NotificationReport Copy(){return (NotificationReport)MemberwiseClone();}
+  }
+  [DllImport("ole32.dll")] static extern int CoGetApartmentType(out int apt,out int qualifier);
++ [DllImport("kernel32.dll")] static extern uint GetCurrentThreadId();
+  public static NotificationReport NotifyDrives() {
+   var result=new NotificationReport();var watch=System.Diagnostics.Stopwatch.StartNew();
+   var thread=new Thread(()=>{
+    IntPtr pidl=IntPtr.Zero;bool initialized=false;
+    try{
+-    lock(result){result.Apartment=Thread.CurrentThread.GetApartmentState().ToString();int type,qualifier;result.ApartmentHr=CoGetApartmentType(out type,out qualifier);result.ApartmentType=type;result.Stage="apartment";}
++    lock(result){result.Apartment=Thread.CurrentThread.GetApartmentState().ToString();result.ManagedThreadId=Thread.CurrentThread.ManagedThreadId;result.NativeThreadId=GetCurrentThreadId();int type,qualifier;result.ApartmentHr=CoGetApartmentType(out type,out qualifier);result.ApartmentType=type;result.Stage="apartment";}
+     int init=CoInitializeEx(IntPtr.Zero,2);lock(result){result.CoInitializeHr=init;result.Stage="CoInitializeEx-returned";}if(init<0)return;initialized=true;
+     int hr=SHGetSpecialFolderLocation(IntPtr.Zero,17,out pidl);lock(result){result.FolderHr=hr;result.PidlPresent=pidl!=IntPtr.Zero;result.Stage="GetSpecialFolderLocation-returned";}if(hr<0||pidl==IntPtr.Zero)return;
+     lock(result){result.NotifyInvoked=true;result.Stage="SHChangeNotify-entered";}
+     SHChangeNotify(0x1000,0,pidl,IntPtr.Zero);
+     lock(result){result.NotifyReturned=true;result.Stage="SHChangeNotify-returned";}
++    lock(result){result.AssocNotifyInvoked=true;result.AssocStartedElapsedMs=watch.ElapsedMilliseconds;result.Stage="SHCNE_ASSOCCHANGED-entered";}
++    SHChangeNotify(0x08000000,0,IntPtr.Zero,IntPtr.Zero);
++    lock(result){result.AssocNotifyReturned=true;result.AssocReturnedElapsedMs=watch.ElapsedMilliseconds;result.Stage="SHCNE_ASSOCCHANGED-returned";}
+    }catch(Exception error){lock(result){result.Stage="exception";result.ExceptionType=error.GetType().FullName;}}
+    finally{if(pidl!=IntPtr.Zero)Marshal.FreeCoTaskMem(pidl);if(initialized)CoUninitialize();}
+   });

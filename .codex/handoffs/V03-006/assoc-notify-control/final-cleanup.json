@@ -1,0 +1,16 @@
+{
+  "Utc": "2026-09-10T04:09:01.0280136+00:00",
+  "GuardExitCode": 0,
+  "RootsCleaned": true,
+  "UpdateDirAndAssocRegistrationCallsCompleted": true,
+  "UpdateDirAndAssocCleanupCallsCompleted": true,
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "ReturnedBrowseHresult": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "VoidReturnNotProofOfCacheProcessing": true,
+  "DebuggerAttached": false,
+  "FurtherVariants": 0
+}

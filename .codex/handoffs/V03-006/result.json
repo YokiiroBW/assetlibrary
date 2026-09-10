@@ -380,7 +380,31 @@
     ".codex/handoffs/V03-006/target-debug-bounded/register.json",
     ".codex/handoffs/V03-006/target-debug-bounded/sdk-baseline.json",
     ".codex/handoffs/V03-006/target-debug-bounded/thispc-baseline.json",
-    ".codex/handoffs/V03-006/target-debug-bounded/window-cleanup.json"
+    ".codex/handoffs/V03-006/target-debug-bounded/window-cleanup.json",
+    ".codex/handoffs/V03-006/assoc-notify-control.md",
+    ".codex/handoffs/V03-006/assoc-notify-control/.gitattributes",
+    ".codex/handoffs/V03-006/assoc-notify-control/actual-view-thispc.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/actual-view-versus-official.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/after-view-readback.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/before-browse.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/cleanup.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/discovery.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/error-dialog.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/evidence.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/final-cleanup.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/guard.ps1.txt",
+    ".codex/handoffs/V03-006/assoc-notify-control/identity.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/official-browse-call.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/preflight.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/preparation-audit.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/preparation-guard-base.ps1.txt",
+    ".codex/handoffs/V03-006/assoc-notify-control/preparation-guard.patch",
+    ".codex/handoffs/V03-006/assoc-notify-control/preparation-validation.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/register.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/run.ps1.txt",
+    ".codex/handoffs/V03-006/assoc-notify-control/sdk-baseline.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/thispc-baseline.json",
+    ".codex/handoffs/V03-006/assoc-notify-control/window-cleanup.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -566,5 +590,15 @@
     "debugger_cleanup_verified": true,
     "target_alive_without_debugger": true,
     "registry_and_ui_cleanup_verified": true
+  },
+  "assoc_notify_checkpoint": {
+    "report": "assoc-notify-control.md",
+    "candidate_sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+    "both_notifications_registration": true,
+    "both_notifications_cleanup": true,
+    "native_browse_calls": 1,
+    "native_browse_timed_out": true,
+    "namespace_activation_observed": false,
+    "cleanup_verified": true
   }
 }

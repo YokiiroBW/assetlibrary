@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[双通知对照](assoc-notify-control.md)：候选hash及最小diff核准；注册/cleanup的UPDATEDIR与ASSOC在同一STA线程各自Invoked/Returned/Joined成功，原字段不变。SDK/ThisPC正控通过，唯一Browse10秒超时/实际无关联模态，有效期view仍ThisPC2项；最终四根与自有UI清理。未附加debugger或重跑旧套件，不计G1通过。
+
 新增[v2真实附加](target-debug-bounded.md)：身份/ready及唯一Browse时序成立；4096总入口上限触发约31秒提前结束，0匹配，passed=false不能写成清理失败。三个断点删除/剩余0/Detach/目标存活无debugger均true；有效期实际view仍ThisPC/2项，最终STA注册清理和自有UI清理完成。未调上限或重跑旧合成/业务测试，G1不计通过。
 
 新增[目标观察器准入拒绝](target-debug-admission.md)：新目标所有权/SDK/ThisPC正控有效，固定749CD509工具在查询debugger状态前置失败，未附加、未ready、未Browse；不计产品激活测试。root只读证实旧handle mask导致Win32 5，另mask查询成功且无debugger。注册/自有UI已清理，旧合成/业务测试不重跑。

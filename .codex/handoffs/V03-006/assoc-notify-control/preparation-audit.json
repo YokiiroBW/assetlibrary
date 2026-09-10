@@ -1,0 +1,107 @@
+{
+  "recordedUtc": "2026-09-10T03:58:05.561492+00:00",
+  "officialSourceAudit": [
+    {
+      "path": ".codex/handoffs/V03-006/official-runtime-control/guard.ps1.txt",
+      "sha256": "fde45f57f7a7caa5a51f57a3a4f1f7b353982635761087cfe7134076a95d9738",
+      "calls": [
+        {
+          "line": 85,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/official-runtime-control/notify-diagnostic.ps1.txt",
+      "sha256": "10947386d74117453d67cade0411bda515470e7e39e4c0c9cb5b50735fd8faa7",
+      "calls": [
+        {
+          "line": 34,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/official-runtime-control/notify-cleanup.ps1.txt",
+      "sha256": "ab316df24e1f94f6c66cf4e48fd9dedfb994b282ca34d65c2963d1d56c440411",
+      "calls": [
+        {
+          "line": 34,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/official-sta-runtime-control/guard.ps1.txt",
+      "sha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+      "calls": [
+        {
+          "line": 99,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/parent-discovery-control/guard.ps1.txt",
+      "sha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+      "calls": [
+        {
+          "line": 99,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/register-first-control/guard.ps1.txt",
+      "sha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+      "calls": [
+        {
+          "line": 99,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/target-debug-admission/guard.ps1.txt",
+      "sha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+      "calls": [
+        {
+          "line": 99,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    },
+    {
+      "path": ".codex/handoffs/V03-006/target-debug-bounded/guard.ps1.txt",
+      "sha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+      "calls": [
+        {
+          "line": 99,
+          "event": "0x1000"
+        }
+      ],
+      "assocChangedCallPresent": false
+    }
+  ],
+  "proofContrast": {
+    "path": "tests/windows-shell/registration.ps1",
+    "line": 24,
+    "event": "0x08000000",
+    "notEvidenceForOfficialRegistrationWindows": true
+  },
+  "conclusion": "No ASSOCCHANGED call in audited official-run helper sources or corresponding notification contracts; not a claim about all software or the whole project",
+  "baselineSha256": "36fa47bfd737b1c8253e5187246a25b0c9c28eb3863cfadf7f769e5d6448c8e4",
+  "candidateSha256": "323cd843ce402405c07102b7950a201617b372ae7a3e7da0a62ed602bacd3a76",
+  "registrationAndCleanupBodyUnchanged": true,
+  "guiOperated": false,
+  "registrationPerformed": false,
+  "notificationsExecuted": false,
+  "intendedPlacement": "Copy candidate as guard.ps1 into a new sibling directory under .runtime/explorer-live only after coordinator approval; its existing relative DLL path remains unchanged"
+}

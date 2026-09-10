@@ -1,0 +1,78 @@
+{
+  "Utc": "2026-09-10T04:08:30.5611275+00:00",
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ],
+  "CleanupErrors": [],
+  "NotifyDrivesCompleted": true,
+  "Notification": {
+    "Apartment": "STA",
+    "ApartmentHr": 0,
+    "ApartmentType": 0,
+    "CoInitializeHr": 1,
+    "FolderHr": 0,
+    "PidlPresent": true,
+    "NotifyInvoked": true,
+    "NotifyReturned": true,
+    "Joined": true,
+    "AssocNotifyInvoked": true,
+    "AssocNotifyReturned": true,
+    "ManagedThreadId": 15,
+    "NativeThreadId": 30208,
+    "AssocStartedElapsedMs": 0,
+    "AssocReturnedElapsedMs": 0,
+    "Stage": "SHCNE_ASSOCCHANGED-returned",
+    "ExceptionType": null,
+    "ElapsedMs": 0,
+    "CoInitializeHex": "00000001",
+    "FolderHex": "00000000",
+    "Success": true
+  }
+}
