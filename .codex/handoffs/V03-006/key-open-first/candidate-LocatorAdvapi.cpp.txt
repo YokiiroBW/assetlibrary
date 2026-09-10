@@ -1,0 +1,109 @@
+#include <Windows.h>
+#include <bcrypt.h>
+#include <winver.h>
+#include <array>
+#include <cstddef>
+#include <cstdio>
+#include <string>
+#include <vector>
+static_assert(sizeof(void*)==8);
+static void Stage(const char* name,HRESULT hr=S_OK) { printf("{\"kind\":\"stage\",\"stage\":\"%s\",\"hr\":\"0x%08lX\",\"tick\":%llu}\n",name,static_cast<ULONG>(hr),GetTickCount64()); fflush(stdout); }
+static void Need(bool ok,const char* stage) { if(!ok) { Stage(stage,E_FAIL); throw E_FAIL; } }
+struct File { HANDLE value=INVALID_HANDLE_VALUE; ~File(){if(value!=INVALID_HANDLE_VALUE) CloseHandle(value);} };
+struct Module { HMODULE value=nullptr; ~Module(){if(value) FreeLibrary(value);} };
+template<typename T> static T ReadSelf(ULONG_PTR address) {
+    T value{}; SIZE_T copied=0;
+    Need(ReadProcessMemory(GetCurrentProcess(),reinterpret_cast<LPCVOID>(address),&value,sizeof(value),&copied)&&copied==sizeof(value),"bounded_self_image_read");
+    return value;
+}
+static std::string Hex(const std::array<BYTE,32>& bytes) {
+    static constexpr char digits[]="0123456789abcdef"; std::string result;
+    for(BYTE b:bytes){result+=digits[b>>4];result+=digits[b&15];} return result;
+}
+struct Sha256 {
+    BCRYPT_ALG_HANDLE algorithm=nullptr; BCRYPT_HASH_HANDLE hash=nullptr; std::vector<BYTE> state;
+    Sha256(){
+        Need(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)>=0,"sha256_provider");
+        DWORD size=0,received=0;
+        Need(BCryptGetProperty(algorithm,BCRYPT_OBJECT_LENGTH,reinterpret_cast<PUCHAR>(&size),sizeof(size),&received,0)>=0&&received==sizeof(size)&&size<65536,"sha256_state_size");
+        state.resize(size);
+        Need(BCryptCreateHash(algorithm,&hash,state.data(),size,nullptr,0,0)>=0,"sha256_create");
+    }
+    ~Sha256(){if(hash)BCryptDestroyHash(hash);if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0);}
+    void Add(BYTE* bytes,ULONG size){Need(BCryptHashData(hash,bytes,size,0)>=0,"sha256_add");}
+    std::string Finish(){std::array<BYTE,32> result{};Need(BCryptFinishHash(hash,result.data(),static_cast<ULONG>(result.size()),0)>=0,"sha256_finish");return Hex(result);}
+};
+
+static void Locate() {
+    Module requested;requested.value=LoadLibraryExW(L"advapi32.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);Need(requested.value!=nullptr,"system_advapi_load");
+    FARPROC api=GetProcAddress(requested.value,"RegOpenKeyExW");Need(api!=nullptr,"public_reg_open_export");
+    ULONG_PTR address=reinterpret_cast<ULONG_PTR>(api);
+    MEMORY_BASIC_INFORMATION memory{};
+    Need(VirtualQuery(reinterpret_cast<LPCVOID>(address),&memory,sizeof(memory))==sizeof(memory)&&memory.Type==MEM_IMAGE&&memory.State==MEM_COMMIT,"reject_non_image_method");
+    DWORD protection=memory.Protect&0xff;
+    Need(!(memory.Protect&PAGE_GUARD)&&(protection==PAGE_EXECUTE||protection==PAGE_EXECUTE_READ||protection==PAGE_EXECUTE_WRITECOPY),"method_executable_not_writable");
+    Module module;
+    Need(GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,reinterpret_cast<LPCWSTR>(address),&module.value)!=FALSE,"hold_method_module");
+    Need(memory.AllocationBase==module.value,"method_allocation_identity");
+    wchar_t modulePath[32768]{},systemPath[32768]{};
+    DWORD chars=GetModuleFileNameW(module.value,modulePath,32768); UINT systemChars=GetSystemDirectoryW(systemPath,32768);
+    Need(chars>0&&chars<32768&&systemChars>0&&systemChars<32768,"module_path_metadata");
+    std::wstring full(modulePath,chars);auto slash=full.find_last_of(L'\\');Need(slash!=std::wstring::npos,"module_basename");
+    std::wstring base=full.substr(slash+1);
+    const char* allowed=nullptr;
+    if(_wcsicmp(base.c_str(),L"advapi32.dll")==0)allowed="advapi32.dll";
+    if(_wcsicmp(base.c_str(),L"KernelBase.dll")==0)allowed="KernelBase.dll";
+    if(_wcsicmp(base.c_str(),L"ntdll.dll")==0)allowed="ntdll.dll";
+    Need(allowed!=nullptr,"reject_unexpected_registry_api_module");
+    std::wstring expected=std::wstring(systemPath)+L"\\"+base;
+    Need(CompareStringOrdinal(full.c_str(),-1,expected.c_str(),-1,TRUE)==CSTR_EQUAL,"reject_non_system32_module");
+    Need((GetFileAttributesW(full.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)==0,"reject_module_reparse_point");
+    File file;file.value=CreateFileW(full.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
+    Need(file.value!=INVALID_HANDLE_VALUE,"lock_system_module_file");
+    wchar_t finalPath[32768]{};DWORD finalChars=GetFinalPathNameByHandleW(file.value,finalPath,32768,0);
+    Need(finalChars>0&&finalChars<32768&&CompareStringOrdinal(finalPath,-1,(L"\\\\?\\"+expected).c_str(),-1,TRUE)==CSTR_EQUAL,"system_module_final_path");
+    LARGE_INTEGER length{};Need(GetFileSizeEx(file.value,&length)&&length.QuadPart>0&&length.QuadPart<=128*1024*1024,"bounded_module_file_size");
+
+    ULONG_PTR imageBase=reinterpret_cast<ULONG_PTR>(module.value);
+    auto dos=ReadSelf<IMAGE_DOS_HEADER>(imageBase);
+    Need(dos.e_magic==IMAGE_DOS_SIGNATURE&&dos.e_lfanew>0&&dos.e_lfanew<4096,"dos_header");
+    auto nt=ReadSelf<IMAGE_NT_HEADERS64>(imageBase+dos.e_lfanew);
+    Need(nt.Signature==IMAGE_NT_SIGNATURE&&nt.FileHeader.Machine==IMAGE_FILE_MACHINE_AMD64&&nt.OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR64_MAGIC,"x64_pe_image");
+    Need(nt.FileHeader.SizeOfOptionalHeader>=sizeof(IMAGE_OPTIONAL_HEADER64)&&nt.FileHeader.NumberOfSections>0&&nt.FileHeader.NumberOfSections<=96,"bounded_pe_sections");
+    Need(address>=imageBase&&address-imageBase<nt.OptionalHeader.SizeOfImage,"method_image_rva");
+    DWORD rva=static_cast<DWORD>(address-imageBase),codeStart=0,codeLength=0,codeFileOffset=0;
+    ULONG_PTR sections=imageBase+dos.e_lfanew+offsetof(IMAGE_NT_HEADERS64,OptionalHeader)+nt.FileHeader.SizeOfOptionalHeader;
+    Need(sections-imageBase+nt.FileHeader.NumberOfSections*sizeof(IMAGE_SECTION_HEADER)<=nt.OptionalHeader.SizeOfHeaders,"sections_within_headers");
+    for(WORD index=0;index<nt.FileHeader.NumberOfSections;index++) {
+        auto section=ReadSelf<IMAGE_SECTION_HEADER>(sections+index*sizeof(IMAGE_SECTION_HEADER));
+        ULONGLONG start=section.VirtualAddress,end=start+section.Misc.VirtualSize;
+        if(rva>=start&&rva<end) {
+            Need((section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=nt.OptionalHeader.SizeOfImage,"method_inside_image_code");
+            codeStart=section.VirtualAddress;codeLength=section.Misc.VirtualSize;
+            Need(static_cast<ULONGLONG>(rva-section.VirtualAddress)+32<=section.SizeOfRawData,"code_prefix_file_backed");
+            codeFileOffset=section.PointerToRawData+rva-section.VirtualAddress;
+        }
+    }
+    Need(codeLength!=0&&static_cast<ULONGLONG>(rva)+32<=static_cast<ULONGLONG>(codeStart)+codeLength,"code_prefix_within_section");
+    auto prefix=ReadSelf<std::array<BYTE,32>>(address);Sha256 codeHash;codeHash.Add(prefix.data(),static_cast<ULONG>(prefix.size()));std::string prefixHash=codeHash.Finish();
+    Sha256 fileHash;std::array<BYTE,65536> buffer{};ULONGLONG total=0;
+    for(;;){DWORD read=0;Need(ReadFile(file.value,buffer.data(),static_cast<DWORD>(buffer.size()),&read,nullptr)!=FALSE,"system_module_hash_read");if(!read)break;total+=read;Need(total<=static_cast<ULONGLONG>(length.QuadPart),"module_file_unchanged_size");fileHash.Add(buffer.data(),read);}
+    Need(total==static_cast<ULONGLONG>(length.QuadPart),"complete_system_module_hash");std::string moduleHash=fileHash.Finish();
+    LARGE_INTEGER position{};position.QuadPart=codeFileOffset;Need(SetFilePointerEx(file.value,position,nullptr,FILE_BEGIN)!=FALSE,"prefix_file_seek");
+    std::array<BYTE,32> diskPrefix{};DWORD got=0;Need(ReadFile(file.value,diskPrefix.data(),32,&got,nullptr)&&got==32&&diskPrefix==prefix,"self_prefix_matches_system_file");
+    DWORD ignored=0,versionSize=GetFileVersionInfoSizeW(full.c_str(),&ignored);
+    Need(versionSize>0&&versionSize<=1024*1024,"bounded_version_metadata");std::vector<BYTE> version(versionSize);
+    Need(GetFileVersionInfoW(full.c_str(),0,versionSize,version.data())!=FALSE,"file_version_read");
+    VS_FIXEDFILEINFO* fixed=nullptr;UINT fixedSize=0;
+    Need(VerQueryValueW(version.data(),L"\\",reinterpret_cast<void**>(&fixed),&fixedSize)&&fixedSize>=sizeof(*fixed)&&fixed->dwSignature==0xFEEF04BD,"fixed_file_version");
+    printf("{\"kind\":\"reg_open_location_candidate\",\"module\":\"%s\",\"rva\":%lu,\"rvaHex\":\"0x%08lX\",\"api\":\"RegOpenKeyExW\",\"codeStartRva\":%lu,\"codeLength\":%lu,\"imageSize\":%lu,\"timestamp\":%lu,\"machine\":\"0x%04X\",\"memoryType\":\"MEM_IMAGE\",\"fileSize\":%llu,\"fileSha256\":\"%s\",\"codePrefix32Sha256\":\"%s\",\"version\":\"%u.%u.%u.%u\",\"absoluteAddressRetained\":false,\"userPathRetained\":false,\"apiInvoked\":false,\"tick\":%llu}\n",
+        allowed,rva,rva,codeStart,codeLength,nt.OptionalHeader.SizeOfImage,nt.FileHeader.TimeDateStamp,static_cast<unsigned>(nt.FileHeader.Machine),total,moduleHash.c_str(),prefixHash.c_str(),static_cast<unsigned>(HIWORD(fixed->dwFileVersionMS)),static_cast<unsigned>(LOWORD(fixed->dwFileVersionMS)),static_cast<unsigned>(HIWORD(fixed->dwFileVersionLS)),static_cast<unsigned>(LOWORD(fixed->dwFileVersionLS)),GetTickCount64());fflush(stdout);
+
+}
+
+int wmain(int argc,wchar_t**) {
+    if(argc!=1){Stage("no_arguments_allowed",E_INVALIDARG);return 2;}
+    bool ok=false;try{Locate();ok=true;}catch(...){Stage("locator_failed",E_FAIL);}
+    int printed=printf("{\"kind\":\"result\",\"passed\":%s,\"ownProcessOnly\":true,\"registryApiInvoked\":false,\"debuggerAttached\":false}\n",ok?"true":"false");
+    return ok&&printed>=0&&fflush(stdout)==0?0:1;
+}

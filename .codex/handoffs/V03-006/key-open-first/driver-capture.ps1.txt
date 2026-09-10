@@ -1,0 +1,69 @@
+param([Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$PlanId)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-clsid-key-open'
+$exe='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-clsid-key-open-debug/bin/ClsidKeyOpenObserver.exe'
+$expectedHash='73A3807982D087F7E67E1789D85A02C2F7E588B908BC6FAAD8C0201DFF0EBF81'
+if((Get-FileHash -LiteralPath $exe).Hash -cne $expectedHash){throw 'Frozen observer changed'}
+$identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw|ConvertFrom-Json
+$registration=Get-Content -LiteralPath (Join-Path $run 'register.json') -Raw|ConvertFrom-Json
+if(-not $registration.Notification.Success -or ([DateTimeOffset]$registration.DeadlineUtc-[DateTimeOffset]::UtcNow).TotalSeconds -lt 180){throw 'Registration prerequisite/time failed'}
+$start=[Diagnostics.ProcessStartInfo]::new($exe)
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+$start.ArgumentList.Add('--run-plan');$start.ArgumentList.Add($PlanId)
+$observer=[Diagnostics.Process]::new();$observer.StartInfo=$start
+$stream=[IO.File]::Open((Join-Path $run 'observer.jsonl'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read)
+$writer=[IO.StreamWriter]::new($stream,[Text.UTF8Encoding]::new($false));$writer.AutoFlush=$true
+$started=$false;$ready=$false;$cancelSent=$false;$final=$null;$lineTask=$null;$failure=$null
+function Save-Json([string]$name,$value){$value|ConvertTo-Json -Depth 8|Set-Content -LiteralPath (Join-Path $run $name) -Encoding utf8}
+function Send-Cancel {
+    if($started -and -not $cancelSent -and -not $observer.HasExited){
+        $script:cancelSent=$true
+        & $exe --cancel-plan $PlanId | Set-Content -LiteralPath (Join-Path $run 'cancel-request.jsonl') -Encoding utf8
+        Save-Json 'cancel-signal-result.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');ExitCode=$LASTEXITCODE})
+    }
+}
+try{
+    if(-not $observer.Start()){throw 'Observer launch failed'}
+    $started=$true;$observerCreation=$observer.StartTime.ToFileTimeUtc().ToString()
+    $stderr=$observer.StandardError.ReadToEndAsync();$lineTask=$observer.StandardOutput.ReadLineAsync();$readyDeadline=[DateTimeOffset]::UtcNow.AddSeconds(45)
+    Save-Json 'capture-launch.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;ObserverPid=$observer.Id;ObserverCreationFileTime=$observerCreation;ObserverHash=$expectedHash;TargetPid=$identity.Pid;CreationFileTime=$identity.CreationFileTime})
+    while($null -ne $lineTask){
+        if($lineTask.Wait(100)){
+            $line=$lineTask.GetAwaiter().GetResult()
+            if($null -eq $line){$lineTask=$null;break}
+            $lineTask=$observer.StandardOutput.ReadLineAsync()
+            $writer.WriteLine($line);Write-Output $line;$row=$line|ConvertFrom-Json
+            if($row.kind -eq 'stage' -and $row.stage -in @('planned_setup_failed','planned_capture_failed')){
+                $failure=$row.stage;Save-Json 'capture-failed.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Stage=$row.stage})
+            }
+            if($row.kind -eq 'result'){$final=$row}
+            if($row.kind -eq 'capture_ready'){
+                if($ready -or $cancelSent -or $failure -or $observer.HasExited -or [DateTimeOffset]::UtcNow -ge $readyDeadline -or
+                   [string]$row.pid -cne [string]$identity.Pid -or [string]$row.creationFiletime -cne [string]$identity.CreationFileTime -or $row.profile -cne 'official'){throw 'Ready identity/time refused'}
+                $ready=$true
+                Save-Json 'capture-ready.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Payload=$row;CaptureDeadlineTick=([long]$row.tick+60000);RegistrationDeadlineUtc=$registration.DeadlineUtc})
+            }
+        }
+        if(-not $ready -and -not $cancelSent -and [DateTimeOffset]::UtcNow -ge $readyDeadline){
+            $failure='no_ready_within_45_seconds';Save-Json 'capture-failed.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Stage=$failure});Send-Cancel
+        }
+    }
+}catch{
+    $failure=$_.Exception.Message;Save-Json 'capture-failed.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Error=$failure});Send-Cancel
+}finally{
+    if($started){
+        # Keep the pipe drained during all external/manual steps and cancellation cleanup.
+        while($null -ne $lineTask){
+            $line=$lineTask.GetAwaiter().GetResult();if($null -eq $line){break}
+            $writer.WriteLine($line);Write-Output $line
+            try{$row=$line|ConvertFrom-Json;if($row.kind -eq 'result'){$final=$row}}catch{$failure='Unparseable observer output preserved'}
+            $lineTask=$observer.StandardOutput.ReadLineAsync()
+        }
+        $observer.WaitForExit()
+        [IO.File]::WriteAllText((Join-Path $run 'observer.stderr.txt'),$stderr.GetAwaiter().GetResult(),[Text.UTF8Encoding]::new($false))
+        Save-Json 'capture-result.json' ([ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;ObserverPid=$observer.Id;ObserverCreationFileTime=$observerCreation;ExitCode=$observer.ExitCode;Ready=$ready;CancelAttempted=$cancelSent;RunnerFailure=$failure;AutomaticNotify=$false;AutomaticBrowse=$false;Final=$final})
+    }
+    $writer.Dispose();$observer.Dispose()
+}
+if($failure -or -not $ready -or $null -eq $final -or -not $final.cleanupVerified){throw 'Capture incomplete/failed; inspect preserved cleanup evidence'}

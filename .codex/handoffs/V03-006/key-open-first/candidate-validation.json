@@ -1,0 +1,77 @@
+{
+  "stage": "compiled_offline_and_owned_reference_missing_key_controls_complete",
+  "observerSha256": "73a3807982d087f7e67e1789d85a02c2f7e588b908bc6faad8c0201dff0ebf81",
+  "targetSha256": "5289c3faa3f2e682ccf9e0252add12ad971599252b6d04e367ac6661ed73700b",
+  "build": {
+    "raw": "build-01.log",
+    "exitCode": 0,
+    "toolchain": "MSVC 14.44.35207 / SDK 10.0.26100.0 / x64 / W4 WX / MT"
+  },
+  "offline": {
+    "raw": "self-test-01.jsonl",
+    "keyStatusAndMappingPredicates": 20,
+    "planParserAndFramePredicates": 19,
+    "processOrRegistryScenariosClaimed": false
+  },
+  "lookup": {
+    "raw": "location-02.jsonl",
+    "api": "RegOpenKeyExW",
+    "module": "KernelBase.dll",
+    "rva": "0x0002BBF0",
+    "fileSha256": "7131d449316ce66a5059f9d07265b2baec91000741e897bae4dda804c13a4972",
+    "prefix32Sha256": "6b963eec632c3324ab1c264c023d04482b72ae71a026806b0e3c137560c1355c",
+    "ownApiSetExportAndAdvapiStubIatTargetEqual": true,
+    "apiInvoked": false,
+    "advapiStubFirstFindingPreserved": "location-01.jsonl and LocatorAdvapi.cpp"
+  },
+  "actualOwnedReferenceRuns": [
+    {
+      "mode": "normal",
+      "raw": "normal-01.jsonl",
+      "pid": 37724,
+      "creationFiletime": 134335276475380894,
+      "matched": 1,
+      "returned": 1,
+      "status": 2,
+      "failedOutputRead": false,
+      "nonmatchingDiscarded": 1,
+      "breakpointsRemoved": 2,
+      "cleanupVerified": true,
+      "ownedChildExitedCooperatively": true,
+      "finiteWaitTimeouts": 0,
+      "exitInterruptObserved": false
+    },
+    {
+      "mode": "cancel",
+      "raw": "cancel-01.jsonl",
+      "pid": 27592,
+      "creationFiletime": 134335276600271581,
+      "matched": 1,
+      "returned": 1,
+      "status": 2,
+      "failedOutputRead": false,
+      "nonmatchingDiscarded": 1,
+      "breakpointsRemoved": 2,
+      "cleanupVerified": true,
+      "ownedChildExitedCooperatively": true,
+      "finiteWaitTimeouts": 14,
+      "exitInterruptObserved": false
+    }
+  ],
+  "postExitIdentity": "post-exit-identity.json",
+  "limits": [
+    "Only standard HKCR and the fixed exact ASCII BA16 ShellFolder subkey match; no arbitrary path or profile accepted",
+    "Failed LSTATUS2 is not HRESULT success; output PHKEY is not dereferenced or claimed null on failure",
+    "Success PHKEY read and close-by-reference paths require the coordinator registered positive test",
+    "Real mode requires frozen SHCORE file/PE and remote IAT AAED8 equal to the selected KernelBase entry; this actual host check is not exercised by the synthetic runs",
+    "Cached metadata can prevent fresh key opens; zero matching events do not prove absence of earlier reads or identify a cause",
+    "Native Attach/Detach lack a hard completion guarantee; no blind debugger/target termination is a valid cleanup method"
+  ],
+  "actionsNotPerformed": [
+    "no real Explorer or existing process attach",
+    "no GUI or registry modification",
+    "no private ordinal or PIDL invocation",
+    "no target handle closed by observer",
+    "no target memory/register/API parameter writes apart from owned debugger breakpoints"
+  ]
+}

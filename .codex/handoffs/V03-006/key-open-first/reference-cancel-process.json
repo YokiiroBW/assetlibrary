@@ -1,0 +1,11 @@
+{
+  "Mode": "cancel",
+  "StartedUtc": "2026-09-10T16:02:12.3046775+00:00",
+  "CompletedUtc": "2026-09-10T16:02:14.1176855+00:00",
+  "Pid": 44940,
+  "CreationFileTime": "134335297323050483",
+  "ExecutableSha256": "73A3807982D087F7E67E1789D85A02C2F7E588B908BC6FAAD8C0201DFF0EBF81",
+  "ExitCode": 0,
+  "StderrEmpty": true,
+  "HardKillUsed": false
+}

@@ -1,0 +1,68 @@
+{
+  "Utc": "2026-09-10T16:07:21.3449869+00:00",
+  "CleanupUtc": "2026-09-10T16:05:35.0180092+00:00",
+  "GuardExitCode": 0,
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ],
+  "DualNotificationSuccess": true,
+  "RegisteredReferencesPassed": true,
+  "RealAttachAndIatMappingPassed": true,
+  "RealCleanupVerified": true,
+  "ExtraNotificationExecuted": false,
+  "FirstThisPcNavigationExecuted": false,
+  "BrowseExecuted": false,
+  "OwnedSdkWindowClosed": true,
+  "PreservedUserWindowId": 2229572,
+  "PreservedUserWindowPresent": true,
+  "ExplorerRestarts": 0,
+  "DebuggerHardKillUsed": false,
+  "NoRetry": true
+}

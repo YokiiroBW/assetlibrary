@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[公开开键首轮](key-open-first.md)registered normal/cancel均status0/非空可读句柄/参考自行close及清理通过。真实SDK窗口准入和SHCORE→KernelBase实际IAT验证S_OK，但ready后5.609秒原异常保护结束，工具返回时已脱离，额外notify/首次ThisPC/Browse均未执行，0匹配无开键结论。有效20字段再次通过，SDK窗/8根双通知/最终20missing清理完成，用户窗口保留；不放宽预算或盲重跑。
+
 最新：[RegOpen触发流程准备](notify-trigger-plan.md)已写notify-only薄包装，仅AST提取/核对323 guard原C#文字块，未来只调用一次原样STA双通知对。流程收敛SDK17→observer ready→通知成功→首次ThisPC及正控→一次Browse，采集日志须持续排空。旧capture未改、包装未执行、未编译提取C#、无notify/注册/GUI/attach；等待新公开API候选与阶段driver合并。
 
 最新：[V2消费点实机](cache-consumption-v2.md)完成同周期normal/cancel语义及清理通过后的一次Explorer对照。参考各2组为flags1/A0000020/0/0，真实4组为0/0/0/0，外部字段前后20/20仍正确；入口仍无关联应用/ThisPC2项。59.438秒异常保护早停，6断点/Detach/目标存活清理成功；最后双通知/8根/20missing与专属UI清理，用户下载窗保留，无原Explorer重启。该消费状态差异不直接等于注册API失败，G1仍partial。

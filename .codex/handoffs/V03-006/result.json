@@ -510,7 +510,9 @@
     ".codex/handoffs/V03-006/cache-consumption-v2.md",
     ".codex/handoffs/V03-006/cache-consumption-v2/",
     ".codex/handoffs/V03-006/notify-trigger-plan.md",
-    ".codex/handoffs/V03-006/notify-trigger-preparation/"
+    ".codex/handoffs/V03-006/notify-trigger-preparation/",
+    ".codex/handoffs/V03-006/key-open-first.md",
+    ".codex/handoffs/V03-006/key-open-first/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -592,7 +594,8 @@
       "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run",
       "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run",
       "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart",
-      "Notify-only preparation: fixed guard and literal hashes, PowerShell AST and static single-method invocation reviewed; no native notification, registration, C# compilation or observer execution"
+      "Notify-only preparation: fixed guard and literal hashes, PowerShell AST and static single-method invocation reviewed; no native notification, registration, C# compilation or observer execution",
+      "Public RegOpen registered normal/cancel succeed with nonnull returned handles closed by reference; real SHCORE IAT matches public entry, then 5.609s protected early exit before manual trigger; complete owned UI/debugger/registry cleanup verified"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -902,7 +905,7 @@
   },
   "notify_trigger_checkpoint": {
     "report": "notify-trigger-plan.md",
-    "status": "wrapper_prepared_ast_only_not_executed",
+    "status": "manual_collector_implemented_extra_notify_unexecuted_due_early_exit",
     "guard_csharp_literal_sha256": "5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A",
     "original_sta_pair_preserved": true,
     "assoc_events_per_future_invocation": 1,
@@ -913,6 +916,27 @@
     "gui_actions": 0,
     "attachments": 0,
     "old_capture_modified": false,
-    "new_stage_driver_pending": true
+    "new_stage_driver_pending": false
+  },
+  "key_open_first_checkpoint": {
+    "report": "key-open-first.md",
+    "status": "registered_references_passed_real_ready_then_early_exit",
+    "registered_normal_passed": true,
+    "registered_cancel_passed": true,
+    "reference_handle_close_verified": true,
+    "real_shcore_iat_mapping_verified": true,
+    "real_ready": true,
+    "health_failure_after_ready_seconds": 5.609,
+    "real_matched_entries": 0,
+    "real_matched_returns": 0,
+    "post_ready_extra_notify_executed": false,
+    "first_thispc_executed": false,
+    "browse_executed": false,
+    "real_debugger_cleanup_verified": true,
+    "registry_cleanup_verified": true,
+    "user_window_preserved": 2229572,
+    "explorer_restarts": 0,
+    "collector_invoked_synchronously": true,
+    "tool_returned_running_session": false
   }
 }

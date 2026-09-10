@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[公开开键首轮](key-open-first.md)：registered normal/cancel成功语义及参考close/2断点清理/协作退出通过；真实准入/IAT验证通过，5.609秒保护退出不计60秒或完整触发。实机0匹配且通知/ThisPC/Browse未执行；唯一断点/Detach/目标存活清理确认。前后20字段正确、最终20missing/8根双通知及SDK窗清理通过，原用户Explorer不重启。
+
 新增[通知触发纯准备](notify-trigger-plan.md)：固定guard323 SHA、唯一Add-Type文字块SHA5D65A429及两个薄包装AST通过；未执行包装/NotifyDrives、未编译提取C#、无注册/GUI/attach。仅确定3秒原join/10秒sender外限和异步日志衔接方案，真实通知成功及新RegOpen参考/实机均未计通过。
 
 新增[V2参考及实机](cache-consumption-v2.md)：normal/cancel各2个matched调用逐个恰1cache/return、flags&1/A0000020/0/0与20000000返回一致，2种参考通过且清理/协作退出确认。之后唯一real命中4cache全零，与0/0/0/26返回配对；59.438秒保护早停非完整60秒通过，6断点/Detach/同目标存活清理确认。前后20字段匹配、最终20missing/8根/双通知及专属UI清理通过；原用户Explorer未重启，G1不计通过。

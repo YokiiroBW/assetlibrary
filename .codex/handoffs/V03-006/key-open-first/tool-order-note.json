@@ -1,0 +1,13 @@
+{
+  "Utc": "2026-09-10T16:13:29.742868+00:00",
+  "kind": "derived_tool_order_note_not_raw_log",
+  "ToolChunkId": "8d1d5a",
+  "ToolWallTimeSeconds": 6.7430622,
+  "ToolExitCode": 1,
+  "ToolReturnedRunningSession": false,
+  "CollectorWasInvokedSynchronously": true,
+  "ReadyProduced": true,
+  "ObserverEndedBeforeToolReturned": true,
+  "PostReadyNotifyThisPcBrowseExecuted": false,
+  "Source": "Observed original tool return metadata and native observer JSONL; no separate parent-process identity log"
+}

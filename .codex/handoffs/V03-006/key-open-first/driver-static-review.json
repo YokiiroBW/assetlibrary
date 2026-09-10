@@ -1,0 +1,32 @@
+{
+  "Utc": "2026-09-10T16:01:07.5996166+00:00",
+  "Style": "minimal manual steps, no state-machine dispatch",
+  "AstFiles": [
+    {
+      "File": ".runtime/explorer-reg-open-stage/capture.ps1",
+      "AstPassed": true,
+      "Sha256": "682FF61C8339F90A9FD5D766F8F70BEB0E6F9318DDFCA8665B8E19CE9115F0FB"
+    },
+    {
+      "File": ".runtime/explorer-reg-open-stage/assert-live.ps1",
+      "AstPassed": true,
+      "Sha256": "2A7641AF35B934AA561BB36F72DCF507E793A99A915094C55E9A43BB18092920"
+    },
+    {
+      "File": ".runtime/explorer-official-observer/run-clsid-key-open.ps1",
+      "AstPassed": true,
+      "Sha256": "B0577834A4E6BEB96FD00633408F87AACE755CEA0CC156542E0C384C26B8991B"
+    }
+  ],
+  "CaptureStartsOnlyObserver": true,
+  "ReadyDoesNotDispatchNotifyOrBrowse": true,
+  "ReadLineTaskAdvancedBeforeParsing": true,
+  "CooperativeCancelOnErrorOrMissingReady": true,
+  "ExternalStepsRequireLiveIdentityAndNativeBudget": true,
+  "NativeClockInvoked": false,
+  "RegistrationStarted": false,
+  "NotificationInvoked": false,
+  "ObserverStarted": false,
+  "GuiActions": 0,
+  "RuntimeFailureBranchesExecuted": false
+}

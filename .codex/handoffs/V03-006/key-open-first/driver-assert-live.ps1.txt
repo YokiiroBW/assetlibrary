@@ -1,0 +1,32 @@
+param([Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$PlanId,[Parameter(Mandatory)][ValidateSet('notify','thispc','browse')][string]$Step)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-clsid-key-open'
+if(-not ('RegOpenStageClock' -as [type])){Add-Type -Path (Join-Path $PSScriptRoot 'StageClock.cs')}
+if((Test-Path -LiteralPath (Join-Path $run 'capture-failed.json')) -or (Test-Path -LiteralPath (Join-Path $run 'capture-result.json')) -or
+   (Test-Path -LiteralPath (Join-Path $run 'stop')) -or (Test-Path -LiteralPath (Join-Path $run 'cleanup.json'))){throw 'Observation or registration has ended/failed'}
+$launch=Get-Content -LiteralPath (Join-Path $run 'capture-launch.json') -Raw|ConvertFrom-Json
+$ready=Get-Content -LiteralPath (Join-Path $run 'capture-ready.json') -Raw|ConvertFrom-Json
+$identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw|ConvertFrom-Json
+$tick=[RegOpenStageClock]::GetTickCount64();$minimumMs=if($Step -eq 'notify'){30000}elseif($Step -eq 'thispc'){25000}else{15000}
+if($launch.PlanId -cne $PlanId -or $ready.PlanId -cne $PlanId -or [string]$ready.Payload.pid -cne [string]$identity.Pid -or
+   [string]$ready.Payload.creationFiletime -cne [string]$identity.CreationFileTime -or
+   $tick -lt [ulong]$ready.Payload.tick -or [long]$ready.CaptureDeadlineTick-[long]$tick -lt $minimumMs -or
+   ([DateTimeOffset]$ready.RegistrationDeadlineUtc-[DateTimeOffset]::UtcNow).TotalSeconds -lt 30){throw 'Identity or remaining-time gate refused'}
+foreach($spec in @(@($launch.ObserverPid,$launch.ObserverCreationFileTime),@($identity.Pid,$identity.CreationFileTime))){
+    $process=[Diagnostics.Process]::GetProcessById([int]$spec[0])
+    try{$null=$process.Handle;if($process.HasExited -or $process.StartTime.ToFileTimeUtc().ToString() -cne [string]$spec[1]){throw 'Observer/target identity expired'}}finally{$process.Dispose()}
+}
+if($Step -eq 'notify'){
+    if(Test-Path -LiteralPath (Join-Path $run 'after-ready-notify-requested')){throw 'Notification already attempted'}
+}else{
+    $notification=Get-Content -LiteralPath (Join-Path $run 'after-ready-notify.json') -Raw|ConvertFrom-Json
+    if($notification.PlanId -cne $PlanId -or -not $notification.Notification.Success){throw 'Successful notification prerequisite absent'}
+}
+if($Step -eq 'browse'){
+    if(Test-Path -LiteralPath (Join-Path $run 'browse-dispatched')){throw 'Browse already attempted'}
+    $baseline=Get-Content -LiteralPath (Join-Path $run 'thispc-baseline.json') -Raw|ConvertFrom-Json
+    if($baseline.Mode -cne 'thispc' -or $baseline.ExitCode -ne 0 -or $baseline.TimedOut -or $baseline.Stderr -or
+       [string]$baseline.TargetPid -cne [string]$identity.Pid -or [DateTimeOffset]$baseline.StartedUtc -lt [DateTimeOffset]$notification.CompletedUtc){throw 'ThisPC baseline/time prerequisite absent'}
+}
+[ordered]@{PlanId=$PlanId;Step=$Step;Utc=[DateTimeOffset]::UtcNow.ToString('o');Tick=$tick;ObserverPid=$launch.ObserverPid;ObserverCreationFileTime=$launch.ObserverCreationFileTime;TargetPid=$identity.Pid;TargetCreationFileTime=$identity.CreationFileTime;RemainingCaptureMs=[long]$ready.CaptureDeadlineTick-[long]$tick;RegistrationDeadlineUtc=$ready.RegistrationDeadlineUtc} | ConvertTo-Json
