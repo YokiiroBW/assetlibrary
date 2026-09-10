@@ -1,0 +1,27 @@
+#pragma once
+#include <Windows.h>
+#include <objbase.h>
+#include <cstdint>
+inline constexpr GUID ComputerClsid{0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
+inline constexpr DWORD SharedMagic=0x414C4244;
+inline constexpr ULONG PidlLimit=2048;
+inline constexpr ULONG AttributesRva=0x1188E0;
+inline constexpr ULONG RequestedAttributes=0x68180000;
+inline constexpr ULONG ExpectedReferenceAttributes=0x60000000;
+inline constexpr ULONG ExpectedImageSize=8798208;
+inline constexpr ULONG ExpectedTimestamp=2800646882;
+inline constexpr char ExpectedFileHash[]="22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b";
+inline constexpr char ExpectedCodeHash[]="991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64";
+struct SharedState {
+    DWORD magic,targetPid;
+    ULONGLONG targetCreation,methodAddress;
+    ULONG expectedPidlLength;
+    BYTE expectedPidl[PidlLimit];
+    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult,matchMask,otherMask;
+    volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
+};
+inline ULONGLONG CreationTime(HANDLE process) {
+    FILETIME created{},exited{},kernel{},user{};
+    if(!GetProcessTimes(process,&created,&exited,&kernel,&user))return 0;
+    return(static_cast<ULONGLONG>(created.dwHighDateTime)<<32)|created.dwLowDateTime;
+}

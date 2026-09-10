@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "bounded_real_capture_complete_parent_bind_locator_in_progress",
-  "next_action": "v2 actual owned Explorer capture complete and cleaned; no repeat COM export capture or count-limit increase. Curie prepares only a standalone MyComputer IShellFolder BindToObject implementation locator/control in .runtime/explorer-bind-location, no real attachment or registration. Root reviews before another actual observation. Optional clean Windows11 environment availability question is pending; current local work continues.",
+  "status": "actual_folder_bit_missing_controlled_pidl_source_comparison_preparing",
+  "next_action": "Actual attributes show parsed official child lacks requestedFOLDER bit. However prior independent evidence queried enumerated child with different mask and only canonical equality; not a controlled process-only difference. Windows owner prepares two standalone modes under the same scoped registration: enum-first dual-source/same-mask comparisons and parse-first host-order masks before enumeration, then comparisons. Root reviews before run; no GUI or debugger in this next control. All prior actual sites clean.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,7 +87,7 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "windows_real_com_capture_complete_parent_bind_locator_in_progress",
+    "stage": "windows_actual_attribute_difference_under_controlled_input_analysis",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "Desktop authorization persists and actual RDP input works; operations remain scoped to owned test windows and reversible proof registration.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",

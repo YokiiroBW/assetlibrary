@@ -1,0 +1,240 @@
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Shared.h" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Shared.h"
+index ce3e9d6..e14fd13 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Shared.h"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Shared.h"
+@@ -5,17 +5,19 @@
+ inline constexpr GUID ComputerClsid{0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
+ inline constexpr DWORD SharedMagic=0x414C4244;
+ inline constexpr ULONG PidlLimit=2048;
+-inline constexpr ULONG BindRva=0xABC70;
++inline constexpr ULONG AttributesRva=0x1188E0;
++inline constexpr ULONG RequestedAttributes=0x68180000;
++inline constexpr ULONG ExpectedReferenceAttributes=0x60000000;
+ inline constexpr ULONG ExpectedImageSize=8798208;
+ inline constexpr ULONG ExpectedTimestamp=2800646882;
+ inline constexpr char ExpectedFileHash[]="22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b";
+-inline constexpr char ExpectedCodeHash[]="d191a9c6322a212351ae2247519f3cbaa2444746feb1b18f4441b5e9c728a162";
++inline constexpr char ExpectedCodeHash[]="991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64";
+ struct SharedState {
+     DWORD magic,targetPid;
+     ULONGLONG targetCreation,methodAddress;
+     ULONG expectedPidlLength;
+     BYTE expectedPidl[PidlLimit];
+-    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult,matchNonNull,otherNonNull;
++    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult,matchMask,otherMask;
+     volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
+ };
+ inline ULONGLONG CreationTime(HANDLE process) {
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Target.cpp" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Target.cpp"
+index 963abbd..d0aee56 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Target.cpp"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Target.cpp"
+@@ -5,7 +5,8 @@
+ #include <cstddef>
+ #include <cwchar>
+ #include <cstring>
+-static_assert(offsetof(IShellFolderVtbl,BindToObject)==5*sizeof(void*));
++static_assert(offsetof(IShellFolderVtbl,GetAttributesOf)==9*sizeof(void*));
++static_assert((SFGAO_FOLDER|SFGAO_FILESYSTEM|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED)==RequestedAttributes);
+ template<typename T>struct Com{T* value=nullptr;~Com(){if(value)value->lpVtbl->Release(value);}};
+ struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}};
+ static void Need(bool ok){if(!ok)throw E_FAIL;}
+@@ -15,7 +16,7 @@ static void ExceptionControl(SharedState* state){
+     __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+ }
+ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+-    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl,windowsPidl;
++    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl;
+     Check(SHGetDesktopFolder(&desktop.value));Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value));
+     Check(desktop.value->lpVtbl->BindToObject(desktop.value,computerPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&computer.value)));
+     Com<IPersist> persist;Check(computer.value->lpVtbl->QueryInterface(computer.value,IID_IPersist,reinterpret_cast<void**>(&persist.value)));
+@@ -24,10 +25,9 @@ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+     Need(GetVolumePathNameW(windows,root,32768)&&wcslen(root)==3&&root[1]==L':'&&root[2]==L'\\');
+     ULONG eaten=0,attributes=0;
+     Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,root,&eaten,&rootPidl.value,&attributes));
+-    Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,windows,&eaten,&windowsPidl.value,&attributes));
+-    UINT rootSize=ILGetSize(rootPidl.value),windowsSize=ILGetSize(windowsPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&windowsSize>rootSize&&windowsSize<=PidlLimit);
++    UINT rootSize=ILGetSize(rootPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&!ILIsEmpty(rootPidl.value)&&ILFindLastID(rootPidl.value)==rootPidl.value);
+     state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());
+-    auto method=computer.value->lpVtbl->BindToObject;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
++    auto method=computer.value->lpVtbl->GetAttributesOf;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
+     state->expectedPidlLength=rootSize;memcpy(state->expectedPidl,rootPidl.value,rootSize);
+     InterlockedExchange(&state->ready,1);
+     ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+@@ -35,8 +35,10 @@ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+         InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+         if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+             ExceptionControl(state);
+-            {Com<IShellFolder> other;state->otherResult=method(computer.value,windowsPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&other.value));state->otherNonNull=other.value!=nullptr;}
+-            {Com<IShellFolder> matching;state->matchResult=method(computer.value,rootPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&matching.value));state->matchNonNull=matching.value!=nullptr;}
++            SFGAOF other=RequestedAttributes;PCUITEMID_CHILD duplicate[]={rootPidl.value,rootPidl.value};
++            state->otherResult=method(computer.value,2,duplicate,&other);state->otherMask=other;
++            SFGAOF matching=RequestedAttributes;PCUITEMID_CHILD single[]={rootPidl.value};
++            state->matchResult=method(computer.value,1,single,&matching);state->matchMask=matching;
+             worked=true;InterlockedExchange(&state->callsFinished,1);
+         }
+         if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Observer.cpp" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Observer.cpp"
+index ffe55d0..a4774c9 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Observer.cpp"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Observer.cpp"
+@@ -99,7 +99,7 @@ struct OwnedTarget {
+         std::wstring targetPath(executable, length);
+         auto slash = targetPath.find_last_of(L'\\');
+         Need(slash != std::wstring::npos, "observer_directory");
+-        targetPath.resize(slash + 1); targetPath += L"BindReferenceTarget.exe";
++        targetPath.resize(slash + 1); targetPath += L"AttributesReferenceTarget.exe";
+         Need((GetFileAttributesW(targetPath.c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) == 0, "synthetic_image_not_reparse");
+         imageLock.value = CreateFileW(targetPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+         Need(imageLock.value != INVALID_HANDLE_VALUE, "synthetic_image_lock");
+@@ -229,12 +229,13 @@ struct Capture {
+     Events* events = nullptr;
+     std::array<PDEBUG_BREAKPOINT,1> entries{};
+     struct ReturnSite { ULONG64 address; ULONG thread; PDEBUG_BREAKPOINT bp; };
+-    struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,outputAddress; };
++    struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,maskAddress; };
+     std::vector<ReturnSite> returnSites;
+     std::vector<PendingCall> pending;
+     bool attachRequested = false, createdEvent = false, storageSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+     ULONG64 candidateAddress=0;
+-    bool returnedNonNull=false;
++    ULONG observedOutputMask=0;bool outputMaskValid=false;
++    ULONG multiItemDiscarded=0;
+     ULONG exceptionCount=0;
+     HANDLE externalCancel = nullptr;
+     std::atomic<bool> cancelled{false};
+@@ -318,11 +319,11 @@ struct Capture {
+         Checked(registers->GetIndexByName("rdx", &regRdx), "rdx_index");
+         Checked(registers->GetIndexByName("r8", &regR8), "r8_index");
+         Checked(registers->GetIndexByName("r9", &regR9), "r9_index");
+-        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"bind_entry_breakpoint_add");
+-        Checked(entries[0]->SetOffset(candidateAddress),"bind_entry_breakpoint_offset");
+-        Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"bind_entry_breakpoint_enable");
++        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"attributes_entry_breakpoint_add");
++        Checked(entries[0]->SetOffset(candidateAddress),"attributes_entry_breakpoint_offset");
++        Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"attributes_entry_breakpoint_enable");
+         armed=true;
+-        Record("single_bind_breakpoint_installed");
++        Record("single_attributes_breakpoint_installed");
+     }
+     void VerifyModule(ULONG64 base,const char* image) {
+         ValidatePid();Need(fixedModule.MatchesImage(image),"target_fixed_system_image_path");
+@@ -336,11 +337,11 @@ struct Capture {
+         for(WORD i=0;i<nt.FileHeader.NumberOfSections;i++) {
+             auto section=Read<IMAGE_SECTION_HEADER>(sections+i*sizeof(IMAGE_SECTION_HEADER));
+             ULONG64 end=static_cast<ULONG64>(section.VirtualAddress)+section.Misc.VirtualSize;
+-            if(BindRva>=section.VirtualAddress&&static_cast<ULONG64>(BindRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
++            if(AttributesRva>=section.VirtualAddress&&static_cast<ULONG64>(AttributesRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
+         }
+         Need(code,"target_candidate_inside_code_range");
+-        auto bytes=Read<std::array<BYTE,32>>(base+BindRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
+-        candidateAddress=base+BindRva;
++        auto bytes=Read<std::array<BYTE,32>>(base+AttributesRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
++        candidateAddress=base+AttributesRva;
+         if(target.Synthetic())Need(candidateAddress==target.state->methodAddress,"remote_candidate_matches_reference_vtable");
+         Record("target_candidate_identity_verified");
+     }
+@@ -360,14 +361,17 @@ struct Capture {
+         Need(copied==length,"complete_pidl_length");
+         return memcmp(bytes.data(),target.expectedPidl.data(),length)==0;
+     }
+-    bool AllSyntheticReturns() const { return returns>0&&pending.empty()&&observed==S_OK&&returnedNonNull; }
++    bool AllSyntheticReturns() const { return returns>0&&pending.empty()&&observed==S_OK&&outputMaskValid&&observedOutputMask==ExpectedReferenceAttributes; }
+     HRESULT OnBreakpoint(PDEBUG_BREAKPOINT bp) {
+         ValidatePid();
+         ULONG id = 0; Checked(bp->GetId(&id), "breakpoint_id");
+         if (id==1) {
+             entryCount++;
+             Need(entryCount <= 4096, "bounded_entry_count");
+-            if(!PidlMatches(Reg(regRdx))){unmatched++;return DEBUG_STATUS_GO;}
++            ULONG cidl=static_cast<ULONG>(Reg(regRdx));
++            if(cidl!=1){unmatched++;if(cidl==2)multiItemDiscarded++;return DEBUG_STATUS_GO;}
++            ULONG64 array=Reg(regR8);
++            if(!array||!PidlMatches(Read<ULONG64>(array))){unmatched++;return DEBUG_STATUS_GO;}
+             Need(pending.size()<32&&matched<128,"bounded_matching_calls");
+             matched++;
+             ULONG64 returnAddress = Read<ULONG64>(Reg(regRsp));
+@@ -383,10 +387,9 @@ struct Capture {
+                 Checked(created.bp->SetMatchThreadId(threadId),"return_thread_scope");
+                 Checked(created.bp->AddFlags(DEBUG_BREAKPOINT_ENABLED),"return_breakpoint_enable");
+             }
+-            ULONG64 rsp=Reg(regRsp);pending.push_back({site,threadId,matched,rsp+8,Read<ULONG64>(rsp+40)});
+-            GUID iid=Read<GUID>(Reg(regR9));const char* category=iid==IID_IShellFolder?"IShellFolder":iid==IID_IShellFolder2?"IShellFolder2":iid==IID_IUnknown?"IUnknown":"other";
+-            wchar_t iidText[40]{};Need(StringFromGUID2(iid,iidText,40)==39,"format_requested_iid");
+-            printf("{\"kind\":\"matching_bind_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"iidCategory\":\"%s\",\"requestedIid\":\"%ls\",\"bindContextPresent\":%s,\"tick\":%llu}\n",matched,target.Profile(),target.pid,category,iidText,Reg(regR8)?"true":"false",GetTickCount64());fflush(stdout);
++            ULONG64 rsp=Reg(regRsp),maskAddress=Reg(regR9);Need(maskAddress!=0,"matched_attribute_mask_pointer_required");
++            ULONG inputMask=Read<ULONG>(maskAddress);pending.push_back({site,threadId,matched,rsp+8,maskAddress});
++            printf("{\"kind\":\"matching_attributes_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"inputMask\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,inputMask,GetTickCount64());fflush(stdout);
+             return DEBUG_STATUS_GO;
+         }
+         Need(id>=100&&id-100<returnSites.size(),"owned_return_breakpoint");
+@@ -395,12 +398,12 @@ struct Capture {
+         size_t found=pending.size();
+         while(found>0) { found--; const auto& call=pending[found]; if(call.site==id-100&&call.thread==threadId&&call.expectedRsp==rsp) break; }
+         if(pending.empty()||pending[found].site!=id-100||pending[found].thread!=threadId||pending[found].expectedRsp!=rsp) return DEBUG_STATUS_GO;
+-        ULONG64 outputAddress=pending[found].outputAddress;
++        ULONG64 maskAddress=pending[found].maskAddress;
+         ULONG callId=pending[found].callId;
+         observed = static_cast<HRESULT>(static_cast<ULONG>(Reg(regRax)));
+-        returns++;returnedNonNull=outputAddress&&Read<ULONG64>(outputAddress)!=0;
++        returns++;observedOutputMask=Read<ULONG>(maskAddress);outputMaskValid=SUCCEEDED(observed);
+         pending.erase(pending.begin()+static_cast<ptrdiff_t>(found));
+-        printf("{\"kind\":\"matching_bind_return\",\"callId\":%lu,\"hr\":\"0x%08lX\",\"outputParameterPresent\":%s,\"returnedInterfaceNull\":%s,\"tick\":%llu}\n",callId,static_cast<ULONG>(observed),outputAddress?"true":"false",outputAddress?(returnedNonNull?"false":"true"):"null",GetTickCount64());fflush(stdout);
++        printf("{\"kind\":\"matching_attributes_return\",\"callId\":%lu,\"hr\":\"0x%08lX\",\"outputMask\":\"0x%08lX\",\"outputMaskValid\":%s,\"tick\":%llu}\n",callId,static_cast<ULONG>(observed),observedOutputMask,outputMaskValid?"true":"false",GetTickCount64());fflush(stdout);
+         atEventBreak = target.Synthetic()&&!cancelMode&&AllSyntheticReturns();
+         return atEventBreak ? DEBUG_STATUS_BREAK : DEBUG_STATUS_GO;
+     }
+@@ -434,7 +437,8 @@ struct Capture {
+             Need(!outputFailed && !callbackFailed && !unexpectedExit, "capture_callback_health");
+             Need(pending.empty()&&returns==matched,"matching_returns_complete");
+             if(target.Synthetic()) {
+-                Need(AllSyntheticReturns()&&unmatched>=1,"bind_positive_and_nonmatching_control");
++                Need(AllSyntheticReturns()&&unmatched>=1&&multiItemDiscarded>=1,"attributes_single_and_multi_item_control");
++                printf("{\"kind\":\"multi_item_control_discarded\",\"count\":%lu,\"extraItemDataRead\":false,\"tick\":%llu}\n",multiItemDiscarded,GetTickCount64());fflush(stdout);
+                 Need(cancelMode ? cancelled.load() : !cancelled.load(),"end_reason");
+             }
+         } catch (...) {
+@@ -610,7 +614,7 @@ int wmain(int argc, wchar_t** argv) {
+         passed = passed && cleaned && detachedAlive && !capture.callbackFailed && !capture.unexpectedExit;
+         if(target.Synthetic()) {
+             passed=passed&&target.state->debuggerObserved&&!target.state->targetError&&target.state->ownExceptionHandled;
+-            passed=passed&&target.state->matchResult==S_OK&&target.state->otherResult==S_OK&&target.state->matchNonNull&&target.state->otherNonNull;
++            passed=passed&&target.state->matchResult==S_OK&&target.state->otherResult==S_OK&&static_cast<ULONG>(target.state->matchMask)==ExpectedReferenceAttributes&&static_cast<ULONG>(target.state->otherMask)==ExpectedReferenceAttributes;
+         }
+     } catch (...) { Record(real?"planned_setup_failed":"synthetic_setup_failed", E_FAIL); }
+     stopped = target.StopNormally();
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Plan.h" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Plan.h"
+index 65cd7ed..16022b2 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Plan.h"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\Plan.h"
+@@ -7,7 +7,7 @@
+ #include <string_view>
+ #include <vector>
+ 
+-inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid";
++inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug";
+ inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+ inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ inline constexpr ULONGLONG Second = 10000000;
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\build.ps1" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\build.ps1"
+index 3ce66de..f5bfa8a 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\build.ps1"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug\\build.ps1"
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference = 'Stop'
+-$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-bind-debug-iid'
++$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-attributes-debug'
+ if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+ $toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk = 'C:\Program Files (x86)\Windows Kits\10'
+@@ -13,8 +13,8 @@ $options = @('/nologo','/std:c++20','/W4','/WX','/EHsc','/MT','/O2','/utf-8','/D
+ $libraries = @('/link',"/LIBPATH:$toolset\lib\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64",'kernel32.lib','ole32.lib','uuid.lib','user32.lib','advapi32.lib','dwmapi.lib','shell32.lib','bcrypt.lib')
+ Push-Location $taskRoot
+ try {
+-  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\BindReferenceTarget.exe" @libraries
++  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\AttributesReferenceTarget.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Synthetic target compilation failed.' }
+-  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\BindObserver.exe" @libraries
++  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\AttributesObserver.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Observer compilation failed.' }
+ } finally { Pop-Location }

@@ -1,0 +1,89 @@
+{
+  "kind": "requested_iid_metadata_only",
+  "baselineObserverSha256": "822fee1961946116b7e6b8babc5907f81e7c569b30d674ac2506cbf823037619",
+  "build": {
+    "compiler": "MSVC x64 14.44.35207",
+    "sdk": "10.0.26100.0",
+    "warnings": 0,
+    "errors": 0,
+    "exit": 0
+  },
+  "unchangedSources": [
+    {
+      "path": "Shared.h",
+      "byteIdentical": true
+    },
+    {
+      "path": "Fingerprint.h",
+      "byteIdentical": true
+    },
+    {
+      "path": "Target.cpp",
+      "byteIdentical": true
+    }
+  ],
+  "finalRuns": [
+    {
+      "log": "normal-final.jsonl",
+      "pid": 8404,
+      "creationFiletime": "134334880840354203",
+      "requestedIid": "{000214E6-0000-0000-C000-000000000046}",
+      "callId": 1,
+      "exit": 0,
+      "result": {
+        "kind": "result",
+        "mode": "normal",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 0,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 253532171
+      }
+    },
+    {
+      "log": "cancel-final.jsonl",
+      "pid": 25076,
+      "creationFiletime": "134334880843709853",
+      "requestedIid": "{000214E6-0000-0000-C000-000000000046}",
+      "callId": 1,
+      "exit": 0,
+      "result": {
+        "kind": "result",
+        "mode": "cancel",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 14,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 253534031
+      }
+    }
+  ],
+  "iidAndCallIdExternallyVerified": true,
+  "addedTargetReads": 0,
+  "syntheticCoverage": "IShellFolder/S_OK/non-null only",
+  "priorRealHostCoverage": "Coordinator reports prior 822fee run other-IID categories with 80070490/null and 80004002/null; not new synthetic coverage or newly identified IIDs",
+  "notExecuted": [
+    "real mode",
+    "existing-process attachment",
+    "GUI",
+    "registration",
+    "policy changes"
+  ],
+  "limits": [
+    "prior other IIDs not yet identified",
+    "failure/null not exercised by these synthetic controls",
+    "base lifecycle/host-implementation limits unchanged"
+  ]
+}

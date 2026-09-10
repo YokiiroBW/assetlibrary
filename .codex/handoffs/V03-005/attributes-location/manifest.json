@@ -1,0 +1,41 @@
+{
+  "kind": "attributes_reference_locator_frozen",
+  "createdUtc": "2026-09-10T04:53:17.3268336Z",
+  "files": [
+    {
+      "path": "Locator.cpp",
+      "length": 12790,
+      "sha256": "c14b9f775a0b6b009c75fe695b0e573e55e73ccbe0f39215de04fafd4c3b5d6e"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1259,
+      "sha256": "58be94368cf48252584c347b81b1921ff8f9c38dd60bcb86f2e02d22cf89ba4b"
+    },
+    {
+      "path": "README.md",
+      "length": 2807,
+      "sha256": "bdb4d6114fae09df320ff80e5b697a6e8548c13e9d2ab5e9789e85a355ed85d5"
+    },
+    {
+      "path": "changes.patch",
+      "length": 8178,
+      "sha256": "fab2fe00b1e9b994826cc1a8500d1a2d86ae12f491e9da3e2a5ea7323e5a6909"
+    },
+    {
+      "path": "location.jsonl",
+      "length": 1392,
+      "sha256": "55b04425ac5d2e87a06f0ed5b7f38e8c5644af6b7a79e91160e7384c9820c622"
+    },
+    {
+      "path": "validation.json",
+      "length": 1965,
+      "sha256": "87319f0e1c2d42caae34128b01a5e7a2e14182f688b8216ae5aaa82ce7f80704"
+    },
+    {
+      "path": "bin\\AttributesLocator.exe",
+      "length": 177152,
+      "sha256": "7686b22825fd48b9b46a8a6e5ea940f1768e64817eac5cda0e6a2e74d1ad4fda"
+    }
+  ]
+}

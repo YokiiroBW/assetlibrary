@@ -1,0 +1,101 @@
+{
+  "kind": "fixed_bind_observer_correlated_frozen_reference_only_executed",
+  "createdUtc": "2026-09-10T04:10:18.8653170Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1231,
+      "sha256": "a5a7eb1350d73e13e446543b21db314e1ec7c4044e7d8b50676281a428a78356"
+    },
+    {
+      "path": "Fingerprint.h",
+      "length": 3434,
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 4250,
+      "sha256": "f426c4e2cf893d58ab19a7a7b7ccca05b512115f8f1b30b8677038470b6404b4"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 43397,
+      "sha256": "228c38c5382c7bd26e503d1c61ce14ffc558f0dab5ec6264ce05dfba81404cd9"
+    },
+    {
+      "path": "Plan.h",
+      "length": 6052,
+      "sha256": "8b0fbcbeb0bac30b181151af6dc64fd6fff7e33cb8613f9274a9303dba08983e"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1546,
+      "sha256": "5a2b17b6e43aad451aac5ce4b9a5cf5d6db48c2dad52dd32267586885a991f59"
+    },
+    {
+      "path": "README.md",
+      "length": 7970,
+      "sha256": "d76f337402234cce65291e3e6df2ee4f6f4c6c89d4c8385d9967baa5105e05e9"
+    },
+    {
+      "path": "validation.json",
+      "length": 3372,
+      "sha256": "72c3fff899c9836f64cb4803b5bc867f608b4588968e6b801c91706b7fa68048"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 798,
+      "sha256": "a4d5610e068ac59c18671451c00a4408e41b82919036c09ed0752595e9cbf944"
+    },
+    {
+      "path": "manifest-pre-callid.json",
+      "length": 2626,
+      "sha256": "bd67f2ef08e507f8aff85660a1af7d587b4feae38508488e7c8a3871eb19a2fe"
+    },
+    {
+      "path": "offline-01.jsonl",
+      "length": 109,
+      "sha256": "073295e2a287c38eea5591f5573980e70e82b86c2fd20f0073842acc450be358"
+    },
+    {
+      "path": "normal-01.jsonl",
+      "length": 2903,
+      "sha256": "e6e7bd5f4f98a9bda984aba7e5daea941be3f4a5cc624da6ba1d3bbb5fab0dc8"
+    },
+    {
+      "path": "cancel-01.jsonl",
+      "length": 3243,
+      "sha256": "5a9041d4c4722c0b454133f50f6ad8b7e2b9ab54e5f10e5a8adde63b0ec6f9b8"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 2900,
+      "sha256": "e218a9fbad8543047fd0027013f6536d4d2bc07f747a5a6dfd08c3734299ec37"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 3243,
+      "sha256": "40c879adc8fdd05347dee13afa0cf4454af68148f6907d0be02fa6d0d2f0f85a"
+    },
+    {
+      "path": "normal-correlated.jsonl",
+      "length": 2925,
+      "sha256": "0b9003745b17f09621bfc7287906eb5156c3d46cb76eff9364830e54708c2695"
+    },
+    {
+      "path": "cancel-correlated.jsonl",
+      "length": 3265,
+      "sha256": "a48cde55c431ae20da73de04dc40e95c8e67e0b3c89d3509e28c1566736bcd57"
+    },
+    {
+      "path": "bin\\BindObserver.exe",
+      "length": 257536,
+      "sha256": "822fee1961946116b7e6b8babc5907f81e7c569b30d674ac2506cbf823037619"
+    },
+    {
+      "path": "bin\\BindReferenceTarget.exe",
+      "length": 120832,
+      "sha256": "c00f2cd38d6784aed600790815cc8dccbd4f41905d612b8ffa77394b84e04f4e"
+    }
+  ]
+}

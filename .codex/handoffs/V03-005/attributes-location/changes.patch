@@ -1,0 +1,79 @@
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-location\\Locator.cpp" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-location\\Locator.cpp"
+index d740e4e..b14c9b4 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-location\\Locator.cpp"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-location\\Locator.cpp"
+@@ -11,7 +11,7 @@
+ #include <vector>
+ 
+ static_assert(sizeof(void*)==8);
+-static_assert(offsetof(IShellFolderVtbl,BindToObject)==5*sizeof(void*));
++static_assert(offsetof(IShellFolderVtbl,GetAttributesOf)==9*sizeof(void*));
+ static constexpr GUID ComputerClsid{0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
+ static void Stage(const char* name,HRESULT hr=S_OK) { printf("{\"kind\":\"stage\",\"stage\":\"%s\",\"hr\":\"0x%08lX\",\"tick\":%llu}\n",name,static_cast<ULONG>(hr),GetTickCount64()); fflush(stdout); }
+ static void Need(bool ok,const char* stage) { if(!ok) { Stage(stage,E_FAIL); throw E_FAIL; } }
+@@ -57,7 +57,7 @@ static void PrintClass(const char* kind,REFCLSID clsid) {
+ }
+ 
+ static void Locate() {
+-    Com<IShellFolder> desktop,computer,drive;
++    Com<IShellFolder> desktop,computer;
+     Pidl computerPidl,drivePidl;
+     Check(SHGetDesktopFolder(&desktop.value),"desktop_reference");
+     Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value),"computer_known_pidl");
+@@ -69,7 +69,7 @@ static void Locate() {
+     HRESULT proxyHr=computer.value->lpVtbl->QueryInterface(computer.value,IID_IClientSecurity,reinterpret_cast<void**>(&proxy.value));
+     Stage("standard_proxy_query",proxyHr);
+     Need(proxyHr==E_NOINTERFACE,"reject_standard_proxy_or_unknown_query_failure");
+-    auto method=computer.value->lpVtbl->BindToObject;
++    auto method=computer.value->lpVtbl->GetAttributesOf;
+     ULONG_PTR address=reinterpret_cast<ULONG_PTR>(method);
+     MEMORY_BASIC_INFORMATION memory{};
+     Need(VirtualQuery(reinterpret_cast<LPCVOID>(address),&memory,sizeof(memory))==sizeof(memory)&&memory.Type==MEM_IMAGE&&memory.State==MEM_COMMIT,"reject_non_image_method");
+@@ -124,7 +124,7 @@ static void Locate() {
+     Need(GetFileVersionInfoW(full.c_str(),0,versionSize,version.data())!=FALSE,"file_version_read");
+     VS_FIXEDFILEINFO* fixed=nullptr;UINT fixedSize=0;
+     Need(VerQueryValueW(version.data(),L"\\",reinterpret_cast<void**>(&fixed),&fixedSize)&&fixedSize>=sizeof(*fixed)&&fixed->dwSignature==0xFEEF04BD,"fixed_file_version");
+-    printf("{\"kind\":\"bind_location_candidate\",\"module\":\"%s\",\"rva\":%lu,\"rvaHex\":\"0x%08lX\",\"vtableSlot\":5,\"vtableOffsetBytes\":40,\"codeStartRva\":%lu,\"codeLength\":%lu,\"imageSize\":%lu,\"timestamp\":%lu,\"machine\":\"0x%04X\",\"memoryType\":\"MEM_IMAGE\",\"fileSize\":%llu,\"fileSha256\":\"%s\",\"codePrefix32Sha256\":\"%s\",\"version\":\"%u.%u.%u.%u\",\"absoluteAddressRetained\":false,\"userPathRetained\":false,\"hostImplementationVerified\":false,\"tick\":%llu}\n",
++    printf("{\"kind\":\"attributes_location_candidate\",\"module\":\"%s\",\"rva\":%lu,\"rvaHex\":\"0x%08lX\",\"vtableSlot\":9,\"vtableOffsetBytes\":72,\"codeStartRva\":%lu,\"codeLength\":%lu,\"imageSize\":%lu,\"timestamp\":%lu,\"machine\":\"0x%04X\",\"memoryType\":\"MEM_IMAGE\",\"fileSize\":%llu,\"fileSha256\":\"%s\",\"codePrefix32Sha256\":\"%s\",\"version\":\"%u.%u.%u.%u\",\"absoluteAddressRetained\":false,\"userPathRetained\":false,\"hostImplementationVerified\":false,\"tick\":%llu}\n",
+         allowed,rva,rva,codeStart,codeLength,nt.OptionalHeader.SizeOfImage,nt.FileHeader.TimeDateStamp,static_cast<unsigned>(nt.FileHeader.Machine),total,moduleHash.c_str(),prefixHash.c_str(),static_cast<unsigned>(HIWORD(fixed->dwFileVersionMS)),static_cast<unsigned>(LOWORD(fixed->dwFileVersionMS)),static_cast<unsigned>(HIWORD(fixed->dwFileVersionLS)),static_cast<unsigned>(LOWORD(fixed->dwFileVersionLS)),GetTickCount64());fflush(stdout);
+ 
+     wchar_t windows[32768]{},volume[32768]{};
+@@ -133,12 +133,15 @@ static void Locate() {
+     ULONG eaten=0,attributes=0;
+     Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,volume,&eaten,&drivePidl.value,&attributes),"system_volume_relative_parse");
+     Need(drivePidl.value!=nullptr,"system_volume_pidl_present");
++    Need(!ILIsEmpty(drivePidl.value)&&ILFindLastID(drivePidl.value)==drivePidl.value,"single_system_volume_child_pidl");
+     // Invoke exactly the pointer obtained from the public SDK vtable. This is a
+     // reference-process call, not a debugger hit or proof of Explorer dispatch.
+-    Check(method(computer.value,drivePidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&drive.value)),"same_method_pointer_system_volume_bind");
+-    Need(drive.value!=nullptr,"system_volume_folder_returned");PrintClass("system_volume_class",ClassId(drive.value,"system_volume_get_class_id"));
+-    printf("{\"kind\":\"reference_bind_control\",\"hr\":\"0x00000000\",\"sameMethodPointerInvoked\":true,\"referenceProcessOnly\":true,\"debuggerHit\":false,\"enumerationPerformed\":false,\"assetReadPerformed\":false,\"tick\":%llu}\n",GetTickCount64());fflush(stdout);
+-    drive.Reset();computer.Reset();desktop.Reset();Stage("reference_interfaces_released");
++    constexpr SFGAOF requested=SFGAO_FOLDER|SFGAO_FILESYSTEM|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED;
++    SFGAOF actual=requested;PCUITEMID_CHILD children[]={drivePidl.value};
++    HRESULT controlHr=method(computer.value,1,children,&actual);
++    printf("{\"kind\":\"reference_attributes_control\",\"inputMask\":\"0x%08lX\",\"hr\":\"0x%08lX\",\"outputMask\":\"0x%08lX\",\"outputMaskValid\":%s,\"sameMethodPointerInvoked\":true,\"referenceProcessOnly\":true,\"debuggerHit\":false,\"itemCount\":1,\"enumerationPerformed\":false,\"assetReadPerformed\":false,\"tick\":%llu}\n",requested,static_cast<ULONG>(controlHr),actual,SUCCEEDED(controlHr)?"true":"false",GetTickCount64());fflush(stdout);
++    Check(controlHr,"same_method_pointer_attributes_call");
++    computer.Reset();desktop.Reset();Stage("reference_interfaces_released");
+ }
+ 
+ int wmain(int argc,wchar_t**) {
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-location\\build.ps1" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-location\\build.ps1"
+index b098084..ec7adeb 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-location\\build.ps1"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-location\\build.ps1"
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference='Stop'
+-$taskRoot='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-bind-location'
++$taskRoot='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-attributes-location'
+ if($PSScriptRoot-ne $taskRoot){throw 'Fixed task directory required.'}
+ $toolset='C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk='C:\Program Files (x86)\Windows Kits\10'
+@@ -11,6 +11,6 @@ $env:TMP=$temp
+ $options=@('/nologo','/std:c++20','/W4','/WX','/EHsc','/MT','/O2','/utf-8','/DUNICODE','/D_UNICODE','/DWIN32_LEAN_AND_MEAN','/DNOMINMAX','/D_WIN32_WINNT=0x0A00',"/I$toolset\include","/I$sdk\Include\10.0.26100.0\ucrt","/I$sdk\Include\10.0.26100.0\shared","/I$sdk\Include\10.0.26100.0\um","/I$sdk\Include\10.0.26100.0\winrt")
+ Push-Location $taskRoot
+ try {
+- & "$toolset\bin\Hostx64\x64\cl.exe" @options 'Locator.cpp' "/Fo$bin\Locator.obj" "/Fe$bin\BindLocator.exe" '/link' "/LIBPATH:$toolset\lib\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64" 'kernel32.lib' 'ole32.lib' 'shell32.lib' 'uuid.lib' 'bcrypt.lib' 'version.lib'
++ & "$toolset\bin\Hostx64\x64\cl.exe" @options 'Locator.cpp' "/Fo$bin\Locator.obj" "/Fe$bin\AttributesLocator.exe" '/link' "/LIBPATH:$toolset\lib\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64" 'kernel32.lib' 'ole32.lib' 'shell32.lib' 'uuid.lib' 'bcrypt.lib' 'version.lib'
+  if($LASTEXITCODE-ne 0){throw 'Locator compilation failed.'}
+ } finally {Pop-Location}

@@ -1,0 +1,52 @@
+#define CINTERFACE
+#include "Shared.h"
+#include <Shlobj.h>
+#include <KnownFolders.h>
+#include <cstddef>
+#include <cwchar>
+#include <cstring>
+static_assert(offsetof(IShellFolderVtbl,BindToObject)==5*sizeof(void*));
+template<typename T>struct Com{T* value=nullptr;~Com(){if(value)value->lpVtbl->Release(value);}};
+struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}};
+static void Need(bool ok){if(!ok)throw E_FAIL;}
+static void Check(HRESULT hr){if(FAILED(hr))throw hr;}
+static void ExceptionControl(SharedState* state){
+    __try{RaiseException(0xE0424242,0,0,nullptr);}
+    __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+}
+static void Work(SharedState* state,HANDLE start,HANDLE stop){
+    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl,windowsPidl;
+    Check(SHGetDesktopFolder(&desktop.value));Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value));
+    Check(desktop.value->lpVtbl->BindToObject(desktop.value,computerPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&computer.value)));
+    Com<IPersist> persist;Check(computer.value->lpVtbl->QueryInterface(computer.value,IID_IPersist,reinterpret_cast<void**>(&persist.value)));
+    GUID clsid{};Check(persist.value->lpVtbl->GetClassID(persist.value,&clsid));Need(clsid==ComputerClsid);
+    wchar_t windows[32768]{},root[32768]{};UINT count=GetWindowsDirectoryW(windows,32768);Need(count>0&&count<32768);
+    Need(GetVolumePathNameW(windows,root,32768)&&wcslen(root)==3&&root[1]==L':'&&root[2]==L'\\');
+    ULONG eaten=0,attributes=0;
+    Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,root,&eaten,&rootPidl.value,&attributes));
+    Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,windows,&eaten,&windowsPidl.value,&attributes));
+    UINT rootSize=ILGetSize(rootPidl.value),windowsSize=ILGetSize(windowsPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&windowsSize>rootSize&&windowsSize<=PidlLimit);
+    state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());
+    auto method=computer.value->lpVtbl->BindToObject;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
+    state->expectedPidlLength=rootSize;memcpy(state->expectedPidl,rootPidl.value,rootSize);
+    InterlockedExchange(&state->ready,1);
+    ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+    while(GetTickCount64()<deadline&&WaitForSingleObject(stop,0)==WAIT_TIMEOUT){
+        InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+        if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+            ExceptionControl(state);
+            {Com<IShellFolder> other;state->otherResult=method(computer.value,windowsPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&other.value));state->otherNonNull=other.value!=nullptr;}
+            {Com<IShellFolder> matching;state->matchResult=method(computer.value,rootPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&matching.value));state->matchNonNull=matching.value!=nullptr;}
+            worked=true;InterlockedExchange(&state->callsFinished,1);
+        }
+        if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+    }
+}
+int wmain(int argc,wchar_t** argv){
+    if(argc!=5||wcscmp(argv[1],L"--synthetic-child")!=0)return 2;
+    HANDLE mapping=reinterpret_cast<HANDLE>(_wcstoui64(argv[2],nullptr,16)),start=reinterpret_cast<HANDLE>(_wcstoui64(argv[3],nullptr,16)),stop=reinterpret_cast<HANDLE>(_wcstoui64(argv[4],nullptr,16));
+    auto state=static_cast<SharedState*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedState)));if(!state||state->magic!=SharedMagic)return 3;
+    HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){state->targetError=init;return 4;}
+    bool ok=true;try{Work(state,start,stop);}catch(HRESULT hr){state->targetError=hr;ok=false;}catch(...){state->targetError=E_FAIL;ok=false;}
+    CoUninitialize();UnmapViewOfFile(state);CloseHandle(stop);CloseHandle(start);CloseHandle(mapping);return ok?0:1;
+}

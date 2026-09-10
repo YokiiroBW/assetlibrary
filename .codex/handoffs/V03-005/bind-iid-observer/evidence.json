@@ -1,0 +1,61 @@
+{
+  "recordedUtc": "2026-09-10T05:10:30.361900+00:00",
+  "runtime_manifest_files_verified": 14,
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "a5a7eb1350d73e13e446543b21db314e1ec7c4044e7d8b50676281a428a78356"
+    },
+    {
+      "file": "Fingerprint.h.txt",
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "f426c4e2cf893d58ab19a7a7b7ccca05b512115f8f1b30b8677038470b6404b4"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "015f2bbc0989f781339a6940998e1d9521410532a962fb595e65b6ddd1adac68"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "5f5297588306ff512ea3e8ca87b195d54f95f82a8efa21a8fc8f8907c03eecb3"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "c4b0de04b67866c4759c4a483b25df01b458beae4c877c2f5f20443c357b9487"
+    },
+    {
+      "file": "README.md",
+      "sha256": "484752bb6b0932daa775c83fdb5646ed7c0d4c25f0bcaaa492ce505d887baafe"
+    },
+    {
+      "file": "changes.patch",
+      "sha256": "0364742f78c5b607cbb841728d9e93fc3a46eea90eea66e61155de2644c6b15b"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "0702443ad98a597c8621b2cd66fc8f85fca6e65174f7825aead71161eec1fbdc"
+    },
+    {
+      "file": "cleanup-check.json",
+      "sha256": "a09547669acc8530d57b5d7b6938e334c8971f5c4289e1e97025521c39d67e01"
+    },
+    {
+      "file": "normal-final.jsonl",
+      "sha256": "a8207eb12bff156b34a7eada0f17042a7416ac81f4bfb8ace330274d5faea870"
+    },
+    {
+      "file": "cancel-final.jsonl",
+      "sha256": "0b05907f2ed605e738eca2a5ec5b53872991d1bb042ad140d660f90cf57b130c"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "09cba56cde6ae2a9f15137c5d6a4bac5f6b1ada54554f10b7bd5fa33523d6603"
+    }
+  ],
+  "status": "reviewed_reference_preparation_real_evidence_separate",
+  "product_gate_passed": false,
+  "review": "Only formats the already-read matched IID and changes fixed directory. No new memory read, match, lifecycle, cap or returned-value logic. Reference normal/cancel verifies IShellFolder GUID and callId; real failures are separately archived."
+}

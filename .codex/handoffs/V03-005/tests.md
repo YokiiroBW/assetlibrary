@@ -161,3 +161,13 @@ Observer749cd509…与manifest21fa0b68…冻结，16文件长度/SHA独立核对
 Windows05b8eba集成为00272f1，27份原件hash一致。实际v2 ready249636937→Browse249637375→上限249667781，30.844秒而非完整60秒，4096非匹配、官方0匹配；外部Browse10秒超时无返回HRESULT。真实模态文本读回为03:27:14Z、晚于捕获结束，不推断其首次出现时刻。3断点移除/剩余0/Detach/同目标存活无debugger均成功；注册有效期内ThisPC2/官方不匹配和后置模块快照保留。guard、4CU/4LM检查及自有窗口/模态清理已验证，原用户窗口/Chrome保留。未增加计数上限或重跑原场景，未把0匹配等同完全无激活。
 
 本集成检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-real-com-capture.log；架构/契约/交接及35项迁移和架构回归通过，发布门禁不变。
+
+## 父绑定、完整IID与实际属性分类
+
+归档/审查的准备清单：Bind locator6、Bind observer19、IID metadata observer14、attributes locator7、attributes observer14项分别核对长度及SHA，保留早期与最终版本身份。两轮独立静态审查覆盖ABI、opaque cb边界、模块/RVA指纹、callId、cidl1/R9 DWORD掩码、输出有效性与v2清理复用；callId缺口已修复并复核。参考normal/cancel只证明新自有参考目标，不代表host；失败/null与多匹配交错的覆盖范围按各README区分。
+
+实际官方双通知控制6f1fc78合入b60230f，21原件核对；加入ASSOC仍未修复且全部清理。Bind828cd73与IIDb2b719c分别合入a835739/9fa54dc，各27原件核对；后者完整GUID映射到SDK propsys.h:3765/516的IPropertyStoreFactory/IPropertyStore，实际80070490/null和80004002/null是属性请求失败，未确定因果。属性78c0a23及输入审计50a2a96合入89161fa/c61433e，27原件不变：四组输入20000000/40418000/40000000/2044007F，输出0/0/0/26，均S_OK；只有第一、第四明确请求FOLDER，结果缺位。33.031秒保护早停与5断点清零/Detach/存活无debugger、四根/双通知/自有UI清理分开记录。
+
+旧独立28180000查询作用于enum child，并未证明其与parsed child逐字节相同；当前不能把差异单归因进程/策略，也未改属性位、系统关联或原窗口。新的同源同mask/枚举前后对照仍在准备。当前命令观察器重新查询包状态为15700/无包，仅补当前进程事实，不扩大为所有进程或所有虚拟化机制排除。
+
+本分类检查点最终diff审查及verify_repository通过，日志.runtime/v03-005-final-tests/repository-classification-checkpoint.log；原始patch上下文空格保留，使用单独.patch whitespace属性，不改原件hash。

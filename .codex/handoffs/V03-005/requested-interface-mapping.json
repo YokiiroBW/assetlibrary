@@ -1,0 +1,26 @@
+{
+  "recordedUtc": "2026-09-10T05:10:30.372609+00:00",
+  "source": "Windows SDK10.0.26100.0/um/propsys.h",
+  "interfaces": [
+    {
+      "iid": "{BC110B6D-57E8-4148-A9C6-91015AB2F3A5}",
+      "name": "IPropertyStoreFactory",
+      "sdk_line": 3765,
+      "actual_hr": "0x80070490",
+      "pbc_present": false,
+      "returned_null": true,
+      "source_url": "https://learn.microsoft.com/en-us/windows/win32/api/propsys/nn-propsys-ipropertystorefactory"
+    },
+    {
+      "iid": "{886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99}",
+      "name": "IPropertyStore",
+      "sdk_line": 516,
+      "actual_hr": "0x80004002",
+      "pbc_present": true,
+      "returned_null": true,
+      "source_url": "https://learn.microsoft.com/en-us/windows/win32/api/propsys/nn-propsys-ipropertystore"
+    }
+  ],
+  "interpretation": "These are property requests, not the ordinary IShellFolder/IShellFolder2 binding interface. Failures are real but their causal significance for navigation is unproved; no pbc contents or mandatory-property-interface requirement inferred.",
+  "real_evidence": "../V03-006/bind-iid-control/evidence.json"
+}

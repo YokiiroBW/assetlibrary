@@ -1,0 +1,110 @@
+{
+  "kind": "fixed_bind_entry_reference_debugger_validation",
+  "build": {
+    "compiler": "MSVC x64 14.44.35207",
+    "sdk": "10.0.26100.0",
+    "warnings": 0,
+    "errors": 0,
+    "exit": 0
+  },
+  "candidate": {
+    "module": "windows.storage.dll",
+    "rva": "0xABC70",
+    "fileSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+    "codePrefix32Sha256": "d191a9c6322a212351ae2247519f3cbaa2444746feb1b18f4441b5e9c728a162",
+    "imageSize": 8798208,
+    "timestamp": 2800646882,
+    "machine": "AMD64"
+  },
+  "offlinePureChecks": 19,
+  "finalRuns": [
+    {
+      "log": "normal-correlated.jsonl",
+      "pid": 17652,
+      "creationFiletime": "134334868868695530",
+      "exit": 0,
+      "callIdCorrelationVerified": true,
+      "result": {
+        "kind": "result",
+        "mode": "normal",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 0,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 252334968
+      }
+    },
+    {
+      "log": "cancel-correlated.jsonl",
+      "pid": 31732,
+      "creationFiletime": "134334868872042436",
+      "exit": 0,
+      "callIdCorrelationVerified": true,
+      "result": {
+        "kind": "result",
+        "mode": "cancel",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 14,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 252336859
+      }
+    }
+  ],
+  "verifiedBoth": [
+    "fixed file hash before attach",
+    "target image path/PE/code range/prefix",
+    "remote candidate equals actual child vtable method",
+    "one exact complete opaque PIDL match",
+    "longer Windows PIDL discarded",
+    "actual S_OK/non-null return",
+    "actual query mask reopened",
+    "target own exception handler preserved",
+    "two breakpoints removed and remaining zero",
+    "Detach and heartbeats/no-debugger",
+    "cooperative child exit zero"
+  ],
+  "pending": [
+    "real BA16 absolute parse/parent equality/leaf construction",
+    "actual Explorer method dispatch",
+    "real matching PIDL representation"
+  ],
+  "notExecuted": [
+    "real --run-plan",
+    "existing-process attachment",
+    "BA16 binding",
+    "registration",
+    "GUI",
+    "directory enumeration",
+    "asset content reads",
+    "policy mutation",
+    "UAC",
+    "ETW",
+    "forced termination"
+  ],
+  "limits": [
+    "no match does not prove no binding/activation",
+    "reference parent is not host parent",
+    "native Attach/Detach lack hard deadline",
+    "first-event/crash cleanup risks remain",
+    "failure HRESULT/null-return output not exercised",
+    "interleaved multiple matching calls not exercised; source-reviewed correlation"
+  ],
+  "priorFinalObserverSha256": "929db242db4cd9e32c46522dcf24b44c10c35a9123cc315676ad903cf8a20a0a",
+  "priorFinalLogs": [
+    "normal-final.jsonl",
+    "cancel-final.jsonl"
+  ]
+}

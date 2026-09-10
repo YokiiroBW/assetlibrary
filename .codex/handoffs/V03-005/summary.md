@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows最高优先级。注册先行对照、v1真实准入拒绝和v2真实COM观察均已集成；v1查询句柄权限不足由同PID实测定位并在v2修复，正常/取消回归使用实际重新打开的句柄。v2已真实附加新自有Explorer，ready后0.438秒提交唯一Browse，30.844秒触及4096非匹配上限，所选三API的官方入口/返回匹配0；完整60秒未完成，不代表完全无激活。三个断点清零、Detach、目标存活无debugger及全部注册/UI清理均通过；实际view仍ThisPC2，后置模块快照未见样例。下一步只先验证独立MyComputer父绑定方法的代码定位器，再裁定真实宿主观察。详见current-windows-work.json及target-debug-control-v2、V03-006/target-debug-bounded。G1..G4仍开放，无Windows安装包。
+1. Windows最高优先级。官方通知补齐、真实Bind/IID/属性观察均已集成且全部现场清理。两对Bind失败已按SDK确认为IPropertyStoreFactory/IPropertyStore属性请求，不能认定普通文件夹绑定失败。实际GetAttributesOf四对均S_OK，其中请求FOLDER的20000000→0、2044007F→26没有该位；其他两对未请求FOLDER不作该推断。该现象尚不能叫纯宿主差异：旧独立控制用了枚举child、另一mask及canonical比较，未控制opaque bytes。下一步是同注册下两个独立进程的枚举优先/解析优先与同父对象同mask对照，当前仅准备，未运行。调试观察受各自上限提前结束，成功清理与观察完整性分开；G1..G4仍开放，无Windows安装包。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

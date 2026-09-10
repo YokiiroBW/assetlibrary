@@ -1,0 +1,86 @@
+{
+  "kind": "fixed_bind_observer_frozen_reference_only_executed",
+  "createdUtc": "2026-09-10T04:06:14.4933424Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1231,
+      "sha256": "a5a7eb1350d73e13e446543b21db314e1ec7c4044e7d8b50676281a428a78356"
+    },
+    {
+      "path": "Fingerprint.h",
+      "length": 3434,
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 4250,
+      "sha256": "f426c4e2cf893d58ab19a7a7b7ccca05b512115f8f1b30b8677038470b6404b4"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 43293,
+      "sha256": "f321fbfdd79ea1cdbeb2d213def16641d62290abd14b322f48919a24668737c8"
+    },
+    {
+      "path": "Plan.h",
+      "length": 6052,
+      "sha256": "8b0fbcbeb0bac30b181151af6dc64fd6fff7e33cb8613f9274a9303dba08983e"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1546,
+      "sha256": "5a2b17b6e43aad451aac5ce4b9a5cf5d6db48c2dad52dd32267586885a991f59"
+    },
+    {
+      "path": "README.md",
+      "length": 7298,
+      "sha256": "c0e8cd49eb24c49f560b04fe82fefb94eb7c135665cd64c98763632abdf959ba"
+    },
+    {
+      "path": "validation.json",
+      "length": 2952,
+      "sha256": "cf08dd077702a95a9df0db42409d2e40acaff4c28f8a29a7c87a0f73e5e7fa8a"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 558,
+      "sha256": "14fd9761ff6a04b25ebcbdc0cf443b8763fa2f24e46fdd7d23bb1a7dd15d69a9"
+    },
+    {
+      "path": "offline-01.jsonl",
+      "length": 109,
+      "sha256": "073295e2a287c38eea5591f5573980e70e82b86c2fd20f0073842acc450be358"
+    },
+    {
+      "path": "normal-01.jsonl",
+      "length": 2903,
+      "sha256": "e6e7bd5f4f98a9bda984aba7e5daea941be3f4a5cc624da6ba1d3bbb5fab0dc8"
+    },
+    {
+      "path": "cancel-01.jsonl",
+      "length": 3243,
+      "sha256": "5a9041d4c4722c0b454133f50f6ad8b7e2b9ab54e5f10e5a8adde63b0ec6f9b8"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 2900,
+      "sha256": "e218a9fbad8543047fd0027013f6536d4d2bc07f747a5a6dfd08c3734299ec37"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 3243,
+      "sha256": "40c879adc8fdd05347dee13afa0cf4454af68148f6907d0be02fa6d0d2f0f85a"
+    },
+    {
+      "path": "bin\\BindObserver.exe",
+      "length": 257024,
+      "sha256": "929db242db4cd9e32c46522dcf24b44c10c35a9123cc315676ad903cf8a20a0a"
+    },
+    {
+      "path": "bin\\BindReferenceTarget.exe",
+      "length": 120832,
+      "sha256": "604797685cdfef2999a0cb320b0759049b2332364e1b2f0dc9f09f8683d88ed4"
+    }
+  ]
+}

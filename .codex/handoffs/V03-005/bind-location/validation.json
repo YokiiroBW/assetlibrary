@@ -1,0 +1,66 @@
+{
+  "kind": "reference_bind_location_only",
+  "build": {
+    "compiler": "MSVC x64 14.44.35207",
+    "sdk": "10.0.26100.0",
+    "warnings": 0,
+    "errors": 0,
+    "exit": 0
+  },
+  "runExit": 0,
+  "location": {
+    "kind": "bind_location_candidate",
+    "module": "windows.storage.dll",
+    "rva": 703600,
+    "rvaHex": "0x000ABC70",
+    "vtableSlot": 5,
+    "vtableOffsetBytes": 40,
+    "codeStartRva": 4096,
+    "codeLength": 6624332,
+    "imageSize": 8798208,
+    "timestamp": 2800646882,
+    "machine": "0x8664",
+    "memoryType": "MEM_IMAGE",
+    "fileSize": 8860504,
+    "fileSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+    "codePrefix32Sha256": "d191a9c6322a212351ae2247519f3cbaa2444746feb1b18f4441b5e9c728a162",
+    "version": "6.2.26100.8036",
+    "absoluteAddressRetained": false,
+    "userPathRetained": false,
+    "hostImplementationVerified": false,
+    "tick": 250766218
+  },
+  "control": {
+    "kind": "reference_bind_control",
+    "hr": "0x00000000",
+    "sameMethodPointerInvoked": true,
+    "referenceProcessOnly": true,
+    "debuggerHit": false,
+    "enumerationPerformed": false,
+    "assetReadPerformed": false,
+    "tick": 250766218
+  },
+  "result": {
+    "kind": "result",
+    "passed": true,
+    "locationClueOnly": true,
+    "debuggerAttached": false,
+    "guiOperated": false,
+    "registrationChanged": false
+  },
+  "independentFileHashMatched": true,
+  "notExecuted": [
+    "debugger attach",
+    "real Explorer observation",
+    "GUI operation",
+    "registration",
+    "folder enumeration",
+    "asset file reads"
+  ],
+  "limits": [
+    "reference method location does not prove host implementation",
+    "IClientSecurity E_NOINTERFACE is not a universal custom-marshaler exclusion",
+    "MEM_IMAGE does not prove unmodified memory",
+    "no real target byte/RVA comparison"
+  ]
+}

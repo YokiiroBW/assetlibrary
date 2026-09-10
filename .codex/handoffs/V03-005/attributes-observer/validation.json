@@ -1,0 +1,118 @@
+{
+  "kind": "single_getattributes_reference_debugger_validation",
+  "build": {
+    "compiler": "MSVC x64 14.44.35207",
+    "sdk": "10.0.26100.0",
+    "warnings": 0,
+    "errors": 0,
+    "exit": 0
+  },
+  "candidate": {
+    "rva": "0x1188E0",
+    "prefixSha256": "991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64",
+    "fileSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b"
+  },
+  "fingerprintImplementationUnchanged": true,
+  "finalRuns": [
+    {
+      "log": "normal-final.jsonl",
+      "pid": 22156,
+      "creationFiletime": "134334899884638199",
+      "entry": {
+        "kind": "matching_attributes_entry",
+        "callId": 1,
+        "profile": "synthetic",
+        "pid": 22156,
+        "inputMask": "0x68180000",
+        "tick": 255436531
+      },
+      "return": {
+        "kind": "matching_attributes_return",
+        "callId": 1,
+        "hr": "0x00000000",
+        "outputMask": "0x60000000",
+        "outputMaskValid": true,
+        "tick": 255436531
+      },
+      "exit": 0,
+      "result": {
+        "kind": "result",
+        "mode": "normal",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 0,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 255436671
+      }
+    },
+    {
+      "log": "cancel-final.jsonl",
+      "pid": 22656,
+      "creationFiletime": "134334899888102244",
+      "entry": {
+        "kind": "matching_attributes_entry",
+        "callId": 1,
+        "profile": "synthetic",
+        "pid": 22656,
+        "inputMask": "0x68180000",
+        "tick": 255436875
+      },
+      "return": {
+        "kind": "matching_attributes_return",
+        "callId": 1,
+        "hr": "0x00000000",
+        "outputMask": "0x60000000",
+        "outputMaskValid": true,
+        "tick": 255436875
+      },
+      "exit": 0,
+      "result": {
+        "kind": "result",
+        "mode": "cancel",
+        "passed": true,
+        "matchedEntries": 1,
+        "matchedReturns": 1,
+        "nonMatchingDiscarded": 1,
+        "finiteWaitTimeouts": 14,
+        "exitInterruptObserved": false,
+        "attachCompleted": true,
+        "cleanupVerified": true,
+        "targetAliveAfterDetach": true,
+        "existingProcessAttached": false,
+        "tick": 255438578
+      }
+    }
+  ],
+  "parameterMasksAndCallIdExternallyVerified": true,
+  "positive": "cidl1 root PIDL,68180000 -> S_OK/60000000/valid",
+  "negative": "legal cidl2 repeated root array discarded before array or item read",
+  "notExecuted": [
+    "real mode",
+    "existing-process attachment",
+    "BA16 attribute query",
+    "GUI",
+    "registration",
+    "directory enumeration",
+    "asset-content reads",
+    "policy changes",
+    "forced termination"
+  ],
+  "unexercised": [
+    "no-FOLDER input",
+    "failed HRESULT",
+    "null-mask argument",
+    "interleaved multiple matching calls"
+  ],
+  "limits": [
+    "reference result is not host FOLDER evidence",
+    "without FOLDER input, missing output FOLDER is inconclusive",
+    "failed HRESULT output mask invalid",
+    "base native lifetime and host-implementation limits unchanged"
+  ]
+}

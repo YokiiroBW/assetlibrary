@@ -1,0 +1,37 @@
+{
+  "recordedUtc": "2026-09-10T05:10:30.361900+00:00",
+  "runtime_manifest_files_verified": 7,
+  "artifacts": [
+    {
+      "file": "Locator.cpp.txt",
+      "sha256": "c14b9f775a0b6b009c75fe695b0e573e55e73ccbe0f39215de04fafd4c3b5d6e"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "58be94368cf48252584c347b81b1921ff8f9c38dd60bcb86f2e02d22cf89ba4b"
+    },
+    {
+      "file": "README.md",
+      "sha256": "bdb4d6114fae09df320ff80e5b697a6e8548c13e9d2ab5e9789e85a355ed85d5"
+    },
+    {
+      "file": "changes.patch",
+      "sha256": "fab2fe00b1e9b994826cc1a8500d1a2d86ae12f491e9da3e2a5ea7323e5a6909"
+    },
+    {
+      "file": "location.jsonl",
+      "sha256": "55b04425ac5d2e87a06f0ed5b7f38e8c5644af6b7a79e91160e7384c9820c622"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "87319f0e1c2d42caae34128b01a5e7a2e14182f688b8216ae5aaa82ce7f80704"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "75ba4d666353ad1861e73e2744b8963573493ff6c5ff0e842d2435606d789417"
+    }
+  ],
+  "status": "reviewed_reference_preparation_real_evidence_separate",
+  "product_gate_passed": false,
+  "review": "SDK slot9, same system file and new method fingerprint verified; reference same-pointer single-system-root request68180000 returnsS_OK/60000000. Not a host hit."
+}

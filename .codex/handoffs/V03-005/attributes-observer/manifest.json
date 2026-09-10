@@ -1,0 +1,76 @@
+{
+  "kind": "single_getattributes_observer_frozen_reference_only",
+  "createdUtc": "2026-09-10T05:02:33.7598902Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1350,
+      "sha256": "44c3427e4c937cecb6c6067bb63315eca0f353c10c173fc6ca69645adaf4a428"
+    },
+    {
+      "path": "Fingerprint.h",
+      "length": 3434,
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 4198,
+      "sha256": "3586dae37d9e4500717e7833b6c269a722967f3009588d173dd337145efcf9c4"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 43945,
+      "sha256": "26fdc2a5cc4e7445503f01b2136a8b5103d9b756cf12e26920a5b9ad04547c28"
+    },
+    {
+      "path": "Plan.h",
+      "length": 6058,
+      "sha256": "fa58c0e64d0a58436509ff5b76d10a10a78f9cf87a9fb326256adbc8edaf6d3b"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1564,
+      "sha256": "654a620ffc3f057f8acd99dd18b9a28ae8ffb7c53a8a1ab5d09bc93ae86c3da2"
+    },
+    {
+      "path": "README.md",
+      "length": 5082,
+      "sha256": "290b84374444b64d78ceac9aa2859e2bbe48b9b0a4838adb9c7a80337a4f46f3"
+    },
+    {
+      "path": "changes.patch",
+      "length": 19966,
+      "sha256": "4e780d442870fa7561b48cc70772cce4a036ff5b034d28ce8f6362ed1d40c536"
+    },
+    {
+      "path": "validation.json",
+      "length": 3428,
+      "sha256": "5dfb907e120c65b160f9a58303fa12548299d75ee521ae7398c36bf42881681f"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 263,
+      "sha256": "135470c1dddbd32a69ae3122efe88fb3127ed364e754fb9c6bf9c95537ed5179"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 2995,
+      "sha256": "db9756cfe65c8fd978956c47beca54ce09767e99920d3eeb18d908090be65483"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 3335,
+      "sha256": "2e5a9db7574006925e7143ae51745adaeed62f160a62a10f69858100a8b2833f"
+    },
+    {
+      "path": "bin\\AttributesObserver.exe",
+      "length": 257536,
+      "sha256": "b41e76f156c39026294351433f9221bd17b90f878f59439ee3422030f7e3b6d0"
+    },
+    {
+      "path": "bin\\AttributesReferenceTarget.exe",
+      "length": 120320,
+      "sha256": "0498b1b458a0544d42c3cf03cb76d475294968beed533a4d7655ffd78f29ff10"
+    }
+  ]
+}

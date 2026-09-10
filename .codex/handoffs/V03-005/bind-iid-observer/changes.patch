@@ -1,0 +1,38 @@
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\Observer.cpp" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Observer.cpp"
+index 6f70b2f..ffe55d0 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\Observer.cpp"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Observer.cpp"
+@@ -385,7 +385,8 @@ struct Capture {
+             }
+             ULONG64 rsp=Reg(regRsp);pending.push_back({site,threadId,matched,rsp+8,Read<ULONG64>(rsp+40)});
+             GUID iid=Read<GUID>(Reg(regR9));const char* category=iid==IID_IShellFolder?"IShellFolder":iid==IID_IShellFolder2?"IShellFolder2":iid==IID_IUnknown?"IUnknown":"other";
+-            printf("{\"kind\":\"matching_bind_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"iidCategory\":\"%s\",\"bindContextPresent\":%s,\"tick\":%llu}\n",matched,target.Profile(),target.pid,category,Reg(regR8)?"true":"false",GetTickCount64());fflush(stdout);
++            wchar_t iidText[40]{};Need(StringFromGUID2(iid,iidText,40)==39,"format_requested_iid");
++            printf("{\"kind\":\"matching_bind_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"iidCategory\":\"%s\",\"requestedIid\":\"%ls\",\"bindContextPresent\":%s,\"tick\":%llu}\n",matched,target.Profile(),target.pid,category,iidText,Reg(regR8)?"true":"false",GetTickCount64());fflush(stdout);
+             return DEBUG_STATUS_GO;
+         }
+         Need(id>=100&&id-100<returnSites.size(),"owned_return_breakpoint");
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\Plan.h" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Plan.h"
+index 75746d3..65cd7ed 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\Plan.h"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\Plan.h"
+@@ -7,7 +7,7 @@
+ #include <string_view>
+ #include <vector>
+ 
+-inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug";
++inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid";
+ inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+ inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ inline constexpr ULONGLONG Second = 10000000;
+diff --git "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\build.ps1" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\build.ps1"
+index 5c2da59..3ce66de 100644
+--- "a/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug\\build.ps1"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-bind-debug-iid\\build.ps1"
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference = 'Stop'
+-$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-bind-debug'
++$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-bind-debug-iid'
+ if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+ $toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk = 'C:\Program Files (x86)\Windows Kits\10'

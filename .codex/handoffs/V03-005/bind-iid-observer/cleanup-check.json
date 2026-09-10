@@ -1,0 +1,14 @@
+{
+  "checkedUtc": "2026-09-10T04:30:14.6034938Z",
+  "checks": [
+    {
+      "pid": 8404,
+      "originalTargetStillRunning": false
+    },
+    {
+      "pid": 25076,
+      "originalTargetStillRunning": false
+    }
+  ],
+  "allOwnedTargetsEnded": true
+}

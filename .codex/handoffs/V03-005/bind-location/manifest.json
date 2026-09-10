@@ -1,0 +1,36 @@
+{
+  "kind": "reference_locator_frozen",
+  "createdUtc": "2026-09-10T03:44:17.1291688Z",
+  "files": [
+    {
+      "path": "Locator.cpp",
+      "length": 12493,
+      "sha256": "d8174c7701450a6c207c7a8945df89566fe1869b31a0f22d63e1e4b7ef6c07db"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1247,
+      "sha256": "a184794c3546d65a77f171b77b732aa6ad1b47af0cd583d4f99d2be1ee94e254"
+    },
+    {
+      "path": "README.md",
+      "length": 3552,
+      "sha256": "f887eb5e49ae1710f4fad8b538874264814449a0c1952bbac8b8760314249d57"
+    },
+    {
+      "path": "location.jsonl",
+      "length": 1391,
+      "sha256": "8cbd877cb41aef6e5f78fea638635f2a3debb782ffd4e684442e63dd574a1e84"
+    },
+    {
+      "path": "validation.json",
+      "length": 1908,
+      "sha256": "e8d079c91e6792bfc6372545d52e2b17426b5275ecb297364979c32864bc3922"
+    },
+    {
+      "path": "bin\\BindLocator.exe",
+      "length": 177664,
+      "sha256": "e91cdf9ca425b8431a83b562b08b80a5aea0f48786861826c69b85d251507cec"
+    }
+  ]
+}

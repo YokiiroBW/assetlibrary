@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T03:36:39.244416+00:00",
-  "status": "bounded_real_capture_complete_parent_bind_locator_in_progress",
+  "updatedAtUtc": "2026-09-10T05:42:43.012877+00:00",
+  "status": "actual_folder_bit_missing_controlled_pidl_source_comparison_preparing",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "v2 actual owned Explorer capture complete and cleaned; no repeat COM export capture or count-limit increase. Curie prepares only a standalone MyComputer IShellFolder BindToObject implementation locator/control in .runtime/explorer-bind-location, no real attachment or registration. Root reviews before another actual observation. Optional clean Windows11 environment availability question is pending; current local work continues.",
+  "active_instruction": "Actual attributes show parsed official child lacks requestedFOLDER bit. However prior independent evidence queried enumerated child with different mask and only canonical equality; not a controlled process-only difference. Windows owner prepares two standalone modes under the same scoped registration: enum-first dual-source/same-mask comparisons and parse-first host-order masks before enumeration, then comparisons. Root reviews before run; no GUI or debugger in this next control. All prior actual sites clean.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Verify standalone stock MyComputer BindToObject implementation locator, module identity/code range and independent bind control.",
-    "Only actual owned-host hits on the approved opaque relative PIDL could establish host binding HRESULT; a reference vtable is a locator, not host identity evidence.",
-    "Keep original user Explorer/Chrome and NAS deployment unchanged; no production Shell gate closure."
+    "Review and execute only the prepared two-mode standalone PIDL/mask/order control; no new registry fields or GUI.",
+    "Compare opaque bytes/hashes and requested/output masks without presuming host or registry root cause.",
+    "Alternate clean Windows environment availability question remains pending; local controlled work continues."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -124,5 +124,75 @@
       "modal_evidence": "no-association modal readback03:27:14Z after capture; not a timestamp of modal onset",
       "scope_limit": "Only selected3 COM exports within bounded window; zero matches does not prove no activation attempt or rule out other processes/implementations."
     }
+  },
+  "bind_location": {
+    "evidence": "bind-location/evidence.json",
+    "module": "windows.storage.dll",
+    "rva": "0xABC70",
+    "reference_control": "same method pointer system-volume bind S_OK",
+    "host_hit": false
+  },
+  "association_notification_control": {
+    "evidence": "../V03-006/assoc-notify-control/evidence.json",
+    "result": "Both UPDATEDIR/ASSOC called/returned on explicitSTA at registration and cleanup; freshExplorer stillThisPC2/one no-association Browse timeout; all owned site cleaned. Void return does not prove every subscriber handled caches.",
+    "integrated_commit": "b60230f",
+    "artifacts_verified": 21
+  },
+  "bind_observer": {
+    "evidence": "bind-observer/evidence.json",
+    "observer_sha256": "822fee1961946116b7e6b8babc5907f81e7c569b30d674ac2506cbf823037619",
+    "real_result": "pending_owner",
+    "review": "root plus independent ABI/PIDL/module/lifecycle/callId review passed"
+  },
+  "requested_interface_mapping": "requested-interface-mapping.json",
+  "attributes_observer": {
+    "evidence": "attributes-observer/evidence.json",
+    "locator": "attributes-location/evidence.json",
+    "observer_sha256": "b41e76f156c39026294351433f9221bd17b90f878f59439ee3422030f7e3b6d0",
+    "real_result": {
+      "evidence": "../V03-006/attributes-debug-control/evidence.json",
+      "worker_commits": [
+        "78c0a23",
+        "50a2a96"
+      ],
+      "integrated_commits": [
+        "89161fa",
+        "c61433e"
+      ],
+      "raw_artifacts_verified": 27,
+      "requested_returned_masks": [
+        [
+          "20000000",
+          "00000000"
+        ],
+        [
+          "40418000",
+          "00000000"
+        ],
+        [
+          "40000000",
+          "00000000"
+        ],
+        [
+          "2044007F",
+          "00000026"
+        ]
+      ],
+      "all_hresult": "S_OK",
+      "folder_requested_but_missing_calls": [
+        1,
+        4
+      ],
+      "no_folder_inference_for_unrequested_calls": [
+        2,
+        3
+      ],
+      "duration_ms": 33031,
+      "full_60_seconds": false,
+      "stop_reason": "first-chance exception/callback-health protection; not evidence of a target crash",
+      "cleanup": "5 breakpoints removed/zero,Detach,target alive/no debugger,all owned registry/UI cleaned",
+      "confounds": "Prior standalone used enumeration candidate and28180000, only canonical equality with parsed leaf; current host used parsed leaf and four other masks."
+    },
+    "review": "Root and independent ABI/cidl/mask/callId/lifecycle review passed"
   }
 }

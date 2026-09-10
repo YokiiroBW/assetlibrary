@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "v1 real observer rejected before attach due insufficient query handle rights; corrected v2 observed one owned Explorer Browse for30.844s before4096-nonmatch cap, no official3-API matches. Three breakpoints removed, detach and target survival verified. Actual view remainsThisPC2, sample absent in post-detach snapshot. All owned registry/UI cleaned; root cause still unknown.",
+  "windows_explorer_entry": "Owned host classifies parsed official item withoutFOLDER for requested20000000 and2044007F, despite scoped registration. Exact matched Bind requests wereIPropertyStoreFactory/IPropertyStore, not ordinary folder binding. Prior reference input source/mask differs, so process-only/root-cause claims are unproved. Every actual guard/owned UI/debugger site has been cleaned.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -64,5 +64,14 @@
   "windows_register_first_evidence": ".codex/handoffs/V03-006/register-first-control/evidence.json",
   "restricted_target_observer": "target-debug-control/evidence.json",
   "restricted_target_observer_v2": "target-debug-control-v2/evidence.json",
-  "windows_real_com_capture": ".codex/handoffs/V03-006/target-debug-bounded/evidence.json"
+  "windows_real_com_capture": ".codex/handoffs/V03-006/target-debug-bounded/evidence.json",
+  "windows_requested_iids": "requested-interface-mapping.json",
+  "windows_actual_attributes": ".codex/handoffs/V03-006/attributes-debug-control/evidence.json",
+  "windows_reference_preparations": [
+    "bind-location/evidence.json",
+    "bind-observer/evidence.json",
+    "bind-iid-observer/evidence.json",
+    "attributes-location/evidence.json",
+    "attributes-observer/evidence.json"
+  ]
 }

@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：Windows最高优先级。v2观测工具已修复查询权限并通过实际掩码回归，真实自有Explorer观察30.844秒后触及4096非匹配上限，三API官方匹配0；成功脱离/存活/注册和UI清理，入口仍未接通。下一步先验证独立MyComputer父绑定方法的代码定位器，再裁定宿主观察。最新完整证据见V03-005/current-windows-work.json，不重跑旧COM捕获或提高上限，不动原用户Explorer。G1..G4/生产Shell与NAS平台决定保持独立。
+   当前接续V03-005：Windows最高优先级。真实官方项的属性查询显示请求FOLDER却未返回；两对Bind失败已确认是属性接口请求。全部实际现场已清理，仍无Windows安装包。旧独立结果使用不同来源PIDL/mask，下一步先用枚举优先/解析优先两个独立流程控制变量，不能直接判宿主/策略根因。详见V03-005/current-windows-work.json；不得重复旧捕获、改属性/系统关联或动原用户窗口。G1..G4与NAS平台决定保持独立。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

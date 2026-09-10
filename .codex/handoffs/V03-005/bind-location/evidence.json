@@ -1,0 +1,59 @@
+{
+  "recordedUtc": "2026-09-10T03:47:30.196006+00:00",
+  "status": "reference_locator_verified_not_host_hit",
+  "manifest_files_verified": 6,
+  "candidate": {
+    "kind": "bind_location_candidate",
+    "module": "windows.storage.dll",
+    "rva": 703600,
+    "rvaHex": "0x000ABC70",
+    "vtableSlot": 5,
+    "vtableOffsetBytes": 40,
+    "codeStartRva": 4096,
+    "codeLength": 6624332,
+    "imageSize": 8798208,
+    "timestamp": 2800646882,
+    "machine": "0x8664",
+    "memoryType": "MEM_IMAGE",
+    "fileSize": 8860504,
+    "fileSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+    "codePrefix32Sha256": "d191a9c6322a212351ae2247519f3cbaa2444746feb1b18f4441b5e9c728a162",
+    "version": "6.2.26100.8036",
+    "absoluteAddressRetained": false,
+    "userPathRetained": false,
+    "hostImplementationVerified": false,
+    "tick": 250766218
+  },
+  "artifacts": [
+    {
+      "file": "Locator.cpp.txt",
+      "sha256": "d8174c7701450a6c207c7a8945df89566fe1869b31a0f22d63e1e4b7ef6c07db"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "a184794c3546d65a77f171b77b732aa6ad1b47af0cd583d4f99d2be1ee94e254"
+    },
+    {
+      "file": "README.md",
+      "sha256": "f887eb5e49ae1710f4fad8b538874264814449a0c1952bbac8b8760314249d57"
+    },
+    {
+      "file": "location.jsonl",
+      "sha256": "8cbd877cb41aef6e5f78fea638635f2a3debb782ffd4e684442e63dd574a1e84"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "e8d079c91e6792bfc6372545d52e2b17426b5275ecb297364979c32864bc3922"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "392d3d590fc07584ef12a5fe1fa5a3937f004e4704e900b84b984d4d93d92ee8"
+    }
+  ],
+  "review": "SDK C-interface offsetof verifies slot5; exact MyComputer class; system module/image/code-range/file and prefix hashes; no proxy proof inferred from IClientSecurity alone. Same extracted method pointer successfully bound system volume in reference process; no enumeration/assets/GUI/registration/real attach.",
+  "sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishellfolder-bindtoobject",
+    "https://learn.microsoft.com/en-us/windows/win32/com/interface-pointers-and-interfaces",
+    "https://learn.microsoft.com/en-us/windows/win32/shell/str-constants"
+  ]
+}

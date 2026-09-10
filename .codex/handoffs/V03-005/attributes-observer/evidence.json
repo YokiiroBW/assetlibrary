@@ -1,0 +1,61 @@
+{
+  "recordedUtc": "2026-09-10T05:10:30.372609+00:00",
+  "runtime_manifest_files_verified": 14,
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "44c3427e4c937cecb6c6067bb63315eca0f353c10c173fc6ca69645adaf4a428"
+    },
+    {
+      "file": "Fingerprint.h.txt",
+      "sha256": "91a1fa4be6f93c8c5a39527d42e713e9ece685c482ed192540c5ecf831875fc3"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "3586dae37d9e4500717e7833b6c269a722967f3009588d173dd337145efcf9c4"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "26fdc2a5cc4e7445503f01b2136a8b5103d9b756cf12e26920a5b9ad04547c28"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "fa58c0e64d0a58436509ff5b76d10a10a78f9cf87a9fb326256adbc8edaf6d3b"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "654a620ffc3f057f8acd99dd18b9a28ae8ffb7c53a8a1ab5d09bc93ae86c3da2"
+    },
+    {
+      "file": "README.md",
+      "sha256": "290b84374444b64d78ceac9aa2859e2bbe48b9b0a4838adb9c7a80337a4f46f3"
+    },
+    {
+      "file": "changes.patch",
+      "sha256": "4e780d442870fa7561b48cc70772cce4a036ff5b034d28ce8f6362ed1d40c536"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "5dfb907e120c65b160f9a58303fa12548299d75ee521ae7398c36bf42881681f"
+    },
+    {
+      "file": "cleanup-check.json",
+      "sha256": "135470c1dddbd32a69ae3122efe88fb3127ed364e754fb9c6bf9c95537ed5179"
+    },
+    {
+      "file": "normal-final.jsonl",
+      "sha256": "db9756cfe65c8fd978956c47beca54ce09767e99920d3eeb18d908090be65483"
+    },
+    {
+      "file": "cancel-final.jsonl",
+      "sha256": "2e5a9db7574006925e7143ae51745adaeed62f160a62a10f69858100a8b2833f"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "266a83ba4218fcd6b1c5f310602024b98867a135b22c03cb6b8c0d059275fd46"
+    }
+  ],
+  "status": "reviewed_reference_preparation_real_evidence_separate",
+  "product_gate_passed": false,
+  "review": "Root and independent review: EDX low32 cidl1 before first R8 array pointer read; exact opaque match; R9 DWORD input/return mask; callId/thread/stack pairing; output valid only for successful HRESULT. Legal duplicate-root cidl2 reference control discarded without array read. Fixed fingerprint and lifecycle preserved."
+}

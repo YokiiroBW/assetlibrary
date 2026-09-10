@@ -738,7 +738,7 @@
       "handoff": ".codex/handoffs/V03-005/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3",
-      "execution_status": "bounded_real_capture_complete_parent_bind_locator_in_progress"
+      "execution_status": "actual_folder_bit_missing_controlled_pidl_source_comparison_preparing"
     },
     {
       "id": "V03-006",
@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "bounded_real_com_capture_and_cleanup_complete_entry_unresolved"
+      "execution_status": "controlled_pidl_source_mask_comparison_preparing_after_host_attribute_capture"
     },
     {
       "id": "V03-007",

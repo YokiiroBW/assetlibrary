@@ -1,0 +1,7 @@
+{"kind":"reference_class","classId":"{20D04FE0-3AEA-1069-A2D8-08002B30309D}","tick":254934968}
+{"kind":"stage","stage":"standard_proxy_query","hr":"0x80004002","tick":254934968}
+{"kind":"attributes_location_candidate","module":"windows.storage.dll","rva":1149152,"rvaHex":"0x001188E0","vtableSlot":9,"vtableOffsetBytes":72,"codeStartRva":4096,"codeLength":6624332,"imageSize":8798208,"timestamp":2800646882,"machine":"0x8664","memoryType":"MEM_IMAGE","fileSize":8860504,"fileSha256":"22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b","codePrefix32Sha256":"991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64","version":"6.2.26100.8036","absoluteAddressRetained":false,"userPathRetained":false,"hostImplementationVerified":false,"tick":254934968}
+{"kind":"reference_attributes_control","inputMask":"0x68180000","hr":"0x00000000","outputMask":"0x60000000","outputMaskValid":true,"sameMethodPointerInvoked":true,"referenceProcessOnly":true,"debuggerHit":false,"itemCount":1,"enumerationPerformed":false,"assetReadPerformed":false,"tick":254934968}
+{"kind":"stage","stage":"reference_interfaces_released","hr":"0x00000000","tick":254934968}
+{"kind":"stage","stage":"reference_com_uninitialized","hr":"0x00000000","tick":254934968}
+{"kind":"result","passed":true,"locationClueOnly":true,"debuggerAttached":false,"guiOperated":false,"registrationChanged":false}

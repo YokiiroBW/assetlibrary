@@ -1,0 +1,36 @@
+{
+  "checkedUtc": "2026-09-10T04:10:18.8461687Z",
+  "checks": [
+    {
+      "log": "normal-01.jsonl",
+      "pid": 22644,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "cancel-01.jsonl",
+      "pid": 29068,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "normal-final.jsonl",
+      "pid": 8528,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "cancel-final.jsonl",
+      "pid": 29340,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "normal-correlated.jsonl",
+      "pid": 17652,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "cancel-correlated.jsonl",
+      "pid": 31732,
+      "originalTargetStillRunning": false
+    }
+  ],
+  "allOwnedTargetsEnded": true
+}
