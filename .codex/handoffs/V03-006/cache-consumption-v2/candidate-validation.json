@@ -1,0 +1,62 @@
+{
+  "stage": "v2_build_and_offline_controls_complete_owner_runtime_retest_pending",
+  "observerSha256": "952886d8f483e81345626f5866887c015a81915432bb7fabf5f2293c576792bc",
+  "sourceChange": "AllSyntheticReturns cacheSnapshots==1 becomes cacheSnapshots==matched; only fixed task and executable paths also change",
+  "build": {
+    "exitCode": 0,
+    "raw": "build-01.log",
+    "toolchain": "MSVC 14.44.35207 / SDK 10.0.26100.0 / W4 WX / MT"
+  },
+  "offlineControls": {
+    "exitCode": 0,
+    "cacheScopePredicates": 19,
+    "planParserAndFramePredicates": 19,
+    "raw": "self-test-01.jsonl"
+  },
+  "unchangedByteForByte": [
+    "Shared.h",
+    "Fingerprint.h",
+    "Target.cpp",
+    "CacheScope.h"
+  ],
+  "baselinePreserved": {
+    "observerSha256": "9192c06013f4d86272bc9f4bbcb03b9fe803c7dd6ce01785ca410af0955eb79d",
+    "manifestSha256": "887898a854b755c0ea08931646f95d4e0df97d90505133a873d70f6c0d1ee894"
+  },
+  "readOnlyV1Evidence": {
+    "path": "<CURRENT_USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260910-cache-attributes\\reference-normal.jsonl",
+    "sha256": "c7a4aa15ed75bd20d0e62a56b3f4b85526f2a9e0dc572b7adadfd111034e8f3d",
+    "entryCallIds": [
+      1,
+      2
+    ],
+    "snapshotOuterCallIds": [
+      1,
+      2
+    ],
+    "returnCallIds": [
+      2,
+      1
+    ],
+    "resultPassed": false,
+    "cleanupVerified": true,
+    "scope": "owned reference child under owner registration, not Explorer; this is v1 evidence, not v2 execution"
+  },
+  "pending": [
+    "owner registered reference normal test",
+    "owner registered reference cooperative cancellation test"
+  ],
+  "noActions": [
+    "no debugger attached by this v2 preparation",
+    "no target launched by this v2 preparation",
+    "no GUI or registry mutation"
+  ],
+  "_evidence_copy": {
+    "kind": "redacted_copy_not_original",
+    "original_runtime_path": ".runtime/explorer-live/20260910-cache-attributes-v2/candidate-frozen/validation.json",
+    "original_sha256": "D2BD6116B083EA4C3A6A129CD9DE78B45F6966937B4766BE3D9B13F031F43456",
+    "redactions": [
+      "Current-user identity/profile markers; nested stdout JSON reserialized when required"
+    ]
+  }
+}

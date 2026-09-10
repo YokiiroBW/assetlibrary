@@ -1,0 +1,68 @@
+param([Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$PlanId)
+$ErrorActionPreference='Stop'
+$exe='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-cache-attributes-debug-v2\bin\CacheAttributesObserverV2.exe'
+$expectedHash='952886D8F483E81345626F5866887C015A81915432BB7FABF5F2293C576792BC'
+if((Get-FileHash -LiteralPath $exe).Hash -ne $expectedHash){throw 'Frozen observer hash mismatch'}
+$identity=Get-Content -Raw (Join-Path $PSScriptRoot 'identity.json')|ConvertFrom-Json
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../../..')).Path
+$start=[Diagnostics.ProcessStartInfo]::new($exe)
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+$start.ArgumentList.Add('--run-plan');$start.ArgumentList.Add($PlanId)
+$observer=[Diagnostics.Process]::new();$observer.StartInfo=$start
+$writer=[IO.StreamWriter]::new((Join-Path $PSScriptRoot 'observer.jsonl'),$false,[Text.UTF8Encoding]::new($false));$writer.AutoFlush=$true
+$browse=$null;$ready=$false;$cancelSent=$false;$final=$null;$failed=$false;$observerStarted=$false
+try{
+  if(-not $observer.Start()){throw 'Observer start failed'}
+  $observerStarted=$true
+  $observerId=$observer.Id;$stderr=$observer.StandardError.ReadToEndAsync();$lineTask=$observer.StandardOutput.ReadLineAsync()
+  $readyDeadline=[DateTimeOffset]::UtcNow.AddSeconds(45)
+  [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;ObserverPid=$observerId;ObserverHash=$expectedHash;TargetPid=$identity.Pid;CreationFileTime=$identity.CreationFileTime}|ConvertTo-Json|Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'capture-launch.json')
+  while($null -ne $lineTask){
+    if($lineTask.Wait(100)){
+      $line=$lineTask.GetAwaiter().GetResult()
+      if($null -eq $line){$lineTask=$null;break}
+      $writer.WriteLine($line);Write-Output $line
+      $row=$line|ConvertFrom-Json
+      if($row.kind -eq 'stage' -and $row.stage -in @('planned_setup_failed','planned_capture_failed')){$failed=$true}
+      if($row.kind -eq 'result'){$final=$row}
+      if($row.kind -eq 'capture_ready'){
+        if($ready -or $cancelSent -or $failed -or [DateTimeOffset]::UtcNow -ge $readyDeadline -or [string]$row.pid -ne [string]$identity.Pid -or [string]$row.creationFiletime -ne [string]$identity.CreationFileTime -or $row.profile -ne 'official'){throw 'Unexpected or late ready identity'}
+        $ready=$true
+        [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Payload=$row}|ConvertTo-Json -Depth 5|Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'capture-ready.json')
+        $browseStart=[Diagnostics.ProcessStartInfo]::new((Get-Process -Id $PID).Path)
+        $browseStart.UseShellExecute=$false;$browseStart.CreateNoWindow=$true;$browseStart.RedirectStandardOutput=$true;$browseStart.RedirectStandardError=$true
+        foreach($arg in @('-NoProfile','-File',(Join-Path $repo '.runtime/explorer-official-observer/run-cache-attributes-v2.ps1'),'-Mode','browse','-Label','debug-browse-call')){$browseStart.ArgumentList.Add($arg)}
+        $browse=[Diagnostics.Process]::new();$browse.StartInfo=$browseStart
+        if(-not $browse.Start()){throw 'Approved Browse controller start failed'}
+        $browseOutput=$browse.StandardOutput.ReadToEndAsync();$browseErrors=$browse.StandardError.ReadToEndAsync()
+      }
+      $lineTask=$observer.StandardOutput.ReadLineAsync()
+    }
+    if(-not $ready -and -not $cancelSent -and [DateTimeOffset]::UtcNow -ge $readyDeadline -and -not $observer.HasExited){
+      $cancelSent=$true
+      & $exe --cancel-plan $PlanId | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'cancel-request.jsonl')
+      Write-Output '{"kind":"no_ready_cooperative_cancel_requested"}'
+    }
+  }
+  $observer.WaitForExit()
+  $errorText=$stderr.GetAwaiter().GetResult();[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'observer.stderr.txt'),$errorText,[Text.UTF8Encoding]::new($false))
+  if($browse){$browse.WaitForExit();[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'browse-launch.stdout.txt'),$browseOutput.GetAwaiter().GetResult(),[Text.UTF8Encoding]::new($false));[IO.File]::WriteAllText((Join-Path $PSScriptRoot 'browse-launch.stderr.txt'),$browseErrors.GetAwaiter().GetResult(),[Text.UTF8Encoding]::new($false))}
+  [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;ObserverPid=$observerId;ExitCode=$observer.ExitCode;Ready=$ready;BrowseLaunched=($null -ne $browse);CancelSent=$cancelSent;Final=$final;StderrEmpty=($errorText.Length -eq 0)}|ConvertTo-Json -Depth 6|Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'capture-result.json')
+}catch{
+  [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');PlanId=$PlanId;Error=$_.Exception.Message;Ready=$ready;BrowseLaunched=($null -ne $browse)}|ConvertTo-Json|Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'capture-runner-error.json')
+  if($observerStarted -and -not $observer.HasExited){
+    if(-not $cancelSent){& $exe --cancel-plan $PlanId | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'cancel-request.jsonl')}
+    Write-Output '{"kind":"runner_error_cooperative_cancel_waiting_for_observer_cleanup"}'
+    if($lineTask){$null=$lineTask.GetAwaiter().GetResult()}
+    $remainder=$observer.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();$writer.Write($remainder)
+    $observer.WaitForExit()
+  }
+  throw
+}finally{
+  $writer.Dispose()
+  if($observerStarted -and $observer.HasExited){$observer.Dispose()}
+  if($browse -and $browse.HasExited){$browse.Dispose()}
+}
+
+
+

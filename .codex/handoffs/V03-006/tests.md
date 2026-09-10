@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[V2参考及实机](cache-consumption-v2.md)：normal/cancel各2个matched调用逐个恰1cache/return、flags&1/A0000020/0/0与20000000返回一致，2种参考通过且清理/协作退出确认。之后唯一real命中4cache全零，与0/0/0/26返回配对；59.438秒保护早停非完整60秒通过，6断点/Detach/同目标存活清理确认。前后20字段匹配、最终20missing/8根/双通知及专属UI清理通过；原用户Explorer未重启，G1不计通过。
+
 新增[cache首轮参考](cache-reference-first.md)：原15候选/6基线hash核对、两次有效20字段读回及PIDL22B通过；normal参考失败（2嵌套snapshot对上1snapshot断言），不可计通过。2返回+2入口断点清零/Detach/参考心跳/无debugger/协作退出通过，guard退出0、双通知/8根及最终reader20missing通过。未跑cancel/真实Explorer/原重启；字段正值、DWORD和空默认字符串本轮得到实测，错误类型等边界仍未测。
 
 新增[固定字段reader](registry-field-readback.md)：C# Add-Type、两个PowerShell AST通过；仅一次expected-missing独立10秒外限（实际未超时）exit0/无stderr，11+4+5条全部missing-key/OpenStatus2，写0/guard调用0。未登记正值、missing-value、错误类型/大小/竞态和超时清理未执行，仅源码审查，不能计新observer或产品测试通过。

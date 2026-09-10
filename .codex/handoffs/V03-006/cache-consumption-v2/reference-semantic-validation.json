@@ -1,0 +1,22 @@
+{
+  "RecordedUtc": "2026-09-10T14:56:50.626272+00:00",
+  "Results": [
+    {
+      "mode": "normal",
+      "matchedCalls": 2,
+      "oneSnapshotAndReturnPerCall": true,
+      "requestedMasksAndCacheValuesMatched": true,
+      "debuggerCleanupVerified": true,
+      "targetCooperativeExitVerified": true
+    },
+    {
+      "mode": "cancel",
+      "matchedCalls": 2,
+      "oneSnapshotAndReturnPerCall": true,
+      "requestedMasksAndCacheValuesMatched": true,
+      "debuggerCleanupVerified": true,
+      "targetCooperativeExitVerified": true
+    }
+  ],
+  "Passed": true
+}

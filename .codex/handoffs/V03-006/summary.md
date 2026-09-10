@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[V2消费点实机](cache-consumption-v2.md)完成同周期normal/cancel语义及清理通过后的一次Explorer对照。参考各2组为flags1/A0000020/0/0，真实4组为0/0/0/0，外部字段前后20/20仍正确；入口仍无关联应用/ThisPC2项。59.438秒异常保护早停，6断点/Detach/目标存活清理成功；最后双通知/8根/20missing与专属UI清理，用户下载窗保留，无原Explorer重启。该消费状态差异不直接等于注册API失败，G1仍partial。
+
 最新：[首轮cache参考](cache-reference-first.md)在原样注册内完成字段20/20前后读回与PIDL S_OK/22B；normal实际两组嵌套cache快照均flags1/A0000020/0/0、outer返回20000000，但候选要求cacheSnapshots==1导致参考失败。4断点/Detach/心跳/协作退出及最终8根双通知清理确认；cancel/实机/GUI/restart未执行，等待root修复冻结版本，不绕过失败门禁。
 
 最新：[固定11字段只读工具](registry-field-readback.md)已准备，C#编译/PS AST及未登记expected-missing通过：11官方+4Owner+5外部HKCR记录均missing-key/OpenStatus2，未调用guard/注册。DWORD规范化、类型/存在/实际值分开，无默认值替代；已登记值与其他负路径待后续周期验证。无GUI/attach/重启，待新observer准备合并。

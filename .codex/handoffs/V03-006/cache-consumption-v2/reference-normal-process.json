@@ -1,0 +1,11 @@
+{
+  "Mode": "normal",
+  "StartedUtc": "2026-09-10T14:55:51.8406110+00:00",
+  "CompletedUtc": "2026-09-10T14:55:52.2105555+00:00",
+  "Pid": 34180,
+  "CreationFileTime": "134335257518409596",
+  "ExecutableSha256": "952886D8F483E81345626F5866887C015A81915432BB7FABF5F2293C576792BC",
+  "ExitCode": 0,
+  "StderrEmpty": true,
+  "HardKillUsed": false
+}

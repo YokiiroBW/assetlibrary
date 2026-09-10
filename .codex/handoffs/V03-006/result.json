@@ -506,7 +506,9 @@
     ".codex/handoffs/V03-006/registry-field-readback.md",
     ".codex/handoffs/V03-006/registry-field-readback/",
     ".codex/handoffs/V03-006/cache-reference-first.md",
-    ".codex/handoffs/V03-006/cache-reference-first/"
+    ".codex/handoffs/V03-006/cache-reference-first/",
+    ".codex/handoffs/V03-006/cache-consumption-v2.md",
+    ".codex/handoffs/V03-006/cache-consumption-v2/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -586,7 +588,8 @@
       "One authorized cold-session control: 22/22 and 2/2 held processes exited, two new desktops each stable across two readbacks; actual entry remains failed; original observer cleanup and final module/registry/UI cleanup verified",
       "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending",
       "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run",
-      "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run"
+      "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run",
+      "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -867,5 +870,31 @@
     "gui_actions": 0,
     "explorer_restarts": 0,
     "hard_kill_used": false
+  },
+  "cache_consumption_v2_checkpoint": {
+    "report": "cache-consumption-v2.md",
+    "status": "references_passed_real_cache_fields_zero",
+    "observer_sha256": "952886D8F483E81345626F5866887C015A81915432BB7FABF5F2293C576792BC",
+    "normal_passed": true,
+    "cancel_passed": true,
+    "reference_semantic_validation_passed": true,
+    "reference_matched_calls_per_mode": 2,
+    "real_matched_calls": 4,
+    "real_cache_snapshots": 4,
+    "real_cache_flags_all_zero": true,
+    "real_cache_attributes_all_zero": true,
+    "real_cache_call_for_all_zero": true,
+    "real_cache_restricted_all_zero": true,
+    "registered_field_readbacks_passed": 2,
+    "fields_per_readback": 20,
+    "actual_entry_opened": false,
+    "capture_health_failure_seconds": 59.438,
+    "full_sixty_seconds_passed": false,
+    "real_debugger_cleanup_verified": true,
+    "registry_cleanup_verified": true,
+    "user_window_preserved": 2229572,
+    "explorer_restarts": 0,
+    "debugger_hard_kill_used": false,
+    "browse_controller_terminated_on_timeout": true
   }
 }

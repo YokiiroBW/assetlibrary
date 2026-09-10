@@ -1,0 +1,53 @@
+{
+  "Utc": "2026-09-10T14:55:30.6054965+00:00",
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ]
+}
