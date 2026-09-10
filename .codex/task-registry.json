@@ -738,7 +738,7 @@
       "handoff": ".codex/handoffs/V03-005/summary.md",
       "thread_deep_link": "",
       "milestone": "V0.3",
-      "execution_status": "actual_folder_bit_missing_controlled_pidl_source_comparison_preparing"
+      "execution_status": "controlled_attribute_difference_confirmed_cold_session_confirmation_pending"
     },
     {
       "id": "V03-006",
@@ -757,7 +757,7 @@
       "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "thread_id": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
       "milestone": "V0.3",
-      "execution_status": "controlled_pidl_source_mask_comparison_preparing_after_host_attribute_capture"
+      "execution_status": "controlled_pidl_comparison_complete_clean_site_waiting_coordinator"
     },
     {
       "id": "V03-007",

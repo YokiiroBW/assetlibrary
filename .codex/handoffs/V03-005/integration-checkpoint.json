@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "Owned host classifies parsed official item withoutFOLDER for requested20000000 and2044007F, despite scoped registration. Exact matched Bind requests wereIPropertyStoreFactory/IPropertyStore, not ordinary folder binding. Prior reference input source/mask differs, so process-only/root-cause claims are unproved. Every actual guard/owned UI/debugger site has been cleaned.",
+  "windows_explorer_entry": "Controlled dual-source/two-process46 queries all succeed with byte-identical stable22B PIDLs: independentFOLDER20000000 preserved, host parsed-item FOLDER absent. Difference persists after controlling tested source/mask/order variables; specific host/cache/registry cause unproved. All task registration/UI/debugger sites cleaned; cold-session restart requires explicit confirmation for original windows.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -73,5 +73,7 @@
     "bind-iid-observer/evidence.json",
     "attributes-location/evidence.json",
     "attributes-observer/evidence.json"
-  ]
+  ],
+  "windows_controlled_pidl_comparison": ".codex/handoffs/V03-006/attribute-pidl-control/evidence.json",
+  "windows_cold_session_plan": "windows-cold-session-plan.md"
 }

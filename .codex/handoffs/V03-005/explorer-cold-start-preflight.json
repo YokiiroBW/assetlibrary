@@ -1,0 +1,140 @@
+{
+  "Utc": "2026-09-10T05:49:03.7064430+00:00",
+  "ReadOnly": true,
+  "Processes": [
+    {
+      "Pid": 6284,
+      "CreationFileTime": "134332346247029344",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 7272,
+      "CreationFileTime": "134334299484762088",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 8364,
+      "CreationFileTime": "134334012838466832",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 8980,
+      "CreationFileTime": "134334840449864319",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 15548,
+      "CreationFileTime": "134334905481728533",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 17396,
+      "CreationFileTime": "134334865802178147",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 17512,
+      "CreationFileTime": "134334834964662522",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 17740,
+      "CreationFileTime": "134334476380531713",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 17944,
+      "CreationFileTime": "134332378912285511",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 19288,
+      "CreationFileTime": "134334022709158085",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 22932,
+      "CreationFileTime": "134334280696084838",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 22968,
+      "CreationFileTime": "134334874764660908",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 24488,
+      "CreationFileTime": "134334807328820494",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 24644,
+      "CreationFileTime": "134333319601588876",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 24772,
+      "CreationFileTime": "134333905950391334",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 26128,
+      "CreationFileTime": "134333319143343303",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 30304,
+      "CreationFileTime": "134334443281966293",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 32356,
+      "CreationFileTime": "134334883960723909",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 32680,
+      "CreationFileTime": "134334334909859309",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 35732,
+      "CreationFileTime": "134334497879881482",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 36396,
+      "CreationFileTime": "134334457370347466",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    },
+    {
+      "Pid": 36676,
+      "CreationFileTime": "134334434287887860",
+      "IsSystemExplorer": true,
+      "SessionId": 2
+    }
+  ],
+  "OriginalProcessesStopped": false,
+  "Scope": "Planning snapshot only; execution requires fresh user/session/creation verification and explicit original-Explorer restart authorization"
+}

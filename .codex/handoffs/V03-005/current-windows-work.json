@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T05:42:43.012877+00:00",
-  "status": "actual_folder_bit_missing_controlled_pidl_source_comparison_preparing",
+  "updatedAtUtc": "2026-09-10T05:55:22.648634+00:00",
+  "status": "controlled_attribute_difference_confirmed_cold_session_confirmation_pending",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Actual attributes show parsed official child lacks requestedFOLDER bit. However prior independent evidence queried enumerated child with different mask and only canonical equality; not a controlled process-only difference. Windows owner prepares two standalone modes under the same scoped registration: enum-first dual-source/same-mask comparisons and parse-first host-order masks before enumeration, then comparisons. Root reviews before run; no GUI or debugger in this next control. All prior actual sites clean.",
+  "active_instruction": "Two-mode standalone comparison completed and cleaned, integrated1d00321;25 raw artifacts verified. Both sources22B/identical stableSHA,46 successful queries including parsed-before-enumeration reproduceFOLDER in independent processes, unlike actual Explorer requests. Specific persistent-host/cache/registry cause still unproved. User has been asked to confirm the concrete two-restart cold-session plan because original Explorer windows/taskbar would be affected. No confirmation yet; do not stop original processes or start new GUI/registration. All owners keep sites clean.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Review and execute only the prepared two-mode standalone PIDL/mask/order control; no new registry fields or GUI.",
-    "Compare opaque bytes/hashes and requested/output masks without presuming host or registry root cause.",
-    "Alternate clean Windows environment availability question remains pending; local controlled work continues."
+    "Await explicit user confirmation for original-Explorer restarts or an accessible clean Windows environment.",
+    "After confirmation, use fresh process identities and the reviewed cold-session plan; do not infer current PID ownership from historical test membership.",
+    "Keep G1..G4 and installer/release gates open until user-observable behavior and remaining platform checks pass."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -194,5 +194,48 @@
       "confounds": "Prior standalone used enumeration candidate and28180000, only canonical equality with parsed leaf; current host used parsed leaf and four other masks."
     },
     "review": "Root and independent ABI/cidl/mask/callId/lifecycle review passed"
+  },
+  "controlled_pidl_comparison": {
+    "evidence": "../V03-006/attribute-pidl-control/evidence.json",
+    "matrix": "../V03-006/attribute-pidl-control/query-matrix.json",
+    "worker_commit": "a118fbe",
+    "integrated_commit": "1d00321",
+    "artifacts_verified": 25,
+    "query_count": 46,
+    "all_hresult": "S_OK",
+    "both_sources_bytes": 22,
+    "both_sources_sha256": "951c3bc3e37630ba023015d1294c0cd7a398bbfa383d04c7d59b7419e8d893db",
+    "inputs_unchanged": true,
+    "same_mask_outputs": [
+      [
+        "28180000",
+        "20000000"
+      ],
+      [
+        "20000000",
+        "20000000"
+      ],
+      [
+        "40418000",
+        "00000000"
+      ],
+      [
+        "40000000",
+        "00000000"
+      ],
+      [
+        "2044007F",
+        "20000024"
+      ]
+    ],
+    "new_process_not_system_cold_state": true,
+    "cleaned": true
+  },
+  "cold_session_plan": {
+    "document": "windows-cold-session-plan.md",
+    "planning_snapshot": "explorer-cold-start-preflight.json",
+    "user_confirmation": "pending",
+    "original_processes_stopped": false,
+    "scope_note": "Planning snapshot contains background Explorer processes left alive after owned windows closed; prior UI/registry cleanup did not claim every Explorer process exited. No snapshot PID can be reused for termination without fresh identity/user/session checks."
   }
 }

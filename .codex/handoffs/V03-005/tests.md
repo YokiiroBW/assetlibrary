@@ -171,3 +171,11 @@ Windows05b8eba集成为00272f1，27份原件hash一致。实际v2 ready249636937
 旧独立28180000查询作用于enum child，并未证明其与parsed child逐字节相同；当前不能把差异单归因进程/策略，也未改属性位、系统关联或原窗口。新的同源同mask/枚举前后对照仍在准备。当前命令观察器重新查询包状态为15700/无包，仅补当前进程事实，不扩大为所有进程或所有虚拟化机制排除。
 
 本分类检查点最终diff审查及verify_repository通过，日志.runtime/v03-005-final-tests/repository-classification-checkpoint.log；原始patch上下文空格保留，使用单独.patch whitespace属性，不改原件hash。
+
+## 同条件双模式完成与冷启动范围
+
+a118fbe合入1d00321，25份原件SHA独立核对。A20/B26共46query、两来源22B与完整hash完全相等，查询前后不变；B在枚举前已稳定返回FOLDER，后续枚举与双来源双顺序未改变5组输出。全部HRESULT成功、无超时/显式sample Bind/sample模块载入；guard/Owner/期限与最终8根absent、双通知、独立probe退出验证完整。当前可确认所测试来源/mask/先后变量未解释host差异，不能直接指定缓存/策略为根因。
+
+冷启动方案仅计划、尚未执行。只读快照列出当前会话系统Explorer进程，包括原进程及窗口关闭后仍驻留的历史测试进程；不把先前UI清理记作所有Explorer进程退出，不据历史PID推断当前独占所有权。用户确认前不得停止原Explorer；实际操作必须再核当前用户/会话/创建时间/系统路径/调试与文件操作状态。
+
+最终同条件比较检查点diff审查及verify_repository通过，日志.runtime/v03-005-final-tests/repository-controlled-comparison.log；此前已通过且未变的业务套件未重跑，发布门禁保持原状。
