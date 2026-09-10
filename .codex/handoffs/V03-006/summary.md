@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[v2目标内受限观察](target-debug-bounded.md)已真实附加并在ready后立即触发一次Browse，但约31秒达到4096入口上限，目标三API匹配为0；不是完整60秒或完全未激活证明。断点清零、Detach、存活无debugger均成功；注册和自有UI已清理。原v1准入失败保留，不扩大上限或重复场景，后续由root选择前置Shell路径检查。
+
 最新：[目标内观察器首次准入](target-debug-admission.md)在CheckRemoteDebuggerPresent检查处拒绝，未附加/ready/Browse，属于工具句柄权限缺陷而非产品激活结果。root已独立确认查询权利差异，旧工具冻结等待v2。自有窗口与注册正常清理，原窗口/Chrome保留。
 
 最新：[注册先于新Explorer的完整控制](register-first-control.md)已完成，02:25:12注册早于新PID24488创建02:25:32，SDK/ThisPC正控均通过，但官方仍缺项、唯一打开无关联模态/超时，实际view仍ThisPC。有效期内模块读回未见样例，现场正常清理，原窗口与Chrome保留。仅此时序改变不足以修复入口，不声称broker冷启动；旧未完成项与父级发现结果继续分别保留。

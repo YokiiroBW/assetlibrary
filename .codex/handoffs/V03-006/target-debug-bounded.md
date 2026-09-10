@@ -1,0 +1,17 @@
+# v2真实COM入口观察：计数上限与成功脱离
+
+固定v2观察器841CB600…已真实附加本任务新建的独占Explorer。唯一Browse在capture_ready后立即执行，但观察约30.844秒时触及4096总入口上限而提前结束；官方CLSID的三项API匹配入口/返回均0。不能把它记成完整60秒，也不能由0匹配推出完全未考虑或未尝试激活。
+
+原F298/正确STA/四个HKCU根和600秒guard保持不变。所有权epoch在CUA创建前记录，新窗口60425396/PID8980、creationFiletime134334840449864319；原1247028及Chrome8128618不作目标。SDK/ThisPC实际view正控、唯一frame/PID/创建时间检查通过。按固定v2目录生成新11行官方plan 06729d67340540b09ad7fce5bfb5c9bb，启动前复核完整EXE hash；旧749CD509准入失败原件未改。
+
+v2的实际pre-attach查询成功、debuggerPresent=false；准入、ONLY_THIS_PROCESS/DETACH_ON_EXIT、三个入口断点安装均S_OK。ready tick249636937，包装记录UTC03:23:09.2364161Z并核对PID/creation/profile，然后启动原有唯一Browse控制器。Browse提交03:23:09.665Z/tick249637375，官方42B PIDL、flags1，前置ThisPC身份正确，发生在有效观察内。
+
+真实自有“无关联应用”模态44501754出现，Browse控制器10秒到期结束，没有browse.return HRESULT。观察器在tick249667781报告bounded_entry_count/capture_callback_health/planned_capture_failed；最终非匹配丢弃4096，matchedEntries/Returns均0。没有保留其他CLSID载荷、路径、栈或地址，也未调高上限/重跑。
+
+清理结果与观察完整性必须分开：确认暂停于所持有的同PID/创建身份、进程数1；三个入口断点删除S_OK，剩余断点0，Detach S_OK；post-detach查询成功且debuggerPresent=false，同一目标存活。最终attachCompleted/cleanupVerified/targetAliveAfterDetach均true，而passed=false来自提前结束。没有盲杀debugger或target。
+
+确认脱离后才通过CUA关闭自有模态。注册仍有效时，实际view仍MyComputer类20D04…/22B，对官方42B目标不匹配；ThisPC匹配读回成功，ItemCount2。观察器各阶段未加载样例，目标模块快照也未见样例。原窗口保留。
+
+stop/finally于03:27:41.1926639Z正常exit0，4个HKCU根及4个HKLM检查全absent、无CleanupErrors、STA清理通知成功。自有60425396和模态44501754已关闭，最终原1247028及Chrome8128618保留。未新加字段、注册变体、权限提升或后续入口。
+
+[原件索引](target-debug-bounded/evidence.json)包含epoch、短效plan、冻结工具hash、包装源、ready、唯一Browse原件、所有观察/清理事件、有效期view/模块和最终现场清理。此轮只覆盖三个选定导出API及受限数量；下一步由主协调选择更具区分力的前置Shell路径证据，G1仍未关闭。

@@ -1,0 +1,25 @@
+{
+  "Utc": "2026-09-10T03:23:40.1054890+00:00",
+  "PlanId": "06729d67340540b09ad7fce5bfb5c9bb",
+  "ObserverPid": 21980,
+  "ExitCode": 1,
+  "Ready": true,
+  "BrowseLaunched": true,
+  "CancelSent": false,
+  "Final": {
+    "kind": "result",
+    "mode": "plan",
+    "passed": false,
+    "matchedEntries": 0,
+    "matchedReturns": 0,
+    "nonMatchingDiscarded": 4096,
+    "finiteWaitTimeouts": 234,
+    "exitInterruptObserved": false,
+    "attachCompleted": true,
+    "cleanupVerified": true,
+    "targetAliveAfterDetach": true,
+    "existingProcessAttached": true,
+    "tick": 249667796
+  },
+  "StderrEmpty": true
+}

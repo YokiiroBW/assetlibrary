@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[v2真实附加](target-debug-bounded.md)：身份/ready及唯一Browse时序成立；4096总入口上限触发约31秒提前结束，0匹配，passed=false不能写成清理失败。三个断点删除/剩余0/Detach/目标存活无debugger均true；有效期实际view仍ThisPC/2项，最终STA注册清理和自有UI清理完成。未调上限或重跑旧合成/业务测试，G1不计通过。
+
 新增[目标观察器准入拒绝](target-debug-admission.md)：新目标所有权/SDK/ThisPC正控有效，固定749CD509工具在查询debugger状态前置失败，未附加、未ready、未Browse；不计产品激活测试。root只读证实旧handle mask导致Win32 5，另mask查询成功且无debugger。注册/自有UI已清理，旧合成/业务测试不重跑。
 
 新增[完整注册先行控制](register-first-control.md)：原guard/STA成功后，新PID创建时间严格更晚；SDK/ThisPC actualview正控通过，F5仍2项，唯一Browse产生无关联模态并触发10秒外限。有效注册期间目标匹配拒绝、ThisPC匹配/2项、模块无样例均已读回，正常清理及STA通知成功。没有重跑旧父枚举/源码构建/业务套件，不将原中断项算失败或将本次SDK成功算G1通过。
