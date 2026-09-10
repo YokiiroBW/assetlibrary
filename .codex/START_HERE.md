@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：Windows最高优先级。实际Explorer查询官方项FOLDER返回缺位；两个独立进程同字节PIDL/同mask/枚举前后46次稳定返回FOLDER，所测试输入差异不能解释。具体宿主/缓存/登记原因仍未知。全部测试注册/UI/调试器已清理，冷启动计划已准备，用户现已明确回复“做吧”批准测试前后两次当前用户Explorer重启，受限准备已审查，但当前WTSDisconnected/输入桌面错误5，必须等待重连再新鲜核验；未注册或stop，不重复索要授权。详见V03-005/current-windows-work.json和windows-cold-session-plan.md，不重跑旧控制、不擅自扩大原窗口范围。G1..G4及NAS决定保持独立。
+   当前接续V03-005：Windows最高优先级。用户已授权的前后两次当前用户Explorer重启实际完成：22个原进程及2个后续进程均按持有句柄退出，Windows自动恢复新桌面，两代桌面身份经独立读回保持稳定。冷启动后官方入口仍不出现，唯一打开仍无关联，查询FOLDER仍缺位；普通SDK/此电脑正控通过。具体原因仍未知，本轮不能等同全系统缓存重置。调试断点、窗口和临时登记全部清理，最终桌面无测试模块。下一项是准备受限观察真实Explorer的目标CLSID/ShellFolder属性读取路径，停止重复未改变条件的旧对照。G1..G4仍开放，无Windows安装包。 详见V03-005/current-windows-work.json及V03-006/cold-session-execution.md。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

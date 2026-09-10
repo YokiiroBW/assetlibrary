@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T06:41:55.328072+00:00",
-  "status": "cold_restart_authorized_waiting_active_desktop",
+  "updatedAtUtc": "2026-09-10T11:24:40.729281+00:00",
+  "status": "cold_restart_completed_entry_failure_persists",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "User approved two Explorer restarts. Preparation passed root and independent static review, but fresh native WTS state4/Disconnected and default-input-desktop access error5 prohibit execution. No cold-session registry directory or stop marker exists, no Explorer terminated. Await user RDP reconnect; authorization persists. Then new inspect/UI/registration are mandatory, no stale snapshots.",
+  "active_instruction": "User-authorized before/after Explorer restarts completed and cleanup verified; entry failure and requested FOLDER absence persist after a new desktop Shell. Next prepare bounded read-only observation of the actual Explorer target CLSID/ShellFolder attribute-reading path. Do not repeat unchanged COM, Bind, PIDL/order or cold-restart controls. Specific root cause remains unknown; this is not proof of a full-system cache reset or a passed Explorer gate.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Wait for active RDP/default desktop; do not ask for restart authorization again.",
-    "After reconnect, validate fresh scoped identities/windows and perform approved before/after cold-session plan.",
-    "Preserve the unexecuted status until actual stopped-process/new-desktop/cleanup evidence is available."
+    "Prepare a minimal observer for actual Explorer reads of the target CLSID/ShellFolder attributes; review before real capture.",
+    "Compare the concrete lookup/result path with the existing successful independent control, without changing registry attributes or system policy.",
+    "Keep product Shell/AssetHost/installer and G1..G4 separate from diagnostic evidence."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -236,13 +236,16 @@
     "planning_snapshot": "explorer-cold-start-preflight.json",
     "user_confirmation": {
       "status": "approved",
-      "user_message": "鍋氬惂",
+      "user_message": "做吧",
       "recordedUtc": "2026-09-10T06:27:18.826688+00:00",
       "scope": "Two current-user Explorer restarts as documented, with fresh preflight and original-window impact; no repeated permission request."
     },
-    "original_processes_stopped": false,
+    "original_processes_stopped": true,
     "scope_note": "Planning snapshot contains background Explorer processes left alive after owned windows closed; prior UI/registry cleanup did not claim every Explorer process exited. No snapshot PID can be reused for termination without fresh identity/user/session checks.",
-    "execution_precondition": {
+    "preparation_evidence": "../V03-006/cold-session-preflight/evidence.json",
+    "preparation_integrated_commit": "df6e41f",
+    "resumed_after_user_message": "已连接",
+    "disconnected_preparation_precondition": {
       "wts_state": 4,
       "meaning": "Disconnected",
       "default_input_desktop_error": 5,
@@ -252,7 +255,52 @@
       "source_review_sha256": "f36f1833bf16e36108daae7b87ea4b2f6249969a36baf768fcc9be12fb4817bf",
       "wrapper_review_sha256": "448ab744ec8f0a7354a9871d92c5f5fbd158192a0315bff92fc06bdf68958aaf"
     },
-    "preparation_evidence": "../V03-006/cold-session-preflight/evidence.json",
-    "preparation_integrated_commit": "df6e41f"
+    "execution_evidence": "../V03-006/cold-session-execution/evidence.json",
+    "execution_worker_commit": "3474209c161847d89f8797bb96b40e6ff13979ce",
+    "execution_integrated_commit": "3d3dbd1e0a571e5f98a4fda1372746ac707bd4b8",
+    "execution": {
+      "before_stop_count": 22,
+      "after_stop_count": 2,
+      "all_planned_exits_confirmed": true,
+      "first_new_desktop_pid": 38388,
+      "final_new_desktop_pid": 32044,
+      "automatic_shell_recovery": true,
+      "active_default_desktop": true,
+      "all_registered_roots_absent": true,
+      "final_desktop_test_modules_absent": true,
+      "artifacts_verified": 48,
+      "redacted_copies": 10,
+      "restart_source_sha256": "06CD2EE08C0CE153B2CD96DBF3A92F90FB85F3A500CF8EF0A13BC3F94A1CB259",
+      "restart_wrapper_sha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF",
+      "capture_duration_ms": 28485,
+      "full_60_seconds": false,
+      "capture_exit": "callback-health protection, exit1/passed=false; cleanup succeeded",
+      "requested_returned_masks": [
+        [
+          "20000000",
+          "00000000"
+        ],
+        [
+          "40418000",
+          "00000000"
+        ],
+        [
+          "40000000",
+          "00000000"
+        ],
+        [
+          "2044007F",
+          "00000026"
+        ]
+      ],
+      "all_hresult": "S_OK",
+      "folder_requested_but_missing_calls": [
+        1,
+        4
+      ],
+      "view": "ThisPC20D04/22B/2items, official target mismatch; one no-association Browse timeout, no returned Browse HRESULT",
+      "cleanup": "5 breakpoints removed/zero, detach, target alive/no debugger, owned modal/window closed, guard exit0, dual notification,8 roots absent, second restart",
+      "limits": "Current-user Explorer restart does not prove all system/shared caches reset. Stop-helper PID/creation was not separately recorded; post-helper ordering relies on completed synchronous tool calls followed by independent desktop snapshots."
+    }
   }
 }

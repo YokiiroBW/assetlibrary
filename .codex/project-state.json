@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "cold_restart_authorized_waiting_active_desktop",
-  "next_action": "User approved two Explorer restarts. Preparation passed root and independent static review, but fresh native WTS state4/Disconnected and default-input-desktop access error5 prohibit execution. No cold-session registry directory or stop marker exists, no Explorer terminated. Await user RDP reconnect; authorization persists. Then new inspect/UI/registration are mandatory, no stale snapshots.",
+  "status": "cold_restart_completed_entry_failure_persists",
+  "next_action": "User-authorized before/after Explorer restarts completed and cleanup verified; entry failure and requested FOLDER absence persist after a new desktop Shell. Next prepare bounded read-only observation of the actual Explorer target CLSID/ShellFolder attribute-reading path. Do not repeat unchanged COM, Bind, PIDL/order or cold-restart controls. Specific root cause remains unknown; this is not proof of a full-system cache reset or a passed Explorer gate.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,9 +87,9 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "cold_restart_authorized_waiting_active_desktop",
+    "stage": "cold_restart_completed_entry_failure_persists",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
-    "command_approvals": "Desktop authorization persists and actual RDP input works; operations remain scoped to owned test windows and reversible proof registration.",
+    "command_approvals": "User approved and completed before/after current-user Explorer restarts; continued diagnostic work remains scoped and reversible.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
     "integration_checkpoint": "163da1b"
   }
