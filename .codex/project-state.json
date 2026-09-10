@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "owner_turn_active_without_new_execution_manual_interrupt_needed",
-  "next_action": "Windows owner turn01a08941 has remained active since02:59UTC without new runtime/plan/GUI test evidence; follow-up messages have not produced execution. No real target attach/result exists. Existing task tools do not expose interrupt; user must stop the stalled turn before controlled resume. Do not start a second GUI actor or repeat synthetic checks.",
+  "status": "owner_responsive_preparing_scoped_real_observation",
+  "next_action": "Windows owner has responded: frozen749cd509 hash rechecked, preparing correctSTA guard/new window and ready-triggered unique Browse wrapper. No access/quota refusal, no real attach yet. Continue in the same sole GUI owner; manual interruption is no longer requested.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
