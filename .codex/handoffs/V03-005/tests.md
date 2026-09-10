@@ -153,3 +153,11 @@ Windows e657813集成为1915b88；18份新原件SHA独立核对一致，纳入�
 Observer749cd509…与manifest21fa0b68…冻结，16文件长度/SHA独立核对，非二进制原件及完整诊断源归档target-debug-control。normal-final/cancel-final各3入口、3实际80040154返回及context1；线程/返回栈配对、6断点移除/剩余0、Detach、心跳与内部/外部无debugger、合作退出通过，目标自身first-chance处理执行。19项纯计划/ID/窗口谓词检查与合成进程精确创建时间正反检查有明确范围；未当作真实GUI身份验收。早期两次工具失败保留，未计产品失败。实际Explorer观测由单一owner执行，本准备检查点尚无真实结果。
 
 准备检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-target-observer-preparation.log，发布门禁不变。
+
+## v2查询权限修复与真实有界观察
+
+同PID17512/创建时间的只读句柄对照证明旧00101000查询错误5、新00100400成功且无debugger；旧准入失败18份原件经核hash合入7160f2b，没有附加/Browse，默认false字段不代表目标死亡。v2仅改查询权限及明确错误，新12文件manifest和两条final原件独立核对；每次先复现旧mask，再关闭全权限creation句柄，以实际mask重新打开目标完成3API/异常处理/正常或取消/断点清零/Detach/无debugger与合作退出。
+
+Windows05b8eba集成为00272f1，27份原件hash一致。实际v2 ready249636937→Browse249637375→上限249667781，30.844秒而非完整60秒，4096非匹配、官方0匹配；外部Browse10秒超时无返回HRESULT。真实模态文本读回为03:27:14Z、晚于捕获结束，不推断其首次出现时刻。3断点移除/剩余0/Detach/同目标存活无debugger均成功；注册有效期内ThisPC2/官方不匹配和后置模块快照保留。guard、4CU/4LM检查及自有窗口/模态清理已验证，原用户窗口/Chrome保留。未增加计数上限或重跑原场景，未把0匹配等同完全无激活。
+
+本集成检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-real-com-capture.log；架构/契约/交接及35项迁移和架构回归通过，发布门禁不变。

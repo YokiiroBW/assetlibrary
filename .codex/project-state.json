@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "owner_responsive_preparing_scoped_real_observation",
-  "next_action": "Windows owner has responded: frozen749cd509 hash rechecked, preparing correctSTA guard/new window and ready-triggered unique Browse wrapper. No access/quota refusal, no real attach yet. Continue in the same sole GUI owner; manual interruption is no longer requested.",
+  "status": "bounded_real_capture_complete_parent_bind_locator_in_progress",
+  "next_action": "v2 actual owned Explorer capture complete and cleaned; no repeat COM export capture or count-limit increase. Curie prepares only a standalone MyComputer IShellFolder BindToObject implementation locator/control in .runtime/explorer-bind-location, no real attachment or registration. Root reviews before another actual observation. Optional clean Windows11 environment availability question is pending; current local work continues.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,7 +87,7 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "real_clients_accepted_explorer_entry_diagnosis_and_nas_decision_pending",
+    "stage": "windows_real_com_capture_complete_parent_bind_locator_in_progress",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "Desktop authorization persists and actual RDP input works; operations remain scoped to owned test windows and reversible proof registration.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",

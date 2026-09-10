@@ -1,0 +1,60 @@
+#include "Shared.h"
+#include <cwchar>
+
+static void ExceptionControl(SharedState* state) {
+    __try { RaiseException(0xE0424242,0,0,nullptr); }
+    __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH) {
+        InterlockedExchange(&state->ownExceptionHandled,1);
+    }
+}
+
+static HRESULT Invoke(ULONG api,REFCLSID clsid) {
+    IUnknown* object=nullptr;
+    HRESULT hr=E_UNEXPECTED;
+    if(api==0) hr=CoCreateInstance(clsid,nullptr,CLSCTX_INPROC_SERVER,IID_IUnknown,reinterpret_cast<void**>(&object));
+    else if(api==1) {
+        MULTI_QI query{}; query.pIID=&IID_IUnknown;
+        hr=CoCreateInstanceEx(clsid,nullptr,CLSCTX_INPROC_SERVER,nullptr,1,&query);
+        object=query.pItf;
+    } else hr=CoGetClassObject(clsid,CLSCTX_INPROC_SERVER,nullptr,IID_IClassFactory,reinterpret_cast<void**>(&object));
+    if(object) object->Release();
+    return hr;
+}
+
+int wmain(int argc, wchar_t** argv) {
+    if (argc != 5 || wcscmp(argv[1], L"--synthetic-child") != 0) return 2;
+    HANDLE mapping = reinterpret_cast<HANDLE>(_wcstoui64(argv[2], nullptr, 16));
+    HANDLE start = reinterpret_cast<HANDLE>(_wcstoui64(argv[3], nullptr, 16));
+    HANDLE stop = reinterpret_cast<HANDLE>(_wcstoui64(argv[4], nullptr, 16));
+    auto state = static_cast<SharedState*>(MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SharedState)));
+    if (!state || state->magic != SharedMagic) return 3;
+    HRESULT init = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(init)) { state->targetError = init; return 4; }
+    state->targetPid = GetCurrentProcessId();
+    state->targetCreation = CreationTime(GetCurrentProcess());
+    state->apiAddresses[0] = reinterpret_cast<ULONGLONG>(&CoCreateInstance);
+    state->apiAddresses[1] = reinterpret_cast<ULONGLONG>(&CoCreateInstanceEx);
+    state->apiAddresses[2] = reinterpret_cast<ULONGLONG>(&CoGetClassObject);
+    InterlockedExchange(&state->ready, 1);
+    ULONGLONG deadline = GetTickCount64() + 45000;
+    bool worked = false;
+    while (GetTickCount64() < deadline && WaitForSingleObject(stop, 0) == WAIT_TIMEOUT) {
+        InterlockedIncrement(&state->heartbeat);
+        if (IsDebuggerPresent()) InterlockedExchange(&state->debuggerObserved, 1);
+        if (!worked && WaitForSingleObject(start, 0) == WAIT_OBJECT_0) {
+            ExceptionControl(state);
+            for(ULONG api=0;api<3;api++) {
+                state->otherResults[api]=Invoke(api,OtherClsid);
+                state->matchResults[api]=Invoke(api,MatchClsid);
+            }
+            worked = true;
+            InterlockedExchange(&state->callsFinished, 1);
+        }
+        if (worked && !IsDebuggerPresent()) InterlockedIncrement(&state->noDebuggerAfterWork);
+        Sleep(20);
+    }
+    CoUninitialize();
+    UnmapViewOfFile(state);
+    CloseHandle(stop); CloseHandle(start); CloseHandle(mapping);
+    return 0;
+}

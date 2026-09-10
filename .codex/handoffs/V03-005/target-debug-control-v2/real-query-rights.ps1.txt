@@ -1,0 +1,27 @@
+$ErrorActionPreference='Stop'
+$taskIdentity=Get-Content -LiteralPath 'C:\Users\Administrator\.codex\worktrees\6f7b\AssetLibrary\.runtime\explorer-live\20260910-target-debug\identity.json' -Raw | ConvertFrom-Json
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class DebugQueryRights {
+ [DllImport("kernel32.dll",SetLastError=true)] public static extern IntPtr OpenProcess(uint access,bool inherit,uint pid);
+ [DllImport("kernel32.dll",SetLastError=true)] public static extern bool GetProcessTimes(IntPtr handle,out long creation,out long exit,out long kernel,out long user);
+ [DllImport("kernel32.dll",SetLastError=true)] public static extern bool CheckRemoteDebuggerPresent(IntPtr handle,out bool present);
+ [DllImport("kernel32.dll")] public static extern bool CloseHandle(IntPtr handle);
+}
+'@
+$taskRows=@()
+foreach($taskMask in @(0x101000,0x100400)){
+ $taskHandle=[DebugQueryRights]::OpenProcess($taskMask,$false,[uint32]$taskIdentity.Pid)
+ if($taskHandle -eq [IntPtr]::Zero){throw "Owned process open failed: $([Runtime.InteropServices.Marshal]::GetLastWin32Error())"}
+ try{
+  [long]$taskCreated=0;[long]$taskExited=0;[long]$taskKernel=0;[long]$taskUser=0
+  if(-not [DebugQueryRights]::GetProcessTimes($taskHandle,[ref]$taskCreated,[ref]$taskExited,[ref]$taskKernel,[ref]$taskUser) -or $taskCreated -ne [long]$taskIdentity.CreationFileTime){throw 'Fresh owned identity mismatch'}
+  [bool]$taskPresent=$false
+  $taskOk=[DebugQueryRights]::CheckRemoteDebuggerPresent($taskHandle,[ref]$taskPresent)
+  $taskError=if($taskOk){0}else{[Runtime.InteropServices.Marshal]::GetLastWin32Error()}
+  $taskRows+=[ordered]@{accessMask=('{0:X8}' -f $taskMask);success=$taskOk;lastError=$taskError;debuggerPresent=if($taskOk){$taskPresent}else{$null};creationMatch=$true}
+ }finally{[void][DebugQueryRights]::CloseHandle($taskHandle)}
+}
+$taskReceipt=[ordered]@{recordedUtc=[DateTimeOffset]::UtcNow.ToString('o');pid=$taskIdentity.Pid;creationFiletime=$taskIdentity.CreationFileTime;readOnly=$true;attached=$false;queries=$taskRows}
+$taskReceipt|ConvertTo-Json -Depth 5|Tee-Object -FilePath (Join-Path $PSScriptRoot 'debug-query-rights.json')

@@ -1,0 +1,16 @@
+{
+  "kind": "v2_minimal_query_access_correction",
+  "baselineObserverSha256": "749cd50985ba51895c410ea1e8fb1d3335c903767dbf87e88b60f846645837e0",
+  "actualQueryHandleMask": "0x00100400",
+  "oldMaskRegression": {"mask": "0x00101000", "querySucceeded": false, "win32Error": 5, "hresult": "0x80070005", "debuggerPresent": null},
+  "actualMaskRegression": {"querySucceeded": true, "win32Error": 0, "hresult": "0x00000000", "debuggerPresent": false, "originalCreateProcessHandleClosed": true, "samePidCreationVerified": true},
+  "build": {"compiler": "MSVC x64 14.44.35207", "sdk": "10.0.26100.0", "warnings": 0, "errors": 0, "exit": 0},
+  "runs": [
+    {"log": "normal-final.jsonl", "pid": 35004, "creationFiletime": "134334838104413917", "exit": 0, "matchingEntries": 3, "matchingReturns": 3, "finiteWaitTimeouts": 0, "passed": true},
+    {"log": "cancel-final.jsonl", "pid": 29364, "creationFiletime": "134334838107928880", "exit": 0, "matchingEntries": 3, "matchingReturns": 3, "finiteWaitTimeouts": 14, "passed": true}
+  ],
+  "verifiedBoth": ["old-mask error 5 reproduced using reopened owned child handle", "actual real-mode mask reopened and retained", "pre-attach debugger query succeeded false", "three target API entries and actual returns 0x80040154", "CLSCTX 1", "nonmatching payload discarded", "target first-chance handler preserved", "six breakpoints removed and count zero", "DetachProcesses S_OK", "post-detach debugger query succeeded false using actual mask", "heartbeat and target own no-debugger checks", "cooperative exit zero"],
+  "notExecuted": ["--run-plan", "real Explorer or existing process attachment", "GUI", "registry mutation", "policy mutation", "privilege adjustment", "UAC", "ETW", "forced process termination"],
+  "unchangedChecksNotRepeated": "Pure plan parser/ID/frame predicates from frozen v1.",
+  "limits": ["native Attach/Detach have no proven hard deadline", "pre-first-event and crash cleanup risks remain", "no event is not proof of no activation attempt", "real target query and detach remain coordinator-run validation"]
+}

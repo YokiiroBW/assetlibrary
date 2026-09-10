@@ -1,0 +1,16 @@
+{
+  "checkedUtc": "2026-09-10T03:19:20.6813367Z",
+  "checks": [
+    {
+      "log": "normal-final.jsonl",
+      "pid": 35004,
+      "originalTargetStillRunning": false
+    },
+    {
+      "log": "cancel-final.jsonl",
+      "pid": 29364,
+      "originalTargetStillRunning": false
+    }
+  ],
+  "allOwnedTargetsEnded": true
+}

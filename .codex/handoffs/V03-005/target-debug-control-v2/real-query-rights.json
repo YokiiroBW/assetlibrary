@@ -1,0 +1,23 @@
+{
+  "recordedUtc": "2026-09-10T03:14:47.7874415+00:00",
+  "pid": 17512,
+  "creationFiletime": "134334834964662522",
+  "readOnly": true,
+  "attached": false,
+  "queries": [
+    {
+      "accessMask": "00101000",
+      "success": false,
+      "lastError": 5,
+      "debuggerPresent": null,
+      "creationMatch": true
+    },
+    {
+      "accessMask": "00100400",
+      "success": true,
+      "lastError": 0,
+      "debuggerPresent": false,
+      "creationMatch": true
+    }
+  ]
+}

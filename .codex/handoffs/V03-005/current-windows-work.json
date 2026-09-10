@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T03:00:35.710098+00:00",
-  "status": "owner_responsive_preparing_scoped_real_observation",
+  "updatedAtUtc": "2026-09-10T03:36:39.244416+00:00",
+  "status": "bounded_real_capture_complete_parent_bind_locator_in_progress",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Windows owner has responded: frozen749cd509 hash rechecked, preparing correctSTA guard/new window and ready-triggered unique Browse wrapper. No access/quota refusal, no real attach yet. Continue in the same sole GUI owner; manual interruption is no longer requested.",
+  "active_instruction": "v2 actual owned Explorer capture complete and cleaned; no repeat COM export capture or count-limit increase. Curie prepares only a standalone MyComputer IShellFolder BindToObject implementation locator/control in .runtime/explorer-bind-location, no real attachment or registration. Root reviews before another actual observation. Optional clean Windows11 environment availability question is pending; current local work continues.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,8 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Complete the already-approved one-shot official Explorer observation with ready-to-Browse coordination and owned-site cleanup.",
-    "Collect real target API/view evidence; do not repeat synthetic checks or start a second GUI actor."
+    "Verify standalone stock MyComputer BindToObject implementation locator, module identity/code range and independent bind control.",
+    "Only actual owned-host hits on the approved opaque relative PIDL could establish host binding HRESULT; a reference vtable is a locator, not host identity evidence.",
+    "Keep original user Explorer/Chrome and NAS deployment unchanged; no production Shell gate closure."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -96,6 +97,32 @@
     "preparation_evidence": "target-debug-control/evidence.json",
     "observer_sha256": "749cd50985ba51895c410ea1e8fb1d3335c903767dbf87e88b60f846645837e0",
     "synthetic_normal_cancel": "passed; each3 API entries/returns, actual80040154/context1, six breakpoint removals, detach and healthy cooperative exit",
-    "real_result": "pending_owner_preparing_guard_and_fresh_window"
+    "real_result": "admission_only_failed_no_attach_no_browse"
+  },
+  "target_debugger_v2": {
+    "preparation_evidence": "target-debug-control-v2/evidence.json",
+    "observer_sha256": "841cb600fe597654b2d49fd1b4f2c834d9f3d53f910926bd8bcd8035e677b622",
+    "runtime_files_verified": 12,
+    "real_result": {
+      "worker_commit": "05b8eba1d7b3a15dd4f2189c23fda79555a4a631",
+      "integrated_commit": "00272f1efc07e945a55ebef9eb49d2bb798f89e4",
+      "evidence": "../V03-006/target-debug-bounded/evidence.json",
+      "raw_artifacts_verified": 27,
+      "ready_tick": 249636937,
+      "browse_tick": 249637375,
+      "count_limit_tick": 249667781,
+      "capture_milliseconds": 30844,
+      "discarded_nonmatching": 4096,
+      "matched_entries": 0,
+      "matched_returns": 0,
+      "full_60_seconds": false,
+      "debugger_cleanup_verified": true,
+      "target_alive_without_debugger": true,
+      "registry_ui_clean": true,
+      "view": "ThisPC20D04/22B,2items; official42B mismatch",
+      "module_snapshot": "sample absent after detach while registration valid",
+      "modal_evidence": "no-association modal readback03:27:14Z after capture; not a timestamp of modal onset",
+      "scope_limit": "Only selected3 COM exports within bounded window; zero matches does not prove no activation attempt or rule out other processes/implementations."
+    }
   }
 }

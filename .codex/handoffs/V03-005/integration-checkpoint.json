@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "Registration-before-new-Explorer control completed: registration02:25:12Z preceded PID24488 creation02:25:32Z; actual SDK/ThisPC positives passed, official entry absent, one Browse blocked by no-association modal with no returned HRESULT. All owned registration/windows cleaned. Root cause remains unknown; shared broker cold start was not established.",
+  "windows_explorer_entry": "v1 real observer rejected before attach due insufficient query handle rights; corrected v2 observed one owned Explorer Browse for30.844s before4096-nonmatch cap, no official3-API matches. Three breakpoints removed, detach and target survival verified. Actual view remainsThisPC2, sample absent in post-detach snapshot. All owned registry/UI cleaned; root cause still unknown.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -62,5 +62,7 @@
   "official_control_build": "official-control-build/evidence.json",
   "synthetic_debug_control": "synthetic-debug-control/evidence.json",
   "windows_register_first_evidence": ".codex/handoffs/V03-006/register-first-control/evidence.json",
-  "restricted_target_observer": "target-debug-control/evidence.json"
+  "restricted_target_observer": "target-debug-control/evidence.json",
+  "restricted_target_observer_v2": "target-debug-control-v2/evidence.json",
+  "windows_real_com_capture": ".codex/handoffs/V03-006/target-debug-bounded/evidence.json"
 }

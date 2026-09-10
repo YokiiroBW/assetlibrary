@@ -1,0 +1,66 @@
+{
+  "kind": "v2_query_access_fix_frozen",
+  "createdUtc": "2026-09-10T03:19:20.7082585Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1191,
+      "sha256": "2c0dc30834fd6798df0074ede788669d3d407476a0040d9d87aa390560dfe9c2"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 2881,
+      "sha256": "9c62e39be8a39c880a9bbded36c293f3cebce20793e60ca413657d8ca87998fa"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 38543,
+      "sha256": "71b8e0f2e2b90c35271e2303b5b31b762a9c2fc45ed94b1babed0af0b84159e4"
+    },
+    {
+      "path": "Plan.h",
+      "length": 6116,
+      "sha256": "017ed197385c4f9bfe5222b32144c3657205229f72ca9a5960e9817e53d4c9ff"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1526,
+      "sha256": "7d1115b0453ab607978e6fecfaa2ed87bd416d54a945556176192dcbf7c204e6"
+    },
+    {
+      "path": "README.md",
+      "length": 5036,
+      "sha256": "956fa7fe320e21fb6794677e146a583291980bb9f66bfdb4d0366fcdf68ae819"
+    },
+    {
+      "path": "validation.json",
+      "length": 2065,
+      "sha256": "49a5b3530366f52a8c8f49f91683c446a2ed2e83dc7bc2c5764d2950d3b51c47"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 335,
+      "sha256": "a1c0749fd600db280793c87de9857d2baa13b39770983440a20f42dc36839559"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 3412,
+      "sha256": "ab8b8f3c1a2e0ade8b500292e18b2acba5dfe2284bc5319b945ceab8a5b357e6"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 3752,
+      "sha256": "a0c01cd73200cac0998c7bba85517069c76a1cd11826f026f9cb57f13fea34d5"
+    },
+    {
+      "path": "bin\\ExplorerTargetObserver.exe",
+      "length": 245760,
+      "sha256": "841cb600fe597654b2d49fd1b4f2c834d9f3d53f910926bd8bcd8035e677b622"
+    },
+    {
+      "path": "bin\\SynthTarget.exe",
+      "length": 107520,
+      "sha256": "ecc93cf8480709a09f92677b501afd19a7327a33abcc50ee4c1b7652916fd0b1"
+    }
+  ]
+}
