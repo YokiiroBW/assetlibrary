@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[cache首轮参考](cache-reference-first.md)：原15候选/6基线hash核对、两次有效20字段读回及PIDL22B通过；normal参考失败（2嵌套snapshot对上1snapshot断言），不可计通过。2返回+2入口断点清零/Detach/参考心跳/无debugger/协作退出通过，guard退出0、双通知/8根及最终reader20missing通过。未跑cancel/真实Explorer/原重启；字段正值、DWORD和空默认字符串本轮得到实测，错误类型等边界仍未测。
+
 新增[固定字段reader](registry-field-readback.md)：C# Add-Type、两个PowerShell AST通过；仅一次expected-missing独立10秒外限（实际未超时）exit0/无stderr，11+4+5条全部missing-key/OpenStatus2，写0/guard调用0。未登记正值、missing-value、错误类型/大小/竞态和超时清理未执行，仅源码审查，不能计新observer或产品测试通过。
 
 只读增补：root匹配PDB输出中5个签名均零偏移，module_info的unmatched均false；原字节输出归档，单独标为离线符号证据，不计运行时调用。新增cache预热/零命中及void、DWORD返回解释限制；未注册、attach、GUI或重新运行旧控制。

@@ -1,0 +1,11 @@
+{
+  "Mode": "pidl",
+  "StartedUtc": "2026-09-10T14:48:11.0884877+00:00",
+  "CompletedUtc": "2026-09-10T14:48:11.1102408+00:00",
+  "Pid": 29496,
+  "CreationFileTime": "134335252910893246",
+  "ExecutableSha256": "081DE6E8DE0B061D0D96F2DD2811E8679302A67B5E5B844BFC8E528F170A1B60",
+  "ExitCode": 0,
+  "StderrEmpty": true,
+  "HardKillUsed": false
+}

@@ -504,7 +504,9 @@
     ".codex/handoffs/V03-006/registry-read-observation-plan.md",
     ".codex/handoffs/V03-006/registry-read-preparation/",
     ".codex/handoffs/V03-006/registry-field-readback.md",
-    ".codex/handoffs/V03-006/registry-field-readback/"
+    ".codex/handoffs/V03-006/registry-field-readback/",
+    ".codex/handoffs/V03-006/cache-reference-first.md",
+    ".codex/handoffs/V03-006/cache-reference-first/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -583,7 +585,8 @@
       "Cold-session preparation only: C# compiled, wrapper parsed, read-only preflight refuses WTSDisconnected and unavailable input desktop; no termination or registration executed",
       "One authorized cold-session control: 22/22 and 2/2 held processes exited, two new desktops each stable across two readbacks; actual entry remains failed; original observer cleanup and final module/registry/UI cleanup verified",
       "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending",
-      "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run"
+      "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run",
+      "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -829,13 +832,13 @@
   },
   "registry_field_reader_checkpoint": {
     "report": "registry-field-readback.md",
-    "status": "prepared_expected_missing_passed",
+    "status": "registered_and_unregistered_readbacks_confirmed_cache_reference_cycle",
     "official_fields": 11,
     "owner_fields": 4,
     "external_hkcr_fields": 5,
     "missing_key_records": 20,
     "native_open_status": 2,
-    "registered_value_paths_tested": false,
+    "registered_value_paths_tested": true,
     "compiled": true,
     "ast_passed": true,
     "timeout": false,
@@ -844,5 +847,25 @@
     "gui_actions": 0,
     "attachments": 0,
     "restarts": 0
+  },
+  "cache_reference_first_checkpoint": {
+    "report": "cache-reference-first.md",
+    "status": "normal_failed_no_real_execution",
+    "observer_sha256": "9192C06013F4D86272BC9F4BBCB03B9FE803C7DD6CE01785CA410AF0955EB79D",
+    "registered_field_readbacks_passed": 2,
+    "fields_per_readback": 20,
+    "pidl_preflight_passed": true,
+    "normal_passed": false,
+    "normal_matched_entries": 2,
+    "normal_matched_returns": 2,
+    "normal_cache_snapshots": 2,
+    "reference_cleanup_verified": true,
+    "reference_cooperative_exit_confirmed": true,
+    "guard_cleanup_verified": true,
+    "cancel_executed": false,
+    "real_plan_created": false,
+    "gui_actions": 0,
+    "explorer_restarts": 0,
+    "hard_kill_used": false
   }
 }

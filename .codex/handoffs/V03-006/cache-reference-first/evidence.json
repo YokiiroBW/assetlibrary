@@ -1,0 +1,249 @@
+{
+  "RecordedUtc": "2026-09-10T14:51:23.657079+00:00",
+  "Status": "normal_reference_failed_no_cancel_no_real_experiment",
+  "ManifestSha256": "887898A854B755C0EA08931646F95D4E0DF97D90505133A873D70F6C0D1EE894",
+  "ObserverSha256": "9192C06013F4D86272BC9F4BBCB03B9FE803C7DD6CE01785CA410AF0955EB79D",
+  "NormalPassed": false,
+  "NormalMatchedEntries": 2,
+  "NormalMatchedReturns": 2,
+  "NormalCacheSnapshots": 2,
+  "ReferenceCleanupVerified": true,
+  "ReferenceCooperativeExitConfirmed": true,
+  "GuardExitCode": 0,
+  "FinalRegistryCleanupVerified": true,
+  "CancelExecuted": false,
+  "RealPlanCreated": false,
+  "GuiActions": 0,
+  "ExplorerRestarts": 0,
+  "Artifacts": [
+    {
+      "File": "capture.ps1.txt",
+      "Sha256": "5730B706F5B4AE694F01091063DD1417816B3DB4EFEA01B66559573CF68FCBB0",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/capture.ps1",
+      "OriginalSha256": "5730B706F5B4AE694F01091063DD1417816B3DB4EFEA01B66559573CF68FCBB0"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "7E1E880DF34AFD17794908E5CFD03E06132315ED9DEFBC54645F90DBBD7B23E9",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/cleanup.json",
+      "OriginalSha256": "7E1E880DF34AFD17794908E5CFD03E06132315ED9DEFBC54645F90DBBD7B23E9"
+    },
+    {
+      "File": "fields-after-reference-failure.json",
+      "Sha256": "072F95980DC2BECF9A48A82DA474F993CCC0F00AC8BB296C2F7D714D5B41AE5A",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/fields-after-reference-failure.json",
+      "OriginalSha256": "D4FA901518A226F5FFACACE3673F856B3A92C82B169383177A847A3116237AF3"
+    },
+    {
+      "File": "fields-before.json",
+      "Sha256": "898E35EBCBD0CA89354F728342A59AC933A189FFFB041FF38363E49A52D87A0B",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/fields-before.json",
+      "OriginalSha256": "AD89509F98226559F5DA8D158E14E4FB7050C6878E2795F6D801E61B4CCDB0C0"
+    },
+    {
+      "File": "fields-cleanup.json",
+      "Sha256": "CC204C709939B9FF8D96D0517C7D437FA2D3470210BD5004A1E3B0DE3360C752",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/fields-cleanup.json",
+      "OriginalSha256": "48CC4C28F6CC18024E9782B03C5A85290A6175AC0E6E05E0CBCE5DA8BC00781D"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "61376768A019EF19A0F9B5E238B4186BF06B3719BBDA3BC667053BF59094789D",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/final-cleanup.json",
+      "OriginalSha256": "61376768A019EF19A0F9B5E238B4186BF06B3719BBDA3BC667053BF59094789D"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/guard.ps1",
+      "OriginalSha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76"
+    },
+    {
+      "File": "preflight.json",
+      "Sha256": "1B8F960AEA19D0371590BD9C6C220FE8307E809927E6264EC154DEB08A91DA9C",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/preflight.json",
+      "OriginalSha256": "1B8F960AEA19D0371590BD9C6C220FE8307E809927E6264EC154DEB08A91DA9C"
+    },
+    {
+      "File": "preparation-session.json",
+      "Sha256": "B859F58B667214C2F0AD1B7692DB6A1967DB13E37F23EC3BAEFD31BA5D35C8B2",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/preparation-session.json",
+      "OriginalSha256": "4E9F4824D74B40C9B69ACD8F61AE9BC9055A245A47B0C7DC1D4C7D62A3FB6AA7"
+    },
+    {
+      "File": "reference-normal-process.json",
+      "Sha256": "39904175C7A275BFF4D1BC21ED6AE0A95165E0D1B956417C6EE423F418AAE4B1",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-normal-process.json",
+      "OriginalSha256": "39904175C7A275BFF4D1BC21ED6AE0A95165E0D1B956417C6EE423F418AAE4B1"
+    },
+    {
+      "File": "reference-normal.jsonl",
+      "Sha256": "C7A4AA15ED75BD20D0E62A56B3F4B85526F2A9E0DC572B7ADADFD111034E8F3D",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-normal.jsonl",
+      "OriginalSha256": "C7A4AA15ED75BD20D0E62A56B3F4B85526F2A9E0DC572B7ADADFD111034E8F3D"
+    },
+    {
+      "File": "reference-normal.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-normal.stderr.txt",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "reference-pidl-process.json",
+      "Sha256": "ACD9584EAD860BDC3508A4F8DD5268079090B674B306080667C8C0538106EDD3",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-pidl-process.json",
+      "OriginalSha256": "ACD9584EAD860BDC3508A4F8DD5268079090B674B306080667C8C0538106EDD3"
+    },
+    {
+      "File": "reference-pidl.jsonl",
+      "Sha256": "7B9DC53B2645D0C481E047AF8DF3E56366E914559DABA9A3650A151C598F98DE",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-pidl.jsonl",
+      "OriginalSha256": "7B9DC53B2645D0C481E047AF8DF3E56366E914559DABA9A3650A151C598F98DE"
+    },
+    {
+      "File": "reference-pidl.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/reference-pidl.stderr.txt",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "6EC0FB672D30266ED034940E8F3CEE4381D7F07E51B05EE6592D5B5D13F0C218",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/register.json",
+      "OriginalSha256": "5140FCA379D2AB99E75DB588D88CA610E18F50FAFA4332D2FDB9DA6E6C28C518"
+    },
+    {
+      "File": "run-reference.ps1.txt",
+      "Sha256": "DFE4E3C11FEF947024E4BF56D5FCD518050D22033000D30815CF2959EAFDA85E",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/run-reference.ps1",
+      "OriginalSha256": "DFE4E3C11FEF947024E4BF56D5FCD518050D22033000D30815CF2959EAFDA85E"
+    },
+    {
+      "File": "stop.marker.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/stop",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "candidate-build-01.log.txt",
+      "Sha256": "8666ED67CEF444CBE1933E7AC8BDDCB7B46319FD0AD2278659976E386D3F3767",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/build-01.log",
+      "OriginalSha256": "8666ED67CEF444CBE1933E7AC8BDDCB7B46319FD0AD2278659976E386D3F3767"
+    },
+    {
+      "File": "candidate-build.ps1.txt",
+      "Sha256": "EEA72BBDE81AB616CDAE9C5F595B5E7D54DBBB55AF42959E68C504934DD98F8F",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/build.ps1",
+      "OriginalSha256": "EEA72BBDE81AB616CDAE9C5F595B5E7D54DBBB55AF42959E68C504934DD98F8F"
+    },
+    {
+      "File": "candidate-CacheScope.h.txt",
+      "Sha256": "236CC5745D5230F33CD3D898E863064339B6E0AC7693212DE843E1018DF5C783",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/CacheScope.h",
+      "OriginalSha256": "236CC5745D5230F33CD3D898E863064339B6E0AC7693212DE843E1018DF5C783"
+    },
+    {
+      "File": "candidate-candidate.diff.txt",
+      "Sha256": "E3F84046A84F501B3EB2F9E7ED0D36E2BD69925F9D625020006445196CD969FE",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/candidate.diff",
+      "OriginalSha256": "E3F84046A84F501B3EB2F9E7ED0D36E2BD69925F9D625020006445196CD969FE"
+    },
+    {
+      "File": "candidate-Fingerprint.h.txt",
+      "Sha256": "91A1FA4BE6F93C8C5A39527D42E713E9ECE685C482ED192540C5ECF831875FC3",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/Fingerprint.h",
+      "OriginalSha256": "91A1FA4BE6F93C8C5A39527D42E713E9ECE685C482ED192540C5ECF831875FC3"
+    },
+    {
+      "File": "candidate-manifest.json",
+      "Sha256": "887898A854B755C0EA08931646F95D4E0DF97D90505133A873D70F6C0D1EE894",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/manifest.json",
+      "OriginalSha256": "887898A854B755C0EA08931646F95D4E0DF97D90505133A873D70F6C0D1EE894"
+    },
+    {
+      "File": "candidate-Observer.cpp.txt",
+      "Sha256": "95E9B26CBDB47F5D8AAFFA811E61A00EBDC340A4E654C23B10E81292CD98C78B",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/Observer.cpp",
+      "OriginalSha256": "95E9B26CBDB47F5D8AAFFA811E61A00EBDC340A4E654C23B10E81292CD98C78B"
+    },
+    {
+      "File": "candidate-Plan.h.txt",
+      "Sha256": "24E3339F5392D65F159BEF62429361F406FB2E2EEA4E7319F9B37403A0E6189B",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/Plan.h",
+      "OriginalSha256": "24E3339F5392D65F159BEF62429361F406FB2E2EEA4E7319F9B37403A0E6189B"
+    },
+    {
+      "File": "candidate-preflight-01.jsonl",
+      "Sha256": "94DDA3B5AF1E0F7C816C4FFC44334FDBCD8F764CBF818AF0F35D8E6BD4E6C3BC",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/preflight-01.jsonl",
+      "OriginalSha256": "94DDA3B5AF1E0F7C816C4FFC44334FDBCD8F764CBF818AF0F35D8E6BD4E6C3BC"
+    },
+    {
+      "File": "candidate-README.md.txt",
+      "Sha256": "02AC8C88B4C7E46A611B14EABCF5ACEEED117993C37A54D654D9897D0D6069A5",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/README.md",
+      "OriginalSha256": "02AC8C88B4C7E46A611B14EABCF5ACEEED117993C37A54D654D9897D0D6069A5"
+    },
+    {
+      "File": "candidate-self-test-01.jsonl",
+      "Sha256": "FBF43AD1A0897B9E0390F625D5AD157490537809D1B10A74273534AFCC719CFC",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/self-test-01.jsonl",
+      "OriginalSha256": "FBF43AD1A0897B9E0390F625D5AD157490537809D1B10A74273534AFCC719CFC"
+    },
+    {
+      "File": "candidate-Shared.h.txt",
+      "Sha256": "29B8853188016F2BB3A0AA1CEC0845EF50119458FB84909A9DBDD6EDC045E160",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/Shared.h",
+      "OriginalSha256": "29B8853188016F2BB3A0AA1CEC0845EF50119458FB84909A9DBDD6EDC045E160"
+    },
+    {
+      "File": "candidate-Target.cpp.txt",
+      "Sha256": "4103F2D98E155CC6989BF6BF2C7A1BA60EB31D664B9AE31EF9B8CE06FC357820",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/Target.cpp",
+      "OriginalSha256": "4103F2D98E155CC6989BF6BF2C7A1BA60EB31D664B9AE31EF9B8CE06FC357820"
+    },
+    {
+      "File": "candidate-validation.json",
+      "Sha256": "48FDAAD0A6B83B3EE1D4E6CC68D28C08C120C6B5F7A0B2C0546EC91C0CCCFA44",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cache-attributes/candidate-frozen/validation.json",
+      "OriginalSha256": "48FDAAD0A6B83B3EE1D4E6CC68D28C08C120C6B5F7A0B2C0546EC91C0CCCFA44"
+    },
+    {
+      "File": "reference-matrix.json",
+      "Sha256": "4ACEDA0510D4A443C892232117B3C642AA56F5424BE8C61A2B31577953EAAA38",
+      "Kind": "derived_from_reference_normal_jsonl"
+    }
+  ]
+}

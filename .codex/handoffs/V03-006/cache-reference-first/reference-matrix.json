@@ -1,0 +1,24 @@
+[
+  {
+    "OuterCallId": 1,
+    "InputMask": "0x68180000",
+    "Flags": "0x00000001",
+    "Attributes": "0xA0000020",
+    "CallForAttributes": "0x00000000",
+    "RestrictedAttributes": "0x00000000",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x20000000",
+    "OutputValid": true
+  },
+  {
+    "OuterCallId": 2,
+    "InputMask": "0x20400000",
+    "Flags": "0x00000001",
+    "Attributes": "0xA0000020",
+    "CallForAttributes": "0x00000000",
+    "RestrictedAttributes": "0x00000000",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x20000000",
+    "OutputValid": true
+  }
+]

@@ -1,0 +1,29 @@
+param([Parameter(Mandatory)][ValidateSet('pidl','normal','cancel')][string]$Mode)
+$ErrorActionPreference='Stop'
+$directory='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-cache-attributes-debug'
+$exe=Join-Path $directory $(if($Mode -eq 'pidl'){'bin/CacheAttributesReferenceTarget.exe'}else{'bin/CacheAttributesObserver.exe'})
+$expected=if($Mode -eq 'pidl'){'081DE6E8DE0B061D0D96F2DD2811E8679302A67B5E5B844BFC8E528F170A1B60'}else{'9192C06013F4D86272BC9F4BBCB03B9FE803C7DD6CE01785CA410AF0955EB79D'}
+if((Get-FileHash -LiteralPath $exe).Hash -cne $expected){throw 'Reference executable changed'}
+$log=Join-Path $PSScriptRoot "reference-$Mode.jsonl"
+if(Test-Path -LiteralPath $log){throw 'Reference mode already recorded; no replay'}
+$start=[Diagnostics.ProcessStartInfo]::new($exe)
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+$start.ArgumentList.Add($(if($Mode -eq 'pidl'){'--check-official-pidl'}else{"--$Mode"}))
+$child=[Diagnostics.Process]::new();$child.StartInfo=$start
+$writer=[IO.StreamWriter]::new($log,$false,[Text.UTF8Encoding]::new($false));$writer.AutoFlush=$true
+try{
+    $started=[DateTimeOffset]::UtcNow.ToString('o')
+    if(-not $child.Start()){throw 'Reference launch failed'}
+    $childId=$child.Id;$creation=$child.StartTime.ToFileTimeUtc().ToString()
+    $stderr=$child.StandardError.ReadToEndAsync()
+    while($null -ne ($line=$child.StandardOutput.ReadLine())){$writer.WriteLine($line);Write-Output $line}
+    $child.WaitForExit()
+    $errorText=$stderr.GetAwaiter().GetResult()
+    [IO.File]::WriteAllText((Join-Path $PSScriptRoot "reference-$Mode.stderr.txt"),$errorText,[Text.UTF8Encoding]::new($false))
+    [ordered]@{Mode=$Mode;StartedUtc=$started;CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$childId;CreationFileTime=$creation;ExecutableSha256=$expected;ExitCode=$child.ExitCode;StderrEmpty=($errorText.Length -eq 0);HardKillUsed=$false} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot "reference-$Mode-process.json") -Encoding utf8
+    if($child.ExitCode -ne 0 -or $errorText){throw 'Reference process did not succeed; preserve all evidence'}
+}finally{
+    $writer.Dispose()
+    # Never hard-kill a debugger; its native normal/cancel and cleanup remain authoritative.
+    if($child.HasExited){$child.Dispose()}
+}

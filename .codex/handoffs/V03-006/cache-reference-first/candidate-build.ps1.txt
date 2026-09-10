@@ -1,0 +1,20 @@
+$ErrorActionPreference = 'Stop'
+$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-cache-attributes-debug'
+if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+$toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+$sdk = 'C:\Program Files (x86)\Windows Kits\10'
+$bin = Join-Path $taskRoot 'bin'
+$temp = Join-Path $taskRoot 'compiler-temp'
+New-Item -ItemType Directory -Path $bin,$temp -Force | Out-Null
+$env:TEMP = $temp
+$env:TMP = $temp
+$compiler = Join-Path $toolset 'bin\Hostx64\x64\cl.exe'
+$options = @('/nologo','/std:c++20','/W4','/WX','/EHsc','/MT','/O2','/utf-8','/DUNICODE','/D_UNICODE','/DWIN32_LEAN_AND_MEAN','/DNOMINMAX','/D_WIN32_WINNT=0x0A00',"/I$toolset\include","/I$sdk\Include\10.0.26100.0\ucrt","/I$sdk\Include\10.0.26100.0\shared","/I$sdk\Include\10.0.26100.0\um","/I$sdk\Include\10.0.26100.0\winrt")
+$libraries = @('/link',"/LIBPATH:$toolset\lib\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64",'kernel32.lib','ole32.lib','uuid.lib','user32.lib','advapi32.lib','dwmapi.lib','shell32.lib','bcrypt.lib')
+Push-Location $taskRoot
+try {
+  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\CacheAttributesReferenceTarget.exe" @libraries
+  if ($LASTEXITCODE -ne 0) { throw 'Synthetic target compilation failed.' }
+  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\CacheAttributesObserver.exe" @libraries
+  if ($LASTEXITCODE -ne 0) { throw 'Observer compilation failed.' }
+} finally { Pop-Location }

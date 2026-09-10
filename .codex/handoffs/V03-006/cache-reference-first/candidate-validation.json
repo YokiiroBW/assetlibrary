@@ -1,0 +1,39 @@
+{
+  "stage": "compiled_and_offline_checked_positive_runtime_pending",
+  "observerSha256": "9192c06013f4d86272bc9f4bbcb03b9fe803c7dd6ce01785ca410af0955eb79d",
+  "baselineObserverSha256": "b41e76f156c39026294351433f9221bd17b90f878f59439ee3422030f7e3b6d0",
+  "sourceChanges": "one fixed cache-consumer point, original outer matching and lifecycle retained",
+  "build": {
+    "log": "build-01.log",
+    "exitCode": 0,
+    "toolchain": "MSVC 14.44.35207 / SDK 10.0.26100.0 / x64 / static CRT / W4 WX"
+  },
+  "checks": {
+    "pureCacheScopePredicates": 19,
+    "existingPlanParserAndFramePredicates": 19,
+    "selfTestExitCode": 0,
+    "raw": "self-test-01.jsonl",
+    "notClaimed": "38 real process or debugger scenarios"
+  },
+  "preflight": {
+    "raw": "preflight-01.jsonl",
+    "exitCode": 1,
+    "fixedOfficialClsid": "BA16CE0E-728C-4FC9-98E5-D0B35B384597",
+    "registrationAbsentHKCUHKLM32And64AtRead": true,
+    "absoluteParseHresult": "0x80070057",
+    "pidlParsed": false,
+    "debuggerStarted": false
+  },
+  "pending": [
+    "registered official opaque PIDL reference control arranged by the GUI owner",
+    "normal and cooperative cancellation new-candidate synthetic runs",
+    "actual consumer snapshot association and cleanup of both entry points plus return breakpoints in the new build",
+    "real Explorer use requires coordinator decision"
+  ],
+  "limits": [
+    "fixed-build private structure and stack offsets, not a public ABI",
+    "one branch consumption snapshot; misses or zero DWORDs do not establish registry absence or cause",
+    "exception/ExitThread invalidation predicates checked offline; real callback scope invalidation not exercised in this build",
+    "no real Explorer, existing process, GUI, registry mutation, or process stop was performed in this preparation"
+  ]
+}
