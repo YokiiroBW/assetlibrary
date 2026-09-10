@@ -1,0 +1,25 @@
+{
+  "status": "reviewable_plan_only_not_applied",
+  "recordedAtUtc": "2026-09-09T16:14:33.199869+00:00",
+  "source": "source/Dll.cpp:209-224,276-306",
+  "dll": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-official-control\\build\\Release\\ExplorerDataProvider.dll",
+  "dll_sha256": "f298a352439c6209d274b567081191819bd55a45bc2f63a025ee28fc69c42e96",
+  "rootClsid": "{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+  "contextMenuClsid": "{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+  "rootAttributes": "0xA0000020",
+  "namespaceParent": "MyComputer",
+  "perUserRoots": [
+    "Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+    "Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+    "Software/Classes/FolderViewSampleType",
+    "Software/Microsoft/Windows/CurrentVersion/Explorer/MyComputer/NameSpace/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}"
+  ],
+  "constraints": [
+    "All proposed roots must be absent before creation; no replacement of existing registrations.",
+    "Use an explicit owner marker, allowed key/value tree and bounded lifetime/finally readback; do not invoke original self-registration.",
+    "Reproduce original HKCU fields and notify the original MyComputer parent; metadata-only owner marker is the only added field.",
+    "Do not register the property schema or write HKLM; official documentation permits base namespace without optional custom property registration.",
+    "The official parent and original attributes differ from the proof; record them as separate variables, not an isolated interface fix.",
+    "Run only if needed after the already approved same-frame BrowseObject experiment."
+  ]
+}

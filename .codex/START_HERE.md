@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：用户明确Windows最重要。已联网核对微软namespace/HKCU、DefView、官方样例及对应KB，完成同注册/原DLL下的两类入口独立绑定：GUID根与实际物理路径均加载自有组件、返回自有CLSID、枚举1项。真实Explorer仍未激活/显示视图，下一步优先读取自有窗口的实际活动视图处理类和导航分发，再做官方完整样例对照；不重复无新观测的入口或CRT试探。研究及原始只读策略结果见V03-005/windows-entry-research/report.md。已有测试授权持续；旧30分钟管理员runner现已不存在。Web/Android已完成的图片/降级候选保留，NAS图片仍因seccomp平台问题未启用、部署方案独立待定；G1..G4及完整发布门禁保持开放。
+   当前接续V03-005：用户已批准执行，Windows最高优先级。E0实际自有Explorer视图查询与同窗口BrowseObject对照均为系统ShellFSFolder、目标路径正确但0项，未加载proof；两现场已清理。完整官方示例18份源码已补齐并原样构建，DLL f298a352…，零告警/4导出；Windows owner正在执行已明确批准的HKCU官方示例对照。精确范围、证据目录及下一步见V03-005/current-windows-work.json，不重复已完成的入口/CRT测试或同一桌面授权。真实入口根因尚未解决，G1..G4与生产Shell门禁保持开放。NAS图片平台决定独立待定。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

@@ -1,0 +1,64 @@
+{
+  "recordedAtUtc": "2026-09-09T16:02:51.717803+00:00",
+  "status": "official_sample_built_not_registered_or_executed",
+  "pinned_revision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+  "official_source_files_verified": 18,
+  "original_source_bytes_changed": false,
+  "sdk": "10.0.26100.0",
+  "compiler": "MSVC19.44.35228",
+  "configuration": "x64 Release /MT /W4 /WX /utf-8 /std:c++17; explicit original .def and /SUBSYSTEM:WINDOWS",
+  "source_semantics_changed": false,
+  "build_adaptation": "External CMake only, current toolchain/default system import libraries; original six CPP/RC/DEF inputs and all source bytes preserved. No obsolete VC70 property sheet or SDK6.0 paths; propdesc copy only.",
+  "warnings": 0,
+  "errors": 0,
+  "exports": [
+    "DllCanUnloadNow",
+    "DllGetClassObject",
+    "DllRegisterServer",
+    "DllUnregisterServer"
+  ],
+  "registered": false,
+  "gui_executed": false,
+  "artifacts": [
+    {
+      "file": "CMakeLists.txt",
+      "bytes": 1338,
+      "sha256": "8f61b86d5bc3dac94bff7ec0f3e449005cd1e6f52e65cecd96c1d0cabcffd7b4"
+    },
+    {
+      "file": "sources.json",
+      "bytes": 3916,
+      "sha256": "d2db86278052e72b5947484d2da6c0d6e2b11b9bdc4bdd9741871c8d493d4362"
+    },
+    {
+      "file": "configure.log",
+      "bytes": 551,
+      "sha256": "564432654b597e0fe777aea2387ace4d7a71f30862e3c596817010662d15b5fc"
+    },
+    {
+      "file": "build-first.log",
+      "bytes": 8064,
+      "sha256": "5a05b1f34697e70c6d7fc7e5b76782858c3a1ca0229eeb03cf237bb61e2c5f53"
+    },
+    {
+      "file": "build-final.log",
+      "bytes": 6404,
+      "sha256": "3ec1f37eaf793d0fd7120cca3e765c0bcd95f9424fca8fbb0207f239f5147e9b"
+    },
+    {
+      "file": "binary-inspection.txt",
+      "bytes": 6741,
+      "sha256": "1a5730d3fb6d2d047d09f5942a5329970620d82e5f8aeea309dff639e59ef5b3"
+    },
+    {
+      "file": "build/Release/ExplorerDataProvider.dll",
+      "bytes": 186880,
+      "sha256": "f298a352439c6209d274b567081191819bd55a45bc2f63a025ee28fc69c42e96"
+    },
+    {
+      "file": "build/Release/ExplorerDataProvider.propdesc",
+      "bytes": 1845,
+      "sha256": "637860f5efdc5ae1eedeb5628bda3ba937916e25a9e65fc3038b04b46e020245"
+    }
+  ]
+}

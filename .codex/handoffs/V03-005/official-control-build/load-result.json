@@ -1,0 +1,11 @@
+{
+  "RecordedUtc": "2026-09-09T16:59:49.3554143+00:00",
+  "Pid": 19988,
+  "ExitCode": 0,
+  "TimedOut": false,
+  "DllHash": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+  "ProbeHash": "3465E5F2C28BAE53BADB73CB9B48EB8EBA5C8551DCCC398977BC7ABB5526D7AE",
+  "Stdout": "CoInitializeEx=00000000\r\nLoadLibraryEx=00000000\r\nGetExport=00000000\r\nDllGetClassObject=00000000\r\nCreateInstance=00000000\r\nGetClassID=00000000\r\nExpectedClass=00000000\r\nDllCanUnloadNow=00000000\r\n",
+  "Stderr": "",
+  "Scope": "Independent LoadLibrary/class-factory/IPersist only; no registration or GUI, no enumeration without initialization"
+}

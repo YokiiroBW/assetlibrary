@@ -1,0 +1,10 @@
+{
+  "archivedAtUtc": "2026-09-09T17:21:21.019343+00:00",
+  "query": "Get-CimInstance -Namespace root/Microsoft/Windows/DeviceGuard -ClassName Win32_DeviceGuard; selected enforcement/status fields only",
+  "CodeIntegrityPolicyEnforcementStatus": 2,
+  "UsermodeCodeIntegrityPolicyEnforcementStatus": 0,
+  "VirtualizationBasedSecurityStatus": 2,
+  "interpretation": "UMCI field is Off per Microsoft documentation. This is not a complete query of all Explorer activation filters or system policies.",
+  "source": "https://learn.microsoft.com/en-us/windows/security/hardware-security/enable-virtualization-based-protection-of-code-integrity",
+  "changed_system_state": false
+}

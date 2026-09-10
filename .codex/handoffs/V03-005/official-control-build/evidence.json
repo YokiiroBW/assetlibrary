@@ -1,0 +1,87 @@
+{
+  "status": "built_and_independent_factory_checked_gui_control_separate",
+  "official_revision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+  "dll_sha256": "f298a352439c6209d274b567081191819bd55a45bc2f63a025ee28fc69c42e96",
+  "dll_bytes": 186880,
+  "all_source_bytes_preserved": true,
+  "source_files_verified": 18,
+  "gui_executed": false,
+  "artifacts": [
+    {
+      "file": "build-evidence.json",
+      "sha256": "d790654c190bb0055dbcc3195fd0ffa28f267437cd65064367989d01f013f4d0"
+    },
+    {
+      "file": "sources.json",
+      "sha256": "d2db86278052e72b5947484d2da6c0d6e2b11b9bdc4bdd9741871c8d493d4362"
+    },
+    {
+      "file": "CMakeLists.txt",
+      "sha256": "8f61b86d5bc3dac94bff7ec0f3e449005cd1e6f52e65cecd96c1d0cabcffd7b4"
+    },
+    {
+      "file": "configure.log.txt",
+      "sha256": "564432654b597e0fe777aea2387ace4d7a71f30862e3c596817010662d15b5fc"
+    },
+    {
+      "file": "build-final.log.txt",
+      "sha256": "3ec1f37eaf793d0fd7120cca3e765c0bcd95f9424fca8fbb0207f239f5147e9b"
+    },
+    {
+      "file": "binary-inspection.txt",
+      "sha256": "1a5730d3fb6d2d047d09f5942a5329970620d82e5f8aeea309dff639e59ef5b3"
+    },
+    {
+      "file": "Category.cpp.original.txt",
+      "sha256": "976997531a20d2364a2c5634f8dd6429872af5b4c90a803e246a3f9894d73aa9"
+    },
+    {
+      "file": "LICENSE-Microsoft.txt",
+      "sha256": "3645a237b872306e4955bc2ce75783537bd7123bcb57332f8819e4cfbcf50b45"
+    },
+    {
+      "file": "registration-plan.json",
+      "sha256": "71de48fd1e26abe20546970a82f07ab8a2453c2d596ed3cda755f1a22661bb78"
+    },
+    {
+      "file": "LoadControl.cpp.txt",
+      "sha256": "3659b16522c13809b2bfcb7c693959b5749893e889a2e826024515ee85f6734a"
+    },
+    {
+      "file": "load-build.log.txt",
+      "sha256": "e8fbd602620d25c5e359a7258b43febe123d3302bf240351cb2c9040419c91df"
+    },
+    {
+      "file": "load-result.json",
+      "sha256": "31a71fbfc8db1b22b3a2b7213b42df2620df03ab727d6fc2b7f0e565204a3582"
+    },
+    {
+      "file": "apartment-diagnostic.json",
+      "sha256": "bd05003683fc41b2b1d7c6b9495d7923fd26616e800fef45166189e0b852c900"
+    },
+    {
+      "file": "fresh-process-context.json",
+      "sha256": "e67d643b9b132c4f15b7a44ae585b54ba2692cf66bcb0ea8a14cd07eb3fc40ea"
+    },
+    {
+      "file": "registration-preflight.json",
+      "sha256": "4d83b30222d4e4be096c11990818a919b925813cd33f43a956a28680d43120e0"
+    },
+    {
+      "file": "CMakeLists-with-load-control.txt",
+      "sha256": "52b56c3776a1929884ef10f59e394a1dc61744daa02dd45302243193a53af981"
+    },
+    {
+      "file": "owned-module-context.json",
+      "sha256": "c4186b9a046b353b21a53580cf9c5dbb43fa575787e07c9f4651b45756700779"
+    },
+    {
+      "file": "user-mode-ci-status.json",
+      "sha256": "158a00536d82f2c47e61d4f1079faf61d9d373d74c4d99c7fbe648f901fb074d"
+    }
+  ],
+  "independent_load_factory_class_and_unload": "all_S_OK_without_registration_or_GUI",
+  "official_dll_source_or_bytes_changed": false,
+  "helper_apartment_diagnostic": "default_managed_MTA_CoInit_STA_80010106; explicit_STA_CoInit_S_FALSE",
+  "fresh_target_context": "PID36396 creation verified, sameSID/session2/nativeAMD64/medium/limited/nonAppContainer as executor"
+}

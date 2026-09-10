@@ -1,0 +1,12 @@
+CMake is re-running because C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/CMakeFiles/generate.stamp is out-of-date.
+  the file 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/CMakeLists.txt'
+  is newer than 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/CMakeLists.txt
+  LoadControl.cpp
+  OfficialLoadControl.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\Release\OfficialLoadControl.exe

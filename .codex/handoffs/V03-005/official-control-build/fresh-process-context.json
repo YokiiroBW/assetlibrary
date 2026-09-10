@@ -1,0 +1,42 @@
+{
+  "RecordedUtc": "2026-09-09T16:55:16.3576062+00:00",
+  "Scope": "Read-only fresh official target plus executor token/architecture/mitigation; exact creation identity checked",
+  "TargetSession": 2,
+  "ExecutorSession": 2,
+  "Target": {
+    "pid": 36396,
+    "process_machine": 0,
+    "native_machine": 34404,
+    "mitigation_flags": {
+      "extension_point": 0,
+      "signature": 0,
+      "image_load": 0
+    },
+    "same_user_as_executor": true,
+    "elevation_type": 3,
+    "elevated": 0,
+    "virtualization_allowed": 1,
+    "virtualization_enabled": 0,
+    "ui_access": 0,
+    "app_container": 0,
+    "integrity_rid": 8192
+  },
+  "Executor": {
+    "pid": 29644,
+    "process_machine": 0,
+    "native_machine": 34404,
+    "mitigation_flags": {
+      "extension_point": 0,
+      "signature": 0,
+      "image_load": 0
+    },
+    "same_user_as_executor": true,
+    "elevation_type": 3,
+    "elevated": 0,
+    "virtualization_allowed": 1,
+    "virtualization_enabled": 0,
+    "ui_access": 0,
+    "app_container": 0,
+    "integrity_rid": 8192
+  }
+}

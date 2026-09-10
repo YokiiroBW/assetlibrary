@@ -1,0 +1,16 @@
+{
+  "kind": "synthetic_dbgeng_entry_return_and_detach",
+  "matchingClsid": "{89100E21-15D2-4F41-87D6-CB36F67D86CC}",
+  "api": "CoGetClassObject",
+  "expectedHresult": "0x80040154",
+  "build": {"compiler": "MSVC x64 14.44.35207", "sdk": "10.0.26100.0", "options": ["/W4", "/WX", "/MT", "/O2"], "exit": 0, "warnings": 0, "errors": 0},
+  "finalRuns": [
+    {"log": "normal-final.jsonl", "mode": "normal", "exit": 0, "pid": 8604, "creationFiletime": "134334488645497517", "matchingEntries": 1, "matchingReturns": 1, "discardedNonmatching": 2, "finiteWaitTimeouts": 0, "passed": true},
+    {"log": "cancel-final.jsonl", "mode": "cancel", "exit": 0, "pid": 34360, "creationFiletime": "134334488648456330", "matchingEntries": 1, "matchingReturns": 1, "discardedNonmatching": 1, "finiteWaitTimeouts": 14, "exitInterruptObserved": false, "passed": true}
+  ],
+  "verifiedInBoth": ["CreateProcess-owned fixed synthetic executable", "PID and creation time", "ONLY_THIS_PROCESS and DETACH_ON_EXIT option readback", "matching API entry and actual target return HRESULT", "nonmatching payload discarded", "paused cleanup identity", "both breakpoints removed successfully", "zero remaining breakpoints", "DetachProcesses S_OK", "same target alive with advancing heartbeats after detach", "target and external no-debugger checks", "cooperative target exit zero"],
+  "notExecuted": ["Explorer attachment", "existing process attachment", "UAC", "registry mutation", "policy mutation", "ETW capture", "debugger hard kill", "target termination"],
+  "limitations": ["AttachProcess and DetachProcesses have no proven hard deadline", "pre-first-event DETACH_ON_EXIT window remains unproved against abrupt failure", "no crash or hang cleanup guarantee", "flag readback does not prove debugger-crash or child-process behavior", "synthetic success does not establish real Explorer behavior", "EXIT interrupt alone was not observed as E_PENDING; ACTIVE pause and cleanup were verified"],
+  "exploratoryFailuresRetained": ["normal-01.jsonl", "cancel-01.jsonl", "cancel-02.jsonl", "cancel-03.jsonl", "cancel-04.jsonl"],
+  "earlierNonfinalSuccesses": ["normal-02.jsonl", "cancel-05.jsonl"]
+}

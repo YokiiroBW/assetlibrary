@@ -1,0 +1,25 @@
+{
+  "status": "synthetic_only_normal_and_cancel_passed_no_real_target_support",
+  "artifacts": [
+    {
+      "file": "README.md",
+      "sha256": "9b938c984271206e28da52fadf51cecb55c594f2f7e07a24b02acba46b58ae47"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "a31f54e4481efab1409c9a7b2ca59d1cfa72d98b9ee744f011cfbcdab8eaed18"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "952fb5d67dc770cd49f2e7ca5a0b55771714ae0fc76c9d612e85b70b2210cc45"
+    },
+    {
+      "file": "normal-final.jsonl",
+      "sha256": "5a8ca83529e34911d750648f2aa225c1fabf9a67fc77c25e2721218df4980c8f"
+    },
+    {
+      "file": "cancel-final.jsonl",
+      "sha256": "74abe3535a158d7f77246818dacb24a08c819e84c83ccac5587080477687ef1f"
+    }
+  ]
+}

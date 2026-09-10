@@ -1,0 +1,88 @@
+{
+  "updatedAtUtc": "2026-09-10T02:19:50.280335+00:00",
+  "status": "resumed_register_first_gui_control_incomplete_after_quota_interruption",
+  "user_priority": "Windows first; user approved execution of the researched plan",
+  "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+  "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
+  "completed": [
+    {
+      "step": "actual_active_view_identity",
+      "result": "SDK actual view17 items; original proof target returns ShellFSFolder F3364BA0-65B9-11CE-A9BA-00AA004AE837, exact physical target/canonical match,0 items; observer and target lack proof module",
+      "runtime_evidence": ".runtime/explorer-live/20260910-active-view",
+      "site_clean": true
+    },
+    {
+      "step": "same_frame_BrowseObject_same_target",
+      "result": "Reset to SDK, externally parsed same filesystem path, flags1, BrowseObject S_OK; post actual view still ShellFSFolder,0 items, observer and target lack proof module. Not an activation success.",
+      "runtime_evidence": ".runtime/explorer-live/20260910-browse-object",
+      "site_clean": true
+    },
+    {
+      "step": "official_sample_build",
+      "result": "All18 exact official sources including retrieved Category.cpp; CMake-only build adaptation, x64 /MT /W4 /WX, Windows subsystem,4 exports,0 warnings/errors",
+      "dll_sha256": "f298a352439c6209d274b567081191819bd55a45bc2f63a025ee28fc69c42e96",
+      "evidence": "official-control-build/evidence.json"
+    }
+  ],
+  "active_instruction": "Windows owner resumed in same thread; first commit stable staged evidence and reconcile old owned window, then only unfinished register-before-new-process GUI control under unchangedF298/correctSTA/4roots/600s guard. No repeated original authorization question or rerun of completed parent/loader checks.",
+  "approved_control_roots": [
+    "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+    "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+    "HKCU Software/Classes/FolderViewSampleType",
+    "HKCU Software/Microsoft/Windows/CurrentVersion/Explorer/MyComputer/NameSpace/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}"
+  ],
+  "preflight": "Root read8 exact HKCU/HKLM64 roots; all absent at16:19:41UTC. Owner must recheck before any write.",
+  "gates": "G1..G4 remain open; no production Shell or installer",
+  "authorization": "Original desktop/test-window authorization persists; no repeated permission question. Old admin runner expired/absent, no new admin tool launched.",
+  "official_first_control": {
+    "runtime_evidence": ".runtime/explorer-live/20260910-official-sample",
+    "notify_problem": "default managed thread MTA; CoInitializeEx(STA)80010106 prevented UPDATEDIR",
+    "browse_before_fix": "one BrowseObject blocked by owned no-association modal;10s external controller timeout, no returned browse HRESULT",
+    "after_successful_STA_notify": "within original registration deadline ThisPC still2 items/no sample; no post-fix activation attempt in that cycle",
+    "cleaned": true
+  },
+  "official_corrected_control": {
+    "runtime_evidence": ".runtime/explorer-live/20260910-official-sta-control",
+    "registrationUtc": "2026-09-09T17:15:39.3627432Z",
+    "notify": "explicitSTA success; CoInit S_FALSE,Folder S_OK, notified/returned/joined true,2ms",
+    "discovery": "fresh ThisPC2 items, no official sample",
+    "browse": "one flags1 Browse17:17:56.192Z to fixed official42B PIDL; no-association modal/10s timeout, no returned HRESULT",
+    "dll": "unchanged F298, no target sample module reported",
+    "cleanup": "owner completing; verify final-cleanup before integration"
+  },
+  "next_steps": [
+    "Owner: two isolated no-GUI controls under corrected scoped registration: parent MyComputer enumeration BEFORE custom parse/bind, then separate direct-bind positive; bounded PIDLs/128items/10s, compare only official target; do not print unrelated names.",
+    "Curie: temporary DbgEng validation on self-created SynthTarget only in root .runtime/explorer-debug-control. No Explorer attachment authorized until reviewed normal/cancel/detach evidence.",
+    "Root: integrate raw evidence and obtain actual host activation/loading decisions only if lower-impact public-API controls leave ambiguity."
+  ],
+  "additional_readonly_context": {
+    "UMCI": 0,
+    "kernelCI": 2,
+    "VBS": 2,
+    "PID17740_modules": 223,
+    "outsideWindowsModules": 0,
+    "meaning": "status/locations only; no full system-policy exclusion"
+  },
+  "parent_discovery": {
+    "with_includehidden": "3 items, official target matched once; target parse only after complete enumeration",
+    "without_includehidden": "3 items, official target matched once; requested28180000 returned20000000, not hidden/nonenumerated",
+    "separate_direct_bind": "official BA16 class, original F298 module loaded during Bind, succeeded",
+    "runtime_evidence": ".runtime/explorer-live/20260910-official-parent-enum; .runtime/explorer-live/20260910-official-register-first/visible-enumeration.json"
+  },
+  "register_first_interruption": {
+    "registeredUtc": "2026-09-09T17:45:44.1920424Z",
+    "explorerCreatedUtc": "2026-09-09T17:49:47.9881482Z",
+    "processCreatedAfterRegistration": true,
+    "sdk_baseline": "passed",
+    "thispc_or_official_target_test": "not_completed",
+    "reason": "Windows task hit usage limit; no product result for unfinished navigation",
+    "registration_cleanup": "2026-09-09T17:55:44.2807826Z all4CU and4LM roots absent, no errors, correctSTA notify success",
+    "old_window_identity": "2885792/PID35732; must fresh-check before any cleanup, no stale-handle action"
+  },
+  "synthetic_debugger": {
+    "status": "normal-final and cancel-final pass,18-file manifest independently verified",
+    "existing_process_attachment": false,
+    "actual_explorer_support": false,
+    "limits": "No hard Attach/Detach guarantee or debugger-crash cleanup proof; no real target use without further scoped design/review"
+  }
+}

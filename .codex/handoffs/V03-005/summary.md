@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows是当前最高优先级，实际Explorer入口仍未激活。已完成官方资料与固定样例revision434f6002审查，补测原DLL/相同注册下的GUID根与实际绝对路径：两独立进程均在Bind阶段加载匹配DLL、返回自有CLSID并枚举1项；未跑GUI。原件及观察器/外部超时脚本由root审查，注册/空目录清理。此结果使实际Explorer活动view身份与导航分发成为下一优先项，不再把不同入口形式混作进程差异。有效AppControl策略列表未取得，所查隐藏策略无自有值、指定旧时段无目标阻断事件；不据此声称排除了全部策略。详见windows-entry-research/report.md。既有一次确认诊断复用已验证，旧runner现已不存在、原授权仍持续。G1..G4未完成，没有Windows安装包。
+1. Windows最高优先级，f7958b0已合入并核对106项原件。实际原型视图在地址栏及原生BrowseObject后仍为系统FS类/0项；完整官方F298样例在正确STA通知后仍无条目且打开阻塞于无关联模态。独立父级枚举含/不含hidden均3项、含官方且无隐藏属性，独立绑定成功。下一步只完成“注册之后创建新Explorer”的时序对照；旧轮只到SDK正控即额度中断，没有ThisPC/目标结果，注册已自动清理、旧自有窗恢复核对后关闭。完整18份官方源/构建/4导出/独立factory、合成DbgEng正常与取消验证均已完成，不代表真实入口通过。详见current-windows-work.json及official-control-build、synthetic-debug-control。G1..G4仍开放，无Windows安装包。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

@@ -1,0 +1,8 @@
+{
+  "RecordedUtc": "2026-09-09T17:19:01.7324301+00:00",
+  "TargetPid": 17740,
+  "ExactCreationMatched": true,
+  "TotalModules": 223,
+  "OutsideWindowsDirectory": [],
+  "Scope": "Read-only module basenames/version metadata from sole owned official test process; no paths or memory dump"
+}

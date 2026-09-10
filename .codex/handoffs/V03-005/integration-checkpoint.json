@@ -1,5 +1,5 @@
 {
-  "checkpoint": "2bd3b02854a25ed3f9d926aaa74fdb1bc0ae83d9",
+  "checkpoint": "261506f71b72b30f407a107e1fc7c600b6d8bdeb",
   "module_provenance": [
     {
       "path": "apps/web",
@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "Official-source investigation found a missing matched-path control; executed two isolated probes under unchanged registration/DLL. Both GUID root and actual filesystem junction bind to the original CLSID and enumerate one item, loading the DLL during Bind. Real Explorer remains unresolved; next read the actual owned active-view handler identity and navigation dispatch. No new GUI, DLL semantics or policy changes. Prior trace absence is not proof of no attempt.",
+  "windows_explorer_entry": "Actual original proof view is ShellFSFolder with0 items via address bar and same-frame BrowseObject. Unmodified official F298 control also fails discovery/open after a verifiedSTA notification. Independent MyComputer enumeration with and withouthidden returns3 items including official target, nonhidden; direct bind succeeds. Old register-first run ended atSDK positive due quota, no target result. Existing authorization persists; resume only unfinished ordering control.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -57,5 +57,8 @@
     "owner_evidence_commit": "81e86dc8de5fbe1e850910a4bad6d3c3dea723c9",
     "integrated_commit": "f1bc903f25327ffb4f7c9067f3575af8a7aa634d"
   },
-  "windows_entry_research": ".codex/handoffs/V03-005/windows-entry-research/evidence.json"
+  "windows_entry_research": ".codex/handoffs/V03-005/windows-entry-research/evidence.json",
+  "windows_execution_checkpoint": "current-windows-work.json",
+  "official_control_build": "official-control-build/evidence.json",
+  "synthetic_debug_control": "synthetic-debug-control/evidence.json"
 }

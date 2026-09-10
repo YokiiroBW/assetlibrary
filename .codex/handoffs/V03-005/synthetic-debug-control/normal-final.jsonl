@@ -1,0 +1,16 @@
+{"kind":"owned_target","pid":8604,"creationFiletime":134334488645497517,"syntheticOnly":true}
+{"kind":"stage","stage":"only_this_process_and_detach_on_exit_verified","hr":"0x00000000"}
+{"kind":"stage","stage":"synthetic_capture_ready","hr":"0x00000000"}
+{"kind":"matching_api_entry","api":"CoGetClassObject","clsid":"{89100E21-15D2-4F41-87D6-CB36F67D86CC}","pid":8604}
+{"kind":"stage","stage":"matching_api_return","hr":"0x80040154"}
+{"kind":"stage","stage":"cleanup_status_query","hr":"0x00000000"}
+{"kind":"cleanup_execution_state","status":6}
+{"kind":"cleanup_target_context","pidHr":"0x00000000","ownedPidMatch":true,"countHr":"0x00000000","processCount":1}
+{"kind":"stage","stage":"cleanup_paused_owned_identity","hr":"0x00000000"}
+{"kind":"stage","stage":"return_breakpoint_remove","hr":"0x00000000"}
+{"kind":"stage","stage":"entry_breakpoint_remove","hr":"0x00000000"}
+{"kind":"stage","stage":"remaining_breakpoints_zero","hr":"0x00000000"}
+{"kind":"stage","stage":"detach_owned_target","hr":"0x00000000"}
+{"kind":"stage","stage":"target_alive_heartbeats_and_no_debugger","hr":"0x00000000"}
+{"kind":"stage","stage":"synthetic_target_cooperative_exit","hr":"0x00000000"}
+{"kind":"result","mode":"normal","passed":true,"matchedEntries":1,"matchedReturns":1,"nonMatchingDiscarded":2,"finiteWaitTimeouts":0,"exitInterruptObserved":false,"attachCompleted":true,"cleanupVerified":true,"targetAliveAfterDetach":true,"existingProcessAttached":false}

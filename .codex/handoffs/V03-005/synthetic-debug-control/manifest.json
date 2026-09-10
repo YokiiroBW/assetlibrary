@@ -1,0 +1,101 @@
+{
+  "kind": "synthetic_only_dbgeng_frozen",
+  "createdUtc": "2026-09-09T17:37:33.0061661Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1139,
+      "sha256": "afd957a450a83f07859ddd42e274ac761cf655da8ccb352353f171da8669b2ee"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 2109,
+      "sha256": "c7ef4cd8a1b7e47b704e7e2ba7ba6e3b9c66118bb56e6b114582d7b12eeb68e0"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 23938,
+      "sha256": "d7147380b60bbed556de6d31bf57bfbe76e57f6777d67b3e64adcfeb5bb05a91"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1474,
+      "sha256": "b3739a317cd6418922f900bb357d679e8f1de2fa9a0767a686ad9203ec438cb6"
+    },
+    {
+      "path": "README.md",
+      "length": 6679,
+      "sha256": "9b938c984271206e28da52fadf51cecb55c594f2f7e07a24b02acba46b58ae47"
+    },
+    {
+      "path": "validation.json",
+      "length": 2161,
+      "sha256": "a31f54e4481efab1409c9a7b2ca59d1cfa72d98b9ee744f011cfbcdab8eaed18"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 1117,
+      "sha256": "ff27626ce4cf4e8fc052ead5a3a85d5cb369cce2a0c83ccfa33d57d20f131abd"
+    },
+    {
+      "path": "bin\\SynthObserver.exe",
+      "length": 203776,
+      "sha256": "fe2e1704b8344439047219963ab9703d3c24c833001889450c8a6f753d935cc8"
+    },
+    {
+      "path": "bin\\SynthTarget.exe",
+      "length": 107520,
+      "sha256": "c315904418674876d2f79427f50c6bb16eed091b41ce0bb1e995ae4672ac9952"
+    },
+    {
+      "path": "cancel-01.jsonl",
+      "length": 1226,
+      "sha256": "7a9acbde6a2198afc2c91dc3d5e1f637bfed155b62bf80a03135afea444481cb"
+    },
+    {
+      "path": "cancel-02.jsonl",
+      "length": 1293,
+      "sha256": "c3682162e2059d924cd1f49210e111c3a13db714bd4bc379ef5a2ed571ae35b9"
+    },
+    {
+      "path": "cancel-03.jsonl",
+      "length": 1340,
+      "sha256": "4e343ce0c9a7dfd1d0336c744b7d130b38451784f4bcec7235478a9ef23165a8"
+    },
+    {
+      "path": "cancel-04.jsonl",
+      "length": 1476,
+      "sha256": "e300ce32861cd3951263a1cd956983ea581c04ecc20b59cbedd3068c12ece276"
+    },
+    {
+      "path": "cancel-05.jsonl",
+      "length": 1661,
+      "sha256": "52d1a8a1cded94f28d6b2c046a3f93a027a2f4cca33dfeb3f49a8b41a1b53ba1"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 1739,
+      "sha256": "74abe3535a158d7f77246818dacb24a08c819e84c83ccac5587080477687ef1f"
+    },
+    {
+      "path": "normal-01.jsonl",
+      "length": 656,
+      "sha256": "199c45f3b31095e5988cd37013722880122b3340cf872222188ad1a6650cf610"
+    },
+    {
+      "path": "normal-02.jsonl",
+      "length": 1160,
+      "sha256": "99c16c1fe1b258ac2352f1fcd5659739bfe5afa12b362d26ba0489613ba30abb"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 1465,
+      "sha256": "5a8ca83529e34911d750648f2aa225c1fabf9a67fc77c25e2721218df4980c8f"
+    }
+  ],
+  "systemEngine": {
+    "path": "C:\\Windows\\System32\\dbgeng.dll",
+    "version": "10.0.26100.1 (WinBuild.160101.0800)",
+    "sha256": "bfa188b10eb64a94f1eb59bfb0f8d85eb5dfc803cd0f6b5c554816fe311a236e"
+  }
+}

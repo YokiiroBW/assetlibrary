@@ -1,0 +1,72 @@
+CMake is re-running because C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/CMakeFiles/generate.stamp is out-of-date.
+  the file 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/CMakeLists.txt'
+  is newer than 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/CMakeFiles/generate.stamp.depend'
+  result='-1'
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build
+Change Dir: 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build'
+
+Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" ExplorerDataProvider.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VisualStudioVersion=17.0 /m:2 /v:n
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+生成启动时间为 2026/9/10 0:01:21。
+
+     1>节点 1 上的项目“C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\ExplorerDataProvider.vcxproj”(默认目标)。
+     1>项目“C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\ExplorerDataProvider.vcxproj”(1)正在节点 1 上生成“C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\ZERO_CHECK.vcxproj”(2) (默认目标)。
+     2>PrepareForBuild:
+         已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+       InitializeBuildStatus:
+         正在创建“x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+         正在对“x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild”执行 Touch 任务。
+       CustomBuild:
+         所有输出均为最新。
+         1>Checking Build System
+       FinalizeBuildStatus:
+         正在删除文件“x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\unsuccessfulbuild”。
+         正在对“x64\Release\ZERO_CHECK\ZERO_CHECK.tlog\ZERO_CHECK.lastbuildstate”执行 Touch 任务。
+     2>已完成生成项目“C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\ZERO_CHECK.vcxproj”(默认目标)的操作。
+     1>PrepareForBuild:
+         已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+       InitializeBuildStatus:
+         正在创建“ExplorerDataProvider.dir\Release\Explorer.E35588E9.tlog\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+         正在对“ExplorerDataProvider.dir\Release\Explorer.E35588E9.tlog\unsuccessfulbuild”执行 Touch 任务。
+       CustomBuild:
+         所有输出均为最新。
+         Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/CMakeLists.txt
+       ClCompile:
+         所有输出均为最新。
+       ResourceCompile:
+         所有输出均为最新。
+       Link:
+         所有输出均为最新。
+         C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\Release\ExplorerDataProvider.dll" /INCREMENTAL:NO /NOLOGO propsys.lib shlwapi.lib ole32.lib oleaut32.lib shell32.lib user32.lib advapi32.lib uuid.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /DEF:"C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/source/ExplorerDataProvider.def" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/Release/ExplorerDataProvider.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/Release/ExplorerDataProvider.lib" /MACHINE:X64  /machine:x64 /DLL ExplorerDataProvider.dir\Release\ExplorerDataProvider.res
+         ExplorerDataProvider.dir\Release\Category.obj
+         ExplorerDataProvider.dir\Release\ContextMenu.obj
+         ExplorerDataProvider.dir\Release\Dll.obj
+         ExplorerDataProvider.dir\Release\ExplorerDataProvider.obj
+         ExplorerDataProvider.dir\Release\FVCommands.obj
+         ExplorerDataProvider.dir\Release\Utils.obj
+           正在创建库 C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/Release/ExplorerDataProvider.lib 和对象 C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/Release/ExplorerDataProvider.exp
+         ExplorerDataProvider.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\Release\ExplorerDataProvider.dll
+       PostBuildEvent:
+         setlocal
+         "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E copy_if_different C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/source/ExplorerDataProvider.propdesc C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-official-control/build/Release/ExplorerDataProvider.propdesc
+         if %errorlevel% neq 0 goto :cmEnd
+         :cmEnd
+         endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+         :cmErrorLevel
+         exit /b %1
+         :cmDone
+         if %errorlevel% neq 0 goto :VCEnd
+         :VCEnd
+       FinalizeBuildStatus:
+         正在删除文件“ExplorerDataProvider.dir\Release\Explorer.E35588E9.tlog\unsuccessfulbuild”。
+         正在对“ExplorerDataProvider.dir\Release\Explorer.E35588E9.tlog\ExplorerDataProvider.lastbuildstate”执行 Touch 任务。
+     1>已完成生成项目“C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-official-control\build\ExplorerDataProvider.vcxproj”(默认目标)的操作。
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.43
+

@@ -1,0 +1,6 @@
+{
+  "RecordedUtc": "2026-09-09T16:51:40.4183136+00:00",
+  "Scope": "Owned new threads; COM initialization only, no objects or Shell notifications",
+  "DefaultThread": "managed=MTA; before=00000000; type=1; init=80010106",
+  "ExplicitStaThread": "managed=STA; before=00000000; type=0; init=00000001"
+}

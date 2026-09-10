@@ -133,3 +133,11 @@ ae1的bc7c7ebf原生启用和注册正控成功，Kernel-Registry event4/version
 本轮仅新增两个有区分力的独立绑定场景：同一注册/原DLL，GUID根和真实sandbox绝对路径均Parse/Bind/GetClassID/GetCurFolder成功、在Bind阶段加载匹配DLL、各枚举1项，两个进程exit0、无stderr/timeout。root审查PathBind.cpp、固定hash外部10秒脚本和原始输出，不只依赖返回码。未执行真实Explorer导航或官方样例注册；原注册/空目录已清理，不计G1通过。PIDL长度采样差异保留原值，未宣称规范化。另核对12项精确隐藏键值与既有8036/3077/3033时段，无自有值或事件；CiTool列表80070005为缺证据。未修改或重复运行既有产品套件。研究依据见windows-entry-research/report.md。
 
 本轮最终diff审查后verify_repository通过（handoff/架构/契约及35项迁移/架构回归，Alpha仍blocked），日志.runtime/v03-005-final-tests/repository-windows-official-research.log。17份已取官方源的长度/SHA256/Git blob与17项归档原件SHA分别核对一致；初次自写校验脚本误把证据索引当作官方源码，改用各自artifacts清单后通过，未更改原件或期望hash。
+
+## 执行与额度中断后的恢复检查点
+
+整合Windows f7958b0：E0/原生BrowseObject、官方原通知失败轮及正确STA完整控制、父级含/不含hidden查询原件共106项immutable SHA核对一致。客户端入口仍未成功；直接Browse返回S_OK不计通过，模态阻塞控制器没有返回HRESULT。注册后新进程旧轮只完成SDK正控，目标步骤因额度中断未发生；原guard自动清理，恢复后旧窗口按新鲜身份关闭。
+
+root补齐官方Category.cpp并校验全18 Git blobs，原样源码经外部CMake/原.def/x64 /MT /W4 /WX构建、4导出与F298 DLL强hash通过；限制DLL目录/System32的独立加载、factory/正确类ID和卸载条件均S_OK。合成DbgEng最终normal/cancel两场景均成功，18文件manifest独立核对；断点清除/Detach/同目标存活及无debugger/合作退出有实际记录。未附加Explorer，Attach/Detach硬期限及异常崩溃清理没有保证。早期失败保留，相关源码/命令/原件见各证据目录。没有重跑未变的业务套件或解除生产Shell门禁。
+
+恢复检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-explorer-execution-checkpoint.log；原始构建日志末尾空行保留，使用该文件的whitespace属性容纳原件，没有改hash来掩盖字节变化。当前注册先行GUI对照仍在执行，此检查点不提前记录其结果。

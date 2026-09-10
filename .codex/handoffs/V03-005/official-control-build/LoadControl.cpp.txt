@@ -1,0 +1,37 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <cstdio>
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+constexpr CLSID kSample={0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+void Print(const char* stage,HRESULT hr){std::printf("%s=%08lx\n",stage,static_cast<unsigned long>(hr));}
+int wmain(int argc,wchar_t** argv){
+ setvbuf(stdout,nullptr,_IONBF,0);
+ if(argc!=2)return 2;
+ HRESULT hr=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);Print("CoInitializeEx",hr);if(FAILED(hr))return 1;
+ HMODULE module=LoadLibraryExW(argv[1],nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+ hr=module?S_OK:HRESULT_FROM_WIN32(GetLastError());Print("LoadLibraryEx",hr);
+ if(module){
+  using GetClass=HRESULT(STDAPICALLTYPE*)(REFCLSID,REFIID,void**);
+  auto get=reinterpret_cast<GetClass>(GetProcAddress(module,"DllGetClassObject"));
+  hr=get?S_OK:HRESULT_FROM_WIN32(GetLastError());Print("GetExport",hr);
+  {
+   ComPtr<IClassFactory> factory;
+   if(get)hr=get(kSample,IID_PPV_ARGS(&factory));Print("DllGetClassObject",hr);
+   ComPtr<IShellFolder2> folder;
+   if(SUCCEEDED(hr)&&factory)hr=factory->CreateInstance(nullptr,IID_PPV_ARGS(&folder));Print("CreateInstance",hr);
+   ComPtr<IPersist> persist;
+   if(SUCCEEDED(hr)&&folder)hr=folder.As(&persist);
+   CLSID clsid{};
+   if(SUCCEEDED(hr)&&persist)hr=persist->GetClassID(&clsid);Print("GetClassID",hr);
+   if(SUCCEEDED(hr)&&clsid!=kSample)hr=E_UNEXPECTED;
+   Print("ExpectedClass",hr);
+  }
+  using CanUnload=HRESULT(STDAPICALLTYPE*)();
+  auto can=reinterpret_cast<CanUnload>(GetProcAddress(module,"DllCanUnloadNow"));
+  HRESULT unload=can?can():E_NOINTERFACE;Print("DllCanUnloadNow",unload);
+  if(SUCCEEDED(hr)&&unload!=S_OK)hr=E_UNEXPECTED;
+  FreeLibrary(module);
+ }
+ CoUninitialize();return SUCCEEDED(hr)?0:1;
+}

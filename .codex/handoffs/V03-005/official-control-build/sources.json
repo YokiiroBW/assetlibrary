@@ -1,0 +1,114 @@
+{
+  "revision": "434f6002bdf9cf9829406c3ff2b33387982d6168",
+  "all_official_bytes_verified": true,
+  "files": [
+    {
+      "file": "LICENSE",
+      "gitBlob": "02a131eabfe560723b3a70efc5ac2a150eac967a",
+      "sha256": "3645a237b872306e4955bc2ce75783537bd7123bcb57332f8819e4cfbcf50b45",
+      "bytes": 1231
+    },
+    {
+      "file": "Category.cpp",
+      "gitBlob": "91ddae4a51fff46b316fce46eeb8b9ddaddbe8c3",
+      "sha256": "976997531a20d2364a2c5634f8dd6429872af5b4c90a803e246a3f9894d73aa9",
+      "bytes": 22895
+    },
+    {
+      "file": "Category.h",
+      "gitBlob": "380d5105ced43c45183c44a049a8c3efa5f6198e",
+      "sha256": "9a68a36f44d2aef1a9c3c9a7b090a843b0c9117f199b4f0c68e8753293c81f03",
+      "bytes": 5511
+    },
+    {
+      "file": "ContextMenu.cpp",
+      "gitBlob": "983e6dc45b10331db1c26001f2ca39a67bd5206b",
+      "sha256": "171e89abc348e2b613216573f5419afde73f137e75e2cc87f353e93c362f8408",
+      "bytes": 7080
+    },
+    {
+      "file": "Dll.cpp",
+      "gitBlob": "24b66f35fe8794f2fe3d6b719b5936fd493526b1",
+      "sha256": "d9d89fa1c3288e4957426af49a61d6c31b90cd00aed8f6924c6eed1ef2630c19",
+      "bytes": 13575
+    },
+    {
+      "file": "ExplorerDataProvider.cpp",
+      "gitBlob": "95c3449bfd1b93a489469e350371e42031ad2e24",
+      "sha256": "52d60bc4a5c21a131d4ea87d6c492edf815a813cd4e8dfb4d8be064f1259588b",
+      "bytes": 45981
+    },
+    {
+      "file": "ExplorerDataProvider.def",
+      "gitBlob": "bd0ac476da3792e6e72f1ffc6fd38a263b0a0756",
+      "sha256": "2359c19000e74b0fd3ff35761946c3acbad44f7ff0ac321c1f81e7b3f3c39f96",
+      "bytes": 126
+    },
+    {
+      "file": "ExplorerDataProvider.propdesc",
+      "gitBlob": "a6d07710622f238c47fe3b82686dc6926c875cfb",
+      "sha256": "637860f5efdc5ae1eedeb5628bda3ba937916e25a9e65fc3038b04b46e020245",
+      "bytes": 1845
+    },
+    {
+      "file": "ExplorerDataProvider.rc",
+      "gitBlob": "629b31b1c0f680e09fffd8b640ed427c8599a49d",
+      "sha256": "601492e508241b3bece37bcdd4646b18147181a4ba47979a7938979523ee2d85",
+      "bytes": 1843
+    },
+    {
+      "file": "ExplorerDataProvider.sln",
+      "gitBlob": "a9d5f4ccd12f08f30b823acaa89d2aed2b2fedd7",
+      "sha256": "907f6482f87861c23afd4aab75112de0b3e32303370941adb1bc8de3bf03383c",
+      "bytes": 1229
+    },
+    {
+      "file": "ExplorerDataProvider.vcproj",
+      "gitBlob": "3249bbbbaa7b3ee59d1b054ad81c0f9ba9d389e2",
+      "sha256": "69dfb080752304d62037c16b223bca6e3c2f47776e43cbd51692d6b239d4abad",
+      "bytes": 9730
+    },
+    {
+      "file": "FVCommands.cpp",
+      "gitBlob": "bf9f2f2254862db5b3d4d53ed3ed85468b678e15",
+      "sha256": "30b960444e807140fb8b70838e8cbc04f49cd3d4a0d34fafa5a5029f850cfc79",
+      "bytes": 6942
+    },
+    {
+      "file": "FVCommands.h",
+      "gitBlob": "2b5d304cefd88a7c6175bd441881e00156ab0e5f",
+      "sha256": "2d7838440f354be0783aa82bbd689f7675d58e956f7a24b5034d6b97a2e0be52",
+      "bytes": 5757
+    },
+    {
+      "file": "Guid.h",
+      "gitBlob": "ca13cd1d3d8b6c257899e648e61e056b4f938939",
+      "sha256": "c209223fb560b1758614153840796ae0eb2868121b13c16f6756485554c5561d",
+      "bytes": 1610
+    },
+    {
+      "file": "README.md",
+      "gitBlob": "1f013de2be801889081a47122029bbf02ea8a91d",
+      "sha256": "2e1f4e2e09969bf9071d8e0d6f756ab8407daf065b12ca90a2fe76d92aafbf72",
+      "bytes": 2108
+    },
+    {
+      "file": "Utils.cpp",
+      "gitBlob": "1c3628e42a662ab2616b1da7cd8eb06877b4574e",
+      "sha256": "45fe38cf1bc3e6c3cd936a7987d9fe1dab189f47afff9b966f2660718bd56d4b",
+      "bytes": 3093
+    },
+    {
+      "file": "Utils.h",
+      "gitBlob": "c64767983c58b22455e3820c8b09e320b90f51e1",
+      "sha256": "959f3135b75735fda1a920099362cb95970a469a90155d8cdd25a97334a0ad52",
+      "bytes": 1157
+    },
+    {
+      "file": "resource.h",
+      "gitBlob": "d55ebd7752fb47d530c034af946b0d19a21d363f",
+      "sha256": "5f43cfd5a29f5ed6f112074e2ae9328047c7308226ea56dd7d0092153d534576",
+      "bytes": 1862
+    }
+  ]
+}
