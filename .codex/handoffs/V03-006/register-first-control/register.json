@@ -1,0 +1,76 @@
+{
+  "Utc": "2026-09-10T02:25:12.1141029+00:00",
+  "DeadlineUtc": "2026-09-10T02:35:12.1141029+00:00",
+  "Owner": "AssetLibrary.V03-006.OfficialSampleControl.20260910",
+  "DllPath": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260910-official-sample\\ExplorerDataProvider.dll",
+  "DllSha256": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+  "AttributesHex": "A0000020",
+  "NotifyDrivesCompleted": true,
+  "Notification": {
+    "Apartment": "STA",
+    "ApartmentHr": 0,
+    "ApartmentType": 0,
+    "CoInitializeHr": 1,
+    "FolderHr": 0,
+    "PidlPresent": true,
+    "NotifyInvoked": true,
+    "NotifyReturned": true,
+    "Joined": true,
+    "Stage": "SHChangeNotify-returned",
+    "ExceptionType": null,
+    "ElapsedMs": 2,
+    "CoInitializeHex": "00000001",
+    "FolderHex": "00000000",
+    "Success": true
+  },
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": true,
+      "Owner": "AssetLibrary.V03-006.OfficialSampleControl.20260910"
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": true,
+      "Owner": "AssetLibrary.V03-006.OfficialSampleControl.20260910"
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": true,
+      "Owner": "AssetLibrary.V03-006.OfficialSampleControl.20260910"
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": true,
+      "Owner": "AssetLibrary.V03-006.OfficialSampleControl.20260910"
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ]
+}

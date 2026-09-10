@@ -308,7 +308,28 @@
     ".codex/handoffs/V03-006/parent-discovery-control/visible-resumption.json",
     ".codex/handoffs/V03-006/parent-discovery-control/visible-sdk-baseline.json",
     ".codex/handoffs/V03-006/parent-discovery-control/visible-visible-enumeration.json",
-    ".codex/handoffs/V03-006/parent-discovery-control/visible-window-cleanup.json"
+    ".codex/handoffs/V03-006/parent-discovery-control/visible-window-cleanup.json",
+    ".codex/handoffs/V03-006/register-first-control.md",
+    ".codex/handoffs/V03-006/register-first-control/.gitattributes",
+    ".codex/handoffs/V03-006/register-first-control/actual-view-thispc.json",
+    ".codex/handoffs/V03-006/register-first-control/actual-view-versus-official.json",
+    ".codex/handoffs/V03-006/register-first-control/after-view-readback.json",
+    ".codex/handoffs/V03-006/register-first-control/before-browse.json",
+    ".codex/handoffs/V03-006/register-first-control/cleanup.json",
+    ".codex/handoffs/V03-006/register-first-control/discovery.json",
+    ".codex/handoffs/V03-006/register-first-control/during-error-modules.json",
+    ".codex/handoffs/V03-006/register-first-control/error-dialog.json",
+    ".codex/handoffs/V03-006/register-first-control/evidence.json",
+    ".codex/handoffs/V03-006/register-first-control/final-cleanup.json",
+    ".codex/handoffs/V03-006/register-first-control/guard.ps1.txt",
+    ".codex/handoffs/V03-006/register-first-control/identity.json",
+    ".codex/handoffs/V03-006/register-first-control/official-browse-call.json",
+    ".codex/handoffs/V03-006/register-first-control/preflight.json",
+    ".codex/handoffs/V03-006/register-first-control/register.json",
+    ".codex/handoffs/V03-006/register-first-control/run.ps1.txt",
+    ".codex/handoffs/V03-006/register-first-control/sdk-baseline.json",
+    ".codex/handoffs/V03-006/register-first-control/thispc-baseline.json",
+    ".codex/handoffs/V03-006/register-first-control/window-cleanup.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -459,5 +480,17 @@
     "register_first_gui_control": "incomplete_after_sdk_positive; ThisPC and target not performed",
     "old_guard_cleaned": true,
     "old_owned_window_cleaned_after_identity_recheck": true
+  },
+  "register_first_checkpoint": {
+    "report": "register-first-control.md",
+    "completed": true,
+    "registration_before_process_creation": true,
+    "target_pid": 24488,
+    "actual_thispc_positive": true,
+    "official_discovered": false,
+    "native_browse_calls": 1,
+    "native_browse_timed_out": true,
+    "cleanup_verified": true,
+    "shared_broker_cold_start_proven": false
   }
 }

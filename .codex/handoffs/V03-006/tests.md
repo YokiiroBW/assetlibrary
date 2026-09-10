@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[完整注册先行控制](register-first-control.md)：原guard/STA成功后，新PID创建时间严格更晚；SDK/ThisPC actualview正控通过，F5仍2项，唯一Browse产生无关联模态并触发10秒外限。有效注册期间目标匹配拒绝、ThisPC匹配/2项、模块无样例均已读回，正常清理及STA通知成功。没有重跑旧父枚举/源码构建/业务套件，不将原中断项算失败或将本次SDK成功算G1通过。
+
 恢复检查点：[父级标准发现查询](parent-discovery-control.md)含/不含hidden均完整3项匹配官方，匹配项属性20000000；另一直接Bind正控匹配官方类。均外部10秒、无GUI、原样STA注册/清理。未重跑这些结果。旧时序GUI控制只完成注册后新PID和SDK正控，未发生ThisPC/目标导航；恢复时清理已匹配的旧窗口，不标失败。
 
 最新官方对照分两轮：[首轮](official-runtime-control.md)确认MTA通知辅助缺陷并单独补成功STA通知，保留其无效前置/晚到读回；[修正前置的完整一轮](official-sta-runtime-control.md)先成功STA通知和11字段读回，再F5/唯一原生打开，仍无关联模态/10秒超时，实际view为ThisPC/2项。原DLL/字段不变，未伪造Factory日志，原失败不覆盖。两轮根键和自有UI均清理，最终清理STA通知成功；没有把控制器或读回成功计为G1通过。

@@ -1,0 +1,16 @@
+{
+  "Utc": "2026-09-10T02:34:00.9847106+00:00",
+  "GuardExitCode": 0,
+  "RegistryRootsCleaned": true,
+  "StaCleanupNotificationSucceeded": true,
+  "RegisterBeforeNewProcessVerified": true,
+  "ThisPcControlCompleted": true,
+  "OfficialBrowseCalls": 1,
+  "OfficialBrowseTimedOut": true,
+  "ReturnedBrowseHresult": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "BrokerColdStartNotProven": true,
+  "FurtherVariants": 0
+}
