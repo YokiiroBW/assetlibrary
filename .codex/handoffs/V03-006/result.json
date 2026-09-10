@@ -819,6 +819,9 @@
     "gui_actions": 0,
     "restarts": 0,
     "observer_implementation_changed": false,
-    "guard_changed": false
+    "guard_changed": false,
+    "exact_offline_signatures_reviewed": 5,
+    "cache_hit_boundary_preferred": true,
+    "observation_point_frozen": false
   }
 }

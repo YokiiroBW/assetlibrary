@@ -1,0 +1,11 @@
+{"loadedLibrary":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\dbghelp.dll"}
+{"symbolDiagnostic":"DBGHELP: No header for C:\\Windows\\System32\\windows.storage.dll.  Searching for image on disk"}
+{"symbolDiagnostic":"DBGHELP: C:\\Windows\\System32\\windows.storage.dll - OK"}
+{"symbolDiagnostic":"DBGHELP: symsrv.dll load failure"}
+{"symbolDiagnostic":"DBGHELP: windows.storage - public symbols          C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}
+{"rva":"1188E0","symbolRva":"1188E0","displacement":0,"name":"?GetAttributesOf@CRegFolder@@UEAAJIPEBQEFBU_ITEMID_CHILD@@PEAK@Z","signature":"public: virtual long __cdecl CRegFolder::GetAttributesOf(unsigned int,struct _ITEMID_CHILD const __unaligned * __ptr64 const * __ptr64,unsigned long * __ptr64) __ptr64"}
+{"rva":"119098","symbolRva":"119098","displacement":0,"name":"?_AttributesOf@CRegFolder@@AEAAJPEFBUIDLREGITEM@@KPEAK@Z","signature":"private: long __cdecl CRegFolder::_AttributesOf(struct IDLREGITEM const __unaligned * __ptr64,unsigned long,unsigned long * __ptr64) __ptr64"}
+{"rva":"11B8F0","symbolRva":"11B8F0","displacement":0,"name":"?_LoadValuesFromRegistry@CCLSIDInfoCache@@AEBAXPEAUCLSID_CACHE_ENTRY@@@Z","signature":"private: void __cdecl CCLSIDInfoCache::_LoadValuesFromRegistry(struct CLSID_CACHE_ENTRY * __ptr64)const __ptr64"}
+{"rva":"119F50","symbolRva":"119F50","displacement":0,"name":"?GetPerUserAttributes@CCLSIDInfoCache@@QEAAKAEBU_GUID@@@Z","signature":"public: unsigned long __cdecl CCLSIDInfoCache::GetPerUserAttributes(struct _GUID const & __ptr64) __ptr64"}
+{"rva":"11B054","symbolRva":"11B054","displacement":0,"name":"?_QueryCallForAttributes@CCLSIDInfoCache@@AEBAKAEBUCLSID_CACHE_ENTRY@@KK@Z","signature":"private: unsigned long __cdecl CCLSIDInfoCache::_QueryCallForAttributes(struct CLSID_CACHE_ENTRY const & __ptr64,unsigned long,unsigned long)const __ptr64"}
+{"stage":"module_info","symbolType":3,"imageSize":8798208,"timestamp":2800646882,"pdbAge":1,"pdbGuid":"FA3BF0701EBD655CD7B3691D3BF1C00A","pdbUnmatched":false,"dbgUnmatched":false,"loadedPdb":"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-symbol-lookup\\symbols\\Windows.Storage.pdb"}

@@ -2,7 +2,19 @@
 
 本轮仅审阅既有观察器、官方注册源码、原guard和公开API文档。没有GUI、注册、attach、重启、系统策略或产品代码修改，没有重跑已完成控制。主协调并行解析固定windows.storage.dll的准确函数/调用边界；本文不把尚未定位的读取API或内部ABI写成既成事实。
 
-**建议只有一项：在精确PIDL匹配的GetAttributesOf活动调用内，仅观察一个经离线验证的目标`CLSID/{BA16…}/ShellFolder/Attributes`读取边界，把该次读取的身份、返回状态、类型/大小/值与同callId外层mask返回配对。** 不先启用所有Reg*断点，不建立泛用trace或进程范围句柄追踪框架。
+**建议只有一项：在精确PIDL匹配的GetAttributesOf活动调用内，仅观察一个经离线验证的目标属性来源边界，优先选择可覆盖缓存命中的消费/合并点，与同callId外层mask返回配对；若静态证据支持选择注册读取点，再记录其身份、状态、类型/大小/值。** 不先启用所有Reg*断点，不建立泛用trace或进程范围句柄追踪框架。
+
+新增准确符号后，该“注册读取边界”须满足一项前提：调用确实发生在所选窗口内。主协调的匹配PDB签名原件已只读核对，得到下表零偏移候选；尚未决定实机点。`_LoadValuesFromRegistry`可能在ThisPC正控或F5阶段就完成缓存填充，随后attach的outer范围内零命中很可能只是缓存命中。因此若静态控制流确认读取只发生于填充路径，方案改为同outer内**一个可覆盖缓存命中的值消费/合并点**，不同时叠加两类点，也不因零命中再盲采。
+
+| RVA | 准确符号签名概要 | 返回解释边界 |
+| --- | --- | --- |
+| 1188E0 | CRegFolder::GetAttributesOf | HRESULT，原B41外层点 |
+| 119098 | CRegFolder::_AttributesOf(IDLREGITEM const*, DWORD, DWORD*) | HRESULT；符号名不能授权解码私有PIDL布局 |
+| 11B8F0 | CCLSIDInfoCache::_LoadValuesFromRegistry(CLSID_CACHE_ENTRY*) const | void，没有可按HRESULT/LSTATUS解释的返回状态 |
+| 119F50 | CCLSIDInfoCache::GetPerUserAttributes(GUID const&) | DWORD返回值，0或高位置位不能直接当失败HRESULT |
+| 11B054 | CCLSIDInfoCache::_QueryCallForAttributes(CLSID_CACHE_ENTRY const&, DWORD, DWORD) const | DWORD返回值，含义需结合消费分支，不能套注册API状态 |
+
+主协调报告PE/CodeView/PDB匹配；原件module_info记录SymPdb、GUID `FA3BF0701EBD655CD7B3691D3BF1C00A`、age1及unmatched=false。签名只提供边界和类型，不证明`CLSID_CACHE_ENTRY`字段布局，也不构成根因证据。若最后选择消费/合并点，下表中的注册读取status/type/size判别须按实际数据流重新定义，不能从DWORD合并结果倒推真实注册返回码。
 
 | 可区分的假设 | 所需观测 | 可得结论边界 |
 | --- | --- | --- |

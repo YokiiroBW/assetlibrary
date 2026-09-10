@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+只读增补：root匹配PDB输出中5个签名均零偏移，module_info的unmatched均false；原字节输出归档，单独标为离线符号证据，不计运行时调用。新增cache预热/零命中及void、DWORD返回解释限制；未注册、attach、GUI或重新运行旧控制。
+
 新增[注册读取源审](registry-read-observation-plan.md)：仅核B41源/二进制、官方Dll注册表与323guard来源，形成11字段存在/类型/值契约和带行号调用范围摘录；未执行新实机检查或重跑旧控制。公开API/ABI已按Microsoft文档核对，具体内层调用点仍待离线分析，方案不计工具验证或G1通过。
 
 新增[冷启动实机](cold-session-execution.md)：v2窄分类27项有源文件验证及20项独立工具内存复核；实际两次固定停止22/22、2/2退出、两新desktop/taskbar持久存活均确认。SDK/ThisPC正控通过，唯一Browse10秒超时/无关联错误，4属性实际S_OK输出仍0/0/0/26；28.485秒早停不计完整60秒。5断点/Detach/无debugger、双通知/8根清理、最终无测试模块通过。纯分类项、属性调用及清理检查不冒充产品案例或G1通过。

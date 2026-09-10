@@ -20,7 +20,7 @@
     }
   ],
   "SourcesReviewedWithoutModification": true,
-  "SelectedInnerCallSite": "pending coordinator fixed-module offline analysis",
+  "SelectedInnerCallSite": "Pending exact data flow; prefer a single cache-hit-capable consumption/merge point if registry loading precedes the outer observation window",
   "GuardGap": "verify only presence/owner; AttributesHex constant; Assert-Tree does not reject missing expected fields",
   "Artifacts": [
     {
@@ -32,6 +32,12 @@
       "File": "official-field-contract.json",
       "Sha256": "63CC68C84E2E49B4AE9078E7A6EE474B795461BE68E464AA765E55E1E2A41A13",
       "Kind": "derived_from_source_not_live_observation"
+    },
+    {
+      "File": "root-symbols-signatures.jsonl",
+      "Sha256": "63B92050B228C44F1B331052E48E0D0678F90BC241213A3E299996D024B2F570",
+      "Kind": "unmodified_root_offline_symbol_output",
+      "OriginalRuntimePath": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-symbol-lookup/symbols-signatures.jsonl"
     }
   ]
 }
