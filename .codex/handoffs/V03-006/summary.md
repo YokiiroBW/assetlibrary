@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[真实注册读取只读准备](registry-read-observation-plan.md)收敛为matched GetAttributesOf内一个准确读取边界，与outer callId配对；具体API/RVA等待root固定模块离线分析。已区分DbgEng与OS线程ID、异常/线程退出归属风险，并发现旧guard的presence/常量Attributes摘要及单向Assert-Tree不能证明11字段持续完整或host实际读值。下个获准周期补固定11字段只读读回，原guard不改；本轮无GUI/注册/attach/restart。
+
 最新：[冷启动实机对照](cold-session-execution.md)完成授权的两次当前用户Explorer重启，22/22及2/2固定旧目标退出，Windows自动恢复38388再32044且helper退出后持续存活。实际入口仍无关联应用/ThisPC2项；4属性返回仍0/0/0/26，B41早停28.485秒但5断点/Detach/目标存活清理成功。双通知/8根/测试UI及最终Shell模块清理全部确认；不追加变体，下一步仅评估真实CLSID/ShellFolder属性读取路径，G1未关闭。
 
 最新：[当前用户Shell冷启动准备](cold-session-preflight.md)已编译/只读预检；用户授权已收到，但WTS Session2=4/Disconnected且输入桌面查询Win32 5，未注册/未stop/未GUI输入。受限工具持有精确身份句柄、固定集合/桌面最后、逐目标活动桌面复核与partial finally退出核验已准备。等待用户重连后全新preflight，不复用旧PID，G1未关闭。

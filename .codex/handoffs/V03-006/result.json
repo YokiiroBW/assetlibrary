@@ -500,7 +500,9 @@
     ".codex/handoffs/V03-006/cold-session-preflight.md",
     ".codex/handoffs/V03-006/cold-session-preflight/",
     ".codex/handoffs/V03-006/cold-session-execution.md",
-    ".codex/handoffs/V03-006/cold-session-execution/"
+    ".codex/handoffs/V03-006/cold-session-execution/",
+    ".codex/handoffs/V03-006/registry-read-observation-plan.md",
+    ".codex/handoffs/V03-006/registry-read-preparation/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -577,7 +579,8 @@
       "Official unchanged sample control with original per-user fields: initial notification defect isolated, corrected STA notification and field readback precede one timed native navigation; owned cleanup confirmed",
       "Two bounded independent attribute modes: 20 plus 26 successful queries, identical unchanged opaque PIDLs; strict native build and wrapper sequence/owner/lifetime/cleanup verification; GUI and debugger actions zero",
       "Cold-session preparation only: C# compiled, wrapper parsed, read-only preflight refuses WTSDisconnected and unavailable input desktop; no termination or registration executed",
-      "One authorized cold-session control: 22/22 and 2/2 held processes exited, two new desktops each stable across two readbacks; actual entry remains failed; original observer cleanup and final module/registry/UI cleanup verified"
+      "One authorized cold-session control: 22/22 and 2/2 held processes exited, two new desktops each stable across two readbacks; actual entry remains failed; original observer cleanup and final module/registry/UI cleanup verified",
+      "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -803,5 +806,19 @@
     "final_test_modules_absent": true,
     "gui_test_windows_closed": true,
     "next_step": "Evaluate read-only tracing of target CLSID/ShellFolder attribute reads in real Explorer; not executed in this control"
+  },
+  "registry_read_plan_checkpoint": {
+    "report": "registry-read-observation-plan.md",
+    "status": "read_only_plan_pending_exact_inner_call_site",
+    "official_expected_fields": 11,
+    "diagnostic_owner_fields_separate": 4,
+    "guard_summary_is_not_host_value_evidence": true,
+    "engine_and_system_thread_ids_distinguished": true,
+    "live_registrations": 0,
+    "live_attachments": 0,
+    "gui_actions": 0,
+    "restarts": 0,
+    "observer_implementation_changed": false,
+    "guard_changed": false
   }
 }

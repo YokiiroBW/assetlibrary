@@ -1,0 +1,139 @@
+Derived line-numbered excerpts; not a complete original source file.
+Original SHA256: 26FDC2A5CC4E7445503F01B2136A8B5103D9B756CF12E26920A5B9AD04547C28
+
+--- Original lines 203-210 ---
+203:     HRESULT STDMETHODCALLTYPE GetInterestMask(PULONG mask) override { *mask = DEBUG_EVENT_BREAKPOINT | DEBUG_EVENT_EXCEPTION | DEBUG_EVENT_CREATE_PROCESS | DEBUG_EVENT_EXIT_PROCESS | DEBUG_EVENT_LOAD_MODULE; return S_OK; }
+204:     HRESULT STDMETHODCALLTYPE Breakpoint(PDEBUG_BREAKPOINT bp) override;
+205:     HRESULT STDMETHODCALLTYPE Exception(PEXCEPTION_RECORD64 record, ULONG first) override;
+206:     HRESULT STDMETHODCALLTYPE CreateProcess(ULONG64,ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG,ULONG64,ULONG64,ULONG64) override;
+207:     HRESULT STDMETHODCALLTYPE ExitProcess(ULONG) override;
+208:     HRESULT STDMETHODCALLTYPE CreateThread(ULONG64,ULONG64,ULONG64) override { return DEBUG_STATUS_NO_CHANGE; }
+209:     HRESULT STDMETHODCALLTYPE ExitThread(ULONG) override { return DEBUG_STATUS_NO_CHANGE; }
+210:     HRESULT STDMETHODCALLTYPE LoadModule(ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG) override;
+
+--- Original lines 231-245 ---
+231:     struct ReturnSite { ULONG64 address; ULONG thread; PDEBUG_BREAKPOINT bp; };
+232:     struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,maskAddress; };
+233:     std::vector<ReturnSite> returnSites;
+234:     std::vector<PendingCall> pending;
+235:     bool attachRequested = false, createdEvent = false, storageSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+236:     ULONG64 candidateAddress=0;
+237:     ULONG observedOutputMask=0;bool outputMaskValid=false;
+238:     ULONG multiItemDiscarded=0;
+239:     ULONG exceptionCount=0;
+240:     HANDLE externalCancel = nullptr;
+241:     std::atomic<bool> cancelled{false};
+242:     std::atomic<HRESULT> interruptResult{E_PENDING};
+243:     bool interruptObserved = false, callbackFailed = false, unexpectedExit = false;
+244:     ULONG regRsp = 0, regRax = 0, regRdx = 0, regR8 = 0, regR9 = 0;
+245:     ULONG entryCount = 0, unmatched = 0, matched = 0, returns = 0, waitTimeouts = 0;
+
+--- Original lines 365-406 ---
+365:     HRESULT OnBreakpoint(PDEBUG_BREAKPOINT bp) {
+366:         ValidatePid();
+367:         ULONG id = 0; Checked(bp->GetId(&id), "breakpoint_id");
+368:         if (id==1) {
+369:             entryCount++;
+370:             Need(entryCount <= 4096, "bounded_entry_count");
+371:             ULONG cidl=static_cast<ULONG>(Reg(regRdx));
+372:             if(cidl!=1){unmatched++;if(cidl==2)multiItemDiscarded++;return DEBUG_STATUS_GO;}
+373:             ULONG64 array=Reg(regR8);
+374:             if(!array||!PidlMatches(Read<ULONG64>(array))){unmatched++;return DEBUG_STATUS_GO;}
+375:             Need(pending.size()<32&&matched<128,"bounded_matching_calls");
+376:             matched++;
+377:             ULONG64 returnAddress = Read<ULONG64>(Reg(regRsp));
+378:             ULONG threadId = 0; Checked(system->GetCurrentThreadId(&threadId), "matching_thread");
+379:             ULONG site=0;
+380:             while(site<returnSites.size()&&(returnSites[site].address!=returnAddress||returnSites[site].thread!=threadId)) site++;
+381:             if(site==returnSites.size()) {
+382:                 Need(site<64,"bounded_return_sites");
+383:                 returnSites.push_back({returnAddress,threadId,nullptr});
+384:                 auto& created=returnSites.back();
+385:                 Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,100+site,&created.bp),"return_breakpoint_add");
+386:                 Checked(created.bp->SetOffset(returnAddress),"return_breakpoint_offset");
+387:                 Checked(created.bp->SetMatchThreadId(threadId),"return_thread_scope");
+388:                 Checked(created.bp->AddFlags(DEBUG_BREAKPOINT_ENABLED),"return_breakpoint_enable");
+389:             }
+390:             ULONG64 rsp=Reg(regRsp),maskAddress=Reg(regR9);Need(maskAddress!=0,"matched_attribute_mask_pointer_required");
+391:             ULONG inputMask=Read<ULONG>(maskAddress);pending.push_back({site,threadId,matched,rsp+8,maskAddress});
+392:             printf("{\"kind\":\"matching_attributes_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"inputMask\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,inputMask,GetTickCount64());fflush(stdout);
+393:             return DEBUG_STATUS_GO;
+394:         }
+395:         Need(id>=100&&id-100<returnSites.size(),"owned_return_breakpoint");
+396:         ULONG threadId=0; Checked(system->GetCurrentThreadId(&threadId),"return_thread");
+397:         ULONG64 rsp=Reg(regRsp);
+398:         size_t found=pending.size();
+399:         while(found>0) { found--; const auto& call=pending[found]; if(call.site==id-100&&call.thread==threadId&&call.expectedRsp==rsp) break; }
+400:         if(pending.empty()||pending[found].site!=id-100||pending[found].thread!=threadId||pending[found].expectedRsp!=rsp) return DEBUG_STATUS_GO;
+401:         ULONG64 maskAddress=pending[found].maskAddress;
+402:         ULONG callId=pending[found].callId;
+403:         observed = static_cast<HRESULT>(static_cast<ULONG>(Reg(regRax)));
+404:         returns++;observedOutputMask=Read<ULONG>(maskAddress);outputMaskValid=SUCCEEDED(observed);
+405:         pending.erase(pending.begin()+static_cast<ptrdiff_t>(found));
+406:         printf("{\"kind\":\"matching_attributes_return\",\"callId\":%lu,\"hr\":\"0x%08lX\",\"outputMask\":\"0x%08lX\",\"outputMaskValid\":%s,\"tick\":%llu}\n",callId,static_cast<ULONG>(observed),observedOutputMask,outputMaskValid?"true":"false",GetTickCount64());fflush(stdout);
+
+--- Original lines 425-439 ---
+425:             while (GetTickCount64() < deadline && !cancelled && !outputFailed && !callbackFailed && !unexpectedExit && (!target.Synthetic() || cancelMode || !AllSyntheticReturns())) {
+426:                 if(externalCancel&&WaitForSingleObject(externalCancel,0)==WAIT_OBJECT_0) { cancelled=true; interruptResult=control->SetInterrupt(DEBUG_INTERRUPT_EXIT); break; }
+427:                 HRESULT hr = control->WaitForEvent(0, 100);
+428:                 if (hr == S_FALSE) {
+429:                     waitTimeouts++;
+430:                     HRESULT resumed = control->SetExecutionStatus(DEBUG_STATUS_GO);
+431:                     if (waitTimeouts == 1) Record("resume_after_finite_wait", resumed);
+432:                     if (resumed != E_ACCESSDENIED) Checked(resumed, "resume_after_wait_failed");
+433:                 }
+434:                 else if (hr == E_PENDING && cancelled) interruptObserved = true;
+435:                 else Checked(hr, "capture_wait");
+436:             }
+437:             Need(!outputFailed && !callbackFailed && !unexpectedExit, "capture_callback_health");
+438:             Need(pending.empty()&&returns==matched,"matching_returns_complete");
+439:             if(target.Synthetic()) {
+
+--- Original lines 461-490 ---
+461:             printf("{\"kind\":\"cleanup_target_context\",\"pidHr\":\"0x%08lX\",\"ownedPidMatch\":%s,\"countHr\":\"0x%08lX\",\"processCount\":%lu}\n", static_cast<ULONG>(pidHr), currentPid == target.pid ? "true" : "false", static_cast<ULONG>(countHr), processCount); fflush(stdout);
+462:             // A finite timeout/EXIT may report BREAK while breakpoint editing
+463:             // still has no stopped-event context. Require an actual event break.
+464:             if (!atEventBreak) {
+465:                 HRESULT resumed = control->SetExecutionStatus(DEBUG_STATUS_GO); Record("cleanup_resume_wait_state", resumed);
+466:                 if (FAILED(resumed) && resumed != E_ACCESSDENIED) ok = false;
+467:                 hr = control->SetInterrupt(DEBUG_INTERRUPT_ACTIVE); Record("cleanup_interrupt", hr);
+468:                 interruptArmed=SUCCEEDED(hr);
+469:                 ULONGLONG deadline = GetTickCount64() + 3000;
+470:                 while (SUCCEEDED(hr) && GetTickCount64() < deadline) {
+471:                     HRESULT waited = control->WaitForEvent(0, 100);
+472:                     if (waited == S_FALSE) waitTimeouts++;
+473:                     if (waited == E_PENDING || waited == S_FALSE) continue;
+474:                     if (FAILED(waited)) { Record("cleanup_wait_failed", waited); hr = waited; break; }
+475:                     if (atEventBreak) break;
+476:                 }
+477:                 if (FAILED(hr) || !atEventBreak) { Record("cleanup_break_unconfirmed", E_FAIL); ok = false; }
+478:             }
+479:             ULONG pausedPid = 0;
+480:             HRESULT pausedIdentity = system->GetCurrentProcessSystemId(&pausedPid);
+481:             bool ownedPause = atEventBreak && SUCCEEDED(pausedIdentity) && pausedPid == target.pid && CreationTime(target.process.value) == target.created;
+482:             Record("cleanup_paused_owned_identity", ownedPause ? S_OK : E_FAIL); ok = ok && ownedPause;
+483:             for(auto& site:returnSites) if(site.bp) { hr=control->RemoveBreakpoint(site.bp); Record("return_breakpoint_remove",hr); ok=ok&&SUCCEEDED(hr); site.bp=nullptr; }
+484:             for(auto& entry:entries) if(entry) { hr=control->RemoveBreakpoint(entry); Record("entry_breakpoint_remove",hr); ok=ok&&SUCCEEDED(hr); entry=nullptr; }
+485:             ULONG count = 0; hr = control->GetNumberBreakpoints(&count);
+486:             Record("remaining_breakpoints_zero", SUCCEEDED(hr) && count == 0 ? S_OK : E_FAIL); ok = ok && SUCCEEDED(hr) && count == 0;
+487:             hr = client->DetachProcesses(); Record("detach_owned_target", hr); ok = ok && SUCCEEDED(hr);
+488:             attachRequested = false;
+489:         }
+490:         cleanupOk = ok;
+
+--- Original lines 495-509 ---
+495: HRESULT Events::Breakpoint(PDEBUG_BREAKPOINT bp) {
+496:     try { return capture.OnBreakpoint(bp); }
+497:     catch (...) { capture.callbackFailed = true; capture.atEventBreak = true; return DEBUG_STATUS_BREAK; }
+498: }
+499: HRESULT Events::Exception(PEXCEPTION_RECORD64 record, ULONG firstChance) {
+500:     if (record->ExceptionCode == EXCEPTION_BREAKPOINT && firstChance) {
+501:         if(capture.interruptArmed) { capture.interruptArmed=false; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
+502:     }
+503:     capture.exceptionCount++;
+504:     if(capture.exceptionCount<=16) Record(firstChance?"target_first_chance_not_handled":"target_second_chance_not_handled",static_cast<HRESULT>(record->ExceptionCode));
+505:     if(!firstChance||capture.exceptionCount>16) capture.callbackFailed=true;
+506:     // Let the target's handlers/OS decide; do not swallow first-chance exceptions.
+507:     return DEBUG_STATUS_GO_NOT_HANDLED;
+508: }
+509: HRESULT Events::CreateProcess(ULONG64,ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG,ULONG64,ULONG64,ULONG64) {

@@ -1,0 +1,37 @@
+{
+  "RecordedUtc": "2026-09-10T14:15:25.203661+00:00",
+  "Status": "read_only_plan_no_live_experiment",
+  "GuiActions": 0,
+  "Registrations": 0,
+  "DebuggerAttachments": 0,
+  "Restarts": 0,
+  "SourceFingerprints": [
+    {
+      "Source": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-attributes-debug/Observer.cpp",
+      "Sha256": "26FDC2A5CC4E7445503F01B2136A8B5103D9B756CF12E26920A5B9AD04547C28"
+    },
+    {
+      "Source": ".runtime/explorer-live/20260910-cold-session/guard.ps1",
+      "Sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76"
+    },
+    {
+      "Source": ".codex/handoffs/V03-006/official-sample-review/Dll.cpp.original.txt",
+      "Sha256": "D9D89FA1C3288E4957426AF49A61D6C31B90CD00AED8F6924C6EED1EF2630C19"
+    }
+  ],
+  "SourcesReviewedWithoutModification": true,
+  "SelectedInnerCallSite": "pending coordinator fixed-module offline analysis",
+  "GuardGap": "verify only presence/owner; AttributesHex constant; Assert-Tree does not reject missing expected fields",
+  "Artifacts": [
+    {
+      "File": "observer-scope-excerpts.txt",
+      "Sha256": "34F4346245B09F248DA5A076BDBA7B8A424C172C853EC072D54E8A4A2497AC5F",
+      "Kind": "derived_from_source_not_live_observation"
+    },
+    {
+      "File": "official-field-contract.json",
+      "Sha256": "63CC68C84E2E49B4AE9078E7A6EE474B795461BE68E464AA765E55E1E2A41A13",
+      "Kind": "derived_from_source_not_live_observation"
+    }
+  ]
+}

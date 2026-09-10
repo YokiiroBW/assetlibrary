@@ -1,0 +1,87 @@
+{
+  "kind": "source_derived_expected_field_contract_not_live_readback",
+  "hive": "CurrentUser",
+  "view": "Registry64",
+  "fieldCount": 11,
+  "fields": [
+    {
+      "path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "FolderView SDK Sample",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "<FROZEN_F298_DLL_PATH>",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "valueName": "ThreadingModel",
+      "type": "REG_SZ",
+      "expected": "Apartment",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "shell32.dll,-42",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "valueName": "Attributes",
+      "type": "REG_DWORD",
+      "expected": "0xA0000020",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "FolderView SDK Sample",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "<FROZEN_F298_DLL_PATH>",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "valueName": "ThreadingModel",
+      "type": "REG_SZ",
+      "expected": "Apartment",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\ShellEx\\MayChangeDefaultMenu",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Classes\\FolderViewSampleType\\shellex\\ContextMenuHandlers\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "existenceRequired": true
+    },
+    {
+      "path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "valueName": "",
+      "type": "REG_SZ",
+      "expected": "FolderView SDK Sample",
+      "existenceRequired": true
+    }
+  ],
+  "diagnosticOwnerCountSeparate": 4,
+  "missingDefaultMustNotBeReplacedWithFallback": true
+}
