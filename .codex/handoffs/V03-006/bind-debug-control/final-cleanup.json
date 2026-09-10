@@ -1,0 +1,19 @@
+{
+  "Utc": "2026-09-10T04:25:39.7226105+00:00",
+  "GuardExitCode": 0,
+  "RootsCleaned": true,
+  "BothCleanupNotificationsCompleted": true,
+  "DebuggerCleanupVerified": true,
+  "TargetAliveWithoutDebuggerVerified": true,
+  "MatchedEntries": 2,
+  "MatchedReturns": 2,
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "FullSixtySecondsObserved": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "OtherIidNotResolved": true,
+  "BindContextContentsNotRead": true,
+  "FurtherVariants": 0
+}

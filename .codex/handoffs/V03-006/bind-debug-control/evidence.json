@@ -1,0 +1,126 @@
+{
+  "RecordedAtUtc": "2026-09-10T04:29:09.822406+00:00",
+  "ObserverSha256": "822FEE1961946116B7E6B8BABC5907F81E7C569B30D674AC2506CBF823037619",
+  "PlanId": "a8c0511fafe84975963c6a0e614f8665",
+  "TargetPid": 22968,
+  "ReadyTick": 253022218,
+  "BrowseAndMatchTick": 253022609,
+  "CallbackHealthFailureTick": 253056281,
+  "MatchedEntries": 2,
+  "MatchedReturns": 2,
+  "OtherIidsUnresolved": true,
+  "FullSixtySecondsObserved": false,
+  "CleanupVerified": true,
+  "TargetAliveAfterDetach": true,
+  "RegistryAndUiCleaned": true,
+  "Artifacts": [
+    {
+      "File": "actual-view-thispc.json",
+      "Sha256": "3DB0E561566E03612DDEBEA2237CF9B0F152E78E3CC68047D6B86A642A635E5B"
+    },
+    {
+      "File": "actual-view-versus-official.json",
+      "Sha256": "EEAD00437531FEDECB11C1F5DCFB09EE5F680AD723DE6CBCD417374949344029"
+    },
+    {
+      "File": "after-detach-modules.json",
+      "Sha256": "42D7B179F0947787C4B8EC1B0BF1F2A442C93D536013EC8139F13A4028A46AB0"
+    },
+    {
+      "File": "after-view-readback.json",
+      "Sha256": "E589363887F7C550168DC436075F50E2212118EC1F2CD801B52EAC992505E40F"
+    },
+    {
+      "File": "browse-launch.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "browse-launch.stdout.txt",
+      "Sha256": "39659EFBA5D927E28114649D4EB9CE6C32C292024C8B8EBD5160F558B3CF9107"
+    },
+    {
+      "File": "browse-wrapper.ps1.txt",
+      "Sha256": "D4F708BA19D4EB9C3870A79EB5701E16ACAD4F79FDA6A3711B748DB6096852D7"
+    },
+    {
+      "File": "capture-launch.json",
+      "Sha256": "75072C9743A678F57F855E8E22733AE5098046EFB90F47CA084C34B4F8F4ED92"
+    },
+    {
+      "File": "capture-ready.json",
+      "Sha256": "C503C93F111CE3036D139FA5F39700FA692E00FC0014E373B239EF7F43AC40E3"
+    },
+    {
+      "File": "capture-result.json",
+      "Sha256": "C30A57000F4FB2D857387736CD2DDC0890EBB11B36E4122F944FCF49952CA42B"
+    },
+    {
+      "File": "capture.ps1.txt",
+      "Sha256": "5A7C58C0265C85A638717B972EF864BB346469FDFBCE10027F613F509C22B050"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "46890E49084401F0F89425F6DE7E0693ABA7CED1282C3ED3012F33A12E8ECBB5"
+    },
+    {
+      "File": "debug-browse-call.json",
+      "Sha256": "39659EFBA5D927E28114649D4EB9CE6C32C292024C8B8EBD5160F558B3CF9107"
+    },
+    {
+      "File": "error-dialog.json",
+      "Sha256": "465E286BDA7D472834D2FD40168D4292CD0106A228ED17B92E2924F1D6C1A825"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "39DD24F436E87D42B8F51ADFE3084D6AFCEFDE253F8EFAACED1E718339C90632"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76"
+    },
+    {
+      "File": "identity.json",
+      "Sha256": "074B94F6E09F9EB1E8A172AC0CB05577ECDE042D3D2060104203845415C83D20"
+    },
+    {
+      "File": "observer.jsonl",
+      "Sha256": "5F79C612D7459315F3721AEC49BA891921EDAB46156C6ED67AEDE5C4BB837A68"
+    },
+    {
+      "File": "observer.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "ownership-epoch.json",
+      "Sha256": "4233D7B7551FE05A2E4A0156D14E6D86C45C3D79182EB2F0A91EA784DAAD4E8A"
+    },
+    {
+      "File": "plan-receipt.json",
+      "Sha256": "4D6BFF13E0E745BDB18E3D33365A92792B01442ED01F7E1D034F639628933195"
+    },
+    {
+      "File": "plan.txt",
+      "Sha256": "84E5FCC9B44F6CE39F65C7BD69FA33470ECD5E080845D18DE3F310913804DA7A"
+    },
+    {
+      "File": "preflight.json",
+      "Sha256": "13213B69491E9A94C3E02186E91E11051F3B23C719A4CE44083B307BC6EA86C2"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "7AEDB46881BAD9C24597371B6D1589DCF351104032330BE84877675B1A5086FD"
+    },
+    {
+      "File": "sdk-baseline.json",
+      "Sha256": "6B0E8B6E7C2CEA27DE29236316AE0F4C1D5D6F3503E6BEE4A6F2D02F6F3D362A"
+    },
+    {
+      "File": "thispc-baseline.json",
+      "Sha256": "E271631B677B55670BB84F56B5A63477D0AAE76E7AB1A88B664E0DF2571E34D4"
+    },
+    {
+      "File": "window-cleanup.json",
+      "Sha256": "CAE9AF18CA5816A987CB774F13512AEEE79A3373A836EF537001ACBE7C949729"
+    }
+  ]
+}
