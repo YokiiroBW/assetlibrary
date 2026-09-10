@@ -61,5 +61,6 @@
   "windows_execution_checkpoint": "current-windows-work.json",
   "official_control_build": "official-control-build/evidence.json",
   "synthetic_debug_control": "synthetic-debug-control/evidence.json",
-  "windows_register_first_evidence": ".codex/handoffs/V03-006/register-first-control/evidence.json"
+  "windows_register_first_evidence": ".codex/handoffs/V03-006/register-first-control/evidence.json",
+  "restricted_target_observer": "target-debug-control/evidence.json"
 }

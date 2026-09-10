@@ -1,0 +1,86 @@
+{
+  "kind": "restricted_target_adapter_prepared_not_real_executed",
+  "createdUtc": "2026-09-10T02:59:14.6416106Z",
+  "files": [
+    {
+      "path": "Shared.h",
+      "length": 1191,
+      "sha256": "2c0dc30834fd6798df0074ede788669d3d407476a0040d9d87aa390560dfe9c2"
+    },
+    {
+      "path": "Target.cpp",
+      "length": 2881,
+      "sha256": "9c62e39be8a39c880a9bbded36c293f3cebce20793e60ca413657d8ca87998fa"
+    },
+    {
+      "path": "Observer.cpp",
+      "length": 36169,
+      "sha256": "df6fad2d559aa28eecc2a4f2e8a95e1cb43e0783d16252b1ac0c64cd85c27ef2"
+    },
+    {
+      "path": "Plan.h",
+      "length": 6113,
+      "sha256": "cf186b2eef05a9891d68973ac2fe38987c9b029ce2da9bd63636a0764ff7c760"
+    },
+    {
+      "path": "build.ps1",
+      "length": 1523,
+      "sha256": "03db61b9030ec20b527fc3e272c0bc9418839c7588c649fe8e25bd35b2fa6fd6"
+    },
+    {
+      "path": "README.md",
+      "length": 8699,
+      "sha256": "9b37d1016233d34aac8495e133b88670e1045f8934467c0725708083ffe00a0d"
+    },
+    {
+      "path": "validation.json",
+      "length": 2489,
+      "sha256": "255df8950dfa1db0f1b803d7f9fdc166a90c4eda37ec0a8892cadfb5c73c5a99"
+    },
+    {
+      "path": "cleanup-check.json",
+      "length": 669,
+      "sha256": "7f888a3b724d4878a08abd1101816abd56d6f8d6f331dd53ddc2f9907d74eddd"
+    },
+    {
+      "path": "bin\\ExplorerTargetObserver.exe",
+      "length": 243200,
+      "sha256": "749cd50985ba51895c410ea1e8fb1d3335c903767dbf87e88b60f846645837e0"
+    },
+    {
+      "path": "bin\\SynthTarget.exe",
+      "length": 107520,
+      "sha256": "77785c64ad1fb221f640527b51c7399ab3cd1683cc4b218134ebbcee1d2146a7"
+    },
+    {
+      "path": "cancel-final.jsonl",
+      "length": 3122,
+      "sha256": "a186e494a68068cc0ceec5199b57f4205f662f0eedc0eb04cf935b145fde9aaa"
+    },
+    {
+      "path": "normal-01.jsonl",
+      "length": 1671,
+      "sha256": "d6b1c62cfd823921e37772e93f95f67b680b23d26eb84c2c57d03e0513b9f32c"
+    },
+    {
+      "path": "normal-02.jsonl",
+      "length": 1501,
+      "sha256": "32f54476db094089f895fa129f027e7a6d824131dcf25131b4e125aef06797f4"
+    },
+    {
+      "path": "normal-03.jsonl",
+      "length": 2692,
+      "sha256": "5661862a359dbf0b8d4af76b9c368219a3e9ec7525179f26fadc58a919e98330"
+    },
+    {
+      "path": "normal-final.jsonl",
+      "length": 2782,
+      "sha256": "00b087e50d91c1eca32ec6c5bdac7958acffc29f1edf5f0269822ffd43862f41"
+    },
+    {
+      "path": "offline-01.jsonl",
+      "length": 109,
+      "sha256": "bec0e7271cf8c0084c773ee4a784a3c4f03133890b2d1507f0a3f31a5936d193"
+    }
+  ]
+}

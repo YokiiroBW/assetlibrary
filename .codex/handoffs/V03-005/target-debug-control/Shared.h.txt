@@ -1,0 +1,30 @@
+#pragma once
+#include <Windows.h>
+#include <objbase.h>
+#include <cstdint>
+
+// Synthetic-only identities. Neither CLSID is registered by this experiment.
+inline constexpr GUID MatchClsid{0x89100e21,0x15d2,0x4f41,{0x87,0xd6,0xcb,0x36,0xf6,0x7d,0x86,0xcc}};
+inline constexpr GUID OtherClsid{0x89100e22,0x15d2,0x4f41,{0x87,0xd6,0xcb,0x36,0xf6,0x7d,0x86,0xcc}};
+inline constexpr wchar_t MatchClsidText[] = L"{89100E21-15D2-4F41-87D6-CB36F67D86CC}";
+inline constexpr DWORD SharedMagic = 0x414C4442;
+struct SharedState {
+    DWORD magic;
+    DWORD targetPid;
+    ULONGLONG targetCreation;
+    ULONGLONG apiAddresses[3];
+    volatile LONG ready;
+    volatile LONG heartbeat;
+    volatile LONG callsFinished;
+    volatile LONG matchResults[3];
+    volatile LONG otherResults[3];
+    volatile LONG debuggerObserved;
+    volatile LONG noDebuggerAfterWork;
+    volatile LONG targetError;
+    volatile LONG ownExceptionHandled;
+};
+inline ULONGLONG CreationTime(HANDLE process) {
+    FILETIME created{}, exited{}, kernel{}, user{};
+    if (!GetProcessTimes(process, &created, &exited, &kernel, &user)) return 0;
+    return (static_cast<ULONGLONG>(created.dwHighDateTime) << 32) | created.dwLowDateTime;
+}

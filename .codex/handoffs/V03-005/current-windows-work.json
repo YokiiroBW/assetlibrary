@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T02:43:20.003993+00:00",
-  "status": "register_first_control_complete_target_activation_observer_in_development",
+  "updatedAtUtc": "2026-09-10T03:00:35.710098+00:00",
+  "status": "reviewed_target_observer_delegated_to_windows_owner",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Windows GUI owner keeps site clean. Curie implements scoped target adapter and three-COM-API synthetic validation; root reviews before any real attachment. No repeat ordering/parent/loader controls.",
+  "active_instruction": "Windows GUI owner executing one new exclusive official-profile Explorer observation with frozen749CD509 observer, exact short-lived plan, ready-before-Browse, cooperative cancellation and complete owned-site cleanup. Root reviews resulting evidence; do not run another GUI actor.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,8 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Complete three-API scoped debugger adapter synthetic normal/cancel and identity/plan negative tests.",
-    "Review adapter source and actual attach/detach limits; only then coordinate one new owned Explorer observation with the Windows GUI owner.",
-    "Use observed target activation/load decisions to select a repair; G1..G4 and production Shell remain open."
+    "Collect single owner real observation and cleanup results; distinguish capture readiness from product entry success.",
+    "Use actual target API evidence to select next repair; G1..G4 remain open."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -92,5 +91,11 @@
     "integrated_commit": "1915b887fe1ddc687de15750aed78e518cbd0d6d",
     "evidence": "../V03-006/register-first-control/evidence.json",
     "raw_artifacts_verified": 18
+  },
+  "target_debugger": {
+    "preparation_evidence": "target-debug-control/evidence.json",
+    "observer_sha256": "749cd50985ba51895c410ea1e8fb1d3335c903767dbf87e88b60f846645837e0",
+    "synthetic_normal_cancel": "passed; each3 API entries/returns, actual80040154/context1, six breakpoint removals, detach and healthy cooperative exit",
+    "real_result": "pending_owner_execution"
   }
 }

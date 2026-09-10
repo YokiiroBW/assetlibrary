@@ -147,3 +147,9 @@ root补齐官方Category.cpp并校验全18 Git blobs，原样源码经外部CMak
 Windows e657813集成为1915b88；18份新原件SHA独立核对一致，纳入目录属性后diff --check通过。注册/进程创建顺序、SDK与ThisPC正控、唯一Browse超时且无返回HRESULT、仍ThisPC2项、模块未见及清理均保留原始结果。只读Folder关联记录归档，无HKCU Folder打开覆盖；没有修改注册关联。未重复旧成功构建/业务测试，未将诊断计作G1通过。
 
 本检查点最终diff审查后verify_repository通过，日志.runtime/v03-005-final-tests/repository-ordering-checkpoint.log；handoff/架构/契约与35项迁移及架构回归通过，发布门禁不变。
+
+## 受限目标激活观察器准备
+
+Observer749cd509…与manifest21fa0b68…冻结，16文件长度/SHA独立核对，非二进制原件及完整诊断源归档target-debug-control。normal-final/cancel-final各3入口、3实际80040154返回及context1；线程/返回栈配对、6断点移除/剩余0、Detach、心跳与内部/外部无debugger、合作退出通过，目标自身first-chance处理执行。19项纯计划/ID/窗口谓词检查与合成进程精确创建时间正反检查有明确范围；未当作真实GUI身份验收。早期两次工具失败保留，未计产品失败。实际Explorer观测由单一owner执行，本准备检查点尚无真实结果。
+
+准备检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-target-observer-preparation.log，发布门禁不变。

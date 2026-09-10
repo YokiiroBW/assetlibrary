@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "1915b887fe1ddc687de15750aed78e518cbd0d6d",
+  "commit": "d8894b7a0ecc785ab742a467555d942d569cdb01",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/current-windows-work.json",
@@ -95,6 +95,23 @@
     ".codex/handoffs/V03-005/synthetic-debug-control/manifest.json",
     ".codex/handoffs/V03-005/synthetic-debug-control/normal-final.jsonl",
     ".codex/handoffs/V03-005/synthetic-debug-control/validation.json",
+    ".codex/handoffs/V03-005/target-debug-control/.gitattributes",
+    ".codex/handoffs/V03-005/target-debug-control/Observer.cpp.txt",
+    ".codex/handoffs/V03-005/target-debug-control/Plan.h.txt",
+    ".codex/handoffs/V03-005/target-debug-control/README.md",
+    ".codex/handoffs/V03-005/target-debug-control/Shared.h.txt",
+    ".codex/handoffs/V03-005/target-debug-control/Target.cpp.txt",
+    ".codex/handoffs/V03-005/target-debug-control/build.ps1.txt",
+    ".codex/handoffs/V03-005/target-debug-control/cancel-final.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/cleanup-check.json",
+    ".codex/handoffs/V03-005/target-debug-control/evidence.json",
+    ".codex/handoffs/V03-005/target-debug-control/manifest.json",
+    ".codex/handoffs/V03-005/target-debug-control/normal-01.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/normal-02.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/normal-03.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/normal-final.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/offline-01.jsonl",
+    ".codex/handoffs/V03-005/target-debug-control/validation.json",
     ".codex/handoffs/V03-005/tests.md",
     ".codex/handoffs/V03-005/windows-entry-research/.gitattributes",
     ".codex/handoffs/V03-005/windows-entry-research/evidence.json",
@@ -676,10 +693,11 @@
       "Single-consent runner: 13 frozen manifest entries independently checked, Release zero warnings and 14 offline checks; one actual UAC launch supported two complete 60s captures and status queries without another UAC prompt. Owner 81e86dc raw artifact digests 11/11 verified before integration. Final Return only was inside the second trace; Explorer entry remains unaccepted.",
       "Windows-priority official research: fixed Microsoft sample434f6002 and public API contracts reviewed; two same-registration isolated entry forms both bind the original proof DLL/CLSID and enumerate one child. Runtime observer/10-second wrapper reviewed; no GUI or production source change, no G1 closure.",
       "Windows active-view/native-Browse and official controls f7958b0 integrated;106 immutable receipt digests checked. Official18 source blobs and unmodifiedF298 DLL build/export/independent factory verified. Synthetic-only DbgEng normal/cancel final controls passed; no real target debugger support or production Shell activation.",
-      "e657813 registration-before-process control integrated;18 immutable artifact hashes and final diff reviewed. Only evidence/state updated, no product dependency or interface change."
+      "e657813 registration-before-process control integrated;18 immutable artifact hashes and final diff reviewed. Only evidence/state updated, no product dependency or interface change.",
+      "Restricted target observer:16-file runtime manifest independently verified; normal/cancel each3 API/context/HRESULT pairs, target-owned first-chance handling, six breakpoint removals, detach/liveness/no-debugger/cooperative exit checked.19 pure parser/ID/frame-predicate controls are not19 GUI cases. Archived source is diagnostic-only; no production dependency or permission change."
     ],
     "technical_debt": [
-      "Registration-before-new-Explorer control completed: registration02:25:12Z preceded PID24488 creation02:25:32Z; actual SDK/ThisPC positives passed, official entry absent, one Browse blocked by no-association modal with no returned HRESULT. All owned registration/windows cleaned. Root cause remains unknown; shared broker cold start was not established. Scoped debugger adapter is in synthetic development; actual attachment not performed.",
+      "Explorer original/official and register-before-new-process controls remain unsuccessful. Restricted three-API observer synthetic validation and review completed; one real owned-target observation delegated, results pending. No hard native-call timeout/crash-cleanup guarantee; only owned disposable test process allowed.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]

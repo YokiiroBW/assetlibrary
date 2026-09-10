@@ -1,0 +1,14 @@
+{"kind":"owned_target","pid":22220,"creationFiletime":134334823870903260,"syntheticOnly":true}
+{"kind":"stage","stage":"owned_process_identity_negative_controls_passed","hr":"0x00000000","tick":247834750}
+{"kind":"stage","stage":"only_this_process_and_detach_on_exit_verified","hr":"0x00000000","tick":247834890}
+{"kind":"stage","stage":"fixed_api_export_resolve","hr":"0x80004005","tick":247834890}
+{"kind":"stage","stage":"synthetic_capture_failed","hr":"0x80004005","tick":247834890}
+{"kind":"stage","stage":"cleanup_status_query","hr":"0x00000000","tick":247834890}
+{"kind":"cleanup_execution_state","status":6}
+{"kind":"cleanup_target_context","pidHr":"0x00000000","ownedPidMatch":true,"countHr":"0x00000000","processCount":1}
+{"kind":"stage","stage":"cleanup_paused_owned_identity","hr":"0x00000000","tick":247834890}
+{"kind":"stage","stage":"remaining_breakpoints_zero","hr":"0x00000000","tick":247834890}
+{"kind":"stage","stage":"detach_owned_target","hr":"0x00000000","tick":247834906}
+{"kind":"stage","stage":"synthetic_alive_heartbeats_and_no_debugger","hr":"0x80004005","tick":247837921}
+{"kind":"stage","stage":"synthetic_target_cooperative_exit","hr":"0x00000000","tick":247837953}
+{"kind":"result","mode":"normal","passed":false,"matchedEntries":0,"matchedReturns":0,"nonMatchingDiscarded":0,"finiteWaitTimeouts":0,"exitInterruptObserved":false,"attachCompleted":true,"cleanupVerified":true,"targetAliveAfterDetach":false,"existingProcessAttached":false,"tick":247837953}

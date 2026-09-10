@@ -1,0 +1,16 @@
+{"kind":"owned_target","pid":26068,"creationFiletime":134334822996394047,"syntheticOnly":true}
+{"kind":"stage","stage":"owned_process_identity_negative_controls_passed","hr":"0x00000000","tick":247747312}
+{"kind":"stage","stage":"only_this_process_and_detach_on_exit_verified","hr":"0x00000000","tick":247747468}
+{"kind":"stage","stage":"initial_break_deadline","hr":"0x80004005","tick":247752546}
+{"kind":"stage","stage":"synthetic_capture_failed","hr":"0x80004005","tick":247752546}
+{"kind":"stage","stage":"cleanup_status_query","hr":"0x00000000","tick":247752546}
+{"kind":"cleanup_execution_state","status":1}
+{"kind":"cleanup_target_context","pidHr":"0x8000FFFF","ownedPidMatch":false,"countHr":"0x00000000","processCount":1}
+{"kind":"stage","stage":"cleanup_resume_wait_state","hr":"0x80070005","tick":247752546}
+{"kind":"stage","stage":"cleanup_interrupt","hr":"0x00000000","tick":247752546}
+{"kind":"stage","stage":"cleanup_paused_owned_identity","hr":"0x00000000","tick":247752546}
+{"kind":"stage","stage":"remaining_breakpoints_zero","hr":"0x00000000","tick":247752546}
+{"kind":"stage","stage":"detach_owned_target","hr":"0x00000000","tick":247752562}
+{"kind":"stage","stage":"synthetic_alive_heartbeats_and_no_debugger","hr":"0x80004005","tick":247755562}
+{"kind":"stage","stage":"synthetic_target_cooperative_exit","hr":"0x00000000","tick":247755593}
+{"kind":"result","mode":"normal","passed":false,"matchedEntries":0,"matchedReturns":0,"nonMatchingDiscarded":0,"finiteWaitTimeouts":46,"exitInterruptObserved":false,"attachCompleted":true,"cleanupVerified":true,"targetAliveAfterDetach":false,"existingProcessAttached":false,"tick":247755593}

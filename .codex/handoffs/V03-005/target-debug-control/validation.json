@@ -1,0 +1,17 @@
+{
+  "kind": "restricted_real_adapter_preparation_synthetic_validation",
+  "build": {"compiler": "MSVC x64 14.44.35207", "sdk": "10.0.26100.0", "warnings": 0, "errors": 0, "exit": 0},
+  "offline": {"log": "offline-01.jsonl", "passed": 19, "type": "pure plan parser, ID and frame-predicate controls; unchanged logic", "realGuiIdentityScenarios": 0},
+  "finalRuns": [
+    {"mode": "normal", "log": "normal-final.jsonl", "pid": 8488, "creationFiletime": "134334825403502182", "exit": 0, "matchingEntries": 3, "matchingReturns": 3, "discardedNonmatches": 3, "finiteWaitTimeouts": 0, "passed": true},
+    {"mode": "cancel", "log": "cancel-final.jsonl", "pid": 8492, "creationFiletime": "134334825406880515", "exit": 0, "matchingEntries": 3, "matchingReturns": 3, "discardedNonmatches": 3, "finiteWaitTimeouts": 14, "exitInterruptObserved": false, "passed": true}
+  ],
+  "actualApis": ["CoCreateInstance", "CoCreateInstanceEx", "CoGetClassObject"],
+  "eachApiExpectedObserved": {"clsctx": 1, "hresult": "0x80040154"},
+  "verifiedInBoth": ["new owned synthetic process", "target-resolved three API addresses cross-checked", "correct creation positive and exact mismatch negative", "real-image admission rejects synthetic image", "ONLY_THIS_PROCESS and DETACH_ON_EXIT readback", "entry/return pairing by thread and expected stack", "target own first-chance handler executes", "six breakpoints removed and remaining count zero", "DetachProcesses succeeds", "target heartbeat/internal+external no-debugger checks after detach", "cooperative target exit zero"],
+  "notExecuted": ["--run-plan", "real Explorer or other existing process attachment", "real frame admission", "GUI operation", "registry mutation", "policy mutation", "UAC", "ETW", "debugger hard kill", "target termination"],
+  "pendingRealValidation": ["plan file/single-use/named-cancel lifecycle", "fresh owned Explorer SID/session/frame admission", "real three-API observations", "real target detach and survival"],
+  "limits": ["capture loop maximum 60 seconds; native Attach/Detach are not hard-time-bounded", "first-event safety-option gap remains", "crash/deadlock breakpoint cleanup unproved", "no events is not proof of no activation attempt", "no DLL-load observation in this milestone", "frame ownership is authorized by GUI owner plan; the helper cannot infer human provenance"],
+  "preservedToolDevelopmentFailures": ["normal-01.jsonl", "normal-02.jsonl"],
+  "priorUnchangedSyntheticDirectory": "../explorer-debug-control"
+}

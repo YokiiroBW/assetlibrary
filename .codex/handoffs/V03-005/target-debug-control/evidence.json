@@ -1,0 +1,75 @@
+{
+  "recordedUtc": "2026-09-10T03:00:35.710098+00:00",
+  "status": "synthetic_preparation_reviewed_real_run_delegated_separately",
+  "manifest_files_independently_verified": 16,
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "2c0dc30834fd6798df0074ede788669d3d407476a0040d9d87aa390560dfe9c2"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "9c62e39be8a39c880a9bbded36c293f3cebce20793e60ca413657d8ca87998fa"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "df6fad2d559aa28eecc2a4f2e8a95e1cb43e0783d16252b1ac0c64cd85c27ef2"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "cf186b2eef05a9891d68973ac2fe38987c9b029ce2da9bd63636a0764ff7c760"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "03db61b9030ec20b527fc3e272c0bc9418839c7588c649fe8e25bd35b2fa6fd6"
+    },
+    {
+      "file": "README.md",
+      "sha256": "9b37d1016233d34aac8495e133b88670e1045f8934467c0725708083ffe00a0d"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "255df8950dfa1db0f1b803d7f9fdc166a90c4eda37ec0a8892cadfb5c73c5a99"
+    },
+    {
+      "file": "cleanup-check.json",
+      "sha256": "7f888a3b724d4878a08abd1101816abd56d6f8d6f331dd53ddc2f9907d74eddd"
+    },
+    {
+      "file": "cancel-final.jsonl",
+      "sha256": "a186e494a68068cc0ceec5199b57f4205f662f0eedc0eb04cf935b145fde9aaa"
+    },
+    {
+      "file": "normal-01.jsonl",
+      "sha256": "d6b1c62cfd823921e37772e93f95f67b680b23d26eb84c2c57d03e0513b9f32c"
+    },
+    {
+      "file": "normal-02.jsonl",
+      "sha256": "32f54476db094089f895fa129f027e7a6d824131dcf25131b4e125aef06797f4"
+    },
+    {
+      "file": "normal-03.jsonl",
+      "sha256": "5661862a359dbf0b8d4af76b9c368219a3e9ec7525179f26fadc58a919e98330"
+    },
+    {
+      "file": "normal-final.jsonl",
+      "sha256": "00b087e50d91c1eca32ec6c5bdac7958acffc29f1edf5f0269822ffd43862f41"
+    },
+    {
+      "file": "offline-01.jsonl",
+      "sha256": "bec0e7271cf8c0084c773ee4a784a3c4f03133890b2d1507f0a3f31a5936d193"
+    },
+    {
+      "file": "manifest.json",
+      "sha256": "21fa0b686f346a20b732a1d4c520f29a230da4eb43443b24c0500ec55efd8c78"
+    }
+  ],
+  "source_review": "Fixed single-use plan, new exclusive Explorer PID/creation/SID/session/frame admission; fixed three-API CLSID filtering and thread/stack return pairing; safe first-event flags before UI admission; bounded cooperative cleanup, no kill/elevation; normal/cancel and first-chance preservation reviewed.",
+  "real_gui_owner": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+  "real_result_included": false,
+  "limits": [
+    "No guarantee on hard native Attach/Detach duration or debugger crash cleanup.",
+    "No matching API event does not prove no activation; no DLL-load tracing.",
+    "Tool synthetic validation is not a Windows product gate."
+  ]
+}
