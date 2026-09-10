@@ -979,7 +979,7 @@
       "a118fbe controlled comparison integrated1d00321;25 raw digests verified,46 successful same-mask queries across two fresh processes and identical22B enum/parsed PIDLs with stable before/after hashes. Actual Explorer discrepancy remains; no root-cause/release claim. All registered task sites clean. Cold-session plan is unexecuted pending scope confirmation."
     ],
     "technical_debt": [
-      "Windows entry remains unaccepted. Controlled source/mask/order comparison leaves a real Explorer classification discrepancy; specific cause unknown. Cold-session test would affect original windows/taskbar and awaits explicit user confirmation. Background Explorer residency after owned-window closure is recorded separately from UI/registry cleanup.",
+      "Windows entry remains unaccepted. Controlled comparison leaves an Explorer classification discrepancy. User approved the two-restart cold-session plan; fresh preflight and scoped restart-tool review are in progress, not execution evidence. Background Explorer residency is distinguished from UI/registry cleanup.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]
