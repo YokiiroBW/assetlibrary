@@ -1,0 +1,90 @@
+{
+  "RecordedAtUtc": "2026-09-10T02:22:32.460673+00:00",
+  "OriginalDllSha256": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+  "HiddenDiscoveryCount": 3,
+  "VisibleDiscoveryCount": 3,
+  "OfficialMatchedBoth": true,
+  "RequestedAttributes": "28180000",
+  "ReturnedAttributes": "20000000",
+  "DirectBindingMatchedOfficial": true,
+  "GuiRegisterFirstControlComplete": false,
+  "InterruptedAfterSdkPositive": true,
+  "Artifacts": [
+    {
+      "File": "build.log.txt",
+      "Sha256": "6FB432B933E08E6A2F72694741C8EFCC3274B06B0F6ACCF46F982AD52CA6452F"
+    },
+    {
+      "File": "CMakeLists.txt.txt",
+      "Sha256": "AC1AED026B1A19E7712F5FF91A881AF58F797363534250EC2200D2BD73197E79"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "36FA47BFD737B1C8253E5187246A25B0C9C28EB3863CFADF7F769E5D6448C8E4"
+    },
+    {
+      "File": "hidden-bind.json",
+      "Sha256": "4F99D39D47B7D50C62AB49833C82C181F4AD89C3898761CE7C18A61A312E47A4"
+    },
+    {
+      "File": "hidden-cleanup.json",
+      "Sha256": "FF81D7F58FDC1D4E684A8DE78B44BA12D855A35F85DF28558DD26F8C6BA34562"
+    },
+    {
+      "File": "hidden-discover.json",
+      "Sha256": "87672309F09C9BC51579C689F5D7CBCCB50B502837572E5C051CB8EFC708483F"
+    },
+    {
+      "File": "hidden-final-cleanup.json",
+      "Sha256": "863D7D152461654422A41F71A2BE4CA1C3A5E2AF198F448E97433BFC51655AC0"
+    },
+    {
+      "File": "hidden-register.json",
+      "Sha256": "2A241AC9C8CF2D2D584E413A5E2E7DF8F0DBE13ABC4AAF6629D20F2F1131896E"
+    },
+    {
+      "File": "ParentControl.cpp.txt",
+      "Sha256": "2D14E0463BE59329962FBABF0096B777CEC81D2766035594ABAB47F9AAE16404"
+    },
+    {
+      "File": "ParentVisible.cpp.txt",
+      "Sha256": "D59E9757773202AF32D19E7A69D59BD4AF2B94130403E3C5A1A467C63E85E9EC"
+    },
+    {
+      "File": "run.ps1.txt",
+      "Sha256": "7313678A76DB6352E0C775BD1FDD957DAFAD7E7712FB54D42A60A7D9ED1EAAAA"
+    },
+    {
+      "File": "visible-build.log.txt",
+      "Sha256": "419A60133E459E2389569DBD1D5BCEBFA42A9B9E4728D2024BCA36D9E9D6AAC5"
+    },
+    {
+      "File": "visible-cleanup.json",
+      "Sha256": "0B0E51CB8A86B7B6D42F4D4F378D19E168CA2447D4DCD0E67EB3BACC5FBDC000"
+    },
+    {
+      "File": "visible-identity.json",
+      "Sha256": "23CA7FCB1F9FF0CFE941BD7C29F693FF502AFC07C930F3323B86C8E4FAB6760E"
+    },
+    {
+      "File": "visible-register.json",
+      "Sha256": "871D4CD394CF649227E234D0BE4A4506BEA40202F09505C812C8D5550AD8ADA9"
+    },
+    {
+      "File": "visible-resumption.json",
+      "Sha256": "4103E06A80837A008E2EB7510089519CB495FCA2E81E5E19C4DFA76EE150EBE7"
+    },
+    {
+      "File": "visible-sdk-baseline.json",
+      "Sha256": "93C7223694DC57E24C9044C5A4ED5949FA43045EF69E2E0E9210109A37E9CA52"
+    },
+    {
+      "File": "visible-visible-enumeration.json",
+      "Sha256": "1B8532B44D8A154B5112A3D549254757542AE2A57652318A72C8625D50D03C6A"
+    },
+    {
+      "File": "visible-window-cleanup.json",
+      "Sha256": "20CC2D0CCCCA5181AC70F30421C517C7F00892D71FE838EDB0C9CD685477F244"
+    }
+  ]
+}

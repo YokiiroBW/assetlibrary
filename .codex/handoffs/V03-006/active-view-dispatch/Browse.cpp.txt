@@ -1,0 +1,125 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <exdisp.h>
+#include <servprov.h>
+#include <wrl/client.h>
+#include <cstdio>
+#include <cwchar>
+#include <cerrno>
+#include <cstring>
+#include <memory>
+
+using Microsoft::WRL::ComPtr;
+constexpr wchar_t kSdk[] = L"C:\\Program Files (x86)\\Windows Kits\\10";
+constexpr wchar_t kTarget[] = L"C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof.{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}";
+constexpr CLSID kProof = {0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+struct FreePidl {
+  using pointer = PIDLIST_ABSOLUTE;
+  void operator()(pointer p) const { CoTaskMemFree(p); }
+};
+using Pidl = std::unique_ptr<ITEMIDLIST, FreePidl>;
+
+void Stage(const char* name, HRESULT hr) {
+  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"tick\":%llu,\"observerPid\":%lu,\"proofLoadedInObserver\":%s}\n",
+      name, static_cast<unsigned long>(hr), GetTickCount64(), GetCurrentProcessId(),
+      GetModuleHandleW(L"AssetLibraryExplorerProof.dll") ? "true" : "false");
+}
+bool Number(const wchar_t* s, unsigned long long* out) {
+  if (!s || !*s) return false;
+  for (auto p = s; *p; ++p) if (*p < L'0' || *p > L'9') return false;
+  errno = 0; wchar_t* end = nullptr; *out = std::wcstoull(s, &end, 10);
+  return errno != ERANGE && end && !*end && *out != 0;
+}
+HRESULT Identity(HWND window, DWORD expectedPid, unsigned long long expectedCreation) {
+  DWORD actualPid = 0;
+  if (!IsWindow(window) || !GetWindowThreadProcessId(window, &actualPid) || actualPid != expectedPid)
+    return HRESULT_FROM_WIN32(ERROR_INVALID_WINDOW_HANDLE);
+  HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, expectedPid);
+  if (!process) return HRESULT_FROM_WIN32(GetLastError());
+  FILETIME created{}, exited{}, kernel{}, user{};
+  wchar_t image[MAX_PATH]{}; DWORD chars = ARRAYSIZE(image);
+  const bool timesOk = GetProcessTimes(process, &created, &exited, &kernel, &user) != FALSE;
+  const bool imageOk = QueryFullProcessImageNameW(process, 0, image, &chars) != FALSE;
+  CloseHandle(process);
+  const unsigned long long creation = (static_cast<unsigned long long>(created.dwHighDateTime) << 32) | created.dwLowDateTime;
+  wchar_t expectedImage[MAX_PATH]{};
+  const UINT length = GetWindowsDirectoryW(expectedImage, ARRAYSIZE(expectedImage));
+  if (!length || length >= ARRAYSIZE(expectedImage) || wcscat_s(expectedImage, L"\\explorer.exe") != 0) return E_FAIL;
+  return timesOk && imageOk && creation == expectedCreation && _wcsicmp(image, expectedImage) == 0
+      ? S_OK : HRESULT_FROM_WIN32(ERROR_INVALID_OWNER);
+}
+
+int Inspect(HWND window, DWORD processId, unsigned long long creation, unsigned long long deadline) {
+  HRESULT hr = Identity(window, processId, creation); Stage("identity.before", hr);
+  if (FAILED(hr)) return 1;
+  ComPtr<IShellWindows> windows;
+  hr = CoCreateInstance(CLSID_ShellWindows, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&windows)); Stage("shellWindows", hr);
+  if (FAILED(hr)) return 1;
+  long count = 0; hr = windows->get_Count(&count); Stage("windowCount", hr);
+  if (FAILED(hr) || count < 0 || count > 64) return 2;
+  unsigned int matches = 0, unreadable = 0;
+  ComPtr<IWebBrowserApp> target;
+  for (long index = 0; index < count; ++index) {
+    VARIANT position{}; position.vt = VT_I4; position.lVal = index;
+    ComPtr<IDispatch> dispatch;
+    hr = windows->Item(position, &dispatch);
+    if (hr == S_FALSE) continue;
+    if (FAILED(hr) || !dispatch) { ++unreadable; continue; }
+    ComPtr<IWebBrowserApp> browser;
+    hr = dispatch.As(&browser);
+    if (FAILED(hr)) { ++unreadable; continue; }
+    SHANDLE_PTR handle = 0; hr = browser->get_HWND(&handle);
+    if (FAILED(hr)) { ++unreadable; continue; }
+    if (reinterpret_cast<HWND>(handle) == window) { ++matches; target = browser; }
+  }
+  long afterCount = 0; hr = windows->get_Count(&afterCount);
+  std::printf("{\"shellWindowCount\":%ld,\"targetMatches\":%u,\"unreadableEntries\":%u,\"countStable\":%s}\n",
+      count, matches, unreadable, SUCCEEDED(hr) && count == afterCount ? "true" : "false");
+  if (matches != 1 || unreadable || FAILED(hr) || count != afterCount) return 2;
+  hr = Identity(window, processId, creation); Stage("identity.beforeView", hr); if (FAILED(hr)) return 1;
+  ComPtr<IServiceProvider> services; hr = target.As(&services); Stage("serviceProvider", hr); if (FAILED(hr)) return 3;
+  ComPtr<IShellBrowser> shell; hr = services->QueryService(SID_STopLevelBrowser, IID_PPV_ARGS(&shell)); Stage("topLevelBrowser", hr); if (FAILED(hr)) return 3;
+  ComPtr<IShellView> view; hr = shell->QueryActiveShellView(&view); Stage("activeShellView", hr); if (FAILED(hr) || !view) return 3;
+  HWND viewWindow = nullptr; hr = view->GetWindow(&viewWindow); Stage("viewWindow", hr);
+  DWORD viewPid = 0; if (viewWindow) GetWindowThreadProcessId(viewWindow, &viewPid);
+  const bool belongs = viewWindow && IsChild(window, viewWindow) && viewPid == processId;
+  std::printf("{\"viewWindowBelongsToTarget\":%s}\n", belongs ? "true" : "false");
+  if (FAILED(hr) || !belongs) return 2;
+  ComPtr<IFolderView> folderView; hr = view.As(&folderView); Stage("folderView", hr); if (FAILED(hr)) return 3;
+  ComPtr<IPersistFolder2> folder; hr = folderView->GetFolder(IID_PPV_ARGS(&folder)); Stage("getFolder", hr); if (FAILED(hr) || !folder) return 3;
+
+  CLSID clsid{}; hr = folder->GetClassID(&clsid); Stage("sdkClassId", hr); if (FAILED(hr)) return 3;
+  wchar_t classText[40]{}; if (!StringFromGUID2(clsid, classText, ARRAYSIZE(classText))) return 3;
+  std::printf("{\"sdkClassId\":\"%ls\"}\n", classText);
+  PIDLIST_ABSOLUTE currentRaw = nullptr; hr = folder->GetCurFolder(&currentRaw); Pidl current(currentRaw); Stage("sdkCurrentFolder", hr);
+  wchar_t physical[1024]{};
+  const bool sdkMatches = SUCCEEDED(hr) && current && SHGetPathFromIDListEx(current.get(), physical, ARRAYSIZE(physical), GPFIDL_DEFAULT) && _wcsicmp(physical, kSdk) == 0;
+  std::printf("{\"currentViewMatchesSdk\":%s}\n", sdkMatches ? "true" : "false");
+  if (!sdkMatches) return 2;
+  PIDLIST_ABSOLUTE targetRaw = nullptr;
+  Stage("externalTargetParse.before", S_OK);
+  hr = SHParseDisplayName(kTarget, nullptr, &targetRaw, 0, nullptr); Pidl targetPidl(targetRaw); Stage("externalTargetParse.after", hr);
+  if (FAILED(hr) || !targetPidl) return 3;
+  const UINT bytes = ILGetSize(targetPidl.get()); if (!bytes || bytes > 16384) return 3;
+  FILETIME now{}; GetSystemTimeAsFileTime(&now);
+  const unsigned long long nowValue = (static_cast<unsigned long long>(now.dwHighDateTime) << 32) | now.dwLowDateTime;
+  if (nowValue >= deadline || deadline - nowValue < 200000000ULL) { Stage("deadline", HRESULT_FROM_WIN32(ERROR_TIMEOUT)); return 5; }
+  hr = Identity(window, processId, creation); Stage("identity.beforeBrowse", hr); if (FAILED(hr)) return 1;
+  constexpr UINT flags = SBSP_SAMEBROWSER | SBSP_ABSOLUTE;
+  SYSTEMTIME utc{}; GetSystemTime(&utc);
+  std::printf("{\"browseSubmitUtc\":\"%04u-%02u-%02uT%02u:%02u:%02u.%03uZ\",\"inputPidlBytes\":%u,\"flags\":%u,\"inputSource\":\"external SHParseDisplayName of the same owned filesystem path\"}\n",
+      utc.wYear, utc.wMonth, utc.wDay, utc.wHour, utc.wMinute, utc.wSecond, utc.wMilliseconds, bytes, flags);
+  hr = shell->BrowseObject(targetPidl.get(), flags); Stage("browse.return", hr);
+  const bool browseOk = SUCCEEDED(hr);
+  hr = Identity(window, processId, creation); Stage("identity.afterBrowse", hr);
+  return browseOk && SUCCEEDED(hr) ? 0 : 3;
+}
+int wmain(int argc, wchar_t** argv) {
+  setvbuf(stdout, nullptr, _IONBF, 0);
+  static_assert(sizeof(void*) == 8);
+  unsigned long long window = 0, process = 0, creation = 0, deadline = 0;
+  if (argc != 5 || !Number(argv[1], &window) || !Number(argv[2], &process) || process > MAXDWORD || !Number(argv[3], &creation) || !Number(argv[4], &deadline)) return 4;
+  HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED); Stage("comInit", hr); if (FAILED(hr)) return 4;
+  const int result = Inspect(reinterpret_cast<HWND>(window), static_cast<DWORD>(process), creation, deadline);
+  CoUninitialize(); return result;
+}

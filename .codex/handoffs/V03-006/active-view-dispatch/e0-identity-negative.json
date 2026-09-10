@@ -1,0 +1,13 @@
+{
+  "Label": "identity-negative",
+  "StartedUtc": "2026-09-09T16:05:36.4510790+00:00",
+  "CompletedUtc": "2026-09-09T16:05:36.4728502+00:00",
+  "ObserverPid": 31184,
+  "TargetPid": 36676,
+  "Stage": "sdk",
+  "CreationOverrideUsed": true,
+  "ExitCode": 1,
+  "TimedOut": false,
+  "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"tick\":208982812,\"observerPid\":31184,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"identity.before\",\"hr\":\"8007051b\",\"tick\":208982812,\"observerPid\":31184,\"proofLoadedInObserver\":false}\r\n",
+  "Stderr": ""
+}

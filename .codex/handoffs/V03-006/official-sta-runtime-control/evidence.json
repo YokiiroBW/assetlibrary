@@ -1,0 +1,96 @@
+{
+  "RecordedAtUtc": "2026-09-09T17:24:18.7337673+00:00",
+  "OriginalDllSha256": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+  "SameInprocPathAsPrevious": true,
+  "RegistrationFieldsMatched": 11,
+  "StaNotificationBeforeDiscoveryAndBrowse": true,
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "BrowseReturnedHresult": false,
+  "ActualViewRemainedThisPc": true,
+  "TargetSampleModuleObserved": false,
+  "Cleaned": true,
+  "ScopeNote": "Actual view readbacks occurred with owned error modal still present; later post-dismissal UI record is after cleanup",
+  "Artifacts": [
+    {
+      "File": "actual-view-thispc.json",
+      "Sha256": "BDF5B2DA8C60720446E21AFF39B68294D38436024E45539B6DC0955916906BF6"
+    },
+    {
+      "File": "actual-view-versus-official.json",
+      "Sha256": "B1658952FC96BF39673119941C174DE62B20A1EE6885DF41AD153F816A39DA1F"
+    },
+    {
+      "File": "after-browse.json",
+      "Sha256": "6CC6E433A180FC145592B6771D48025EC9B6391DA06AEA6128A0ECE4B33360F6"
+    },
+    {
+      "File": "after-view-readback.json",
+      "Sha256": "B677428E180E80498E550546D13C168B2E9DF5AF468EC3AC063C7B8116872A7E"
+    },
+    {
+      "File": "before-browse.json",
+      "Sha256": "67AA651B261B3BF41EB686C9EF8767A0ED5C2BF0A85CB7426C440D4526290441"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "C53322E7F035A43233995F666977A4DF237FA47BAE9DC1C844C97DE7B27E071E"
+    },
+    {
+      "File": "discovery.json",
+      "Sha256": "83276EA7F640A5FC373C228F600853899EEE4FC8C2F33903058B70BAD19DA0ED"
+    },
+    {
+      "File": "error-dialog.json",
+      "Sha256": "14D742D71A581C58AABE8EC702396903697A9478329F4FE80500D798977B404C"
+    },
+    {
+      "File": "fields-readback.json",
+      "Sha256": "EE8A6BB2E7EF720678454D45865ECDFB3BBA76EBABE70D530168A8AD3D516575"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "A1057F7BC4122109A98D7ACD33EE05991F607DE46BFD2233D0D882D0A3BEEF82"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "36FA47BFD737B1C8253E5187246A25B0C9C28EB3863CFADF7F769E5D6448C8E4"
+    },
+    {
+      "File": "identity.json",
+      "Sha256": "16937E7A41446BCF9BEC28D25E96D2FA8BD3BE189F5341945663E4E8A8637F49"
+    },
+    {
+      "File": "official-browse-call.json",
+      "Sha256": "C7FEFA9D78BE72A221D767CDC6B525AE7DB0FB2AD6F88FA59828B685B9C6FC9C"
+    },
+    {
+      "File": "preflight.json",
+      "Sha256": "49FA797D519D2971A9413680CD4B7A86F5D238CAEE10C1513A1C07BA44879864"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "A68A971ACB9040C04695C1C5C4E1BADCF6A8E64890FE1837E14AF5B193EEFFAD"
+    },
+    {
+      "File": "run-sta.ps1.txt",
+      "Sha256": "40E9E06523A007D8D53C29E3C6E8216F9C259CC3A19A67A987B84110694891AD"
+    },
+    {
+      "File": "thispc-baseline.json",
+      "Sha256": "E103693F241A79CFF578D772E299D6144F6CFD013B48F6A6599EFD01AAAA20CF"
+    },
+    {
+      "File": "ui-after-error-closed.json",
+      "Sha256": "8F5DA5D9132CF20E8283138A32C0A2646C3AAA3FEDF6094E83A42D361BC9AD56"
+    },
+    {
+      "File": "window-cleanup.json",
+      "Sha256": "8982699E74805D22FD261471BBD7FEA6B4E40F3BF8EE77AC9059C76A300C75A6"
+    },
+    {
+      "File": "validation.json",
+      "Sha256": "4CF36958E71113687694CBCA93D15AEC54244C99829B76B45B0CAAD88A61774F"
+    }
+  ]
+}

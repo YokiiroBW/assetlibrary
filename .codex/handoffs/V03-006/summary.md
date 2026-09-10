@@ -1,5 +1,11 @@
 # V03-006 — Explorer 入口诊断交接
 
+恢复检查点：[独立父级发现](parent-discovery-control.md)已证明含/不含hidden都3项含官方，匹配项不HIDDEN/NONENUMERATED，独立绑定正控成功。旧“先注册后新进程”只完成SDK正控，ThisPC/目标步骤因额度中断未发生，不能计失败；旧注册已到期清理，旧自有窗在新鲜身份核对后关闭。接下来只完成此唯一未完控制，既有E0/Browse/官方两轮保持原证据。
+
+最新：[正确STA通知后的官方完整控制](official-sta-runtime-control.md)仍未发现/打开样例；一次原生打开在“无关联应用”模态阻塞到10秒外限，实际view仍ThisPC/2项，目标未观察到样例模块。F298原DLL与11原字段不变，通知及清理均真实成功，现场已清理。此前[通知未执行那轮](official-runtime-control.md)独立保留，不能混作同一前置。现需目标内精确激活/加载证据，未盲改本体接口，G1保持partial。
+
+最新稳定结果：[真实活动view与原生BrowseObject对照](active-view-dispatch.md)已完成。两项实际目标view均为Shell File System Folder、路径匹配、0项，observer和目标Explorer均未加载proof；原生BrowseObject虽S_OK也未激活扩展。SDK正控及创建时间负控验证了观察匹配。两轮guard/空目录/测试窗口均清理，原用户窗口保留；证据指向分派层，未修改原DLL实现或自动切换官方注册。G1仍partial。
+
 本轮最新：[官方固定提交对照研究](official-sample-review.md)已完成，[相同注册下的两路径绑定](path-bind-comparison.md)均实际绑定原CLSID并枚举1项，DLL均在Bind阶段出现。原注册/目录已清理，未运行GUI；下一优先项是E0真实活动view的Folder/PIDL身份，不继续猜测接口或属性。官方源17份通过Git blob核验，缺Category.cpp，官方样例未构建/注册/运行。G1仍partial。
 
 最新：[第五轮用户态ETW对齐](explorer-user-trace-aligned.md)进行了两次GUI提交，首次晚于捕获结束、第二次最终Return有效对齐（预填除外）。两次均为空目录，三个计划进程无proof DLL/trace；主协调报告有效捕获仅见control、无目标COM/UserLoader失败事件，不能据此断定未尝试加载。注册/空目录/测试窗口已清理，原窗口和管理员控制台保留。G1仍未完成，不继续接口/注册试探。

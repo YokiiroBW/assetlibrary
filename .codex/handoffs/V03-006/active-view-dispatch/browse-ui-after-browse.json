@@ -1,0 +1,11 @@
+{
+  "utc": "2026-09-09T16:20:17.068Z",
+  "ownWindowId": 49349910,
+  "lines": [
+    "Window: \"C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof - 文件资源管理器\", App: explorer.exe.",
+    "\t\t\t\t\t\t254 文本 0 个项目 Description: 项目总数 ID: PropertyValue",
+    "\t\t\t\t\t\t266 文本 此文件夹为空。 ID: EmptyTextFocusable",
+    "\t\t\t\t\t\t129 选项卡项目 (selectable) C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\sandbox-storage\\AssetLibraryProof"
+  ],
+  "screenshotUsed": false
+}

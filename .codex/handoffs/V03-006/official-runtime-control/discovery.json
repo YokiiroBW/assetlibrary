@@ -1,0 +1,13 @@
+{
+  "utc": "2026-09-09T16:48:28.998Z",
+  "ownWindowId": 88280002,
+  "refresh": "F5",
+  "sampleItemObserved": false,
+  "lines": [
+    "Window: \"此电脑 - 文件资源管理器\", App: explorer.exe.",
+    "\t\t\t\t\t\t224 文本 2 个项目 Description: 项目总数 ID: PropertyValue",
+    "\t\t\t\t\t\t226 文本 选中 1 个项目 Description: 所选项目数量和大小 ID: PropertyValue",
+    "\t\t\t\t\t\t123 选项卡项目 (selectable) 此电脑"
+  ],
+  "screenshotUsed": false
+}

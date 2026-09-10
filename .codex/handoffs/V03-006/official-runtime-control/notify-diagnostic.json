@@ -1,0 +1,32 @@
+[
+  {
+    "StartedUtc": "2026-09-09T16:52:44.7705227+00:00",
+    "CompletedUtc": "2026-09-09T16:52:44.7774773+00:00",
+    "ExplicitSta": false,
+    "ManagedApartment": "MTA",
+    "BeforeApartmentHr": "00000000",
+    "BeforeApartmentType": 1,
+    "CoInitializeHr": "80010106",
+    "FolderHr": "8000000A",
+    "NotifyInvoked": false,
+    "NotifyReturned": false,
+    "Joined": true,
+    "Stage": "CoInitializeEx-returned",
+    "ElapsedMs": 0
+  },
+  {
+    "StartedUtc": "2026-09-09T16:52:44.7843827+00:00",
+    "CompletedUtc": "2026-09-09T16:52:44.7866845+00:00",
+    "ExplicitSta": true,
+    "ManagedApartment": "STA",
+    "BeforeApartmentHr": "00000000",
+    "BeforeApartmentType": 0,
+    "CoInitializeHr": "00000001",
+    "FolderHr": "00000000",
+    "NotifyInvoked": true,
+    "NotifyReturned": true,
+    "Joined": true,
+    "Stage": "SHChangeNotify-returned",
+    "ElapsedMs": 2
+  }
+]

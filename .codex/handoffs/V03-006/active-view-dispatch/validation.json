@@ -1,0 +1,13 @@
+{
+  "utc": "2026-09-09T16:27:21.640721+00:00",
+  "checks": [
+    "e0-sdk-baseline.json",
+    "e0-target-view.json",
+    "browse-sdk-baseline.json",
+    "browse-target-after-browse.json",
+    "creation mismatch refused before enumeration",
+    "single BrowseObject ordinary flags, SDK precondition and S_OK recorded separately from activation"
+  ],
+  "scope": "Readback assertions only; no extra execution",
+  "productEntryPassed": false
+}

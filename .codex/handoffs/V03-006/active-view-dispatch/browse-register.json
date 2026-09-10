@@ -1,0 +1,10 @@
+{
+  "Utc": "2026-09-09T16:19:29.8831642+00:00",
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof"
+  },
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "MaximumSeconds": 600
+}

@@ -1,0 +1,13 @@
+{
+  "RecordedUtc": "2026-09-09T17:51:54.6141570+00:00",
+  "CuaWindowId": 2885792,
+  "NativeHwnd": "2885792",
+  "Pid": 35732,
+  "CreationFileTime": "134334497879881482",
+  "CreatedUtc": "2026-09-09T17:49:47.9881482Z",
+  "RegistrationUtc": "2026-09-09T17:45:44.1920424+00:00",
+  "ProcessCreatedStrictlyAfterRegistration": true,
+  "OriginalWindowPreserved": 1247028,
+  "OtherWindowsNotOwned": "Preserve unrelated windows, including Chrome",
+  "CuaTabCount": 1
+}

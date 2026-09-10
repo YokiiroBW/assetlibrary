@@ -1,0 +1,15 @@
+{
+  "Utc": "2026-09-09T16:22:27.9274975+00:00",
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "BrowseObjectCalls": 1,
+  "Flags": "SBSP_SAMEBROWSER|SBSP_ABSOLUTE",
+  "BrowseHresult": "00000000",
+  "ActualViewRemainsSystemFilesystem": true,
+  "FurtherVariants": 0
+}

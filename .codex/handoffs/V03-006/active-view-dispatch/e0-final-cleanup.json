@@ -1,0 +1,12 @@
+{
+  "Utc": "2026-09-09T16:14:53.8010602+00:00",
+  "GuardExitCode": 0,
+  "DirectoryRemoved": true,
+  "Registration": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null
+  },
+  "EntryCount": 1,
+  "NextStep": "Approved single BrowseObject comparison will use a fresh window and new unchanged owner guard"
+}

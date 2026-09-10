@@ -1,0 +1,83 @@
+{
+  "Utc": "2026-09-09T17:16:55.0872083+00:00",
+  "FieldCount": 11,
+  "Fields": [
+    {
+      "Path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Name": "",
+      "Value": "FolderView SDK Sample",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "Name": "",
+      "Value": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260910-official-sample\\ExplorerDataProvider.dll",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "Name": "ThreadingModel",
+      "Value": "Apartment",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "Name": "",
+      "Value": "shell32.dll,-42",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "Name": "Attributes",
+      "Value": -1610612704,
+      "Kind": "DWord",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Name": "",
+      "Value": "FolderView SDK Sample",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "Name": "",
+      "Value": "C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260910-official-sample\\ExplorerDataProvider.dll",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "Name": "ThreadingModel",
+      "Value": "Apartment",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\ShellEx\\MayChangeDefaultMenu",
+      "Name": "",
+      "Value": "",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Classes\\FolderViewSampleType\\shellex\\ContextMenuHandlers\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Name": "",
+      "Value": "{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Kind": "String",
+      "Matched": true
+    },
+    {
+      "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Name": "",
+      "Value": "FolderView SDK Sample",
+      "Kind": "String",
+      "Matched": true
+    }
+  ]
+}

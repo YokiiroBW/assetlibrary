@@ -1,0 +1,41 @@
+param(
+  [Parameter(Mandatory)][ValidateSet('sdk-read','target-read','browse')][string]$Mode,
+  [Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label
+)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-browse-object'
+$identity=Get-Content -Raw (Join-Path $run 'identity.json') | ConvertFrom-Json
+$probe=if($Mode -eq 'browse'){Join-Path $PSScriptRoot 'build/Release/ExplorerBrowseControl.exe'}else{Join-Path $repo '.runtime/explorer-active-view/build/Release/ExplorerActiveView.exe'}
+$expectedHash=if($Mode -eq 'browse'){'9142AEBB468868F1655DF3108291ABD7E25964A62BC2F0B709061593A856FDB3'}else{'2F3287A25CA18D33B90DA510967F8FD34C64A1D35EE2910DD9BAA5B9589F17B8'}
+if((Get-FileHash -LiteralPath $probe).Hash -ne $expectedHash){throw 'Unexpected executable hash'}
+$lastArgument=if($Mode -eq 'sdk-read'){'sdk'}else{'target'}
+if($Mode -eq 'browse') {
+  $registration=& (Join-Path $repo 'tests/windows-shell/registration.ps1') -Action verify | ConvertFrom-Json
+  if(-not $registration.ClassPresent -or -not $registration.NamespacePresent){throw 'Guard not active'}
+  if((Get-FileHash -LiteralPath (Join-Path $run 'AssetLibraryExplorerProof.dll')).Hash -ne '0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15'){throw 'DLL hash mismatch'}
+  $started=[DateTimeOffset](Get-Content -Raw (Join-Path $run 'register.json') | ConvertFrom-Json).Utc
+  $deadline=$started.AddSeconds(600)
+  if([DateTimeOffset]::UtcNow.AddSeconds(25) -ge $deadline){throw 'Insufficient original guard lifetime'}
+  $lastArgument=$deadline.UtcDateTime.ToFileTimeUtc().ToString()
+  New-Item -ItemType File -Path (Join-Path $run 'browse-dispatched') -ErrorAction Stop | Out-Null
+}
+$start=[Diagnostics.ProcessStartInfo]::new($probe)
+$start.UseShellExecute=$false
+$start.CreateNoWindow=$true
+$start.RedirectStandardOutput=$true
+$start.RedirectStandardError=$true
+foreach($value in @([string]$identity.NativeHwnd,[string]$identity.Pid,[string]$identity.CreationFileTime,$lastArgument)){$start.ArgumentList.Add($value)}
+$child=[Diagnostics.Process]::new()
+$child.StartInfo=$start
+try {
+  $started=[DateTimeOffset]::UtcNow
+  if(-not $child.Start()){throw 'Child start failed'}
+  $childId=$child.Id
+  $stdout=$child.StandardOutput.ReadToEndAsync()
+  $stderr=$child.StandardError.ReadToEndAsync()
+  $timeout=-not $child.WaitForExit(10000)
+  if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned child failed to exit'}}
+  [ordered]@{Label=$Label;Mode=$Mode;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');ChildPid=$childId;TargetPid=$identity.Pid;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$stdout.GetAwaiter().GetResult();Stderr=$stderr.GetAwaiter().GetResult()} |
+    ConvertTo-Json -Depth 5 | Tee-Object -FilePath (Join-Path $run "$Label.json")
+} finally {$child.Dispose()}

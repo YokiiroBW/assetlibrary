@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_SYSTEM_VERSION "10.0.26100.0")
+project(ExplorerActiveView LANGUAGES CXX)
+add_executable(ExplorerActiveView ActiveView.cpp)
+target_compile_features(ExplorerActiveView PRIVATE cxx_std_17)
+target_compile_definitions(ExplorerActiveView PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(ExplorerActiveView PRIVATE /W4 /WX /permissive- /analyze /utf-8)
+target_link_libraries(ExplorerActiveView PRIVATE ole32 oleaut32 shell32 shlwapi uuid)

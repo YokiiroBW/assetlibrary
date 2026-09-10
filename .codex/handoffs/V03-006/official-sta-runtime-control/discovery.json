@@ -1,0 +1,11 @@
+{
+  "utc": "2026-09-09T17:16:55.426Z",
+  "sampleItemObserved": false,
+  "lines": [
+    "Window: \"此电脑 - 文件资源管理器\", App: explorer.exe.",
+    "\t\t\t\t\t\t234 文本 2 个项目 Description: 项目总数 ID: PropertyValue",
+    "\t\t\t\t\t\t236 文本 选中 1 个项目 Description: 所选项目数量和大小 ID: PropertyValue",
+    "\t\t\t\t\t\t129 选项卡项目 (selectable) 此电脑"
+  ],
+  "screenshotUsed": false
+}

@@ -1,0 +1,11 @@
+{
+  "utc": "2026-09-09T17:21:04.564Z",
+  "errorClosed": 24119662,
+  "lines": [
+    "Window: \"此电脑 - 文件资源管理器\", App: explorer.exe.",
+    "\t\t\t\t\t\t276 文本 2 个项目 Description: 项目总数 ID: PropertyValue",
+    "\t\t\t\t\t\t280 文本 选中 1 个项目 Description: 所选项目数量和大小 ID: PropertyValue",
+    "\t\t\t\t\t\t129 选项卡项目 (selectable) 此电脑"
+  ],
+  "scope": "After registry cleanup; earlier E0 reads occurred while owned error modal remained"
+}

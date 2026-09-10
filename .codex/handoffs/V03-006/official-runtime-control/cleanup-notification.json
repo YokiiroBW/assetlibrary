@@ -1,0 +1,11 @@
+{
+  "Utc": "2026-09-09T16:58:50.0683584+00:00",
+  "ExplicitSta": true,
+  "CoInitializeHr": "00000001",
+  "FolderHr": "00000000",
+  "NotifyInvoked": true,
+  "NotifyReturned": true,
+  "Joined": true,
+  "Stage": "SHChangeNotify-returned",
+  "ElapsedMs": 2
+}

@@ -1,0 +1,120 @@
+param([ValidateSet('run','verify')][string]$Action='verify')
+$ErrorActionPreference='Stop'
+$owner='AssetLibrary.V03-006.OfficialSampleControl.20260910'
+$rootClsid='{BA16CE0E-728C-4FC9-98E5-D0B35B384597}'
+$menuClsid='{BB8F539D-3B97-4473-9E07-C8248C53248E}'
+$dll=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'ExplorerDataProvider.dll')).Path
+$root="Software\Classes\CLSID\$rootClsid"
+$menu="Software\Classes\CLSID\$menuClsid"
+$progid='Software\Classes\FolderViewSampleType'
+$mount="Software\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\$rootClsid"
+$specs=[ordered]@{
+  $root=@{
+    ''=@{''='FolderView SDK Sample';AssetLibraryOwner=$owner}
+    'InprocServer32'=@{''=$dll;ThreadingModel='Apartment'}
+    'DefaultIcon'=@{''='shell32.dll,-42'}
+    'ShellFolder'=@{Attributes=[int]-1610612704} # A0000020
+  }
+  $menu=@{
+    ''=@{''='FolderView SDK Sample';AssetLibraryOwner=$owner}
+    'InprocServer32'=@{''=$dll;ThreadingModel='Apartment'}
+    'ShellEx'=@{}
+    'ShellEx\MayChangeDefaultMenu'=@{''=''}
+  }
+  $progid=@{
+    ''=@{AssetLibraryOwner=$owner}
+    'shellex'=@{}
+    'shellex\ContextMenuHandlers'=@{}
+    "shellex\ContextMenuHandlers\$menuClsid"=@{''=$menuClsid}
+  }
+  $mount=@{''=@{''='FolderView SDK Sample';AssetLibraryOwner=$owner}}
+}
+function Read-Presence {
+  foreach($hiveName in @('CurrentUser','LocalMachine')) {
+    $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::$hiveName,[Microsoft.Win32.RegistryView]::Registry64)
+    try {foreach($path in $specs.Keys){$key=$base.OpenSubKey($path,$false);try{[pscustomobject]@{Hive=$hiveName;Root=$path;Present=($null -ne $key);Owner=if($key){$key.GetValue('AssetLibraryOwner')}else{$null}}}finally{if($key){$key.Dispose()}}}}finally{$base.Dispose()}
+  }
+}
+function Assert-Tree($key,[string]$relative,$nodes) {
+  if(-not $nodes.ContainsKey($relative)){throw 'Foreign registry node prevents cleanup'}
+  $values=$nodes[$relative]
+  foreach($name in $key.GetValueNames()) {
+    if(-not $values.ContainsKey($name)){throw 'Foreign registry value prevents cleanup'}
+    $expected=$values[$name]
+    if($key.GetValue($name) -cne $expected){throw 'Changed registry value prevents cleanup'}
+    $kind=if($expected -is [int]){[Microsoft.Win32.RegistryValueKind]::DWord}else{[Microsoft.Win32.RegistryValueKind]::String}
+    if($key.GetValueKind($name) -ne $kind){throw 'Changed registry value type prevents cleanup'}
+  }
+  foreach($childName in $key.GetSubKeyNames()) {
+    $child=$key.OpenSubKey($childName,$false)
+    $childPath=if($relative){"$relative\$childName"}else{$childName}
+    try{Assert-Tree $child $childPath $nodes}finally{$child.Dispose()}
+  }
+}
+if($Action -eq 'verify') {@(Read-Presence) | ConvertTo-Json -Depth 5; return}
+if((Get-FileHash -LiteralPath $dll).Hash -ne 'F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96'){throw 'Official DLL hash mismatch'}
+$before=@(Read-Presence)
+[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Roots=$before} | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'preflight.json')
+if(@($before | Where-Object Present).Count){throw 'Existing official-sample root: refusing replacement'}
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
+public static class OfficialSampleRegistryControl {
+ [DllImport("advapi32.dll",CharSet=CharSet.Unicode)] static extern int RegCreateKeyEx(IntPtr key,string sub,int reserved,string cls,int options,int access,IntPtr attributes,out IntPtr result,out int disposition);
+ [DllImport("advapi32.dll")] static extern int RegCloseKey(IntPtr key);
+ [DllImport("shell32.dll")] static extern void SHChangeNotify(uint id,uint flags,IntPtr first,IntPtr second);
+ [DllImport("shell32.dll")] static extern int SHGetSpecialFolderLocation(IntPtr owner,int folder,out IntPtr pidl);
+ [DllImport("ole32.dll")] static extern int CoInitializeEx(IntPtr reserved,uint flags);
+ [DllImport("ole32.dll")] static extern void CoUninitialize();
+ public static RegistryKey CreateExclusive(string path) {
+   IntPtr key; int disposition;
+   int error=RegCreateKeyEx(new IntPtr(unchecked((int)0x80000001)),path,0,null,0,0x2011F,IntPtr.Zero,out key,out disposition);
+   if(error!=0)throw new System.ComponentModel.Win32Exception(error);
+   if(disposition!=1){RegCloseKey(key);throw new InvalidOperationException("Registry creation raced with an existing root");}
+   return RegistryKey.FromHandle(new SafeRegistryHandle(key,true),RegistryView.Registry64);
+ }
+ public static bool NotifyDrives() {
+   int status=-1;
+   var thread=new Thread(()=>{
+     try {
+       int init=CoInitializeEx(IntPtr.Zero,2); if(init<0){status=init;return;}
+       IntPtr pidl=IntPtr.Zero;
+       try {status=SHGetSpecialFolderLocation(IntPtr.Zero,17,out pidl);if(status>=0)SHChangeNotify(0x1000,0,pidl,IntPtr.Zero);}
+       finally {if(pidl!=IntPtr.Zero)Marshal.FreeCoTaskMem(pidl);CoUninitialize();}
+     } catch {status=-1;}
+   });
+   thread.IsBackground=true;thread.SetApartmentState(ApartmentState.STA);thread.Start();return thread.Join(3000)&&status>=0;
+ }
+}
+'@
+$created=[Collections.Generic.List[string]]::new()
+try {
+  foreach($path in $specs.Keys) {
+    $key=[OfficialSampleRegistryControl]::CreateExclusive($path)
+    $created.Add($path)
+    try {
+      $key.SetValue('AssetLibraryOwner',$owner,[Microsoft.Win32.RegistryValueKind]::String)
+      foreach($relative in $specs[$path].Keys) {
+        $node=if($relative){$key.CreateSubKey($relative)}else{$key}
+        try{foreach($name in $specs[$path][$relative].Keys){$value=$specs[$path][$relative][$name];$kind=if($value -is [int]){[Microsoft.Win32.RegistryValueKind]::DWord}else{[Microsoft.Win32.RegistryValueKind]::String};$node.SetValue($name,$value,$kind)}}finally{if($relative){$node.Dispose()}}
+      }
+      Assert-Tree $key '' $specs[$path]
+    } finally {$key.Dispose()}
+  }
+  $registered=[DateTimeOffset]::UtcNow
+  $notified=[OfficialSampleRegistryControl]::NotifyDrives()
+  [ordered]@{Utc=$registered.ToString('o');DeadlineUtc=$registered.AddSeconds(600).ToString('o');Owner=$owner;DllPath=$dll;DllSha256=(Get-FileHash -LiteralPath $dll).Hash;AttributesHex='A0000020';NotifyDrivesCompleted=$notified;Roots=@(Read-Presence)} | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'register.json')
+  while([DateTimeOffset]::UtcNow -lt $registered.AddSeconds(600) -and -not(Test-Path -LiteralPath (Join-Path $PSScriptRoot 'stop'))){Start-Sleep -Milliseconds 250}
+} finally {
+  $errors=[Collections.Generic.List[string]]::new()
+  $hive=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::CurrentUser,[Microsoft.Win32.RegistryView]::Registry64)
+  try {
+    for($i=$created.Count-1;$i -ge 0;$i--){$path=$created[$i];try{$key=$hive.OpenSubKey($path,$false);if(-not $key){continue};try{if($key.GetValue('AssetLibraryOwner') -cne $owner){throw 'Owner mismatch prevents cleanup'};Assert-Tree $key '' $specs[$path]}finally{$key.Dispose()};$hive.DeleteSubKeyTree($path,$false)}catch{$errors.Add($_.Exception.Message)}}
+  } finally {$hive.Dispose()}
+  $notified=[OfficialSampleRegistryControl]::NotifyDrives()
+  [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Roots=@(Read-Presence);CleanupErrors=@($errors);NotifyDrivesCompleted=$notified} | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 (Join-Path $PSScriptRoot 'cleanup.json')
+  if($errors.Count){throw 'Owned official-sample cleanup incomplete; see cleanup.json'}
+}

@@ -1,0 +1,161 @@
+{
+  "RecordedAtUtc": "2026-09-09T16:25:20.6043640+00:00",
+  "LocalBaseCommit": "38274de488ea021f34b11a0c2418df36b9496f2b",
+  "ObserverExeSha256": "2F3287A25CA18D33B90DA510967F8FD34C64A1D35EE2910DD9BAA5B9589F17B8",
+  "ControllerExeSha256": "9142AEBB468868F1655DF3108291ABD7E25964A62BC2F0B709061593A856FDB3",
+  "ProofDllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "Sdk": "10.0.26100.0",
+  "Compiler": "MSVC19.44.35228",
+  "Runtime": "/MD",
+  "OriginalObserverSourcePreserved": true,
+  "E0ActualClass": "{F3364BA0-65B9-11CE-A9BA-00AA004AE837}",
+  "BrowseActualClass": "{F3364BA0-65B9-11CE-A9BA-00AA004AE837}",
+  "BrowseObjectCalls": 1,
+  "BrowseFlags": 1,
+  "BrowseReturn": "00000000",
+  "GuiNamespaceActivationObserved": false,
+  "BothRegistrationGuardsExitCode": 0,
+  "OriginalWindowPreserved": 1247028,
+  "Artifacts": [
+    {
+      "File": "ActiveView.cpp.txt",
+      "Sha256": "046063DDF645533E4787EC61BB62C70A9E1CADD15E72EDDF56F0E86B97D18684"
+    },
+    {
+      "File": "browse-after-post-observer.json",
+      "Sha256": "6F5EAA416EF8A6DB4038FB604722B8457D4E7C1697736FBED8162628379FE78F"
+    },
+    {
+      "File": "browse-before-browse.json",
+      "Sha256": "79608EA19E8E63C1489B362BFE286456B799E14CD702EE64116115E157F0ADAC"
+    },
+    {
+      "File": "browse-before-post-observer.json",
+      "Sha256": "40E13A308458644C5916B19AA2059683FDD036F25B6ACA7EB46C1F58BC42E36F"
+    },
+    {
+      "File": "browse-browse-call.json",
+      "Sha256": "618D4B284F83C11155E7FDCB0AE729F39684CA3532CBC6D9EFB8199FE07FC16B"
+    },
+    {
+      "File": "browse-cleanup.json",
+      "Sha256": "21FDB4F52DE142AE501E61C969F7E0FFB347BB9284C0130D6DA6E6826941ECC8"
+    },
+    {
+      "File": "browse-final-cleanup.json",
+      "Sha256": "484B158FFC7274DBEB5C11E3D6AABB4219BDA0418DC1F785582C7457A049FF94"
+    },
+    {
+      "File": "browse-identity.json",
+      "Sha256": "4BA9E58E130A71910CFE785A0C521B191A3939502B630AA0CAF098AC2397C7B7"
+    },
+    {
+      "File": "browse-register.json",
+      "Sha256": "CE5725B46FA4FC1D21631CE049B48CEEB6876F80F9A809E27AC6A108E655F585"
+    },
+    {
+      "File": "browse-sdk-baseline.json",
+      "Sha256": "E0ACE1A2935AC46299D50E8FE067929984D827409A6D0764C5695DB323FE8A11"
+    },
+    {
+      "File": "browse-target-after-browse.json",
+      "Sha256": "234B52C54C6A2467AFFC62B84A1378B537D44CC7C7D0AFBE0F1880CAA45EC14D"
+    },
+    {
+      "File": "browse-ui-after-browse.json",
+      "Sha256": "AD40B0ABADD7281093B7BA7A5B379D89D6BB8344DB653185CEFD4DDFBB1EC065"
+    },
+    {
+      "File": "browse-window-cleanup.json",
+      "Sha256": "9FDCC60127A4E09C6495BB3F48632C1C0F7E3DB0BAE9C5739C2632728B67DD95"
+    },
+    {
+      "File": "Browse.cpp.txt",
+      "Sha256": "3ECD6F9E80F5089FBC64FE90544640D0B5930B88102EAD4679A0CB317694C1B2"
+    },
+    {
+      "File": "controller-build.log.txt",
+      "Sha256": "5B5E12F92095610FD11C4B20939F10F9D983CA6B82A376A6D32C90C7174D548E"
+    },
+    {
+      "File": "controller-CMakeLists.txt",
+      "Sha256": "6666EA65B6A634A312F03032BEEDB182D3030C5BD07C8558AF71A5C00B8463D9"
+    },
+    {
+      "File": "controller-run.ps1.txt",
+      "Sha256": "EC772C09A65ED8D2A245761EEF4A30A6316A1B4DDDC843DE74FD5B863B79714A"
+    },
+    {
+      "File": "e0-after-target-observer.json",
+      "Sha256": "E4ADF1D77E35AD6CB1D14B8E88B2322CC2C9CD5F43FCE0754DB235A9C0AF515C"
+    },
+    {
+      "File": "e0-before-target-observer.json",
+      "Sha256": "E2473A8BA3A7DC13EB8A8EE96FB023FE6ED1D36E22EF5C1059235DFB21D53549"
+    },
+    {
+      "File": "e0-cleanup.json",
+      "Sha256": "D31ADD23EFD5748A8BD0A8BE9ED99F6447EE53F61E1EDF5A295FE8313481BBAC"
+    },
+    {
+      "File": "e0-final-cleanup.json",
+      "Sha256": "DB1DE7987C9A3C3EE33F723542E4B57ED5FCA9EB35EB7C619F3BC3FC2B2D9732"
+    },
+    {
+      "File": "e0-gui-navigation.json",
+      "Sha256": "1011BE74849475B73E50B7C8461E6BC702322C5E10FB152A898A69E7B703E7D0"
+    },
+    {
+      "File": "e0-identity-negative.json",
+      "Sha256": "4BA9F7549ED28D8C64E64618A875F97B519D3E79E6365A7A8C5BECB9D8343E2E"
+    },
+    {
+      "File": "e0-identity.json",
+      "Sha256": "C1D0D3BE83A1F1B53648A2A1CB52C6AC0F0C4D38878773DFB933D9BB2EC735F4"
+    },
+    {
+      "File": "e0-pre-navigation.json",
+      "Sha256": "F8F9B3A10E770A65E08FC1C1BF671558CEE48E427D1E75556C20EBA6EF73DCF0"
+    },
+    {
+      "File": "e0-register.json",
+      "Sha256": "08BA54BDB70AC9BC533D41CA1B5DA85F24C145AD2030FCCFAAD88C84A03825C1"
+    },
+    {
+      "File": "e0-sdk-baseline.json",
+      "Sha256": "F5FAE0FF651FEC1548BFD880F55E5EA78F81A240F1D00975881F7BFA69AC794C"
+    },
+    {
+      "File": "e0-system-class-identification.json",
+      "Sha256": "CBC4B1AB12F197917834726F3637255E7FE40BC6B00791E1C91A267C80525D53"
+    },
+    {
+      "File": "e0-target-view.json",
+      "Sha256": "82ED3D3806F99349DD34DE1F6A2F00EAD6A2A0347579C633F0FDE75822D8B45B"
+    },
+    {
+      "File": "e0-window-cleanup.json",
+      "Sha256": "DD978F66275C5571223040F1E8BBC76C6578B4170D2A9A3EF28DED429B68F3C5"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "B01AF1205518673573D9A0711A9D7C1233CF467B5CB27D3DACC41B76DA804129"
+    },
+    {
+      "File": "observe.ps1.txt",
+      "Sha256": "E3492C0BF451B0AF3F9908E9CC76533D963FA3FF829F5D38306E0B5407A0678D"
+    },
+    {
+      "File": "observer-build.log.txt",
+      "Sha256": "C8D6CA93750D1D7BEA01D12B690E0F4393EA5063DF04F51B3926883738F1E33B"
+    },
+    {
+      "File": "observer-CMakeLists.txt",
+      "Sha256": "8F12761FBEDD81E0C4E28AB3EF48AF70DBDC21102DFAB73322EDE435E2659431"
+    },
+    {
+      "File": "validation.json",
+      "Sha256": "C564BBED4BF39441CAB8BCE5CD6159756195FDFBA180F9F73F432035A3169983"
+    }
+  ]
+}

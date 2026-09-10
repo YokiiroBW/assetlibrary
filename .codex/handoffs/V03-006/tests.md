@@ -1,5 +1,11 @@
 # V03-006 测试记录
 
+恢复检查点：[父级标准发现查询](parent-discovery-control.md)含/不含hidden均完整3项匹配官方，匹配项属性20000000；另一直接Bind正控匹配官方类。均外部10秒、无GUI、原样STA注册/清理。未重跑这些结果。旧时序GUI控制只完成注册后新PID和SDK正控，未发生ThisPC/目标导航；恢复时清理已匹配的旧窗口，不标失败。
+
+最新官方对照分两轮：[首轮](official-runtime-control.md)确认MTA通知辅助缺陷并单独补成功STA通知，保留其无效前置/晚到读回；[修正前置的完整一轮](official-sta-runtime-control.md)先成功STA通知和11字段读回，再F5/唯一原生打开，仍无关联模态/10秒超时，实际view为ThisPC/2项。原DLL/字段不变，未伪造Factory日志，原失败不覆盖。两轮根键和自有UI均清理，最终清理STA通知成功；没有把控制器或读回成功计为G1通过。
+
+最新：[E0与BrowseObject](active-view-dispatch.md)原生观察器/独立控制器均Release x64 `/W4 /WX /analyze`零告警。两份SDK和两份目标view读回成功；创建时间+1负控在ShellWindows枚举前拒绝。实际目标view均系统FS类/0项，唯一BrowseObject调用S_OK不计入口通过；所有进程外部10秒期限且无超时，原owner guards正常撤销，空目录/自有窗口清理。未改产品/tests源码，未重跑已通过的未变业务套件。
+
 本轮最新：[路径绑定控制](path-bind-comparison.md)2/2完成，独立进程各10秒外部期限、无超时/错误输出，原CLSID根与实际sandbox路径均绑定原类/枚举1项。临时C++探针最终Release x64 `/W4 /WX /analyze`零警告/错误；600秒guard正常退出并卸载，空目录清理，GUI动作0。PIDL尺寸与ILIsEqual原数值保留且解释限制已写明。另[官方研究](official-sample-review.md)锁定revision并校验17份Git blob；官方样例缺源码且未构建，不能计通过。仅本轮归档/交接校验，不重跑未变业务套件。
 
 最新[第五轮用户态捕获](explorer-user-trace-aligned.md)：首次Return13:21:33.466晚于捕获截止；第二次Return13:25:38.586有效对齐，但预填/补全不在范围内。UIA仍空目录，三计划进程无proof DLL/trace；主协调报告只见control、无目标失败事件，不能认定未尝试加载。guard自然到期exit0/两键false，自有窗口目录清理，管理员控制台及原窗口保留。未改代码或重跑既有套件。

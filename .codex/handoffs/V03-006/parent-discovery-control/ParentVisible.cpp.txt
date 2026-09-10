@@ -1,0 +1,59 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <wrl/client.h>
+#include <cstdio>
+#include <cwchar>
+#include <memory>
+#include <vector>
+using Microsoft::WRL::ComPtr;
+constexpr wchar_t kParent[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}";
+constexpr wchar_t kTarget[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+constexpr CLSID kSample = {0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+struct FreePidl { using pointer=PIDLIST_ABSOLUTE; void operator()(pointer p) const {CoTaskMemFree(p);} };
+using Pidl=std::unique_ptr<ITEMIDLIST,FreePidl>;
+void Stage(const char* name,HRESULT hr) {
+  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"pid\":%lu,\"tick\":%llu,\"sampleLoaded\":%s}\n",
+      name,static_cast<unsigned long>(hr),GetCurrentProcessId(),GetTickCount64(),GetModuleHandleW(L"ExplorerDataProvider.dll")?"true":"false");
+}
+int Discover() {
+  ComPtr<IShellFolder> desktop; HRESULT hr=SHGetDesktopFolder(&desktop);Stage("desktop",hr);if(FAILED(hr))return 1;
+  PIDLIST_ABSOLUTE parentRaw=nullptr;hr=SHParseDisplayName(kParent,nullptr,&parentRaw,0,nullptr);Pidl parentPidl(parentRaw);Stage("stockParent.parse",hr);if(FAILED(hr)||!parentPidl)return 1;
+  ComPtr<IShellFolder> parent;hr=desktop->BindToObject(parentPidl.get(),nullptr,IID_PPV_ARGS(&parent));Stage("stockParent.bind",hr);if(FAILED(hr)||!parent)return 1;
+  ComPtr<IEnumIDList> enumerator;hr=parent->EnumObjects(nullptr,SHCONTF_FOLDERS|SHCONTF_NONFOLDERS,&enumerator);Stage("enumeration.begin",hr);
+  if(FAILED(hr)||(hr==S_OK&&!enumerator))return 1;
+  std::vector<Pidl> saved; saved.reserve(128); bool complete=hr==S_FALSE;unsigned int bytes=0;
+  if(enumerator){
+    while(saved.size()<128){
+      PITEMID_CHILD raw=nullptr;ULONG fetched=0;hr=enumerator->Next(1,&raw,&fetched);Pidl item(raw);
+      if(hr==S_FALSE){complete=true;break;}
+      if(FAILED(hr)||!item||fetched!=1){Stage("enumeration.next.failure",FAILED(hr)?hr:E_UNEXPECTED);return 1;}
+      const UINT size=ILGetSize(item.get());if(!size||size>16384){Stage("enumeration.pidl.bound",E_INVALIDARG);return 1;}
+      bytes+=size;saved.push_back(std::move(item));
+    }
+  }
+  enumerator.Reset();
+  Stage("enumeration.finished.beforeTargetParse",hr);
+  std::printf("{\"enumeratedCount\":%zu,\"savedPidlBytes\":%u,\"enumerationComplete\":%s,\"targetParsedBeforeEnumeration\":false}\n",saved.size(),bytes,complete?"true":"false");
+  if(!complete)return 2;
+  PIDLIST_ABSOLUTE targetRaw=nullptr;hr=SHParseDisplayName(kTarget,nullptr,&targetRaw,0,nullptr);Pidl target(targetRaw);Stage("target.parse.afterEnumeration",hr);if(FAILED(hr)||!target)return 1;
+  PCUIDLIST_RELATIVE targetChild=ILFindChild(parentPidl.get(),target.get());
+  if(!targetChild||ILIsEmpty(targetChild)){Stage("target.child",E_INVALIDARG);return 1;}
+  unsigned int matches=0,failures=0;
+  for(const auto& candidate:saved){hr=parent->CompareIDs(SHCIDS_CANONICALONLY,candidate.get(),targetChild);Stage("parent.compare",hr);if(FAILED(hr))++failures;else if(HRESULT_CODE(hr)==0){++matches;PCUITEMID_CHILD ownChild=candidate.get();SFGAOF attributes=SFGAO_FOLDER|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED;HRESULT attributeHr=parent->GetAttributesOf(1,&ownChild,&attributes);Stage("matchedTarget.attributes",attributeHr);std::printf("{\"requestedAttributes\":\"28180000\",\"returnedAttributes\":\"%08lx\"}\n",static_cast<unsigned long>(attributes));if(FAILED(attributeHr))++failures;}}
+  std::printf("{\"containsOfficialTarget\":%s,\"matchCount\":%u,\"comparisonFailures\":%u}\n",matches?"true":"false",matches,failures);
+  return failures?1:0;
+}
+int Bind() {
+  ComPtr<IShellFolder> desktop;HRESULT hr=SHGetDesktopFolder(&desktop);Stage("desktop",hr);if(FAILED(hr))return 1;
+  PIDLIST_ABSOLUTE raw=nullptr;hr=SHParseDisplayName(kTarget,nullptr,&raw,0,nullptr);Pidl target(raw);Stage("direct.parse",hr);if(FAILED(hr)||!target)return 1;
+  ComPtr<IShellFolder2> folder;hr=desktop->BindToObject(target.get(),nullptr,IID_PPV_ARGS(&folder));Stage("direct.bind",hr);if(FAILED(hr)||!folder)return 1;
+  ComPtr<IPersist> persist;hr=folder.As(&persist);CLSID clsid{};if(SUCCEEDED(hr))hr=persist->GetClassID(&clsid);Stage("direct.classId",hr);
+  if(SUCCEEDED(hr)){wchar_t text[40]{};if(!StringFromGUID2(clsid,text,ARRAYSIZE(text)))return 1;std::printf("{\"classId\":\"%ls\",\"expectedOfficialClass\":%s}\n",text,clsid==kSample?"true":"false");}
+  return SUCCEEDED(hr)&&clsid==kSample?0:1;
+}
+int wmain(int argc,wchar_t** argv) {
+  setvbuf(stdout,nullptr,_IONBF,0);
+  if(argc!=2||(wcscmp(argv[1],L"discover")&&wcscmp(argv[1],L"bind")))return 3;
+  HRESULT hr=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);Stage("comInit",hr);if(FAILED(hr))return 1;
+  int result=wcscmp(argv[1],L"discover")==0?Discover():Bind();CoUninitialize();return result;
+}

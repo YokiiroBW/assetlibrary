@@ -1,0 +1,30 @@
+param([Parameter(Mandatory)][ValidateSet('sdk','thispc','official','browse')][string]$Mode,[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-official-sta-control'
+$identity=Get-Content -Raw (Join-Path $run 'identity.json') | ConvertFrom-Json
+$probe=Join-Path $PSScriptRoot $(if($Mode -eq 'browse'){'build/Release/OfficialBrowseControl.exe'}else{'build/Release/OfficialActiveView.exe'})
+$hash=if($Mode -eq 'browse'){'508C3E5BD99125FA43BA6079990AD1E816A6D1F1B719FF65DF0E93AC0F1B130E'}else{'C6ED563FA225CE6A4383452274AB90DD69343CC7A3A67A213FCE716FC52B32AA'}
+if((Get-FileHash -LiteralPath $probe).Hash -ne $hash){throw 'Official diagnostic executable changed'}
+$lastArgument=$Mode
+if($Mode -eq 'browse'){
+  $presence=& (Join-Path $run 'guard.ps1') -Action verify | ConvertFrom-Json
+  if(@($presence|Where-Object {$_.Hive -eq 'CurrentUser' -and $_.Present -and $_.Owner -eq 'AssetLibrary.V03-006.OfficialSampleControl.20260910'}).Count -ne 4 -or @($presence|Where-Object {$_.Hive -eq 'LocalMachine' -and $_.Present}).Count){throw 'Official guard not valid'}
+  $registration=Get-Content -Raw (Join-Path $run 'register.json') | ConvertFrom-Json
+  $deadline=[DateTimeOffset]$registration.DeadlineUtc
+  if([DateTimeOffset]::UtcNow.AddSeconds(25) -ge $deadline){throw 'Official guard lifetime insufficient'}
+  $lastArgument=$deadline.UtcDateTime.ToFileTimeUtc().ToString()
+  New-Item -ItemType File -Path (Join-Path $run 'browse-dispatched') -ErrorAction Stop | Out-Null
+}
+$start=[Diagnostics.ProcessStartInfo]::new($probe)
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+foreach($value in @([string]$identity.NativeHwnd,[string]$identity.Pid,[string]$identity.CreationFileTime,$lastArgument)){$start.ArgumentList.Add($value)}
+$child=[Diagnostics.Process]::new();$child.StartInfo=$start
+try{
+  $started=[DateTimeOffset]::UtcNow
+  if(-not $child.Start()){throw 'Official diagnostic failed to start'}
+  $childId=$child.Id;$stdout=$child.StandardOutput.ReadToEndAsync();$stderr=$child.StandardError.ReadToEndAsync()
+  $timeout=-not $child.WaitForExit(10000)
+  if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned diagnostic failed to exit'}}
+  [ordered]@{Label=$Label;Mode=$Mode;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');ChildPid=$childId;TargetPid=$identity.Pid;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$stdout.GetAwaiter().GetResult();Stderr=$stderr.GetAwaiter().GetResult()} | ConvertTo-Json -Depth 5 | Tee-Object -FilePath (Join-Path $run "$Label.json")
+}finally{$child.Dispose()}

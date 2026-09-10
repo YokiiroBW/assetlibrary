@@ -1,0 +1,10 @@
+{
+  "StartedUtc": "2026-09-09T17:49:47.7990315+00:00",
+  "CompletedUtc": "2026-09-09T17:49:47.8571559+00:00",
+  "Pid": 33260,
+  "ExitCode": 0,
+  "TimedOut": false,
+  "EnumFlags": "FOLDERS|NONFOLDERS",
+  "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234265,\"sampleLoaded\":false}\r\n{\"stage\":\"desktop\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234265,\"sampleLoaded\":false}\r\n{\"stage\":\"stockParent.parse\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234265,\"sampleLoaded\":false}\r\n{\"stage\":\"stockParent.bind\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234265,\"sampleLoaded\":false}\r\n{\"stage\":\"enumeration.begin\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234265,\"sampleLoaded\":false}\r\n{\"stage\":\"enumeration.finished.beforeTargetParse\",\"hr\":\"00000001\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"enumeratedCount\":3,\"savedPidlBytes\":76,\"enumerationComplete\":true,\"targetParsedBeforeEnumeration\":false}\r\n{\"stage\":\"target.parse.afterEnumeration\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"stage\":\"parent.compare\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"stage\":\"matchedTarget.attributes\",\"hr\":\"00000000\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"requestedAttributes\":\"28180000\",\"returnedAttributes\":\"20000000\"}\r\n{\"stage\":\"parent.compare\",\"hr\":\"00000001\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"stage\":\"parent.compare\",\"hr\":\"00000001\",\"pid\":33260,\"tick\":215234312,\"sampleLoaded\":false}\r\n{\"containsOfficialTarget\":true,\"matchCount\":1,\"comparisonFailures\":0}\r\n",
+  "Stderr": ""
+}

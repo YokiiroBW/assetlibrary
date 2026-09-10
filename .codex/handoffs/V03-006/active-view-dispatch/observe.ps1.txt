@@ -1,0 +1,34 @@
+param(
+  [Parameter(Mandatory)][ValidateSet('sdk','target')][string]$Stage,
+  [Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label,
+  [string]$ExpectedCreationOverride
+)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-active-view'
+$identity=Get-Content -Raw (Join-Path $run 'identity.json') | ConvertFrom-Json
+$probe=Join-Path $PSScriptRoot 'build/Release/ExplorerActiveView.exe'
+if((Get-FileHash -LiteralPath $probe).Hash -ne '2F3287A25CA18D33B90DA510967F8FD34C64A1D35EE2910DD9BAA5B9589F17B8') {throw 'Observer hash changed'}
+$start=[Diagnostics.ProcessStartInfo]::new($probe)
+$start.UseShellExecute=$false
+$start.CreateNoWindow=$true
+$start.RedirectStandardOutput=$true
+$start.RedirectStandardError=$true
+$start.ArgumentList.Add([string]$identity.NativeHwnd)
+$start.ArgumentList.Add([string]$identity.Pid)
+$creation=if($ExpectedCreationOverride){$ExpectedCreationOverride}else{[string]$identity.CreationFileTime}
+$start.ArgumentList.Add($creation)
+$start.ArgumentList.Add($Stage)
+$child=[Diagnostics.Process]::new()
+$child.StartInfo=$start
+try {
+  $started=[DateTimeOffset]::UtcNow
+  if(-not $child.Start()) {throw 'Observer start failed'}
+  $childId=$child.Id
+  $stdout=$child.StandardOutput.ReadToEndAsync()
+  $stderr=$child.StandardError.ReadToEndAsync()
+  $timeout=-not $child.WaitForExit(10000)
+  if($timeout) {$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned observer failed to exit'}}
+  [ordered]@{Label=$Label;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');ObserverPid=$childId;TargetPid=$identity.Pid;Stage=$Stage;CreationOverrideUsed=[bool]$ExpectedCreationOverride;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$stdout.GetAwaiter().GetResult();Stderr=$stderr.GetAwaiter().GetResult()} |
+    ConvertTo-Json -Depth 5 | Tee-Object -FilePath (Join-Path $run "$Label.json")
+} finally {$child.Dispose()}

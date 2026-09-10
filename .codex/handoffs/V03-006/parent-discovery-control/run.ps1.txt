@@ -1,0 +1,24 @@
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260910-official-parent-enum'
+$probe=Join-Path $PSScriptRoot 'build/Release/OfficialParentControl.exe'
+if((Get-FileHash -LiteralPath $probe).Hash -ne '4599040AEE310B497A0DF1015754E0967294C8AEF51ACAD80B6FCAE825B6AD7F'){throw 'Parent control hash changed'}
+try{
+  $registered=Get-Content -Raw (Join-Path $run 'register.json') | ConvertFrom-Json
+  if(-not $registered.Notification.Success){throw 'Notification prerequisite failed'}
+  $roots=& (Join-Path $run 'guard.ps1') -Action verify | ConvertFrom-Json
+  if(@($roots|Where-Object {$_.Hive -eq 'CurrentUser' -and $_.Present}).Count -ne 4){throw 'Registration inactive'}
+  foreach($mode in @('discover','bind')){
+    $start=[Diagnostics.ProcessStartInfo]::new($probe);$start.ArgumentList.Add($mode)
+    $start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+    $child=[Diagnostics.Process]::new();$child.StartInfo=$start
+    try{
+      $started=[DateTimeOffset]::UtcNow
+      if(-not $child.Start()){throw 'Parent control start failed'}
+      $childId=$child.Id;$output=$child.StandardOutput.ReadToEndAsync();$errors=$child.StandardError.ReadToEndAsync()
+      $timeout=-not $child.WaitForExit(10000)
+      if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned child failed to exit'}}
+      [ordered]@{Mode=$mode;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$childId;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$output.GetAwaiter().GetResult();Stderr=$errors.GetAwaiter().GetResult()} | ConvertTo-Json -Depth 5 | Tee-Object -FilePath (Join-Path $run "$mode.json")
+    }finally{$child.Dispose()}
+  }
+}finally{New-Item -ItemType File -Path (Join-Path $run 'stop') -ErrorAction Stop | Out-Null}

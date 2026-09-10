@@ -1,0 +1,67 @@
+{
+  "Utc": "2026-09-10T01:21:21.048099+08:00",
+  "GuardExitCode": 0,
+  "GuardCleanupUtc": "2026-09-10T01:19:53.7036861+08:00",
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ],
+  "SuccessfulStaRegistrationNotification": true,
+  "SuccessfulStaCleanupNotification": true,
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "BrowseHresultReturned": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "ReadbackTiming": "Actual E0 reads were while error modal remained; later UI after modal close is after registry cleanup",
+  "FurtherVariants": 0,
+  "OfficialComparisonPerformed": true,
+  "ActualViewMatchesOfficial": false
+}
