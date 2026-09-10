@@ -1,0 +1,11 @@
+{
+  "Utc": "2026-09-10T11:14:11.3400437+00:00",
+  "CuaWindowId": 9373906,
+  "NativePid": 13040,
+  "View": "ThisPC",
+  "VisibleItemCount": 2,
+  "OfficialItemObserved": false,
+  "F5Executed": true,
+  "EarlierClickFailed": "coordinate input geometry is unavailable; reobserved before keyboard navigation",
+  "Navigation": "Ctrl+L; shell:MyComputerFolder; Return; subsequent fresh state confirmed navigation"
+}

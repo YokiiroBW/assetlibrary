@@ -1,0 +1,39 @@
+$ErrorActionPreference='Stop'
+# Compile the candidate; invoke only the separate pure classifier below.
+Add-Type -Path (Join-Path $PSScriptRoot 'ScopedExplorer.cs')
+$results=[Collections.Generic.List[object]]::new()
+function Test-Strip([string]$Name,[bool]$Expected,[hashtable]$Changes){
+ $p=@{ClassName='EdgeUiInputTopWndClass';CloakHr=0;Cloaked=[uint32]1;TitleLength=0;Left=15;Top=0;Right=2310;Bottom=3;Vx=0;Vy=0;Vw=2311}
+ foreach($key in $Changes.Keys){$p[$key]=$Changes[$key]}
+ $actual=[ScopedExplorerWindowClassification]::IsEdgeInputTopStrip($p.ClassName,$p.CloakHr,$p.Cloaked,$p.TitleLength,$p.Left,$p.Top,$p.Right,$p.Bottom,$p.Vx,$p.Vy,$p.Vw)
+ $results.Add([ordered]@{case=$Name;expected=$Expected;actual=$actual;passed=($actual-eq $Expected)})
+ if($actual-ne $Expected){throw "Pure classifier case failed: $Name"}
+}
+Test-Strip 'recorded_rect_with_recorded_desktop_bounds_fixture' $true @{}
+Test-Strip 'height_zero' $true @{Bottom=0}
+Test-Strip 'height_one' $true @{Bottom=1}
+Test-Strip 'full_width' $true @{Left=0;Right=2311}
+Test-Strip 'one_pixel_width' $true @{Right=16}
+Test-Strip 'other_nonzero_cloak' $true @{Cloaked=[uint32]2}
+Test-Strip 'negative_virtual_origin' $true @{Vx=-1920;Vy=-1080;Vw=3840;Left=-1900;Right=1900;Top=-1080;Bottom=-1077}
+Test-Strip 'wrong_class' $false @{ClassName='OtherWindow'}
+Test-Strip 'wrong_class_case' $false @{ClassName='edgeuiinputtopwndclass'}
+Test-Strip 'null_class' $false @{ClassName=$null}
+Test-Strip 'positive_nonzero_cloak_hr' $false @{CloakHr=1}
+Test-Strip 'failed_cloak_hr' $false @{CloakHr=-1}
+Test-Strip 'not_cloaked' $false @{Cloaked=[uint32]0}
+Test-Strip 'nonempty_title' $false @{TitleLength=1}
+Test-Strip 'top_below_virtual_top' $false @{Top=1;Bottom=3}
+Test-Strip 'top_above_virtual_top' $false @{Top=-1;Bottom=2}
+Test-Strip 'negative_height' $false @{Bottom=-1}
+Test-Strip 'height_four' $false @{Bottom=4}
+Test-Strip 'zero_width' $false @{Right=15}
+Test-Strip 'negative_width' $false @{Right=14}
+Test-Strip 'width_above_screen_width' $false @{Left=0;Right=2312}
+Test-Strip 'left_outside_screen' $false @{Left=-1;Right=2300}
+Test-Strip 'right_outside_screen' $false @{Left=15;Right=2312}
+Test-Strip 'zero_screen_width' $false @{Vw=0}
+Test-Strip 'negative_screen_width' $false @{Vw=-1}
+Test-Strip 'width_arithmetic_does_not_wrap' $false @{Vx=[int]::MinValue;Left=[int]::MinValue;Right=[int]::MaxValue;Vw=[int]::MaxValue}
+Test-Strip 'height_arithmetic_does_not_wrap' $false @{Vy=[int]::MinValue;Top=[int]::MinValue;Bottom=[int]::MaxValue}
+[ordered]@{kind='pure_classification_tests';compiled=$true;passed=$results.Count;cases=$results;inspectCalled=$false;stopCalled=$false;nativeMethodsCalled=$false;guiOperated=$false}|ConvertTo-Json -Depth 5

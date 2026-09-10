@@ -1,0 +1,25 @@
+diff --git "a/C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-cold-session-control\\ScopedExplorer.cs" "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cold-session-control-v2\\ScopedExplorer.cs"
+index c75c759..4a0e1d2 100644
+--- "a/C:\\Users\\Administrator\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-cold-session-control\\ScopedExplorer.cs"
++++ "b/C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-cold-session-control-v2\\ScopedExplorer.cs"
+@@ -95,7 +95,7 @@ public static class ScopedExplorer {
+                 (visible && System.Text.RegularExpressions.Regex.IsMatch(caption,"复制|移动|重命名|删除|正在|copying|moving|renaming|deleting|%",System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+             string captionCategory=hint?(System.Text.RegularExpressions.Regex.IsMatch(caption,@"^(已完成\s*100\s*%|100\s*%\s*(完成|complete))$",System.Text.RegularExpressions.RegexOptions.IgnoreCase)?"exact_completed_100_percent":caption.Length==0?"empty":"other_not_recorded"):"not_operation_hint";
+             bool completedCandidate=className=="OperationStatusWindow"&&!visible&&captionCategory=="exact_completed_100_percent";
+-            bool classifiedHelper=(className=="ThumbnailDeviceHelperWnd"||className=="DummyDWMListenerWindow")&&cloakHr==0&&cloaked!=0&&caption.Length==0&&rect.Right-rect.Left>=0&&rect.Right-rect.Left<=1&&rect.Bottom-rect.Top>=0&&rect.Bottom-rect.Top<=1;
++            bool classifiedHelper=((className=="ThumbnailDeviceHelperWnd"||className=="DummyDWMListenerWindow")&&cloakHr==0&&cloaked!=0&&caption.Length==0&&rect.Right-rect.Left>=0&&rect.Right-rect.Left<=1&&rect.Bottom-rect.Top>=0&&rect.Bottom-rect.Top<=1)||ScopedExplorerWindowClassification.IsEdgeInputTopStrip(className,cloakHr,cloaked,caption.Length,rect.Left,rect.Top,rect.Right,rect.Bottom,vx,vy,vw);
+             rows.Add(new WindowRecord{Pid=pid,HwndHex=hwnd.ToInt64().ToString("X"),ClassName=className,Visible=visible,OperationHint=hint,UnclassifiedVisible=visible&&!allowed.Contains(className)&&!classifiedHelper,Left=rect.Left,Top=rect.Top,Right=rect.Right,Bottom=rect.Bottom,TitleLength=caption.Length,CloakHr=cloakHr,Cloaked=cloaked,IntersectsScreen=intersects,NonemptyRect=nonempty,OperationCaptionCategory=captionCategory,CompletedHiddenOperationCandidate=completedCandidate,ClassifiedCloakedHelper=classifiedHelper});
+             return true;
+         };
+@@ -169,3 +169,11 @@ public static class ScopedExplorer {
+         return result;
+     }
+ }
++
++public static class ScopedExplorerWindowClassification {
++    public static bool IsEdgeInputTopStrip(string className,int cloakHr,uint cloaked,int titleLength,int left,int top,int right,int bottom,int vx,int vy,int vw){
++        long width=(long)right-left,height=(long)bottom-top;
++        return string.Equals(className,"EdgeUiInputTopWndClass",StringComparison.Ordinal)&&cloakHr==0&&cloaked!=0&&titleLength==0&&
++            top==vy&&height>=0&&height<=3&&width>0&&width<=vw&&left>=vx&&(long)right<=(long)vx+vw;
++    }
++}

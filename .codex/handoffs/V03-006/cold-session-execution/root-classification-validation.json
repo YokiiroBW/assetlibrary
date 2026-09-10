@@ -1,0 +1,173 @@
+{
+  "kind": "pure_classification_tests",
+  "compiled": true,
+  "passed": 27,
+  "cases": [
+    {
+      "case": "recorded_rect_with_recorded_desktop_bounds_fixture",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "height_zero",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "height_one",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "full_width",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "one_pixel_width",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "other_nonzero_cloak",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "negative_virtual_origin",
+      "expected": true,
+      "actual": true,
+      "passed": true
+    },
+    {
+      "case": "wrong_class",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "wrong_class_case",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "null_class",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "positive_nonzero_cloak_hr",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "failed_cloak_hr",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "not_cloaked",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "nonempty_title",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "top_below_virtual_top",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "top_above_virtual_top",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "negative_height",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "height_four",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "zero_width",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "negative_width",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "width_above_screen_width",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "left_outside_screen",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "right_outside_screen",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "zero_screen_width",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "negative_screen_width",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "width_arithmetic_does_not_wrap",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    },
+    {
+      "case": "height_arithmetic_does_not_wrap",
+      "expected": false,
+      "actual": false,
+      "passed": true
+    }
+  ],
+  "inspectCalled": false,
+  "stopCalled": false,
+  "nativeMethodsCalled": false,
+  "guiOperated": false
+}

@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[冷启动实机](cold-session-execution.md)：v2窄分类27项有源文件验证及20项独立工具内存复核；实际两次固定停止22/22、2/2退出、两新desktop/taskbar持久存活均确认。SDK/ThisPC正控通过，唯一Browse10秒超时/无关联错误，4属性实际S_OK输出仍0/0/0/26；28.485秒早停不计完整60秒。5断点/Detach/无debugger、双通知/8根清理、最终无测试模块通过。纯分类项、属性调用及清理检查不冒充产品案例或G1通过。
+
 新增[冷启动纯准备](cold-session-preflight.md)：最终C# Add-Type编译和wrapper AST通过，只读inspect记录22同用户/会话/系统image/无debugger；WTS后变4及输入桌面Win32 5，Eligible=false。初始辅助窗/隐藏100%完成态拒绝原件保留；未调用Stop或启动注册，不能算冷启动/产品测试通过。完整工具边界及恢复前置已封存。
 
 新增[双模式属性控制](attribute-pidl-control.md)：严格原生构建、脚本AST/default validate通过，经主协调最终审查后仅一次run。A20+B26查询全S_OK/有效，顺序及前后22B/同SHA读回通过，两个进程各10秒外限均未触发；guard exit0/双通知/8根absent、probe退出确认，GUI0/附加0。46次属性查询不是46个产品测试，G1不计通过。

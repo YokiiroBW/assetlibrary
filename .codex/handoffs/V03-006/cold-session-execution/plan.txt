@@ -1,0 +1,11 @@
+AssetLibrary.Explorer.DebugPlan.v1
+id=687ce2e2ee304877908a738eef7793db
+profile=official
+pid=13040
+creationFiletime=134335123552278776
+hwndHex=8F08D2
+ownershipStartFiletime=134335123548538573
+issuedFiletime=134335124821417883
+expiresFiletime=134335126021417883
+durationSeconds=60
+purpose=owned-explorer-namespace-diagnostic

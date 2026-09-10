@@ -1,0 +1,354 @@
+{
+  "RecordedUtc": "2026-09-10T11:19:33.331277+00:00",
+  "Result": "cold_user_shell_restart_did_not_change_observed_entry_failure",
+  "RestartSourceSha256": "06CD2EE08C0CE153B2CD96DBF3A92F90FB85F3A500CF8EF0A13BC3F94A1CB259",
+  "RestartWrapperSha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF",
+  "BeforeStopCount": 22,
+  "AfterStopCount": 2,
+  "FirstNewDesktopPid": 38388,
+  "FinalNewDesktopPid": 32044,
+  "DebuggerCleanupVerified": true,
+  "RegistryCleanupVerified": true,
+  "FinalTestModulesAbsent": true,
+  "PureClassificationCasesWithRawFiles": 27,
+  "IndependentReviewCasesWithoutSeparateRawFile": 20,
+  "ArtifactCount": 48,
+  "RedactedCopyCount": 10,
+  "Artifacts": [
+    {
+      "File": "actual-view-thispc.json",
+      "Sha256": "3EAB75CC9532C91E066A9A6E7234B57BAD66E3992EE225D3DCD5E79B0EEB5F82",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/actual-view-thispc.json",
+      "OriginalSha256": "3EAB75CC9532C91E066A9A6E7234B57BAD66E3992EE225D3DCD5E79B0EEB5F82"
+    },
+    {
+      "File": "actual-view-versus-official.json",
+      "Sha256": "80F411571864BB4ABB8D93AA27D611594238267AA6974DDF30205891C1D9FD7C",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/actual-view-versus-official.json",
+      "OriginalSha256": "80F411571864BB4ABB8D93AA27D611594238267AA6974DDF30205891C1D9FD7C"
+    },
+    {
+      "File": "after-detach-modules.json",
+      "Sha256": "81F5A1803384CFB0E140F2EAD9F55A5C5878DF4D0BD610FD1A5CA3BB7E92F7D5",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/after-detach-modules.json",
+      "OriginalSha256": "81F5A1803384CFB0E140F2EAD9F55A5C5878DF4D0BD610FD1A5CA3BB7E92F7D5"
+    },
+    {
+      "File": "after-view-readback.json",
+      "Sha256": "8E8AC93412F541B35D903711E5B43DCCE8B5AAD3647076D80FCC9C85EF4C29BB",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/after-view-readback.json",
+      "OriginalSha256": "8E8AC93412F541B35D903711E5B43DCCE8B5AAD3647076D80FCC9C85EF4C29BB"
+    },
+    {
+      "File": "before-capture-modules.json",
+      "Sha256": "3E74ADFA831E06DAFE5371647BAC7462612A4E5C3DE9AB843BF4939A929C1D6D",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/before-capture-modules.json",
+      "OriginalSha256": "3E74ADFA831E06DAFE5371647BAC7462612A4E5C3DE9AB843BF4939A929C1D6D"
+    },
+    {
+      "File": "browse-dispatched.marker.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/browse-dispatched",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "browse-launch.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/browse-launch.stderr.txt",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "browse-launch.stdout.txt",
+      "Sha256": "F240E2A9D71442E9AECA1C9A57CC2B4700B9D9EADD9E900F9A5BB21190FD3206",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/browse-launch.stdout.txt",
+      "OriginalSha256": "F240E2A9D71442E9AECA1C9A57CC2B4700B9D9EADD9E900F9A5BB21190FD3206"
+    },
+    {
+      "File": "capture-launch.json",
+      "Sha256": "CCE3B4E322EA3204167D4553EAC269771882C51B7E77958C197BC67E6B4B0909",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/capture-launch.json",
+      "OriginalSha256": "CCE3B4E322EA3204167D4553EAC269771882C51B7E77958C197BC67E6B4B0909"
+    },
+    {
+      "File": "capture-ready.json",
+      "Sha256": "2224EB11BB8DE8864D204ED68BCDA63C2C2C7893E78B36F29E34D8D1F59DC6D6",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/capture-ready.json",
+      "OriginalSha256": "2224EB11BB8DE8864D204ED68BCDA63C2C2C7893E78B36F29E34D8D1F59DC6D6"
+    },
+    {
+      "File": "capture-result.json",
+      "Sha256": "DD1E736EC5027BFAB5ADA064B14D4105BB5D0B23D1D7D3F673FFCAF2D164C5F6",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/capture-result.json",
+      "OriginalSha256": "DD1E736EC5027BFAB5ADA064B14D4105BB5D0B23D1D7D3F673FFCAF2D164C5F6"
+    },
+    {
+      "File": "capture.ps1.txt",
+      "Sha256": "CA448DED20253965ED44F2E7B6115BA6DB78202FAE4FC1D5FAAEEFCDD080E65B",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/capture.ps1",
+      "OriginalSha256": "CA448DED20253965ED44F2E7B6115BA6DB78202FAE4FC1D5FAAEEFCDD080E65B"
+    },
+    {
+      "File": "cleanup-before-second-restart.json",
+      "Sha256": "FD251230BF0A85CA37DFDEC97A81D9AB5786B1241651899F4C29D939F8A5BFBB",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/cleanup-before-second-restart.json",
+      "OriginalSha256": "FD251230BF0A85CA37DFDEC97A81D9AB5786B1241651899F4C29D939F8A5BFBB"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "B07540F022CF1B3B54513777E0BA36E436BC93ACF53FB1D7D0C8B002FC2CED74",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/cleanup.json",
+      "OriginalSha256": "B07540F022CF1B3B54513777E0BA36E436BC93ACF53FB1D7D0C8B002FC2CED74"
+    },
+    {
+      "File": "debug-browse-call.json",
+      "Sha256": "F240E2A9D71442E9AECA1C9A57CC2B4700B9D9EADD9E900F9A5BB21190FD3206",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/debug-browse-call.json",
+      "OriginalSha256": "F240E2A9D71442E9AECA1C9A57CC2B4700B9D9EADD9E900F9A5BB21190FD3206"
+    },
+    {
+      "File": "desktop-after-first-stop.json",
+      "Sha256": "4CD1A1A770BC7422897F71AF410D6EDD59BB627E82264614266A7F62C4688DB9",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/desktop-after-first-stop.json",
+      "OriginalSha256": "2F9C35D92C807210E080C771FBA083876BA31D340ECDC444F7A118E0A868AA02"
+    },
+    {
+      "File": "desktop-after-second-stop.json",
+      "Sha256": "BBE9D6834B61C45C5F46C7A22DFB64A0E0E149F3D4F4F17BFE41745437498591",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/desktop-after-second-stop.json",
+      "OriginalSha256": "9C04FB592F4F16BFB97D7CEB4E23A1851C981A487264E7E4E6879F9D43F35B12"
+    },
+    {
+      "File": "desktop-first-persistent.json",
+      "Sha256": "CE956142922AE1E5AFEE712067DA19DBBE079CA9C98A2A24D7F93AAFC2B33BA9",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/desktop-first-persistent.json",
+      "OriginalSha256": "FB4D32F7753F526588BD6769659343A450445E7DF89AB5FA02F4FD4039A00963"
+    },
+    {
+      "File": "desktop-second-persistent.json",
+      "Sha256": "F1063A9A139CA2F9173F71E10A98846D15A5A44D9C2A2F9C7265CBD398BE7D10",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/desktop-second-persistent.json",
+      "OriginalSha256": "71F313048C779433901A78344F6E390DF33A30EABCFAFB14D074C9F82E43D77F"
+    },
+    {
+      "File": "discovery-ui.json",
+      "Sha256": "6E0888582DA259AC37DB124FCE55432DCC5C3D2A65A0B75FABE8F35703846A07",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/discovery-ui.json",
+      "OriginalSha256": "6E0888582DA259AC37DB124FCE55432DCC5C3D2A65A0B75FABE8F35703846A07"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "F8C58FAA5DB2B0409E79D7040EEC47BF20825F7E5FA724249F8C5D8D4DE9CF07",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/final-cleanup.json",
+      "OriginalSha256": "F8C58FAA5DB2B0409E79D7040EEC47BF20825F7E5FA724249F8C5D8D4DE9CF07"
+    },
+    {
+      "File": "guard.ps1.txt",
+      "Sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/guard.ps1",
+      "OriginalSha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76"
+    },
+    {
+      "File": "identity.json",
+      "Sha256": "63E7D38B7FEB8AAF3C809CCE4AD85E5F6FD961BDB0DD30916B5ECE9050D94E92",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/identity.json",
+      "OriginalSha256": "63E7D38B7FEB8AAF3C809CCE4AD85E5F6FD961BDB0DD30916B5ECE9050D94E92"
+    },
+    {
+      "File": "observer.jsonl",
+      "Sha256": "6FA855CC1009C93EEF5790B72E25F0C210A2050E57EA0371A592191273DB0D7F",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/observer.jsonl",
+      "OriginalSha256": "6FA855CC1009C93EEF5790B72E25F0C210A2050E57EA0371A592191273DB0D7F"
+    },
+    {
+      "File": "observer.stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/observer.stderr.txt",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "open-error-ui.json",
+      "Sha256": "80224F0AB03B4A4780A906DEB1424999CC7DCFACB8746637FE3F6767C1CED19B",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/open-error-ui.json",
+      "OriginalSha256": "80224F0AB03B4A4780A906DEB1424999CC7DCFACB8746637FE3F6767C1CED19B"
+    },
+    {
+      "File": "plan-id.txt",
+      "Sha256": "CB451E2F0B06683E5D97F37258BDA490F37B8615E20E026F8A82927218DAA098",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/plan-id.txt",
+      "OriginalSha256": "CB451E2F0B06683E5D97F37258BDA490F37B8615E20E026F8A82927218DAA098"
+    },
+    {
+      "File": "plan.txt",
+      "Sha256": "EFF97EB04F37FD330FE51EE37CF3F3136545ACEA25CB253EB2B9E53925198BC4",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/plan.txt",
+      "OriginalSha256": "EFF97EB04F37FD330FE51EE37CF3F3136545ACEA25CB253EB2B9E53925198BC4"
+    },
+    {
+      "File": "preflight.json",
+      "Sha256": "99FBDBD86AB2A41FD52A4576D0C5CA5F400765DB1A0F85D879533DE16F0A70A2",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/preflight.json",
+      "OriginalSha256": "99FBDBD86AB2A41FD52A4576D0C5CA5F400765DB1A0F85D879533DE16F0A70A2"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "2EA42C5CE40C1A9D6CE6173C866F7761259CAE5C557A5099BB12A7818AEBF10B",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/register.json",
+      "OriginalSha256": "FA210D135B0C8A64684E4947719BAA35DE91B1919D15C8FEB88A0E4B47B158D1"
+    },
+    {
+      "File": "sdk-baseline.json",
+      "Sha256": "5F77CBE7E768435D7A30F5D08208166643A1FEFA45AFA39C576B78F549488D8E",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/sdk-baseline.json",
+      "OriginalSha256": "5F77CBE7E768435D7A30F5D08208166643A1FEFA45AFA39C576B78F549488D8E"
+    },
+    {
+      "File": "stop.marker.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/stop",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "thispc-baseline.json",
+      "Sha256": "56DBFFDC29CA7EFD6F6644209DF6271AB78483060404E27467712CC8DD676F8E",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/thispc-baseline.json",
+      "OriginalSha256": "56DBFFDC29CA7EFD6F6644209DF6271AB78483060404E27467712CC8DD676F8E"
+    },
+    {
+      "File": "window-epoch.json",
+      "Sha256": "300EC4333AC72A5516046A76E6B999A1A81140DAC5D042F16FBA2D874BB62272",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260910-cold-session/window-epoch.json",
+      "OriginalSha256": "300EC4333AC72A5516046A76E6B999A1A81140DAC5D042F16FBA2D874BB62272"
+    },
+    {
+      "File": "restart-ScopedExplorer.cs.txt",
+      "Sha256": "06CD2EE08C0CE153B2CD96DBF3A92F90FB85F3A500CF8EF0A13BC3F94A1CB259",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/ScopedExplorer.cs",
+      "OriginalSha256": "06CD2EE08C0CE153B2CD96DBF3A92F90FB85F3A500CF8EF0A13BC3F94A1CB259"
+    },
+    {
+      "File": "restart-scoped-restart.ps1.txt",
+      "Sha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/scoped-restart.ps1",
+      "OriginalSha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF"
+    },
+    {
+      "File": "restart-before-preflight.json",
+      "Sha256": "9AD032FB385FA03F269C1B585105247E9EC7EB4B78D31DEDD38F03051BDB9372",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/before-preflight.json",
+      "OriginalSha256": "568B4E00D6D02B5CC31ADC53912C572786720BB0EDF90263084E7B8B4C67A9E0"
+    },
+    {
+      "File": "restart-before-stop.json",
+      "Sha256": "ECDD05F202491D7429825D66C1F8CBD8689B71E4F13D2546C1723232207C64EB",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/before-stop.json",
+      "OriginalSha256": "A4A8BF016DE2442E7B5BD8AFA8C97AD9B86E07D5665EA035A51FE2190B006F0E"
+    },
+    {
+      "File": "restart-before-ui-clear.json",
+      "Sha256": "494DA445BB6932714CF581AA0206F99D39770AD2824F04979114DFF891D02B89",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/before-ui-clear.json",
+      "OriginalSha256": "494DA445BB6932714CF581AA0206F99D39770AD2824F04979114DFF891D02B89"
+    },
+    {
+      "File": "restart-after-preflight.json",
+      "Sha256": "4326A6F72C9EBCFE0C686DDD977291C39C6E4CA7BBAFD2E2831FD49AB5B6A6E3",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/after-preflight.json",
+      "OriginalSha256": "FC1E4063AC03A93F049FA14E197228BD7CC784FC267AE328DD762AF976B127CF"
+    },
+    {
+      "File": "restart-after-stop.json",
+      "Sha256": "9D48E9AEADAF6EADDD610257A05F1685BB6A35E1CDE193CD4D60E8FC21D93F55",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/after-stop.json",
+      "OriginalSha256": "F0286350712D8F3EBA7A4E227BBA7C1A7D2E0B6ACF56F8471942789E6DD6F22B"
+    },
+    {
+      "File": "restart-after-ui-clear.json",
+      "Sha256": "217C4D8B2144C30D810D689AD359D7E903A25C5407082BE069D83EBF2776CC61",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/after-ui-clear.json",
+      "OriginalSha256": "217C4D8B2144C30D810D689AD359D7E903A25C5407082BE069D83EBF2776CC61"
+    },
+    {
+      "File": "restart-resume-initial-ineligible.json",
+      "Sha256": "7E41DED6AB91EB0238FAF5CCF779D9D31B29B0A23C69B7B2D626289775A81798",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/resume-initial-ineligible.json",
+      "OriginalSha256": "74B78310739CC32DB97B9135EF9FA0CD2205EA88BB8749B6D99B8523F9C4BCDD"
+    },
+    {
+      "File": "browse-view-wrapper.ps1.txt",
+      "Sha256": "4B378DF79C979EE8CEEC6C4947AFE0E9C15A536D51CB1018C46FC79C2346A89F",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-official-observer/run-cold-session.ps1",
+      "OriginalSha256": "4B378DF79C979EE8CEEC6C4947AFE0E9C15A536D51CB1018C46FC79C2346A89F"
+    },
+    {
+      "File": "root-classification-self-test.ps1.txt",
+      "Sha256": "CD2788471C86E26FFD0AAD7C1BEF8DE058CA542342BAA5A9D94D3BA0DAD79041",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-cold-session-control-v2/self-test.ps1",
+      "OriginalSha256": "CD2788471C86E26FFD0AAD7C1BEF8DE058CA542342BAA5A9D94D3BA0DAD79041"
+    },
+    {
+      "File": "root-classification-validation.json",
+      "Sha256": "7254D7FDF50C25B48C79C64F48C6BA3841EF85BD59CF951F549338A9030C3944",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-cold-session-control-v2/validation.json",
+      "OriginalSha256": "7254D7FDF50C25B48C79C64F48C6BA3841EF85BD59CF951F549338A9030C3944"
+    },
+    {
+      "File": "root-classification-changes.patch.txt",
+      "Sha256": "5FA9ABA04CAC3D2E7DD3BBCD4E7DE9442D4FEC5D859FC2D1DE4BA2785178AC67",
+      "SourceKind": "unmodified_copy",
+      "OriginalRuntimePath": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-cold-session-control-v2/changes.patch",
+      "OriginalSha256": "5FA9ABA04CAC3D2E7DD3BBCD4E7DE9442D4FEC5D859FC2D1DE4BA2785178AC67"
+    },
+    {
+      "File": "attribute-matrix.json",
+      "Sha256": "AE52979B35E4FA7788EAF90D2003FD44D775EFC91D32C532716B6D9410E83BD0",
+      "SourceKind": "derived_matrix",
+      "DerivedFrom": "observer.jsonl"
+    }
+  ]
+}

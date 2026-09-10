@@ -1,0 +1,11 @@
+{
+  "Utc": "2026-09-10T11:14:42.6623459+00:00",
+  "PlanId": "687ce2e2ee304877908a738eef7793db",
+  "Payload": {
+    "kind": "capture_ready",
+    "pid": 13040,
+    "creationFiletime": 134335123552278776,
+    "profile": "official",
+    "tick": 277931140
+  }
+}

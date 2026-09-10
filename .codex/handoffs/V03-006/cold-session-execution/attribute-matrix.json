@@ -1,0 +1,38 @@
+[
+  {
+    "CallId": 1,
+    "InputMask": "0x20000000",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x00000000",
+    "OutputMaskValid": true,
+    "EntryTick": 277931546,
+    "ReturnTick": 277931546
+  },
+  {
+    "CallId": 2,
+    "InputMask": "0x40418000",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x00000000",
+    "OutputMaskValid": true,
+    "EntryTick": 277931562,
+    "ReturnTick": 277931562
+  },
+  {
+    "CallId": 3,
+    "InputMask": "0x40000000",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x00000000",
+    "OutputMaskValid": true,
+    "EntryTick": 277931562,
+    "ReturnTick": 277931562
+  },
+  {
+    "CallId": 4,
+    "InputMask": "0x2044007F",
+    "Hresult": "0x00000000",
+    "OutputMask": "0x00000026",
+    "OutputMaskValid": true,
+    "EntryTick": 277931562,
+    "ReturnTick": 277931562
+  }
+]
