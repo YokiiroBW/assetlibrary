@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[单GetAttributesOf实机](attributes-debug-control.md)取得4对有效输入/输出。call1请求FOLDER→S_OK/0，call4含FOLDER→S_OK/26；call2/3未请求FOLDER不作非folder推断。捕获约33秒提前结束但5断点清零/Detach/存活及注册/UI清理成功。未改mask、接口或注册，根因待root结合真实属性路径裁决。
+
 最新：[完整请求IID元数据](bind-iid-control.md)已补齐，callId1为BC110B6D…/无pbc→80070490/null，callId2为886D8EEB…/有pbc→80004002/null；与旧类别轮一致。仅记录已匹配数据，具体接口由root按主源解释。捕获异常保护提前结束但两断点/Detach/存活清理成功，双通知/四根/自有UI已清理，G1仍partial。
 
 最新：[单绑定实机观测](bind-debug-control.md)取得两对官方PIDL匹配Bind调用，other IID分别在无/有pbc时返回80070490/80004002及null接口。约34秒callback异常保护提前结束，非完整60秒；不能把other直接解释成必需folder接口或认定pbc根因。两断点清零/Detach/目标存活无debugger成功，注册和自有UI已清理，G1仍未关闭。

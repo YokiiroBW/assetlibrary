@@ -1,0 +1,25 @@
+{
+  "Utc": "2026-09-10T05:16:29.3281523+00:00",
+  "GuardExitCode": 0,
+  "RootsCleaned": true,
+  "BothCleanupNotificationsCompleted": true,
+  "DebuggerCleanupVerified": true,
+  "TargetAliveWithoutDebuggerVerified": true,
+  "MatchedEntries": 4,
+  "MatchedReturns": 4,
+  "AllObservedHresultsSuccessful": true,
+  "OutputMasksValid": true,
+  "FolderRequestedCalls": [
+    1,
+    4
+  ],
+  "FolderNotReturnedInThoseCalls": true,
+  "MasksNeverModified": true,
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "FullSixtySecondsObserved": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "FurtherVariants": 0
+}

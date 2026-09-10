@@ -1,0 +1,6 @@
+{
+  "utc": "2026-09-10T05:14:28.541Z",
+  "windowId": 331134,
+  "tree": "Window: \"explorer.exe\", App: explorer.exe.\n\t0 对话框 explorer.exe Secondary Actions: Raise\n\t\t1 图像 MainInstructionIcon ID: MainIcon\n\t\t2 文本 该文件没有与之关联的应用来执行该操作。请安装应用，若已经安装应用，请在“默认应用设置”页面中创建关联。 ID: ContentText\n\t\t3 按钮 确定 ID: CommandButton_1\n\t\t4 标题栏\n\t\t\t5 菜单栏 系统 ID: MenuBar\n\t\t\t\t6 菜单项目 系统\n\t\t\t7 按钮 关闭\n\nThe focused UI element is 0 对话框 explorer.exe Secondary Actions: Raise.",
+  "debuggerCleanupAlreadyVerified": true
+}
