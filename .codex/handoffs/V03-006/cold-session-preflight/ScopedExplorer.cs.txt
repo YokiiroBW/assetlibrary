@@ -1,0 +1,171 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
+
+public static class ScopedExplorer {
+    [DllImport("kernel32.dll",SetLastError=true)] static extern IntPtr OpenProcess(uint access,bool inherit,uint pid);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern bool CloseHandle(IntPtr handle);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetProcessTimes(IntPtr handle,out long created,out long exited,out long kernel,out long user);
+    [DllImport("kernel32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool QueryFullProcessImageName(IntPtr handle,uint flags,StringBuilder name,ref uint size);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern bool ProcessIdToSessionId(uint pid,out uint session);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern bool CheckRemoteDebuggerPresent(IntPtr handle,out bool present);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern uint WaitForSingleObject(IntPtr handle,uint milliseconds);
+    [DllImport("kernel32.dll",SetLastError=true)] static extern bool TerminateProcess(IntPtr handle,uint code);
+    [DllImport("advapi32.dll",SetLastError=true)] static extern bool OpenProcessToken(IntPtr process,uint access,out IntPtr token);
+    [DllImport("user32.dll")] static extern IntPtr GetShellWindow();
+    [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern IntPtr FindWindow(string cls,string title);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hwnd,out uint pid);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr hwnd);
+    [StructLayout(LayoutKind.Sequential)] struct Rect { public int Left,Top,Right,Bottom; }
+    [DllImport("user32.dll",SetLastError=true)] static extern bool GetWindowRect(IntPtr hwnd,out Rect rect);
+    [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr hwnd,uint attribute,out uint value,uint size);
+    [DllImport("user32.dll")] static extern int GetSystemMetrics(int index);
+    [DllImport("user32.dll",SetLastError=true)] static extern IntPtr OpenInputDesktop(uint flags,bool inherit,uint access);
+    [DllImport("user32.dll",SetLastError=true)] static extern bool CloseDesktop(IntPtr desktop);
+    [DllImport("user32.dll",CharSet=CharSet.Unicode,SetLastError=true)] static extern bool GetUserObjectInformation(IntPtr handle,int index,StringBuilder value,uint bytes,out uint needed);
+    [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr hwnd,StringBuilder value,int capacity);
+    [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr hwnd,StringBuilder value,int capacity);
+    delegate bool EnumCallback(IntPtr hwnd,IntPtr state);
+    [DllImport("user32.dll",SetLastError=true)] static extern bool EnumWindows(EnumCallback callback,IntPtr state);
+    [DllImport("wtsapi32.dll",SetLastError=true)] static extern bool WTSQuerySessionInformation(IntPtr server,uint session,int info,out IntPtr buffer,out uint bytes);
+    [DllImport("wtsapi32.dll")] static extern void WTSFreeMemory(IntPtr buffer);
+    public sealed class Identity {
+        public uint Pid,Session; public string CreationFileTime,Image,OwnerSid; public bool DebuggerPresent,Alive;
+    }
+    public sealed class WindowRecord {
+        public uint Pid; public string HwndHex,ClassName; public bool Visible,OperationHint,UnclassifiedVisible;
+        public int Left,Top,Right,Bottom,TitleLength,CloakHr; public uint Cloaked; public bool IntersectsScreen,NonemptyRect;
+        public string OperationCaptionCategory;
+        public bool CompletedHiddenOperationCandidate,ClassifiedCloakedHelper;
+    }
+    public sealed class Snapshot {
+        public string Utc,UserName,OwnerSid,SystemExplorerPath; public uint Session,ShellPid,TaskbarPid;
+        public string ShellHwndHex,TaskbarHwndHex; public bool SessionActive,Eligible;
+        public int SessionConnectState;
+        public bool InputDesktopIsDefault; public int InputDesktopError;
+        public List<Identity> Targets=new List<Identity>(); public List<WindowRecord> Windows=new List<WindowRecord>();
+        public List<string> Errors=new List<string>(); public int OtherSessionProcesses,OtherUserProcesses;
+    }
+    public sealed class StopRecord {
+        public uint Pid; public string CreationFileTime; public bool TerminateReturned,ExitConfirmed; public int Error;
+    }
+    public sealed class StopResult {
+        public Snapshot Before; public string StartedUtc,CompletedUtc; public bool AllPlannedExited;
+        public List<StopRecord> Stops=new List<StopRecord>(); public List<string> Errors=new List<string>();
+    }
+    sealed class Held : IDisposable {
+        public IntPtr Handle; public Identity Identity;
+        public void Dispose(){if(Handle!=IntPtr.Zero){CloseHandle(Handle);Handle=IntPtr.Zero;}}
+    }
+    static void Need(bool condition,string stage){if(!condition)throw new InvalidOperationException(stage+"; win32="+Marshal.GetLastWin32Error());}
+    static uint CurrentSession(){uint session;Need(ProcessIdToSessionId((uint)Process.GetCurrentProcess().Id,out session),"executor_session");return session;}
+    static int ConnectState(uint session){IntPtr data;uint bytes;Need(WTSQuerySessionInformation(IntPtr.Zero,session,8,out data,out bytes),"session_state");try{Need(bytes>=4,"session_state_length");return Marshal.ReadInt32(data);}finally{WTSFreeMemory(data);}}
+    static bool DefaultInputDesktop(out int error){
+        error=0;IntPtr desktop=OpenInputDesktop(0,false,1);
+        if(desktop==IntPtr.Zero){error=Marshal.GetLastWin32Error();return false;}
+        try{var name=new StringBuilder(256);uint needed;if(!GetUserObjectInformation(desktop,2,name,(uint)name.Capacity*2,out needed)){error=Marshal.GetLastWin32Error();return false;}return string.Equals(name.ToString(),"Default",StringComparison.OrdinalIgnoreCase);}
+        finally{CloseDesktop(desktop);}
+    }
+    static string Owner(IntPtr handle){IntPtr token;Need(OpenProcessToken(handle,8,out token),"process_token");try{using(var identity=new WindowsIdentity(token)){return identity.User.Value;}}finally{CloseHandle(token);}}
+    static Identity Read(IntPtr handle,uint pid){
+        long created,exited,kernel,user;Need(GetProcessTimes(handle,out created,out exited,out kernel,out user),"process_times");
+        var name=new StringBuilder(32768);uint chars=(uint)name.Capacity;Need(QueryFullProcessImageName(handle,0,name,ref chars),"process_image");
+        uint session;Need(ProcessIdToSessionId(pid,out session),"process_session");bool debugger;Need(CheckRemoteDebuggerPresent(handle,out debugger),"process_debugger");
+        uint wait=WaitForSingleObject(handle,0);Need(wait==0||wait==258,"process_liveness");
+        return new Identity{Pid=pid,Session=session,CreationFileTime=created.ToString(),Image=name.ToString(),OwnerSid=Owner(handle),DebuggerPresent=debugger,Alive=wait==258};
+    }
+    static List<WindowRecord> Windows(HashSet<uint> targets){
+        var rows=new List<WindowRecord>();
+        var allowed=new HashSet<string>(StringComparer.Ordinal){"CabinetWClass","ExploreWClass","Progman","WorkerW","Shell_TrayWnd","Shell_SecondaryTrayWnd"};
+        bool exceeded=false;
+        EnumCallback callback=(hwnd,state)=>{
+            uint pid;GetWindowThreadProcessId(hwnd,out pid);if(!targets.Contains(pid))return true;
+            if(rows.Count>=512){exceeded=true;return false;}
+            var cls=new StringBuilder(256);var title=new StringBuilder(2048);GetClassName(hwnd,cls,cls.Capacity);GetWindowText(hwnd,title,title.Capacity);
+            bool visible=IsWindowVisible(hwnd);string className=cls.ToString(),caption=title.ToString();
+            Rect rect;Need(GetWindowRect(hwnd,out rect),"window_rect");uint cloaked;int cloakHr=DwmGetWindowAttribute(hwnd,14,out cloaked,4);
+            int vx=GetSystemMetrics(76),vy=GetSystemMetrics(77),vw=GetSystemMetrics(78),vh=GetSystemMetrics(79);
+            bool nonempty=rect.Right>rect.Left&&rect.Bottom>rect.Top;
+            bool intersects=nonempty&&rect.Right>vx&&rect.Left<vx+vw&&rect.Bottom>vy&&rect.Top<vy+vh;
+            bool hint=className=="#32770" || className.IndexOf("OperationStatus",StringComparison.OrdinalIgnoreCase)>=0 || className.IndexOf("Progress",StringComparison.OrdinalIgnoreCase)>=0 ||
+                (visible && System.Text.RegularExpressions.Regex.IsMatch(caption,"复制|移动|重命名|删除|正在|copying|moving|renaming|deleting|%",System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+            string captionCategory=hint?(System.Text.RegularExpressions.Regex.IsMatch(caption,@"^(已完成\s*100\s*%|100\s*%\s*(完成|complete))$",System.Text.RegularExpressions.RegexOptions.IgnoreCase)?"exact_completed_100_percent":caption.Length==0?"empty":"other_not_recorded"):"not_operation_hint";
+            bool completedCandidate=className=="OperationStatusWindow"&&!visible&&captionCategory=="exact_completed_100_percent";
+            bool classifiedHelper=(className=="ThumbnailDeviceHelperWnd"||className=="DummyDWMListenerWindow")&&cloakHr==0&&cloaked!=0&&caption.Length==0&&rect.Right-rect.Left>=0&&rect.Right-rect.Left<=1&&rect.Bottom-rect.Top>=0&&rect.Bottom-rect.Top<=1;
+            rows.Add(new WindowRecord{Pid=pid,HwndHex=hwnd.ToInt64().ToString("X"),ClassName=className,Visible=visible,OperationHint=hint,UnclassifiedVisible=visible&&!allowed.Contains(className)&&!classifiedHelper,Left=rect.Left,Top=rect.Top,Right=rect.Right,Bottom=rect.Bottom,TitleLength=caption.Length,CloakHr=cloakHr,Cloaked=cloaked,IntersectsScreen=intersects,NonemptyRect=nonempty,OperationCaptionCategory=captionCategory,CompletedHiddenOperationCandidate=completedCandidate,ClassifiedCloakedHelper=classifiedHelper});
+            return true;
+        };
+        bool ok=EnumWindows(callback,IntPtr.Zero);GC.KeepAlive(callback);Need(ok&&!exceeded,"window_inventory_complete");return rows;
+    }
+    static Snapshot Collect(bool terminateAccess,List<Held> held){
+        var result=new Snapshot{Utc=DateTimeOffset.UtcNow.ToString("o"),Session=CurrentSession(),SystemExplorerPath=System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows),"explorer.exe")};
+        using(var me=WindowsIdentity.GetCurrent()){result.OwnerSid=me.User.Value;result.UserName=me.Name;}
+        result.SessionConnectState=ConnectState(result.Session);result.SessionActive=result.SessionConnectState==0;if(!result.SessionActive)result.Errors.Add("Current session is not active");
+        int inputError;result.InputDesktopIsDefault=DefaultInputDesktop(out inputError);result.InputDesktopError=inputError;
+        if(!result.InputDesktopIsDefault)result.Errors.Add("Default interactive input desktop is unavailable");
+        var shell=GetShellWindow();var taskbar=FindWindow("Shell_TrayWnd",null);uint shellPid=0,taskbarPid=0;
+        if(shell!=IntPtr.Zero)GetWindowThreadProcessId(shell,out shellPid);if(taskbar!=IntPtr.Zero)GetWindowThreadProcessId(taskbar,out taskbarPid);
+        result.ShellPid=shellPid;result.TaskbarPid=taskbarPid;result.ShellHwndHex=shell.ToInt64().ToString("X");result.TaskbarHwndHex=taskbar.ToInt64().ToString("X");
+        var processes=Process.GetProcessesByName("explorer");
+        try{
+            Need(processes.Length<=128,"explorer_inventory_bound");
+            foreach(var process in processes){
+                uint pid=(uint)process.Id,session;Need(ProcessIdToSessionId(pid,out session),"candidate_session");
+                if(session!=result.Session){++result.OtherSessionProcesses;continue;}
+                var item=new Held{Handle=OpenProcess(0x100400u|(terminateAccess?1u:0u),false,pid)};
+                Need(item.Handle!=IntPtr.Zero,"candidate_open");
+                try{
+                    item.Identity=Read(item.Handle,pid);
+                    if(item.Identity.OwnerSid!=result.OwnerSid){++result.OtherUserProcesses;continue;}
+                    held.Add(item);item=null;
+                    var identity=held.Last().Identity;result.Targets.Add(identity);
+                    if(!identity.Alive||identity.DebuggerPresent||!string.Equals(identity.Image,result.SystemExplorerPath,StringComparison.OrdinalIgnoreCase))result.Errors.Add("Identity, debugger or liveness refused for PID "+pid);
+                }finally{if(item!=null)item.Dispose();}
+            }
+        }finally{foreach(var process in processes)process.Dispose();}
+        result.Targets=result.Targets.OrderBy(x=>x.Pid).ToList();
+        result.Windows=Windows(new HashSet<uint>(result.Targets.Select(x=>x.Pid)));
+        if(result.Windows.Any(x=>(x.OperationHint&&!x.CompletedHiddenOperationCandidate)||x.UnclassifiedVisible))result.Errors.Add("Unreviewed operation or visible window");
+        if(shellPid==0||taskbarPid!=shellPid||!result.Targets.Any(x=>x.Pid==shellPid))result.Errors.Add("Desktop Shell/taskbar identity unavailable or mismatched");
+        result.Eligible=result.Targets.Count>0&&result.Errors.Count==0;return result;
+    }
+    public static Snapshot Inspect(){var held=new List<Held>();try{return Collect(false,held);}finally{foreach(var item in held)item.Dispose();}}
+    public static StopResult Stop(Identity[] expected,uint expectedShellPid,WindowRecord[] expectedWindows){
+        var result=new StopResult{StartedUtc=DateTimeOffset.UtcNow.ToString("o")};var held=new List<Held>();
+        try{
+            result.Before=Collect(true,held);Need(result.Before.Eligible,"fresh_scope_not_eligible");
+            Need(result.Before.ShellPid==expectedShellPid&&expected.Length==held.Count,"scope_count_or_shell_changed");
+            foreach(var item in held){var prior=expected.SingleOrDefault(x=>x.Pid==item.Identity.Pid);Need(prior!=null&&prior.CreationFileTime==item.Identity.CreationFileTime&&prior.OwnerSid==item.Identity.OwnerSid&&prior.Session==item.Identity.Session,"planned_identity_changed");}
+            foreach(var window in result.Before.Windows.Where(x=>x.CompletedHiddenOperationCandidate)){
+                Need(expectedWindows.Any(x=>x.Pid==window.Pid&&x.HwndHex==window.HwndHex&&x.ClassName==window.ClassName&&x.CompletedHiddenOperationCandidate&&!x.Visible&&x.OperationCaptionCategory=="exact_completed_100_percent"),"completed_operation_not_stable_in_two_reads");
+            }
+            foreach(var prior in expectedWindows.Where(x=>x.CompletedHiddenOperationCandidate)){
+                Need(result.Before.Windows.Any(x=>x.Pid==prior.Pid&&x.HwndHex==prior.HwndHex&&x.CompletedHiddenOperationCandidate),"prior_operation_window_changed_or_disappeared");
+            }
+            // Complete all admission before terminating anything; stop the desktop host last.
+            foreach(var item in held.OrderBy(x=>x.Identity.Pid==expectedShellPid?1:0)){
+                int inputError;Need(ConnectState(result.Before.Session)==0&&DefaultInputDesktop(out inputError),"interactive_session_changed_before_stop");
+                var now=Read(item.Handle,item.Identity.Pid);
+                Need(now.Alive&&!now.DebuggerPresent&&now.CreationFileTime==item.Identity.CreationFileTime&&now.OwnerSid==result.Before.OwnerSid&&now.Session==result.Before.Session&&string.Equals(now.Image,result.Before.SystemExplorerPath,StringComparison.OrdinalIgnoreCase),"pre_stop_identity_changed");
+                var record=new StopRecord{Pid=now.Pid,CreationFileTime=now.CreationFileTime};result.Stops.Add(record);
+                record.TerminateReturned=TerminateProcess(item.Handle,0);record.Error=record.TerminateReturned?0:Marshal.GetLastWin32Error();Need(record.TerminateReturned,"held_handle_termination_failed");
+            }
+        }catch(Exception error){result.Errors.Add(error.Message);}
+        finally{
+            // A failed later admission/termination must still account for earlier requests.
+            var exitWatch=Stopwatch.StartNew();
+            foreach(var record in result.Stops){
+                var item=held.Single(x=>x.Identity.Pid==record.Pid);
+                uint remaining=(uint)Math.Max(0,5000-exitWatch.ElapsedMilliseconds);
+                record.ExitConfirmed=WaitForSingleObject(item.Handle,remaining)==0;
+            }
+            result.AllPlannedExited=held.Count>0&&result.Stops.Count==held.Count&&result.Stops.All(x=>x.ExitConfirmed);
+            foreach(var item in held)item.Dispose();result.CompletedUtc=DateTimeOffset.UtcNow.ToString("o");
+        }
+        return result;
+    }
+}

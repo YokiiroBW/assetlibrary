@@ -1,0 +1,45 @@
+param([ValidateSet('inspect','stop')][string]$Action='inspect',[ValidateSet('before','after')][string]$Phase='before')
+$ErrorActionPreference='Stop'
+Add-Type -Path (Join-Path $PSScriptRoot 'ScopedExplorer.cs')
+$snapshotPath=Join-Path $PSScriptRoot "$Phase-preflight.json"
+if($Action -eq 'inspect'){
+    if(Test-Path -LiteralPath (Join-Path $PSScriptRoot "$Phase-stop.json")){throw 'Phase already stopped; no reused plan'}
+    [ScopedExplorer]::Inspect() | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $snapshotPath -Encoding utf8
+    Get-Content -LiteralPath $snapshotPath -Raw
+    return
+}
+$snapshot=Get-Content -LiteralPath $snapshotPath -Raw | ConvertFrom-Json
+$ui=Get-Content -LiteralPath (Join-Path $PSScriptRoot "$Phase-ui-clear.json") -Raw | ConvertFrom-Json
+if(-not $snapshot.Eligible -or -not $ui.NoActiveFileOperationObserved -or
+   [DateTimeOffset]$snapshot.Utc -gt [DateTimeOffset]::UtcNow -or [DateTimeOffset]$ui.Utc -gt [DateTimeOffset]::UtcNow -or
+   ([DateTimeOffset]::UtcNow-[DateTimeOffset]$snapshot.Utc).TotalSeconds -gt 60 -or
+   ([DateTimeOffset]::UtcNow-[DateTimeOffset]$ui.Utc).TotalSeconds -gt 60){throw 'Scope or fresh UI prerequisite missing'}
+$registration=Join-Path $PSScriptRoot '../explorer-live/20260910-cold-session'
+$guard=Join-Path $registration 'guard.ps1'
+if((Get-FileHash -LiteralPath $guard).Hash -cne '323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76'){throw 'Frozen guard mismatch'}
+$roots=@(& $guard -Action verify | ConvertFrom-Json)
+if($Phase -eq 'before'){
+    $registered=Get-Content -LiteralPath (Join-Path $registration 'register.json') -Raw | ConvertFrom-Json
+    if(-not $registered.Notification.Success -or
+       $registered.DllSha256 -cne 'F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96' -or
+       ([DateTimeOffset]$registered.DeadlineUtc-[DateTimeOffset]::UtcNow).TotalSeconds -lt 60 -or
+       (Test-Path -LiteralPath (Join-Path $registration 'stop')) -or
+       @($roots|Where-Object {$_.Hive -eq 'CurrentUser' -and $_.Present -and $_.Owner -ceq 'AssetLibrary.V03-006.OfficialSampleControl.20260910'}).Count -ne 4 -or
+       @($roots|Where-Object {$_.Hive -eq 'LocalMachine' -and $_.Present}).Count){throw 'First restart requires valid original registration and notification'}
+}else{
+    $cleanup=Get-Content -LiteralPath (Join-Path $registration 'cleanup.json') -Raw | ConvertFrom-Json
+    if(@($roots|Where-Object Present).Count -or @($cleanup.CleanupErrors).Count -or -not $cleanup.Notification.Success){throw 'Second restart requires registration cleanup and dual notification'}
+}
+$marker=Join-Path $PSScriptRoot "$Phase-stop-requested"
+$markerFile=[IO.File]::Open($marker,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);$markerFile.Dispose()
+$expected=@($snapshot.Targets|ForEach-Object {
+    $item=[ScopedExplorer+Identity]::new();$item.Pid=$_.Pid;$item.Session=$_.Session;$item.CreationFileTime=$_.CreationFileTime;$item.OwnerSid=$_.OwnerSid;$item
+})
+$expectedWindows=@($snapshot.Windows|ForEach-Object {
+    $item=[ScopedExplorer+WindowRecord]::new();$item.Pid=$_.Pid;$item.HwndHex=$_.HwndHex;$item.ClassName=$_.ClassName;$item.Visible=$_.Visible
+    $item.CompletedHiddenOperationCandidate=$_.CompletedHiddenOperationCandidate;$item.OperationCaptionCategory=$_.OperationCaptionCategory;$item
+})
+$result=[ScopedExplorer]::Stop([ScopedExplorer+Identity[]]$expected,[uint32]$snapshot.ShellPid,[ScopedExplorer+WindowRecord[]]$expectedWindows)
+$result | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $PSScriptRoot "$Phase-stop.json") -Encoding utf8
+$result | ConvertTo-Json -Depth 12
+if(-not $result.AllPlannedExited -or $result.Errors.Count){throw 'Scoped stop incomplete; inspect recorded result; do not broaden target set'}

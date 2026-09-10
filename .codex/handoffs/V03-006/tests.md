@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[冷启动纯准备](cold-session-preflight.md)：最终C# Add-Type编译和wrapper AST通过，只读inspect记录22同用户/会话/系统image/无debugger；WTS后变4及输入桌面Win32 5，Eligible=false。初始辅助窗/隐藏100%完成态拒绝原件保留；未调用Stop或启动注册，不能算冷启动/产品测试通过。完整工具边界及恢复前置已封存。
+
 新增[双模式属性控制](attribute-pidl-control.md)：严格原生构建、脚本AST/default validate通过，经主协调最终审查后仅一次run。A20+B26查询全S_OK/有效，顺序及前后22B/同SHA读回通过，两个进程各10秒外限均未触发；guard exit0/双通知/8根absent、probe退出确认，GUI0/附加0。46次属性查询不是46个产品测试，G1不计通过。
 
 恢复只读审计：78c0a23内27份属性轮原件的工作区/HEAD字节SHA均一致。调用链发现独立属性正控使用枚举child与28180000输入，host捕获匹配解析child且输入mask不同；尚无同对象同mask的两来源结果。仅补充结论边界及下一项建议，未执行新注册、GUI或附加，也未重跑未变业务套件。

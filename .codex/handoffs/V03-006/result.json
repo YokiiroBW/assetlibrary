@@ -496,7 +496,9 @@
     ".codex/handoffs/V03-006/attributes-debug-control/thispc-baseline.json",
     ".codex/handoffs/V03-006/attributes-debug-control/window-cleanup.json",
     ".codex/handoffs/V03-006/attribute-pidl-control.md",
-    ".codex/handoffs/V03-006/attribute-pidl-control/"
+    ".codex/handoffs/V03-006/attribute-pidl-control/",
+    ".codex/handoffs/V03-006/cold-session-preflight.md",
+    ".codex/handoffs/V03-006/cold-session-preflight/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -535,7 +537,8 @@
       "Shared ImageChildCleanupPendingException/Completion and bounded Core admission ownership",
       "Win32 AppContainer APIs and versioned private owner journal with verified artifact copying",
       "Existing owner-protected registration script and SHGetDesktopFolder/BindToObject/CreateViewObject APIs",
-      "Fixed MyComputer parent enumeration, Browse absolute parse route, opaque IL/CompareIDs APIs and immutable 323CD843/F298 owner guard"
+      "Fixed MyComputer parent enumeration, Browse absolute parse route, opaque IL/CompareIDs APIs and immutable 323CD843/F298 owner guard",
+      "Existing current-user process identity and debugger checks plus fixed F298/323CD843 registration guards; native WTS/input-desktop checks gate the authorized cold-session experiment"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -569,7 +572,8 @@
       "Independent bounded native CLSID/actual filesystem-path bind controls both return original class and one item; no tracked runtime source change or GUI actions",
       "Strict native E0 and Browse controller builds; actual-view SDK/target readbacks and creation-time mismatch refusal; original observer hash preserved",
       "Official unchanged sample control with original per-user fields: initial notification defect isolated, corrected STA notification and field readback precede one timed native navigation; owned cleanup confirmed",
-      "Two bounded independent attribute modes: 20 plus 26 successful queries, identical unchanged opaque PIDLs; strict native build and wrapper sequence/owner/lifetime/cleanup verification; GUI and debugger actions zero"
+      "Two bounded independent attribute modes: 20 plus 26 successful queries, identical unchanged opaque PIDLs; strict native build and wrapper sequence/owner/lifetime/cleanup verification; GUI and debugger actions zero",
+      "Cold-session preparation only: C# compiled, wrapper parsed, read-only preflight refuses WTSDisconnected and unavailable input desktop; no termination or registration executed"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -758,5 +762,20 @@
     "debugger_attachments": 0,
     "cleanup_verified": true,
     "production_changes": false
+  },
+  "cold_session_checkpoint": {
+    "report": "cold-session-preflight.md",
+    "status": "prepared_not_executed_session_disconnected",
+    "user_restart_authorization_received": true,
+    "session_connect_state": 4,
+    "input_desktop_error": 5,
+    "targets_observed": 22,
+    "stop_invocations": 0,
+    "registration_started": false,
+    "gui_input_actions": 0,
+    "source_compiled": true,
+    "wrapper_syntax_passed": true,
+    "requires_fresh_active_unlocked_desktop": true,
+    "background_io_absence_proven": false
   }
 }

@@ -1,0 +1,58 @@
+{
+  "Status": "prepared_not_executed_session_disconnected",
+  "FinalSourceSha256": "F36F1833BF16E36108DAAE7B87EA4B2F6249969A36BAF768FCC9BE12FB4817BF",
+  "WrapperSha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF",
+  "Artifacts": [
+    {
+      "File": "before-preflight.json",
+      "Sha256": "F8D86B58C0779C7075FE291C93FEC8376286DFE58F5509B09B2762BA65018F80",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/before-preflight.json",
+      "OriginalSha256": "7220D57FCEAE3073E59CD3923D6EBF0382B2266D828509ACCEAF4E3D28E9C62F"
+    },
+    {
+      "File": "preflight-disconnected-state4.json",
+      "Sha256": "CB4DAB51583BBEA8E44A95DFCE58A1046ECB0DF87E17BAB7127763141B3D67A9",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/preflight-disconnected-state4.json",
+      "OriginalSha256": "496A1A3879BD7B5A9C789B9BDB51325E6057B2B43B1174DF5478E95D60866FC5"
+    },
+    {
+      "File": "preflight-geometry-ineligible.json",
+      "Sha256": "1088D5669A17F0E2352195CB8E5F6F50AECA36248ED228C6BC6D36D35CDBFD5D",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/preflight-geometry-ineligible.json",
+      "OriginalSha256": "3B1213FF14A3BE0718444AE64872FB85F17D390FBB779418DB1651CA528F08B3"
+    },
+    {
+      "File": "preflight-inactive.json",
+      "Sha256": "8FDA9C886D427AB84A5F097E3D60C36784E16F73200D56DDAEF2B12367099B6B",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/preflight-inactive.json",
+      "OriginalSha256": "135E5C6EBE1BF00ABD9E929630D3DC72EEBAE7F29D0D2E31DDE956A3A293EE17"
+    },
+    {
+      "File": "preflight-initial-ineligible.json",
+      "Sha256": "623F6ABC0225FE75FCB0DCDC66A5AE32A2B979CCA9B9379656FFF938A2D305A8",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-cold-session-control/preflight-initial-ineligible.json",
+      "OriginalSha256": "B6B25973836954024007130BE8E27795A784049D9BB0DEA82E41CD3648095FB5"
+    },
+    {
+      "File": "scoped-restart.ps1.txt",
+      "Sha256": "448AB744EC8F0A7354A9871D92C5F5FBD158192A0315BFF92FC06BDF68958AAF",
+      "SourceKind": "unmodified_tool_source"
+    },
+    {
+      "File": "ScopedExplorer.cs.txt",
+      "Sha256": "F36F1833BF16E36108DAAE7B87EA4B2F6249969A36BAF768FCC9BE12FB4817BF",
+      "SourceKind": "unmodified_tool_source"
+    },
+    {
+      "File": "status.json",
+      "Sha256": "35933665C33797AE97A44264AF4F48D72972D99170209294E941BB64962902F0",
+      "SourceKind": "derived_status_summary"
+    }
+  ],
+  "IdentityHandling": "Raw identity snapshots remain only in runtime; repository snapshots are labeled redacted copies with original and copy SHA256 mapping."
+}

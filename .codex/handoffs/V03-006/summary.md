@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[当前用户Shell冷启动准备](cold-session-preflight.md)已编译/只读预检；用户授权已收到，但WTS Session2=4/Disconnected且输入桌面查询Win32 5，未注册/未stop/未GUI输入。受限工具持有精确身份句柄、固定集合/桌面最后、逐目标活动桌面复核与partial finally退出核验已准备。等待用户重连后全新preflight，不复用旧PID，G1未关闭。
+
 最新：[双模式同条件属性对照](attribute-pidl-control.md)已完成，A20/B26次全部S_OK；枚举/解析child完整22B相等且所有前后SHA不变，两模式及双查询顺序结果一致。20000000→20000000、2044007F→20000024，与旧host差异仍在；未推定根因或扩展变体。原guard双通知/8根及两probe清理确认，GUI0/附加0。
 
 恢复复核：[属性报告](attributes-debug-control.md)补充PIDL来源与请求mask差异，独立正控和host结果尚不是同输入对照；已向root提交下一项同对象对照建议，未执行新现场操作。78c0a23的27份原件工作区/HEAD哈希一致，G1仍partial。
