@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T02:19:50.280335+00:00",
-  "status": "resumed_register_first_gui_control_incomplete_after_quota_interruption",
+  "updatedAtUtc": "2026-09-10T02:43:20.003993+00:00",
+  "status": "register_first_control_complete_target_activation_observer_in_development",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Windows owner resumed in same thread; first commit stable staged evidence and reconcile old owned window, then only unfinished register-before-new-process GUI control under unchangedF298/correctSTA/4roots/600s guard. No repeated original authorization question or rerun of completed parent/loader checks.",
+  "active_instruction": "Windows GUI owner keeps site clean. Curie implements scoped target adapter and three-COM-API synthetic validation; root reviews before any real attachment. No repeat ordering/parent/loader controls.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -48,12 +48,12 @@
     "discovery": "fresh ThisPC2 items, no official sample",
     "browse": "one flags1 Browse17:17:56.192Z to fixed official42B PIDL; no-association modal/10s timeout, no returned HRESULT",
     "dll": "unchanged F298, no target sample module reported",
-    "cleanup": "owner completing; verify final-cleanup before integration"
+    "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Owner: two isolated no-GUI controls under corrected scoped registration: parent MyComputer enumeration BEFORE custom parse/bind, then separate direct-bind positive; bounded PIDLs/128items/10s, compare only official target; do not print unrelated names.",
-    "Curie: temporary DbgEng validation on self-created SynthTarget only in root .runtime/explorer-debug-control. No Explorer attachment authorized until reviewed normal/cancel/detach evidence.",
-    "Root: integrate raw evidence and obtain actual host activation/loading decisions only if lower-impact public-API controls leave ambiguity."
+    "Complete three-API scoped debugger adapter synthetic normal/cancel and identity/plan negative tests.",
+    "Review adapter source and actual attach/detach limits; only then coordinate one new owned Explorer observation with the Windows GUI owner.",
+    "Use observed target activation/load decisions to select a repair; G1..G4 and production Shell remain open."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -61,7 +61,8 @@
     "VBS": 2,
     "PID17740_modules": 223,
     "outsideWindowsModules": 0,
-    "meaning": "status/locations only; no full system-policy exclusion"
+    "meaning": "status/locations only; no full system-policy exclusion",
+    "folder_association": "No HKCU Folder open override; merged Folder open references SystemRoot explorer.exe with DelegateExecute11dbb47c-a525-400b-9e80-a54615a090c0. No association changes justified by this receipt."
   },
   "parent_discovery": {
     "with_includehidden": "3 items, official target matched once; target parse only after complete enumeration",
@@ -77,12 +78,19 @@
     "thispc_or_official_target_test": "not_completed",
     "reason": "Windows task hit usage limit; no product result for unfinished navigation",
     "registration_cleanup": "2026-09-09T17:55:44.2807826Z all4CU and4LM roots absent, no errors, correctSTA notify success",
-    "old_window_identity": "2885792/PID35732; must fresh-check before any cleanup, no stale-handle action"
+    "old_window_identity": "2885792/PID35732 fresh-checked and closed on resume; interrupted control retained without a target result."
   },
   "synthetic_debugger": {
     "status": "normal-final and cancel-final pass,18-file manifest independently verified",
     "existing_process_attachment": false,
     "actual_explorer_support": false,
     "limits": "No hard Attach/Detach guarantee or debugger-crash cleanup proof; no real target use without further scoped design/review"
+  },
+  "register_first_completed": {
+    "result": "Registration-before-new-Explorer control completed: registration02:25:12Z preceded PID24488 creation02:25:32Z; actual SDK/ThisPC positives passed, official entry absent, one Browse blocked by no-association modal with no returned HRESULT. All owned registration/windows cleaned. Root cause remains unknown; shared broker cold start was not established.",
+    "worker_commit": "e65781367d2da9ef7fb4053282dce8d33d3f68b9",
+    "integrated_commit": "1915b887fe1ddc687de15750aed78e518cbd0d6d",
+    "evidence": "../V03-006/register-first-control/evidence.json",
+    "raw_artifacts_verified": 18
   }
 }

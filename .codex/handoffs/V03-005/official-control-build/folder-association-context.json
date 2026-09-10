@@ -1,0 +1,186 @@
+{
+  "RecordedUtc": "2026-09-10T02:36:28.9957305+00:00",
+  "Scope": "Read-only six exact folder association keys in three hives; raw commands/arguments not retained",
+  "Rows": [
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Folder\\shell",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Folder\\shell\\open\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Folder\\shell\\opennewwindow\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Directory\\shell",
+      "Present": true,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Directory\\shell\\open\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Path": "Software\\Classes\\Directory\\shell\\explore\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Folder\\shell",
+      "Present": true,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Folder\\shell\\open\\command",
+      "Present": true,
+      "DefaultLength": 23,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": true,
+      "DelegateExecute": "{11dbb47c-a525-400b-9e80-a54615a090c0}",
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Folder\\shell\\opennewwindow\\command",
+      "Present": true,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": "{11dbb47c-a525-400b-9e80-a54615a090c0}",
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Directory\\shell",
+      "Present": true,
+      "DefaultLength": 4,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Directory\\shell\\open\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Path": "Software\\Classes\\Directory\\shell\\explore\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Folder\\shell",
+      "Present": true,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Folder\\shell\\open\\command",
+      "Present": true,
+      "DefaultLength": 23,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": true,
+      "DelegateExecute": "{11dbb47c-a525-400b-9e80-a54615a090c0}",
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Folder\\shell\\opennewwindow\\command",
+      "Present": true,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": "{11dbb47c-a525-400b-9e80-a54615a090c0}",
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Directory\\shell",
+      "Present": true,
+      "DefaultLength": 4,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Directory\\shell\\open\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    },
+    {
+      "Hive": "ClassesRoot",
+      "Path": "Directory\\shell\\explore\\command",
+      "Present": false,
+      "DefaultLength": 0,
+      "DefaultIsOpen": false,
+      "DefaultReferencesSystemExplorer": false,
+      "DelegateExecute": null,
+      "ExplorerCommandHandler": null
+    }
+  ]
+}

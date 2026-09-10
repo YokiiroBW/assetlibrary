@@ -78,6 +78,10 @@
     {
       "file": "user-mode-ci-status.json",
       "sha256": "158a00536d82f2c47e61d4f1079faf61d9d373d74c4d99c7fbe648f901fb074d"
+    },
+    {
+      "file": "folder-association-context.json",
+      "sha256": "7deb0c87e78972a6852bef6645369bb6263fa89e1725336413647c7a4cc0e943"
     }
   ],
   "independent_load_factory_class_and_unload": "all_S_OK_without_registration_or_GUI",

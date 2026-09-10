@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_register_first_control_resumed_after_quota_interruption",
-  "next_action": "Resume existing Windows owner from current-windows-work.json. Parent enumeration with and without INCLUDEHIDDEN both finds official sample; direct binding passes. Prior real Explorer source/official controls failed. Last registration-before-process experiment only completed new-process identity and SDK positive before task usage limit; cleanup succeeded, target result missing. User said continue; existing authorization persists. Commit staged stable Windows evidence, fresh-check old owned window, then complete the one unfinished ordering control. Synthetic-only DbgEng validation completed; no real process attachment supported or authorized by that helper. Do not repeat earlier successful checks or mislabel the interrupted control as failure.",
+  "status": "register_first_control_complete_target_activation_observer_in_development",
+  "next_action": "Registration-before-new-Explorer control completed: registration02:25:12Z preceded PID24488 creation02:25:32Z; actual SDK/ThisPC positives passed, official entry absent, one Browse blocked by no-association modal with no returned HRESULT. All owned registration/windows cleaned. Root cause remains unknown; shared broker cold start was not established. Windows GUI owner keeps site clean. Curie implements scoped target adapter and three-COM-API synthetic validation; root reviews before any real attachment. No repeat ordering/parent/loader controls.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

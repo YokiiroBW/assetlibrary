@@ -141,3 +141,9 @@ ae1的bc7c7ebf原生启用和注册正控成功，Kernel-Registry event4/version
 root补齐官方Category.cpp并校验全18 Git blobs，原样源码经外部CMake/原.def/x64 /MT /W4 /WX构建、4导出与F298 DLL强hash通过；限制DLL目录/System32的独立加载、factory/正确类ID和卸载条件均S_OK。合成DbgEng最终normal/cancel两场景均成功，18文件manifest独立核对；断点清除/Detach/同目标存活及无debugger/合作退出有实际记录。未附加Explorer，Attach/Detach硬期限及异常崩溃清理没有保证。早期失败保留，相关源码/命令/原件见各证据目录。没有重跑未变的业务套件或解除生产Shell门禁。
 
 恢复检查点最终diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-explorer-execution-checkpoint.log；原始构建日志末尾空行保留，使用该文件的whitespace属性容纳原件，没有改hash来掩盖字节变化。当前注册先行GUI对照仍在执行，此检查点不提前记录其结果。
+
+## 注册先行完整对照集成
+
+Windows e657813集成为1915b88；18份新原件SHA独立核对一致，纳入目录属性后diff --check通过。注册/进程创建顺序、SDK与ThisPC正控、唯一Browse超时且无返回HRESULT、仍ThisPC2项、模块未见及清理均保留原始结果。只读Folder关联记录归档，无HKCU Folder打开覆盖；没有修改注册关联。未重复旧成功构建/业务测试，未将诊断计作G1通过。
+
+本检查点最终diff审查后verify_repository通过，日志.runtime/v03-005-final-tests/repository-ordering-checkpoint.log；handoff/架构/契约与35项迁移及架构回归通过，发布门禁不变。

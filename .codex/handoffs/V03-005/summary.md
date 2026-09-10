@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows最高优先级，f7958b0已合入并核对106项原件。实际原型视图在地址栏及原生BrowseObject后仍为系统FS类/0项；完整官方F298样例在正确STA通知后仍无条目且打开阻塞于无关联模态。独立父级枚举含/不含hidden均3项、含官方且无隐藏属性，独立绑定成功。下一步只完成“注册之后创建新Explorer”的时序对照；旧轮只到SDK正控即额度中断，没有ThisPC/目标结果，注册已自动清理、旧自有窗恢复核对后关闭。完整18份官方源/构建/4导出/独立factory、合成DbgEng正常与取消验证均已完成，不代表真实入口通过。详见current-windows-work.json及official-control-build、synthetic-debug-control。G1..G4仍开放，无Windows安装包。
+1. Windows最高优先级。最新注册先行对照e657813已合入1915b88并独立核对18份原件：注册后新Explorer的SDK/ThisPC正控成功，但官方入口仍缺项，唯一Browse阻塞于无关联模态、没有返回HRESULT；现场全部清理。共享broker冷启动未被证实，根因仍未知。此前独立父级枚举/绑定成功与真实view失败记录均保留。下一步完成受限目标激活观测工具的三API合成验证和代码审查，再由Windows owner操作新自有窗口。G1..G4仍开放，无Windows安装包。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

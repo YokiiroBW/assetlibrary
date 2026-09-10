@@ -40,7 +40,7 @@
     "target_worker_status": "failed_before_ready_seccomp_unavailable",
     "decision": ".codex/handoffs/V03-005/nas-platform-decision.md"
   },
-  "windows_explorer_entry": "Actual original proof view is ShellFSFolder with0 items via address bar and same-frame BrowseObject. Unmodified official F298 control also fails discovery/open after a verifiedSTA notification. Independent MyComputer enumeration with and withouthidden returns3 items including official target, nonhidden; direct bind succeeds. Old register-first run ended atSDK positive due quota, no target result. Existing authorization persists; resume only unfinished ordering control.",
+  "windows_explorer_entry": "Registration-before-new-Explorer control completed: registration02:25:12Z preceded PID24488 creation02:25:32Z; actual SDK/ThisPC positives passed, official entry absent, one Browse blocked by no-association modal with no returned HRESULT. All owned registration/windows cleaned. Root cause remains unknown; shared broker cold start was not established.",
   "android_prior_candidate": {
     "path": ".runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1.apk",
     "sha256": "8461631cdd24fa077abe35794a92ab599cdff1036cfff7aa4cd743595fea158b",
@@ -60,5 +60,6 @@
   "windows_entry_research": ".codex/handoffs/V03-005/windows-entry-research/evidence.json",
   "windows_execution_checkpoint": "current-windows-work.json",
   "official_control_build": "official-control-build/evidence.json",
-  "synthetic_debug_control": "synthetic-debug-control/evidence.json"
+  "synthetic_debug_control": "synthetic-debug-control/evidence.json",
+  "windows_register_first_evidence": ".codex/handoffs/V03-006/register-first-control/evidence.json"
 }
