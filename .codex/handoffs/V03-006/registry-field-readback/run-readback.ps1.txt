@@ -1,0 +1,24 @@
+param([Parameter(Mandatory)][ValidateSet('expected-missing','expected-registered')][string]$Mode,[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$resultPath=Join-Path $PSScriptRoot "$Label.json"
+if(Test-Path -LiteralPath $resultPath){throw 'Readback label already exists; preserve prior result'}
+$start=[Diagnostics.ProcessStartInfo]::new((Join-Path $PSHOME 'pwsh.exe'))
+$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+foreach($argument in @('-NoProfile','-File',(Join-Path $PSScriptRoot 'read-fields.ps1'),'-Mode',$Mode)){$start.ArgumentList.Add($argument)}
+$child=[Diagnostics.Process]::new();$child.StartInfo=$start;$started=$false
+try{
+    if(-not $child.Start()){throw 'Standalone readback child failed to start'}
+    $started=$true;$childId=$child.Id;$creation=$child.StartTime.ToFileTimeUtc().ToString()
+    $output=$child.StandardOutput.ReadToEndAsync();$errors=$child.StandardError.ReadToEndAsync()
+    $timeout=-not $child.WaitForExit(10000)
+    if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Readback child exit unconfirmed'}}
+    $stdout=$output.GetAwaiter().GetResult();$stderr=$errors.GetAwaiter().GetResult()
+    [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Label=$Label;Mode=$Mode;ChildPid=$childId;CreationFileTime=$creation;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$stdout;Stderr=$stderr} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $resultPath -Encoding utf8
+    if($timeout -or $child.ExitCode -ne 0 -or $stderr){throw 'Readback did not match required state; original output preserved'}
+    $result=$stdout|ConvertFrom-Json
+    if(-not $result.ExpectedStateMatched){throw 'Readback validation failed'}
+    [ordered]@{Label=$Label;Mode=$Mode;ExpectedStateMatched=$result.ExpectedStateMatched;OfficialFields=$result.OfficialFieldCount;Owners=$result.DiagnosticOwnerCount;ExternalMergedFields=$result.ExternalMergedFieldCount;RegistryWrites=$result.RegistryWrites} | ConvertTo-Json
+}finally{
+    if($started -and -not $child.HasExited){$child.Kill();$null=$child.WaitForExit(3000)}
+    $child.Dispose()
+}

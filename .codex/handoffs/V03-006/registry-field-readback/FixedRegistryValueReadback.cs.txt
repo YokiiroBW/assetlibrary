@@ -1,0 +1,56 @@
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public static class FixedRegistryValueReadback {
+    [DllImport("advapi32.dll",CharSet=CharSet.Unicode)] static extern int RegOpenKeyEx(IntPtr root,string subkey,uint options,uint access,out IntPtr key);
+    [DllImport("advapi32.dll",CharSet=CharSet.Unicode)] static extern int RegQueryValueEx(IntPtr key,string name,IntPtr reserved,out uint type,[Out] byte[] data,ref uint length);
+    [DllImport("advapi32.dll")] static extern int RegCloseKey(IntPtr key);
+    public sealed class Result {
+        public int OpenStatus,MetadataStatus=-1,DataStatus=-1,CloseStatus=-1;
+        public bool KeyPresent,ValuePresent,DataValid;
+        public uint MetadataType,ActualType,RequiredBytes,ReturnedBytes;
+        public string State,ActualKind,ActualValue;
+    }
+    public static Result Read(string hive,string path,string valueName) {
+        if(!Environment.Is64BitProcess)throw new InvalidOperationException("Reader requires x64");
+        IntPtr root;
+        if(hive=="CurrentUser")root=new IntPtr(unchecked((int)0x80000001));
+        else if(hive=="ClassesRoot")root=new IntPtr(unchecked((int)0x80000000));
+        else throw new InvalidOperationException("Unsupported fixed readback hive");
+        var result=new Result();IntPtr key;
+        result.OpenStatus=RegOpenKeyEx(root,path,0,0x101,out key); // QUERY_VALUE | WOW64_64KEY only.
+        if(result.OpenStatus!=0){result.State=(result.OpenStatus==2||result.OpenStatus==3)?"missing-key":"key-open-error";return result;}
+        result.KeyPresent=true;
+        try {
+            uint type,length=0;
+            result.MetadataStatus=RegQueryValueEx(key,valueName,IntPtr.Zero,out type,null,ref length);
+            result.MetadataType=type;result.RequiredBytes=length;
+            if(result.MetadataStatus!=0){result.State=result.MetadataStatus==2?"missing-value":"value-metadata-error";return result;}
+            result.ValuePresent=true;
+            result.ActualKind=Kind(type);result.ActualType=type;
+            if(type!=1&&type!=4){result.State="unsupported-value-type";return result;}
+            if(length>4096){result.State="value-size-limit";return result;}
+            if((type==4&&length!=4)||(type==1&&(length<2||(length&1)!=0))){result.State="invalid-value-size";return result;}
+            byte[] bytes=new byte[length];uint returned=length,actualType;
+            result.DataStatus=RegQueryValueEx(key,valueName,IntPtr.Zero,out actualType,bytes,ref returned);
+            result.ActualType=actualType;result.ActualKind=Kind(actualType);result.ReturnedBytes=returned;
+            if(result.DataStatus!=0){result.State="value-data-error";return result;}
+            if(actualType!=type||returned!=length){result.State="value-changed-between-reads";return result;}
+            if(type==4){result.ActualValue="0x"+BitConverter.ToUInt32(bytes,0).ToString("X8");}
+            else {
+                if(bytes[bytes.Length-2]!=0||bytes[bytes.Length-1]!=0){result.State="missing-string-terminator";return result;}
+                string value=new UnicodeEncoding(false,false,true).GetString(bytes,0,bytes.Length-2);
+                if(value.IndexOf('\0')>=0){result.State="embedded-string-null";return result;}
+                result.ActualValue=value;
+            }
+            result.State="read";result.DataValid=true;return result;
+        }finally{
+            result.CloseStatus=RegCloseKey(key);
+            if(result.CloseStatus!=0){result.State="key-close-error";result.DataValid=false;}
+        }
+    }
+    static string Kind(uint type) {
+        switch(type){case 1:return "REG_SZ";case 2:return "REG_EXPAND_SZ";case 3:return "REG_BINARY";case 4:return "REG_DWORD";case 7:return "REG_MULTI_SZ";case 11:return "REG_QWORD";default:return "REG_TYPE_"+type;}
+    }
+}

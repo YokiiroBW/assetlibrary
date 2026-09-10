@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[固定11字段只读工具](registry-field-readback.md)已准备，C#编译/PS AST及未登记expected-missing通过：11官方+4Owner+5外部HKCR记录均missing-key/OpenStatus2，未调用guard/注册。DWORD规范化、类型/存在/实际值分开，无默认值替代；已登记值与其他负路径待后续周期验证。无GUI/attach/重启，待新observer准备合并。
+
 方案增补：已核root离线PDB的5个准确签名；ThisPC/F5可能先填cache，单盯_LoadValues容易零命中。唯一观察点优先考虑可覆盖cache-hit的消费/合并位置，具体仍待静态数据流冻结；void、DWORD与HRESULT/LSTATUS严格分开，不解码猜测私有结构。原始离线签名输出已保存，无实机操作。
 
 最新：[真实注册读取只读准备](registry-read-observation-plan.md)收敛为matched GetAttributesOf内一个准确读取边界，与outer callId配对；具体API/RVA等待root固定模块离线分析。已区分DbgEng与OS线程ID、异常/线程退出归属风险，并发现旧guard的presence/常量Attributes摘要及单向Assert-Tree不能证明11字段持续完整或host实际读值。下个获准周期补固定11字段只读读回，原guard不改；本轮无GUI/注册/attach/restart。

@@ -502,7 +502,9 @@
     ".codex/handoffs/V03-006/cold-session-execution.md",
     ".codex/handoffs/V03-006/cold-session-execution/",
     ".codex/handoffs/V03-006/registry-read-observation-plan.md",
-    ".codex/handoffs/V03-006/registry-read-preparation/"
+    ".codex/handoffs/V03-006/registry-read-preparation/",
+    ".codex/handoffs/V03-006/registry-field-readback.md",
+    ".codex/handoffs/V03-006/registry-field-readback/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -580,7 +582,8 @@
       "Two bounded independent attribute modes: 20 plus 26 successful queries, identical unchanged opaque PIDLs; strict native build and wrapper sequence/owner/lifetime/cleanup verification; GUI and debugger actions zero",
       "Cold-session preparation only: C# compiled, wrapper parsed, read-only preflight refuses WTSDisconnected and unavailable input desktop; no termination or registration executed",
       "One authorized cold-session control: 22/22 and 2/2 held processes exited, two new desktops each stable across two readbacks; actual entry remains failed; original observer cleanup and final module/registry/UI cleanup verified",
-      "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending"
+      "Read-only B41 scope and official 11-field registration source review; no new experiment, no observer/guard implementation change; exact inner read point remains pending",
+      "Fixed 11-field standalone read-only reader: C# compiled, PowerShell parsed, one expected-missing run records 20 missing keys including owners and external HKCR; no registration or observer run"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -823,5 +826,23 @@
     "exact_offline_signatures_reviewed": 5,
     "cache_hit_boundary_preferred": true,
     "observation_point_frozen": false
+  },
+  "registry_field_reader_checkpoint": {
+    "report": "registry-field-readback.md",
+    "status": "prepared_expected_missing_passed",
+    "official_fields": 11,
+    "owner_fields": 4,
+    "external_hkcr_fields": 5,
+    "missing_key_records": 20,
+    "native_open_status": 2,
+    "registered_value_paths_tested": false,
+    "compiled": true,
+    "ast_passed": true,
+    "timeout": false,
+    "guard_invoked": false,
+    "registry_writes": 0,
+    "gui_actions": 0,
+    "attachments": 0,
+    "restarts": 0
   }
 }

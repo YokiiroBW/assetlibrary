@@ -1,0 +1,38 @@
+param([Parameter(Mandatory)][ValidateSet('expected-missing','expected-registered')][string]$Mode)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$contractPath=Join-Path $repo '.codex/handoffs/V03-006/registry-read-preparation/official-field-contract.json'
+if((Get-FileHash -LiteralPath $contractPath).Hash -cne '63CC68C84E2E49B4AE9078E7A6EE474B795461BE68E464AA765E55E1E2A41A13'){throw 'Reviewed field contract changed'}
+$contract=Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
+if($contract.fields.Count -ne 11 -or $contract.hive -cne 'CurrentUser' -or $contract.view -cne 'Registry64'){throw 'Contract shape mismatch'}
+$dll=(Resolve-Path -LiteralPath (Join-Path $repo '.runtime/explorer-live/20260910-official-sample/ExplorerDataProvider.dll')).Path
+if((Get-FileHash -LiteralPath $dll).Hash -cne 'F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96'){throw 'Frozen DLL changed'}
+Add-Type -Path (Join-Path $PSScriptRoot 'FixedRegistryValueReadback.cs')
+$started=[DateTimeOffset]::UtcNow.ToString('o')
+$records=[Collections.Generic.List[object]]::new()
+function Add-Read([string]$group,[string]$hive,[string]$path,[string]$name,[string]$kind,[string]$expected){
+    $actual=[FixedRegistryValueReadback]::Read($hive,$path,$name)
+    $typeMatches=$actual.ValuePresent -and $actual.ActualKind -ceq $kind
+    $valueMatches=$actual.DataValid -and $actual.ActualValue -ceq $expected
+    $records.Add([ordered]@{Group=$group;Hive=$hive;View='Registry64';Path=$path;ValueName=$name;ExpectedType=$kind;ExpectedValue=$expected;TypeMatches=$typeMatches;ValueMatches=$valueMatches;Actual=$actual})
+}
+foreach($field in $contract.fields){
+    $path=[string]$field.path
+    if($path.Contains('\\')){throw 'Unexpected repeated path separator'}
+    $expected=if($field.expected -ceq '<FROZEN_F298_DLL_PATH>'){$dll}else{[string]$field.expected}
+    Add-Read 'official' 'CurrentUser' $path $field.valueName $field.type $expected
+}
+$ba16='Software\Classes\CLSID\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}'
+$ownerRoots=@($ba16,'Software\Classes\CLSID\{BB8F539D-3B97-4473-9E07-C8248C53248E}','Software\Classes\FolderViewSampleType','Software\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}')
+foreach($path in $ownerRoots){Add-Read 'diagnostic-owner' 'CurrentUser' $path 'AssetLibraryOwner' 'REG_SZ' 'AssetLibrary.V03-006.OfficialSampleControl.20260910'}
+foreach($field in $contract.fields){
+    $path=[string]$field.path
+    if($path -ceq $ba16 -or $path.StartsWith($ba16+'\',[StringComparison]::Ordinal)){
+        $expected=if($field.expected -ceq '<FROZEN_F298_DLL_PATH>'){$dll}else{[string]$field.expected}
+        Add-Read 'external-merged-view-not-explorer' 'ClassesRoot' $path.Substring('Software\Classes\'.Length) $field.valueName $field.type $expected
+    }
+}
+$shapeOk=@($records|Where-Object {$_.Group -eq 'official'}).Count -eq 11 -and @($records|Where-Object {$_.Group -eq 'diagnostic-owner'}).Count -eq 4 -and @($records|Where-Object {$_.Group -eq 'external-merged-view-not-explorer'}).Count -eq 5
+$matched=if($Mode -eq 'expected-missing'){@($records|Where-Object {$_.Actual.State -cne 'missing-key' -or $_.Actual.KeyPresent}).Count -eq 0}else{@($records|Where-Object {-not $_.TypeMatches -or -not $_.ValueMatches -or -not $_.Actual.DataValid}).Count -eq 0}
+[ordered]@{StartedUtc=$started;CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Mode=$Mode;ObserverPid=$PID;ProcessX64=[Environment]::Is64BitProcess;RegistryWrites=0;GuardInvoked=$false;ContractSha256=(Get-FileHash -LiteralPath $contractPath).Hash;ContractPathsUsedVerbatim=$true;OfficialFieldCount=11;DiagnosticOwnerCount=4;ExternalMergedFieldCount=5;MergedViewScope='Current standalone reader only; not an Explorer-process observation';ExpectedStateMatched=($shapeOk -and $matched);Records=$records} | ConvertTo-Json -Depth 10
+if(-not $shapeOk -or -not $matched){exit 1}

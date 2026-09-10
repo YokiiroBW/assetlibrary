@@ -1,0 +1,44 @@
+{
+  "RecordedUtc": "2026-09-10T14:36:14.911460+00:00",
+  "Status": "reader_prepared_missing_key_control_passed_no_registration",
+  "OfficialFields": 11,
+  "OwnerFields": 4,
+  "ExternalMergedFields": 5,
+  "ExpectedMissingValidated": true,
+  "RegisteredValuePathsRuntimeValidated": false,
+  "GuardInvoked": false,
+  "RegistryWrites": 0,
+  "Artifacts": [
+    {
+      "File": "FixedRegistryValueReadback.cs.txt",
+      "Sha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379",
+      "SourceKind": "unmodified_tool_source",
+      "OriginalRuntimePath": ".runtime/explorer-registry-readback/FixedRegistryValueReadback.cs"
+    },
+    {
+      "File": "read-fields.ps1.txt",
+      "Sha256": "F282B79AA0D121B4E0A60537E8A9603FAA25604145FF7DDF59597DD8946E3453",
+      "SourceKind": "unmodified_tool_source",
+      "OriginalRuntimePath": ".runtime/explorer-registry-readback/read-fields.ps1"
+    },
+    {
+      "File": "run-readback.ps1.txt",
+      "Sha256": "BA62DE638654AFAB91247E11810200A439876DB74E547888A718C3C04ECE587C",
+      "SourceKind": "unmodified_tool_source",
+      "OriginalRuntimePath": ".runtime/explorer-registry-readback/run-readback.ps1"
+    },
+    {
+      "File": "README.md.txt",
+      "Sha256": "9538B8BF67CBAA6E942DFAE8D572410A50F401CDB7FCDA243388E88C5DE54397",
+      "SourceKind": "unmodified_tool_source",
+      "OriginalRuntimePath": ".runtime/explorer-registry-readback/README.md"
+    },
+    {
+      "File": "unregistered-baseline.json",
+      "Sha256": "94B6023E209DFD92CCA5376923F9E877C729BBA53F5769C70329AE6F2D55E179",
+      "SourceKind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-registry-readback/unregistered-baseline.json",
+      "OriginalSha256": "7CE5FE198CF81CB98F9CEB9069F09BE4882E80E6FEE91568D8D977302B02940E"
+    }
+  ]
+}
