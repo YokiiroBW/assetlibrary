@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T06:27:18.826688+00:00",
-  "status": "cold_session_user_approved_preflight_in_progress",
+  "updatedAtUtc": "2026-09-10T06:41:55.328072+00:00",
+  "status": "cold_restart_authorized_waiting_active_desktop",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "User explicitly said 做吧 after the two-restart cold-session question and status explanation. Approval now covers restarting current-user Explorer before test and after cleanup, including original folder windows/taskbar. Sole Windows owner performs fresh identity/session/user/debugger/file-operation preflight and prepares bounded restart method for root review. No historical PID termination; no other apps, HKLM, policies or NAS changes.",
+  "active_instruction": "User approved two Explorer restarts. Preparation passed root and independent static review, but fresh native WTS state4/Disconnected and default-input-desktop access error5 prohibit execution. No cold-session registry directory or stop marker exists, no Explorer terminated. Await user RDP reconnect; authorization persists. Then new inspect/UI/registration are mandatory, no stale snapshots.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Review fresh owner preflight and bounded restart implementation.",
-    "Execute approved before/after cold-session test and verify desktop/taskbar restoration plus owned registration/debugger cleanup.",
-    "Assess actual result without closing remaining G1..G4 or release gates prematurely."
+    "Wait for active RDP/default desktop; do not ask for restart authorization again.",
+    "After reconnect, validate fresh scoped identities/windows and perform approved before/after cold-session plan.",
+    "Preserve the unexecuted status until actual stopped-process/new-desktop/cleanup evidence is available."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -236,11 +236,23 @@
     "planning_snapshot": "explorer-cold-start-preflight.json",
     "user_confirmation": {
       "status": "approved",
-      "user_message": "做吧",
+      "user_message": "鍋氬惂",
       "recordedUtc": "2026-09-10T06:27:18.826688+00:00",
       "scope": "Two current-user Explorer restarts as documented, with fresh preflight and original-window impact; no repeated permission request."
     },
     "original_processes_stopped": false,
-    "scope_note": "Planning snapshot contains background Explorer processes left alive after owned windows closed; prior UI/registry cleanup did not claim every Explorer process exited. No snapshot PID can be reused for termination without fresh identity/user/session checks."
+    "scope_note": "Planning snapshot contains background Explorer processes left alive after owned windows closed; prior UI/registry cleanup did not claim every Explorer process exited. No snapshot PID can be reused for termination without fresh identity/user/session checks.",
+    "execution_precondition": {
+      "wts_state": 4,
+      "meaning": "Disconnected",
+      "default_input_desktop_error": 5,
+      "observedUtc": "2026-09-10T06:39:36.6012472Z",
+      "registration_started": false,
+      "stop_requested": false,
+      "source_review_sha256": "f36f1833bf16e36108daae7b87ea4b2f6249969a36baf768fcc9be12fb4817bf",
+      "wrapper_review_sha256": "448ab744ec8f0a7354a9871d92c5f5fbd158192a0315bff92fc06bdf68958aaf"
+    },
+    "preparation_evidence": "../V03-006/cold-session-preflight/evidence.json",
+    "preparation_integrated_commit": "df6e41f"
   }
 }

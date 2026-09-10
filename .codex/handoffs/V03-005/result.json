@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "1d0032130a9fd3f96894396da2693e29eb0932d4",
+  "commit": "df6e41fcbfadbb10f10bb07571e68c50e838f290",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attributes-location/.gitattributes",
@@ -385,6 +385,17 @@
     ".codex/handoffs/V03-006/bind-iid-control/sdk-baseline.json",
     ".codex/handoffs/V03-006/bind-iid-control/thispc-baseline.json",
     ".codex/handoffs/V03-006/bind-iid-control/window-cleanup.json",
+    ".codex/handoffs/V03-006/cold-session-preflight.md",
+    ".codex/handoffs/V03-006/cold-session-preflight/.gitattributes",
+    ".codex/handoffs/V03-006/cold-session-preflight/ScopedExplorer.cs.txt",
+    ".codex/handoffs/V03-006/cold-session-preflight/before-preflight.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/evidence.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/preflight-disconnected-state4.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/preflight-geometry-ineligible.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/preflight-inactive.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/preflight-initial-ineligible.json",
+    ".codex/handoffs/V03-006/cold-session-preflight/scoped-restart.ps1.txt",
+    ".codex/handoffs/V03-006/cold-session-preflight/status.json",
     ".codex/handoffs/V03-006/environment-evidence.json",
     ".codex/handoffs/V03-006/explorer-20260909-interruption.md",
     ".codex/handoffs/V03-006/explorer-entry-20260909.md",
@@ -976,10 +987,11 @@
       "Restricted target observer:16-file runtime manifest independently verified; normal/cancel each3 API/context/HRESULT pairs, target-owned first-chance handling, six breakpoint removals, detach/liveness/no-debugger/cooperative exit checked.19 pure parser/ID/frame-predicate controls are not19 GUI cases. Archived source is diagnostic-only; no production dependency or permission change.",
       "v2 actual-mask regression and12-file manifest verified; real admission failure18 and bounded real capture27 raw artifacts independently hashed and integrated. One real capture30.844s/4096 nonmatches/0 official3-API matches; cleanup/target survival successful despite incomplete observation. See tests.md for timestamp and no-activation inference limits.",
       "Reference locator/observer frozen manifests verified and independent ABI/matching/mask/callId/cleanup review passed. Actual association21,Bind27,IID27,attributes27 raw receipts independently hashed/integrated. Exact property IIDs mapped from SDK; hostFOLDER absence is limited to parsed child/requested bits. Enum-vs-parse/mask confounds retained, not called pure-process/root-cause proof.",
-      "a118fbe controlled comparison integrated1d00321;25 raw digests verified,46 successful same-mask queries across two fresh processes and identical22B enum/parsed PIDLs with stable before/after hashes. Actual Explorer discrepancy remains; no root-cause/release claim. All registered task sites clean. Cold-session plan is unexecuted pending scope confirmation."
+      "a118fbe controlled comparison integrated1d00321;25 raw digests verified,46 successful same-mask queries across two fresh processes and identical22B enum/parsed PIDLs with stable before/after hashes. Actual Explorer discrepancy remains; no root-cause/release claim. All registered task sites clean. Cold-session plan is unexecuted pending scope confirmation.",
+      "Cold restart preparation232d753 integrateddf6e41f:8 archived artifacts and5 raw-to-redacted digest mappings independently verified. Root and independent static review approved held-handle identity/scope, partial-failure exit accounting, narrow window classification and per-target active/default desktop checks. Only compilation/AST/read-only inspection executed; WTSDisconnected blocks restart."
     ],
     "technical_debt": [
-      "Windows entry remains unaccepted. Controlled comparison leaves an Explorer classification discrepancy. User approved the two-restart cold-session plan; fresh preflight and scoped restart-tool review are in progress, not execution evidence. Background Explorer residency is distinguished from UI/registry cleanup.",
+      "Cold-session restart is explicitly user-authorized and its scoped preparation reviewed, but current WTSDisconnected/default desktop error5 blocks execution. Reconnect then perform fresh inspection; no original Explorer has been stopped. Product entry/root cause remains unresolved.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]

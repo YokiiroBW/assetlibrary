@@ -181,3 +181,7 @@ a118fbe合入1d00321，25份原件SHA独立核对。A20/B26共46query、两来�
 最终同条件比较检查点diff审查及verify_repository通过，日志.runtime/v03-005-final-tests/repository-controlled-comparison.log；此前已通过且未变的业务套件未重跑，发布门禁保持原状。
 
 用户在冷启动问题后回复做吧；已记录前后两次当前用户Explorer重启的扩展授权。工具准备/身份核验仍是未执行状态，不复用旧PID、不计入验收通过。
+
+冷启动准备232d753合入df6e41f，8项归档SHA及5项原件/脱敏副本映射核对一致；源码与wrapper经root/独立两轮静态复核，修复中途失败的退出确认，并保留逐目标活动会话/Default桌面门槛。仅编译、AST和只读inspect；最后WTS4/输入桌面错误5，无注册、无stop、无GUI输入。授权已获，等待重连不是等待重新授权。
+
+最终冷启动准备集成diff与verify_repository通过，日志.runtime/v03-005-final-tests/repository-cold-preparation.log。没有将断开会话下的只读准备计作重启或实机通过。
