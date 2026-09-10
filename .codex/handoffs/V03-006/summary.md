@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[完整请求IID元数据](bind-iid-control.md)已补齐，callId1为BC110B6D…/无pbc→80070490/null，callId2为886D8EEB…/有pbc→80004002/null；与旧类别轮一致。仅记录已匹配数据，具体接口由root按主源解释。捕获异常保护提前结束但两断点/Detach/存活清理成功，双通知/四根/自有UI已清理，G1仍partial。
+
 最新：[单绑定实机观测](bind-debug-control.md)取得两对官方PIDL匹配Bind调用，other IID分别在无/有pbc时返回80070490/80004002及null接口。约34秒callback异常保护提前结束，非完整60秒；不能把other直接解释成必需folder接口或认定pbc根因。两断点清零/Detach/目标存活无debugger成功，注册和自有UI已清理，G1仍未关闭。
 
 最新：[ASSOCCHANGED完整通知对照](assoc-notify-control.md)已在官方四根有效期内执行，原字段/F298/STA/600秒不变，注册和cleanup两通知均实际完成，但ThisPC仍缺官方项、唯一Browse仍无关联模态/超时，实际view仍ThisPC。现场已清理；不将void返回当所有缓存处理证明，不改写旧proof已有ASSOC调用事实，G1仍partial。

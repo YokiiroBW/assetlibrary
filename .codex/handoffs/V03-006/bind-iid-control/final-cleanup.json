@@ -1,0 +1,21 @@
+{
+  "Utc": "2026-09-10T04:38:30.3500762+00:00",
+  "GuardExitCode": 0,
+  "RootsCleaned": true,
+  "BothCleanupNotificationsCompleted": true,
+  "DebuggerCleanupVerified": true,
+  "TargetAliveWithoutDebuggerVerified": true,
+  "MatchedEntries": 2,
+  "MatchedReturns": 2,
+  "FirstRequestedIid": "{BC110B6D-57E8-4148-A9C6-91015AB2F3A5}",
+  "SecondRequestedIid": "{886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99}",
+  "BrowseCalls": 1,
+  "BrowseTimedOut": true,
+  "FullSixtySecondsObserved": false,
+  "ActualViewClass": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+  "ActualViewItemCount": 2,
+  "TargetSampleModuleObserved": false,
+  "BindContextContentsNotRead": true,
+  "IidInterpretationDelegatedToCoordinator": true,
+  "FurtherVariants": 0
+}

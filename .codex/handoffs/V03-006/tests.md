@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[完整IID轮](bind-iid-control.md)：同一已审查场景仅增加请求IID输出，2对callId/完整GUID/pbc/HRESULT/null关系已记录；未扩大目标读取或上限。约29.75秒异常保护早停不计完整60秒，两断点清零/Detach/存活无debugger及有效注册期view/模块读回、最终双通知/四根/自有UI清理均完成。无接口身份猜测或关联修改。
+
 新增[单Bind观测](bind-debug-control.md)：实际reference/系统候选校验和ready成立，唯一Browse触发两对callId关联（other/pbcfalse→80070490/null；other/pbctrue→80004002/null）。后续异常保护提前结束，非60秒通过；两断点删除、数量0、Detach、同目标存活无debugger均确认。有效期view仍ThisPC2项，双通知/四根与自有UI清理完成；不重跑或提高上限。
 
 新增[双通知对照](assoc-notify-control.md)：候选hash及最小diff核准；注册/cleanup的UPDATEDIR与ASSOC在同一STA线程各自Invoked/Returned/Joined成功，原字段不变。SDK/ThisPC正控通过，唯一Browse10秒超时/实际无关联模态，有效期view仍ThisPC2项；最终四根与自有UI清理。未附加debugger或重跑旧套件，不计G1通过。
