@@ -227,3 +227,7 @@ short-key-open归档60件（43原字节/17明确脱敏），root重核75个来�
 ## 自有Shell登记来源防误报修正集成
 
 ad84644合入4479bcb。root审查12文件的完整改动：写前执行来源准入、null owner保留、始终区分当前视图与真实系统注册/清理、原通知STA/COM与失败回滚。worker已通过19个上下文/报告案例、2个入口接线检查、17项Shell契约与帮助类型编译；这些成功输入未变，不重复执行。合并后的仓库验证通过，日志.runtime/v03-005-final-tests/repository-native-context-integration.log。自身4FF扩展的包外实机验证仍由Windows owner准备，未把此代码修正或微软样例恢复计作G1..G4关闭。
+
+## 自有最小Shell真实入口与清理信号
+
+bafd144合入f1443a0，self token QUERY|DUPLICATE查询修复及原始probe流留证已复核。worker verify-02实际普通Explorer父来源全部成立，独立COM/DefView和同进程清理通过；source对应运行的stdout310字节、stderr0、exit0/无timeout/流完成/退出确认。root读取本次cycle原件确认：target10088正常GUI双击后actual4FF/22B PIDL binary与canonical相等/1项；后续同包外guard清理、另一包外reader9字段missing、实际Desktop00021400/2B/32项及CUA入口消失，guard进程不存在。owner报告两自有窗口已关并移交GUI权，原desktop未重启。证据归档由V03-006继续完成，不将最小test-only闭环计作AssetHost/Core/G2..G4或完整客户端通过。

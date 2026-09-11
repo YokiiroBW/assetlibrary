@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-11T14:37:03.077058+00:00",
-  "status": "windows_registry_view_boundary_proven_official_entry_recovered_product_pending",
+  "updatedAtUtc": "2026-09-11T15:29:43.935499+00:00",
+  "status": "windows_own_minimal_explorer_entry_cleanup_passed_host_integration_pending",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. The Windows owner test-only execution-context fix is integrated as4479bcb; validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
+  "active_instruction": "The registry-view environment blocker is resolved. The own test-only extension now passes actual Explorer discovery, normal GUI entry into class4FF/22-byte PIDL/one sample library, and outside-view unregister/9 missing fields/Desktop return to32 items. Archive and integrate owner evidence, then define the next bounded AssetHost/real Core read-only integration work. Remaining performance, failure recovery,20-cycle/eight-hour stability and production release gates are not closed.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Review and integrate the Windows owner minimal registration/verification execution-context fix and effective regression checks.",
-    "Assign one GUI operator for a fresh AssetLibrary test-only Shell proof using the observed Explorer launch route, with native registration/readback/cleanup evidence.",
-    "Keep production installer, AssetHost integration and remaining G1..G4 distinct from the successful Microsoft sample control."
+    "Integrate the Windows owner immutable own-proof runtime handoff after checking source/copy hashes and limits.",
+    "Prepare the next minimal AssetHost and real Core read-only integration under ADR-0018; no production Shell or unapproved contract expansion.",
+    "Keep the actual20-cycle,8-hour,latency,cancellation and fault-recovery gates explicit."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -400,9 +400,26 @@
     "code_integrated_commit": "4479bcb",
     "code_review": "Root reviewed complete implementation, notification rollback, null-owner preservation, 19 policy/report cases and 2 pre-registry wiring checks; worker tests passed and unchanged checks not repeated.",
     "plan": "../V03-006/proof-native-registration-plan.md",
-    "stage": "Windows owner preparing one native-context own-proof cycle; thin guard/field-reader source review required before registration.",
-    "gui_owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+    "stage": "Own test-only actual Explorer entry and unregister loop passed; Windows owner archiving evidence, no new GUI action.",
+    "gui_owner_thread": null,
     "root_gui_stopped": true,
-    "allowed_scope": "Fresh broker/target; original own-proof 4FF CLSID and 2 HKCU roots/values, ordinary-user execution, 600-second cleanup, actual 4FF/root PIDL/one sample library, native cleanup readback. No original Explorer restart."
+    "allowed_scope": "Fresh broker/target; original own-proof 4FF CLSID and 2 HKCU roots/values, ordinary-user execution, 600-second cleanup, actual 4FF/root PIDL/one sample library, native cleanup readback. No original Explorer restart.",
+    "query_and_capture_fix": {
+      "worker_commit": "bafd144f3ead73af8c4608c78ab46fa88383396c",
+      "integrated_commit": "f1443a0",
+      "root_review": "Source/diff reviewed; 15 runtime artifacts and 5 project hashes verified before authorization. Self token query+duplicate only, parent query unchanged; raw stream/exit evidence preserved, timeout remains failure; guard TTL begins before registration and native HKLM2-root preflight stays read-only.",
+      "prior_result": "First independent verify refused before registration due SecurityException in own-token membership query; original record retained.",
+      "current_result": "Read-only query comparison confirms fix; own proof native verify-02 and real GUI pending."
+    },
+    "verified_runtime": {
+      "cycle": "../V03-006 proof-native-01 archive pending",
+      "target_pid": 10088,
+      "target_creation_filetime": "134336135445905668",
+      "target_hwnd": 263622,
+      "independent_verify": "verify-02 passed in observed ordinary Explorer-launched context; raw streams and exit metadata saved",
+      "actual_entry": "One normal GUI double-click; actual class4FF8301D-2E73-4D49-9FE5-868D5F1EA302;22-byte PIDL binary/canonical equal;1 sample library; observer proof module absent",
+      "cleanup": "Same outside guard unregistered;independent outside9fields missing;actual Desktop00021400/2-byte PIDL/32items, proof label absent;guard process absent;owned target/broker windows closed by owner",
+      "scope": "Test-only own proof; no AssetHost/Core integration or G2..G4/release completion claim"
+    }
   }
 }
