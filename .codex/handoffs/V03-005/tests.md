@@ -211,3 +211,7 @@ a118fbe合入1d00321，25份原件SHA独立核对。A20/B26共46query、两来�
 short-key-open归档60件（43原字节/17明确脱敏），root重核75个来源含排除/重复源。第一次18行plan附加前拒绝；修正生成器320B样例与10负例后第二次11行321B已执行ready/原通知/首次ThisPC。other阈值40080201在25.813秒触发（81=64+17），26.797秒结果、cleanup总177=132+45、second0；0match/3896discard。nativeThisPC为3项、在capture结果后15.05ms启动，不宣称完整导航覆盖；Browse未dispatch且独立拒绝回执未保存，限制原样记录。两cycle前后20字段匹配、清理后20missing/8根/双通知、自有窗关闭均核对。SDK roerrorapi.h294明确此码为EXCEPTION_RO_ORIGINATEERROR，未记录其payload或caller，不作根因推断。
 
 最终仓库验证日志：.runtime/v03-005-final-tests/repository-key-open-final.log。没有重跑未改产品套件或关闭G1..G4。
+
+## 2026-09-11 文献优先对照
+
+复核微软官方机制、同ExplorerDataProvider的Q&A亲历案例、失败缓存原始复现及官方仓库#349/PR#332的适用范围；与已有09-09进程/策略、09-10 UAC和冷重启证据比较。无新本地动态取证、产品代码、注册、GUI或系统策略修改。研究文档链接与JSON结构核对；最终仓库验证日志：.runtime/v03-005-final-tests/repository-literature-final.log。未重跑既有成功产品套件，未关闭Windows验收门禁。

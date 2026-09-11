@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "0d9e84fd354841396a834e1bbb2cd2e687bd7a6e",
+  "commit": "7eae45a6068d87fec043ed2831727328e9719af9",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attribute-read-path/.gitattributes",
@@ -204,6 +204,7 @@
     ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/bc7c7ebfff2b4e47bec098fb0a94bae7.plan.json",
     ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/evidence.json",
     ".codex/handoffs/V03-005/explorer-kernel-pid-reproduction/limitations.md",
+    ".codex/handoffs/V03-005/explorer-literature-20260911.md",
     ".codex/handoffs/V03-005/explorer-process-context.json",
     ".codex/handoffs/V03-005/explorer-process-context.ps1.txt",
     ".codex/handoffs/V03-005/explorer-second-launch/.gitattributes",
@@ -1446,10 +1447,11 @@
       "Cold restart preparation232d753 integrateddf6e41f:8 archived artifacts and5 raw-to-redacted digest mappings independently verified. Root and independent static review approved held-handle identity/scope, partial-failure exit accounting, narrow window classification and per-target active/default desktop checks. Only compilation/AST/read-only inspection executed; WTSDisconnected blocks restart.",
       "Cold execution 3474209 integrated 3d3dbd1: 48 archived artifacts/raw-source mappings independently hashed; root and independent read-only review confirmed22/2 held-handle exits, automatic new desktop identities,28.485s bounded failed capture with successful cleanup, and unchanged entry/FOLDER failure.27 pure classification cases with files;20 independent in-memory review cases are not GUI evidence. No product contract/dependency/gate changes.",
       "Fixed-version consumer analysis/source review integrated;33 failed-reference and59 V2 archive artifacts/source mappings independently verified. Per-call reference/real cache divergence and full cleanup reviewed; no product source, dependency, permission model or release gate changed.",
-      "RegOpen preparation/reference/caller mapping and60/45 owner artifacts reviewed, plus60 short artifacts and75 source identities. C++ budget50pure/three own-reference controls retain failed threshold semantics; corrected short remains inconclusive after SDK-mapped WinRT notification threshold. Full cleanup verified; no product source/contract/system-policy changes."
+      "RegOpen preparation/reference/caller mapping and60/45 owner artifacts reviewed, plus60 short artifacts and75 source identities. C++ budget50pure/three own-reference controls retain failed threshold semantics; corrected short remains inconclusive after SDK-mapped WinRT notification threshold. Full cleanup verified; no product source/contract/system-policy changes.",
+      "Literature-first diagnosis review: official COM/context and Shell contracts plus original similar cases checked against historical local evidence. Documentation/state only; no product dependency, contract, permission or gate changes; no new live action. See explorer-literature-20260911.md and tests.md."
     ],
     "technical_debt": [
-      "All latest test sites and owned windows cleaned; no operator is running a new cycle. Real cache divergence remains established, but exact key-open calls are still unobserved. The corrected short trace reached ready/notification/ThisPC, then other-first-chance threshold code40080201 ended it before Browse;0 matches/3896 discards is inconclusive. Next review SDK-documented WinRT debugger notification classification and a narrower or less intrusive observation boundary; do not repeat unchanged global RegOpen captures or simply increase thresholds. No system policy or original Explorer restart is authorized by this next-step note.",
+      "Literature-first review completed in explorer-literature-20260911.md. Similar firsthand cases cover UAC/per-user COM and failure caching, but historical local medium-integrity/UAC-on and failed cold-restart evidence prevent direct attribution. Prefer read-only current identity/context checks and a reviewed bounded Microsoft Process Monitor capture before any further internal breakpoint. No live action, registration, original Explorer restart or system-policy change occurred in this review.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]

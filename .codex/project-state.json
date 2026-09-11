@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_key_open_trace_inconclusive_scene_clean",
-  "next_action": "All latest test sites and owned windows cleaned; no operator is running a new cycle. Real cache divergence remains established, but exact key-open calls are still unobserved. The corrected short trace reached ready/notification/ThisPC, then other-first-chance threshold code40080201 ended it before Browse;0 matches/3896 discards is inconclusive. Next review SDK-documented WinRT debugger notification classification and a narrower or less intrusive observation boundary; do not repeat unchanged global RegOpen captures or simply increase thresholds. No system policy or original Explorer restart is authorized by this next-step note.",
+  "status": "windows_literature_review_complete_native_entry_unresolved",
+  "next_action": "Literature-first review completed in explorer-literature-20260911.md. Similar firsthand cases cover UAC/per-user COM and failure caching, but historical local medium-integrity/UAC-on and failed cold-restart evidence prevent direct attribution. Prefer read-only current identity/context checks and a reviewed bounded Microsoft Process Monitor capture before any further internal breakpoint. No live action, registration, original Explorer restart or system-policy change occurred in this review.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,7 +87,7 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "windows_key_open_trace_inconclusive_scene_clean",
+    "stage": "windows_literature_review_complete_native_entry_unresolved",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "User approved and completed before/after current-user Explorer restarts; continued diagnostic work remains scoped and reversible.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
