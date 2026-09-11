@@ -1,0 +1,19 @@
+{
+  "status": "partial_root_data_passed_child_default_navigation_failed_cleaned",
+  "registration": "two owned native HKCU roots",
+  "root_data": "actual 4FF class/22 byte PIDL/one real Core fixture library",
+  "child_navigation": "GUI double click selected the library but remained at root",
+  "shell_sha256": "8DAF4C9BCCD5DFDD52EA19180409CDE154BCF649069772CF19C9C57A8AA3A304",
+  "host_sha256": "367B5AB07B3E8DFFBF15A17300191DF4C00608ACC2AEF045F4B7FFEC068499C9",
+  "cleanup": {
+    "same_executor": true,
+    "native_missing_fields": 9,
+    "actual_desktop_items": 32,
+    "entry_absent": true,
+    "target_window_closed": true,
+    "guard_exited": true,
+    "host_normal_logout_and_exit": true,
+    "broker_retained_for_next_cycle": true
+  },
+  "next": "Implement native default open command and validate new owned Explorer window. Existing Core fixture remains running."
+}

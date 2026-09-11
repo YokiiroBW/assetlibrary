@@ -1,0 +1,47 @@
+{
+  "Utc": "2026-09-11T17:43:31.6280100+00:00",
+  "DeadlineUtc": "2026-09-11T17:53:31.6280100+00:00",
+  "ExecutorPid": 21676,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 21232,
+    "ExecutorCreationFileTime": "134336222110211693",
+    "ParentCreationFileTime": "134336202676968473",
+    "ErrorType": null
+  },
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof",
+    "RegistryView": "current-process",
+    "NativeLaunchRouteVerified": true,
+    "SystemExplorerRegistrationVerified": false,
+    "SystemExplorerCleanupVerified": false,
+    "ExecutionContext": {
+      "QuerySucceeded": true,
+      "Is64Bit": true,
+      "PackageIdentityAbsent": true,
+      "ParentIsSystemExplorer": true,
+      "SameUser": true,
+      "SameSession": true,
+      "ParentPredatesExecutor": true,
+      "OrdinaryUser": true,
+      "PackageIdentityStatus": 15700,
+      "ParentPid": 21232,
+      "ExecutorCreationFileTime": "134336222110211693",
+      "ParentCreationFileTime": "134336202676968473",
+      "ErrorType": null
+    }
+  },
+  "DllPath": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\shell-build\\Release\\AssetLibraryExplorerProof.dll",
+  "DllSha256": "8DAF4C9BCCD5DFDD52EA19180409CDE154BCF649069772CF19C9C57A8AA3A304",
+  "Scope": "Original 4FF proof two HKCU roots in this verified external executor"
+}

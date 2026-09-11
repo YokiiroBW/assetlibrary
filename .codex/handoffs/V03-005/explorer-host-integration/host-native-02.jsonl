@@ -1,0 +1,15 @@
+{"operation":"host","status":"ready","elapsed_ms":0}
+{"operation":"core_page","status":"Ready","elapsed_ms":10}
+{"operation":"core_page","status":"Ready","elapsed_ms":3}
+{"operation":"core_page","status":"Ready","elapsed_ms":9}
+{"operation":"core_page","status":"Ready","elapsed_ms":4}
+{"operation":"core_page","status":"Ready","elapsed_ms":3}
+{"operation":"core_page","status":"Ready","elapsed_ms":2030}
+{"operation":"core_page","status":"Ready","elapsed_ms":2028}
+{"operation":"core_page","status":"Ready","elapsed_ms":3}
+{"operation":"core_page","status":"Ready","elapsed_ms":2052}
+{"operation":"core_page","status":"Ready","elapsed_ms":5}
+{"operation":"core_page","status":"Ready","elapsed_ms":5}
+{"operation":"core_page","status":"Ready","elapsed_ms":3}
+{"operation":"logout","status":"server_revoked","elapsed_ms":0}
+{"operation":"session","status":"local_clear","elapsed_ms":0}

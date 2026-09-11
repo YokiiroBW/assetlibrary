@@ -1,0 +1,72 @@
+{
+  "status": "default_open_and_folder_icon_passed_library_render_loading_gap_cleaned",
+  "shell_source": "71a43fa",
+  "shell_sha256": "7F5871AC05A5D411D4F9ED6DFC951FA02568A3EAF9D758850628C1508C72810C",
+  "host_source": "5de9017",
+  "native_interop_counts": [
+    1,
+    101,
+    38,
+    1
+  ],
+  "actual_library_pidl_bytes": 88,
+  "default_doubleclick_same_window": true,
+  "cold_content_ready_render": false,
+  "readiness_limit": "Manual refresh misses a five-second Ready window; root approved bounded view-local loading refresh, without weakening Core freshness.",
+  "observer_limit": "Observer loaded proof DLL while reading descendant display names; do not claim observer stayed module-free. View/PIDL are obtained from verified target IFolderView.",
+  "cleaned": true,
+  "native_missing_fields": 9,
+  "actual_desktop_items": 32,
+  "owned_target_window_closed": true,
+  "host_logout_and_exit": true,
+  "artifacts": [
+    {
+      "file": "interop-native.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/interop-native.json",
+      "sha256": "c55ee5ad8e0ab4ab175f2ecffeb2a7f26cf816da081135831500607430daa3f2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "root-ready.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/root-ready.json",
+      "sha256": "19b3a05c8156b261a3993ac3445d78a2392ca9b7ab57da1fe1efe0a5a8acedb3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "library-entered.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/library-entered.json",
+      "sha256": "9813e4f8280fed3e5edfa2b7a7e66e9902b2b3d866d0241cdeab1e9781e2534b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "library-loading-final.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/library-loading-final.json",
+      "sha256": "f12aff1b9c3262572f8a7a0ce3476b23b53fe12d3f12a1eaa3c006e2bf8b68e7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "register.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/register.json",
+      "sha256": "e3598c603b88f5900d607e654d28b6633307191672286555c353886190fee65f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/cleanup.json",
+      "sha256": "8664bcb1db83dfee510f920f67d82204815dcb28ca3762de246a3f2c62d2eb86",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "native-after-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/native-after-cleanup.json",
+      "sha256": "3a296a49bf5239b2b84ddb929e0008220752e4c56ae1ee18fc25e106b1834854",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-after-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-02/desktop-after-cleanup.json",
+      "sha256": "a9f3e850161ba588f971c972e1ec8e9eac34e0bff7bda6239920ef9aab2ee550",
+      "kind": "unmodified_copy"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "bytes": 33832359,
+  "counts": [
+    {
+      "operation": "core_page",
+      "status": "Ready",
+      "count": 3
+    },
+    {
+      "operation": "host",
+      "status": "ready",
+      "count": 1
+    },
+    {
+      "operation": "pipe_exchange",
+      "status": "InvalidResponse",
+      "count": 463452
+    },
+    {
+      "operation": "logout",
+      "status": "server_revoked",
+      "count": 1
+    },
+    {
+      "operation": "session",
+      "status": "local_clear",
+      "count": 1
+    }
+  ],
+  "non_pipe_events": [
+    {
+      "operation": "core_page",
+      "status": "Ready",
+      "elapsed_ms": 11
+    },
+    {
+      "operation": "host",
+      "status": "ready",
+      "elapsed_ms": 0
+    },
+    {
+      "operation": "core_page",
+      "status": "Ready",
+      "elapsed_ms": 2050
+    },
+    {
+      "operation": "core_page",
+      "status": "Ready",
+      "elapsed_ms": 9
+    },
+    {
+      "operation": "logout",
+      "status": "server_revoked",
+      "elapsed_ms": 0
+    },
+    {
+      "operation": "session",
+      "status": "local_clear",
+      "elapsed_ms": 0
+    }
+  ],
+  "raw_log_not_archived": true
+}

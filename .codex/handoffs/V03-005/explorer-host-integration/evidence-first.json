@@ -1,0 +1,93 @@
+{
+  "status": "partial_real_pipe_and_root_gui_passed_default_child_open_failed",
+  "source_commits": {
+    "host": "5de9017",
+    "shell": "e896ebd"
+  },
+  "raw_failed_pipe_log": {
+    "sha256": "99b3a4a6c441165526e1a7056492c1225599bad6ea6de92c85fa429f9175d312",
+    "bytes": 33832359,
+    "kept_only_in_runtime": true
+  },
+  "artifacts": [
+    {
+      "file": "interop-first-summary.json",
+      "source": ".runtime/explorer-host-integration/interop-first-summary.json",
+      "sha256": "efaabe63b23646039f50f24d496324fee54d8e9359cd50071918bc6b3a07b8dc",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-first-summary.json",
+      "source": ".runtime/explorer-host-integration/desktop-first-summary.json",
+      "sha256": "e134db87781c4a7b091a1fd08666c9309e6d351229387a2896992b856175d12e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "interop-native-02.json",
+      "source": ".runtime/explorer-host-integration/desktop/interop-native-02.json",
+      "sha256": "f414785cfdc4ef77be8f3981f9beb08b2e60107953f901ef929dd840c43bcc83",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "root-loading.json",
+      "source": ".runtime/explorer-host-integration/desktop/root-loading.json",
+      "sha256": "9861599b2bf1534408c3be4cba90001fb831b7aa6b921cbf52085a172d36746e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "root-ready.json",
+      "source": ".runtime/explorer-host-integration/desktop/root-ready.json",
+      "sha256": "d2ae85b35fa72c8a6e822aa6c1c1a4f3496581dfab14cd598d7319978918b222",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "library-doubleclick.json",
+      "source": ".runtime/explorer-host-integration/desktop/library-doubleclick.json",
+      "sha256": "c8efe8d9442a202ffc0e885a821156d379de8428e494dee646b7e15a40606c8e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "register.json",
+      "source": ".runtime/explorer-host-integration/desktop/register.json",
+      "sha256": "fbeacffa68d95d00da0e140c9b7179af14bdedc07959158ada0d9c75f5b0651e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop/cleanup.json",
+      "sha256": "9df6e0f570ab195bef375e3d926dc46872730be3a85186f1079ecb5796e91256",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "native-before-register.json",
+      "source": ".runtime/explorer-host-integration/desktop/native-before-register.json",
+      "sha256": "1976d69d12efb5f7a9bb83215d3676f0575ad0da33d0ee725c5a54bcea349e52",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "native-fields-registered.json",
+      "source": ".runtime/explorer-host-integration/desktop/native-fields-registered.json",
+      "sha256": "051085be89d9040e1bee52f7a0820876040328b6a475f4e25173735eb09d49f5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "native-after-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop/native-after-cleanup.json",
+      "sha256": "a661a63d1fbeb40d0f38e49c2a0561d638f4a9a7a7ca64c8923cafbede63b90c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-after-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop/desktop-after-cleanup.json",
+      "sha256": "aeba76487892e7db0993f4055d59b8947e26f9caecf2fd51ccfd961ce0995908",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-native-02.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop/host-native-02.stdout.jsonl",
+      "sha256": "57c4fa8be9e7ee43c40712b6d98bcdbca9765656abd15706295d4a94cf00f6f9",
+      "kind": "unmodified_copy"
+    }
+  ],
+  "limits": "This archive records the first GUI cycle only; child navigation did not succeed. Core fixture and owned SDK broker remain for the next fixed build."
+}

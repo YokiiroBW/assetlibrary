@@ -1,6 +1,6 @@
 {
   "updatedAtUtc": "2026-09-11T17:05:17.116151+00:00",
-  "status": "windows_explorer_real_core_host_integration_in_progress",
+  "status": "windows_gui_native_directory_open_passed_loading_autorefresh_in_progress",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "User requested integration. Contract read-only-snapshot-v1 frozen at 7016377/e325e7e. V03-006 implements native C++ Shell; V03-010 implements external AssetHost in an isolated worktree; V03-005 coordinates real HTTPS Core and Explorer acceptance. No production release gate closure.",
+  "active_instruction": "Real native4FF root and doubleclick library88B in sameExplorer verified; stockfoldericons correct. ManualF5/5secondfreshness leftLoading painted, so root approved bounded per-view500ms/10s/20attempt/4view refresh callback preserving150msIPC and CoreTTL. SecondGUIcycle cleaned9fields/Desktop32/target24008closed/Hostlogout, broker21232 retained. Core fixture expires2026-09-11T19:01:36Z; stop/renew under root ownership.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",

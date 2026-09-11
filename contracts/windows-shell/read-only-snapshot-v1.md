@@ -24,6 +24,8 @@ Response payload: status u32, current host epoch GUID (16), item count u32, then
 
 Record: node GUID (16), kind u16, name length u16 in UTF-16 code units, then the exact UTF-16LE display name without terminator. Name length 1..255. Kind: 1 Library, 2 Directory, 3 File, 4 Reparse (not navigable), 5 NextPage. Only 1/2/5 are navigable. No write/drop/rename/delete/paste capabilities. PIDLs carry epoch, node, kind and validated display text, never Core paths. Stale names from an already displayed PIDL are not proof of current permission or existence.
 
+Shell parsing names must round-trip in a fresh folder instance and across a bounded nested chain without I/O. The current test-only implementation uses self-contained, strictly validated private-PIDL hex segments; it cannot depend on a previous EnumObjects call's in-memory list. Display names remain presentation metadata and never authorize a Core lookup. Name/type column sorting is local to the loaded page; canonical comparison uses opaque identity.
+
 ## Bounded lifecycle
 
 Shell query has one monotonic total foreground waiting budget of 150 ms including connect/write/header/body. CancelIoEx only requests cancellation: overlapped storage/handles and the DLL lifetime must remain owned until actual completion, with at most 4 retained operations and Busy when capacity is exhausted. Any deferred cleanup cannot extend the foreground wait with an infinite wait; safely completed storage can be released immediately. No network fallback, busy loop or per-item IPC. EnumObjects queries one page; display/attribute/compare calls use the enumerated PIDL. Missing Host, loading, busy and protocol failures produce a non-navigable fixed status item with an F5 retry instruction, not a fake empty library. No fabricated success fallback.
@@ -32,7 +34,9 @@ Host returns the current in-memory result immediately and schedules Core work se
 
 Core HTTP 410 (`cursor_expired`) maps to Expired and retires the affected pagination token, or resets the bounded location epoch and requests reopening the root. It must not repeatedly retry the same invalid cursor as Unavailable.
 
-The first controlled slice uses native F5/reopen to request fresh snapshots; it does not claim push invalidation of names already painted by Explorer. Authorization is rechecked by Core on each page query; the limited display freshness and manual refresh are explicit acceptance limitations pending G2/G3 lifecycle work.
+Real Explorer acceptance showed that manual F5 alone can repeatedly miss the five-second Ready window and leave Loading painted. The controlled slice therefore permits a bounded loading refresh loop: each DefView has independent Folder/status state, IShellFolderViewCB supplies its view HWND, and only that window's UI thread owns a 500 ms timer. At most four views may refresh automatically; each Loading episode has a fixed ten-second/20-attempt budget which continuous Loading cannot extend. Ready, any error, window destruction or site removal stops the loop. Timed-out continuous Loading does not restart itself; F5 remains a manual single retry and reopening starts a fresh view. Refresh resolves the site's current IShellView, verifies the same HWND and retains callback/site/view across calls. Queued status notifications carry no borrowed pointer. Window subclass and COM/DLL references must be released in their real lifecycle, including reentrant teardown. No network or media work is added to Explorer, and every local query retains the same 150 ms foreground budget.
+
+F5/reopen still requests fresh snapshots after an error or timeout; this does not claim push invalidation of names already painted by Explorer. Authorization is rechecked by Core on each page query; cached-display invalidation and full recovery/soak remain explicit G2/G3/G4 acceptance limitations.
 
 ## Integration entry and acceptance
 
