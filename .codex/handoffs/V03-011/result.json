@@ -1,0 +1,73 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-011",
+  "title": "rendered-view-loading",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-shell-rendered-loading",
+  "branch": "codex/v03-011-rendered-view-loading",
+  "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-011",
+  "commit": "22700ee",
+  "changed_files": [
+    "tests/windows-shell/LoadingRefresh.cpp",
+    "tests/windows-shell/LoadingRefresh.h",
+    "tests/windows-shell/LoadingRefreshTests.cpp",
+    "tests/windows-shell/ProbeDiagnostics.cpp",
+    "tests/windows-shell/ProbeDiagnosticsTests.cpp",
+    "tests/windows-shell/CMakeLists.txt",
+    "tests/windows-shell/README.md",
+    ".codex/tasks/V03-011.md",
+    ".codex/handoffs/V03-011/summary.md",
+    ".codex/handoffs/V03-011/result.json",
+    ".codex/handoffs/V03-011/tests.md"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "strict_release_build": "passed",
+    "affected_ctest_passed": 4,
+    "affected_ctest_failed": 0,
+    "affected_ctest_skipped": 0,
+    "affected_ctest_seconds": 44.96,
+    "repository_verification": "passed",
+    "diff_review": "passed",
+    "strict_proof_owner_lifetime": "not_rerun_existing_failure_preserved",
+    "real_explorer_core_acceptance": false,
+    "registration_actions": 0,
+    "real_desktop_actions": 0,
+    "dll_sha256": "34aa5d26121be3d5bfe46dffe61365a5ffb0a0b5ffa8f9ed64a5fe85b16ec82d"
+  },
+  "risks": [
+    "Real cold Explorer/Core acceptance remains owned by V03-005.",
+    "Existing Windows CViewSettings callback retention and strict owner lifetime diagnostic failure remain open G2 evidence.",
+    "No push invalidation, installation or production release claim; G2/G3/G4 remain independent."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-011/summary.md",
+  "architecture_review": {
+    "module": "test-only Windows Shell adapter; V03-011 owns rendered Loading observation, V03-005 owns integration and contract",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "IShellFolderViewCB/IObjectWithSite and native DefView window lifecycle",
+      "SnapshotPidl::ReadPidl validation and existing status/kind types",
+      "Existing Refresh/EnumObjects snapshot query with 150ms IPC foreground budget",
+      "Existing per-view quota, monotonic budget, COM owner and DLL lifetime"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "python -I -B scripts/verify_repository.py",
+      "Strict C++ Release build with /W4 /WX /analyze",
+      "explorer_loading_refresh",
+      "explorer_loading_view_wiring",
+      "explorer_navigation_menu",
+      "explorer_diagnostics"
+    ],
+    "technical_debt": [
+      "Existing G2 retained callback/DLL lifetime, G3 recovery and G4 soak evidence remain open; this task does not close them."
+    ]
+  }
+}
