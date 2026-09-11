@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_explorer_real_core_host_integration_in_progress",
-  "next_action": "User requested integration. Contract read-only-snapshot-v1 frozen at 7016377/e325e7e. V03-006 implements native C++ Shell; V03-010 implements external AssetHost in an isolated worktree; V03-005 coordinates real HTTPS Core and Explorer acceptance. No production release gate closure.",
+  "status": "windows_test_only_native_core_browse_cold_gui_and_defined_recovery_verified",
+  "next_action": "Controlled native Explorer/AssetHost/Core read-only connection is functionally accepted and all owned test resources cleaned. Next work is production login/settings/startup/install, file opening/preview, category/tree polish, push invalidation and G2..G4 lifecycle/soak; CViewSettings retained references remain an explicit unresolved unload gate. Do not repeat the resolved registry-view or clone-signal diagnosis.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

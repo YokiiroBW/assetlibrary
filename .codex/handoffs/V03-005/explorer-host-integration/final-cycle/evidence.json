@@ -1,0 +1,173 @@
+{
+  "status": "controlled_read_only_real_explorer_functional_acceptance_passed",
+  "shell_commit": "4e3f6bb",
+  "host_commit": "12618ca",
+  "cold_no_prewarm_or_manual_refresh": true,
+  "file_open_or_write": false,
+  "observed_counts": [
+    1,
+    101,
+    38,
+    1,
+    1
+  ],
+  "defined_stop_restart_old_location_recovery": true,
+  "registration_cleanup": "original_600second_deadline_then_independent9missing_Desktop32",
+  "owned_windows_and_Hosts_closed": true,
+  "core_source_integrity_and_cleanup": "verified_138files_6roles_runtime_listener_processes",
+  "full_client_release": false,
+  "G2_full_COM_unload": "not_passed_existing_CViewSettings_retention",
+  "observed_latency": "upper_bounds_only_not_under10s_evidence",
+  "artifacts": [
+    {
+      "file": "acceptance-summary.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/acceptance-summary.json",
+      "sha256": "f5e7635ae448b5e06b2ca8e1757b83a99c21303c4d4081b733564c033c0c6a1f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "register.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/register.json",
+      "sha256": "70b9f14479d7c90a4f32b54410a0f1d6241a01d36b63d086d38eb8a51c1d7360",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "root-auto-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/root-auto-actual.json",
+      "sha256": "4c77dd6e3a700cdd3e2cb3a92e340bcfc2e4dad54077e1871ae54d4b77e1e086",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "page-one-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/page-one-actual.json",
+      "sha256": "d9afce749e2e3e8758c0b83e92d2c5fa12194618219b9d4d2b4c5c0b8a48973f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "page-two-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/page-two-actual.json",
+      "sha256": "fa9f87d45107de52e7fca66c55892b0f0e4a82fac3b3117f1af45ed8a7e1bf0b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "album-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/album-actual.json",
+      "sha256": "6d39a1f6d591288dc2cfa9b5e7624318b468111f37923d9e4ec824d988e924fd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "summer-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/summer-actual.json",
+      "sha256": "94b4c6ec4cb57099ae1705f69a53db55ec42e9cb90ed19b61fab82d025a57435",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-absent-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/host-absent-actual.json",
+      "sha256": "e082843187f1974f3d1d76446c4ed354a56929af4a96207dc3fa5cc637edd70e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "old-epoch-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/old-epoch-actual.json",
+      "sha256": "52ea84bce25a76b8fdef19c3f59ef8338ca48bc0bf9cf0251b1c055abce3d917",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "root-recovered-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/root-recovered-actual.json",
+      "sha256": "0256d6533e7a57b3937492f6a9c11f41a605783fb7586388e6b7f717a0a43096",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "negative-retry.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/negative-retry.json",
+      "sha256": "34f5fd61e74d57e0d37d9c1672ba416e0084bda45b3329fe6c558065104a8ec7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/cleanup.json",
+      "sha256": "4fbe6a84df4a277fea26e159dc9f2783ba852219914ca5efd9d626f6f0024a17",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fields-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/fields-cleanup.json",
+      "sha256": "17d16dea6ad150fc7a497c578f30e2722d2cec81e5b8e83ef53a990fc2b1a844",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-cleanup-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/desktop-cleanup-actual.json",
+      "sha256": "8d180eaa6ab7c779e09187e3ef98ef6862c532fe85c19ee32eec085d5abb4a27",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-checkpoint.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/cleanup-checkpoint.json",
+      "sha256": "3e075237fc0f3fa338b1a82a28dc6e68c80a5d3c3ae7cbbbffe2f79048b5f658",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "final-native-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-05/final-native-cleanup.json",
+      "sha256": "dde25561dbbce389a50c626967a776878baba5dcd954cfbbdf6dae5893dcef91",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/01-root-loading.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/01-root-loading.jpg",
+      "sha256": "916248fa7342fa190d160b35a483f1dc2403ac249ee44f817ed4cf6f2cff60cc",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/02-root-ready.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/02-root-ready.jpg",
+      "sha256": "d2beaed87a06ad9ebc93c932da151905917e8011ef616ed0c727bd9ed17e91b7",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/03-library-first-page.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/03-library-first-page.jpg",
+      "sha256": "d37a5d60ac9dda4f943d70170aedc2553706cd5a6954af6166a136240cf9f59d",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/04-next-page.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/04-next-page.jpg",
+      "sha256": "df2ae71152e0dc2b560ef4d1516d1003f9d2918fa44aa748ad38dd2e9027557d",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/05-summer-file.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/05-summer-file.jpg",
+      "sha256": "7aa16864c2ddfd868a8d4bbab82df89b9bf22a13b110a0797645defe62c222f5",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/06-host-unavailable.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/06-host-unavailable.jpg",
+      "sha256": "1951f6baf587f5e992deb52e5f741ed5d5941e9596037d26a0f4a8c80ab5f94f",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/07-old-epoch-rejected.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/07-old-epoch-rejected.jpg",
+      "sha256": "e702669225790696ebcc77aa2b250646051d705a41fdf1352995e88893f3b858",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "screenshots/08-root-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-05/screenshots/08-root-recovered.jpg",
+      "sha256": "11f109d331d3b28b38ad959e004dcdc6912857aaf984b5fa3ccf718eae17dae5",
+      "kind": "original_screenshot_bytes_no_edit"
+    },
+    {
+      "file": "core-cleanup.json",
+      "source": ".runtime/explorer-host-integration/core/20260911T192417Z-1aa3bda9/acceptance.json",
+      "sha256": "005357f2c8475a9da7d87397961acd6b16c53236641d5468c3f01ea1f49aae58",
+      "kind": "unmodified_copy"
+    }
+  ]
+}

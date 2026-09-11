@@ -1,0 +1,14 @@
+{
+  "Utc": "2026-09-11T19:07:14.2617164+00:00",
+  "TargetPid": 23188,
+  "CreationFileTime": "134336269562124355",
+  "MatchingModuleCount": 1,
+  "Modules": [
+    {
+      "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\shell-build-03\\Release\\AssetLibraryExplorerProof.dll",
+      "Sha256": "26F615B6FF319F67AB0CD32D13C77E19D413A7BD3CA7B53E5D5A3E0AF1E58DE6"
+    }
+  ],
+  "OtherModuleNamesRecorded": false,
+  "DebuggerAttached": false
+}

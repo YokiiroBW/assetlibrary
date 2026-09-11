@@ -2,6 +2,8 @@
 
 用户已明确 Windows 日常入口必须位于原生资源管理器。本目录保存进程外 AssetHost 可复用的 .NET 10 AssetLink 适配组件；它不是已交付的独立桌面应用，也不要求用户打开独立客户端。
 
+`AssetHost` 已复用这些组件，通过受限本机管道向 test-only 原生 Shell 提供授权库、物理目录与分页快照。受控启动、配置和边界见 [AssetHost 说明](AssetHost/README.md)。
+
 `Core` 只消费既有生成 SDK 与已批准的读取接口：HTTPS 登录/会话/退出、分类资源库、完整范围服务器排序与筛选、目录/范围搜索、详情。每页最多100条；导航历史100项、分页游标最多200项、当前页替换且有取消/代际检查。没有本地权限/身份/路径/文件操作业务副本，没有资产内容写入。
 
 连接只接受一个 HTTPS origin；默认系统 TLS 信任，用户显式 SHA256 叶证书指纹仍校验主机名和有效期。Cookie 与 CSRF 只在进程内，禁止自动重定向；错误正文不会进入诊断，401/403/404优先清除快照，即使响应体错误或卡住。未实现持久凭证、设备配对、主备切换、预览、文件传输与同步。
@@ -23,6 +25,6 @@ python scripts/validate_dotnet_dependencies.py --solution apps/windows-client/As
 
 ## Explorer 状态
 
-本项目test-only proof现已取得一次真实4FF类/22B根PIDL/1项“示例资源库”的包外进入及卸载负控，见[执行交接](../../.codex/handoffs/V03-006/proof-native-entry.md)。尚未把本目录Core只读组件接入进程外AssetHost并向生产Shell提供真实资产快照，完整Windows首版与G2..G4仍未完成。
+本项目test-only proof已接入真实Core只读快照，进程外Host/C++互通、原生库根显示及同窗口目录打开已验证；加载态的有界自动刷新已合入，最终冷页面实机结果见[集成验收](../../.codex/handoffs/V03-005/explorer-host-integration/README.md)。早期[合成入口证据](../../.codex/handoffs/V03-006/proof-native-entry.md)只代表其原始DLL，不替代新代码验收。
 
-[test-only DefView/IShellFolder2 验证](../../tests/windows-shell/README.md)已可构建。已定位诊断执行器的 MSIX 注册表视图与普通 Explorer 不同；改用经核验的普通用户 Explorer 启动登记后，微软样例及上述本项目最小proof均可实际进入。注册工具拒绝未经核验启动路线的登记，局部 presence/absence 不代表系统 Explorer 注册或清理。当前没有可用 Explorer 安装包，不关闭完整 M0-002-G1..G4 或正式发布门禁。下一步才把授权快照通过受审查的本机 IPC 接到 Shell。Shell 仍不得加载 .NET/WinUI、网络、媒体或 Provider；C# 上下文检查只运行于进程外测试脚本。
+[test-only DefView/IShellFolder2 验证](../../tests/windows-shell/README.md)使用经核验的普通用户 Explorer 启动登记，避开已确认的 MSIX 注册表视图隔离；局部 presence/absence 不能冒充系统 Explorer 注册或清理。Shell 使用原生目录命令、系统图标和有界加载刷新；网络与会话继续留在进程外Host。当前没有正式安装包，Windows视图设置保留部分COM引用的诊断仍未通过最终卸载检查，完整G2..G4和发布门禁保持开放。

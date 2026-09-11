@@ -1,0 +1,503 @@
+{
+  "RecordedUtc": "2026-09-11T20:18:26.066354+00:00",
+  "Outcome": "controlled_real_core_explorer_cold_navigation_and_defined_restart_path_observed",
+  "Scope": "Test-only registered namespace + genuine Core synthetic fixture; not full client or G2-G4 release completion",
+  "Inputs": {
+    "Utc": "2026-09-11T19:58:55.0971190+00:00",
+    "CoreMinutesRemaining": 85.6,
+    "RootCommit": "4e3f6bb",
+    "BrokerPid": 21232,
+    "BrokerHwnd": 1049642,
+    "BrokerCreation": "134336202676968473",
+    "ShellDll": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\shell-build-05\\Release\\AssetLibraryExplorerProof.dll",
+    "ShellSha256": "FA0F657A66F922DE1ED7A0C6A8E3E9635C2D6D0DDE59B355177DF60C34742C85",
+    "HostDll": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\apps\\windows-client\\AssetHost\\bin\\Release\\net10.0\\AssetLibrary.Windows.AssetHost.dll",
+    "HostSha256": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+    "NativeSessionReady": true,
+    "ColdF5Planned": false,
+    "InteropPrewarmPlanned": false,
+    "LaterNegativeRetrySeparate": true
+  },
+  "Identity": {
+    "RecordedUtc": "2026-09-11T20:00:21.3200759+00:00",
+    "NativeHwnd": "788706",
+    "Pid": 21912,
+    "CreationFileTime": "134336303965220325",
+    "OwnershipStartFiletime": "134336303961512919",
+    "DesktopPid": 6212,
+    "SessionId": 2
+  },
+  "Cold": {
+    "RootLoadingScreenshot": "screenshots/01-root-loading.jpg",
+    "RootReadyScreenshot": "screenshots/02-root-ready.jpg",
+    "RootObservedUpperBoundMs": 28919,
+    "RootUpperBoundIsNotMeasuredReadyLatency": true,
+    "RootUnderTenSecondsClaim": false,
+    "LibraryObservedUpperBoundMs": 28643,
+    "NextPageObservedUpperBoundMs": 30070,
+    "F5Used": false,
+    "InteropPrewarmUsed": false,
+    "NormalDoubleClickNavigation": true,
+    "FileOpened": false
+  },
+  "Views": {
+    "root-auto-actual.json": {
+      "File": "root-auto-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:02:26.0940689+00:00",
+      "CompletedUtc": "2026-09-11T20:02:26.4921929+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 22,
+      "ItemCount": 1,
+      "Names": [
+        "原生客户端隔离样例"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": true,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "page-one-actual.json": {
+      "File": "page-one-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:03:16.7209381+00:00",
+      "CompletedUtc": "2026-09-11T20:03:17.0966647+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 88,
+      "ItemCount": 101,
+      "Names": [
+        "empty.txt",
+        "sample-001.txt",
+        "sample-002.txt",
+        "sample-003.txt",
+        "sample-004.txt",
+        "sample-005.txt",
+        "sample-006.txt",
+        "sample-007.txt",
+        "sample-008.txt",
+        "sample-009.txt",
+        "sample-010.txt",
+        "sample-011.txt",
+        "sample-012.txt",
+        "sample-013.txt",
+        "sample-014.txt",
+        "sample-015.txt",
+        "sample-016.txt",
+        "sample-017.txt",
+        "sample-018.txt",
+        "sample-019.txt",
+        "sample-020.txt",
+        "sample-021.txt",
+        "sample-022.txt",
+        "sample-023.txt",
+        "sample-024.txt",
+        "sample-025.txt",
+        "sample-026.txt",
+        "sample-027.txt",
+        "sample-028.txt",
+        "sample-029.txt",
+        "sample-030.txt",
+        "sample-031.txt",
+        "sample-032.txt",
+        "sample-033.txt",
+        "sample-034.txt",
+        "sample-035.txt",
+        "sample-036.txt",
+        "sample-037.txt",
+        "sample-038.txt",
+        "sample-039.txt",
+        "sample-040.txt",
+        "sample-041.txt",
+        "sample-042.txt",
+        "sample-043.txt",
+        "sample-044.txt",
+        "sample-045.txt",
+        "sample-046.txt",
+        "sample-047.txt",
+        "sample-048.txt",
+        "sample-049.txt",
+        "sample-050.txt",
+        "sample-051.txt",
+        "sample-052.txt",
+        "sample-053.txt",
+        "sample-054.txt",
+        "sample-055.txt",
+        "sample-056.txt",
+        "sample-057.txt",
+        "sample-058.txt",
+        "sample-059.txt",
+        "sample-060.txt",
+        "sample-061.txt",
+        "sample-062.txt",
+        "sample-063.txt",
+        "sample-064.txt",
+        "sample-065.txt",
+        "sample-066.txt",
+        "sample-067.txt",
+        "sample-068.txt",
+        "sample-069.txt",
+        "sample-070.txt",
+        "sample-071.txt",
+        "sample-072.txt",
+        "sample-073.txt",
+        "sample-074.txt",
+        "sample-075.txt",
+        "sample-076.txt",
+        "sample-077.txt",
+        "sample-078.txt",
+        "sample-079.txt",
+        "sample-080.txt",
+        "sample-081.txt",
+        "sample-082.txt",
+        "sample-083.txt",
+        "sample-084.txt",
+        "sample-085.txt",
+        "sample-086.txt",
+        "sample-087.txt",
+        "sample-088.txt",
+        "sample-089.txt",
+        "sample-090.txt",
+        "sample-091.txt",
+        "sample-092.txt",
+        "sample-093.txt",
+        "sample-094.txt",
+        "sample-095.txt",
+        "sample-096.txt",
+        "sample-097.txt",
+        "sample-098.txt",
+        "sample-099.txt",
+        "下一页（导航）"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "page-two-actual.json": {
+      "File": "page-two-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:05:09.9759511+00:00",
+      "CompletedUtc": "2026-09-11T20:05:10.3894172+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 150,
+      "ItemCount": 38,
+      "Names": [
+        "sample-100.txt",
+        "sample-101.txt",
+        "sample-102.txt",
+        "sample-103.txt",
+        "sample-104.txt",
+        "sample-105.txt",
+        "sample-106.txt",
+        "sample-107.txt",
+        "sample-108.txt",
+        "sample-109.txt",
+        "sample-110.txt",
+        "sample-111.txt",
+        "sample-112.txt",
+        "sample-113.txt",
+        "sample-114.txt",
+        "sample-115.txt",
+        "sample-116.txt",
+        "sample-117.txt",
+        "sample-118.txt",
+        "sample-119.txt",
+        "sample-120.txt",
+        "sample-121.txt",
+        "sample-122.txt",
+        "sample-123.txt",
+        "sample-124.txt",
+        "sample-125.txt",
+        "sample-126.txt",
+        "sample-127.txt",
+        "sample-128.txt",
+        "sample-129.txt",
+        "sample-130.txt",
+        "sample-131.txt",
+        "sample-132.txt",
+        "sample-133.txt",
+        "sample-134.txt",
+        "sample-135.txt",
+        "相册",
+        "说明_中文.md"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "album-actual.json": {
+      "File": "album-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:05:57.0665707+00:00",
+      "CompletedUtc": "2026-09-11T20:05:57.4412558+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 202,
+      "ItemCount": 1,
+      "Names": [
+        "夏日"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "summer-actual.json": {
+      "File": "summer-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:06:46.5372431+00:00",
+      "CompletedUtc": "2026-09-11T20:06:46.9248225+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 254,
+      "ItemCount": 1,
+      "Names": [
+        "preview-placeholder.jpg"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "host-absent-actual.json": {
+      "File": "host-absent-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:07:47.1951733+00:00",
+      "CompletedUtc": "2026-09-11T20:07:47.5820943+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 202,
+      "ItemCount": 1,
+      "Names": [
+        "后台连接服务不可用；启动并登录后按 F5 重试"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "old-epoch-actual.json": {
+      "File": "old-epoch-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:08:50.0513025+00:00",
+      "CompletedUtc": "2026-09-11T20:08:50.4192412+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 202,
+      "ItemCount": 1,
+      "Names": [
+        "位置已过期；重新打开资产库根目录，按 F5 重试"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": false,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "root-recovered-actual.json": {
+      "File": "root-recovered-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:09:42.4128451+00:00",
+      "CompletedUtc": "2026-09-11T20:09:42.7879469+00:00",
+      "ClassId": "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+      "CurrentPidlBytes": 22,
+      "ItemCount": 1,
+      "Names": [
+        "原生客户端隔离样例"
+      ],
+      "Scope": {
+        "proofScopeVerified": true,
+        "expectedRootPidlBytes": 22,
+        "isRootPidl": true,
+        "isDescendantPidl": true
+      },
+      "Stable": true
+    },
+    "desktop-cleanup-actual.json": {
+      "File": "desktop-cleanup-actual.json",
+      "Passed": true,
+      "StartedUtc": "2026-09-11T20:11:29.8838116+00:00",
+      "CompletedUtc": "2026-09-11T20:11:30.2826617+00:00",
+      "ClassId": "{00021400-0000-0000-C000-000000000046}",
+      "CurrentPidlBytes": 2,
+      "ItemCount": 32,
+      "Names": [],
+      "Scope": null,
+      "Stable": true
+    }
+  },
+  "Pagination": {
+    "FirstViewItems": 101,
+    "FirstDataItems": 100,
+    "NextPageLabel": "下一页（导航）",
+    "SecondViewItems": 38,
+    "DisplayedNameOverlap": 0,
+    "CombinedDisplayedEntryNames": 138,
+    "NamesAreDisplayAssertionsNotGeneralFileIdentity": true
+  },
+  "NegativePath": {
+    "HostStoppedNormally": true,
+    "UnavailableTriggeredByStandardParentNavigation": true,
+    "FirstHostStop": {
+      "Utc": "2026-09-11T20:06:49.3583549+00:00",
+      "HostPid": 22224,
+      "HostExited": true,
+      "StopFileUsed": true,
+      "HardKillUsed": false
+    },
+    "RestartedHost": {
+      "Utc": "2026-09-11T20:07:48.3357646+00:00",
+      "Pid": 23220,
+      "CreationFileTime": "134336308683341665",
+      "ExecutorPid": 19384,
+      "Context": {
+        "QuerySucceeded": true,
+        "Is64Bit": true,
+        "PackageIdentityAbsent": true,
+        "ParentIsSystemExplorer": true,
+        "SameUser": true,
+        "SameSession": true,
+        "ParentPredatesExecutor": true,
+        "OrdinaryUser": true,
+        "PackageIdentityStatus": 15700,
+        "ParentPid": 21232,
+        "ExecutorCreationFileTime": "134336308677199986",
+        "ParentCreationFileTime": "134336202676968473",
+        "ErrorType": null
+      },
+      "DllSha256": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+      "StopFile": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\desktop-05\\host-restarted.stop"
+    },
+    "SingleExplicitErrorRetry": {
+      "Utc": "2026-09-11T20:08:49.123Z",
+      "Reason": "One explicit retry after observed Host-unavailable error and Host restart",
+      "ColdF5": false,
+      "NegativeF5Count": 1
+    },
+    "OldLocationRejected": true,
+    "PrivateEpochBytesNotDecoded": true,
+    "RootReopenedViaBreadcrumb": true,
+    "RootRecovery": {
+      "ReopenUtc": "2026-09-11T20:09:10.227Z",
+      "ObservedUtc": "2026-09-11T20:09:41.750Z",
+      "RealLibraryVisible": true,
+      "Tree": "Window: \"AssetLibrary 集成验证 - 文件资源管理器\", App: explorer.exe.\n\t0 窗口 AssetLibrary 集成验证 - 文件资源管理器 Secondary Actions: Raise\n\t\t1 窗格\n\t\t689 窗格 AssetLibrary 集成验证\n\t\t\t690 窗格\n\t\t\t\t691 工具栏 命令模块 ID: FolderBandModuleInner\n\t\t\t\t\t692 按钮 帮助(&H) Description: 获取帮助。 ID: HelpButton\n\t\t\t\t\t693 复选框 预览窗格 Description: 显示预览窗格。 ID: PreviewButton\n\t\t\t\t\t694 拆分按钮 平铺 Description: 更改你的视图。 ID: ViewControl\n\t\t\t\t\t\t695 按钮 视图滑块 Description: 更多选项 ID: SplitMenuButton\n\t\t\t\t\t696 按钮 组织​​ Description: 组织该文件夹的内容。 ID: {7DDC1264-7E4D-4F74-BBC0-D191987C8D0F}\n\t\t\t\t697 状态栏 状态栏 ID: StatusBarModuleInner\n\t\t\t\t\t966 组 属性字段 ID: System.StatusBarViewItemCount\n\t\t\t\t\t\t967 文本 1 个项目 Description: 项目总数 ID: PropertyValue\n\t\t\t\t\t700 组 查看模式 ID: ViewButtonsGroup\n\t\t\t\t\t\t701 单选按钮 (selectable) 详细信息 Description: 在窗口中显示每一项的相关信息。(Ctrl+Alt+6) ID: ViewMode_Details\n\t\t\t\t\t\t702 单选按钮 (selectable) 大图标 Description: 使用大缩略图显示项。(Ctrl+Alt+2) ID: ViewMode_LargeIcons\n\t\t\t\t703 窗格 控制项宿主 ID: ProperTreeHost\n\t\t\t\t\t704 树 导航窗格 ID: 100\n\t\t\t\t\t\t705 树项目 (selectable) 桌面\n\t\t\t\t\t\t\t706 树项目 (selectable) 主文件夹\n\t\t\t\t\t\t\t707 树项目 (selectable) 图库\n\t\t\t\t\t\t\t708 树项目 (selectable) 快速访问开始 - 桌面 (已固定)\n\t\t\t\t\t\t\t709 树项目 (selectable) 下载 (已固定)\n\t\t\t\t\t\t\t710 树项目 (selectable) 文档 (已固定)\n\t\t\t\t\t\t\t711 树项目 (selectable) 图片 (已固定)\n\t\t\t\t\t\t\t712 树项目 (selectable) 音乐 (已固定)\n\t\t\t\t\t\t\t713 树项目 (selectable) 快速访问结束 - 视频 (已固定)\n\t\t\t\t\t\t\t714 树项目 (selectable) 此电脑\n\t\t\t\t\t\t\t715 树项目 (selectable) 网络\n\t\t\t\t\t\t\t\t716 树项目 (selectable) tsclient\n\t\t\t\t\t\t\t\t717 树项目 (selectable) YokiiroNAS\n\t\t\t\t\t\t\t718 树项目 (selectable) AssetLibrary 集成验证\n\t\t\t\t943 窗格 Shell 文件夹视图 ID: listview\n\t\t\t\t\t944 列表 项目视图\n\t\t\t\t\t\t968 列表项目 (selectable) 原生客户端隔离样例 ID: 0\n\t\t\t\t\t\t\t969 编辑 状态 ID: System.StorageProviderUIStatus\n\t\t\t\t\t\t\t965 编辑 名称 ID: System.ItemNameDisplay\n\t\t120 窗格\n\t\t\t121 窗格\n\t\t\t\t122 选项卡 ID: TabView\n\t\t\t\t\t123 列表 ID: TabListView\n\t\t\t\t\t\t124 选项卡项目 (selectable) AssetLibrary 集成验证\n\t\t\t\t\t\t\t948 图像\n\t\t\t\t\t\t\t126 文本 AssetLibrary 集成验证\n\t\t\t\t\t\t\t127 按钮 关闭标签页 ID: CloseButton\n\t\t\t\t\t128 按钮 添加新标签页 ID: AddButton\n\t\t\t\t129 应用栏 ID: NavigationCommands\n\t\t\t\t\t130 应用栏按钮 后退 Description: 返回到 相册 ID: backButton\n\t\t\t\t\t131 应用栏按钮 (disabled) 前进 Description: 前进 ID: forwardButton\n\t\t\t\t\t132 应用栏按钮 上移到“桌面”(Alt + 向上键) Description: 上移到“桌面”(Alt + 向上键) ID: upButton\n\t\t\t\t\t133 应用栏按钮 刷新“AssetLibrary 集成验证”(F5) Description: 刷新“AssetLibrary 集成验证”(F5) ID: refreshButton\n\t\t\t\t134 组 ID: PART_AutoSuggestBox\n\t\t\t\t\t135 编辑 地址栏 ID: TextBox\n\t\t\t\t288 拆分按钮 AssetLibrary 集成验证 ID: FirstCrumbStackPanel\n\t\t\t\t\t289 图像\n\t\t\t\t290 组 ID: PART_BreadcrumbBar\n\t\t\t\t\t949 拆分按钮 AssetLibrary 集成验证\n\t\t\t\t\t\t950 文本 AssetLibrary 集成验证\n\t\t\t\t149 组 ID: FileExplorerSearchBox\n\t\t\t\t\t150 编辑 在 AssetLibrary 集成验证 中搜索 ID: TextBox\n\t\t\t\t\t\t151 文本 在 AssetLibrary 集成验证 中搜索\n\t\t\t\t152 应用栏 ID: FileExplorerCommandBar\n\t\t\t\t\t153 应用栏按钮 (disabled) 新建\n\t\t\t\t\t\t154 图像\n\t\t\t\t\t155 应用栏按钮 (disabled) 剪切​​ Description: 将所选项目移动到剪贴板。\n\t\t\t\t\t\t156 图像\n\t\t\t\t\t157 应用栏按钮 (disabled) 复制​​ Description: 将所选项目复制到剪贴板。\n\t\t\t\t\t\t158 图像\n\t\t\t\t\t159 应用栏按钮 (disabled) 粘贴​​ Description: 将剪贴板中的内容粘贴到当前位置。\n\t\t\t\t\t\t160 图像\n\t\t\t\t\t161 应用栏按钮 (disabled) 重命名​​ Description: 重命名所选项目。\n\t\t\t\t\t\t162 图像\n\t\t\t\t\t163 应用栏按钮 (disabled) 共享\n\t\t\t\t\t\t164 图像\n\t\t\t\t\t165 应用栏按钮 (disabled) 删除​​ Description: 将所选项目移动到回收站或将其永久删除。\n\t\t\t\t\t\t166 图像\n\t\t\t\t\t167 应用栏按钮 排序 ID: SortAndGroupButton\n\t\t\t\t\t\t168 图像\n\t\t\t\t\t169 应用栏按钮 查看\n\t\t\t\t\t\t170 图像\n\t\t\t\t\t171 按钮 更多选项 ID: MoreButton\n\t\t\t\t172 应用栏 ID: FileExplorerSecondaryCommandBar\n\t\t\t\t\t173 应用栏按钮 详细信息 Description: 显示或隐藏详细信息窗格。 ID: DetailsPaneToggleButton\n\t\t\t\t\t\t174 图像\n\t\t175 标题栏\n\t\t\t176 菜单栏 系统 ID: MenuBar\n\t\t\t\t177 菜单项目 系统\n\t\t\t178 按钮 最小化\n\t\t\t179 按钮 最大化\n\t\t\t180 按钮 关闭\n\nThe focused UI element is 135 编辑 地址栏 ID: TextBox.",
+      "AdditionalF5": false
+    },
+    "RootRecoveredAutomatically": true
+  },
+  "Cleanup": {
+    "RegistrationDeadlineUtc": "2026-09-11T20:09:55.2806030+00:00",
+    "CleanupUtc": "2026-09-11T20:09:55.5046951+00:00",
+    "DeadlineToCleanupMilliseconds": 224.092,
+    "StopMarkerCreationUtc": "2026-09-11T20:10:17.0372933Z",
+    "Trigger": "original_600_second_deadline; later stop marker was not the trigger",
+    "SameExecutorCleanup": true,
+    "IndependentNativeNineMissing": true,
+    "DesktopEntryAbsent": true,
+    "ActualDesktopItems": 32,
+    "HostsLoggedOutServerRevokedAndLocalClear": true,
+    "FinalNative": {
+      "Utc": "2026-09-11T20:12:53.9781259+00:00",
+      "KnownOwnedWindowCountRemaining": 0,
+      "KnownOwnedWindows": [],
+      "TargetOriginalProcessResident": true,
+      "BrokerOriginalProcessResident": true,
+      "GuardProcessAbsent": true,
+      "FirstHostProcessAbsent": true,
+      "RestartedHostProcessAbsent": true,
+      "DesktopPid": 6212,
+      "UserExplorerNotRestarted": true,
+      "ExplorerForceKilled": false,
+      "CoreStopOwnedByRoot": true,
+      "FullComUnloadClaim": false
+    },
+    "ProcessIdentityTiming": {
+      "RecordedUtc": "2026-09-11T20:18:25.6947211+00:00",
+      "StopMarkerCreationUtc": "2026-09-11T20:10:17.0372933Z",
+      "TargetSameCreationResident": true,
+      "BrokerSameCreationResident": true,
+      "NoGuiInvoked": true,
+      "NoServiceStarted": true
+    },
+    "BrokerClosureAuthorizedByRoot": true,
+    "CoreCleanupOwnedByRoot": true,
+    "CoreCleanupParentReported": "root reported exec73183 exit0 / NATIVE_CLIENT_CLEANUP verified; source hashes, roles and runtime receipts are being independently finalized by root"
+  },
+  "Limitations": [
+    "View-read Passed means actual view/class/PIDL/content observation, not a complete client or release gate.",
+    "Cold observations establish automatic transitions without input; recorded intervals are observation upper bounds and do not prove less than 10 seconds.",
+    "Exactly one F5 was used only after a defined Host-unavailable error and restart, separate from all cold navigation.",
+    "Internal snapshot-pidl-v1 parsing strings remain visible in some child window/tab titles; breadcrumb labels show display names.",
+    "Some root/child screenshots update before accessibility text during navigation; settled CUA/native records support the final content claims.",
+    "Target and broker processes may remain resident after their windows close. No Explorer was killed/restarted; full COM unload is not claimed.",
+    "This run did not open files, verify previews, or close G2-G4; final 138-file SHA/mtime and Core teardown evidence belong to root."
+  ],
+  "Screenshots": [
+    {
+      "File": "screenshots/01-root-loading.jpg",
+      "Sha256": "916248FA7342FA190D160B35A483F1DC2403AC249EE44F817ED4CF6F2CFF60CC",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/02-root-ready.jpg",
+      "Sha256": "D2BEAED87A06AD9EBC93C932DA151905917E8011EF616ED0C727BD9ED17E91B7",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/03-library-first-page.jpg",
+      "Sha256": "D37A5D60AC9DDA4F943D70170AEDC2553706CD5A6954AF6166A136240CF9F59D",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/04-next-page.jpg",
+      "Sha256": "DF2AE71152E0DC2B560EF4D1516D1003F9D2918FA44AA748AD38DD2E9027557D",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/05-summer-file.jpg",
+      "Sha256": "7AA16864C2DDFD868A8D4BBAB82DF89B9BF22A13B110A0797645DEFE62C222F5",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/06-host-unavailable.jpg",
+      "Sha256": "1951F6BAF587F5E992DEB52E5F741ED5D5941E9596037D26A0F4A8C80AB5F94F",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/07-old-epoch-rejected.jpg",
+      "Sha256": "E702669225790696EBCC77AA2B250646051D705A41FDF1352995E88893F3B858",
+      "OriginalBytes": true,
+      "Edited": false
+    },
+    {
+      "File": "screenshots/08-root-recovered.jpg",
+      "Sha256": "11F109D331D3B28B38AD959E004DCDC6912857AAF984B5FA3CCF718EAE17DAE5",
+      "OriginalBytes": true,
+      "Edited": false
+    }
+  ]
+}

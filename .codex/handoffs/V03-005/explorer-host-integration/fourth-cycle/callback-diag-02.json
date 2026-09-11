@@ -1,0 +1,59 @@
+{
+  "StartedUtc": "2026-09-11T19:36:14.4423171+00:00",
+  "CompletedUtc": "2026-09-11T19:36:14.8534201+00:00",
+  "Mode": "proof",
+  "Label": "callback-diag-02",
+  "ExecutorPid": 24080,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 21232,
+    "ExecutorCreationFileTime": "134336289741554408",
+    "ParentCreationFileTime": "134336202676968473",
+    "ErrorType": null
+  },
+  "PropertyFmtid": "{2F242D38-C686-4E35-87C3-36C9BAF44EFE}",
+  "PropertyPid": 1,
+  "ItemArgument": "nullptr",
+  "Native": {
+    "Pid": 12520,
+    "TargetPid": 7428,
+    "ExitCode": 0,
+    "TimedOut": false,
+    "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"tick\":31644765,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"identity.before\",\"hr\":\"00000000\",\"tick\":31644765,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"shellWindows\",\"hr\":\"00000000\",\"tick\":31644765,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"windowCount\",\"hr\":\"00000000\",\"tick\":31644765,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"shellWindowCount\":2,\"targetMatches\":1,\"unreadableEntries\":0,\"countStable\":true}\r\n{\"stage\":\"identity.beforeView\",\"hr\":\"00000000\",\"tick\":31644765,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"serviceProvider\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"topLevelBrowser\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"activeShellView\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"viewWindow\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"viewWindowBelongsToTarget\":true}\r\n{\"stage\":\"folderView\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"getFolder\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"classId\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"classId\":\"{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}\",\"isSampleClass\":true}\r\n{\"stage\":\"currentFolder\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"currentPidlBytes\":22,\"actualFolderClassVerified\":true,\"namesRead\":false}\r\n{\"stage\":\"actualFolderDetailsInterface\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"fixedDiagnosticGetDetailsEx\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"diagnosticVariantType\":8,\"diagnosticUtf16Length\":699,\"propertyCallCount\":1}\r\n{\"kind\":\"diagnostic_property\",\"variantType\":8,\"utf16Length\":699,\"payload\":\"{\\\"v\\\":1,\\\"pid\\\":7428,\\\"tick\\\":31644781,\\\"folder\\\":110,\\\"source\\\":109,\\\"last_clone\\\":0,\\\"folder_tid\\\":412,\\\"enum_n\\\":0,\\\"enum_tid\\\":0,\\\"enum_status\\\":2,\\\"last_cb_hr\\\":2147483658,\\\"slots\\\":1,\\\"view\\\":{\\\"cookie\\\":11912302489371672577,\\\"started\\\":0,\\\"published\\\":0,\\\"current\\\":1,\\\"status\\\":2,\\\"cb_hr\\\":0,\\\"cb_slots\\\":0,\\\"cb_tid\\\":412,\\\"site_n\\\":1,\\\"site_tid\\\":412,\\\"site_hr\\\":0,\\\"site\\\":1,\\\"window_n\\\":1,\\\"window_tid\\\":412,\\\"owner_tid\\\":412,\\\"window_hr\\\":0,\\\"reported_hwnd\\\":592132,\\\"attached_hwnd\\\":592132,\\\"post_n\\\":0,\\\"post_error\\\":0,\\\"arm_n\\\":0,\\\"arm_tid\\\":0,\\\"arm_error\\\":0,\\\"timer\\\":0,\\\"tick_n\\\":0,\\\"attempt_n\\\":0,\\\"service_hr\\\":2147483658,\\\"active_hr\\\":2147483658,\\\"getwindow_hr\\\":2147483658,\\\"active_hwnd\\\":0,\\\"match\\\":0,\\\"skip\\\":0,\\\"refresh_n\\\":0,\\\"refresh_hr\\\":2147483658,\\\"detach_n\\\":0}}\"}\r\n{\"stage\":\"diagnosticPayloadPreserved\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"kind\":\"diagnostic_stability\",\"folderPidlStable\":true,\"activeViewStable\":true,\"snapshotStable\":true}\r\n{\"stage\":\"identity.after\",\"hr\":\"00000000\",\"tick\":31644781,\"observerPid\":12520,\"proofLoadedInObserver\":false}\r\n{\"payloadSemanticValidation\":\"required_in_wrapper\",\"expectedTargetPid\":7428,\"observerPid\":12520,\"navigationInvoked\":false,\"folderEnumerationInvoked\":false,\"refreshInvoked\":false}\r\n",
+    "Stderr": ""
+  },
+  "Diagnostic": {
+    "Version": 1,
+    "ExecutionPid": 7428,
+    "ExpectedTargetPid": 7428,
+    "PidMatchesTarget": true,
+    "Inconclusive": false,
+    "Scope": "target-object-execution",
+    "RawJson": "{\"v\":1,\"pid\":7428,\"tick\":31644781,\"folder\":110,\"source\":109,\"last_clone\":0,\"folder_tid\":412,\"enum_n\":0,\"enum_tid\":0,\"enum_status\":2,\"last_cb_hr\":2147483658,\"slots\":1,\"view\":{\"cookie\":11912302489371672577,\"started\":0,\"published\":0,\"current\":1,\"status\":2,\"cb_hr\":0,\"cb_slots\":0,\"cb_tid\":412,\"site_n\":1,\"site_tid\":412,\"site_hr\":0,\"site\":1,\"window_n\":1,\"window_tid\":412,\"owner_tid\":412,\"window_hr\":0,\"reported_hwnd\":592132,\"attached_hwnd\":592132,\"post_n\":0,\"post_error\":0,\"arm_n\":0,\"arm_tid\":0,\"arm_error\":0,\"timer\":0,\"tick_n\":0,\"attempt_n\":0,\"service_hr\":2147483658,\"active_hr\":2147483658,\"getwindow_hr\":2147483658,\"active_hwnd\":0,\"match\":0,\"skip\":0,\"refresh_n\":0,\"refresh_hr\":2147483658,\"detach_n\":0}}",
+    "MissingSignalInferred": false
+  },
+  "Stability": {
+    "kind": "diagnostic_stability",
+    "folderPidlStable": true,
+    "activeViewStable": true,
+    "snapshotStable": true
+  },
+  "Passed": true,
+  "Inconclusive": false,
+  "Failure": null,
+  "CountersAreNonTransactional": true,
+  "FolderEnumerationInvoked": false,
+  "NavigationInvoked": false,
+  "RefreshInvoked": false,
+  "ExtraQueryServiceInvoked": false,
+  "RegistryWrites": 0,
+  "MissingSignalInferred": false
+}

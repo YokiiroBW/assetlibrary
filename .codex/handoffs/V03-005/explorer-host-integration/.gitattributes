@@ -1,2 +1,3 @@
 *.json -text whitespace=cr-at-eol
 *.jsonl -text whitespace=cr-at-eol
+fourth-cycle/diagnostic-summary.md -text whitespace=cr-at-eol

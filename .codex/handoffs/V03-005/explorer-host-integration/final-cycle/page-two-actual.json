@@ -1,0 +1,34 @@
+{
+  "StartedUtc": "2026-09-11T20:05:09.9759511+00:00",
+  "CompletedUtc": "2026-09-11T20:05:10.3894172+00:00",
+  "Mode": "proof",
+  "Label": "page-two-actual",
+  "ExecutorPid": 22872,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 21232,
+    "ExecutorCreationFileTime": "134336307096990864",
+    "ParentCreationFileTime": "134336202676968473",
+    "ErrorType": null
+  },
+  "Native": {
+    "Pid": 18176,
+    "TargetPid": 21912,
+    "ExitCode": 0,
+    "TimedOut": false,
+    "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"tick\":33380328,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"identity.before\",\"hr\":\"00000000\",\"tick\":33380328,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"shellWindows\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"windowCount\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"shellWindowCount\":2,\"targetMatches\":1,\"unreadableEntries\":0,\"countStable\":true}\r\n{\"stage\":\"identity.beforeView\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"serviceProvider\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"topLevelBrowser\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"activeShellView\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"viewWindow\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"viewWindowBelongsToTarget\":true}\r\n{\"stage\":\"folderView\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"getFolder\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"classId\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"classId\":\"{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}\",\"isSampleClass\":true}\r\n{\"stage\":\"currentFolder\",\"hr\":\"00000000\",\"tick\":33380343,\"observerPid\":18176,\"proofLoadedInObserver\":false}\r\n{\"currentPidlBytes\":150,\"physicalPathAvailable\":false,\"physicalPathMatchesExpected\":false}\r\n{\"stage\":\"expectedPathParse\",\"hr\":\"00000000\",\"tick\":33380359,\"observerPid\":18176,\"proofLoadedInObserver\":true}\r\n{\"proofScopeVerified\":true,\"expectedRootPidlBytes\":22,\"isRootPidl\":false,\"isDescendantPidl\":true}\r\n{\"stage\":\"viewItemCount\",\"hr\":\"00000000\",\"tick\":33380359,\"observerPid\":18176,\"proofLoadedInObserver\":true}\r\n{\"viewItemCount\":38}\r\n{\"stage\":\"proofViewItems\",\"hr\":\"00000000\",\"tick\":33380359,\"observerPid\":18176,\"proofLoadedInObserver\":true}\r\n{\"stage\":\"proofArrayCount\",\"hr\":\"00000000\",\"tick\":33380359,\"observerPid\":18176,\"proofLoadedInObserver\":true}\r\n{\"proofItemIndex\":0,\"syntheticDisplayName\":\"sample-100.txt\"}\r\n{\"proofItemIndex\":1,\"syntheticDisplayName\":\"sample-101.txt\"}\r\n{\"proofItemIndex\":2,\"syntheticDisplayName\":\"sample-102.txt\"}\r\n{\"proofItemIndex\":3,\"syntheticDisplayName\":\"sample-103.txt\"}\r\n{\"proofItemIndex\":4,\"syntheticDisplayName\":\"sample-104.txt\"}\r\n{\"proofItemIndex\":5,\"syntheticDisplayName\":\"sample-105.txt\"}\r\n{\"proofItemIndex\":6,\"syntheticDisplayName\":\"sample-106.txt\"}\r\n{\"proofItemIndex\":7,\"syntheticDisplayName\":\"sample-107.txt\"}\r\n{\"proofItemIndex\":8,\"syntheticDisplayName\":\"sample-108.txt\"}\r\n{\"proofItemIndex\":9,\"syntheticDisplayName\":\"sample-109.txt\"}\r\n{\"proofItemIndex\":10,\"syntheticDisplayName\":\"sample-110.txt\"}\r\n{\"proofItemIndex\":11,\"syntheticDisplayName\":\"sample-111.txt\"}\r\n{\"proofItemIndex\":12,\"syntheticDisplayName\":\"sample-112.txt\"}\r\n{\"proofItemIndex\":13,\"syntheticDisplayName\":\"sample-113.txt\"}\r\n{\"proofItemIndex\":14,\"syntheticDisplayName\":\"sample-114.txt\"}\r\n{\"proofItemIndex\":15,\"syntheticDisplayName\":\"sample-115.txt\"}\r\n{\"proofItemIndex\":16,\"syntheticDisplayName\":\"sample-116.txt\"}\r\n{\"proofItemIndex\":17,\"syntheticDisplayName\":\"sample-117.txt\"}\r\n{\"proofItemIndex\":18,\"syntheticDisplayName\":\"sample-118.txt\"}\r\n{\"proofItemIndex\":19,\"syntheticDisplayName\":\"sample-119.txt\"}\r\n{\"proofItemIndex\":20,\"syntheticDisplayName\":\"sample-120.txt\"}\r\n{\"proofItemIndex\":21,\"syntheticDisplayName\":\"sample-121.txt\"}\r\n{\"proofItemIndex\":22,\"syntheticDisplayName\":\"sample-122.txt\"}\r\n{\"proofItemIndex\":23,\"syntheticDisplayName\":\"sample-123.txt\"}\r\n{\"proofItemIndex\":24,\"syntheticDisplayName\":\"sample-124.txt\"}\r\n{\"proofItemIndex\":25,\"syntheticDisplayName\":\"sample-125.txt\"}\r\n{\"proofItemIndex\":26,\"syntheticDisplayName\":\"sample-126.txt\"}\r\n{\"proofItemIndex\":27,\"syntheticDisplayName\":\"sample-127.txt\"}\r\n{\"proofItemIndex\":28,\"syntheticDisplayName\":\"sample-128.txt\"}\r\n{\"proofItemIndex\":29,\"syntheticDisplayName\":\"sample-129.txt\"}\r\n{\"proofItemIndex\":30,\"syntheticDisplayName\":\"sample-130.txt\"}\r\n{\"proofItemIndex\":31,\"syntheticDisplayName\":\"sample-131.txt\"}\r\n{\"proofItemIndex\":32,\"syntheticDisplayName\":\"sample-132.txt\"}\r\n{\"proofItemIndex\":33,\"syntheticDisplayName\":\"sample-133.txt\"}\r\n{\"proofItemIndex\":34,\"syntheticDisplayName\":\"sample-134.txt\"}\r\n{\"proofItemIndex\":35,\"syntheticDisplayName\":\"sample-135.txt\"}\r\n{\"proofItemIndex\":36,\"syntheticDisplayName\":\"相册\"}\r\n{\"proofItemIndex\":37,\"syntheticDisplayName\":\"说明_中文.md\"}\r\n{\"folderPidlStable\":true,\"activeViewStable\":true,\"itemCountAfter\":38,\"snapshotStable\":true,\"namesEmittedOnlyForProof\":true}\r\n{\"stage\":\"identity.after\",\"hr\":\"00000000\",\"tick\":33380359,\"observerPid\":18176,\"proofLoadedInObserver\":true}\r\n",
+    "Stderr": ""
+  },
+  "Passed": true,
+  "Failure": null,
+  "RegistryWrites": 0,
+  "NavigationInvoked": false
+}

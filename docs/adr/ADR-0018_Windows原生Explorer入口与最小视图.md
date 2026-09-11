@@ -26,7 +26,7 @@ M0-002-G1..G4 保留原有证据标准：批准的每用户注册与真实发现
 
 ## 2026-09-12 受控数据接入
 
-自有test-only入口及原生注册/注销闭环已取得真实Explorer证据。用户随后要求接入，V03-005冻结 [只读快照IPC](../../contracts/windows-shell/read-only-snapshot-v1.md)：进程外AssetHost复用现有HTTPS会话与ReadOnlyClient，Shell显示授权库/物理目录分页。此阶段使用F5或重新打开获取快照，最长5秒缓存有效期；不宣称已实现权限变化的界面推送清空、正式登录设置界面或生产安装。剩余生命周期与稳定性门禁继续独立验收。
+自有test-only入口及原生注册/注销闭环已取得真实Explorer证据。用户随后要求接入，V03-005冻结 [只读快照IPC](../../contracts/windows-shell/read-only-snapshot-v1.md)：进程外AssetHost复用现有HTTPS会话与ReadOnlyClient，Shell显示授权库/物理目录分页。真实冷页面证明clone枚举通知不足以驱动实际视图；最终使用公开IFolderView的呈现PIDL观察，只有Loading时执行有界刷新，500ms/10秒/20次/4活动视图，Core5秒有效期不变。根、分页、目录及Host停止/重启/旧位置拒绝已完成受控实机验收。主动权限失效清空、正式登录设置/安装与CViewSettings保留对象的最终卸载仍未完成；生命周期和稳定性门禁独立保留。
 
 ## 依据
 

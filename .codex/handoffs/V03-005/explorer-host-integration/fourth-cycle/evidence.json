@@ -1,0 +1,42 @@
+{
+  "status": "callback_attached_clone_not_enumerated_rendered_state_fix_required",
+  "artifacts": [
+    {
+      "file": "callback-diag-01.json",
+      "source": ".runtime/explorer-host-integration/desktop-04/callback-diag-01.json",
+      "sha256": "910a6ecf569f7e3730629d6f85105d3dce7fb57dd66efd547e1569938f33f8c8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "callback-diag-02.json",
+      "source": ".runtime/explorer-host-integration/desktop-04/callback-diag-02.json",
+      "sha256": "5adb7db5e1675beebae975451f8279970984bcccf3f6108918370b42ea3cb353",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "diagnostic-summary.json",
+      "source": ".runtime/explorer-host-integration/desktop-04/diagnostic-summary.json",
+      "sha256": "2d4fe03abcbf53ed7565015a656de731bec51a72a11dfa54f93789c4bdf0b786",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "diagnostic-summary.md",
+      "source": ".runtime/explorer-host-integration/desktop-04/diagnostic-summary.md",
+      "sha256": "6a37480203217b61076ec0f2e2a8fb7810ad2cbed119f0c93328f09580a5a808",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-04/cleanup.json",
+      "sha256": "c57f0b8da8c8dceada05d09c8f5d323e512924766adbed35e811edb306308e47",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-diag.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-04/host-diag.stdout.jsonl",
+      "sha256": "28ee950e3182b3c20cd682c5418c9520576c1b39c3f1edb7657ea20494272dea",
+      "kind": "unmodified_copy"
+    }
+  ],
+  "decision": "Actual targetPID matched,viewstable; callbackthread/site/window valid,cloneenum/statuspublish/timersneverstarted. Repair uses actualIFolderView presentedPIDLstatus,avoiding assumptions about otherFolderenum routing. No F5diagnostic aftercleanup; complete functionality stillpending."
+}

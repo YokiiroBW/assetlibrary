@@ -1,0 +1,15 @@
+{
+  "Utc": "2026-09-11T20:12:53.9781259+00:00",
+  "KnownOwnedWindowCountRemaining": 0,
+  "KnownOwnedWindows": [],
+  "TargetOriginalProcessResident": true,
+  "BrokerOriginalProcessResident": true,
+  "GuardProcessAbsent": true,
+  "FirstHostProcessAbsent": true,
+  "RestartedHostProcessAbsent": true,
+  "DesktopPid": 6212,
+  "UserExplorerNotRestarted": true,
+  "ExplorerForceKilled": false,
+  "CoreStopOwnedByRoot": true,
+  "FullComUnloadClaim": false
+}

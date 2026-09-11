@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / Windows真实数据接入实施中**。Windows原生Explorer最小入口与清理闭环已验证。用户要求接入后，V03-005冻结只读快照IPC，V03-006实现Shell侧，V03-010在独立worktree实现进程外AssetHost，主协调统一验收。Web/Android既有验收保留，NAS图片发行仍受目标内核阻断；完整客户端与发布门禁未完成。
+状态 **partial / Windows受控真实数据接入验收通过**。V03-006 Shell、V03-010 AssetHost与V03-011实际视图加载观察已集成；真实Explorer冷库根、分页、两级目录、Host不可用/重启与旧位置拒绝/根恢复通过，入口/自有窗口/Host/Core清理与合成原件完整性已核验。详见[本次接入验收](explorer-host-integration/README.md)。Web/Android既有证据保留，NAS图片发行仍受原目标内核阻断；正式登录安装、预览、CViewSettings引用保留和G2..G4/完整客户端门禁未完成。
 
 ## 已集成与已验收
 

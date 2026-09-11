@@ -1,5 +1,12 @@
 # V03-005 当前验证记录
 
+## 2026-09-12 Windows真实Core接入完成本切片验收
+
+Host57普通测试、既有2真实Core组件测试、最终呈现状态修复4项受影响CTest、集成严格构建及repository-rendered-final.log仓库检查通过；重复运行不累计。第五轮真实Explorer无需F5/预热自动显示1库、100条+下一页、第二页38条、相册/夏日/文件，并通过Host停止不可用、重启一次负路径F5拒绝旧位置、重开根自动恢复。actual4FF/PIDL/计数/名称与原始截图一致；观测延迟仅上界，不称<10s/G3通过。
+
+原600秒guard自动注销，9字段包外missing、Desktop32/入口消失、所有自有窗口与两个Host结束；原Explorer未重启或强杀。三轮Core支架分别核验138原件hash/mtime不变、6临时账号/数据库/runtime/HTTPS监听及进程清理。参见[最终索引](explorer-host-integration/final-cycle/evidence.json)。Windows CViewSettings仍持有对象的严格proof-owner诊断exit1/S_FALSE保持未通过，安装、预览、主动失效与G2..G4均未关闭。
+
+
 本阶段是分工/启动，不是新功能验收。共享70ce45c基线已运行python -I -B scripts/verify_repository.py并通过（原迁移21、架构14及现有源/SDK/依赖检查），原日志在主目录.runtime/parallel-browse-baseline.log。此35项仅是基线，不算本批新增功能测试。
 
 4个App创建的工作区均检查git-common-dir与本仓库一致，初始HEAD70ce45c/无改动，然后建立独立codex/v03-006..009分支，生成各自任务/交接。真实thread ID通过read_thread核实。新窗口默认权限造成命令审批等待，已向用户说明；不能把waitingOnApproval说成已实施。

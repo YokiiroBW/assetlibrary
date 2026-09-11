@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-11T17:05:17.116151+00:00",
-  "status": "windows_gui_native_directory_open_passed_loading_autorefresh_in_progress",
+  "updatedAtUtc": "2026-09-11T20:20:55.164707+00:00",
+  "status": "windows_test_only_native_core_browse_cold_gui_and_defined_recovery_verified",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Real native4FF root and doubleclick library88B in sameExplorer verified; stockfoldericons correct. ManualF5/5secondfreshness leftLoading painted, so root approved bounded per-view500ms/10s/20attempt/4view refresh callback preserving150msIPC and CoreTTL. SecondGUIcycle cleaned9fields/Desktop32/target24008closed/Hostlogout, broker21232 retained. Core fixture expires2026-09-11T19:01:36Z; stop/renew under root ownership.",
+  "active_instruction": "Controlled native Explorer/AssetHost/Core read-only connection is functionally accepted and all owned test resources cleaned. Next work is production login/settings/startup/install, file opening/preview, category/tree polish, push invalidation and G2..G4 lifecycle/soak; CViewSettings retained references remain an explicit unresolved unload gate. Do not repeat the resolved registry-view or clone-signal diagnosis.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Merge reviewed Shell and AssetHost implementations against the frozen local contract.",
-    "Verify real Core libraries/directories/pagination, absence/restart and authorization boundaries.",
-    "Use an owned native Explorer window and guarded registration, then verify cleanup. Keep G2..G4 and installer gaps explicit."
+    "Implement production connection/login/settings and install/startup flow within release-gate rules.",
+    "Complete file opening/preview and navigation-category/title polish.",
+    "Resolve final COM retention/growth, push invalidation and full G2..G4/soak evidence before production release."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -433,5 +433,6 @@
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
   },
-  "gui_owner": "V03-005 root only; code owners have no live GUI/registration ownership in this slice"
+  "gui_owner": "No active GUI task; all owned test windows closed, test registrations removed, Hosts and Core fixtures stopped. No further desktop action scheduled.",
+  "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json"
 }

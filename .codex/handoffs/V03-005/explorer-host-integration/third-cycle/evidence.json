@@ -1,0 +1,54 @@
+{
+  "status": "cold_root_loading_failed_cleaned",
+  "artifacts": [
+    {
+      "file": "acceptance-summary.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/acceptance-summary.json",
+      "sha256": "86529a168c983338b8288f7d01aeb64250917d15c82e5f7221a89135403830ec",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cold-root-loading-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/cold-root-loading-actual.json",
+      "sha256": "9ae84bf6f6320dde80c2cf9fa39b09aeea55307dde98966c2ecf340d42d695f0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cold-target-module.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/cold-target-module.json",
+      "sha256": "0ca7d3db463cdb35ebb0a680b487ef345f27b818ae4a8e48f7cc82cd1170922f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/cleanup.json",
+      "sha256": "f90640c76e0e0c19b9a033418055d849ae30eb3b94238cc9df0660a3a8d2be87",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fields-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/fields-cleanup.json",
+      "sha256": "24486a2fe8b550108f7014bd8120b99fe0485fd5bdde6370e3c9036550ce28ca",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-cleanup-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/desktop-cleanup-actual.json",
+      "sha256": "175cc4e0472953e57cfcc718e5d908330f8e20978fbeffb23e24580a18e31bb7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-stop-result.json",
+      "source": ".runtime/explorer-host-integration/desktop-03/host-stop-result.json",
+      "sha256": "e7c4ef11b041722de31d9b204466e19fbffb435ba2a104cbd385382da152986f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-initial.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-03/host-initial.stdout.jsonl",
+      "sha256": "bad50a05a4aed4d893b581765f95c950b40f50ca1848d68cea8f27acec8939dd",
+      "kind": "unmodified_copy"
+    }
+  ],
+  "limits": "No F5 or prewarm. Later paging/nested/restart stages not run; screenshots remain in runtime. This is a failed realGUI cold-loading result, not replaced by passing component tests."
+}

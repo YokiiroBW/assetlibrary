@@ -1,0 +1,6 @@
+{
+  "Utc": "2026-09-11T20:08:49.123Z",
+  "Reason": "One explicit retry after observed Host-unavailable error and Host restart",
+  "ColdF5": false,
+  "NegativeF5Count": 1
+}
