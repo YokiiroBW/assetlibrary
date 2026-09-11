@@ -28,6 +28,8 @@ Shell query has one monotonic total foreground waiting budget of 150 ms includin
 
 Host returns the current in-memory result immediately and schedules Core work separately. It never waits for HTTPS on the pipe handler. At most 4 live pipe clients, 2 concurrent Core reads, 64 retained page snapshots and 8192 location/item tokens; refuse or expire old locations when bounded capacity is reached. Use existing 8-second HTTP cancellation, at most 5-second successful snapshot freshness, and no stale-data fallback after expiry. Refresh after expiry returns Loading while requerying. Coalesce requests for the same node. Failed queries can retry after a bounded 1-second backoff. 401/403/404 and session expiry cancel pending work, clear all cached identity data and change epoch; late responses cannot repopulate it. No automatic credential retry. Restart/reconnect requires the root to be reopened. Stop cancels and awaits owned work with an explicit deadline and logs only operation/status/timing.
 
+Core HTTP 410 (`cursor_expired`) maps to Expired and retires the affected pagination token, or resets the bounded location epoch and requests reopening the root. It must not repeatedly retry the same invalid cursor as Unavailable.
+
 The first controlled slice uses native F5/reopen to request fresh snapshots; it does not claim push invalidation of names already painted by Explorer. Authorization is rechecked by Core on each page query; the limited display freshness and manual refresh are explicit acceptance limitations pending G2/G3 lifecycle work.
 
 ## Integration entry and acceptance

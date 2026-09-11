@@ -1,0 +1,18 @@
+{
+  "description": "Independent literal frame vectors for read-only-snapshot-v1; hex is wire order, not GUID text order.",
+  "root_request": {
+    "request_id": 7,
+    "hex": "414c53310100010020000000070000000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "ready_one_library": {
+    "request_id": 7,
+    "epoch": "00112233-4455-6677-8899-aabbccddeeff",
+    "node": "ffeeddcc-bbaa-9988-7766-554433221100",
+    "name": "资料库",
+    "hex": "414c53310100020032000000070000000000000033221100554477668899aabbccddeeff01000000ccddeeffaabb8899776655443322110001000300448d9965935e"
+  },
+  "loading": {
+    "request_id": 7,
+    "hex": "414c53310100020018000000070000000100000033221100554477668899aabbccddeeff00000000"
+  }
+}
