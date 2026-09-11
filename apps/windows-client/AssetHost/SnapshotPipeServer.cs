@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Runtime.Versioning;
 
@@ -40,21 +41,46 @@ public sealed class SnapshotPipeServer : IAsyncDisposable
 
     private async Task ListenAsync(NamedPipeServerStream pipe)
     {
-        while (!stopping.IsCancellationRequested)
+        long lastFailureLog = 0;
+        try
         {
-            try
+            while (!stopping.IsCancellationRequested)
             {
-                await pipe.WaitForConnectionAsync(stopping.Token).ConfigureAwait(false);
-                await ExchangeAsync(pipe).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (stopping.IsCancellationRequested) { return; }
-            catch (Exception failure) when (failure is IOException or InvalidDataException or OperationCanceledException)
-            { log?.Invoke("pipe_exchange", SnapshotStatus.InvalidResponse, 0); }
-            finally
-            {
-                if (pipe.IsConnected) { pipe.Disconnect(); }
+                var accepted = false;
+                var backoff = false;
+                try
+                {
+                    await pipe.WaitForConnectionAsync(stopping.Token).ConfigureAwait(false);
+                    accepted = true;
+                    await ExchangeAsync(pipe).ConfigureAwait(false);
+                }
+                catch (IOException) when (!accepted)
+                {
+                    // A failed accept cannot be treated as a bad request and retried on the same broken handle.
+                    log?.Invoke("pipe_accept", SnapshotStatus.Unavailable, 0);
+                    throw;
+                }
+                catch (Exception failure) when (!stopping.IsCancellationRequested
+                    && failure is IOException or InvalidDataException or OperationCanceledException)
+                {
+                    var now = Stopwatch.GetTimestamp();
+                    if (lastFailureLog == 0 || Stopwatch.GetElapsedTime(lastFailureLog, now) >= TimeSpan.FromSeconds(1))
+                    {
+                        log?.Invoke("pipe_exchange", SnapshotStatus.InvalidResponse, 0);
+                        lastFailureLog = now;
+                    }
+                    backoff = true;
+                }
+                finally
+                {
+                    // ReadAsync returning EOF marks the managed stream Broken (IsConnected=false), but Windows
+                    // still requires DisconnectNamedPipe before the instance can accept another connection.
+                    if (accepted) { pipe.Disconnect(); }
+                }
+                if (backoff) { await Task.Delay(100, stopping.Token).ConfigureAwait(false); }
             }
         }
+        catch (OperationCanceledException) when (stopping.IsCancellationRequested) { return; }
     }
 
     private async Task ExchangeAsync(NamedPipeServerStream pipe)

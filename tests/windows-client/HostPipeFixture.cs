@@ -11,17 +11,17 @@ internal sealed class HostPipeFixture : IAsyncDisposable
     internal SnapshotStore Store { get; }
     internal SnapshotPipeServer Server { get; }
 
-    private HostPipeFixture()
+    private HostPipeFixture(Action<string, SnapshotStatus, long>? log)
     {
         var handler = new ProtocolFixture((request, _) => ProtocolFixture.ResultAsync(request, HostTestSupport.Libraries()));
         transport = new ClientTransport(ProtocolFixture.Profile, handler, TimeSpan.FromSeconds(3));
         Store = new SnapshotStore(new ReadOnlyClient(transport), DateTimeOffset.UtcNow.AddHours(1));
-        Server = new SnapshotPipeServer(Store, NativePipe.EndpointName + ".test." + Guid.NewGuid().ToString("N"));
+        Server = new SnapshotPipeServer(Store, NativePipe.EndpointName + ".test." + Guid.NewGuid().ToString("N"), log);
     }
 
-    internal static async Task<HostPipeFixture> CreateAsync(bool prime = false)
+    internal static async Task<HostPipeFixture> CreateAsync(bool prime = false, Action<string, SnapshotStatus, long>? log = null)
     {
-        var fixture = new HostPipeFixture();
+        var fixture = new HostPipeFixture(log);
         if (prime) { _ = await HostTestSupport.SettledAsync(fixture.Store); }
         return fixture;
     }
