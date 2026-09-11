@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param([Parameter(Mandatory)][string]$BuildDirectory)
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'execution-context.ps1')
+Assert-ProofNativeLaunch -Context (Get-ProofExecutionContext)
 $resolvedBuild = (Resolve-Path -LiteralPath $BuildDirectory).Path
 $library = Join-Path $resolvedBuild 'Release/AssetLibraryExplorerProof.dll'
 $probe = Join-Path $resolvedBuild 'Release/ExplorerProofProbe.exe'
@@ -8,9 +10,11 @@ $registration = Join-Path $PSScriptRoot 'registration.ps1'
 if (!(Test-Path -LiteralPath $library) -or !(Test-Path -LiteralPath $probe)) { throw 'Compiled proof artifacts are required.' }
 $before = & $registration -Action verify | ConvertFrom-Json
 if ($before.ClassPresent -or $before.NamespacePresent) { throw 'Proof registry must be empty before tests.' }
+$registeredByThisRun = $false
 try {
   $registered = & $registration -Action register -DllPath $library | ConvertFrom-Json
-  if (!$registered.ClassPresent -or !$registered.NamespacePresent) { throw 'Registration was not confirmed.' }
+  $registeredByThisRun = $true
+  if (!$registered.NativeLaunchRouteVerified -or $registered.RegistryView -ne 'current-process' -or !$registered.ClassPresent -or !$registered.NamespacePresent) { throw 'Registration in the selected native execution route was not confirmed.' }
   $collisionRejected = $false
   try { & $registration -Action register -DllPath $library | Out-Null }
   catch { $collisionRejected = $_.Exception.Message -eq 'Existing registration: refusing replacement.' }
@@ -34,8 +38,8 @@ try {
     Write-Output $text.Trim()
   } finally { $process.Dispose() }
 } finally {
-  & $registration -Action unregister | Out-Null
+  if ($registeredByThisRun) { & $registration -Action unregister | Out-Null }
   $after = & $registration -Action verify | ConvertFrom-Json
   if ($after.ClassPresent -or $after.NamespacePresent) { throw 'Proof registration residue detected.' }
 }
-Write-Output 'Isolated COM/DefView + registration collision + cleanup checks passed. Real Explorer discovery remains a separate gate.'
+Write-Output 'Native-launched isolated COM/DefView + current-process registration/collision/cleanup checks passed. Actual system Explorer class, PIDL and content verification remains required; G1..G4 are not closed.'

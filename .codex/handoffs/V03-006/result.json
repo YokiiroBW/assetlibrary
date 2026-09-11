@@ -514,7 +514,14 @@
     ".codex/handoffs/V03-006/key-open-first.md",
     ".codex/handoffs/V03-006/key-open-first/",
     ".codex/handoffs/V03-006/key-open-v2-expiry.md",
-    ".codex/handoffs/V03-006/key-open-v2-expiry/"
+    ".codex/handoffs/V03-006/key-open-v2-expiry/",
+    "tests/windows-shell/NativeExecutionContext.cs",
+    "tests/windows-shell/execution-context.ps1",
+    "tests/windows-shell/test-registration-context.ps1",
+    "tests/windows-shell/registration.ps1",
+    "tests/windows-shell/verify.ps1",
+    "apps/windows-client/README.md",
+    ".codex/handoffs/V03-006/proof-native-registration-plan.md"
   ],
   "changed_contracts": [],
   "tests": {
@@ -555,7 +562,8 @@
       "Existing owner-protected registration script and SHGetDesktopFolder/BindToObject/CreateViewObject APIs",
       "Fixed MyComputer parent enumeration, Browse absolute parse route, opaque IL/CompareIDs APIs and immutable 323CD843/F298 owner guard",
       "Existing current-user process identity and debugger checks plus fixed F298/323CD843 registration guards; native WTS/input-desktop checks gate the authorized cold-session experiment",
-      "Reviewed scoped Explorer handle/identity lifecycle, narrow v2 window predicate, immutable official registration and attributes observer; only this task runtime and evidence changed"
+      "Reviewed scoped Explorer handle/identity lifecycle, narrow v2 window predicate, immutable official registration and attributes observer; only this task runtime and evidence changed",
+      "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -598,13 +606,15 @@
       "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart",
       "Notify-only preparation: fixed guard and literal hashes, PowerShell AST and static single-method invocation reviewed; no native notification, registration, C# compilation or observer execution",
       "Public RegOpen registered normal/cancel succeed with nonnull returned handles closed by reference; real SHCORE IAT matches public entry, then 5.609s protected early exit before manual trigger; complete owned UI/debugger/registry cleanup verified",
-      "V2 exception-budget registered normal/cancel each pass 32 caught C++ exceptions and successful open/close; original registry expires before real attach and capture refuses; natural cleanup and final missing/window/process checks pass; exclusive GUI handoff to root"
+      "V2 exception-budget registered normal/cancel each pass 32 caught C++ exceptions and successful open/close; original registry expires before real attach and capture refuses; natural cleanup and final missing/window/process checks pass; exclusive GUI handoff to root",
+      "19 pure context/report cases and 2 admission wiring checks, helper compilation without native actions; 17 existing Shell contracts; repository architecture/contract/dependency verification; live own-proof validation pending GUI handoff"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
       "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
-      "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension"
+      "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension",
+      "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -962,5 +972,23 @@
     "explorer_restarts": 0,
     "gui_owner_handoff_to_root": true,
     "code_owner_retained": true
+  },
+  "native_registration_code_checkpoint": {
+    "report": "proof-native-registration-plan.md",
+    "status": "code_and_nonmutating_regressions_ready_no_live_proof",
+    "context_policy_cases": 19,
+    "admission_wiring_checks": 2,
+    "shell_contract_tests": 17,
+    "registration_requires_validated_explorer_parent_route": true,
+    "no_package_identity_alone_is_insufficient": true,
+    "local_results_not_system_registration_or_cleanup": true,
+    "current_view_owner_cleanup_retained": true,
+    "notification_sta_com_initialized": true,
+    "gui_actions": 0,
+    "registration_actions": 0,
+    "notification_actions": 0,
+    "explorer_restarts": 0,
+    "root_retains_gui_ownership": true,
+    "product_gates_closed": false
   }
 }

@@ -23,4 +23,4 @@ python scripts/validate_dotnet_dependencies.py --solution apps/windows-client/As
 
 ## Explorer 状态
 
-[test-only DefView/IShellFolder2 验证](../../tests/windows-shell/README.md)已可构建，独立 COM/PIDL/DefView 与可逆 HKCU 注册通过。真实 Explorer 尚未进入本项目类工厂，入口显示无关联应用；原因未定位。当前没有可用 Explorer 安装包，不关闭 M0-002-G1..G4 或正式发布门禁。后续入口接通后，才把授权快照通过受审查的本机 IPC 接到 Shell。Shell 仍不得加载 .NET/WinUI、网络、媒体或 Provider。
+[test-only DefView/IShellFolder2 验证](../../tests/windows-shell/README.md)已可构建。已定位诊断执行器的 MSIX 注册表视图与普通 Explorer 不同；同一微软样例改由经核验的普通用户 Explorer 启动登记后可实际进入。该结果只解除环境阻断，本项目自身类工厂/视图仍需重新实机验收。注册工具现在拒绝未经核验启动路线的登记，局部 presence/absence 不再代表系统 Explorer 注册或清理。当前没有可用 Explorer 安装包，不关闭 M0-002-G1..G4 或正式发布门禁。后续入口接通后，才把授权快照通过受审查的本机 IPC 接到 Shell。Shell 仍不得加载 .NET/WinUI、网络、媒体或 Provider；新增 C# 上下文检查只运行于进程外测试脚本。

@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增代码回归：`pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1`，19个上下文/局部报告边界案例、2个入口接线检查及两帮助类型编译通过，无上下文查询/注册/通知/Explorer动作。真实来源与通知正例留待包外周期。现有`python -m unittest discover -s tests/spikes/windows-shell -p test_*.py -v`17项通过；`python -I -B scripts/verify_repository.py`架构/契约/源码/依赖及既有35回归通过、Alpha仍blocked。C++和Windows应用代码未变，不重跑未变原生构建或.NET整套测试。详见proof-native-registration-plan.md。
+
 新增[异常V2到期周期](key-open-v2-expiry.md)：19件冻结hash与registered normal/cancel32-C++语义、status0/handle/close/清理通过；SDK读取已晚于原登记期限，capture前置拒绝、无实机attach。自然600秒cleanup双通知/8根absent、reader20missing及最终SDK窗/PID不存在确认。无extra notify/ThisPC/Browse/原重启，不把时限拒绝记作键打开失败，成功参考不重复。
 
 新增[公开开键首轮](key-open-first.md)：registered normal/cancel成功语义及参考close/2断点清理/协作退出通过；真实准入/IAT验证通过，5.609秒保护退出不计60秒或完整触发。实机0匹配且通知/ThisPC/Browse未执行；唯一断点/Detach/目标存活清理确认。前后20字段正确、最终20missing/8根双通知及SDK窗清理通过，原用户Explorer不重启。

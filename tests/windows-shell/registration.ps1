@@ -4,6 +4,11 @@ param(
   [string]$DllPath
 )
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'execution-context.ps1')
+$proofContext = Get-ProofExecutionContext
+# Refuse ambiguous writes before opening HKCU. Cleanup remains available in the
+# current view so a parent exiting cannot strand an already-owned registration.
+if ($Action -eq 'register') { Assert-ProofNativeLaunch -Context $proofContext }
 $proofOwner = 'AssetLibrary.V03-002.ExplorerProof'
 $proofClsid = '{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
 $classSubkey = "Software\Classes\CLSID\$proofClsid"
@@ -19,22 +24,31 @@ namespace AssetLibraryExplorerProof {
  public static class Notification {
   [DllImport("shell32.dll")] static extern void SHChangeNotify(uint id, uint flags, IntPtr a, IntPtr b);
   [DllImport("shell32.dll")] static extern int SHGetSpecialFolderLocation(IntPtr owner, int folder, out IntPtr pidl);
+  [DllImport("ole32.dll")] static extern int CoInitializeEx(IntPtr reserved, uint flags);
+  [DllImport("ole32.dll")] static extern void CoUninitialize();
   public static bool Run() {
+   bool notified = false;
    var thread = new Thread(() => {
-    SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);
-    IntPtr desktop;
-    if(SHGetSpecialFolderLocation(IntPtr.Zero,0,out desktop)==0) {
-     try { SHChangeNotify(0x00001000,0x2000,desktop,IntPtr.Zero); }
-     finally { Marshal.FreeCoTaskMem(desktop); }
-    }
+    IntPtr desktop = IntPtr.Zero;
+    bool initialized = false;
+    try {
+     if (CoInitializeEx(IntPtr.Zero, 2) < 0) return;
+     initialized = true;
+     if (SHGetSpecialFolderLocation(IntPtr.Zero,0,out desktop) < 0 || desktop == IntPtr.Zero) return;
+     SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);
+     SHChangeNotify(0x00001000,0x2000,desktop,IntPtr.Zero);
+     notified = true;
+    } catch (Exception) { notified = false; }
+    finally { if (desktop != IntPtr.Zero) Marshal.FreeCoTaskMem(desktop); if (initialized) CoUninitialize(); }
    });
-   thread.IsBackground = true; thread.Start(); return thread.Join(3000);
+   thread.IsBackground = true; thread.SetApartmentState(ApartmentState.STA);
+   thread.Start(); return thread.Join(3000) && notified;
   }
  }
 }
 '@
   }
-  if (-not [AssetLibraryExplorerProof.Notification]::Run()) { Write-Warning 'Shell notification exceeded 3 seconds; registry state remains authoritative.' }
+  if (-not [AssetLibraryExplorerProof.Notification]::Run()) { throw 'Shell notification did not complete with valid STA/COM/PIDL state; no Explorer visibility claim is valid.' }
 }
 function Remove-ProofKeys {
   foreach ($subkey in @($namespaceSubkey, $classSubkey)) {
@@ -77,5 +91,8 @@ if ($Action -eq 'register') {
 if ($Action -eq 'unregister') { Remove-ProofKeys; Notify-ProofShell }
 $class = $hive.OpenSubKey($classSubkey, $false)
 $entry = $hive.OpenSubKey($namespaceSubkey, $false)
-try { [pscustomobject]@{ ClassPresent=($null -ne $class); NamespacePresent=($null -ne $entry); Owner=if($class){$class.GetValue('AssetLibraryOwner')}else{$null} } | ConvertTo-Json -Compress }
+try {
+  $owner = if($class){$class.GetValue('AssetLibraryOwner')}else{$null}
+  New-ProofRegistryReport -Context $proofContext -ClassPresent ($null -ne $class) -NamespacePresent ($null -ne $entry) -Owner $owner | ConvertTo-Json -Depth 4 -Compress
+}
 finally { if($class){$class.Dispose()}; if($entry){$entry.Dispose()} }

@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[本项目注册入口修正与下一实机计划](proof-native-registration-plan.md)已落代码：包内局部读回不再晋级system Explorer注册/清理，register与verify在写入前要求已核普通系统Explorer直接父路线；NoPackage本身不放行。owner当前视图cleanup保留，通知补STA/COM，CLI说明同步。19上下文/报告案例、2接线检查和帮助类型编译、17 Shell契约及仓库相关检查通过；本轮无GUI/注册/通知/重启，root仍是唯一GUI操作者。微软样例恢复仅解除环境阻断，本项目G1..G4待包外实机。
+
 最新：[异常V2到期交接](key-open-v2-expiry.md)新registered normal/cancel各32真C++自行捕获、total33/详16、status0/句柄close/清理均通过；实机调用发生在600秒自然到期后被拒绝，observer/额外notify/ThisPC/Browse均未启动。8根双通知/20missing与专属SDK窗清理确认，原PID已不存在。按root排他协调交接后停止GUI/登记/实机，保留代码owner；脚本、SDK创建方法和接管边界已列明。
 
 最新：[公开开键首轮](key-open-first.md)registered normal/cancel均status0/非空可读句柄/参考自行close及清理通过。真实SDK窗口准入和SHCORE→KernelBase实际IAT验证S_OK，但ready后5.609秒原异常保护结束，工具返回时已脱离，额外notify/首次ThisPC/Browse均未执行，0匹配无开键结论。有效20字段再次通过，SDK窗/8根双通知/最终20missing清理完成，用户窗口保留；不放宽预算或盲重跑。

@@ -10,11 +10,31 @@ cmake --build .runtime/explorer-proof --config Release --parallel 2
 pwsh -NoProfile -File tests/windows-shell/verify.ps1 -BuildDirectory .runtime/explorer-proof
 ```
 
+`verify.ps1`及`registration.ps1 -Action register`现在必须由经核验的普通用户系统Explorer直接启动的PowerShell进程执行。上面的verify命令是该包外进程中的命令，不可从包内终端直接运行并据其成功认定系统注册。先运行不登记的回归：
+
+```powershell
+pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1
+```
+
+测试使用合成来源证据检查允许/拒绝与presence/absence报告边界，编译帮助类型但不调用原生上下文查询、通知或注册。当前CI的Shell入口仍仅构建C++；测试注册不是未授权的CI桌面动作。
+
+### 注册表视图与启动路线
+
+MSIX包内工具可能在私有注册表视图中成功写入HKCU，普通Explorer却看不到。没有包身份、同SID、同session或局部字段匹配都不能单独证明视图一致。测试入口用直接父进程的系统Explorer路径、创建先后、同用户/会话及普通权限检查选择已实测支持的启动路线，不依赖本机Silo、包名称/版本或更改manifest、UAC、系统策略。没有包身份只是必要检查之一，不是通用虚拟化探测器。
+
+由协调者先观测一个新的系统Explorer窗口并核PID/creation/HWND，再通过该窗口的`ShellFolderView.Application.ShellExecute`启动固定PowerShell脚本，是本次采用的Windows支持方法；不要用包内`Process.Start`启动的新PowerShell替代。引用已观测窗口的`Document.Application`，不另创建一个未验证来源的Shell执行对象。完整精确方案见[本次交接](../../.codex/handoffs/V03-006/proof-native-registration-plan.md)。
+
+`registration.ps1 -Action verify`仍可只读任意当前视图，结果含`RegistryView=current-process`和分开的`NativeLaunchRouteVerified`。`SystemExplorerRegistrationVerified`与`SystemExplorerCleanupVerified`始终为false，实际Explorer的类、PIDL、内容及包外清理证据要另取。`unregister`保留owner保护的当前视图清理，避免父进程退出使恢复被卡住；包内退出0或absence不能宣称系统清理，必须在相同已核包外执行上下文清理/复核。
+
+参考：[Flexible virtualization](https://learn.microsoft.com/en-us/windows/msix/desktop/flexible-virtualization)、[MSIX运行时排查与Explorer边界](https://learn.microsoft.com/en-us/windows/msix/manage/troubleshoot-msix-container)、[通过已有Explorer执行](https://devblogs.microsoft.com/oldnewthing/20131118-00/?p=2643)。这些是测试工具的启动约束，不是产品安装器，也不自动证明G1通过。
+
 构建启用 `/W4 /WX /permissive- /analyze /utf-8`。verify 在 finally 中卸载；隔离子进程最多10秒，校验 COM factory、PIDL、Desktop 枚举/属性/Folder 关联、DefView、子目录 bind、重复注册拒绝和最终无残留。它不替代 Explorer G1..G4。
 
 交互验证必须由协调线程单独启用，限定注册/卸载和窗口所有权；`ExplorerProofProbe --navigate` 只通过 ShellWindows 前后差分定位本次新开的 Desktop 窗口，给 IWebBrowser2.Navigate2 传 PIDL SAFEARRAY。此 COM 调用可能被 Explorer 模态错误阻塞，外层必须设置进程超时和注册清理，不可直接无界运行。不得关闭用户已有窗口。任务曾观察到 UI 输入/截图拒绝，不能据此改变桌面安全状态。
 
 ## 当前证据
+
+2026-09-11：主协调完成微软样例的包内/包外A/B与恢复。原包内自检20字段正确，而同用户/会话普通进程读回全部缺失；原样guard从已观察Explorer执行后，真实Explorer进入BA16类/42B PIDL/10项，原样清理后字段缺失和样例项消失。历史失败保留，下述“原因未定位”描述的是当时状态。微软样例通过不能直接晋级本项目test-only proof或G1..G4；本项目注册路线与独立测试需按新边界重验。
 
 2026-09-08：隔离探针和可逆 HKCU 注册通过；真实 Explorer 的 CLSID、选择 API 和直接 Navigate2 入口均未证明加载本类，显示“无关联应用”。有界调用日志仅记录隔离探针；parent Desktop UPDATEDIR、正确 DWORD Folder 属性和成功 Folder open association 未消除故障。原因尚未定位，不擅自归因于某个系统设置，不关闭 G1。G2 故障生命周期、G3 取消/延迟、G4 20轮和8小时稳定性尚未获得真实视图证据。
 
