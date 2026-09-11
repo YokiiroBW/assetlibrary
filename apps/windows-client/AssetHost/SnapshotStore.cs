@@ -115,12 +115,14 @@ public sealed class SnapshotStore : IAsyncDisposable
         }
         finally
         {
-            log?.Invoke("core_page", status, (long)clock.GetElapsedTime(started).TotalMilliseconds);
+            // A slow log sink must not give an already completed Core result a new freshness window.
+            var finished = clock.GetTimestamp();
+            log?.Invoke("core_page", status, (long)clock.GetElapsedTime(started, finished).TotalMilliseconds);
             lock (gate)
             {
                 --running;
                 page.Pending = false;
-                page.Finished = clock.GetTimestamp();
+                page.Finished = finished;
             }
         }
     }
