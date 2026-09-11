@@ -1,0 +1,168 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+  ],
+  "payload": {
+    "process": {
+      "Label": "sdk-baseline",
+      "Mode": "sdk",
+      "StartedUtc": "2026-09-11T13:47:47.2741617+00:00",
+      "CompletedUtc": "2026-09-11T13:47:47.3242558+00:00",
+      "ChildPid": 12340,
+      "TargetPid": 9860,
+      "ExitCode": 0,
+      "TimedOut": false
+    },
+    "events": [
+      {
+        "stage": "comInit",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "identity.before",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "shellWindows",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "windowCount",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "shellWindowCount": 2,
+        "targetMatches": 1,
+        "unreadableEntries": 0,
+        "countStable": true
+      },
+      {
+        "stage": "identity.beforeView",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "serviceProvider",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "topLevelBrowser",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "activeShellView",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "viewWindow",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "viewWindowBelongsToTarget": true
+      },
+      {
+        "stage": "folderView",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "getFolder",
+        "hr": "00000000",
+        "tick": 10736062,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "classId",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "classId": "{F3364BA0-65B9-11CE-A9BA-00AA004AE837}",
+        "isSampleClass": false
+      },
+      {
+        "stage": "currentFolder",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "currentPidlBytes": 373,
+        "physicalPathAvailable": true,
+        "physicalPathMatchesExpected": true
+      },
+      {
+        "stage": "expectedPathParse",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "stage": "canonicalCompare",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "expectedPidlBytes": 373,
+        "binaryEqual": true,
+        "canonicalEqual": true,
+        "currentPidlBytesAfterCompare": 373,
+        "expectedPidlBytesAfterCompare": 373
+      },
+      {
+        "stage": "viewItemCount",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      },
+      {
+        "viewItemCount": 17
+      },
+      {
+        "stage": "identity.after",
+        "hr": "00000000",
+        "tick": 10736078,
+        "observerPid": 12340,
+        "sampleLoadedInObserver": false
+      }
+    ],
+    "stderr_empty": true
+  }
+}

@@ -1,0 +1,27 @@
+#requires -Version 7.0
+param([Parameter(Mandatory)][ValidateSet('expected-missing','expected-registered')][string]$Mode,[Parameter(Mandatory)][ValidateSet('outside-before','outside-during','outside-after','outside-native')][string]$Label)
+$ErrorActionPreference='Stop'
+$root='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\procmon-20260911\view-boundary'
+if($PSScriptRoot -cne $root){throw 'Fixed diagnostic directory required'}
+$worker='<USER_PROFILE>\.codex\worktrees\6f7b\AssetLibrary'
+$source=Join-Path $worker '.runtime\procmon-live-preparation\run-readback.ps1'
+if((Get-FileHash -LiteralPath $source).Hash -cne 'BA62DE638654AFAB91247E11810200A439876DB74E547888A718C3C04ECE587C'){throw 'Read-only entry changed'}
+$expected=(Get-Content -LiteralPath (Join-Path $worker '.runtime\explorer-live\20260911-procmon-01\session-owned.json') -Raw|ConvertFrom-Json).OwnerSid
+$identity=[Security.Principal.WindowsIdentity]::GetCurrent()
+if($identity.User.Value -cne $expected){throw 'Read-only process user differs from Explorer user'}
+$self=[Diagnostics.Process]::GetCurrentProcess()
+$parent=(Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
+$record=[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$PID;CreationFileTime=$self.StartTime.ToUniversalTime().ToFileTimeUtc().ToString();ParentPid=$parent;Session=$self.SessionId;SameUserAsExplorer=$true;AdministratorEnabled=([Security.Principal.WindowsPrincipal]::new($identity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator);Mode=$Mode;Label=$Label;RegistryWrites=0}
+$contextPath=Join-Path $root ($Label+'-context.json')
+if(Test-Path -LiteralPath $contextPath){throw 'Context already exists'}
+$record|ConvertTo-Json|Set-Content -LiteralPath $contextPath -Encoding utf8NoBOM
+try {
+    $output=& $source -Mode $Mode -Label $Label
+    $result=[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Completed=$true;Matched=$true;ReadbackSummary=($output|ConvertFrom-Json)}
+} catch {
+    $result=[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Completed=$true;Matched=$false;ErrorType=$_.Exception.GetType().Name;Message=$_.Exception.Message}
+}
+$done=Join-Path $root ($Label+'-done.json')
+if(Test-Path -LiteralPath $done){throw 'Completion already exists'}
+$result|ConvertTo-Json -Depth 5|Set-Content -LiteralPath $done -Encoding utf8NoBOM
+if(-not $result.Matched){exit 1}

@@ -1,0 +1,219 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original lifecycle receipts and event log; preserve failed control/exit codes; redact private text if present. No PML/CSV copied."
+  ],
+  "payload": [
+    {
+      "source_file": "control.ready.json",
+      "data": {
+        "pid": 18264,
+        "creation": "134336066443623873",
+        "utc": "2026-09-11T13:24:04.4969099+00:00",
+        "runtimeSeconds": 30,
+        "tick": 9313250,
+        "pml": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\procmon-20260911\\runner\\76acef5e3cb0448ca9fe4e7396b772c9\\control.pml",
+        "waitForIdleSucceeded": true
+      }
+    },
+    {
+      "source_file": "control.stopped.json",
+      "data": {
+        "reason": "size_trigger_incomplete",
+        "pid": 18264,
+        "creation": "134336066443623873",
+        "utc": "2026-09-11T13:24:33.5647644+00:00",
+        "error": null,
+        "bytes": 425983040,
+        "exitCode": 1,
+        "sizeLimitIsPollingTriggerNotHardCap": true,
+        "complete": false
+      }
+    },
+    {
+      "source_file": "control.exported.json",
+      "data": {
+        "pml": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\procmon-20260911\\runner\\76acef5e3cb0448ca9fe4e7396b772c9\\control.pml",
+        "csv": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\procmon-20260911\\runner\\76acef5e3cb0448ca9fe4e7396b772c9\\control.csv",
+        "pid": 8268,
+        "exitCode": 0,
+        "csvBytes": 160621898,
+        "contentsValidated": false,
+        "creation": "134336066735851259",
+        "utc": "2026-09-11T13:24:38.5615592+00:00"
+      }
+    },
+    {
+      "source_file": "result.json",
+      "data": {
+        "passed": false,
+        "noHardKill": true,
+        "inspectEvents": true,
+        "completedUtc": "2026-09-11T13:24:38.5767716+00:00"
+      }
+    },
+    {
+      "source_file": "events.jsonl",
+      "data": [
+        {
+          "utc": "2026-09-11T13:22:52.4615115+00:00",
+          "tick": 9241234,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336056419510148",
+            "role": "authorized_old_noconnect_main",
+            "pid": 2616
+          }
+        },
+        {
+          "utc": "2026-09-11T13:22:52.5062505+00:00",
+          "tick": 9241265,
+          "kind": "terminate_requested",
+          "data": {
+            "reason": "owner_confirmed_old_main_noconnect",
+            "scope": "Official /Terminate is global; all enumerated instances are held and owned",
+            "pids": [
+              {}
+            ]
+          }
+        },
+        {
+          "utc": "2026-09-11T13:22:52.5257571+00:00",
+          "tick": 9241296,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336065725222734",
+            "role": "terminate_command",
+            "pid": 5864
+          }
+        },
+        {
+          "utc": "2026-09-11T13:22:52.5455345+00:00",
+          "tick": 9241312,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 0,
+            "creation": "134336065725222734",
+            "role": "terminate_command",
+            "pid": 5864
+          }
+        },
+        {
+          "utc": "2026-09-11T13:22:52.5461636+00:00",
+          "tick": 9241312,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 1,
+            "creation": "134336056419510148",
+            "role": "authorized_old_noconnect_main",
+            "pid": 2616
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:04.3634402+00:00",
+          "tick": 9313125,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336066443623873",
+            "role": "control.capture",
+            "pid": 18264
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:04.3686419+00:00",
+          "tick": 9313125,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336066443676345",
+            "role": "control.wait_for_idle",
+            "pid": 14500
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:04.4835548+00:00",
+          "tick": 9313250,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 0,
+            "creation": "134336066443676345",
+            "role": "control.wait_for_idle",
+            "pid": 14500
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:27.3047688+00:00",
+          "tick": 9336062,
+          "kind": "terminate_requested",
+          "data": {
+            "reason": "size_trigger_incomplete",
+            "scope": "Official /Terminate is global; all enumerated instances are held and owned",
+            "pids": [
+              {}
+            ]
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:27.3143797+00:00",
+          "tick": 9336078,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336066673120865",
+            "role": "terminate_command",
+            "pid": 17164
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:33.5469226+00:00",
+          "tick": 9342296,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 0,
+            "creation": "134336066673120865",
+            "role": "terminate_command",
+            "pid": 17164
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:33.5542683+00:00",
+          "tick": 9342312,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 1,
+            "creation": "134336066443623873",
+            "role": "control.capture",
+            "pid": 18264
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:33.5861752+00:00",
+          "tick": 9342343,
+          "kind": "held_process",
+          "data": {
+            "creation": "134336066735851259",
+            "role": "control.export",
+            "pid": 8268
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:38.5604112+00:00",
+          "tick": 9347328,
+          "kind": "process_exit",
+          "data": {
+            "exitCode": 0,
+            "creation": "134336066735851259",
+            "role": "control.export",
+            "pid": 8268
+          }
+        },
+        {
+          "utc": "2026-09-11T13:24:38.5697046+00:00",
+          "tick": 9347328,
+          "kind": "runner_failure",
+          "data": {
+            "message": "Incomplete stage preserved; next stage refused"
+          }
+        }
+      ]
+    }
+  ]
+}

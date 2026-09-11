@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-11T12:28:04.538426+00:00",
-  "status": "windows_literature_review_complete_native_entry_unresolved",
+  "updatedAtUtc": "2026-09-11T14:14:24.426873+00:00",
+  "status": "windows_registry_view_boundary_proven_official_entry_recovered_product_pending",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Literature-first review completed in explorer-literature-20260911.md. Similar firsthand cases cover UAC/per-user COM and failure caching, but historical local medium-integrity/UAC-on and failed cold-restart evidence prevent direct attribution. Prefer read-only current identity/context checks and a reviewed bounded Microsoft Process Monitor capture before any further internal breakpoint. No live action, registration, original Explorer restart or system-policy change occurred in this review.",
+  "active_instruction": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. Integrate the Windows owner test-only execution-context fix, then validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -33,7 +33,7 @@
   ],
   "preflight": "Root read8 exact HKCU/HKLM64 roots; all absent at16:19:41UTC. Owner must recheck before any write.",
   "gates": "G1..G4 remain open; no production Shell or installer",
-  "authorization": "Original desktop/test-window authorization persists; no repeated permission question. Old admin runner expired/absent, no new admin tool launched.",
+  "authorization": "Existing user authorization covers scoped native Explorer development and owned test windows. This cycle user confirmed UAC for Microsoft Procmon and its bounded command runner; they have ended. Successful native registration used the same ordinary user without elevation. No original Explorer restart or system-policy change occurred.",
   "official_first_control": {
     "runtime_evidence": ".runtime/explorer-live/20260910-official-sample",
     "notify_problem": "default managed thread MTA; CoInitializeEx(STA)80010106 prevented UPDATEDIR",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Reconcile current actual process/user/session/integrity with the official COM conditions; historical snapshots cannot identify a new target.",
-    "Review Microsoft Process Monitor capture scope, reference visibility, coverage from before first target exposure, loss accounting and cleanup before a bounded live experiment.",
-    "Use actual registry status/path or loader evidence to choose a fix; absent events are not proof of missing keys. Do not repeat unchanged global RegOpen captures or apply forum cache-flush suggestions as established fixes."
+    "Review and integrate the Windows owner minimal registration/verification execution-context fix and effective regression checks.",
+    "Assign one GUI operator for a fresh AssetLibrary test-only Shell proof using the observed Explorer launch route, with native registration/readback/cleanup evidence.",
+    "Keep production installer, AssetHost integration and remaining G1..G4 distinct from the successful Microsoft sample control."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -382,5 +382,17 @@
     "user_instruction": "先从网络寻找文献，看看有无这种问题，不要直接自己蒙着头查",
     "outcome": "Similar primary reports and official mechanisms found; no established exact-case fix. See document for supporting and conflicting local evidence.",
     "live_actions": 0
+  },
+  "registry_view_boundary": {
+    "evidence": "registry-view-boundary/evidence.json",
+    "summary": "registry-view-boundary/summary.md",
+    "package_family": "OpenAI.Codex_2p2nqsd0c76g0",
+    "manifest_observation": "Legacy RegistryWriteVirtualization disabled plus Windows11 ExcludedKeys only Chrome NativeMessagingHosts; latest documented exclusions take precedence. Manifest was only read, never changed.",
+    "private_cycle": "Same valid registration interval: inside20registered, outside20missing, inside-after20registered; both missing after cleanup.",
+    "outside_reader_context": "Observed Explorer ShellFolderView.Application.ShellExecute; same user, Session2, not administrator; actual parent15848 recorded.",
+    "native_recovery": "Unmodified323guard/F298DLL/4HKCU values/600sec; registration and native trigger/read helpers execute outside package. Fresh Explorer9860 after registration:SDK17,ThisPC4,BrowseS_OK,actualBA16/42B/binary+canonical equal/10items; after unregister nativeThisPC3.",
+    "cleanup": "Private8roots20missing;native8roots20missing/dualnotify/guardexit;owned windows0,Procmon0,guards0;desktop6212 exact initial creation preserved. Explorer processes were not forcibly stopped.",
+    "procmon_limit": "Control failed on size trigger; no live trace stage. PML/CSV exported; native capture exit1 and export0 retained. Hung offline viewer was later forcibly closed, not a capture/debugger/Explorer; CSV unchanged, PML pre-exit hash unavailable due exclusive lock, final size/mtime unchanged and final hash recorded.",
+    "product_status": "Official control recovered; AssetLibrary proof and G1..G4 still pending."
   }
 }

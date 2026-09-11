@@ -1,0 +1,49 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "outside-native-launch.json",
+      "data": {
+        "Utc": "2026-09-11T13:45:37.8450375+00:00",
+        "DispatcherHwnd": 788038,
+        "DispatcherPid": 15848,
+        "ReadOnly": true
+      }
+    },
+    {
+      "source_file": "outside-native-context.json",
+      "data": {
+        "Utc": "2026-09-11T13:45:38.3207300+00:00",
+        "Pid": 5620,
+        "CreationFileTime": "134336079378552331",
+        "ParentPid": 15848,
+        "Session": 2,
+        "SameUserAsExplorer": true,
+        "AdministratorEnabled": false,
+        "Mode": "expected-registered",
+        "Label": "outside-native",
+        "RegistryWrites": 0
+      }
+    },
+    {
+      "source_file": "outside-native-done.json",
+      "data": {
+        "Utc": "2026-09-11T13:45:39.3193783+00:00",
+        "Completed": true,
+        "Matched": true,
+        "ReadbackSummary": {
+          "Label": "outside-native",
+          "Mode": "expected-registered",
+          "ExpectedStateMatched": true,
+          "OfficialFields": 11,
+          "Owners": 4,
+          "ExternalMergedFields": 5,
+          "RegistryWrites": 0
+        }
+      }
+    }
+  ]
+}

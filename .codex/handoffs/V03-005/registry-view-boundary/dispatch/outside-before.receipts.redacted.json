@@ -1,0 +1,50 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "outside-before-launch.json",
+      "data": {
+        "Utc": "2026-09-11T13:37:33.4602357+00:00",
+        "DispatcherHwnd": 788038,
+        "DispatcherPid": 15848,
+        "ReadOnly": true,
+        "Source": "Existing ShellFolderView.Application.ShellExecute; Microsoft Execute-in-Explorer pattern"
+      }
+    },
+    {
+      "source_file": "outside-before-context.json",
+      "data": {
+        "Utc": "2026-09-11T13:37:34.0299617+00:00",
+        "Pid": 15320,
+        "CreationFileTime": "134336074534776013",
+        "ParentPid": 15848,
+        "Session": 2,
+        "SameUserAsExplorer": true,
+        "AdministratorEnabled": false,
+        "Mode": "expected-missing",
+        "Label": "outside-before",
+        "RegistryWrites": 0
+      }
+    },
+    {
+      "source_file": "outside-before-done.json",
+      "data": {
+        "Utc": "2026-09-11T13:37:35.0586257+00:00",
+        "Completed": true,
+        "Matched": true,
+        "ReadbackSummary": {
+          "Label": "outside-before",
+          "Mode": "expected-missing",
+          "ExpectedStateMatched": true,
+          "OfficialFields": 11,
+          "Owners": 4,
+          "ExternalMergedFields": 5,
+          "RegistryWrites": 0
+        }
+      }
+    }
+  ]
+}

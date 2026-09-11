@@ -1,0 +1,36 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine final summary and minimal native desktop projection; omit SID/account, all window inventory and unrelated process identities. Do not claim all Explorer processes exited."
+  ],
+  "payload": {
+    "summary": {
+      "Utc": "2026-09-11T14:01:05.9029202+00:00",
+      "OwnedWindowsStillPresent": 0,
+      "DesktopPid": 6212,
+      "DesktopPreserved": true,
+      "SessionActive": true,
+      "InputDesktopIsDefault": true,
+      "ProcmonProcesses": 0,
+      "OwnedGuardProcesses": 0,
+      "ExplorerProcessesNotTerminated": true,
+      "DesktopCreationFiletime": "134335976399732731",
+      "DesktopCreationMatchesInitial": true
+    },
+    "native_scene": {
+      "Utc": "2026-09-11T14:01:05.9029202+00:00",
+      "ShellPid": 6212,
+      "TaskbarPid": 6212,
+      "SessionActive": true,
+      "InputDesktopIsDefault": true,
+      "desktop": {
+        "Pid": 6212,
+        "CreationFileTime": "134335976399732731",
+        "Alive": true,
+        "DebuggerPresent": false
+      },
+      "total_explorer_processes": 5,
+      "all_explorer_processes_exited_claimed": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+#requires -Version 7.0
+$ErrorActionPreference='Stop'
+$taskRoot='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\procmon-20260911\view-boundary'
+if($PSScriptRoot -cne $taskRoot){throw 'Fixed registration wrapper directory required'}
+$taskWorker='<USER_PROFILE>\.codex\worktrees\6f7b\AssetLibrary'
+$taskExpected=Get-Content -LiteralPath (Join-Path $taskWorker '.runtime\explorer-live\20260911-procmon-01\session-owned.json') -Raw|ConvertFrom-Json
+$taskIdentity=[Security.Principal.WindowsIdentity]::GetCurrent()
+$taskSelf=[Diagnostics.Process]::GetCurrentProcess()
+$taskParent=(Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
+if($taskIdentity.User.Value -cne $taskExpected.OwnerSid -or $taskSelf.SessionId -ne $taskExpected.Session -or $taskParent -ne 15848){throw 'Unexpected outside registration context'}
+if(([Security.Principal.WindowsPrincipal]::new($taskIdentity)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){throw 'This comparison requires ordinary user permissions'}
+$taskRun=Join-Path $taskWorker '.runtime\explorer-live\20260911-native-reg-01'
+$taskGuard=Join-Path $taskRun 'guard.ps1'
+if((Get-FileHash -LiteralPath $taskGuard).Hash -cne '323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76'){throw 'Original guard changed'}
+if(Test-Path -LiteralPath (Join-Path $taskRun 'register.json')){throw 'Native registration already attempted'}
+[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$PID;CreationFileTime=$taskSelf.StartTime.ToUniversalTime().ToFileTimeUtc().ToString();ParentPid=$taskParent;Session=$taskSelf.SessionId;SameUserAsExplorer=$true;AdministratorEnabled=$false;GuardSha256='323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76';Scope='Original 4 HKCU roots, original 600-second guard and notification pair; execution context is the changed variable'}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $taskRun 'outside-guard-context.json') -Encoding utf8NoBOM
+try {& $taskGuard -Action run}
+finally {[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$PID;GuardReturned=$true}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $taskRun 'outside-guard-returned.json') -Encoding utf8NoBOM}

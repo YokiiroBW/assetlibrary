@@ -1,0 +1,914 @@
+{
+  "schema": "AssetLibrary.RegistryViewBoundaryEvidence.v1",
+  "packaged_utc": "2026-09-11T14:19:58.1037932+00:00",
+  "scope": "Archive only; no GUI, registry calls/writes, new capture, source tool execution, compilation or commit.",
+  "conclusion": "Registration execution view was the demonstrated environment blocker. Same-period private-view registered/native-view missing contrast, followed by package-external ordinary-user registration and actual official Explorer recovery, then cleanup reversal.",
+  "frozen_references": [
+    {
+      "path": "<ROOT_WORKTREE>/.codex/handoffs/V03-006/cache-consumption-v2/guard.ps1.txt",
+      "sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "bytes": 10366
+    },
+    {
+      "path": "<ROOT_WORKTREE>/.codex/handoffs/V03-006/registry-field-readback/FixedRegistryValueReadback.cs.txt",
+      "sha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379",
+      "bytes": 3807
+    }
+  ],
+  "guard_sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+  "official_dll_sha256": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+  "comparison_variables": {
+    "unchanged": [
+      "guard source",
+      "official DLL",
+      "four HKCU roots and exact values",
+      "dual notification",
+      "600-second registration lifetime"
+    ],
+    "changed": [
+      "registration guard execution context",
+      "native trigger/readback helper execution context",
+      "new Explorer identity and observation time"
+    ],
+    "strict_single_variable_gui_experiment_claimed": false
+  },
+  "reader_matrix": [
+    {
+      "label": "inside-during",
+      "started_utc": "2026-09-11T13:38:31.8100635+00:00",
+      "completed_utc": "2026-09-11T13:38:31.8431736+00:00",
+      "mode": "expected-registered",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": true
+    },
+    {
+      "label": "inside-after-outside",
+      "started_utc": "2026-09-11T13:40:26.0459525+00:00",
+      "completed_utc": "2026-09-11T13:40:26.0726304+00:00",
+      "mode": "expected-registered",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": true
+    },
+    {
+      "label": "inside-cleanup",
+      "started_utc": "2026-09-11T13:40:26.9639435+00:00",
+      "completed_utc": "2026-09-11T13:40:26.9967933+00:00",
+      "mode": "expected-missing",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": false
+    },
+    {
+      "label": "outside-before",
+      "started_utc": "2026-09-11T13:37:34.9267426+00:00",
+      "completed_utc": "2026-09-11T13:37:34.9564681+00:00",
+      "mode": "expected-missing",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": false
+    },
+    {
+      "label": "outside-during",
+      "started_utc": "2026-09-11T13:38:55.4933432+00:00",
+      "completed_utc": "2026-09-11T13:38:55.5228321+00:00",
+      "mode": "expected-missing",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": false
+    },
+    {
+      "label": "outside-after",
+      "started_utc": "2026-09-11T13:42:12.3473139+00:00",
+      "completed_utc": "2026-09-11T13:42:12.3771781+00:00",
+      "mode": "expected-missing",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": false
+    },
+    {
+      "label": "outside-native",
+      "started_utc": "2026-09-11T13:45:39.1894223+00:00",
+      "completed_utc": "2026-09-11T13:45:39.2198025+00:00",
+      "mode": "expected-registered",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": true
+    },
+    {
+      "label": "native-before-cleanup",
+      "started_utc": "2026-09-11T13:52:06.2290588+00:00",
+      "completed_utc": "2026-09-11T13:52:06.2575922+00:00",
+      "mode": "expected-registered",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": true
+    },
+    {
+      "label": "native-after-cleanup",
+      "started_utc": "2026-09-11T13:52:07.5896260+00:00",
+      "completed_utc": "2026-09-11T13:52:07.6150262+00:00",
+      "mode": "expected-missing",
+      "record_count": 20,
+      "state_matched": true,
+      "values_present": false
+    }
+  ],
+  "native_identity": {
+    "RecordedUtc": "2026-09-11T13:47:46.4117739+00:00",
+    "NativeHwnd": "3671782",
+    "CuaWindowId": 3671782,
+    "Pid": 9860,
+    "CreationFileTime": "134336080130447535",
+    "OwnershipStartFiletime": "134336079688519801",
+    "DesktopPid": 6212
+  },
+  "private_registration_utc": "2026-09-11T13:38:30.8925133+00:00",
+  "private_cleanup_utc": "2026-09-11T13:40:26.3376130+00:00",
+  "native_registration_utc": "2026-09-11T13:45:37.7781094+00:00",
+  "native_cleanup_utc": "2026-09-11T13:52:06.4654321+00:00",
+  "limitations": [
+    "No saved ThisPC four-item CUA tree; only native count4 is archived. Official-view CUA and unregister CUA have genuine saved sources.",
+    "No live-stage Procmon capture; control size trigger remains failed even though CSV is semantically readable.",
+    "Normal Procmon /Terminate can produce capture process exit1; this archive does not redefine it as exit0.",
+    "One forced exit was the hung offline OpenLog viewer, after captures had exited, not Explorer/debugger/capture termination.",
+    "CSV byte identity before/after viewer cleanup was recorded; PML had no pre-exit hash because of exclusive lock, only unchanged length/mtime and post-exit SHA.",
+    "Silo routing alone does not prove a particular historical write; the contemporaneous 20-vs-0 A/B and recovery strengthen the registration-view diagnosis.",
+    "Medium/AppContainer0 or NoPackage alone does not prove lack of MSIX registry virtualization.",
+    "The recovery used an official sample, not the product Shell; G1..G4 and product acceptance remain separate."
+  ],
+  "official_sources": [
+    "https://learn.microsoft.com/en-us/windows/msix/desktop/flexible-virtualization",
+    "https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes",
+    "https://learn.microsoft.com/en-us/windows/msix/manage/troubleshoot-msix-container",
+    "https://devblogs.microsoft.com/oldnewthing/20131118-00/?p=2643"
+  ],
+  "artifacts": [
+    {
+      "path": "context/current-context.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/context/current-context.json",
+          "sha256": "D0E3D3876448F1B02742C5CB11EFAE518ED15F4F4F87216E12290A902E13257E",
+          "bytes": 6281
+        }
+      ],
+      "copy_sha256": "D0E3D3876448F1B02742C5CB11EFAE518ED15F4F4F87216E12290A902E13257E",
+      "bytes": 6281,
+      "transformations": []
+    },
+    {
+      "path": "context/comparison.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/context/comparison.json",
+          "sha256": "10D44260CDA0620809EF5BD9DB3C92BD515F64976F24AF7F3CE1992516E28246",
+          "bytes": 2032
+        }
+      ],
+      "copy_sha256": "10D44260CDA0620809EF5BD9DB3C92BD515F64976F24AF7F3CE1992516E28246",
+      "bytes": 2032,
+      "transformations": []
+    },
+    {
+      "path": "context/silo-comparison.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/context/silo-comparison.json",
+          "sha256": "2A318630744CA9736A6EC7096878A6B12B944E66D4C71CFDBCBE9F3C7B2C47B5",
+          "bytes": 20807
+        }
+      ],
+      "copy_sha256": "2A318630744CA9736A6EC7096878A6B12B944E66D4C71CFDBCBE9F3C7B2C47B5",
+      "bytes": 20807,
+      "transformations": []
+    },
+    {
+      "path": "context/codex-virtualization-manifest.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/context/codex-virtualization-manifest.json",
+          "sha256": "165C34348CD1AD34ECD606C471722B6035808F83586A0B745D67B0B0B5B2AACA",
+          "bytes": 1121
+        }
+      ],
+      "copy_sha256": "165C34348CD1AD34ECD606C471722B6035808F83586A0B745D67B0B0B5B2AACA",
+      "bytes": 1121,
+      "transformations": []
+    },
+    {
+      "path": "context/observed-silo-hivelist.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/context/observed-silo-hivelist.json",
+          "sha256": "BB1205D5A96978F8348D216182FDE765CD894A5761E5331FFBFCF977F174ED5F",
+          "bytes": 1295
+        }
+      ],
+      "copy_sha256": "17032926134BDDC7DA07B0D5B2B51E3ED105ED32CE34F5C2B0581E0A8AAF4608",
+      "bytes": 1356,
+      "transformations": [
+        "Replace personal profile, SID, observed silo ID and private cache filename; retain package family and Helium/User.dat/UserClasses.dat relationship."
+      ]
+    },
+    {
+      "path": "dispatch/read-only.ps1.redacted.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/read-only.ps1",
+          "sha256": "D9592305EF8352B272D311458540482B093ECE77FF090BC95783B6A4611D2B58",
+          "bytes": 2381
+        }
+      ],
+      "copy_sha256": "5634166FA286EF0B0543028964DFF6D2FBD0F64E6A97AB5979C21D7F7113FFDA",
+      "bytes": 2373,
+      "transformations": [
+        "Replace private profile prefixes; UTF-8 display text, not executable frozen source or original bytes."
+      ]
+    },
+    {
+      "path": "dispatch/invoke-reader.ps1.redacted.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/invoke-reader.ps1",
+          "sha256": "278EB3BF6B5DD9EB92B871AA25AE73F0E00F33A016D01A48C60F2FF56FF4A225",
+          "bytes": 2121
+        }
+      ],
+      "copy_sha256": "E30711F8F8FEE2F35639824C600F00BF3E0E68C2F8962DE023AC76325AA6768B",
+      "bytes": 2113,
+      "transformations": [
+        "Replace private profile prefixes; UTF-8 display text, not executable frozen source or original bytes."
+      ]
+    },
+    {
+      "path": "dispatch/register-native.ps1.redacted.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/register-native.ps1",
+          "sha256": "C632C159429CEFE26ECA0B3418BBF624F17F9E347DEF9283F14DBE20CACDEDCF",
+          "bytes": 2213
+        }
+      ],
+      "copy_sha256": "B4F56DFA5F04383C13B36ED0253B76743C1F3BC92EE7EE86731227EB1B2FD467",
+      "bytes": 2205,
+      "transformations": [
+        "Replace private profile prefixes; UTF-8 display text, not executable frozen source or original bytes."
+      ]
+    },
+    {
+      "path": "dispatch/outside-before.receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-before-launch.json",
+          "sha256": "EFC0A7D91A4FCBDB73FE488781995FB925D5E9CE2E1B457B5DD2CDA4DAD24F64",
+          "bytes": 234
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-before-context.json",
+          "sha256": "1C685DB3E37EEA22C94AC657C83D7FC3C5BEA6BABE4EFDC5E4F259DAA2BC8F15",
+          "bytes": 304
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-before-done.json",
+          "sha256": "A5B35F16771C4AD9DA1DDBD19DF624DFA12FFD26A299485729EBF4A36E249548",
+          "bytes": 326
+        }
+      ],
+      "copy_sha256": "8193FE9CE5287A1A40C4A8FA32E19C3802E54E564C32ADB425832DF1CC0DBE97",
+      "bytes": 1568,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "dispatch/outside-during.receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-during-launch.json",
+          "sha256": "3B194DB54DA2502AD280FE29C34E95C3EFDACAF2D70A4D213B668F2E25E7D709",
+          "bytes": 129
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-during-context.json",
+          "sha256": "2A657E8B67B86EE6705BA5E6DE09BB91B176F0F81D851FC1D893DBDB3FCC3ABB",
+          "bytes": 304
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-during-done.json",
+          "sha256": "196D725F6DD094EB604152634A4B697017AAF05859EBB7A1A2002CA5838EAA49",
+          "bytes": 326
+        }
+      ],
+      "copy_sha256": "F77071D378B395C79E1D3BAA912330D2DDC1E814FFFA905DD3B11EE1422A7D2F",
+      "bytes": 1457,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "dispatch/outside-after.receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-after-launch.json",
+          "sha256": "5C164E9B31D9A5F837F54E5C55F07E410AB81A1C7293AD859896E8DB453B4578",
+          "bytes": 129
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-after-context.json",
+          "sha256": "5171A09A899B4FDF3D5CD3D8D9983F069ED4F484B88C8859BA5C14751DFD50E1",
+          "bytes": 302
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-after-done.json",
+          "sha256": "4E7DC3C81ACD91F41FE085B121E98BE4B55FBE2DC2883E1790002CFAF718EE3C",
+          "bytes": 325
+        }
+      ],
+      "copy_sha256": "41B82DFA8867F6D2D2B887897A6F56B800651A4F5513D72DFF4522E51528CADB",
+      "bytes": 1451,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "dispatch/outside-native.receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-native-launch.json",
+          "sha256": "B12FE04227513C51F34CE396402AF8FBD69C1BAA541D9ADDCC8290F27E5E0BD6",
+          "bytes": 129
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-native-context.json",
+          "sha256": "3F5812814ED8ACDA4C7783C277082563D59ECBD513ADB08E8890ABA97470749D",
+          "bytes": 306
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/view-boundary/outside-native-done.json",
+          "sha256": "A06F44BB676BE6FF840D8AB4F2A233B7E8FB5790B034BCBBC3B98618219B5A50",
+          "bytes": 329
+        }
+      ],
+      "copy_sha256": "B2BFDE289BD0254DF670E86003CFED16D17ADAD25A09077A2495463F2EF756E5",
+      "bytes": 1462,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "readers/inside-during.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/inside-during.json",
+          "sha256": "48F3B26278DCED14D827D6BE0BF77CD07B0E9B696EC12D7340916AF9D974F9DC",
+          "bytes": 20851
+        }
+      ],
+      "copy_sha256": "2D63E496D8705E3DC96DDB209887A0A454FCABF305BF2FF5ABCFFEFB11BFE50A",
+      "bytes": 19525,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/inside-after-outside.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/inside-after-outside.json",
+          "sha256": "AB90C9182BE3FD588FB7662609B939BA62A43EC2171A8FA0A2F3B1D725F7B230",
+          "bytes": 20858
+        }
+      ],
+      "copy_sha256": "298883BDDC6CCB18BC05643BC69E237464512F79A1D422F43DCEF36654620A19",
+      "bytes": 19532,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/inside-cleanup.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/inside-cleanup.json",
+          "sha256": "7DECAC540184245B4A211E7B2EE63142DDF4829F7AC5663DD81C83A979919A62",
+          "bytes": 20089
+        }
+      ],
+      "copy_sha256": "43805B66A5DE52C7391862B4CCF6EFA47ED59584546722AA1F3831B8A65BC046",
+      "bytes": 18933,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/outside-before.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/outside-before.json",
+          "sha256": "3ABBAE46BD3BE40CFCF338184BDB29A78FEF13A6F9898BB3FA31A385A6F77E0C",
+          "bytes": 20087
+        }
+      ],
+      "copy_sha256": "D1123E4448D0D5FDE7EF2F7C797AABE7313013B8C2B1FEF126FA9510836D1C4C",
+      "bytes": 18931,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/outside-during.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/outside-during.json",
+          "sha256": "A2E8E9A2E1C6B7B9EDDA392FA4C4B3EAE27BFCE6AB1A1A9D9CE5D756207CA822",
+          "bytes": 20087
+        }
+      ],
+      "copy_sha256": "15DC82B58EE9BDF37AE336241D652921439244F886CDE6A693E6C498E8C9C073",
+      "bytes": 18931,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/outside-after.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/outside-after.json",
+          "sha256": "5847DEA197F24F54F464FBB1CA714B4DB96707626072416F9550D3C06C20686F",
+          "bytes": 20088
+        }
+      ],
+      "copy_sha256": "FBDBFB6F9EF046BC63D46FF3B5674E09FAF433EDC0894644DFB773D3B8DB2BF7",
+      "bytes": 18932,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/outside-native.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/outside-native.json",
+          "sha256": "932D030C0F7A08546CEACF43A8877ED6455DEF7CE5EFAA8BF4539F7B548D85D7",
+          "bytes": 20852
+        }
+      ],
+      "copy_sha256": "0E70A3CD85E0FBFEF66A8DF9DBA1604E05637C3E208803F62DA65D4B9E4CE6E9",
+      "bytes": 19526,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/native-before-cleanup.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/native-before-cleanup.json",
+          "sha256": "66765632F5D5CE9BABA77A19C4FAA975A6E87A5DB018BFEF04E59E5EC6C7B5E9",
+          "bytes": 20859
+        }
+      ],
+      "copy_sha256": "381B3FC9BD4FE2E58FA9627A23F0BD5AFCCBBD142E18802AB46FCE87826ACDD6",
+      "bytes": 19533,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "readers/native-after-cleanup.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/procmon-live-preparation/native-after-cleanup.json",
+          "sha256": "9828F0F2FAABD00B892E02F9E10AD274A78631F8E62DCD4030094C6D7D7D2B46",
+          "bytes": 20093
+        }
+      ],
+      "copy_sha256": "A447B6F8CBC63E71B6355FAAE1FCF585ABC99F73AD521FA173EC88970CE9D3F0",
+      "bytes": 18937,
+      "transformations": [
+        "Parse nested stdout JSON; retain 20 actual value/type/status records. Omit raw stdout, raw/encoded byte buffers and non-selected fields. Redact decoded personal paths; original bytes are not claimed."
+      ]
+    },
+    {
+      "path": "private/register.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-procmon-01/register.json",
+          "sha256": "6FDFB91155E7A2FEA51EA223250DFC329CD0FE494AD4D305F16E45827D17984E",
+          "bytes": 2766
+        }
+      ],
+      "copy_sha256": "20C7FFC00345854CEF21CEF6B3B8E83D3A4E4B36C149732EF65DC172AA9D0490",
+      "bytes": 3110,
+      "transformations": [
+        "Replace private DLL/profile path; keep exact rules, values, notification and interval."
+      ]
+    },
+    {
+      "path": "private/cleanup.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-procmon-01/cleanup.json",
+          "sha256": "6776E20E5C5581D7B9F3F523A26063521E6CFE144602687E720DD10695BDAC6B",
+          "bytes": 2202
+        }
+      ],
+      "copy_sha256": "6776E20E5C5581D7B9F3F523A26063521E6CFE144602687E720DD10695BDAC6B",
+      "bytes": 2202,
+      "transformations": []
+    },
+    {
+      "path": "native/register.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/register.json",
+          "sha256": "0E34181919E79AFA123C148A40A17948938575373D6641CD88B9D59E5AE25F86",
+          "bytes": 2768
+        }
+      ],
+      "copy_sha256": "519C3FEA6A05BD5996733E912773DB49A027A3DCF32A7AFB09C6C978FAC9AD06",
+      "bytes": 3112,
+      "transformations": [
+        "Replace private DLL/profile path; keep exact rules, values, notification and interval."
+      ]
+    },
+    {
+      "path": "native/cleanup.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/cleanup.json",
+          "sha256": "3A779D968A2417F682509888FD483E988E541B120CAABC754A25AF3607412BEB",
+          "bytes": 2204
+        }
+      ],
+      "copy_sha256": "3A779D968A2417F682509888FD483E988E541B120CAABC754A25AF3607412BEB",
+      "bytes": 2204,
+      "transformations": []
+    },
+    {
+      "path": "private/launch-and-identity.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-procmon-01/guard-launch.json",
+          "sha256": "634787F0F43426C558975746D18ADA8ADF8CBCCF73F888FB938A35BC8A50A583",
+          "bytes": 200
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-procmon-01/identity.json",
+          "sha256": "3B5B6D4C6BF20B9EDDED7AFE7727054175F194FEB8789924D1F948FC1717EBC2",
+          "bytes": 249
+        }
+      ],
+      "copy_sha256": "9AE5704CC8F7B17BE6800E48409B71C90019AA6D3910A8B386758896EDF43BB2",
+      "bytes": 949,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "native/outside-guard.receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/outside-guard-launch.json",
+          "sha256": "DA6625E4AA8668F111823780DFA85B5A1BA0FB7F8A8F7E214821808B0AE87C7F",
+          "bytes": 173
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/outside-guard-context.json",
+          "sha256": "6E39F1622608F82013D2EB1C6A318B990D7012CC45CC7F5AADEEC697AE01884A",
+          "bytes": 434
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/outside-guard-returned.json",
+          "sha256": "6D8CC267F9C0DD47AD7DBAE9D7E47730E5D74984177978420AC7C84CAF83A8DE",
+          "bytes": 95
+        }
+      ],
+      "copy_sha256": "F0F03F7D9537D81A559B09FD67F3E84CB1E6CD15EE92BEE800DB06CE09683322",
+      "bytes": 1341,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "native/identity-and-epoch.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/identity.json",
+          "sha256": "EC1FEBDE436BD101B6B9FB9EED52660FF5BBF2245D178030C62AEF8C2FE8C54F",
+          "bytes": 250
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/window-epoch.json",
+          "sha256": "9E4B175344BA8DD29BE5A720E0515B5574C94455D53E77548E0A0704B450ECF0",
+          "bytes": 103
+        }
+      ],
+      "copy_sha256": "2A60161E60AA13AFAECA1994E70CA5DFB276987A70D052067F0A8ABA25DCBEDF",
+      "bytes": 841,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "native/sdk-baseline.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/sdk-baseline.json",
+          "sha256": "4CB6D555B21E0ACA506726F54AFBF6BFCA023698A260C9481A2141EC9AF8883D",
+          "bytes": 2910
+        }
+      ],
+      "copy_sha256": "895D63C3D800523FE20F2A954233DA53A52AF929BD24044270141A87EA381FB5",
+      "bytes": 4405,
+      "transformations": [
+        "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+      ]
+    },
+    {
+      "path": "native/thispc-baseline.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/thispc-baseline.json",
+          "sha256": "A2ADA3B298CB1E604B26B4AB8FFE5E06CA768ABF7B829966DFD2D8E8CBBF3685",
+          "bytes": 2895
+        }
+      ],
+      "copy_sha256": "5DDBF92B25900C5F7A23E2F2DF4B29B28DC528CE04310E30995A8B89E90AAF27",
+      "bytes": 4390,
+      "transformations": [
+        "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+      ]
+    },
+    {
+      "path": "native/browse-once.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/browse-once.json",
+          "sha256": "7593BA752D83C918E8DDC1458C8D3DF0CB401B50DBAEE130E48CBA01F7562BBD",
+          "bytes": 3126
+        }
+      ],
+      "copy_sha256": "6CCD91816D4D793468C52F718E116CF339B65AF60265A7BBA479C4EB6F87BE04",
+      "bytes": 4667,
+      "transformations": [
+        "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+      ]
+    },
+    {
+      "path": "native/official-after.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/official-after.json",
+          "sha256": "ACB6B00AB9BE98D974D52EF84483A64475EA3B9941046B29E9A3F12917823CA7",
+          "bytes": 2914
+        }
+      ],
+      "copy_sha256": "A5A24776671ACCA8E5D06937F7C7C46E40A3CA2C0E149C0570FE9B9E787892EF",
+      "bytes": 4409,
+      "transformations": [
+        "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+      ]
+    },
+    {
+      "path": "native/after-unregister.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/after-unregister.json",
+          "sha256": "D70FEC0D2201EEC586A7AB561C1A6B5C9964DC7A319BEB7AA053A8BB953F46DD",
+          "bytes": 2914
+        }
+      ],
+      "copy_sha256": "2AC50163E4080652255BBB24F8EA70FAE3BB198C3B51FB2B4F48ACEEA67AD1B7",
+      "bytes": 4409,
+      "transformations": [
+        "Parse native stdout into an allowlist of HRESULT/identity/PIDL-comparison/count fields; omit raw output and any encoded/path payload. This is a projection, not original bytes."
+      ]
+    },
+    {
+      "path": "native/cleanup-verification.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/cleanup-verification.json",
+          "sha256": "E778C1F5145F3DBFDD80964F54486FC77B9FE55A3FCEC15FF678EBA6E8F348B3",
+          "bytes": 175
+        }
+      ],
+      "copy_sha256": "E778C1F5145F3DBFDD80964F54486FC77B9FE55A3FCEC15FF678EBA6E8F348B3",
+      "bytes": 175,
+      "transformations": []
+    },
+    {
+      "path": "native/action-receipts.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/sdk-baseline.action-done.json",
+          "sha256": "83ECE299FF37DC91D126950AC1844FFFD5B5217A2A0712801AB73AD2BD49E71D",
+          "bytes": 1200
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/thispc-baseline.action-done.json",
+          "sha256": "345F4A714EA0AA92538B664E552D7A9CD5AE71679B3BADEA4A40D6B812CE2183",
+          "bytes": 1212
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/browse-once.action-done.json",
+          "sha256": "59417E7046E5D52E2DA8BD3BBF944CA4D73249184FB3A4092ED263C29582F994",
+          "bytes": 1199
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/official-after.action-done.json",
+          "sha256": "761BCA1292D2F07BC5B9D2808BDA62B347CC3E1CC390597EFA55E7DA51F64FB6",
+          "bytes": 1210
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/after-unregister.action-done.json",
+          "sha256": "C668D0A75EC3E15FE76A5F17F55B2384FB7EB57B2EB038BC7615E8BCF0EE4250",
+          "bytes": 1215
+        }
+      ],
+      "copy_sha256": "EBF90309A774F7E45AA01A337444B2484149E223FDE9593ECDF35E36AD09EF43",
+      "bytes": 7366,
+      "transformations": [
+        "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+      ]
+    },
+    {
+      "path": "native/ui-minimal-projection.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/official-view-observation.json",
+          "sha256": "21D96AACA3F01A55139966859B5435080A268543331C98188501E0A94DDF5F42",
+          "bytes": 7292
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/after-unregister-ui.json",
+          "sha256": "C4FC7C979DAED927661F2684BBF297A4AA227FC2E105E1A596F81088BFFCA294",
+          "bytes": 7054
+        },
+        {
+          "path": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-native-reg-01/thispc-navigation-time.json",
+          "sha256": "13EEB29F7C1E65059145252AB4B13A30DBC55E21CE28EC63E5CAAAB2B20277C6",
+          "bytes": 116
+        }
+      ],
+      "copy_sha256": "22AD0494B538FE5D398DDB4CA8A89764BE02DB4BBB67D80FD11CF3CA3252A58F",
+      "bytes": 1145,
+      "transformations": [
+        "Discard complete UI trees, storage/network labels, selection and unrelated controls. Retain only stored timestamps, exact public sample names and counts. No ThisPC four-item CUA tree was saved; do not fabricate one."
+      ]
+    },
+    {
+      "path": "procmon/control-reg-events.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/control-selected.json",
+          "sha256": "BD4B1D761350ACB36A77E9877592D31E5EF3EB3E9C91FF2F624C600DC225D2F1",
+          "bytes": 38395
+        }
+      ],
+      "copy_sha256": "1304207D404FECC193A98DD1E7A86B6E98C136A8E16C614F8D6D29D613D3D763",
+      "bytes": 11832,
+      "transformations": [
+        "Retain only 36 fixed-GUID Reg* rows; omit all Detail and file/process payload, including encoded commands/paths. Replace native silo identifier and any decoded user path/SID."
+      ]
+    },
+    {
+      "path": "procmon/control-lifecycle.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/control.ready.json",
+          "sha256": "21D65178D39B041E44923BB003914955ED4F3C04AB82FF50A4F66856BCD63FC0",
+          "bytes": 327
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/control.stopped.json",
+          "sha256": "1FE42C0C7EFF289F2B3A90EB23BDB0F954A22F58FC3C8771D3347F8916A6F6FF",
+          "bytes": 273
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/control.exported.json",
+          "sha256": "A6C7912C54FE071892B4DF5B779745F989F0AD28B6442C8D656639552E9E3C3C",
+          "bytes": 468
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/result.json",
+          "sha256": "AA211D61C5F2D62D15CCC3869977E214E2E1A86464FC51E8B2071F38F48B2A7F",
+          "bytes": 128
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/events.jsonl",
+          "sha256": "4A1F0C77645B19994E6488F3B0D9EB2540A70726FD380E012525791855D110F4",
+          "bytes": 2666
+        }
+      ],
+      "copy_sha256": "DF30AF37223575DD8F560C8945124947204E6F129D9EA4541093C79F7278E5C4",
+      "bytes": 6715,
+      "transformations": [
+        "Combine original lifecycle receipts and event log; preserve failed control/exit codes; redact private text if present. No PML/CSV copied."
+      ]
+    },
+    {
+      "path": "procmon/offline-viewer-cleanup.json",
+      "artifact_kind": "original_copy",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/offline-viewer-cleanup.json",
+          "sha256": "3A7987C412578B4FAD8A94DF5BE9D14A48D5C8F5135C08C6224D5DC6E612457F",
+          "bytes": 726
+        }
+      ],
+      "copy_sha256": "3A7987C412578B4FAD8A94DF5BE9D14A48D5C8F5135C08C6224D5DC6E612457F",
+      "bytes": 726,
+      "transformations": []
+    },
+    {
+      "path": "final-scene.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/final-scene-summary.json",
+          "sha256": "08C167D632C3AB7A6071A204B9E1BE0EE9CC6198A807B20909CCF63FEFB0E7A2",
+          "bytes": 390
+        },
+        {
+          "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/final-scene-raw.json",
+          "sha256": "2B3BCAF2B51A827638906EE65680AE2930949549F0D954C6E2000E935D4715E7",
+          "bytes": 35352
+        }
+      ],
+      "copy_sha256": "C6A1321FDC18CC0E80A919EF47FCFDB96D843FCF5E8A4701A988459D844108D6",
+      "bytes": 1199,
+      "transformations": [
+        "Combine final summary and minimal native desktop projection; omit SID/account, all window inventory and unrelated process identities. Do not claim all Explorer processes exited."
+      ]
+    }
+  ],
+  "excluded_large_artifacts": [
+    {
+      "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/control.csv",
+      "bytes": 160621898,
+      "recorded_post_viewer_sha256": "5D82CC47DEED5251084234C2B0BBC8C9941FA2F8FB70C65CFBA32B0FCC22A0B7",
+      "hash_source": "procmon/offline-viewer-cleanup.json; not recomputed here",
+      "copied": false
+    },
+    {
+      "path": "<ROOT_WORKTREE>/.runtime/procmon-20260911/runner/76acef5e3cb0448ca9fe4e7396b772c9/control.pml",
+      "bytes": 425983040,
+      "recorded_post_viewer_sha256": "46E433C7423FE0B164CF66169D6717F1CB6CC243AB9376F967E6D45AC45FD5D2",
+      "pre_exit_sha_available": false,
+      "copied": false
+    },
+    {
+      "class": "system libraries, Procmon binaries/EULA, complete UI trees, duplicate action stdout, frozen guard/reader code",
+      "copied": false
+    }
+  ],
+  "generated_files": [
+    ".gitattributes",
+    "summary.md",
+    "evidence.json",
+    "verification.json"
+  ]
+}

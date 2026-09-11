@@ -1,0 +1,39 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Discard complete UI trees, storage/network labels, selection and unrelated controls. Retain only stored timestamps, exact public sample names and counts. No ThisPC four-item CUA tree was saved; do not fabricate one."
+  ],
+  "payload": {
+    "official_view": {
+      "utc": "2026-09-11T13:50:52.781Z",
+      "window_id": 3671782,
+      "sample_label_present": true,
+      "sample_names": [
+        "Zero",
+        "One",
+        "Two",
+        "Three",
+        "Four",
+        "Five",
+        "Six",
+        "Seven",
+        "Eight",
+        "Nine"
+      ],
+      "item_count": 10
+    },
+    "after_unregister": {
+      "utc": "2026-09-11T13:53:44.259Z",
+      "window_id": 3671782,
+      "sample_label_present": false,
+      "item_count": 3
+    },
+    "thispc_navigation": {
+      "submittedUtc": "2026-09-11T13:48:19.250Z",
+      "observedUtc": "2026-09-11T13:48:19.844Z",
+      "windowId": 3671782
+    },
+    "thispc_four_item_cua_tree_saved": false,
+    "thispc_four_item_count_evidence": "native thispc-baseline only"
+  }
+}

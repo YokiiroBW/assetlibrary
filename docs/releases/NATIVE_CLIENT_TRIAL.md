@@ -1,6 +1,6 @@
 # 原生客户端首版进度与 Android 试用
 
-2026-09-08，V03-001..004。Android 手机/平板只读首版已交付；Windows 按用户要求以原生 Explorer 为入口，当前仍在实际加载阶段阻断，没有可用的 Windows/Explorer 安装包。没有改为要求用户另开独立 Windows 应用。
+2026-09-08，V03-001..004。Android 手机/平板只读首版已交付；Windows 按用户要求以原生 Explorer 为入口，没有可用的 Windows/Explorer 安装包。最新排查与验证状态见下方 Windows 小节；没有改为要求用户另开独立 Windows 应用。
 
 2026-09-09补充：V03-005集成分支提供新的[Android图片兼容试用候选](../../.runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1-404-fallback.apk)，30,425,593字节，SHA256 `6d959b5ac000b6a7a932c9d50298b51a25c9992d92ed748c9371e7b710444ddb`，仍为APK v2调试试用签名。它包含已在真实Core验证过的图片交互代码，以及旧服务缺少图片接口时的准确降级提示；本次修订另通过11项状态和1项相关原生UI检查。现有NAS没有启用图片引擎，连接该NAS时仍作为基础文件浏览使用，不据此宣称NAS图片预览已上线。新旧候选与验证来源分别记录在[V03-009交接](../../.codex/handoffs/V03-009/summary.md)；下方保留原只读首版说明与旧包，不覆盖原证据。
 
@@ -31,14 +31,16 @@ AFD7CBD3F387AEBC1F2D00EC34C3F824909673615546404B81AFD2A24A79B8CB
 
 方向已由 [ADR-0018](../adr/ADR-0018_Windows原生Explorer入口与最小视图.md) 修订为原生 Explorer 资产库入口，保留系统顶部与导航，右侧使用原生 DefView；网络/会话与查询留在进程外 C# AssetHost。
 
-只读协议组件、独立 COM/PIDL/DefView 和 owner 保护的 HKCU 注册/卸载验证已经完成；真正 Explorer 入口仍报“无关联应用”，尚未观察到调用本项目类工厂。原因未定位，不能用独立探针替代内嵌成功。输入自动化另返回 `0x80070005`，已请用户确认桌面登录/解锁状态。测试注册已清理，少量本任务诊断窗口待界面输入恢复后核对关闭。
+只读协议组件、独立 COM/PIDL/DefView 和 owner 保护的 HKCU 注册/卸载验证已经完成。2026-09-11 已定位实机排查中的注册表视图隔离：由 Codex 启动的登记和检查进程看到同一份包内视图，普通 Explorer 启动的同用户检查进程却看不到这些登记。相同微软样例 DLL、字段和清理工具改由正常 Windows 用户进程执行后，真实 Explorer 已发现入口并进入 BA16 类、42 字节 PIDL、10 项内容；注销后入口消失、此电脑恢复为 3 项，登记与自有窗口清理完成。完整对照见[注册表视图边界证据](../../.codex/handoffs/V03-005/registry-view-boundary/summary.md)。
+
+这一结果解除的是微软样例控制中的执行环境阻断。本项目自己的 test-only Shell、进程外 AssetHost 与最终安装流程仍须按正确执行环境完成验证和集成，不能据此宣布 Windows 客户端交付。登记/验收脚本正在增加执行来源检查，包内局部自检不再作为系统 Explorer 注册成功的依据。
 
 M0-002-G1..G4、完整 V0.3/Alpha 和生产文件写入门禁均保持原状态。
 
 ## 证据与复现
 
 - [Android 交接与截图](../../.codex/handoffs/V03-003/summary.md)、[真实构建命令](../../apps/android/README.md)。
-- [Windows 当前证据与阻断](../../.codex/handoffs/V03-002/summary.md)。
+- [Windows 当前任务与证据](../../.codex/handoffs/V03-006/summary.md)、[最新集成状态](../../.codex/handoffs/V03-005/current-windows-work.json)。
 - [真实 Core/PostgreSQL 联调与清理](../../.codex/handoffs/V03-004/summary.md)。
 - [本轮集成交接](../../.codex/handoffs/V03-001/summary.md)。
 

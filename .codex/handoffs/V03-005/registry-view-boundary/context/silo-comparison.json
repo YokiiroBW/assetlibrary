@@ -1,0 +1,656 @@
+{
+  "schema": "AssetLibrary.ProcmonSiloComparison.v1",
+  "analyzed_utc": "2026-09-11T13:32:31.8346099+00:00",
+  "source_csv": "runner/76acef5e3cb0448ca9fe4e7396b772c9/control.csv",
+  "source_bytes": 160621898,
+  "streaming_parser": "Microsoft.VisualBasic.FileIO.TextFieldParser",
+  "csv_changed_during_read": false,
+  "total_csv_rows": 988220,
+  "selected_pid_rows": 110356,
+  "processes": [
+    {
+      "pid": 2728,
+      "role": "root_executor",
+      "process_names": {
+        "pwsh.exe": 6584
+      },
+      "all_rows": 6584,
+      "reg_rows": 2067,
+      "wc_silo_rows": 176,
+      "wc_results": {
+        "BUFFER OVERFLOW": 1,
+        "NAME NOT FOUND": 36,
+        "REPARSE": 3,
+        "SUCCESS": 132,
+        "REPARSE GLOBAL": 4
+      },
+      "path_categories": {
+        "HKLM": 1602,
+        "HKCU": 94,
+        "HKCR": 188,
+        "WC_Silo": 176,
+        "HKU": 7
+      },
+      "operations": {
+        "RegQueryKey": 492,
+        "RegQueryValue": 367,
+        "RegCloseKey": 286,
+        "RegEnumKey": 88,
+        "RegCreateKey": 45,
+        "RegOpenKey": 623,
+        "RegEnumValue": 140,
+        "RegSetInfoKey": 25,
+        "RegSetValue": 1
+      },
+      "results": {
+        "BUFFER OVERFLOW": 34,
+        "NO MORE ENTRIES": 11,
+        "NAME NOT FOUND": 390,
+        "REPARSE": 59,
+        "BUFFER TOO SMALL": 1,
+        "ACCESS DENIED": 6,
+        "SUCCESS": 1473,
+        "REPARSE GLOBAL": 93
+      },
+      "silo_aliases": {
+        "silo_3": 8,
+        "silo_1": 105,
+        "silo_2": 63
+      },
+      "first_reg_time": "21:24:25.8469057",
+      "last_reg_time": "21:24:26.2317423",
+      "target_guid_reg_rows": 0,
+      "public_classes_samples": 4
+    },
+    {
+      "pid": 6212,
+      "role": "desktop_explorer",
+      "process_names": {
+        "Explorer.EXE": 43026
+      },
+      "all_rows": 43026,
+      "reg_rows": 33164,
+      "wc_silo_rows": 0,
+      "wc_results": {},
+      "path_categories": {
+        "HKCR": 11812,
+        "HKLM": 8800,
+        "HKCU": 12552
+      },
+      "operations": {
+        "RegQueryKey": 13509,
+        "RegQueryValue": 3933,
+        "RegCloseKey": 4428,
+        "RegEnumKey": 508,
+        "RegCreateKey": 27,
+        "RegOpenKey": 10429,
+        "RegEnumValue": 50,
+        "RegSetInfoKey": 278,
+        "RegSetValue": 2
+      },
+      "results": {
+        "BUFFER OVERFLOW": 421,
+        "NO MORE ENTRIES": 163,
+        "NAME NOT FOUND": 7891,
+        "REPARSE": 69,
+        "SUCCESS": 24620
+      },
+      "silo_aliases": {},
+      "first_reg_time": "21:24:04.4421135",
+      "last_reg_time": "21:24:21.3419656",
+      "target_guid_reg_rows": 0,
+      "public_classes_samples": 4
+    },
+    {
+      "pid": 15344,
+      "role": "readonly_reference",
+      "process_names": {
+        "pwsh.exe": 17655
+      },
+      "all_rows": 17655,
+      "reg_rows": 2133,
+      "wc_silo_rows": 214,
+      "wc_results": {
+        "BUFFER OVERFLOW": 1,
+        "NAME NOT FOUND": 42,
+        "REPARSE": 15,
+        "SUCCESS": 152,
+        "REPARSE GLOBAL": 4
+      },
+      "path_categories": {
+        "HKLM": 1615,
+        "HKCU": 104,
+        "HKCR": 193,
+        "WC_Silo": 214,
+        "HKU": 7
+      },
+      "operations": {
+        "RegQueryKey": 525,
+        "RegQueryValue": 364,
+        "RegCloseKey": 288,
+        "RegEnumKey": 90,
+        "RegCreateKey": 45,
+        "RegOpenKey": 658,
+        "RegEnumValue": 138,
+        "RegSetInfoKey": 24,
+        "RegSetValue": 1
+      },
+      "results": {
+        "BUFFER OVERFLOW": 34,
+        "NO MORE ENTRIES": 13,
+        "NAME NOT FOUND": 408,
+        "REPARSE": 79,
+        "BUFFER TOO SMALL": 1,
+        "ACCESS DENIED": 6,
+        "SUCCESS": 1505,
+        "REPARSE GLOBAL": 87
+      },
+      "silo_aliases": {
+        "silo_3": 8,
+        "silo_1": 130,
+        "silo_2": 76
+      },
+      "first_reg_time": "21:24:26.2312689",
+      "last_reg_time": "21:24:27.1296942",
+      "target_guid_reg_rows": 36,
+      "public_classes_samples": 4
+    },
+    {
+      "pid": 15848,
+      "role": "new_sdk_explorer",
+      "process_names": {
+        "explorer.exe": 39410
+      },
+      "all_rows": 39410,
+      "reg_rows": 10417,
+      "wc_silo_rows": 0,
+      "wc_results": {},
+      "path_categories": {
+        "HKCR": 1859,
+        "HKLM": 6101,
+        "HKCU": 2457
+      },
+      "operations": {
+        "RegQueryKey": 3812,
+        "RegQueryValue": 1799,
+        "RegCloseKey": 1558,
+        "RegEnumKey": 37,
+        "RegEnumValue": 10,
+        "RegOpenKey": 2825,
+        "RegSetInfoKey": 376
+      },
+      "results": {
+        "BUFFER OVERFLOW": 93,
+        "NO MORE ENTRIES": 13,
+        "NAME NOT FOUND": 2641,
+        "REPARSE": 26,
+        "SUCCESS": 7644
+      },
+      "silo_aliases": {},
+      "first_reg_time": "21:24:04.4515441",
+      "last_reg_time": "21:24:27.1654383",
+      "target_guid_reg_rows": 0,
+      "public_classes_samples": 4
+    },
+    {
+      "pid": 17396,
+      "role": "administrator_runner",
+      "process_names": {
+        "pwsh.exe": 3681
+      },
+      "all_rows": 3681,
+      "reg_rows": 0,
+      "wc_silo_rows": 0,
+      "wc_results": {},
+      "path_categories": {},
+      "operations": {},
+      "results": {},
+      "silo_aliases": {},
+      "first_reg_time": null,
+      "last_reg_time": null,
+      "target_guid_reg_rows": 0,
+      "public_classes_samples": 0
+    }
+  ],
+  "silo_alias_count": 3,
+  "silo_alias_semantics": "Distinct native WC child names, not a package/container count",
+  "raw_silo_names_retained": false,
+  "selected_public_path_events": [
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.4524180",
+      "pid": 6212,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.4524385",
+      "pid": 6212,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.4524473",
+      "pid": 6212,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.4524870",
+      "pid": 6212,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.8766203",
+      "pid": 15848,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.8766533",
+      "pid": 15848,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.8766650",
+      "pid": 15848,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:04.8811350",
+      "pid": 15848,
+      "operation": "RegQueryKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:25.9369662",
+      "pid": 2728,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:25.9378974",
+      "pid": 2728,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:25.9379121",
+      "pid": 2728,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:25.9394724",
+      "pid": 2728,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:26.3350216",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:26.3358696",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:26.3358840",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "classes_root",
+      "time_of_day": "21:24:26.3374611",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes",
+      "result": "SUCCESS"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1033748",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1034023",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1055332",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1055528",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1058326",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1058478",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1059409",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1059535",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1060378",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1060489",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1061323",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1061440",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1062308",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1062472",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1063261",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1063379",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1064415",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1064536",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1065334",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1065463",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1066424",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1067369",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1067488",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1068250",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_1>\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "result": "REPARSE"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1068360",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1069861",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "<target-GUID path; non-allowlisted components omitted>",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1086287",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_2>\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1086413",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1102625",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_2>\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1102770",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1104015",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_2>\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1104148",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1105099",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_2>\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1105218",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1106144",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "\\REGISTRY\\WC\\<silo_2>\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "result": "NAME NOT FOUND"
+    },
+    {
+      "selection": "target_guid",
+      "time_of_day": "21:24:27.1106269",
+      "pid": 15344,
+      "operation": "RegOpenKey",
+      "path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+      "result": "NAME NOT FOUND"
+    }
+  ],
+  "target_guid_sample_count": 36,
+  "target_guid_samples_truncated": false,
+  "target_guid_sample_limit": 256,
+  "classes_sample_limit_per_pid": 4,
+  "detail_column_retained": false,
+  "official_sources": [
+    "https://learn.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-behind-the-scenes",
+    "https://learn.microsoft.com/en-us/windows/msix/desktop/flexible-virtualization",
+    "https://learn.microsoft.com/en-us/windows/msix/msix-containerization-overview"
+  ],
+  "limitations": [
+    "Only this incomplete control CSV and five supplied PIDs are compared; no new capture or registry operation.",
+    "CSV has PID but no creation FILETIME column; role assignments are supplied by the coordinator.",
+    "A WC Silo path shows that this recorded access traversed that registry namespace; it does not alone identify the owning MSIX package or prove the target entry was written there.",
+    "REPARSE is not a final key-open outcome; adjacent events have no exported TID/activity ID here, so sequence alone is not exact call correlation.",
+    "Zero WC rows for a PID means none were observed in this captured interval, not proof that the process is universally unvirtualized.",
+    "No live-stage registration happened in this control; expected NAME NOT FOUND does not explain the previous registered-state failure.",
+    "Medium integrity and AppContainer=0 do not exclude full-trust MSIX virtualization; these are different dimensions.",
+    "A same-Silo independent reader can share the writer perspective and is not independent proof of unvirtualized registry visibility."
+  ]
+}

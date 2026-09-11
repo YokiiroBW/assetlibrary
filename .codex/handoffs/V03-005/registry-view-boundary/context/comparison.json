@@ -1,0 +1,71 @@
+{
+  "schema": "AssetLibrary.ReadOnlyExplorerContextComparison.v1",
+  "current_record": "current-context.json",
+  "baseline_record": ".codex/handoffs/V03-005/explorer-process-context.json",
+  "current_utc": "2026-09-11T20:59:42.8305696+08:00",
+  "baseline_utc": "2026-09-09T10:00:26.7023605+08:00",
+  "baseline_explorer_count": 5,
+  "current_explorer_count": 3,
+  "property_comparison": [
+    {
+      "field": "same_user_as_executor",
+      "baseline_values": [
+        true
+      ],
+      "current_values": [
+        true
+      ]
+    },
+    {
+      "field": "session",
+      "baseline_values": [
+        2
+      ],
+      "current_values": [
+        2
+      ]
+    },
+    {
+      "field": "elevation_type",
+      "baseline_values": [
+        3
+      ],
+      "current_values": [
+        3
+      ]
+    },
+    {
+      "field": "elevated",
+      "baseline_values": [
+        0
+      ],
+      "current_values": [
+        0
+      ]
+    },
+    {
+      "field": "integrity_rid",
+      "baseline_values": [
+        8192
+      ],
+      "current_values": [
+        8192
+      ]
+    },
+    {
+      "field": "app_container",
+      "baseline_values": [
+        0
+      ],
+      "current_values": [
+        0
+      ]
+    }
+  ],
+  "all_queries_succeeded": true,
+  "pid_set_unchanged": true,
+  "full_sid_or_account_fields_retained": false,
+  "privacy_check_note": "An initial over-broad text search matched the permitted policy name FilterAdministratorToken; the corrected field/SID check passed without changing the evidence.",
+  "conclusion": "Checked current Explorer primary tokens remain Medium, Limited and not elevated, with EnableLUA=1 and FilterAdministratorToken=1. Their token properties match the 09-09 sample; process identities differ. This does not establish a past thread impersonation context, ordinary HKCR access or cache contents.",
+  "actions": "Only a self-owned read-only checker ran. No Explorer start/stop, GUI, registry write, attachment or capture."
+}

@@ -1,0 +1,17 @@
+{
+  "Utc": "2026-09-11T13:58:34.0022981+00:00",
+  "Pid": 17736,
+  "CreationFileTime": "134336067685179313",
+  "ExactHeldIdentityVerified": true,
+  "Role": "Hung offline /OpenLog /NoConnect viewer only",
+  "ForcedOfflineViewerExit": true,
+  "ExitConfirmed": true,
+  "CaptureProcessesAlreadyExited": true,
+  "CsvShaUnchanged": true,
+  "PmlLengthUnchanged": true,
+  "PmlLastWriteUnchanged": true,
+  "PmlPreExitShaUnavailable": "Viewer held an exclusive file lock; no byte-for-byte pre/post PML claim",
+  "PmlShaAfterExit": "46E433C7423FE0B164CF66169D6717F1CB6CC243AB9376F967E6D45AC45FD5D2",
+  "CsvShaAfterExit": "5D82CC47DEED5251084234C2B0BBC8C9941FA2F8FB70C65CFBA32B0FCC22A0B7",
+  "ExplorerTerminated": false
+}

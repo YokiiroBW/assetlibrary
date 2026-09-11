@@ -1,0 +1,302 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Retain only 36 fixed-GUID Reg* rows; omit all Detail and file/process payload, including encoded commands/paths. Replace native silo identifier and any decoded user path/SID."
+  ],
+  "payload": {
+    "source_csv_rows": 988220,
+    "source_target_rows": 95,
+    "registry_rows": [
+      {
+        "Time of Day": "21:24:27.1033748",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1034023",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1055332",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1055528",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1058326",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1058478",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1059409",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1059535",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1060378",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1060489",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1061323",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1061440",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1062308",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1062472",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1063261",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1063379",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1064415",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\ShellEx\\MayChangeDefaultMenu",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1064536",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}\\ShellEx\\MayChangeDefaultMenu",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1065334",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\FolderViewSampleType\\shellex\\ContextMenuHandlers\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1065463",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\FolderViewSampleType\\shellex\\ContextMenuHandlers\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1066424",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1067369",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1067488",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1068250",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "REPARSE"
+      },
+      {
+        "Time of Day": "21:24:27.1068360",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCU\\Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1069861",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1086287",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1086413",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1102625",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1102770",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1104015",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1104148",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\InprocServer32",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1105099",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1105218",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\DefaultIcon",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1106144",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+        "Result": "NAME NOT FOUND"
+      },
+      {
+        "Time of Day": "21:24:27.1106269",
+        "Process Name": "pwsh.exe",
+        "PID": "15344",
+        "Operation": "RegOpenKey",
+        "Path": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
+        "Result": "NAME NOT FOUND"
+      }
+    ],
+    "detail_column_retained": false,
+    "non_registry_rows_retained": false
+  }
+}

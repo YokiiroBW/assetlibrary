@@ -1,0 +1,39 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "outside-guard-launch.json",
+      "data": {
+        "Utc": "2026-09-11T13:45:36.6716950+00:00",
+        "DispatcherPid": 15848,
+        "DispatcherHwnd": 788038,
+        "Guard": "original 323C; execution environment changed only"
+      }
+    },
+    {
+      "source_file": "outside-guard-context.json",
+      "data": {
+        "Utc": "2026-09-11T13:45:37.2161774+00:00",
+        "Pid": 14432,
+        "CreationFileTime": "134336079366980885",
+        "ParentPid": 15848,
+        "Session": 2,
+        "SameUserAsExplorer": true,
+        "AdministratorEnabled": false,
+        "GuardSha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+        "Scope": "Original 4 HKCU roots, original 600-second guard and notification pair; execution context is the changed variable"
+      }
+    },
+    {
+      "source_file": "outside-guard-returned.json",
+      "data": {
+        "Utc": "2026-09-11T13:52:06.4690416+00:00",
+        "Pid": 14432,
+        "GuardReturned": true
+      }
+    }
+  ]
+}

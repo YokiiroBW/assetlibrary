@@ -1,0 +1,29 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Replace personal profile, SID, observed silo ID and private cache filename; retain package family and Helium/User.dat/UserClasses.dat relationship."
+  ],
+  "payload": {
+    "Utc": "2026-09-11T13:28:00.4117913+00:00",
+    "Scope": "Read-only exact observed silo mapping only",
+    "Matches": [
+      {
+        "Name": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>software",
+        "BackingFile": "\\Device\\HarddiskVolume3\\ProgramData\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\<USER_SID>\\SystemAppData\\Helium\\Cache\\<CACHE_FILE>.dat\u0000"
+      },
+      {
+        "Name": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_sid",
+        "BackingFile": "<USER_PROFILE>\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\SystemAppData\\Helium\\User.dat\u0000"
+      },
+      {
+        "Name": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>user_classes",
+        "BackingFile": "<USER_PROFILE>\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\SystemAppData\\Helium\\UserClasses.dat\u0000"
+      },
+      {
+        "Name": "\\REGISTRY\\WC\\Silo<OBSERVED_ID>com",
+        "BackingFile": "\\Device\\HarddiskVolume3\\ProgramData\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\<USER_SID>\\SystemAppData\\Helium\\Cache\\<CACHE_FILE>.dat\u0000"
+      }
+    ],
+    "RegistryWrites": 0
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "outside-after-launch.json",
+      "data": {
+        "Utc": "2026-09-11T13:42:10.9664506+00:00",
+        "DispatcherHwnd": 788038,
+        "DispatcherPid": 15848,
+        "ReadOnly": true
+      }
+    },
+    {
+      "source_file": "outside-after-context.json",
+      "data": {
+        "Utc": "2026-09-11T13:42:11.4866380+00:00",
+        "Pid": 1912,
+        "CreationFileTime": "134336077309925789",
+        "ParentPid": 15848,
+        "Session": 2,
+        "SameUserAsExplorer": true,
+        "AdministratorEnabled": false,
+        "Mode": "expected-missing",
+        "Label": "outside-after",
+        "RegistryWrites": 0
+      }
+    },
+    {
+      "source_file": "outside-after-done.json",
+      "data": {
+        "Utc": "2026-09-11T13:42:12.4763501+00:00",
+        "Completed": true,
+        "Matched": true,
+        "ReadbackSummary": {
+          "Label": "outside-after",
+          "Mode": "expected-missing",
+          "ExpectedStateMatched": true,
+          "OfficialFields": 11,
+          "Owners": 4,
+          "ExternalMergedFields": 5,
+          "RegistryWrites": 0
+        }
+      }
+    }
+  ]
+}

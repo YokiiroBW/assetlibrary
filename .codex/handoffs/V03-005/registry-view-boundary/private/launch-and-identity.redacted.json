@@ -1,0 +1,29 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "guard-launch.json",
+      "data": {
+        "Utc": "2026-09-11T13:38:30.1002781+00:00",
+        "GuardPid": 13972,
+        "CreationFileTime": "134336075100986665",
+        "Purpose": "Package-view visibility A/B; no new Procmon capture or debugger"
+      }
+    },
+    {
+      "source_file": "identity.json",
+      "data": {
+        "RecordedUtc": "2026-09-11T13:16:28.7775343+00:00",
+        "NativeHwnd": "788038",
+        "CuaWindowId": 788038,
+        "Pid": 15848,
+        "CreationFileTime": "134336061591808981",
+        "OwnershipStartFiletime": "134336061532652893",
+        "DesktopPid": 6212
+      }
+    }
+  ]
+}

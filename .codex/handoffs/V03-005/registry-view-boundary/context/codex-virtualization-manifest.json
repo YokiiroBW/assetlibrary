@@ -1,0 +1,19 @@
+{
+  "Utc": "2026-09-11T13:33:18.8247778+00:00",
+  "Packages": [
+    {
+      "PackageFamilyName": "OpenAI.Codex_2p2nqsd0c76g0",
+      "Version": "26.903.8094.0",
+      "RuntimeBehavior": [
+        ""
+      ],
+      "RegistryVirtualizationNodes": [
+        "<desktop6:RegistryWriteVirtualization xmlns:desktop6=\"http://schemas.microsoft.com/appx/manifest/desktop/windows10/6\">disabled</desktop6:RegistryWriteVirtualization>",
+        "<virtualization:RegistryWriteVirtualization xmlns:virtualization=\"http://schemas.microsoft.com/appx/manifest/virtualization/windows10\"><virtualization:ExcludedKeys><virtualization:ExcludedKey>HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts</virtualization:ExcludedKey></virtualization:ExcludedKeys></virtualization:RegistryWriteVirtualization>",
+        "<virtualization:ExcludedKey xmlns:virtualization=\"http://schemas.microsoft.com/appx/manifest/virtualization/windows10\">HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts</virtualization:ExcludedKey>"
+      ],
+      "UnvirtualizedResources": 1
+    }
+  ],
+  "Changed": false
+}

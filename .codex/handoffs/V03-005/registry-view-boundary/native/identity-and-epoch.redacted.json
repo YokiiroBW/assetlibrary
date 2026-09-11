@@ -1,0 +1,27 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "transformations": [
+    "Combine original JSON receipts; preserve timestamps, statuses and identities; replace private paths/identity strings. This combined copy is not any original byte stream."
+  ],
+  "payload": [
+    {
+      "source_file": "identity.json",
+      "data": {
+        "RecordedUtc": "2026-09-11T13:47:46.4117739+00:00",
+        "NativeHwnd": "3671782",
+        "CuaWindowId": 3671782,
+        "Pid": 9860,
+        "CreationFileTime": "134336080130447535",
+        "OwnershipStartFiletime": "134336079688519801",
+        "DesktopPid": 6212
+      }
+    },
+    {
+      "source_file": "window-epoch.json",
+      "data": {
+        "Utc": "2026-09-11T13:46:08.8490051+00:00",
+        "OwnershipStartFiletime": "134336079688519801"
+      }
+    }
+  ]
+}

@@ -215,3 +215,11 @@ short-key-open归档60件（43原字节/17明确脱敏），root重核75个来�
 ## 2026-09-11 文献优先对照
 
 复核微软官方机制、同ExplorerDataProvider的Q&A亲历案例、失败缓存原始复现及官方仓库#349/PR#332的适用范围；与已有09-09进程/策略、09-10 UAC和冷重启证据比较。无新本地动态取证、产品代码、注册、GUI或系统策略修改。研究文档链接与JSON结构核对；最终仓库验证日志：.runtime/v03-005-final-tests/repository-literature-final.log。未重跑既有成功产品套件，未关闭Windows验收门禁。
+
+## 2026-09-11 注册表视图隔离与原生入口恢复
+
+当前token/policy只读检查仍Medium/非管理员/同用户会话，UAC开启；Procmon对照全局迹988220行，因文件尺寸阈值提前结束，原failed保留，未进入live阶段。95个固定目标行/36个Reg事件显示检查进程经过WC Silo；只读hivelist把该Silo映射到Codex包。当前manifest的新ExcludedKeys与旧disabled同时存在，按微软文献限定解释，未修改应用包。
+
+原323 guard包内登记的同一有效期，inside20registered→包外同用户普通reader20missing→inside20registered；清理后两侧20missing。相同guard/DLL/字段的包外登记后native20registered；登记之后创建新Explorer9860，SDK17、此电脑4、一次Browse S_OK、实际BA16/42B相等PIDL/10项；注销后原生此电脑3项和UI入口消失。native8根/20missing/双通知/guard退出、自有窗口0、原desktop6212精确创建时间保留。成功范围仅官方样例控制；产品自身Shell待验，源码套件未因取证重复运行。
+
+只读Procmon离线查看器后来卡住，精确持有身份后只结束该查看器；CSV前后SHA相同，PML因独占锁缺关闭前SHA，尺寸和mtime不变并记录关闭后SHA，不作不存在的逐字节前后证明。来源与脱敏限制见registry-view-boundary/evidence.json。本次证据与协调检查点验证日志：.runtime/v03-005-final-tests/repository-view-boundary-final.log。40副本、63个直接来源加2个冻结引用由root独立核对；Git暂存后的原件字节另行核对。
