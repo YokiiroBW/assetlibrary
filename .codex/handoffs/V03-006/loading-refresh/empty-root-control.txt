@@ -1,0 +1,22 @@
+Start testing: Sep 12 02:31 中国标准时间
+----------------------------------------------------------
+3/3 Testing: explorer_loading_refresh
+3/3 Test: explorer_loading_refresh
+Command: "<worktree>/.runtime/explorer-snapshot/Release/ExplorerLoadingRefreshTests.exe" "<worktree>/.runtime/explorer-snapshot/Release/AssetLibraryExplorerProof.dll"
+Directory: <worktree>/.runtime/explorer-snapshot
+"explorer_loading_refresh" start time: Sep 12 02:31 中国标准时间
+Output:
+----------------------------------------------------------
+LoadingRefreshTests: actual initial Loading item
+budget=passed; interval=500ms; duration=10s; maximum_attempts=20
+hidden_DefView_CreateViewWindow=00000000
+hidden_DefView_initial_count=33; count_hr=00000000; queries=0
+<end of output>
+Test time =  12.84 sec
+----------------------------------------------------------
+Test Failed.
+"explorer_loading_refresh" end time: Sep 12 02:31 中国标准时间
+"explorer_loading_refresh" time elapsed: 00:00:12
+----------------------------------------------------------
+
+End testing: Sep 12 02:31 中国标准时间

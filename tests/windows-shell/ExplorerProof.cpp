@@ -10,6 +10,7 @@
 #include "SnapshotPidl.h"
 #include "NavigationMenu.h"
 #include "SnapshotIcon.h"
+#include "LoadingRefresh.h"
 #include <cstring>
 
 namespace {
@@ -57,8 +58,10 @@ class Enumerator final : public IEnumIDList {
 
 class Folder final : public IShellFolder2, public IPersistFolder2 {
   ULONG refs_ = 1; PIDLIST_ABSOLUTE absolute_ = nullptr; snapshot::Location location_;
+  std::shared_ptr<loading::Signal> viewState_;
  public:
   Folder() { ++objects; }
+  explicit Folder(std::shared_ptr<loading::Signal> state):viewState_(std::move(state)){++objects;}
   ~Folder() { CoTaskMemFree(absolute_); --objects; }
   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** value) override {
     if (!value) return E_POINTER; *value = nullptr;
@@ -97,13 +100,16 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   }
   HRESULT STDMETHODCALLTYPE EnumObjects(HWND, SHCONTF flags, IEnumIDList** value) override {
     if(!value)return E_POINTER;*value=nullptr;
+    const auto generation=viewState_?viewState_->Begin():0;
     try {
       auto page=snapshot::Query(location_);auto entries=std::move(page.entries);
       if(page.status!=snapshot::Status::Ready)entries.push_back({page.epoch,{},snapshot::Kind::StatusRow,snapshot::StatusText(page.status),page.status});
       std::vector<snapshot::Entry> visible;
       for(const auto& entry:entries)if(flags&(snapshot::Navigable(entry.kind)?SHCONTF_FOLDERS:SHCONTF_NONFOLDERS))visible.push_back(entry);
-      *value=new(std::nothrow) Enumerator(std::move(visible));return *value?S_OK:E_OUTOFMEMORY;
-    }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
+      *value=new(std::nothrow) Enumerator(std::move(visible));
+      if(viewState_)viewState_->Publish(generation,*value?page.status:snapshot::Status::Unavailable);
+      return *value?S_OK:E_OUTOFMEMORY;
+    }catch(const std::bad_alloc&){if(viewState_)viewState_->Publish(generation,snapshot::Status::Unavailable);return E_OUTOFMEMORY;}
   }
   HRESULT STDMETHODCALLTYPE BindToObject(PCUIDLIST_RELATIVE pidl, IBindCtx*, REFIID iid, void** value) override {
     if(!value)return E_POINTER;*value=nullptr;UINT bytes=0,count=0;
@@ -144,8 +150,13 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   }
   HRESULT STDMETHODCALLTYPE CreateViewObject(HWND, REFIID iid, void** value) override {
     if (!value) return E_POINTER; *value = nullptr; if (iid != IID_IShellView) return E_NOINTERFACE;
-    SFV_CREATE create{sizeof(create), static_cast<IShellFolder2*>(this), nullptr, nullptr};
-    return SHCreateShellFolderView(&create, reinterpret_cast<IShellView**>(value));
+    if(!absolute_)return E_UNEXPECTED;
+    try {
+      auto state=std::make_shared<loading::Signal>();auto folder=new(std::nothrow) Folder(state);if(!folder)return E_OUTOFMEMORY;
+      auto hr=folder->Initialize(absolute_);
+      if(SUCCEEDED(hr))hr=loading::CreateView(static_cast<IShellFolder2*>(folder),state,reinterpret_cast<IShellView**>(value));
+      folder->Release();return hr;
+    }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
   }
   HRESULT STDMETHODCALLTYPE GetAttributesOf(UINT count, PCUITEMID_CHILD_ARRAY items, SFGAOF* attributes) override {
     if(!attributes||(count&&!items))return E_POINTER;if(count>snapshot::MaxItems)return E_INVALIDARG;

@@ -38,6 +38,20 @@ ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^
 
 此测试实际调用DLL菜单/图标COM接口，用无窗口浏览器服务记录器，不显示菜单、不连接pipe或注册，10秒外限。实际双击和图标仍需协调者新DLL原生周期验收。
 
+## Loading 自动刷新与生命周期边界
+
+当前Loading使用每view独立的500ms自动刷新，固定10秒/最多20次、最多4个活动名额。连续Loading不延长预算；Ready/错误/站点清空/窗口销毁停止。超时后F5仍是单次查询，重开可获得新周期；Core五秒有效期及单次150ms IPC不变。确认Detach即归还名额，callback/DLL保活则跟随真实COM引用，不能把关窗等同于对象全部释放。
+
+`explorer_loading_refresh`检查预算、代次、重入、owner线程、独立view及名额复用；`explorer_loading_view_wiring`使用真实Desktop owner检查系统自动site/window回调与活动view记录器，不代表proof数据验收。
+
+严格proof-owner卸载诊断独立运行，当前仍返回exit1、保留callback1/DLL S_FALSE：
+
+```powershell
+& .runtime/explorer-snapshot/Release/ExplorerLoadingRefreshTests.exe (Resolve-Path .runtime/explorer-snapshot/Release/AssetLibraryExplorerProof.dll).Path --proof-owner-lifetime
+```
+
+该失败保留，直接加载的测试模块在COM清理后仍有外部持有时保持pin至进程退出。四项限定CTest通过不代表此卸载诊断或G2通过。详见[本轮范围与反例](../../.codex/handoffs/V03-006/loading-refresh.md)。
+
 ## 实际命令
 
 ```powershell

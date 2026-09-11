@@ -1,0 +1,8 @@
+native_lifetime=not_passed; safe_module_pin_until_process_exit=true
+system_SetSite=passed; system_WINDOWCREATED=passed; auto_recorded_refresh=1; proof_data_acceptance=false
+system_UIActivate_DEACTIVATE=00000000
+system_DestroyViewWindow=00000000; window_alive=0; signal_window=0; callback_refs=4
+system_after_destroy_site=80004005; view_refs=1; browser_refs=1
+system_callback_cleanup active=0; retained_callbacks=1; dll=00000001
+loading_refresh_mechanism=passed; native_lifetime=pending; registry=0; explorer=0; pipe=0
+after_CoUninitialize retained_callbacks=1; dll=00000001

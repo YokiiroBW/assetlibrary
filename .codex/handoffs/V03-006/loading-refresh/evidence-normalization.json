@@ -1,0 +1,14 @@
+[
+  {
+    "file": "empty-root-control.txt",
+    "raw_sha256": "efadb00b89dc8c0c606f23b98bc5898d65d0c388dc7aec687d55758cd6c12861",
+    "raw_encoding": "gb18030",
+    "normalization": "UTF-8/LF; owned worktree prefix replaced with <worktree>; no item names recorded"
+  },
+  {
+    "file": "proof-owner-lifetime.txt",
+    "raw_sha256": "ca31316625826cabcddd212d3647f891c6a4ebadccad933252a75880d72c02f5",
+    "raw_encoding": "utf-8",
+    "normalization": "UTF-8/LF; owned worktree prefix replaced with <worktree>; no item names recorded"
+  }
+]

@@ -539,7 +539,15 @@
     "tests/windows-shell/NavigationMenuTests.cpp",
     "tests/windows-shell/SnapshotIcon.h",
     "tests/windows-shell/SnapshotIcon.cpp",
-    ".codex/handoffs/V03-006/navigation-menu.md"
+    ".codex/handoffs/V03-006/navigation-menu.md",
+    "tests/windows-shell/LoadingRefresh.cpp",
+    "tests/windows-shell/LoadingRefresh.h",
+    "tests/windows-shell/LoadingRefreshTests.cpp",
+    "tests/windows-shell/RefreshTestBrowser.h",
+    ".codex/handoffs/V03-006/loading-refresh.md",
+    ".codex/handoffs/V03-006/loading-refresh/empty-root-control.txt",
+    ".codex/handoffs/V03-006/loading-refresh/proof-owner-lifetime.txt",
+    ".codex/handoffs/V03-006/loading-refresh/reference-source.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -583,7 +591,8 @@
       "Reviewed scoped Explorer handle/identity lifecycle, narrow v2 window predicate, immutable official registration and attributes observer; only this task runtime and evidence changed",
       "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools",
       "Current slice: frozen read-only-snapshot-v1 local wire, native COM/DefView and owner registration route; no duplicated Core authorization/path logic",
-      "Default navigation: native IContextMenu/IObjectWithSite, SID_STopLevelBrowser BrowseObject, bounded snapshot PIDL, Windows stock icons and default extractor"
+      "Default navigation: native IContextMenu/IObjectWithSite, SID_STopLevelBrowser BrowseObject, bounded snapshot PIDL, Windows stock icons and default extractor",
+      "Loading refresh: native DefView/SFVM_WINDOWCREATED/IObjectWithSite/IShellBrowser; existing bounded snapshot Query/PIDL; system Comctl32 subclass and UI-thread timer only"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -632,7 +641,8 @@
       "Current snapshot slice: strict native build, independent literal/malformed wire, real pipe budget/cancel/capacity, fresh/nested canonical, type sort, registration-free COM and standalone probe; five stable CTest runs",
       "Default navigation: strict build, actual menu COM protocol with no-window IShellBrowser recorder, lifetime/negative verbs, six stock icon cases, affected snapshot CTest",
       "Mixed verb follow-up: strict DLL/menu build, 10 ANSI/Unicode field combinations for each of 3 navigation kinds, decision and actual BrowseObject count; complete navigation menu CTest passed",
-      "Same review patch: QueryService and BrowseObject callbacks release every external menu/site interface reference; self retains copied target and DLL owner, final refcounts/unload verified in both cases"
+      "Same review patch: QueryService and BrowseObject callbacks release every external menu/site interface reference; self retains copied target and DLL owner, final refcounts/unload verified in both cases",
+      "Loading refresh: strict build and four scoped CTest passes; generation, UI thread, call-out/reentrant teardown, independent view capacity, actual system callback wiring; separate proof-owner final native lifetime diagnostic exit1 retained, not passed"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
@@ -640,7 +650,8 @@
       "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension",
       "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector",
       "V03-006/V03-005: new DLL real Host/Core and Explorer acceptance; real cross-SID/session and forced delayed kernel cancellation; no G2..G4 or production installer claim",
-      "V03-006/V03-005: verify default open and stock icons in a new coordinator-owned native Explorer cycle; COM recorder is not GUI evidence"
+      "V03-006/V03-005: verify default open and stock icons in a new coordinator-owned native Explorer cycle; COM recorder is not GUI evidence",
+      "V03-006/V03-005: native CViewSettings-associated retained callback and final DLL release/growth remain open G2; no forced release, test pin retained to exit; real cold GUI and long soak still required"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -1095,5 +1106,24 @@
     "numeric_offset_source": "lpVerb_only",
     "callout_self_reference": true,
     "reentrant_release_cases_passed": 2
+  },
+  "loading_refresh_checkpoint": {
+    "report": "loading-refresh.md",
+    "status": "controlled_refresh_passed_strict_native_lifetime_not_passed",
+    "interval_ms": 500,
+    "episode_ms": 10000,
+    "maximum_attempts": 20,
+    "maximum_active_view_slots": 4,
+    "strict_release_build": true,
+    "scoped_ctest_passed": 4,
+    "system_callback_site_window_verified": true,
+    "proof_data_gui_verified": false,
+    "strict_proof_owner_diagnostic_exit": 1,
+    "retained_callbacks_after_apartment": 1,
+    "final_dll_unload_passed": false,
+    "active_slots_after_close": 0,
+    "native_gui_actions": 0,
+    "registration_actions": 0,
+    "dll_sha256": "263bdaa5147500312338ae6add6669b191b019881d6e2f811b400974a2fad87d"
   }
 }

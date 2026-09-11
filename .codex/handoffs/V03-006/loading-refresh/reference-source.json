@@ -1,0 +1,13 @@
+{
+  "image": "windows.storage.dll",
+  "rva": "23DFB1",
+  "symbol": "CViewSettings::CViewSettings(IShellFolder2*, IShellFolderViewCB*, IItemFilter*)",
+  "symbol_rva": "23DDBC",
+  "displacement": 501,
+  "pdb_guid": "FA3BF0701EBD655CD7B3691D3BF1C00A",
+  "pdb_age": 1,
+  "pdb_matched": true,
+  "lookup_exe_sha256": "43b83ebae6d0561792eb4c3e10d389993e581365d950cdde47bfac021cf7373c",
+  "target_processes_attached": 0,
+  "conclusion": "Observed reference acquisition source; final release timing and cause remain unproven"
+}

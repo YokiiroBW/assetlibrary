@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[Loading有界自动刷新](loading-refresh.md)代码与四项限定范围CTest已通过，500ms/10秒/20次/4view，generation与重入边界已验证。系统自动site/window机制通过；独立proof-owner严格卸载诊断仍exit1、callback1/DLL S_FALSE，G2不通过，安全pin和反例保留。真实冷GUI由协调端指定操作者执行，本窗口无注册/真实Explorer操作。
+
 默认导航审查补丁完整完成：30次Unicode/ANSI混合字段回归及QueryService/BrowseObject重入释放全部外部菜单引用的两种回归通过；InvokeCommand以RAII self引用保留目标和DLL owner直至结束。严格目标build与完整菜单CTest通过，无GUI/注册；详见navigation-menu.md。
 
 默认导航补充：独立review发现并已修复Unicode/ANSI混合字段误判；优先有效Unicode字符串，否则ANSI字符串/仅lpVerb数字，矛盾字符串拒绝。每种导航项10组混合字段及实际导航次数断言通过，详见navigation-menu.md；新DLL仍待root实际GUI验证。
