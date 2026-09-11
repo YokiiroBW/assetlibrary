@@ -19,3 +19,11 @@
 主协调首次 C++ 实际互通读到真实库后出现 Busy 和大量错误日志，发现已关闭的 native client 令 managed pipe 不再 IsConnected，但服务器仍必须 Disconnect 后才能重新 accept。按 [Microsoft DisconnectNamedPipe 说明](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-disconnectnamedpipe) 及 [.NET Windows pipe 实现](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.IO.Pipes/src/System/IO/Pipes/NamedPipeServerStream.Windows.cs) 修正生命周期：跟踪已接受连接，在 finally 必定断开；接受失败停止该监听并由 Host 统一退出；错误交换先断开再退避100ms，每实例最多每秒一条错误日志。
 
 新增 CreateFileW + Identification/overlapped 原生句柄回归，原代码98ms记录5232次错误，修正后64次顺序读完整帧并关闭、0错误；20次畸形请求限速/日志界限/后续正常恢复通过。最终普通56项通过、453文件源码检查通过；本次未重复输入不变的2项 Core NativeLive。累计新 Host36项不同用例（35普通+1NativeLive），继续由主协调重新验证 C++ 与 Explorer。补丁没有打开默认端点或 GUI。
+
+## 延迟日志不得延长缓存有效期（d9b3c7f）
+
+只读集成审查发现成功页面已生成后才写日志，日志恢复后再取完成时间会把已过期页面续给新五秒。现于调用外部日志前捕获单调完成时间，并将同一时间用于缓存新鲜度和耗时。TTL仍为5秒，没有通过延长缓存掩盖Loading。
+
+新增可控时钟+阻塞日志反例：Core已返回，日志期间时钟前进6秒；旧代码错误返回Ready，新代码返回Loading和零条目，再实际查询一次Core。修正提交`d9b3c7f354b24bfa7bbf7f726e323b2c8c63bf65`；最终普通57项通过，源码454文件通过，构建无警告/错误。此前2项NativeLive作为历史证据保留，本次按主协调要求不重复使用已到期旧支架配置。Host测试代码累计37不同用例（36普通+1NativeLive）。
+
+本次静态集成审查覆盖root d7fc839..26a377a的既有wire、PIDL解析/导航、权限/依赖边界，除上述已修复缓存时间问题外未发现其他可操作阻断；待合入的LoadingRefresh生命周期由另一reviewer独立负责，不在本结论范围。

@@ -33,3 +33,13 @@ Host 34 个不同用例：33 普通（严格 wire/endian/GUID/UTF16/bounds/100+o
 - Release构建0警告/错误，格式验证通过，源码策略453文件通过；依赖/契约/Store/ClientTransport未变，不重复2项旧 NativeLive。没有测试另一用户/会话登录或声称 accept 故障注入经过实测；accept failstop 为本轮源码审查路径。
 
 修正提交：`381ee211ff8e061ee927d18bea893bf4c8e40e82`。官方生命周期依据与差异说明见 summary.md；完整 C++ 实机重试由 V03-005 保存独立证据。
+
+## d9b3c7f 日志阻塞与五秒缓存边界
+
+- 新`HostSnapshotFreshnessTests.SlowLoggingCannotRenewTheAgeOfAnAlreadyCompletedCorePage`使用ManualClock和有界阻塞日志callback。Core已完成后将时钟推进6秒，放开日志。
+- 旧代码反例失败：预期Loading，实际Ready；`.runtime/assethost-tests/host-freshness-before.trx`。
+- 修正后1项通过：Loading不携旧条目，触发第二次Core读取；`.runtime/assethost-tests/host-freshness-after.trx`。
+- 受影响普通套件57/57通过；`.runtime/assethost-tests/windows-freshness-affected.trx`。Release构建0警告/错误；源码策略454文件通过；无新依赖/接口/平台操作。
+- 记录完成时间的语义修正没有改变5秒TTL。未重复NativeLive、未使用旧私密profile或默认pipe；后续真实Core/Explorer证据仍由主协调保存。Result中的最新passed57只计本次普通套件，另列历史NativeLive2项。
+
+提交：`d9b3c7f354b24bfa7bbf7f726e323b2c8c63bf65`。
