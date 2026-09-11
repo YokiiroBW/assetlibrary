@@ -1,0 +1,20 @@
+{
+  "StartedUtc": "2026-09-11T15:17:00.0228597+00:00",
+  "CompletedUtc": "2026-09-11T15:17:00.0728357+00:00",
+  "Pid": 4008,
+  "ExitCode": 0,
+  "TimedOut": false,
+  "ExitConfirmed": true,
+  "StreamsCompleted": true,
+  "CaptureError": null,
+  "StdoutFile": "<CURRENT_USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\proof-native-preparation\\proof-build\\verify-evidence\\227dfd9b831740d29892b216a6d83976\\stdout.txt",
+  "StderrFile": "<CURRENT_USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\proof-native-preparation\\proof-build\\verify-evidence\\227dfd9b831740d29892b216a6d83976\\stderr.txt",
+  "_evidence_copy": {
+    "kind": "redacted_copy_not_original",
+    "original_runtime_path": ".runtime/proof-native-preparation/proof-build/verify-evidence/227dfd9b831740d29892b216a6d83976/result.json",
+    "original_sha256": "2A6FD4A0F124C5A29B01E14B5E27469B31225CD0F6E74C939C2012D4E398F83D",
+    "redactions": [
+      "Current-user profile prefix replaced by marker"
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "Utc": "2026-09-11T14:45:56.6845397+00:00",
+  "Scripts": [
+    {
+      "File": "run-verify.ps1",
+      "Sha256": "43DE62289A15F024CCD1926717CF3BEA4F718DC56D0BFB4349D3E5D9BD3E21D9",
+      "AstPassed": true
+    },
+    {
+      "File": "guard.ps1",
+      "Sha256": "6E188AF94C85EF157C95C7C8A4856DC5BBF074B32EED5E97C1B198DFCA38166A",
+      "AstPassed": true
+    },
+    {
+      "File": "read-fields.ps1",
+      "Sha256": "BAF69565FA9930E7429EBE46BC5571BDD5F1192663D989CB965DCA6DFDFFBC41",
+      "AstPassed": true
+    },
+    {
+      "File": "run-view.ps1",
+      "Sha256": "9C7588B988A9D337A2ED7EB783599E67932314E06DE20306454C9D96DBE26592",
+      "AstPassed": true
+    }
+  ],
+  "FieldTupleCount": 9,
+  "NativeViewBuild": "Release /W4 /WX /analyze passed",
+  "GuiActions": 0,
+  "RegistrationActions": 0,
+  "NotificationActions": 0,
+  "NativeViewExecuted": false
+}

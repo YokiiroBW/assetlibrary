@@ -1,0 +1,8 @@
+{
+  "Utc": "2026-09-11T14:50:39.4609572+00:00",
+  "BrokerPid": 13592,
+  "BrokerHwnd": 525692,
+  "Command": "fixed run-verify.ps1 via observed ShellFolderView.Application.ShellExecute",
+  "Verb": "open",
+  "ElevatedVerbUsed": false
+}

@@ -1,0 +1,46 @@
+{
+  "Utc": "2026-09-11T15:18:41.9063954+00:00",
+  "DeadlineUtc": "2026-09-11T15:28:41.9063954+00:00",
+  "ExecutorPid": 18328,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13592,
+    "ExecutorCreationFileTime": "134336135212211555",
+    "ParentCreationFileTime": "134336117190102514",
+    "ErrorType": null
+  },
+  "Registration": {
+    "ClassPresent": true,
+    "NamespacePresent": true,
+    "Owner": "AssetLibrary.V03-002.ExplorerProof",
+    "RegistryView": "current-process",
+    "NativeLaunchRouteVerified": true,
+    "SystemExplorerRegistrationVerified": false,
+    "SystemExplorerCleanupVerified": false,
+    "ExecutionContext": {
+      "QuerySucceeded": true,
+      "Is64Bit": true,
+      "PackageIdentityAbsent": true,
+      "ParentIsSystemExplorer": true,
+      "SameUser": true,
+      "SameSession": true,
+      "ParentPredatesExecutor": true,
+      "OrdinaryUser": true,
+      "PackageIdentityStatus": 15700,
+      "ParentPid": 13592,
+      "ExecutorCreationFileTime": "134336135212211555",
+      "ParentCreationFileTime": "134336117190102514",
+      "ErrorType": null
+    }
+  },
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "Scope": "Original 4FF proof two HKCU roots in this verified external executor"
+}

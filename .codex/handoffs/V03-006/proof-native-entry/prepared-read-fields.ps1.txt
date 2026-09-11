@@ -1,0 +1,30 @@
+param([Parameter(Mandatory)][ValidateSet('expected-registered','expected-missing')][string]$Mode,[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260911-proof-native-01'
+$result=Join-Path $run ($Label+'.json')
+if(Test-Path -LiteralPath $result){throw 'Readback label already exists'}
+$started=[DateTimeOffset]::UtcNow;$passed=$false;$failure=$null;$context=$null;$rows=@()
+try{
+    . (Join-Path $repo 'tests/windows-shell/execution-context.ps1')
+    $context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+    $source=Join-Path $PSScriptRoot 'FixedRegistryValueReadback.cs'
+    if((Get-FileHash -LiteralPath $source).Hash -cne '5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379'){throw 'Readback helper changed'}
+    Add-Type -Path $source
+    $root='Software\Classes\CLSID\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
+    $mount='Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}'
+    $dll=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot 'proof-build/Release/AssetLibraryExplorerProof.dll')).Path
+    $icon=([Environment]::GetFolderPath([Environment+SpecialFolder]::Windows))+'\System32\shell32.dll,3'
+    $specs=@(@($root,'','REG_SZ','AssetLibrary 集成验证'),@($root,'AssetLibraryOwner','REG_SZ','AssetLibrary.V03-002.ExplorerProof'),@($root,'System.IsPinnedToNameSpaceTree','REG_DWORD','0x00000001'),@(($root+'\InprocServer32'),'','REG_SZ',$dll),@(($root+'\InprocServer32'),'ThreadingModel','REG_SZ','Apartment'),@(($root+'\ShellFolder'),'Attributes','REG_DWORD','0xA8040000'),@(($root+'\DefaultIcon'),'','REG_SZ',$icon),@($mount,'','REG_SZ','AssetLibrary 集成验证'),@($mount,'AssetLibraryOwner','REG_SZ','AssetLibrary.V03-002.ExplorerProof'))
+    foreach($spec in $specs){
+        $actual=[FixedRegistryValueReadback]::Read('CurrentUser',$spec[0],$spec[1])
+        $match=$actual.DataValid -and $actual.ActualKind -ceq $spec[2] -and $actual.ActualValue -ceq $spec[3]
+        $rows += [ordered]@{Path=$spec[0];ValueName=$spec[1];ExpectedKind=$spec[2];ExpectedValue=$spec[3];Actual=$actual;Matches=$match}
+    }
+    $passed=if($Mode -eq 'expected-registered'){@($rows|Where-Object {-not $_.Matches}).Count -eq 0}else{@($rows|Where-Object {$_.Actual.State -cne 'missing-key'}).Count -eq 0}
+}catch{$failure=$_.Exception.Message}
+finally{
+    [ordered]@{StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Label=$Label;Mode=$Mode;ExecutorPid=$PID;Context=$context;RegistryView='current-process selected by verified native launch route';FieldCount=$rows.Count;Rows=$rows;Passed=$passed;Failure=$failure;RegistryWrites=0;SystemExplorerContentVerified=$false}|ConvertTo-Json -Depth 9|Set-Content -LiteralPath $result -Encoding utf8
+}
+if(-not $passed){exit 1}
+

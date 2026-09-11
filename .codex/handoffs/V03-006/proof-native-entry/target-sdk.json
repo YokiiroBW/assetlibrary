@@ -1,0 +1,34 @@
+{
+  "StartedUtc": "2026-09-11T15:20:05.4379611+00:00",
+  "CompletedUtc": "2026-09-11T15:20:05.8166388+00:00",
+  "Mode": "sdk",
+  "Label": "target-sdk",
+  "ExecutorPid": 9756,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13592,
+    "ExecutorCreationFileTime": "134336136051538641",
+    "ParentCreationFileTime": "134336117190102514",
+    "ErrorType": null
+  },
+  "Native": {
+    "Pid": 6344,
+    "TargetPid": 10088,
+    "ExitCode": 0,
+    "TimedOut": false,
+    "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"tick\":16274531,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"identity.before\",\"hr\":\"00000000\",\"tick\":16274546,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"shellWindows\",\"hr\":\"00000000\",\"tick\":16274546,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"windowCount\",\"hr\":\"00000000\",\"tick\":16274546,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"shellWindowCount\":2,\"targetMatches\":1,\"unreadableEntries\":0,\"countStable\":true}\r\n{\"stage\":\"identity.beforeView\",\"hr\":\"00000000\",\"tick\":16274546,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"serviceProvider\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"topLevelBrowser\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"activeShellView\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"viewWindow\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"viewWindowBelongsToTarget\":true}\r\n{\"stage\":\"folderView\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"getFolder\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"classId\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"classId\":\"{F3364BA0-65B9-11CE-A9BA-00AA004AE837}\",\"isSampleClass\":false}\r\n{\"stage\":\"currentFolder\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"currentPidlBytes\":373,\"physicalPathAvailable\":true,\"physicalPathMatchesExpected\":true}\r\n{\"stage\":\"expectedPathParse\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"canonicalCompare\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"expectedPidlBytes\":373,\"binaryEqual\":true,\"canonicalEqual\":true,\"currentPidlBytesAfterCompare\":373,\"expectedPidlBytesAfterCompare\":373}\r\n{\"stage\":\"viewItemCount\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n{\"viewItemCount\":17}\r\n{\"stage\":\"identity.after\",\"hr\":\"00000000\",\"tick\":16274562,\"observerPid\":6344,\"proofLoadedInObserver\":false}\r\n",
+    "Stderr": ""
+  },
+  "Passed": true,
+  "Failure": null,
+  "RegistryWrites": 0,
+  "NavigationInvoked": false
+}

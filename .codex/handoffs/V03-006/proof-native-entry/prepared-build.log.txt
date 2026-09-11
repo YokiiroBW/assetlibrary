@@ -1,0 +1,4 @@
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  ProofActiveView.cpp
+  ProofActiveView.vcxproj -> C:\Users\Administrator\.codex\worktrees\6f7b\AssetLibrary\.runtime\proof-native-preparation\build\Release\ProofActiveView.exe

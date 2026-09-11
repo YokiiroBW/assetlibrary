@@ -1,0 +1,10 @@
+CoCreateInstance=00000000
+SHParseDisplayName=00000000
+RootAssociationArray=00000000
+RootOpenAssociation=00000000; Length=24
+RootAttributes=a8000000; Result=00000000
+DesktopEnumeratesRoot=true; Result=00000000
+Initialize=00000000
+CreateDefView=00000000
+FirstChild=00000000; Count=1
+BindChild=00000000

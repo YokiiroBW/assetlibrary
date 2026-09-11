@@ -1,0 +1,31 @@
+{
+  "Utc": "2026-09-11T15:27:35.7995935+00:00",
+  "SameExecutorCleanup": true,
+  "NativeCurrentViewClean": true,
+  "GuardExited": true,
+  "IndependentNativeMissingPassed": true,
+  "FieldCount": 9,
+  "DesktopProofEntryAbsent": true,
+  "OwnTargetWindowAbsent": true,
+  "OwnBrokerWindowAbsent": true,
+  "OriginalDesktopRestarted": false,
+  "DebuggerUsed": false,
+  "ProcessModuleReadback": [
+    {
+      "Role": "target",
+      "Pid": 10088,
+      "ProcessPresent": true,
+      "MainWindowHandle": "0",
+      "ProofModuleStillLoaded": false
+    },
+    {
+      "Role": "broker",
+      "Pid": 13592,
+      "ProcessPresent": true,
+      "MainWindowHandle": "0",
+      "ProofModuleStillLoaded": false
+    }
+  ],
+  "GuiOwnershipReturnedToRoot": true,
+  "ProductGatesClosed": false
+}

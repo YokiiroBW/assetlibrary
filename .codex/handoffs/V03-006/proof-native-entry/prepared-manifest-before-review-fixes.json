@@ -1,0 +1,71 @@
+{
+  "Artifacts": [
+    {
+      "File": "run-verify.ps1",
+      "Sha256": "43DE62289A15F024CCD1926717CF3BEA4F718DC56D0BFB4349D3E5D9BD3E21D9"
+    },
+    {
+      "File": "guard.ps1",
+      "Sha256": "6E188AF94C85EF157C95C7C8A4856DC5BBF074B32EED5E97C1B198DFCA38166A"
+    },
+    {
+      "File": "read-fields.ps1",
+      "Sha256": "BAF69565FA9930E7429EBE46BC5571BDD5F1192663D989CB965DCA6DFDFFBC41"
+    },
+    {
+      "File": "run-view.ps1",
+      "Sha256": "9C7588B988A9D337A2ED7EB783599E67932314E06DE20306454C9D96DBE26592"
+    },
+    {
+      "File": "FixedRegistryValueReadback.cs",
+      "Sha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379"
+    },
+    {
+      "File": "ProofActiveView.cpp",
+      "Sha256": "15E94A2F855EA37FD2F07746804113E70739D6ADF80261EDE6E5E64320CE839E"
+    },
+    {
+      "File": "CMakeLists.txt",
+      "Sha256": "CD8A55B3D7AA86CA3F8FBA08D6A48DF591B89FFB83FF8923A0E8043C5DCEE130"
+    },
+    {
+      "File": "build.log",
+      "Sha256": "58E6314B8482DF6700D677D5C1C3998D2B7602B827F564F6296E236C3D61CA89"
+    },
+    {
+      "File": "view.diff",
+      "Sha256": "65FFB0B7C73C23AB8109AC1FC18151310A084A9CD541D08CD48C7ABAB8F02707"
+    },
+    {
+      "File": "build/Release/ProofActiveView.exe",
+      "Sha256": "FFD3C441020C1C16E3D1127F87655928C86D99738064C5297F1B206C393252AA"
+    },
+    {
+      "File": "proof-build/Release/AssetLibraryExplorerProof.dll",
+      "Sha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15"
+    },
+    {
+      "File": "proof-build/Release/ExplorerProofProbe.exe",
+      "Sha256": "90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C"
+    }
+  ],
+  "ProjectSource": [
+    {
+      "File": "tests/windows-shell/registration.ps1",
+      "Sha256": "2E23681A2AFCD3E90F4C37A0FFC2452FB6282C7865173D5F77CB4086218B0D11"
+    },
+    {
+      "File": "tests/windows-shell/verify.ps1",
+      "Sha256": "3C84195A69CFEBE01141F9DA81D63DF7B2E045D1FC9773E4105DE84BC64FA450"
+    },
+    {
+      "File": "tests/windows-shell/execution-context.ps1",
+      "Sha256": "5F989A1DB679F811B2F9FAF77769DA54BFAA4CDB586CE07D7FE16EF739611B65"
+    },
+    {
+      "File": "tests/windows-shell/NativeExecutionContext.cs",
+      "Sha256": "374C15476913644862C9EDB5DCA56EFE0748E15C766DE10DD8CC14CDC6C86999"
+    }
+  ],
+  "Execution": "prepared_only_no_gui_registration_or_notification"
+}

@@ -36,6 +36,8 @@ MSIX包内工具可能在私有注册表视图中成功写入HKCU，普通Explor
 
 ## 当前证据
 
+2026-09-11自身proof已完成一个包外普通用户最小闭环：原0174 DLL、原2HKCU根/字段，从Desktop正常进入后实际class4FF、22B根PIDL匹配、1项“示例资源库”；同进程注销和另包外9字段缺失、Desktop入口消失均确认。见[实际原件与边界](../../.codex/handoffs/V03-006/proof-native-entry.md)。这不是AssetHost/真实Core接线或G2..G4完成，测试文件夹不代表可用Windows客户端。
+
 2026-09-11：主协调完成微软样例的包内/包外A/B与恢复。原包内自检20字段正确，而同用户/会话普通进程读回全部缺失；原样guard从已观察Explorer执行后，真实Explorer进入BA16类/42B PIDL/10项，原样清理后字段缺失和样例项消失。历史失败保留，下述“原因未定位”描述的是当时状态。微软样例通过不能直接晋级本项目test-only proof或G1..G4；本项目注册路线与独立测试需按新边界重验。
 
 2026-09-08：隔离探针和可逆 HKCU 注册通过；真实 Explorer 的 CLSID、选择 API 和直接 Navigate2 入口均未证明加载本类，显示“无关联应用”。有界调用日志仅记录隔离探针；parent Desktop UPDATEDIR、正确 DWORD Folder 属性和成功 Folder open association 未消除故障。原因尚未定位，不擅自归因于某个系统设置，不关闭 G1。G2 故障生命周期、G3 取消/延迟、G4 20轮和8小时稳定性尚未获得真实视图证据。

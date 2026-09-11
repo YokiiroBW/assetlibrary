@@ -1,0 +1,22 @@
+{
+  "Utc": "2026-09-11T15:16:58.9182514+00:00",
+  "Broker": {
+    "pid": 13592,
+    "query_succeeded": true,
+    "errors": [],
+    "held_handle_pid_matches": true,
+    "creation_filetime": "134336117190102514",
+    "creation_utc": "2026-09-11T14:48:39.0102514Z",
+    "image_matches_expected_system_explorer": true,
+    "same_user_as_executor": true,
+    "session": 2,
+    "elevation_type": 3,
+    "elevated": 0,
+    "app_container": 0,
+    "integrity_rid": 8192,
+    "alive_at_end": true
+  },
+  "Window": "525692",
+  "Active": true,
+  "DefaultDesktop": true
+}

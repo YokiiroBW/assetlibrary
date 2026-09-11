@@ -1,0 +1,17 @@
+{
+  "Utc": "2026-09-11T14:52:29.9944605+00:00",
+  "Scope": "Read-only own token access comparison; no token modification, elevation, registry or GUI",
+  "QueryOnly": {
+    "Access": 8,
+    "Opened": true,
+    "MembershipQuerySucceeded": false,
+    "ErrorType": "SecurityException",
+    "ErrorMessage": "拒绝访问。"
+  },
+  "QueryAndDuplicate": {
+    "Access": 10,
+    "Opened": true,
+    "MembershipQuerySucceeded": true,
+    "AdministratorEnabled": false
+  }
+}

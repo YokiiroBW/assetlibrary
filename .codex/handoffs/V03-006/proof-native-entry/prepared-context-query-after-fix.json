@@ -1,0 +1,22 @@
+{
+  "Utc": "2026-09-11T15:03:45.8852387+00:00",
+  "Scope": "Read-only current executor context after self-token access fix",
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": false,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 5600,
+    "ExecutorCreationFileTime": "134336126241590613",
+    "ParentCreationFileTime": "134335976543195227",
+    "ErrorType": null
+  },
+  "NativeLaunchAllowed": false,
+  "RegistryWrites": 0,
+  "Notifications": 0
+}

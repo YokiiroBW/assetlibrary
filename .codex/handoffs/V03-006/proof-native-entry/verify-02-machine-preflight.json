@@ -1,0 +1,20 @@
+[
+  {
+    "Hive": "LocalMachine",
+    "View": "Registry64",
+    "Path": "Software\\Classes\\CLSID\\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+    "Present": false,
+    "ReadSucceeded": true,
+    "ErrorType": null,
+    "WriteInvoked": false
+  },
+  {
+    "Hive": "LocalMachine",
+    "View": "Registry64",
+    "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Desktop\\NameSpace\\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}",
+    "Present": false,
+    "ReadSucceeded": true,
+    "ErrorType": null,
+    "WriteInvoked": false
+  }
+]

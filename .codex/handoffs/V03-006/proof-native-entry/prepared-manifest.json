@@ -1,0 +1,87 @@
+{
+  "Artifacts": [
+    {
+      "File": "run-verify.ps1",
+      "Sha256": "38806FEDDCACB1903A83F46E3FB08914994D21C103B6AC745C1EC811E7E26EFD"
+    },
+    {
+      "File": "guard.ps1",
+      "Sha256": "E581B5825AF18BB52A03AC45B3192944C604097EEC63691083194B28D24A65AA"
+    },
+    {
+      "File": "read-fields.ps1",
+      "Sha256": "BAF69565FA9930E7429EBE46BC5571BDD5F1192663D989CB965DCA6DFDFFBC41"
+    },
+    {
+      "File": "run-view.ps1",
+      "Sha256": "9C7588B988A9D337A2ED7EB783599E67932314E06DE20306454C9D96DBE26592"
+    },
+    {
+      "File": "machine-preflight.ps1",
+      "Sha256": "317F017E87028B2C87001D12738F444F057E692F2B46ABA40CDA86F9549C6CFF"
+    },
+    {
+      "File": "FixedRegistryValueReadback.cs",
+      "Sha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379"
+    },
+    {
+      "File": "ProofActiveView.cpp",
+      "Sha256": "15E94A2F855EA37FD2F07746804113E70739D6ADF80261EDE6E5E64320CE839E"
+    },
+    {
+      "File": "CMakeLists.txt",
+      "Sha256": "CD8A55B3D7AA86CA3F8FBA08D6A48DF591B89FFB83FF8923A0E8043C5DCEE130"
+    },
+    {
+      "File": "build.log",
+      "Sha256": "58E6314B8482DF6700D677D5C1C3998D2B7602B827F564F6296E236C3D61CA89"
+    },
+    {
+      "File": "view.diff",
+      "Sha256": "65FFB0B7C73C23AB8109AC1FC18151310A084A9CD541D08CD48C7ABAB8F02707"
+    },
+    {
+      "File": "build/Release/ProofActiveView.exe",
+      "Sha256": "FFD3C441020C1C16E3D1127F87655928C86D99738064C5297F1B206C393252AA"
+    },
+    {
+      "File": "proof-build/Release/AssetLibraryExplorerProof.dll",
+      "Sha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15"
+    },
+    {
+      "File": "proof-build/Release/ExplorerProofProbe.exe",
+      "Sha256": "90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C"
+    },
+    {
+      "File": "token-query-diagnostic.json",
+      "Sha256": "1E84A857A61E263B8310898D1DEAAEA163E4BC0F72052C3ED419D8A09892858C"
+    },
+    {
+      "File": "context-query-after-fix.json",
+      "Sha256": "2F526BC4A8F6251D8173E03F93B2FD87F159B3BF97480784460EF25EAAADBA92"
+    }
+  ],
+  "ProjectSource": [
+    {
+      "File": "tests/windows-shell/registration.ps1",
+      "Sha256": "2E23681A2AFCD3E90F4C37A0FFC2452FB6282C7865173D5F77CB4086218B0D11"
+    },
+    {
+      "File": "tests/windows-shell/verify.ps1",
+      "Sha256": "711249D967729C545AA068286173A277920BFCD2F42EE511BA4E907848243C22"
+    },
+    {
+      "File": "tests/windows-shell/execution-context.ps1",
+      "Sha256": "5F989A1DB679F811B2F9FAF77769DA54BFAA4CDB586CE07D7FE16EF739611B65"
+    },
+    {
+      "File": "tests/windows-shell/NativeExecutionContext.cs",
+      "Sha256": "19CA3138E6813C4455D595FB63DE2B8C6690F00B0A16112E33A8E919C5047A42"
+    },
+    {
+      "File": "tests/windows-shell/test-registration-context.ps1",
+      "Sha256": "0304D5858172602DA5448003C49387E2A1D82ED530256D3925205C4B2CD994C9"
+    }
+  ],
+  "Execution": "one prior independent verify refused before registration; no retry or GUI guard started after source fixes"
+}

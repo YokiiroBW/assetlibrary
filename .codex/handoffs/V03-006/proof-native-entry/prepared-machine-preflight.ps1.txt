@@ -1,0 +1,12 @@
+function Read-ProofMachineConflicts {
+    $paths=@('Software\Classes\CLSID\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}','Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}')
+    $base=[Microsoft.Win32.RegistryKey]::OpenBaseKey([Microsoft.Win32.RegistryHive]::LocalMachine,[Microsoft.Win32.RegistryView]::Registry64)
+    try{
+        foreach($path in $paths){
+            $key=$null;$present=$null;$errorType=$null
+            try{$key=$base.OpenSubKey($path,$false);$present=$null -ne $key}catch{$errorType=$_.Exception.GetType().Name}
+            finally{if($key){$key.Dispose()}}
+            [pscustomobject]@{Hive='LocalMachine';View='Registry64';Path=$path;Present=$present;ReadSucceeded=($null -eq $errorType);ErrorType=$errorType;WriteInvoked=$false}
+        }
+    }finally{$base.Dispose()}
+}

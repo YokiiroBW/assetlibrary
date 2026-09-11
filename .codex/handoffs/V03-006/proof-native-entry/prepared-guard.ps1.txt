@@ -1,0 +1,31 @@
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260911-proof-native-01'
+$registration=Join-Path $repo 'tests/windows-shell/registration.ps1'
+$dll=Join-Path $PSScriptRoot 'proof-build/Release/AssetLibraryExplorerProof.dll'
+. (Join-Path $repo 'tests/windows-shell/execution-context.ps1')
+$context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+. (Join-Path $PSScriptRoot 'machine-preflight.ps1')
+$machine=@(Read-ProofMachineConflicts)
+$machine|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $run 'guard-machine-preflight.json') -Encoding utf8
+if($machine.Count -ne 2 -or @($machine|Where-Object {$_.Present -or -not $_.ReadSucceeded}).Count){throw 'HKLM proof root conflict or incomplete read; no registration'}
+if((Get-FileHash -LiteralPath $registration).Hash -cne '2E23681A2AFCD3E90F4C37A0FFC2452FB6282C7865173D5F77CB4086218B0D11' -or
+   (Get-FileHash -LiteralPath $dll).Hash -cne '0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15'){throw 'Frozen registration or DLL changed'}
+$marker=[IO.File]::Open((Join-Path $run 'guard.requested'),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);$marker.Dispose()
+$registered=$false;$failure=$null
+try{
+    $before=& $registration -Action verify|ConvertFrom-Json
+    if($before.ClassPresent -or $before.NamespacePresent){throw 'Native proof roots must be absent'}
+    $started=[DateTimeOffset]::UtcNow
+    $record=& $registration -Action register -DllPath $dll|ConvertFrom-Json
+    $registered=$true
+    if(-not $record.NativeLaunchRouteVerified -or -not $record.ClassPresent -or -not $record.NamespacePresent){throw 'Native route/local registration readback failed'}
+    [ordered]@{Utc=$started.ToString('o');DeadlineUtc=$started.AddSeconds(600).ToString('o');ExecutorPid=$PID;Context=$context;Registration=$record;DllSha256=(Get-FileHash -LiteralPath $dll).Hash;Scope='Original 4FF proof two HKCU roots in this verified external executor'}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $run 'register.json') -Encoding utf8
+    while([DateTimeOffset]::UtcNow -lt $started.AddSeconds(600) -and -not(Test-Path -LiteralPath (Join-Path $run 'stop'))){Start-Sleep -Milliseconds 250}
+}catch{$failure=$_.Exception.Message}
+finally{
+    $cleanupError=$null;$after=$null
+    try{if($registered){$null=& $registration -Action unregister};$after=& $registration -Action verify|ConvertFrom-Json}catch{$cleanupError=$_.Exception.Message}
+    [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');ExecutorPid=$PID;SameExecutorCleanup=$true;RegisteredByThisRun=$registered;Context=$context;After=$after;Failure=$failure;CleanupError=$cleanupError;CurrentViewClean=($null -ne $after -and -not $after.ClassPresent -and -not $after.NamespacePresent);ExternalIndependentReadbackRequired=$true}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath (Join-Path $run 'cleanup.json') -Encoding utf8
+}
+if($failure -or $cleanupError -or $null -eq $after -or $after.ClassPresent -or $after.NamespacePresent){exit 1}

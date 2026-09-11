@@ -1,0 +1,24 @@
+param([ValidatePattern('^verify-[a-z0-9-]+$')][string]$Label='verify-02')
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260911-proof-native-01'
+$build=Join-Path $PSScriptRoot 'proof-build'
+if(Test-Path -LiteralPath (Join-Path $run ($Label+'.requested'))){throw 'Verify label already attempted'}
+$marker=[IO.File]::Open((Join-Path $run ($Label+'.requested')),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);$marker.Dispose()
+$started=[DateTimeOffset]::UtcNow;$passed=$false;$failure=$null;$context=$null
+try{
+    . (Join-Path $repo 'tests/windows-shell/execution-context.ps1')
+    $context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+    . (Join-Path $PSScriptRoot 'machine-preflight.ps1')
+    $machine=@(Read-ProofMachineConflicts)
+    $machine|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $run ($Label+'-machine-preflight.json')) -Encoding utf8
+    if($machine.Count -ne 2 -or @($machine|Where-Object {$_.Present -or -not $_.ReadSucceeded}).Count){throw 'HKLM proof root conflict or incomplete read; no registration'}
+    if((Get-FileHash -LiteralPath (Join-Path $build 'Release/AssetLibraryExplorerProof.dll')).Hash -cne '0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15' -or
+       (Get-FileHash -LiteralPath (Join-Path $build 'Release/ExplorerProofProbe.exe')).Hash -cne '90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C'){throw 'Original proof artifacts changed'}
+    & (Join-Path $repo 'tests/windows-shell/verify.ps1') -BuildDirectory $build | Tee-Object -FilePath (Join-Path $run ($Label+'-output.txt')) | Out-Null
+    $passed=$true
+}catch{$failure=$_.Exception.Message}
+finally{
+    [ordered]@{Label=$Label;StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');ExecutorPid=$PID;Context=$context;Passed=$passed;Failure=$failure;RealExplorerGateClosed=$false}|ConvertTo-Json -Depth 5|Set-Content -LiteralPath (Join-Path $run ($Label+'-result.json')) -Encoding utf8
+}
+if(-not $passed){exit 1}

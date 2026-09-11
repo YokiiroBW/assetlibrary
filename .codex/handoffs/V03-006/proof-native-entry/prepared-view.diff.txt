@@ -1,0 +1,63 @@
+diff --git a/.runtime/explorer-official-observer/OfficialView.cpp b/.runtime/proof-native-preparation/ProofActiveView.cpp
+index 651c469..507cf41 100644
+--- a/.runtime/explorer-official-observer/OfficialView.cpp
++++ b/.runtime/proof-native-preparation/ProofActiveView.cpp
+@@ -11,9 +11,9 @@
+ 
+ using Microsoft::WRL::ComPtr;
+ constexpr wchar_t kSdk[] = L"C:\\Program Files (x86)\\Windows Kits\\10";
+-constexpr wchar_t kThisPc[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}";
+-constexpr wchar_t kTarget[] = L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+-constexpr CLSID kProof = {0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
++constexpr wchar_t kDesktop[] = L"<desktop>";
++constexpr wchar_t kTarget[] = L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}";
++constexpr CLSID kProof = {0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ struct FreePidl {
+   using pointer = PIDLIST_ABSOLUTE;
+   void operator()(pointer p) const { CoTaskMemFree(p); }
+@@ -21,9 +21,9 @@ struct FreePidl {
+ using Pidl = std::unique_ptr<ITEMIDLIST, FreePidl>;
+ 
+ void Stage(const char* name, HRESULT hr) {
+-  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"tick\":%llu,\"observerPid\":%lu,\"sampleLoadedInObserver\":%s}\n",
++  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"tick\":%llu,\"observerPid\":%lu,\"proofLoadedInObserver\":%s}\n",
+       name, static_cast<unsigned long>(hr), GetTickCount64(), GetCurrentProcessId(),
+-      GetModuleHandleW(L"ExplorerDataProvider.dll") ? "true" : "false");
++      GetModuleHandleW(L"AssetLibraryExplorerProof.dll") ? "true" : "false");
+ }
+ bool Number(const wchar_t* s, unsigned long long* out) {
+   if (!s || !*s) return false;
+@@ -100,7 +100,7 @@ int Inspect(HWND window, DWORD processId, unsigned long long creation, const wch
+   const bool physicalMatches = physicalAvailable && _wcsicmp(physical, expectedPath) == 0;
+   std::printf("{\"currentPidlBytes\":%u,\"physicalPathAvailable\":%s,\"physicalPathMatchesExpected\":%s}\n",
+       currentBefore, physicalAvailable ? "true" : "false", physicalMatches ? "true" : "false");
+-  PIDLIST_ABSOLUTE expectedRaw = nullptr; hr = SHParseDisplayName(expectedPath, nullptr, &expectedRaw, 0, nullptr); Pidl expected(expectedRaw); Stage("expectedPathParse", hr);
++  PIDLIST_ABSOLUTE expectedRaw = nullptr; hr = wcscmp(expectedPath, kDesktop) == 0 ? SHGetSpecialFolderLocation(nullptr, CSIDL_DESKTOP, &expectedRaw) : SHParseDisplayName(expectedPath, nullptr, &expectedRaw, 0, nullptr); Pidl expected(expectedRaw); Stage("expectedPathParse", hr);
+   if (FAILED(hr) || !expected) return 3;
+   const UINT expectedBefore = ILGetSize(expected.get());
+   if (!expectedBefore || expectedBefore > 16384) return 3;
+@@ -111,9 +111,11 @@ int Inspect(HWND window, DWORD processId, unsigned long long creation, const wch
+   std::printf("{\"expectedPidlBytes\":%u,\"binaryEqual\":%s,\"canonicalEqual\":%s,\"currentPidlBytesAfterCompare\":%u,\"expectedPidlBytesAfterCompare\":%u}\n",
+       expectedBefore, binaryEqual ? "true" : "false", canonicalEqual ? "true" : "false", ILGetSize(current.get()), ILGetSize(expected.get()));
+   if (!physicalMatches && !canonicalEqual) return 2;
++  if (wcscmp(expectedPath, kDesktop) == 0 && clsid != CLSID_ShellDesktop) return 2;
++  if (wcscmp(expectedPath, kTarget) == 0 && clsid != kProof) return 2;
+   int itemCount = 0; hr = folderView->ItemCount(SVGIO_ALLVIEW, &itemCount); Stage("viewItemCount", hr);
+   if (SUCCEEDED(hr)) std::printf("{\"viewItemCount\":%d}\n", itemCount);
+-  const bool countOk = SUCCEEDED(hr) && itemCount >= 0;
++  const bool countOk = SUCCEEDED(hr) && itemCount >= 0 && (wcscmp(expectedPath, kTarget) != 0 || itemCount == 1);
+   hr = Identity(window, processId, creation); Stage("identity.after", hr);
+   return SUCCEEDED(hr) && countOk ? 0 : 3;
+ }
+@@ -123,9 +125,10 @@ int wmain(int argc, wchar_t** argv) {
+   static_assert(sizeof(void*) == 8);
+   unsigned long long window = 0, process = 0, creation = 0;
+   if (argc != 5 || !Number(argv[1], &window) || !Number(argv[2], &process) || process > MAXDWORD || !Number(argv[3], &creation)) return 4;
+-  const wchar_t* path = wcscmp(argv[4], L"sdk") == 0 ? kSdk : wcscmp(argv[4], L"thispc") == 0 ? kThisPc : wcscmp(argv[4], L"official") == 0 ? kTarget : nullptr;
++  const wchar_t* path = wcscmp(argv[4], L"sdk") == 0 ? kSdk : wcscmp(argv[4], L"desktop") == 0 ? kDesktop : wcscmp(argv[4], L"proof") == 0 ? kTarget : nullptr;
+   if (!path) return 4;
+   HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED); Stage("comInit", hr); if (FAILED(hr)) return 4;
+   const int result = Inspect(reinterpret_cast<HWND>(window), static_cast<DWORD>(process), creation, path);
+   CoUninitialize(); return result;
+ }
++

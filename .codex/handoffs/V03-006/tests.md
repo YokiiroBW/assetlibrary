@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[自有proof真实包外闭环](proof-native-entry.md)：首次来源查询拒绝原件保留；修正后verify-02包外来源/独立COM/碰撞/finally通过且probe原流已落盘。HKLM2根无冲突、9字段登记前缺失/登记后与清理前正确/清理后缺失；actual Desktop00021400/2B/33项→一次GUI4FF/22B/1项→注销后Desktop32项入口消失；同进程guard退出、自有两窗关闭、模块无残留通过。未扩G2..G4、未重跑微软样例或使用新debugger/重启原Explorer。
+
 后续来源查询回归补充：真实当前进程QUERY-only self token的IsInRole抛SecurityException，QUERY|DUPLICATE成功且普通权限；生产context getter修后QuerySucceeded=true，包内父来源仍拒绝。test-registration-context现19策略/报告+2接线及1次当前进程原生只读查询通过，无注册/通知。新增probe原始流/失败元数据路径完成静态审查，尚未重跑独立verify；仓库校验通过。
 
 新增代码回归：`pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1`，19个上下文/局部报告边界案例、2个入口接线检查及两帮助类型编译通过，无上下文查询/注册/通知/Explorer动作。真实来源与通知正例留待包外周期。现有`python -m unittest discover -s tests/spikes/windows-shell -p test_*.py -v`17项通过；`python -I -B scripts/verify_repository.py`架构/契约/源码/依赖及既有35回归通过、Alpha仍blocked。C++和Windows应用代码未变，不重跑未变原生构建或.NET整套测试。详见proof-native-registration-plan.md。

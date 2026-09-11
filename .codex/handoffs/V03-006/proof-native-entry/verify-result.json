@@ -1,0 +1,23 @@
+{
+  "StartedUtc": "2026-09-11T14:50:39.7442636+00:00",
+  "CompletedUtc": "2026-09-11T14:50:40.0977885+00:00",
+  "ExecutorPid": 17820,
+  "Context": {
+    "QuerySucceeded": false,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": false,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13592,
+    "ExecutorCreationFileTime": "134336118394575451",
+    "ParentCreationFileTime": "134336117190102514",
+    "ErrorType": "SecurityException"
+  },
+  "Passed": false,
+  "Failure": "Native Explorer launch required for registration tests. Use an observed system Explorer ShellFolderView.Application.ShellExecute with ordinary user permissions; current-process HKCU or no package identity does not prove system Explorer visibility.",
+  "RealExplorerGateClosed": false
+}

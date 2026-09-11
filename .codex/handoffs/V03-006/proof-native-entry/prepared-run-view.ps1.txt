@@ -1,0 +1,28 @@
+param([Parameter(Mandatory)][ValidateSet('sdk','desktop','proof')][string]$Mode,[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$repo=(Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../..')).Path
+$run=Join-Path $repo '.runtime/explorer-live/20260911-proof-native-01'
+$result=Join-Path $run ($Label+'.json')
+if(Test-Path -LiteralPath $result){throw 'View label already exists'}
+$started=[DateTimeOffset]::UtcNow;$context=$null;$failure=$null;$native=$null;$passed=$false
+try{
+    . (Join-Path $repo 'tests/windows-shell/execution-context.ps1')
+    $context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+    $identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw|ConvertFrom-Json
+    $exe=Join-Path $PSScriptRoot 'build/Release/ProofActiveView.exe'
+    if((Get-FileHash -LiteralPath $exe).Hash -cne 'FFD3C441020C1C16E3D1127F87655928C86D99738064C5297F1B206C393252AA'){throw 'Fixed read-only view probe changed'}
+    $start=[Diagnostics.ProcessStartInfo]::new($exe);$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+    foreach($value in @([string]$identity.NativeHwnd,[string]$identity.Pid,[string]$identity.CreationFileTime,$Mode)){$start.ArgumentList.Add($value)}
+    $child=[Diagnostics.Process]::new();$child.StartInfo=$start
+    try{
+        if(-not $child.Start()){throw 'View probe launch failed'}
+        $output=$child.StandardOutput.ReadToEndAsync();$errors=$child.StandardError.ReadToEndAsync();$timeout=-not $child.WaitForExit(10000)
+        if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned read-only view probe exit unconfirmed'}}
+        $native=[ordered]@{Pid=$child.Id;TargetPid=$identity.Pid;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$output.GetAwaiter().GetResult();Stderr=$errors.GetAwaiter().GetResult()}
+        $passed=$native.ExitCode -eq 0 -and -not $native.TimedOut -and -not $native.Stderr
+    }finally{$child.Dispose()}
+}catch{$failure=$_.Exception.Message}
+finally{
+    [ordered]@{StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Mode=$Mode;Label=$Label;ExecutorPid=$PID;Context=$context;Native=$native;Passed=$passed;Failure=$failure;RegistryWrites=0;NavigationInvoked=$false}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath $result -Encoding utf8
+}
+if(-not $passed){exit 1}

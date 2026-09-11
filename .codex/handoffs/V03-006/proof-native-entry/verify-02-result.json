@@ -1,0 +1,24 @@
+{
+  "Label": "verify-02",
+  "StartedUtc": "2026-09-11T15:16:59.3449343+00:00",
+  "CompletedUtc": "2026-09-11T15:17:00.2070324+00:00",
+  "ExecutorPid": 16532,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13592,
+    "ExecutorCreationFileTime": "134336134190172772",
+    "ParentCreationFileTime": "134336117190102514",
+    "ErrorType": null
+  },
+  "Passed": true,
+  "Failure": null,
+  "RealExplorerGateClosed": false
+}

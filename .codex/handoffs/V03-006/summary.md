@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[自有4FF原生最小闭环](proof-native-entry.md)通过：verify-02真实包外来源/COM正控成功；原2HKCU/0174 DLL在600秒guard内，从Desktop一次正常双击进入实际4FF/22B相等/1项“示例资源库”。同guard18328清理、另包外9missing和虚拟Desktop00021400/2B/32项入口消失通过；目标与broker自有窗口均关闭、模块未留在两驻留进程，无原desktop重启。GUI权已还root。此为test-only最小入口/卸载闭环，Host/真实Core只读接入及G2..G4仍缺，未宣布Windows首版完成。
+
 包外proof首次verify在登记前因self token成员查询SecurityException拒绝，原件保留。已由只读8/10权限对照确认仅self需QUERY|DUPLICATE，parent保持QUERY，修后当前包内上下文查询成功但仍因父来源拒绝，准入不降级。probe失败/超时原始流和exit先落盘；runtime guard计时前移至register调用前，并加包外只读HKLM2根冲突前置。新verify标签待审后执行，当前无新增登记/GUI guard。
 
 最新：[本项目注册入口修正与下一实机计划](proof-native-registration-plan.md)已落代码：包内局部读回不再晋级system Explorer注册/清理，register与verify在写入前要求已核普通系统Explorer直接父路线；NoPackage本身不放行。owner当前视图cleanup保留，通知补STA/COM，CLI说明同步。19上下文/报告案例、2接线检查和帮助类型编译、17 Shell契约及仓库相关检查通过；本轮无GUI/注册/通知/重启，root仍是唯一GUI操作者。微软样例恢复仅解除环境阻断，本项目G1..G4待包外实机。

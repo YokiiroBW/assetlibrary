@@ -1,0 +1,5 @@
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.txt -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+prepared-ProofActiveView.cpp.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+prepared-read-fields.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+prepared-view.diff.txt whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

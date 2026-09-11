@@ -1,0 +1,403 @@
+{
+  "Utc": "2026-09-11T15:31:15.764392+00:00",
+  "Status": "own_test_only_proof_actual_entry_confirmed_cleaned_product_gates_remain_open",
+  "DllSha256": "0174DB9B1B4CCD4925D3A28470930FA6FAEBD4070348CC374A7CB87313E2FD15",
+  "ProbeSha256": "90FCC911D6569B2D48EBB70792343413C58E48A9C62D7B399E6CC4E40F164E1C",
+  "ViewProbeSha256": "FFD3C441020C1C16E3D1127F87655928C86D99738064C5297F1B206C393252AA",
+  "NativeVerifyPassed": true,
+  "ActualProofClass": "4FF8301D-2E73-4D49-9FE5-868D5F1EA302",
+  "ActualRootPidlBytes": 22,
+  "ActualItemCount": 1,
+  "ActualItemName": "示例资源库",
+  "DesktopBeforeCount": 33,
+  "DesktopAfterCount": 32,
+  "NativeFields": 9,
+  "HklmConflictRoots": 2,
+  "SameExecutorCleanup": true,
+  "IndependentNativeMissing": true,
+  "OwnedWindowsClosed": true,
+  "ExplorerRestarted": false,
+  "DebuggerUsed": false,
+  "GuiOwnershipReturned": true,
+  "ArtifactCount": 54,
+  "Artifacts": [
+    {
+      "File": "before-gui-missing-launch.json",
+      "Sha256": "7E386362FAF1E5D4A0AB0D04A08020A7098D0935208DA85D46F6AD2764184DCE",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/before-gui-missing-launch.json",
+      "OriginalSha256": "7E386362FAF1E5D4A0AB0D04A08020A7098D0935208DA85D46F6AD2764184DCE"
+    },
+    {
+      "File": "before-gui-missing.json",
+      "Sha256": "95A93763B6CDBAA78FE4700FA074060C9F52DD1E5FBA2FA358C188F2D63E5B22",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/before-gui-missing.json",
+      "OriginalSha256": "ECF01DEA91D329EF44099A8D2AFDF9680EB9C3C34D65EF1FF4AD6C09DC1FC0FA"
+    },
+    {
+      "File": "cleanup.json",
+      "Sha256": "BEB5FD60A1C764F543EF45DE36595F2C1566D900B0B998579DD3AA2B76F831EC",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/cleanup.json",
+      "OriginalSha256": "BEB5FD60A1C764F543EF45DE36595F2C1566D900B0B998579DD3AA2B76F831EC"
+    },
+    {
+      "File": "desktop-after-cleanup.json",
+      "Sha256": "DA68934C9A7DCB2EDD8F4D534EDF26E25FF60544BBC35EDA58F01DADD0C2C4E4",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/desktop-after-cleanup.json",
+      "OriginalSha256": "DA68934C9A7DCB2EDD8F4D534EDF26E25FF60544BBC35EDA58F01DADD0C2C4E4"
+    },
+    {
+      "File": "desktop-before-entry.json",
+      "Sha256": "F765545DCC40311B4416BF1ABDF6CAE2F7BEADB8C71228A69BB2337AF55DC161",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/desktop-before-entry.json",
+      "OriginalSha256": "F765545DCC40311B4416BF1ABDF6CAE2F7BEADB8C71228A69BB2337AF55DC161"
+    },
+    {
+      "File": "desktop-cleanup-ui.json",
+      "Sha256": "E799F6AD5548C250DFAB405EAF30CD171C0F0E706F2EC309F911A110879E2A41",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/desktop-cleanup-ui.json",
+      "OriginalSha256": "E799F6AD5548C250DFAB405EAF30CD171C0F0E706F2EC309F911A110879E2A41"
+    },
+    {
+      "File": "entry-ui.json",
+      "Sha256": "1E0DA6A53DC40D5A322AA9DC0F48FA6F7E37B276C07B8B2EA57253F9DD399B20",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/entry-ui.json",
+      "OriginalSha256": "1E0DA6A53DC40D5A322AA9DC0F48FA6F7E37B276C07B8B2EA57253F9DD399B20"
+    },
+    {
+      "File": "final-cleanup.json",
+      "Sha256": "DB05A297F4D049F841D9D3BCAA0D78191202DE3C4ADAB39E1F89D2A40EE16A11",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/final-cleanup.json",
+      "OriginalSha256": "DB05A297F4D049F841D9D3BCAA0D78191202DE3C4ADAB39E1F89D2A40EE16A11"
+    },
+    {
+      "File": "final-guard-readback.json",
+      "Sha256": "2CF5719B1E2108B4C9A6A5284128966E9A4ED59C16CAC25F42CAD729A78390DD",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/final-guard-readback.json",
+      "OriginalSha256": "2CF5719B1E2108B4C9A6A5284128966E9A4ED59C16CAC25F42CAD729A78390DD"
+    },
+    {
+      "File": "guard-exit-readback.json",
+      "Sha256": "BD4E85328F2483CB55C752401AD28390EAC9FB3490F442EC76F45348B027DB66",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/guard-exit-readback.json",
+      "OriginalSha256": "BD4E85328F2483CB55C752401AD28390EAC9FB3490F442EC76F45348B027DB66"
+    },
+    {
+      "File": "guard-launch.json",
+      "Sha256": "39270D751B6858B5E3AB126DCB2EEDE9E806826B43229495556734261570A214",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/guard-launch.json",
+      "OriginalSha256": "39270D751B6858B5E3AB126DCB2EEDE9E806826B43229495556734261570A214"
+    },
+    {
+      "File": "guard-machine-preflight.json",
+      "Sha256": "B4FB929B994E58DAAF4A383D7649BC4C8E93DA44846F0472DAD02AC17C188A0A",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/guard-machine-preflight.json",
+      "OriginalSha256": "B4FB929B994E58DAAF4A383D7649BC4C8E93DA44846F0472DAD02AC17C188A0A"
+    },
+    {
+      "File": "guard.requested",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/guard.requested",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "identity.json",
+      "Sha256": "7E9C4E93D848B2CDB4590DEFC08863F891B13A249112BCA8A4D153AC84D3B7CD",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/identity.json",
+      "OriginalSha256": "7E9C4E93D848B2CDB4590DEFC08863F891B13A249112BCA8A4D153AC84D3B7CD"
+    },
+    {
+      "File": "native-after-cleanup.json",
+      "Sha256": "D5861BCEB8BC0795537587DB5426F70D9F8DB9C9313FCC52580F5231AB49E0B8",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/native-after-cleanup.json",
+      "OriginalSha256": "FA69C9136D5EABAD2DB007216FA261CF0DB5BA51749F7A6761FBD3781FA9181C"
+    },
+    {
+      "File": "native-before-cleanup.json",
+      "Sha256": "024794053A612D968E1F030D9ADF45FC39091E3110EE39117597DF5BE99BD5BC",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/native-before-cleanup.json",
+      "OriginalSha256": "B58E0E90BC5F3591244A0669D57D08470CBF2CE2EFFB9DC82A802B6E359E2DD9"
+    },
+    {
+      "File": "native-before-gui.json",
+      "Sha256": "4D8C852CE3757062F88960D77FB6DA5D2A9D8D1730CB6E70B3DDF0AFFA115C08",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/native-before-gui.json",
+      "OriginalSha256": "D616DB2CDE043453857026078B070A47E6777C54297495E7679461B87738C684"
+    },
+    {
+      "File": "proof-after-entry.json",
+      "Sha256": "AD583D9071A6557AAACDE046FD7693E4021E4A229D66A9CEC314A7CEFFABD1BD",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/proof-after-entry.json",
+      "OriginalSha256": "AD583D9071A6557AAACDE046FD7693E4021E4A229D66A9CEC314A7CEFFABD1BD"
+    },
+    {
+      "File": "proof-ui-result.json",
+      "Sha256": "B1CAC16463A257BDCCAAFDE63BEE5C6C76701CCFB2E275F5A7668324700D9487",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/proof-ui-result.json",
+      "OriginalSha256": "B1CAC16463A257BDCCAAFDE63BEE5C6C76701CCFB2E275F5A7668324700D9487"
+    },
+    {
+      "File": "register.json",
+      "Sha256": "5A0ED16D6C7BE3CE4F5AA9BCE52F36645029643EB4598940E47457BB870454C6",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/register.json",
+      "OriginalSha256": "5A0ED16D6C7BE3CE4F5AA9BCE52F36645029643EB4598940E47457BB870454C6"
+    },
+    {
+      "File": "stop.marker.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/stop",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "target-epoch.json",
+      "Sha256": "1A3D111D7BDC90D58B90B8D69BA486485088A54CA70889A89F0ADCB149EFEC45",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/target-epoch.json",
+      "OriginalSha256": "1A3D111D7BDC90D58B90B8D69BA486485088A54CA70889A89F0ADCB149EFEC45"
+    },
+    {
+      "File": "target-proof-module.json",
+      "Sha256": "659DF889964A8CB8CAF6D3317F487332874C551C9505874FB05DA4857C775729",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/target-proof-module.json",
+      "OriginalSha256": "659DF889964A8CB8CAF6D3317F487332874C551C9505874FB05DA4857C775729"
+    },
+    {
+      "File": "target-sdk.json",
+      "Sha256": "6D10B6D14C5C424D80FF0783D4D0B14007689B090ADFC5C198591257B3104118",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/target-sdk.json",
+      "OriginalSha256": "6D10B6D14C5C424D80FF0783D4D0B14007689B090ADFC5C198591257B3104118"
+    },
+    {
+      "File": "verify-02-launch.json",
+      "Sha256": "537ABA905272D66FEF6BE7495B7A9A3A48CC605C7D697AF677EB49E505187EC5",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-02-launch.json",
+      "OriginalSha256": "537ABA905272D66FEF6BE7495B7A9A3A48CC605C7D697AF677EB49E505187EC5"
+    },
+    {
+      "File": "verify-02-machine-preflight.json",
+      "Sha256": "B4FB929B994E58DAAF4A383D7649BC4C8E93DA44846F0472DAD02AC17C188A0A",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-02-machine-preflight.json",
+      "OriginalSha256": "B4FB929B994E58DAAF4A383D7649BC4C8E93DA44846F0472DAD02AC17C188A0A"
+    },
+    {
+      "File": "verify-02-output.txt",
+      "Sha256": "9CFD650FF8D77161634BB1B7A0845F0EC389629F30D93F05B4E3D2FB615B78E4",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-02-output.txt",
+      "OriginalSha256": "86F4E42B169356E3BC8DADE6103E424397224CE07EBB2FED8D069D55EBBF4560"
+    },
+    {
+      "File": "verify-02-result.json",
+      "Sha256": "F1A8DAE388066F2CF22D036EB1B37FD2A7DBA98927FA0BFB15A89F63ADE2681E",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-02-result.json",
+      "OriginalSha256": "F1A8DAE388066F2CF22D036EB1B37FD2A7DBA98927FA0BFB15A89F63ADE2681E"
+    },
+    {
+      "File": "verify-02.requested",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-02.requested",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "verify-launch.json",
+      "Sha256": "A332EC5EB704C14EBF72C4CE8B6F6884240CD2F12718372DE7A59F5DB62C68B7",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-launch.json",
+      "OriginalSha256": "A332EC5EB704C14EBF72C4CE8B6F6884240CD2F12718372DE7A59F5DB62C68B7"
+    },
+    {
+      "File": "verify-result.json",
+      "Sha256": "64D71B2154E30EC6CA2D9DDAB9639D0AA41177B958C1B3E949CDD088CB31205B",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify-result.json",
+      "OriginalSha256": "64D71B2154E30EC6CA2D9DDAB9639D0AA41177B958C1B3E949CDD088CB31205B"
+    },
+    {
+      "File": "verify.requested",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/explorer-live/20260911-proof-native-01/verify.requested",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "prepared-run-verify.ps1.txt",
+      "Sha256": "38806FEDDCACB1903A83F46E3FB08914994D21C103B6AC745C1EC811E7E26EFD",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/run-verify.ps1",
+      "OriginalSha256": "38806FEDDCACB1903A83F46E3FB08914994D21C103B6AC745C1EC811E7E26EFD"
+    },
+    {
+      "File": "prepared-guard.ps1.txt",
+      "Sha256": "E581B5825AF18BB52A03AC45B3192944C604097EEC63691083194B28D24A65AA",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/guard.ps1",
+      "OriginalSha256": "E581B5825AF18BB52A03AC45B3192944C604097EEC63691083194B28D24A65AA"
+    },
+    {
+      "File": "prepared-read-fields.ps1.txt",
+      "Sha256": "BAF69565FA9930E7429EBE46BC5571BDD5F1192663D989CB965DCA6DFDFFBC41",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/read-fields.ps1",
+      "OriginalSha256": "BAF69565FA9930E7429EBE46BC5571BDD5F1192663D989CB965DCA6DFDFFBC41"
+    },
+    {
+      "File": "prepared-run-view.ps1.txt",
+      "Sha256": "9C7588B988A9D337A2ED7EB783599E67932314E06DE20306454C9D96DBE26592",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/run-view.ps1",
+      "OriginalSha256": "9C7588B988A9D337A2ED7EB783599E67932314E06DE20306454C9D96DBE26592"
+    },
+    {
+      "File": "prepared-machine-preflight.ps1.txt",
+      "Sha256": "317F017E87028B2C87001D12738F444F057E692F2B46ABA40CDA86F9549C6CFF",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/machine-preflight.ps1",
+      "OriginalSha256": "317F017E87028B2C87001D12738F444F057E692F2B46ABA40CDA86F9549C6CFF"
+    },
+    {
+      "File": "prepared-FixedRegistryValueReadback.cs.txt",
+      "Sha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/FixedRegistryValueReadback.cs",
+      "OriginalSha256": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379"
+    },
+    {
+      "File": "prepared-ProofActiveView.cpp.txt",
+      "Sha256": "15E94A2F855EA37FD2F07746804113E70739D6ADF80261EDE6E5E64320CE839E",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/ProofActiveView.cpp",
+      "OriginalSha256": "15E94A2F855EA37FD2F07746804113E70739D6ADF80261EDE6E5E64320CE839E"
+    },
+    {
+      "File": "prepared-CMakeLists.txt.txt",
+      "Sha256": "CD8A55B3D7AA86CA3F8FBA08D6A48DF591B89FFB83FF8923A0E8043C5DCEE130",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/CMakeLists.txt",
+      "OriginalSha256": "CD8A55B3D7AA86CA3F8FBA08D6A48DF591B89FFB83FF8923A0E8043C5DCEE130"
+    },
+    {
+      "File": "prepared-view.diff.txt",
+      "Sha256": "65FFB0B7C73C23AB8109AC1FC18151310A084A9CD541D08CD48C7ABAB8F02707",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/view.diff",
+      "OriginalSha256": "65FFB0B7C73C23AB8109AC1FC18151310A084A9CD541D08CD48C7ABAB8F02707"
+    },
+    {
+      "File": "prepared-build.log.txt",
+      "Sha256": "58E6314B8482DF6700D677D5C1C3998D2B7602B827F564F6296E236C3D61CA89",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/build.log",
+      "OriginalSha256": "58E6314B8482DF6700D677D5C1C3998D2B7602B827F564F6296E236C3D61CA89"
+    },
+    {
+      "File": "prepared-preparation-checks.json",
+      "Sha256": "98982854CCF663EBCBBE48D481134326EB10552351D2E5F50F4F6D21721BD46D",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/preparation-checks.json",
+      "OriginalSha256": "98982854CCF663EBCBBE48D481134326EB10552351D2E5F50F4F6D21721BD46D"
+    },
+    {
+      "File": "prepared-token-query-diagnostic.json",
+      "Sha256": "1E84A857A61E263B8310898D1DEAAEA163E4BC0F72052C3ED419D8A09892858C",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/token-query-diagnostic.json",
+      "OriginalSha256": "1E84A857A61E263B8310898D1DEAAEA163E4BC0F72052C3ED419D8A09892858C"
+    },
+    {
+      "File": "prepared-context-query-after-fix.json",
+      "Sha256": "2F526BC4A8F6251D8173E03F93B2FD87F159B3BF97480784460EF25EAAADBA92",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/context-query-after-fix.json",
+      "OriginalSha256": "2F526BC4A8F6251D8173E03F93B2FD87F159B3BF97480784460EF25EAAADBA92"
+    },
+    {
+      "File": "prepared-broker.json",
+      "Sha256": "DDBC83352C170CBB091E242869952CB2FDAA6B2B3616A78A57D7C2E1A05A77DC",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/broker.json",
+      "OriginalSha256": "DDBC83352C170CBB091E242869952CB2FDAA6B2B3616A78A57D7C2E1A05A77DC"
+    },
+    {
+      "File": "prepared-broker-epoch.json",
+      "Sha256": "82E4EA1C40EC072E9D465C388910CB0AD0EA31B7FDD902C10BA8F293CB9C736D",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/broker-epoch.json",
+      "OriginalSha256": "82E4EA1C40EC072E9D465C388910CB0AD0EA31B7FDD902C10BA8F293CB9C736D"
+    },
+    {
+      "File": "prepared-broker-fresh-before-verify02.json",
+      "Sha256": "DFD52E6012F1723B08B37ACF61201BDCCB35A1C91657ECACDB3E1B51A82313A8",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/broker-fresh-before-verify02.json",
+      "OriginalSha256": "DFD52E6012F1723B08B37ACF61201BDCCB35A1C91657ECACDB3E1B51A82313A8"
+    },
+    {
+      "File": "prepared-manifest.json",
+      "Sha256": "9CD3317AB9B344460A8ADDDBC17809706E95ECDEFD05A426BA8059183C4617FF",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/manifest.json",
+      "OriginalSha256": "9CD3317AB9B344460A8ADDDBC17809706E95ECDEFD05A426BA8059183C4617FF"
+    },
+    {
+      "File": "prepared-manifest-before-review-fixes.json",
+      "Sha256": "ABEC7DAF93AA43F45C013181888E139A70746533358EE49B3FB2A8684FE173CF",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/manifest-before-review-fixes.json",
+      "OriginalSha256": "ABEC7DAF93AA43F45C013181888E139A70746533358EE49B3FB2A8684FE173CF"
+    },
+    {
+      "File": "probe-result.json",
+      "Sha256": "6AC407297C1D8425DF7E1D5DF91749DD9B79F8D5BCA05B9787B789B0443BDCB7",
+      "Kind": "redacted_copy_not_original",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/proof-build/verify-evidence/227dfd9b831740d29892b216a6d83976/result.json",
+      "OriginalSha256": "2A6FD4A0F124C5A29B01E14B5E27469B31225CD0F6E74C939C2012D4E398F83D"
+    },
+    {
+      "File": "probe-stderr.txt",
+      "Sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/proof-build/verify-evidence/227dfd9b831740d29892b216a6d83976/stderr.txt",
+      "OriginalSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+      "File": "probe-stdout.txt",
+      "Sha256": "25777ACB2C7C44F50D55B8C13A93D57FB98BE25F48C32F7D7989636FB074CDB1",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/proof-build/verify-evidence/227dfd9b831740d29892b216a6d83976/stdout.txt",
+      "OriginalSha256": "25777ACB2C7C44F50D55B8C13A93D57FB98BE25F48C32F7D7989636FB074CDB1"
+    },
+    {
+      "File": "proof-calls.log.txt",
+      "Sha256": "4AC1543B6E2F87B2BF78CAADED97E11E2DCD2BFF7E236DD99A8FA4800954E140",
+      "Kind": "unmodified_copy",
+      "OriginalRuntimePath": ".runtime/proof-native-preparation/proof-build/Release/proof-calls.log",
+      "OriginalSha256": "4AC1543B6E2F87B2BF78CAADED97E11E2DCD2BFF7E236DD99A8FA4800954E140"
+    }
+  ]
+}
