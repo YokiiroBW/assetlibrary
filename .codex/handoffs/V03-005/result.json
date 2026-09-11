@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "bb14db351907a322ffe57d1ac67e3fdf9da98a94",
+  "commit": "4479bcb16a486e6da17c5b9dd974aae6c787a5ff",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attribute-read-path/.gitattributes",
@@ -1073,6 +1073,7 @@
     ".codex/handoffs/V03-006/path-bind-comparison/register.json",
     ".codex/handoffs/V03-006/path-bind-comparison/run.ps1.txt",
     ".codex/handoffs/V03-006/path-bind-comparison/validation.json",
+    ".codex/handoffs/V03-006/proof-native-registration-plan.md",
     ".codex/handoffs/V03-006/register-first-control.md",
     ".codex/handoffs/V03-006/register-first-control/.gitattributes",
     ".codex/handoffs/V03-006/register-first-control/actual-view-thispc.json",
@@ -1277,6 +1278,7 @@
     "apps/web/src/imageResponses.ts",
     "apps/web/src/styles.css",
     "apps/web/src/styles/images.css",
+    "apps/windows-client/README.md",
     "contracts/assetlink/image-preview-v1.md",
     "\"docs/adr/ADR-0019_\\351\\246\\226\\346\\211\\271\\345\\233\\276\\347\\211\\207\\351\\242\\204\\350\\247\\210\\345\\245\\221\\347\\272\\246\\344\\270\\216\\351\\232\\224\\347\\246\\273\\350\\246\\201\\346\\261\\202.md\"",
     "docs/releases/NATIVE_CLIENT_TRIAL.md",
@@ -1401,9 +1403,14 @@
     "tests/web/real-core-image-support.mjs",
     "tests/windows-shell/CMakeLists.txt",
     "tests/windows-shell/LoaderProbe.cpp",
+    "tests/windows-shell/NativeExecutionContext.cs",
     "tests/windows-shell/Probe.cpp",
     "tests/windows-shell/README.md",
-    "tests/windows-shell/diagnose-loader.ps1"
+    "tests/windows-shell/diagnose-loader.ps1",
+    "tests/windows-shell/execution-context.ps1",
+    "tests/windows-shell/registration.ps1",
+    "tests/windows-shell/test-registration-context.ps1",
+    "tests/windows-shell/verify.ps1"
   ],
   "changed_contracts": [
     "contracts/assetlink/image-preview-v1.md"
@@ -1493,10 +1500,11 @@
       "Fixed-version consumer analysis/source review integrated;33 failed-reference and59 V2 archive artifacts/source mappings independently verified. Per-call reference/real cache divergence and full cleanup reviewed; no product source, dependency, permission model or release gate changed.",
       "RegOpen preparation/reference/caller mapping and60/45 owner artifacts reviewed, plus60 short artifacts and75 source identities. C++ budget50pure/three own-reference controls retain failed threshold semantics; corrected short remains inconclusive after SDK-mapped WinRT notification threshold. Full cleanup verified; no product source/contract/system-policy changes.",
       "Literature-first diagnosis review: official COM/context and Shell contracts plus original similar cases checked against historical local evidence. Documentation/state only; no product dependency, contract, permission or gate changes; no new live action. See explorer-literature-20260911.md and tests.md.",
-      "Registry-view boundary A/B and official native recovery verified with unchanged guard/DLL/fields: outside ordinary-user execution restores actual Explorer BA16/42B/10-item view and native cleanup/3-item negative. Current package/token findings and failed Procmon control retained separately; only diagnostic coordination/evidence changes here, no product contract/dependency/security-policy modification. Own Shell proof and G1..G4 remain open."
+      "Registry-view boundary A/B and official native recovery verified with unchanged guard/DLL/fields: outside ordinary-user execution restores actual Explorer BA16/42B/10-item view and native cleanup/3-item negative. Current package/token findings and failed Procmon control retained separately; only diagnostic coordination/evidence changes here, no product contract/dependency/security-policy modification. Own Shell proof and G1..G4 remain open.",
+      "ad84644 integrated as4479bcb after complete root review: test-only native launch provenance and current-view reporting safeguards, STA/COM notification failure propagation, 19 context/report cases +2 wiring checks +17 Shell contracts; combined repository verification passed. Actual own-proof GUI still pending Windows owner; no production API/contract/dependency changes."
     ],
     "technical_debt": [
-      "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. Integrate the Windows owner test-only execution-context fix, then validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
+      "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. The Windows owner test-only execution-context fix is integrated as4479bcb; validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]

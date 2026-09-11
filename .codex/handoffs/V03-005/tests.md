@@ -223,3 +223,7 @@ short-key-open归档60件（43原字节/17明确脱敏），root重核75个来�
 原323 guard包内登记的同一有效期，inside20registered→包外同用户普通reader20missing→inside20registered；清理后两侧20missing。相同guard/DLL/字段的包外登记后native20registered；登记之后创建新Explorer9860，SDK17、此电脑4、一次Browse S_OK、实际BA16/42B相等PIDL/10项；注销后原生此电脑3项和UI入口消失。native8根/20missing/双通知/guard退出、自有窗口0、原desktop6212精确创建时间保留。成功范围仅官方样例控制；产品自身Shell待验，源码套件未因取证重复运行。
 
 只读Procmon离线查看器后来卡住，精确持有身份后只结束该查看器；CSV前后SHA相同，PML因独占锁缺关闭前SHA，尺寸和mtime不变并记录关闭后SHA，不作不存在的逐字节前后证明。来源与脱敏限制见registry-view-boundary/evidence.json。本次证据与协调检查点验证日志：.runtime/v03-005-final-tests/repository-view-boundary-final.log。40副本、63个直接来源加2个冻结引用由root独立核对；Git暂存后的原件字节另行核对。
+
+## 自有Shell登记来源防误报修正集成
+
+ad84644合入4479bcb。root审查12文件的完整改动：写前执行来源准入、null owner保留、始终区分当前视图与真实系统注册/清理、原通知STA/COM与失败回滚。worker已通过19个上下文/报告案例、2个入口接线检查、17项Shell契约与帮助类型编译；这些成功输入未变，不重复执行。合并后的仓库验证通过，日志.runtime/v03-005-final-tests/repository-native-context-integration.log。自身4FF扩展的包外实机验证仍由Windows owner准备，未把此代码修正或微软样例恢复计作G1..G4关闭。

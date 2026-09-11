@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
   "status": "windows_registry_view_boundary_proven_official_entry_recovered_product_pending",
-  "next_action": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. Integrate the Windows owner test-only execution-context fix, then validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
+  "next_action": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. The Windows owner test-only execution-context fix is integrated as4479bcb; validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows最高优先级。已实测定位执行环境的注册表视图隔离：同一有效期包内20字段正确、Explorer启动的同用户普通进程20字段全missing；原样例guard/DLL/字段改为包外正常用户执行后，真实Explorer已发现入口，Browse S_OK，实际BA16/42B/10项。注销后回到此电脑3项，8根/20字段及自有窗口清理已完成，原desktop精确身份保留。详见V03-005/registry-view-boundary。Windows owner正在修正测试登记/验收的执行来源准入，随后验证AssetLibrary自己的Shell；官方样例成功不关闭产品G1..G4，安装包与完整首版仍未完成。
+1. Windows最高优先级。已实测定位执行环境的注册表视图隔离：同一有效期包内20字段正确、Explorer启动的同用户普通进程20字段全missing；原样例guard/DLL/字段改为包外正常用户执行后，真实Explorer已发现入口，Browse S_OK，实际BA16/42B/10项。注销后回到此电脑3项，8根/20字段及自有窗口清理已完成，原desktop精确身份保留。详见V03-005/registry-view-boundary。测试登记/验收的执行来源准入已修正并合入4479bcb，Windows owner正在准备AssetLibrary自身Shell实机验证；官方样例成功不关闭产品G1..G4，安装包与完整首版仍未完成。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

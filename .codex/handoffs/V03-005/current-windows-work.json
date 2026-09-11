@@ -1,5 +1,5 @@
 {
-  "updatedAtUtc": "2026-09-11T14:14:24.426873+00:00",
+  "updatedAtUtc": "2026-09-11T14:37:03.077058+00:00",
   "status": "windows_registry_view_boundary_proven_official_entry_recovered_product_pending",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. Integrate the Windows owner test-only execution-context fix, then validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
+  "active_instruction": "Registry-view boundary is proven: package-launched registration/readers saw 20 correct fields while a same-user ordinary reader launched by Explorer saw all 20 missing in the same valid interval. The same frozen official guard/DLL/fields run through Explorer restored native visibility and an actual BA16/42-byte/10-item Explorer view; cleanup returned ThisPC to 3 items and both registry views were checked. The Windows owner test-only execution-context fix is integrated as4479bcb; validate the AssetLibrary proof in a fresh observed native context. Official sample success does not close product G1..G4.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -394,5 +394,15 @@
     "cleanup": "Private8roots20missing;native8roots20missing/dualnotify/guardexit;owned windows0,Procmon0,guards0;desktop6212 exact initial creation preserved. Explorer processes were not forcibly stopped.",
     "procmon_limit": "Control failed on size trigger; no live trace stage. PML/CSV exported; native capture exit1 and export0 retained. Hung offline viewer was later forcibly closed, not a capture/debugger/Explorer; CSV unchanged, PML pre-exit hash unavailable due exclusive lock, final size/mtime unchanged and final hash recorded.",
     "product_status": "Official control recovered; AssetLibrary proof and G1..G4 still pending."
+  },
+  "own_shell_validation": {
+    "code_worker_commit": "ad84644e3d50afc08ee42aae3f00bce02522bbf5",
+    "code_integrated_commit": "4479bcb",
+    "code_review": "Root reviewed complete implementation, notification rollback, null-owner preservation, 19 policy/report cases and 2 pre-registry wiring checks; worker tests passed and unchanged checks not repeated.",
+    "plan": "../V03-006/proof-native-registration-plan.md",
+    "stage": "Windows owner preparing one native-context own-proof cycle; thin guard/field-reader source review required before registration.",
+    "gui_owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
+    "root_gui_stopped": true,
+    "allowed_scope": "Fresh broker/target; original own-proof 4FF CLSID and 2 HKCU roots/values, ordinary-user execution, 600-second cleanup, actual 4FF/root PIDL/one sample library, native cleanup readback. No original Explorer restart."
   }
 }
