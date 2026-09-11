@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+最新：[默认目录导航与系统图标](navigation-menu.md)已完成严格构建、默认open命令/站点/生命周期负控、六类系统图标与受影响快照CTest。只在当前窗口导航，无写入命令；真实GUI目录进入仍待协调任务独占新DLL周期验证。
+
 最终仓库检查：`python -I -B scripts/verify_repository.py` 通过（交接/架构/契约/依赖、432 C#文件策略与35既有回归；Alpha保持blocked）；17项既有Shell契约通过；`test-registration-context.ps1` 的19策略+2接线+当前进程原生查询通过，修改后verify.ps1 AST通过；`git diff --cached --check`通过。未运行无关.NET整套或真实注册。
 
 新增：[只读快照 IPC 检查](snapshot-ipc.md)包括三个独立wire向量、畸形边界、累计150ms预算、取消/四名额、PIDL/无逐条IPC、fresh/nested canonical、类型排序和独立LoadLibrary probe四阶段；严格Release build与连续五轮CTest通过。无Host --once 的status2/exit2为预期负控。真实跨用户/session拒绝、强制延迟取消回收、真实Core/Explorer和G2..G4尚无本轮证据。

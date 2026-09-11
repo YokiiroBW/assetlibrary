@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 #include "SnapshotPidl.h"
+#include "NavigationMenu.h"
+#include "SnapshotIcon.h"
 #include <cstring>
 
 namespace {
@@ -152,7 +154,10 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
       *attributes&=result;return S_OK;
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
   }
-  HRESULT STDMETHODCALLTYPE GetUIObjectOf(HWND, UINT, PCUITEMID_CHILD_ARRAY, REFIID, UINT*, void** value) override { if(value)*value=nullptr;return E_NOINTERFACE; }
+  HRESULT STDMETHODCALLTYPE GetUIObjectOf(HWND, UINT count, PCUITEMID_CHILD_ARRAY items, REFIID iid, UINT*, void** value) override {
+    if(iid==IID_IExtractIconW||iid==IID_IExtractIconA)return CreateSnapshotIcon(count,items,iid,value);
+    return CreateNavigationMenu(static_cast<IShellFolder2*>(this),absolute_,count,items,iid,value);
+  }
   HRESULT STDMETHODCALLTYPE GetDisplayNameOf(PCUITEMID_CHILD pidl, SHGDNF flags, STRRET* value) override {
     if(!value)return E_POINTER;
     try {snapshot::Entry entry;if(!snapshot::ReadPidl(pidl,entry))return E_INVALIDARG;

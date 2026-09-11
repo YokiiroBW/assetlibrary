@@ -533,7 +533,13 @@
     "tests/windows-shell/SnapshotTests.cpp",
     "tests/windows-shell/SnapshotProbe.cpp",
     "tests/windows-shell/ExplorerProof.cpp",
-    ".codex/handoffs/V03-006/snapshot-ipc.md"
+    ".codex/handoffs/V03-006/snapshot-ipc.md",
+    "tests/windows-shell/NavigationMenu.h",
+    "tests/windows-shell/NavigationMenu.cpp",
+    "tests/windows-shell/NavigationMenuTests.cpp",
+    "tests/windows-shell/SnapshotIcon.h",
+    "tests/windows-shell/SnapshotIcon.cpp",
+    ".codex/handoffs/V03-006/navigation-menu.md"
   ],
   "changed_contracts": [],
   "tests": {
@@ -576,7 +582,8 @@
       "Existing current-user process identity and debugger checks plus fixed F298/323CD843 registration guards; native WTS/input-desktop checks gate the authorized cold-session experiment",
       "Reviewed scoped Explorer handle/identity lifecycle, narrow v2 window predicate, immutable official registration and attributes observer; only this task runtime and evidence changed",
       "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools",
-      "Current slice: frozen read-only-snapshot-v1 local wire, native COM/DefView and owner registration route; no duplicated Core authorization/path logic"
+      "Current slice: frozen read-only-snapshot-v1 local wire, native COM/DefView and owner registration route; no duplicated Core authorization/path logic",
+      "Default navigation: native IContextMenu/IObjectWithSite, SID_STopLevelBrowser BrowseObject, bounded snapshot PIDL, Windows stock icons and default extractor"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -622,14 +629,16 @@
       "V2 exception-budget registered normal/cancel each pass 32 caught C++ exceptions and successful open/close; original registry expires before real attach and capture refuses; natural cleanup and final missing/window/process checks pass; exclusive GUI handoff to root",
       "19 pure context/report cases and 2 admission wiring checks, helper compilation without native actions; 17 existing Shell contracts; repository architecture/contract/dependency verification; live own-proof validation pending GUI handoff",
       "Own immutable 0174 test-only proof: verified external ordinary-user COM/DefView/collision/cleanup; actual 4FF/22B/1-item GUI entry; same-executor unregistration and independent native 9-field/Desktop negative checks; no production Host/Core or G2..G4 completion",
-      "Current snapshot slice: strict native build, independent literal/malformed wire, real pipe budget/cancel/capacity, fresh/nested canonical, type sort, registration-free COM and standalone probe; five stable CTest runs"
+      "Current snapshot slice: strict native build, independent literal/malformed wire, real pipe budget/cancel/capacity, fresh/nested canonical, type sort, registration-free COM and standalone probe; five stable CTest runs",
+      "Default navigation: strict build, actual menu COM protocol with no-window IShellBrowser recorder, lifetime/negative verbs, six stock icon cases, affected snapshot CTest"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
       "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
       "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension",
       "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector",
-      "V03-006/V03-005: new DLL real Host/Core and Explorer acceptance; real cross-SID/session and forced delayed kernel cancellation; no G2..G4 or production installer claim"
+      "V03-006/V03-005: new DLL real Host/Core and Explorer acceptance; real cross-SID/session and forced delayed kernel cancellation; no G2..G4 or production installer claim",
+      "V03-006/V03-005: verify default open and stock icons in a new coordinator-owned native Explorer cycle; COM recorder is not GUI evidence"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -1063,5 +1072,20 @@
     "registration_policy_cases": 19,
     "registration_wiring_checks": 2,
     "verify_powershell_ast": true
+  },
+  "navigation_menu_checkpoint": {
+    "report": "navigation-menu.md",
+    "status": "default_open_and_stock_icons_independent_tests_passed_pending_gui",
+    "default_open_kinds": 3,
+    "icon_kinds": 6,
+    "strict_release_build": true,
+    "navigation_ctest_passed": true,
+    "snapshot_ctest_passed": true,
+    "current_window_absolute_browse": true,
+    "other_verbs_rejected": true,
+    "actual_gui_directory_navigation": false,
+    "gui_actions": 0,
+    "registration_actions": 0,
+    "dll_sha256": "ce2d3fb9b2b25db3bcf6a693f8e8f16b651e8799a78daca66d127c82bb85d5c3"
   }
 }

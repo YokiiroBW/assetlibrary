@@ -28,6 +28,16 @@ probe 直接 LoadLibrary/factory/固定空根 PIDL，不注册、不调用桌面
 
 旧 registration/verify 仍保留包外来源准入与 owner 清理；旧 probe 改为验证只读页，允许无 Host 时的固定状态，不再要求示例库。以下历史原生证据只适用于其记录的旧 DLL；新 DLL 的真实 HTTPS/Core 与原生 Explorer 验收由协调任务执行，COM 通过不能关闭 G1..G4。
 
+## 默认打开与图标
+
+单个资源库、目录、下一页提供唯一默认“打开”（双击/Enter），通过站点浏览器在当前窗口导航。文件、链接、状态、背景与多选不提供打开菜单；不增加写入、复制、新窗口或文件关联。图标来自Windows系统文件夹/通用文档资源，无资产访问或媒体解码。
+
+```powershell
+ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^explorer_navigation_menu$'
+```
+
+此测试实际调用DLL菜单/图标COM接口，用无窗口浏览器服务记录器，不显示菜单、不连接pipe或注册，10秒外限。实际双击和图标仍需协调者新DLL原生周期验收。
+
 ## 实际命令
 
 ```powershell
