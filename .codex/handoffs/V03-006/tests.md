@@ -1,5 +1,9 @@
 # V03-006 测试记录
 
+最终仓库检查：`python -I -B scripts/verify_repository.py` 通过（交接/架构/契约/依赖、432 C#文件策略与35既有回归；Alpha保持blocked）；17项既有Shell契约通过；`test-registration-context.ps1` 的19策略+2接线+当前进程原生查询通过，修改后verify.ps1 AST通过；`git diff --cached --check`通过。未运行无关.NET整套或真实注册。
+
+新增：[只读快照 IPC 检查](snapshot-ipc.md)包括三个独立wire向量、畸形边界、累计150ms预算、取消/四名额、PIDL/无逐条IPC、fresh/nested canonical、类型排序和独立LoadLibrary probe四阶段；严格Release build与连续五轮CTest通过。无Host --once 的status2/exit2为预期负控。真实跨用户/session拒绝、强制延迟取消回收、真实Core/Explorer和G2..G4尚无本轮证据。
+
 新增[自有proof真实包外闭环](proof-native-entry.md)：首次来源查询拒绝原件保留；修正后verify-02包外来源/独立COM/碰撞/finally通过且probe原流已落盘。HKLM2根无冲突、9字段登记前缺失/登记后与清理前正确/清理后缺失；actual Desktop00021400/2B/33项→一次GUI4FF/22B/1项→注销后Desktop32项入口消失；同进程guard退出、自有两窗关闭；末次按PID快照未见proof模块，但未再次核creation，不作为持续卸载保证。未扩G2..G4、未重跑微软样例或使用新debugger/重启原Explorer。
 
 后续来源查询回归补充：真实当前进程QUERY-only self token的IsInRole抛SecurityException，QUERY|DUPLICATE成功且普通权限；生产context getter修后QuerySucceeded=true，包内父来源仍拒绝。test-registration-context现19策略/报告+2接线及1次当前进程原生只读查询通过，无注册/通知。新增probe原始流/失败元数据路径完成静态审查，尚未重跑独立verify；仓库校验通过。

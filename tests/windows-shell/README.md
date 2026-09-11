@@ -2,6 +2,32 @@
 
 V03-002 的 test-only C++17/Windows SDK 10.0.26100 验证，复用系统 DefView。只有当前用户独占 CLSID `{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}`；拒绝已有注册，不修改 HKLM/UAC/系统策略，不重启 Explorer。代码无网络、资产 I/O、数据库、Provider 和 WinUI 运行时。
 
+## 当前只读快照实现（2026-09-12）
+
+当前 DLL 已移除固定示例条目，按冻结的 `contracts/windows-shell/read-only-snapshot-v1.md` 从同用户/同会话的进程外 Host 读取一页。每页最多 100 条资产/目录与一个“下一页（导航）”；资源库、普通目录和下一页可进入，文件、链接项目及固定错误状态不可进入。缺少 Host、正在加载、权限拒绝、过期、协议错误和繁忙显示带 F5 指引的状态行；Ready 的零条目才表示真实空页。F5/重开刷新，不宣称推送失效。
+
+每次 EnumObjects 共用一个 150ms 单调等待预算，不等待 EOF；四个在途/待回收名额，取消后保留 OVERLAPPED、缓冲、句柄与 DLL 引用到完成。连接后核实际 TokenUser SID、session 与持有的服务进程身份；客户端只能被识别，不能被 Host 冒用身份。名称/类型/排序/解析从严格校验的私有 PIDL 完成，不做逐条 IPC。解析名称用有界的 `snapshot-pidl-v1:<完整私有PIDL hex>`，支持新实例、多层相对及完整名称还原；hex 中仍只有 epoch/token/kind/展示名，不包含 Core 路径或凭据。
+
+无需注册、无需 GUI 的实际检查命令：
+
+```powershell
+cmake -S tests/windows-shell -B .runtime/explorer-snapshot -G "Visual Studio 17 2022" -A x64
+cmake --build .runtime/explorer-snapshot --config Release --parallel 2
+ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure
+```
+
+CTest 有 30 秒外限，包含三个独立固定字节向量、畸形帧/UTF-16/分页边界、PIDL、真实本地管道、累计超时、取消、四名额，以及不注册的 COM/独立 probe 测试。Mock 独占冻结端点，拒绝覆盖已有 Host；执行前由协调者保留该端点。Mock 等待客户端关闭再断开，避免丢弃未读缓冲；再次枚举前等待 mock 恢复监听，不掩盖生产 Busy 状态。
+
+与已启动的真实 Host 联调：
+
+```powershell
+& .runtime/explorer-snapshot/Release/ExplorerSnapshotProbe.exe --dll (Resolve-Path .runtime/explorer-snapshot/Release/AssetLibraryExplorerProof.dll).Path --budget-ms 8000 --require-navigation
+```
+
+probe 直接 LoadLibrary/factory/固定空根 PIDL，不注册、不调用桌面或打开窗口。全程共享可选 150..30000ms 重试预算（默认 8000），Loading/Unavailable/Busy 每 250ms 重试；每次 Shell 请求仍保持 150ms。`--require-navigation` 适用于同时含库、目录与下一页的合成联调样例；一般数据省略此参数。`--once` 只读取根一页，Host 缺失等固定状态返回 exit 2，真正成功返回 0，探针错误返回 1。JSON 行仅输出阶段、状态、种类和转义展示名；不输出 token、路径、服务地址或凭据。不要将真实资产名称日志纳入公共测试夹具。
+
+旧 registration/verify 仍保留包外来源准入与 owner 清理；旧 probe 改为验证只读页，允许无 Host 时的固定状态，不再要求示例库。以下历史原生证据只适用于其记录的旧 DLL；新 DLL 的真实 HTTPS/Core 与原生 Explorer 验收由协调任务执行，COM 通过不能关闭 G1..G4。
+
 ## 实际命令
 
 ```powershell
@@ -42,7 +68,7 @@ MSIX包内工具可能在私有注册表视图中成功写入HKCU，普通Explor
 
 2026-09-08：隔离探针和可逆 HKCU 注册通过；真实 Explorer 的 CLSID、选择 API 和直接 Navigate2 入口均未证明加载本类，显示“无关联应用”。有界调用日志仅记录隔离探针；parent Desktop UPDATEDIR、正确 DWORD Folder 属性和成功 Folder open association 未消除故障。原因尚未定位，不擅自归因于某个系统设置，不关闭 G1。G2 故障生命周期、G3 取消/延迟、G4 20轮和8小时稳定性尚未获得真实视图证据。
 
-`proof-calls.log` 仅为验证诊断，位于构建 DLL 同目录，上限1MiB；含操作、接口GUID、PID、单调时钟，未包含用户路径或资产名称。`QueryInterface` 行记录请求，`CreateDefView.result` 记录返回HRESULT。不得将此文件I/O移入生产 Shell。
+历史 DLL 的 `proof-calls.log` 为旧验证诊断；当前快照 DLL 已移除此同步文件写入，避免在原生前台路径增加无界文件 I/O。新检查使用独立探针输出。
 
 参考：[Microsoft NSE implementation](https://learn.microsoft.com/en-us/windows/win32/shell/nse-implement)、[ExplorerDataProvider sample](https://github.com/microsoft/Windows-classic-samples/tree/main/Samples/Win7Samples/winui/shell/shellextensibility/explorerdataprovider)、[Shell notifications](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify)。
 

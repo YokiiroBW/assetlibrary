@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+最新：[只读快照 IPC](snapshot-ipc.md)实现与独立严格构建/协议/管道/COM/公开probe检查通过，fresh/nested canonical及类型排序已修正。默认pipe交回root，等待真实Host/Core与新DLL原生视图验收；本轮无注册/GUI，不关闭G1..G4。
+
 最新：[自有4FF原生最小闭环](proof-native-entry.md)通过：verify-02真实包外来源/COM正控成功；原2HKCU/0174 DLL在600秒guard内，从Desktop一次正常双击进入实际4FF/22B相等/1项“示例资源库”。同guard18328清理、另包外9missing和虚拟Desktop00021400/2B/32项入口消失通过；目标与broker自有窗口均关闭、模块未留在两驻留进程，无原desktop重启。GUI权已还root。此为test-only最小入口/卸载闭环，Host/真实Core只读接入及G2..G4仍缺，未宣布Windows首版完成。
 
 包外proof首次verify在登记前因self token成员查询SecurityException拒绝，原件保留。已由只读8/10权限对照确认仅self需QUERY|DUPLICATE，parent保持QUERY，修后当前包内上下文查询成功但仍因父来源拒绝，准入不降级。probe失败/超时原始流和exit先落盘；runtime guard计时前移至register调用前，并加包外只读HKLM2根冲突前置。新verify标签待审后执行，当前无新增登记/GUI guard。

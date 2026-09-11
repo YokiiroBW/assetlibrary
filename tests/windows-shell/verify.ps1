@@ -56,7 +56,7 @@ try {
     $text = [IO.File]::ReadAllText($stdoutPath)
     $errorText = [IO.File]::ReadAllText($stderrPath)
     if ($process.ExitCode -ne 0 -or $errorText.Length -ne 0) { throw "Isolated COM/DefView probe failed; evidence: $evidenceDirectory" }
-    foreach ($expected in @('CoCreateInstance=00000000','SHParseDisplayName=00000000','RootAssociationArray=00000000','RootAttributes=a8000000; Result=00000000','DesktopEnumeratesRoot=true','CreateDefView=00000000','BindChild=00000000')) {
+    foreach ($expected in @('CoCreateInstance=00000000','SHParseDisplayName=00000000','RootAssociationArray=00000000','RootAttributes=a8000000; Result=00000000','DesktopEnumeratesRoot=true','CreateDefView=00000000','ReadOnlyPageValidated=true')) {
       if (!$text.Contains($expected)) { throw "Missing proof result: $expected" }
     }
     Write-Output $text.Trim()

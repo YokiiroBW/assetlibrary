@@ -102,10 +102,14 @@ int wmain(int argc, wchar_t** argv) {
     wprintf(L"FirstChild=%08lx; Count=%lu\n", static_cast<unsigned long>(hr), fetched);
     if (item) {
       IShellFolder2* child = nullptr;
-      hr = folder->BindToObject(item, nullptr, IID_PPV_ARGS(&child));
+      PCUITEMID_CHILD raw=item;SFGAOF attributes=SFGAO_FOLDER|SFGAO_READONLY;
+      hr=folder->GetAttributesOf(1,&raw,&attributes);
+      if(SUCCEEDED(hr)&&!(attributes&SFGAO_READONLY))hr=E_UNEXPECTED;
+      if(SUCCEEDED(hr)&&(attributes&SFGAO_FOLDER))hr = folder->BindToObject(item, nullptr, IID_PPV_ARGS(&child));
       wprintf(L"BindChild=%08lx\n", static_cast<unsigned long>(hr));
       if (child) child->Release();
     }
+    wprintf(L"ReadOnlyPageValidated=%ls\n", SUCCEEDED(hr) ? L"true" : L"false");
     if (argc == 2 && wcscmp(argv[1], L"--open") == 0) {
       SHChangeNotify(SHCNE_MKDIR, SHCNF_IDLIST | SHCNF_FLUSHNOWAIT, root, nullptr);
       PCUITEMID_CHILD selected = item;

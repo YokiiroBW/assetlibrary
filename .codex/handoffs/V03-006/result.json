@@ -523,7 +523,17 @@
     "apps/windows-client/README.md",
     ".codex/handoffs/V03-006/proof-native-registration-plan.md",
     ".codex/handoffs/V03-006/proof-native-entry.md",
-    ".codex/handoffs/V03-006/proof-native-entry/"
+    ".codex/handoffs/V03-006/proof-native-entry/",
+    "tests/windows-shell/Snapshot.h",
+    "tests/windows-shell/Snapshot.cpp",
+    "tests/windows-shell/SnapshotPipe.cpp",
+    "tests/windows-shell/SnapshotPidl.h",
+    "tests/windows-shell/SnapshotPidl.cpp",
+    "tests/windows-shell/SnapshotTestSupport.h",
+    "tests/windows-shell/SnapshotTests.cpp",
+    "tests/windows-shell/SnapshotProbe.cpp",
+    "tests/windows-shell/ExplorerProof.cpp",
+    ".codex/handoffs/V03-006/snapshot-ipc.md"
   ],
   "changed_contracts": [],
   "tests": {
@@ -551,7 +561,7 @@
   "handoff_summary": ".codex/handoffs/V03-006/summary.md",
   "thread_deep_link": "codex://threads/01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "architecture_review": {
-    "module": "Windows Shell diagnostics and transferred Windows image worker isolation",
+    "module": "Windows test-only Shell snapshot adapter; prior diagnostic/image-worker history below",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
       "Existing CMake/MSVC and frozen Windows SDK",
@@ -565,7 +575,8 @@
       "Fixed MyComputer parent enumeration, Browse absolute parse route, opaque IL/CompareIDs APIs and immutable 323CD843/F298 owner guard",
       "Existing current-user process identity and debugger checks plus fixed F298/323CD843 registration guards; native WTS/input-desktop checks gate the authorized cold-session experiment",
       "Reviewed scoped Explorer handle/identity lifecycle, narrow v2 window predicate, immutable official registration and attributes observer; only this task runtime and evidence changed",
-      "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools"
+      "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools",
+      "Current slice: frozen read-only-snapshot-v1 local wire, native COM/DefView and owner registration route; no duplicated Core authorization/path logic"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -610,14 +621,15 @@
       "Public RegOpen registered normal/cancel succeed with nonnull returned handles closed by reference; real SHCORE IAT matches public entry, then 5.609s protected early exit before manual trigger; complete owned UI/debugger/registry cleanup verified",
       "V2 exception-budget registered normal/cancel each pass 32 caught C++ exceptions and successful open/close; original registry expires before real attach and capture refuses; natural cleanup and final missing/window/process checks pass; exclusive GUI handoff to root",
       "19 pure context/report cases and 2 admission wiring checks, helper compilation without native actions; 17 existing Shell contracts; repository architecture/contract/dependency verification; live own-proof validation pending GUI handoff",
-      "Own immutable 0174 test-only proof: verified external ordinary-user COM/DefView/collision/cleanup; actual 4FF/22B/1-item GUI entry; same-executor unregistration and independent native 9-field/Desktop negative checks; no production Host/Core or G2..G4 completion"
+      "Own immutable 0174 test-only proof: verified external ordinary-user COM/DefView/collision/cleanup; actual 4FF/22B/1-item GUI entry; same-executor unregistration and independent native 9-field/Desktop negative checks; no production Host/Core or G2..G4 completion",
+      "Current snapshot slice: strict native build, independent literal/malformed wire, real pipe budget/cancel/capacity, fresh/nested canonical, type sort, registration-free COM and standalone probe; five stable CTest runs"
     ],
     "technical_debt": [
-      "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
       "V03-005 / coordinator: retain general Provider/network/COM/platform gates beyond the explicitly measured matrix; uncertain Prepared journals remain fail closed",
       "V03-006 / windows-shell-owner: obtain precise existing-tool COM/registry/load observation after all three real GUI entry paths failed to activate the immutable extension",
-      "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector"
+      "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector",
+      "V03-006/V03-005: new DLL real Host/Core and Explorer acceptance; real cross-SID/session and forced delayed kernel cancellation; no G2..G4 or production installer claim"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -1027,5 +1039,29 @@
     "full_windows_client_complete": false,
     "host_real_core_connected": false,
     "full_product_gates_closed": false
+  },
+  "snapshot_ipc_checkpoint": {
+    "report": "snapshot-ipc.md",
+    "status": "shell_implementation_and_independent_tests_passed_pending_real_host_explorer",
+    "strict_release_build": true,
+    "literal_vectors": 3,
+    "ctest_repeat_passes": 5,
+    "canonical_fresh_nested_roundtrip": true,
+    "type_column_sort": true,
+    "per_item_ipc": false,
+    "probe_registration_free": true,
+    "snapshot_wait_budget_ms": 150,
+    "maximum_inflight_and_retained_operations": 4,
+    "gui_actions": 0,
+    "registration_actions": 0,
+    "default_pipe_returned_to_root": true,
+    "real_host_core_acceptance": false,
+    "production_gates_closed": false,
+    "dll_sha256": "7b9e6e6f857fdd5944aa4b3da707b2b1dca43778af34d05413c557698185859f",
+    "repository_verification_passed": true,
+    "existing_shell_contract_tests": 17,
+    "registration_policy_cases": 19,
+    "registration_wiring_checks": 2,
+    "verify_powershell_ast": true
   }
 }
