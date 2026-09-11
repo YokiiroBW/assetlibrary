@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-11T15:50:15.288823+00:00",
-  "status": "windows_own_minimal_explorer_entry_cleanup_passed_host_integration_pending",
+  "updatedAtUtc": "2026-09-11T17:05:17.116151+00:00",
+  "status": "windows_explorer_real_core_host_integration_in_progress",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "The registry-view blocker and own test-only Explorer entry/unregister loop are verified; aa17c04 evidence integrated as96c798d with54 source/copy/Git digests and independent content review. Next freeze and implement the smallest authorized AssetHost/real Core read-only snapshot integration with bounded IPC under ADR-0018. This does not complete the production Windows client, installation or G2..G4/release gates.",
+  "active_instruction": "User requested integration. Contract read-only-snapshot-v1 frozen at 7016377/e325e7e. V03-006 implements native C++ Shell; V03-010 implements external AssetHost in an isolated worktree; V03-005 coordinates real HTTPS Core and Explorer acceptance. No production release gate closure.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Prepare the next minimal AssetHost/real Core authorized read-only snapshot task and freeze bounded IPC before implementation.",
-    "Reuse ReadOnlyClient/WorkspaceState and keep networking/credentials/decoding outside Explorer.",
-    "Keep G2..G4 latency, cancellation, fault recovery,20-cycle and8-hour evidence and production installation/release gates explicit."
+    "Merge reviewed Shell and AssetHost implementations against the frozen local contract.",
+    "Verify real Core libraries/directories/pagination, absence/restart and authorization boundaries.",
+    "Use an owned native Explorer window and guarded registration, then verify cleanup. Keep G2..G4 and installer gaps explicit."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -432,5 +432,6 @@
       "original_copy_git_hashes_verified": true,
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
-  }
+  },
+  "gui_owner": "V03-005 root only; code owners have no live GUI/registration ownership in this slice"
 }

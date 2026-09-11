@@ -1470,7 +1470,9 @@
     "tests/windows-shell/verify.ps1"
   ],
   "changed_contracts": [
-    "contracts/assetlink/image-preview-v1.md"
+    "contracts/assetlink/image-preview-v1.md",
+    "contracts/windows-shell/read-only-snapshot-v1.md",
+    "contracts/windows-shell/wire-vectors-v1.json"
   ],
   "tests": {
     "passed": 360,
@@ -1505,7 +1507,7 @@
     "diagnostic_acceptance": "Single UAC launch with two complete user-mode captures and status requests passed; cleanup independently verified. GUI first Return was outside capture and second final Return was inside; both remained ordinary empty folders, so this is not a passed Explorer gate."
   },
   "risks": [
-    "Real Explorer input now works after RDP reconnect, but namespace discovery/navigation before confirmed factory load is still under diagnosis; no Windows installer.",
+    "Own test-only native Explorer entry is verified; real Core/AssetHost integration is in progress. Production login/settings/installer and G2..G4 remain pending.",
     "NAS kernel does not provide required seccomp; image package remains disabled/not deployed pending the user/ADR deployment decision.",
     "Windows Job CPU configuration is checked periodically and measured overshoot must not be presented as a strict three-second execution bound.",
     "Physical Android11/HyperOS, production signing, scale/soak and full release gates remain independent."
@@ -1515,13 +1517,14 @@
   "handoff_summary": ".codex/handoffs/V03-005/summary.md",
   "thread_deep_link": "codex://threads/01a0801a-4c6c-7d92-b0be-ce0150f8b115",
   "architecture_review": {
-    "module": "Shared image contract, isolated Core source/decoder integration, reviewed Web/Android consumers, Windows lifecycle and NAS packaging coordination",
+    "module": "Shared image integration and native client coordination; bounded test-only Explorer snapshot contract and external AssetHost integration",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
       "Existing task graph/worktree scaffolds and handoff validators",
       "Existing real Core/PostgreSQL/HTTPS synthetic fixture, lifecycle cleanup and source hash/mtime verification",
       "Existing generated SDK, HTTPS authorization/query flows and shared UI theme in consumers",
-      "Temporary single-consent runner reuses the reviewed fixed user-mode observer and its independent guardian; no production service, framework or global UAC setting was added."
+      "Temporary single-consent runner reuses the reviewed fixed user-mode observer and its independent guardian; no production service, framework or global UAC setting was added.",
+      "External AssetHost reuses Windows ClientTransport/ReadOnlyClient; native Shell remains the minimal test-only DefView adapter."
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -1533,7 +1536,8 @@
       "Approved SkiaSharp/NativeAssets4.151.2 in the isolated worker; exact normal/RID locks, signatures, licenses and native notices verified. clang/zlib build tools remain outside runtime images."
     ],
     "contract_changes": [
-      "New read-only image-preview-v1 binary PNG contract and ADR0019; generated SDK stamps refreshed by existing generator"
+      "New read-only image-preview-v1 binary PNG contract and ADR0019; generated SDK stamps refreshed by existing generator",
+      "Frozen contracts/windows-shell/read-only-snapshot-v1.md and independent wire-vectors-v1.json under ADR-0018; no AssetLink/HTTP business contract change."
     ],
     "architecture_tests": [
       "Contract generator --check and architecture checks passed at freeze38aedca",
@@ -1563,7 +1567,7 @@
       "aa17c04 integrated as96c798d:54 source/copy/Git digests verified and independent read-only content review passed. Own 4FF/22B/one-item normal GUI entry and native unregister/Desktop negative retained; final PID-only module snapshot is qualified, not continuous unload evidence. Evidence/docs only; no product contract or dependency changes."
     ],
     "technical_debt": [
-      "The registry-view blocker and own test-only Explorer entry/unregister loop are verified; aa17c04 evidence integrated as96c798d with54 source/copy/Git digests and independent content review. Next freeze and implement the smallest authorized AssetHost/real Core read-only snapshot integration with bounded IPC under ADR-0018. This does not complete the production Windows client, installation or G2..G4/release gates.",
+      "User-authorized real Core/AssetHost integration is being implemented in V03-006 and V03-010. Native F5/reopen snapshot freshness remains a controlled limitation; production installer, push invalidation and G2..G4 still require evidence.",
       "Resolve the NAS isolation deployment decision before implementing another internal endpoint or enabling images.",
       "Maintain independent physical-device/signing/scale/soak and full release gates."
     ]

@@ -14,6 +14,8 @@ Byte-mode local named pipe `AssetLibrary.ExplorerProof.v1.<current-user-SID>.<Wi
 
 All integers are unsigned little-endian. GUID bytes use .NET Guid.ToByteArray / native GUID memory order. One request and response per connection. Reject unknown versions/types, malformed UTF-16, embedded NUL/control characters, duplicate/zero item tokens, trailing data inside the declared payload and lengths beyond limits before allocation/use. Consume exactly the declared frame and close after the exchange; never wait for EOF or for hypothetical later bytes to validate framing. An invalid packet is a connection/protocol error, never an empty successful library.
 
+After writing the response, Host allows the client to read and close within the connection's 500 ms total budget before recycling the pipe instance. Windows DisconnectNamedPipe discards unread buffered bytes, so successful WriteAsync alone is not permission to disconnect immediately. Use bounded asynchronous client-close observation, not synchronous FlushFileBuffers/WaitForPipeDrain. This drain phase does not change frame validity or add a client ACK.
+
 Header (16 bytes): magic u32 `0x31534C41` (ALS1), version u16=1, type u16 (1=request, 2=response), payload length u32, request-id u32 (nonzero; response must match). Total payload at most 65536 bytes.
 
 Request payload (32 bytes): host epoch GUID (16), node GUID (16). Both zero means root. Non-root requires the current epoch and a known nonzero node. Host restart/identity loss changes epoch and invalidates every previous token. Old nodes return Expired; never resolve by name.

@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / 客户端集成与Windows入口排查**。继续使用四个既有独立窗口、分支和worktree。Web与Android已在同一真实Core/PostgreSQL/受限解码引擎上通过图片验收；Windows原生Explorer入口仍在排查，NAS实际图片发行受目标内核阻断，不宣告整批或完整版本完成。
+状态 **partial / Windows真实数据接入实施中**。Windows原生Explorer最小入口与清理闭环已验证。用户要求接入后，V03-005冻结只读快照IPC，V03-006实现Shell侧，V03-010在独立worktree实现进程外AssetHost，主协调统一验收。Web/Android既有验收保留，NAS图片发行仍受目标内核阻断；完整客户端与发布门禁未完成。
 
 ## 已集成与已验收
 

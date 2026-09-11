@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_own_minimal_explorer_entry_cleanup_passed_host_integration_pending",
-  "next_action": "The registry-view blocker and own test-only Explorer entry/unregister loop are verified; aa17c04 evidence integrated as96c798d with54 source/copy/Git digests and independent content review. Next freeze and implement the smallest authorized AssetHost/real Core read-only snapshot integration with bounded IPC under ADR-0018. This does not complete the production Windows client, installation or G2..G4/release gates.",
+  "status": "windows_explorer_real_core_host_integration_in_progress",
+  "next_action": "User requested integration. Contract read-only-snapshot-v1 frozen at 7016377/e325e7e. V03-006 implements native C++ Shell; V03-010 implements external AssetHost in an isolated worktree; V03-005 coordinates real HTTPS Core and Explorer acceptance. No production release gate closure.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [

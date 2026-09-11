@@ -24,6 +24,10 @@ V03-002 独占 `tests/windows-shell/**` 的具体兼容性验证、测试 GUID �
 
 M0-002-G1..G4 保留原有证据标准：批准的每用户注册与真实发现；实际视图和故障恢复/干净卸载；250ms 返回及有界取消/重连；真实恢复循环与八小时稳定性。未完成的门禁不能因用户选择嵌入入口而变成通过。`apps/windows-shell` 生产实现/默认启用与正式发行仍以 `explorer-v0.5` 结果为准；兼容性验证只在专属测试命名空间进行。无法获得的运行证据须明确报告，不能用独立 Host 循环或隐藏 IShellBrowser 代替真实 Explorer。
 
+## 2026-09-12 受控数据接入
+
+自有test-only入口及原生注册/注销闭环已取得真实Explorer证据。用户随后要求接入，V03-005冻结 [只读快照IPC](../../contracts/windows-shell/read-only-snapshot-v1.md)：进程外AssetHost复用现有HTTPS会话与ReadOnlyClient，Shell显示授权库/物理目录分页。此阶段使用F5或重新打开获取快照，最长5秒缓存有效期；不宣称已实现权限变化的界面推送清空、正式登录设置界面或生产安装。剩余生命周期与稳定性门禁继续独立验收。
+
 ## 依据
 
 - [IShellFolder::CreateViewObject](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishellfolder-createviewobject)：Shell 的视图创建接口。
