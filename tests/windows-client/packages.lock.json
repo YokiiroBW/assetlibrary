@@ -116,6 +116,12 @@
       "assetlibrary.assetlink": {
         "type": "Project"
       },
+      "assetlibrary.windows.assethost": {
+        "type": "Project",
+        "dependencies": {
+          "AssetLibrary.Windows.Core": "[1.0.0, )"
+        }
+      },
       "assetlibrary.windows.core": {
         "type": "Project",
         "dependencies": {

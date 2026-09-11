@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="../../packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj" />
   <Project Path="Core/AssetLibrary.Windows.Core.csproj" />
+  <Project Path="AssetHost/AssetLibrary.Windows.AssetHost.csproj" />
   <Project Path="../../tests/windows-client/AssetLibrary.Windows.Tests.csproj" />
 </Solution>

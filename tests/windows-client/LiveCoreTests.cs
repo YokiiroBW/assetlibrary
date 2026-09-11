@@ -10,8 +10,7 @@ public sealed class LiveCoreTests
     [TestCategory("NativeLive")]
     public async Task RealHttpsCoreAuthenticatesPagesSearchesDetailsAndRevokes()
     {
-        var path = Environment.GetEnvironmentVariable("ASSETLIBRARY_NATIVE_TEST_PROFILE");
-        if (string.IsNullOrEmpty(path) || !File.Exists(path)) { Assert.Inconclusive("A running isolated Core fixture and private connection profile are required."); }
+        var path = HostTestSupport.RequiredNativeProfilePath();
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         var settings = JsonNode.Parse(await File.ReadAllTextAsync(path, deadline.Token))!.AsObject();
         string Value(string name) => settings[name]!.GetValue<string>();

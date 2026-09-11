@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>AssetLibrary.Windows.AssetHost</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Core/AssetLibrary.Windows.Core.csproj" />
+    <InternalsVisibleTo Include="AssetLibrary.Windows.Tests" />
+  </ItemGroup>
+</Project>
