@@ -1,0 +1,88 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-010",
+  "title": "Bounded out-of-process Explorer AssetHost snapshots",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "assethost-agent",
+  "branch": "codex/v03-010-explorer-assethost",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-009",
+  "commit": "0be1438e66534086028147a5e0122e1a876e5181",
+  "changed_files": [
+    ".codex/handoffs/V03-010/result.json",
+    ".codex/handoffs/V03-010/summary.md",
+    ".codex/handoffs/V03-010/tests.md",
+    ".codex/tasks/V03-010.md",
+    "apps/windows-client/AssetHost/AssetLibrary.Windows.AssetHost.csproj",
+    "apps/windows-client/AssetHost/NativePipe.cs",
+    "apps/windows-client/AssetHost/PrivateProfile.cs",
+    "apps/windows-client/AssetHost/Program.cs",
+    "apps/windows-client/AssetHost/README.md",
+    "apps/windows-client/AssetHost/SnapshotPipeServer.cs",
+    "apps/windows-client/AssetHost/SnapshotProjection.cs",
+    "apps/windows-client/AssetHost/SnapshotProtocol.cs",
+    "apps/windows-client/AssetHost/SnapshotStore.cs",
+    "apps/windows-client/AssetHost/packages.lock.json",
+    "apps/windows-client/AssetLibrary.Windows.slnx",
+    "tests/windows-client/AssetLibrary.Windows.Tests.csproj",
+    "tests/windows-client/HostLiveTests.cs",
+    "tests/windows-client/HostPipeFixture.cs",
+    "tests/windows-client/HostPipeSecurityTests.cs",
+    "tests/windows-client/HostPipeTestSupport.cs",
+    "tests/windows-client/HostPipeTests.cs",
+    "tests/windows-client/HostProfileTests.cs",
+    "tests/windows-client/HostProtocolTests.cs",
+    "tests/windows-client/HostSnapshotCapacityTests.cs",
+    "tests/windows-client/HostSnapshotNavigationTests.cs",
+    "tests/windows-client/HostSnapshotTests.cs",
+    "tests/windows-client/HostTestSupport.cs",
+    "tests/windows-client/LiveCoreTests.cs",
+    "tests/windows-client/packages.lock.json"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 56,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "Final54ordinary+2realHTTPSCore; newHost33ordinary+1NativeLive. Earlier corrected failures retained in tests.md; no C++/Explorer acceptance claimed."
+  },
+  "risks": [
+    "Controlled private-profile executable only; production login/settings/startup/installer remain pending.",
+    "Native F5/reopen refresh and five-second maximum successful cache lifetime; no push removal of names already painted by Explorer.",
+    "DACL/native same-user pipe exercised; no separate-user/session login acceptance claimed.",
+    "Actual C++ process interoperability and Explorer behavior/sourcehash/registration cleanup belong to V03-005 integration."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V03-010/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows AssetHost test-only snapshot adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing ServerProfile HTTPS origin/pin verification, ClientTransport cookie/CSRF/session/cancellation and ReadOnlyClient paging",
+      "Generated AssetLink SDK and Core-authorized library/entry public query endpoints",
+      "Existing ProtocolFixture and native-client HTTPS/PostgreSQL fixture; shared required profile helper",
+      "Windows named pipe and actual TokenUser security descriptor using framework/platform only"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Only public Windows adapter and generated SDK; no Core internals, database or physical asset access"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "validate_dotnet_source.py:451files passed",
+      "validate_dotnet_dependencies.py:4projects15lockedpackages passed",
+      "Windows solution locked restore,format,Release build,54ordinary tests and2realHTTPSCore NativeLive passed",
+      "verify_repository.py passed (M0-009 fast architecture gate)"
+    ],
+    "technical_debt": [
+      "V03-005/V03-006: actual C++/Explorer integration and source hashes/owned registration cleanup",
+      "V03-006: manual F5 projection does not close G2/G3/G4 lifecycle/push invalidation/soak gates",
+      "Windows owner: production login/settings/startup, signed installer, preview/file opening are outside controlled slice"
+    ]
+  }
+}
