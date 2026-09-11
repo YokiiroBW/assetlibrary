@@ -11,6 +11,7 @@
 #include "NavigationMenu.h"
 #include "SnapshotIcon.h"
 #include "LoadingRefresh.h"
+#include "ProbeDiagnostics.h"
 #include <cstring>
 
 namespace {
@@ -59,9 +60,10 @@ class Enumerator final : public IEnumIDList {
 class Folder final : public IShellFolder2, public IPersistFolder2 {
   ULONG refs_ = 1; PIDLIST_ABSOLUTE absolute_ = nullptr; snapshot::Location location_;
   std::shared_ptr<loading::Signal> viewState_;
+  diagnostics::FolderState diagnostic_;
  public:
   Folder() { ++objects; }
-  explicit Folder(std::shared_ptr<loading::Signal> state):viewState_(std::move(state)){++objects;}
+  Folder(std::shared_ptr<loading::Signal> state,ULONGLONG source):viewState_(std::move(state)),diagnostic_(source){++objects;}
   ~Folder() { CoTaskMemFree(absolute_); --objects; }
   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** value) override {
     if (!value) return E_POINTER; *value = nullptr;
@@ -100,9 +102,11 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   }
   HRESULT STDMETHODCALLTYPE EnumObjects(HWND, SHCONTF flags, IEnumIDList** value) override {
     if(!value)return E_POINTER;*value=nullptr;
+    ++diagnostic_.enumerations;diagnostic_.enumThread=GetCurrentThreadId();
     const auto generation=viewState_?viewState_->Begin():0;
     try {
       auto page=snapshot::Query(location_);auto entries=std::move(page.entries);
+      diagnostic_.enumStatus=page.status;
       if(page.status!=snapshot::Status::Ready)entries.push_back({page.epoch,{},snapshot::Kind::StatusRow,snapshot::StatusText(page.status),page.status});
       std::vector<snapshot::Entry> visible;
       for(const auto& entry:entries)if(flags&(snapshot::Navigable(entry.kind)?SHCONTF_FOLDERS:SHCONTF_NONFOLDERS))visible.push_back(entry);
@@ -152,9 +156,11 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
     if (!value) return E_POINTER; *value = nullptr; if (iid != IID_IShellView) return E_NOINTERFACE;
     if(!absolute_)return E_UNEXPECTED;
     try {
-      auto state=std::make_shared<loading::Signal>();auto folder=new(std::nothrow) Folder(state);if(!folder)return E_OUTOFMEMORY;
+      auto state=std::make_shared<loading::Signal>();auto folder=new(std::nothrow) Folder(state,diagnostic_.instance);if(!folder)return E_OUTOFMEMORY;
+      diagnostic_.lastClone=folder->diagnostic_.instance;
       auto hr=folder->Initialize(absolute_);
       if(SUCCEEDED(hr))hr=loading::CreateView(static_cast<IShellFolder2*>(folder),state,reinterpret_cast<IShellView**>(value));
+      diagnostic_.lastCallbackResult=state->diagnostic.createResult.load();
       folder->Release();return hr;
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
   }
@@ -192,6 +198,7 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   HRESULT STDMETHODCALLTYPE GetDefaultColumnState(UINT column, SHCOLSTATEF* state) override { if (!state) return E_POINTER; if (column > 1) return E_INVALIDARG; *state = SHCOLSTATE_TYPE_STR | SHCOLSTATE_ONBYDEFAULT; return S_OK; }
   HRESULT STDMETHODCALLTYPE GetDetailsEx(PCUITEMID_CHILD item, const SHCOLUMNID* key, VARIANT* value) override {
     if(!key||!value)return E_POINTER;VariantInit(value);
+    if(IsEqualPropertyKey(*key,diagnostics::Key))return (!item||!item->mkid.cb)?diagnostics::Read(diagnostic_,viewState_.get(),value):E_INVALIDARG;
     if(!IsEqualPropertyKey(*key,PKEY_ItemNameDisplay)&&!IsEqualPropertyKey(*key,PKEY_ItemTypeText))return E_INVALIDARG;
     try {snapshot::Entry entry;if(!snapshot::ReadPidl(item,entry))return E_INVALIDARG;
       value->bstrVal=SysAllocString(IsEqualPropertyKey(*key,PKEY_ItemNameDisplay)?entry.name.c_str():snapshot::TypeText(entry.kind));

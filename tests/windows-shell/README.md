@@ -54,6 +54,8 @@ ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^
 
 ## 实际命令
 
+临时只读诊断键 `{2F242D38-C686-4E35-87C3-36C9BAF44EFE}, pid=1` 通过空item的GetDetailsEx返回≤2048字符VT_BSTR。它不注册属性、不触发枚举/IPC/刷新；读取者必须先核JSON执行pid等于实际Explorer目标。字段、UInt64解释及因果边界见[诊断协议](../../.codex/handoffs/V03-006/probe-diagnostics.md)。诊断只为定位冷Loading，不代表已修复。
+
 ```powershell
 cmake -S tests/windows-shell -B .runtime/explorer-proof -G "Visual Studio 17 2022" -A x64
 cmake --build .runtime/explorer-proof --config Release --parallel 2

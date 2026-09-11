@@ -20,12 +20,22 @@ struct Budget {
 };
 
 // Enumeration can publish from a worker; only the owner UI thread touches the view.
+// Fixed last-values/counters only: no trace buffer, pointers, paths or UI call-outs.
+struct DiagnosticState {
+    std::atomic<HRESULT> createResult{E_PENDING},siteResult{E_PENDING},windowResult{E_PENDING};
+    std::atomic<HRESULT> serviceResult{E_PENDING},activeResult{E_PENDING},getWindowResult{E_PENDING},refreshResult{E_PENDING};
+    std::atomic_ulong createSlots{0},constructorThread{0},siteCalls{0},siteThread{0},sitePresent{0};
+    std::atomic_ulong windowCalls{0},windowThread{0},windowOwnerThread{0},posts{0},postError{0};
+    std::atomic_ulong arms{0},armThread{0},armError{0},timerActive{0},ticks{0},attempts{0},refreshes{0},detaches{0},windowMatch{0},skip{0};
+    std::atomic<UINT_PTR> reportedWindow{0},activeWindow{0};
+};
 struct Signal {
     const UINT notification;
     const UINT_PTR cookie;
     std::atomic<ULONGLONG> started{0},published{static_cast<ULONGLONG>(snapshot::Status::Unavailable)};
     std::atomic<HWND> window{nullptr};
     std::atomic_bool queued{false};
+    DiagnosticState diagnostic;
     Signal();
     ULONGLONG Begin() noexcept {return started.fetch_add(1)+1;}
     void Publish(ULONGLONG generation,snapshot::Status value) noexcept;

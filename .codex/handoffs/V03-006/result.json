@@ -547,7 +547,12 @@
     ".codex/handoffs/V03-006/loading-refresh.md",
     ".codex/handoffs/V03-006/loading-refresh/empty-root-control.txt",
     ".codex/handoffs/V03-006/loading-refresh/proof-owner-lifetime.txt",
-    ".codex/handoffs/V03-006/loading-refresh/reference-source.json"
+    ".codex/handoffs/V03-006/loading-refresh/reference-source.json",
+    "tests/windows-shell/ProbeDiagnostics.h",
+    "tests/windows-shell/ProbeDiagnostics.cpp",
+    "tests/windows-shell/ProbeDiagnosticsTests.cpp",
+    ".codex/handoffs/V03-006/probe-diagnostics.md",
+    ".codex/handoffs/V03-006/probe-diagnostics/samples.json"
   ],
   "changed_contracts": [],
   "tests": {
@@ -592,7 +597,8 @@
       "Existing per-user proof owner/CLSID and COM/DefView probe; standard process/token APIs and verified Windows Explorer ShellExecute route for external test tools",
       "Current slice: frozen read-only-snapshot-v1 local wire, native COM/DefView and owner registration route; no duplicated Core authorization/path logic",
       "Default navigation: native IContextMenu/IObjectWithSite, SID_STopLevelBrowser BrowseObject, bounded snapshot PIDL, Windows stock icons and default extractor",
-      "Loading refresh: native DefView/SFVM_WINDOWCREATED/IObjectWithSite/IShellBrowser; existing bounded snapshot Query/PIDL; system Comctl32 subclass and UI-thread timer only"
+      "Loading refresh: native DefView/SFVM_WINDOWCREATED/IObjectWithSite/IShellBrowser; existing bounded snapshot Query/PIDL; system Comctl32 subclass and UI-thread timer only",
+      "Readonly diagnostics: existing GetDetailsEx/VARIANT channel, per-Folder and per-Signal fixed atomic counters; public window-thread query, no new business or IPC contract"
     ],
     "duplicated_logic": [
       "Temporary BrowseObject controller copies frozen E0 identity/window-matching prefix to preserve original observer artifact; no production or business logic duplication",
@@ -642,7 +648,8 @@
       "Default navigation: strict build, actual menu COM protocol with no-window IShellBrowser recorder, lifetime/negative verbs, six stock icon cases, affected snapshot CTest",
       "Mixed verb follow-up: strict DLL/menu build, 10 ANSI/Unicode field combinations for each of 3 navigation kinds, decision and actual BrowseObject count; complete navigation menu CTest passed",
       "Same review patch: QueryService and BrowseObject callbacks release every external menu/site interface reference; self retains copied target and DLL owner, final refcounts/unload verified in both cases",
-      "Loading refresh: strict build and four scoped CTest passes; generation, UI thread, call-out/reentrant teardown, independent view capacity, actual system callback wiring; separate proof-owner final native lifetime diagnostic exit1 retained, not passed"
+      "Loading refresh: strict build and four scoped CTest passes; generation, UI thread, call-out/reentrant teardown, independent view capacity, actual system callback wiring; separate proof-owner final native lifetime diagnostic exit1 retained, not passed",
+      "Diagnostic PKEY strict build, actual COM missing/bound Signal and source/clone mapping, early thread/capacity failures, readonly/no-retained-owner checks, four JSON whitelist/bounds samples; existing four affected CTest pass"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
@@ -651,7 +658,8 @@
       "V03-006 / windows-shell-owner: validate the new direct-Explorer launch provenance and STA notification in the next approved external own-proof cycle; parent route is not a universal container detector",
       "V03-006/V03-005: new DLL real Host/Core and Explorer acceptance; real cross-SID/session and forced delayed kernel cancellation; no G2..G4 or production installer claim",
       "V03-006/V03-005: verify default open and stock icons in a new coordinator-owned native Explorer cycle; COM recorder is not GUI evidence",
-      "V03-006/V03-005: native CViewSettings-associated retained callback and final DLL release/growth remain open G2; no forced release, test pin retained to exit; real cold GUI and long soak still required"
+      "V03-006/V03-005: native CViewSettings-associated retained callback and final DLL release/growth remain open G2; no forced release, test pin retained to exit; real cold GUI and long soak still required",
+      "V03-006/windows-shell-owner: remove temporary readonly PKEY/counters after Root-approved cold callback diagnosis and fix verification; current cold Loading and G2 remain unproven"
     ]
   },
   "explorer_entry_checkpoint": {
@@ -1125,5 +1133,22 @@
     "native_gui_actions": 0,
     "registration_actions": 0,
     "dll_sha256": "263bdaa5147500312338ae6add6669b191b019881d6e2f811b400974a2fad87d"
+  },
+  "probe_diagnostics_checkpoint": {
+    "report": "probe-diagnostics.md",
+    "status": "readonly_diagnostic_ready_pending_actual_target_read",
+    "fmtid": "2F242D38-C686-4E35-87C3-36C9BAF44EFE",
+    "property_id": 1,
+    "max_utf16_characters": 2048,
+    "maximum_sample_characters": 998,
+    "diagnostic_ctest_passed": true,
+    "affected_ctest_passed": 4,
+    "json_schema_samples_passed": 4,
+    "execution_pid_required": true,
+    "native_target_observed": false,
+    "behavior_changed": false,
+    "registration_actions": 0,
+    "native_gui_actions": 0,
+    "dll_sha256": "5a733b98443719ade12c45ef9809026d5d6d24720b50df44aeb3c2a8edc3e723"
   }
 }
