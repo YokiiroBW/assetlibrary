@@ -29,3 +29,11 @@ IExtractIconW/A使用SHGetStockIconInfo的SIID_FOLDER（库/目录/下一页）�
 分支codex/v03-006-windows-explorer-native-integration。建议协调端合入本交接包所在提交后构建新DLL并记录hash，独占全新原生周期验证双击/Enter、下一页与图标，不复用旧目标进程/guard。COM记录器不能替代真实Explorer目录证据，G2..G4仍未关闭。
 
 最终`git diff --cached --check`与`python -I -B scripts/verify_repository.py`通过：交接、架构、契约、依赖与35项既有回归保持通过，Alpha仍blocked。注册脚本与原spike源码未变，不重跑已通过的原注册策略/17项spike测试或无关.NET整套。
+
+## 混合字段审查修正
+
+独立review指出Unicode标志不等于lpVerbW包含字符串，空lpVerbW不能被解释成默认offset0。现按[官方InvokeCommand实现说明](https://learn.microsoft.com/en-us/windows/win32/shell/how-to-implement-the-icontextmenu-interface)优先使用有效Unicode字符串，否则判定ANSI字符串或仅从lpVerb读取数字offset。Unicode字符串open不再被无效的未使用ANSI数字提前否决；两字段都是字符串却互相冲突时拒绝。lpVerbW低字值不作为命令ID，未知ANSI字符串不再落成open。
+
+新增每种导航项10组混合字段（共30次）回归：ANSI delete/W null拒绝、ANSI open/W null通过、ANSI offset1/W null拒绝、ANSI offset0/W null通过、ANSI offset1/W open通过、相互矛盾字符串拒绝、Unicode unknown拒绝、大小写同义open通过、W低字不覆盖ANSI数字。每个断言同时核导航调用次数，拒绝路径为零。严格DLL/菜单测试目标build与完整explorer_navigation_menu通过；快照/pipe及图标实现未变，不重跑无关检查或GUI。
+
+同批第二条review修复：InvokeCommand在任何站点/浏览器call-out前取得RAII self引用，结束后释放，防止浏览器重入销毁最后外部menu引用时提前释放target与owner。新增分别在QueryService和BrowseObject中释放全部外部IContextMenu/IObjectWithSite引用的实际DLL回归；原Folder外部引用已先释放。回调期间DLL owner必须仍存活，导航使用原复制PIDL，调用返回后menu/site/owner全部归零且DLL可卸载。两模式通过，不把仅保持browser/site当作menu生命周期保证。

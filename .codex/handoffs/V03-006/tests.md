@@ -1,5 +1,9 @@
 # V03-006 测试记录
 
+默认导航审查补丁完整完成：30次Unicode/ANSI混合字段回归及QueryService/BrowseObject重入释放全部外部菜单引用的两种回归通过；InvokeCommand以RAII self引用保留目标和DLL owner直至结束。严格目标build与完整菜单CTest通过，无GUI/注册；详见navigation-menu.md。
+
+默认导航补充：独立review发现并已修复Unicode/ANSI混合字段误判；优先有效Unicode字符串，否则ANSI字符串/仅lpVerb数字，矛盾字符串拒绝。每种导航项10组混合字段及实际导航次数断言通过，详见navigation-menu.md；新DLL仍待root实际GUI验证。
+
 最新：[默认目录导航与系统图标](navigation-menu.md)已完成严格构建、默认open命令/站点/生命周期负控、六类系统图标与受影响快照CTest。只在当前窗口导航，无写入命令；真实GUI目录进入仍待协调任务独占新DLL周期验证。
 
 最终仓库检查：`python -I -B scripts/verify_repository.py` 通过（交接/架构/契约/依赖、432 C#文件策略与35既有回归；Alpha保持blocked）；17项既有Shell契约通过；`test-registration-context.ps1` 的19策略+2接线+当前进程原生查询通过，修改后verify.ps1 AST通过；`git diff --cached --check`通过。未运行无关.NET整套或真实注册。

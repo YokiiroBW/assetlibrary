@@ -54,18 +54,25 @@ public:
     }
     HRESULT STDMETHODCALLTYPE InvokeCommand(CMINVOKECOMMANDINFO* info) override {
         if(!info||info->cbSize<sizeof(CMINVOKECOMMANDINFO))return E_INVALIDARG;
-        if(IS_INTRESOURCE(info->lpVerb)&&reinterpret_cast<ULONG_PTR>(info->lpVerb)!=0)return E_FAIL;
-        bool open=false;
+        LPCWSTR wideVerb=nullptr;
         if(info->fMask&CMIC_MASK_UNICODE){
             if(info->cbSize<sizeof(CMINVOKECOMMANDINFOEX))return E_INVALIDARG;
-            const auto verb=reinterpret_cast<const CMINVOKECOMMANDINFOEX*>(info)->lpVerbW;
-            open=IS_INTRESOURCE(verb)?reinterpret_cast<ULONG_PTR>(verb)==0:_wcsnicmp(verb,L"open",5)==0;
-        }else{
-            const auto verb=info->lpVerb;
-            open=IS_INTRESOURCE(verb)?reinterpret_cast<ULONG_PTR>(verb)==0:_strnicmp(verb,"open",5)==0;
+            wideVerb=reinterpret_cast<const CMINVOKECOMMANDINFOEX*>(info)->lpVerbW;
         }
+        const bool ansiString=!IS_INTRESOURCE(info->lpVerb);
+        bool open=false;
+        if(wideVerb&&!IS_INTRESOURCE(wideVerb)){
+            // A Unicode string selects the verb; lpVerb's numeric value is then unused.
+            open=_wcsnicmp(wideVerb,L"open",5)==0;
+            if(ansiString&&_strnicmp(info->lpVerb,"open",5)!=0)return E_FAIL;
+        }else if(ansiString)open=_strnicmp(info->lpVerb,"open",5)==0;
+        // An identifier offset is carried only by lpVerb, never by lpVerbW.
+        else open=reinterpret_cast<ULONG_PTR>(info->lpVerb)==0;
         if(!open)return E_FAIL;
         if(!site_)return E_NOINTERFACE;
+        // QueryService/BrowseObject may tear down the view and its last menu reference.
+        struct InvocationReference { NavigationMenu* menu;~InvocationReference(){menu->Release();} };
+        AddRef();const InvocationReference invocation{this};
         auto site=site_;site->AddRef();IShellBrowser* browser=nullptr;
         auto hr=IUnknown_QueryService(site,SID_STopLevelBrowser,IID_PPV_ARGS(&browser));site->Release();
         if(SUCCEEDED(hr)&&browser){

@@ -2,6 +2,7 @@
 #include <shlguid.h>
 #include <servprov.h>
 #include <shellapi.h>
+#include <functional>
 
 namespace {
 using proof::Check;
@@ -16,6 +17,7 @@ class Browser final : public IShellBrowser, public IServiceProvider {
 public:
     ULONG refs=1,calls=0;UINT flags=0;PIDLIST_ABSOLUTE last=nullptr;
     HRESULT serviceResult=S_OK,browseResult=S_OK;
+    std::function<void()> duringQuery,duringBrowse;
     ~Browser(){CoTaskMemFree(last);}
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** result) override {
         if(!result)return E_POINTER;*result=nullptr;
@@ -28,9 +30,11 @@ public:
     HRESULT STDMETHODCALLTYPE QueryService(REFGUID service,REFIID iid,void** result) override {
         if(!result)return E_POINTER;*result=nullptr;
         if(service!=SID_STopLevelBrowser||iid!=IID_IShellBrowser)return E_NOINTERFACE;
+        if(duringQuery)duringQuery();
         if(FAILED(serviceResult))return serviceResult;return QueryInterface(iid,result);
     }
     HRESULT STDMETHODCALLTYPE BrowseObject(PCUIDLIST_RELATIVE target,UINT requested) override {
+        if(duringBrowse)duringBrowse();
         ++calls;flags=requested;CoTaskMemFree(last);last=ILCloneFull(target);return last?browseResult:E_OUTOFMEMORY;
     }
     HRESULT STDMETHODCALLTYPE GetWindow(HWND* result) override {if(result)*result=nullptr;return E_NOTIMPL;}
@@ -86,6 +90,21 @@ void OpenKind(proof::Library& library,snapshot::Kind kind){
     info.lpVerb="OPEN";Check(context.value->InvokeCommand(&info)==S_OK,"ANSI open invoke");
     CMINVOKECOMMANDINFOEX unicode{};unicode.cbSize=sizeof(unicode);unicode.fMask=CMIC_MASK_UNICODE;unicode.lpVerbW=L"open";
     Check(context.value->InvokeCommand(reinterpret_cast<CMINVOKECOMMANDINFO*>(&unicode))==S_OK,"Unicode open invoke");
+    struct Mixed { LPCSTR ansi;LPCWSTR wide;bool allowed; };
+    const Mixed mixed[]={
+        {"delete",nullptr,false},{"open",nullptr,true},
+        {MAKEINTRESOURCEA(1),nullptr,false},{MAKEINTRESOURCEA(0),nullptr,true},
+        {MAKEINTRESOURCEA(1),L"open",true},{"delete",L"open",false},
+        {"open",L"delete",false},{MAKEINTRESOURCEA(0),L"delete",false},
+        {"open",L"OPEN",true},{MAKEINTRESOURCEA(0),MAKEINTRESOURCEW(1),true}
+    };
+    for(const auto& row:mixed){
+        CMINVOKECOMMANDINFOEX command{};command.cbSize=sizeof(command);command.fMask=CMIC_MASK_UNICODE;
+        command.lpVerb=row.ansi;command.lpVerbW=row.wide;const auto calls=browser.value->calls;
+        auto hr=context.value->InvokeCommand(reinterpret_cast<CMINVOKECOMMANDINFO*>(&command));
+        Check(row.allowed?hr==S_OK:FAILED(hr),"mixed ANSI/Unicode verb decision");
+        Check(browser.value->calls==calls+(row.allowed?1:0),"mixed field navigation count");
+    }
     const auto before=browser.value->calls;
     for(const char* verb:{"delete","copy","rename","paste","opennew","properties","open-extra"}){info.lpVerb=verb;Check(FAILED(context.value->InvokeCommand(&info)),"unrecognized verb denied");}
     info.lpVerb=MAKEINTRESOURCEA(1);Check(FAILED(context.value->InvokeCommand(&info)),"numeric nonzero denied");
@@ -137,6 +156,25 @@ void Icons(proof::Library& library){
     }
     puts("stock_icons=passed; kinds=6; asset_paths=0");
 }
+void ReentrantRelease(proof::Library& library,bool duringQuery){
+    auto root=library.Root();snapshot::Entry entry{{301},{302},snapshot::Kind::Directory,L"reentrant"};
+    proof::Item item(snapshot::MakePidl(entry));PCUITEMID_CHILD raw=item.value;proof::Com<IContextMenu> context;
+    Check(SUCCEEDED(root.value->GetUIObjectOf(nullptr,1,&raw,IID_IContextMenu,nullptr,reinterpret_cast<void**>(&context.value))),"reentrant menu acquisition");
+    proof::Com<IObjectWithSite> site;Check(SUCCEEDED(context.value->QueryInterface(IID_PPV_ARGS(&site.value))),"reentrant site interface");
+    proof::Com<Browser> browser;browser.value=new Browser();
+    Check(SUCCEEDED(site.value->SetSite(static_cast<IShellBrowser*>(browser.value))),"reentrant browser site");
+    root.value->Release();root.value=nullptr;
+    bool released=false;
+    auto release=[&]{
+        context.value->Release();context.value=nullptr;site.value->Release();site.value=nullptr;released=true;
+        Check(library.canUnload()==S_FALSE,"call-out must retain menu, target and DLL owner");
+    };
+    if(duringQuery)browser.value->duringQuery=release;else browser.value->duringBrowse=release;
+    CMINVOKECOMMANDINFO info{};info.cbSize=sizeof(info);info.lpVerb="open";
+    auto caller=context.value;Check(caller->InvokeCommand(&info)==S_OK,"invoke survives release of every external menu reference");
+    Check(released&&!context.value&&!site.value&&browser.value->calls==1&&ILIsEqual(browser.value->last,item.value),"reentrant navigation preserves owned target");
+    Check(browser.value->refs==1&&library.canUnload()==S_OK,"self/site/owner references released after call-out");
+}
 }
 int wmain(int argc,wchar_t** argv){
     if(argc!=2)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
@@ -147,6 +185,7 @@ int wmain(int argc,wchar_t** argv){
             OpenKind(library,kind);Check(library.canUnload()==S_OK,"all menu/owner/site references released");
         }
         NegativeKinds(library);Icons(library);Check(library.canUnload()==S_OK,"negative/icon cases release references");
+        ReentrantRelease(library,true);ReentrantRelease(library,false);
         puts("navigation_menu=passed; kinds=3; default_invoke=numeric_ANSI_Unicode; denied_write_verbs=passed; site_lifetime=passed; registry=0; GUI=0; pipe=0");
     }catch(const std::exception& error){fprintf(stderr,"NavigationMenuTests: %s\n",error.what());result=1;}
     CoUninitialize();return result;

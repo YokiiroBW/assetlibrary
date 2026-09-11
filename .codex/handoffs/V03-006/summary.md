@@ -1,5 +1,9 @@
 # V03-006 — Explorer 入口诊断交接
 
+默认导航审查补丁完整完成：30次Unicode/ANSI混合字段回归及QueryService/BrowseObject重入释放全部外部菜单引用的两种回归通过；InvokeCommand以RAII self引用保留目标和DLL owner直至结束。严格目标build与完整菜单CTest通过，无GUI/注册；详见navigation-menu.md。
+
+默认导航补充：独立review发现并已修复Unicode/ANSI混合字段误判；优先有效Unicode字符串，否则ANSI字符串/仅lpVerb数字，矛盾字符串拒绝。每种导航项10组混合字段及实际导航次数断言通过，详见navigation-menu.md；新DLL仍待root实际GUI验证。
+
 最新：[默认目录导航与系统图标](navigation-menu.md)已完成严格构建、默认open命令/站点/生命周期负控、六类系统图标与受影响快照CTest。只在当前窗口导航，无写入命令；真实GUI目录进入仍待协调任务独占新DLL周期验证。
 
 最新：[只读快照 IPC](snapshot-ipc.md)实现与独立严格构建/协议/管道/COM/公开probe检查通过，fresh/nested canonical及类型排序已修正。默认pipe交回root，等待真实Host/Core与新DLL原生视图验收；本轮无注册/GUI，不关闭G1..G4。

@@ -630,7 +630,9 @@
       "19 pure context/report cases and 2 admission wiring checks, helper compilation without native actions; 17 existing Shell contracts; repository architecture/contract/dependency verification; live own-proof validation pending GUI handoff",
       "Own immutable 0174 test-only proof: verified external ordinary-user COM/DefView/collision/cleanup; actual 4FF/22B/1-item GUI entry; same-executor unregistration and independent native 9-field/Desktop negative checks; no production Host/Core or G2..G4 completion",
       "Current snapshot slice: strict native build, independent literal/malformed wire, real pipe budget/cancel/capacity, fresh/nested canonical, type sort, registration-free COM and standalone probe; five stable CTest runs",
-      "Default navigation: strict build, actual menu COM protocol with no-window IShellBrowser recorder, lifetime/negative verbs, six stock icon cases, affected snapshot CTest"
+      "Default navigation: strict build, actual menu COM protocol with no-window IShellBrowser recorder, lifetime/negative verbs, six stock icon cases, affected snapshot CTest",
+      "Mixed verb follow-up: strict DLL/menu build, 10 ANSI/Unicode field combinations for each of 3 navigation kinds, decision and actual BrowseObject count; complete navigation menu CTest passed",
+      "Same review patch: QueryService and BrowseObject callbacks release every external menu/site interface reference; self retains copied target and DLL owner, final refcounts/unload verified in both cases"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: real G2/G3/G4 including 20 cycles and eight-hour soak",
@@ -1086,6 +1088,12 @@
     "actual_gui_directory_navigation": false,
     "gui_actions": 0,
     "registration_actions": 0,
-    "dll_sha256": "ce2d3fb9b2b25db3bcf6a693f8e8f16b651e8799a78daca66d127c82bb85d5c3"
+    "dll_sha256": "24434975fd0d41f3941871d613dc894ce66db4b69a74553e8ae1e08a6dcb52e7",
+    "mixed_verb_cases_per_kind": 10,
+    "mixed_verb_assertions": 30,
+    "mixed_verb_regression_passed": true,
+    "numeric_offset_source": "lpVerb_only",
+    "callout_self_reference": true,
+    "reentrant_release_cases_passed": 2
   }
 }
