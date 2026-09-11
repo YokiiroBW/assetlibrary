@@ -1,0 +1,30 @@
+#pragma once
+#include <Windows.h>
+inline constexpr ULONG CppExceptionCode=0xE06D7363;
+inline constexpr ULONG ExceptionTotalLimit=256,OtherFirstChanceLimit=16,ExceptionDetailLimit=16;
+enum class ExceptionStop {None,SecondChance,OtherFirstChanceLimit,TotalLimit};
+inline const char* ExceptionStopName(ExceptionStop reason) {
+    switch(reason) {
+    case ExceptionStop::None:return "none";
+    case ExceptionStop::SecondChance:return "second_chance";
+    case ExceptionStop::OtherFirstChanceLimit:return "other_first_chance_limit";
+    case ExceptionStop::TotalLimit:return "total_exception_limit";
+    }
+    return "invalid";
+}
+struct ExceptionBudget {
+    ULONG total=0,cppFirst=0,otherFirst=0,second=0,lastCode=0;
+    bool lastFirst=false;
+    ExceptionStop stop=ExceptionStop::None;
+    ULONG triggerCode=0,triggerTotal=0;bool triggerFirst=false;
+    bool Observe(ULONG code,bool first) {
+        total++;lastCode=code;lastFirst=first;
+        if(!first)second++;else if(code==CppExceptionCode)cppFirst++;else otherFirst++;
+        if(stop!=ExceptionStop::None)return false;
+        if(!first)stop=ExceptionStop::SecondChance;
+        else if(otherFirst>OtherFirstChanceLimit)stop=ExceptionStop::OtherFirstChanceLimit;
+        else if(total>ExceptionTotalLimit)stop=ExceptionStop::TotalLimit;
+        if(stop==ExceptionStop::None)return false;
+        triggerCode=code;triggerFirst=first;triggerTotal=total;return true;
+    }
+};

@@ -1,0 +1,68 @@
+{
+  "Utc": "2026-09-11T10:56:32.9158671+00:00",
+  "CleanupUtc": "2026-09-10T16:42:43.0126223+00:00",
+  "NaturalExpiry": true,
+  "GuardExitCode": 0,
+  "DualNotificationSuccess": true,
+  "Roots": [
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "CurrentUser",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\CLSID\\{BB8F539D-3B97-4473-9E07-C8248C53248E}",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Classes\\FolderViewSampleType",
+      "Present": false,
+      "Owner": null
+    },
+    {
+      "Hive": "LocalMachine",
+      "Root": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MyComputer\\NameSpace\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
+      "Present": false,
+      "Owner": null
+    }
+  ],
+  "ExpectedMissingRecords": 20,
+  "RegisteredNormalCancel32CppPassed": true,
+  "SdkBaselineStartedUtc": "2026-09-10T16:48:17.9162908+00:00",
+  "ObserverStarted": false,
+  "NotifyExecuted": false,
+  "ThisPcExecuted": false,
+  "BrowseExecuted": false,
+  "OwnedSdkWindowClosed": true,
+  "LastObservedUserWindowId": 2229572,
+  "ExplorerRestarts": 0,
+  "ExclusiveGuiOwnerRelinquishing": true
+}

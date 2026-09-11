@@ -1,0 +1,24 @@
+{
+  "Utc": "2026-09-10T16:33:43.844095+00:00",
+  "Passed": true,
+  "Results": [
+    {
+      "Mode": "normal",
+      "RegisteredOpenAndClosePassed": true,
+      "RequestedCpp": 32,
+      "CaughtCpp": 32,
+      "TotalExceptions": 33,
+      "DetailedLogs": 16,
+      "CleanupPassed": true
+    },
+    {
+      "Mode": "cancel",
+      "RegisteredOpenAndClosePassed": true,
+      "RequestedCpp": 32,
+      "CaughtCpp": 32,
+      "TotalExceptions": 33,
+      "DetailedLogs": 16,
+      "CleanupPassed": true
+    }
+  ]
+}

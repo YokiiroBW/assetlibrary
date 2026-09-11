@@ -1,0 +1,5 @@
+using System.Runtime.InteropServices;
+public static class RegOpenStageClock {
+    [DllImport("kernel32.dll")]
+    public static extern ulong GetTickCount64();
+}

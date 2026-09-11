@@ -1,0 +1,11 @@
+{
+  "Utc": "2026-09-11T10:57:44.9462498+00:00",
+  "RecordedPid": 48420,
+  "RecordedCreationFileTime": "134335316254447886",
+  "ProcessStillPresent": false,
+  "CreationStillMatches": false,
+  "CurrentMainWindowHandle": null,
+  "LatestCuaOwnWindowAbsent": true,
+  "LatestCuaExposedOnlyChatGpt": true,
+  "OtherUserWindowCurrentVisibilityNotClaimed": true
+}

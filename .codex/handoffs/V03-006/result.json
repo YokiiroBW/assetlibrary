@@ -512,7 +512,9 @@
     ".codex/handoffs/V03-006/notify-trigger-plan.md",
     ".codex/handoffs/V03-006/notify-trigger-preparation/",
     ".codex/handoffs/V03-006/key-open-first.md",
-    ".codex/handoffs/V03-006/key-open-first/"
+    ".codex/handoffs/V03-006/key-open-first/",
+    ".codex/handoffs/V03-006/key-open-v2-expiry.md",
+    ".codex/handoffs/V03-006/key-open-v2-expiry/"
   ],
   "changed_contracts": [],
   "tests": {
@@ -595,7 +597,8 @@
       "First registered cache-observer reference cycle: 20 fields before/after and 22B PIDL pass; normal fails exact-one-cache-snapshot assertion with two matched nested calls; reference/registry cleanup passes; no cancel or real Explorer run",
       "V2 reference normal/cancel each pass exact per-call cache/return pairing and expected values; one real Explorer run shows four zero cache states despite correct external fields; exception guard cleanup and final UI/registry cleanup verified, no Explorer restart",
       "Notify-only preparation: fixed guard and literal hashes, PowerShell AST and static single-method invocation reviewed; no native notification, registration, C# compilation or observer execution",
-      "Public RegOpen registered normal/cancel succeed with nonnull returned handles closed by reference; real SHCORE IAT matches public entry, then 5.609s protected early exit before manual trigger; complete owned UI/debugger/registry cleanup verified"
+      "Public RegOpen registered normal/cancel succeed with nonnull returned handles closed by reference; real SHCORE IAT matches public entry, then 5.609s protected early exit before manual trigger; complete owned UI/debugger/registry cleanup verified",
+      "V2 exception-budget registered normal/cancel each pass 32 caught C++ exceptions and successful open/close; original registry expires before real attach and capture refuses; natural cleanup and final missing/window/process checks pass; exclusive GUI handoff to root"
     ],
     "technical_debt": [
       "V03-006 / windows-shell-owner: child associations, parsing round-trip and bounded Host IPC after G1",
@@ -938,5 +941,26 @@
     "explorer_restarts": 0,
     "collector_invoked_synchronously": true,
     "tool_returned_running_session": false
+  },
+  "key_open_v2_expiry_checkpoint": {
+    "report": "key-open-v2-expiry.md",
+    "status": "references_passed_expired_before_real_attach_clean_handoff",
+    "observer_sha256": "75F1AB60E25283FAB42A87DDBC716339DA94417E18315054C021FA53E60541FC",
+    "registered_normal_cancel_passed": true,
+    "cpp_requested_caught_per_mode": 32,
+    "total_exceptions_per_mode": 33,
+    "detailed_logs_per_mode": 16,
+    "real_observer_started": false,
+    "extra_notify_executed": false,
+    "thispc_executed": false,
+    "browse_executed": false,
+    "guard_natural_cleanup_verified": true,
+    "final_missing_records": 20,
+    "owned_sdk_window_absent": true,
+    "recorded_sdk_process_absent": true,
+    "other_user_windows_current_visibility_not_claimed": true,
+    "explorer_restarts": 0,
+    "gui_owner_handoff_to_root": true,
+    "code_owner_retained": true
   }
 }

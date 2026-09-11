@@ -1,0 +1,8 @@
+*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.jsonl -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+*.txt -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+candidate-candidate.diff.txt whitespace=-blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+driver-assert-live.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+driver-capture.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+run-reference.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol
+view-wrapper.ps1.txt whitespace=blank-at-eol,-blank-at-eof,space-before-tab,cr-at-eol

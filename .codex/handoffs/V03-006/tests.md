@@ -1,5 +1,7 @@
 # V03-006 测试记录
 
+新增[异常V2到期周期](key-open-v2-expiry.md)：19件冻结hash与registered normal/cancel32-C++语义、status0/handle/close/清理通过；SDK读取已晚于原登记期限，capture前置拒绝、无实机attach。自然600秒cleanup双通知/8根absent、reader20missing及最终SDK窗/PID不存在确认。无extra notify/ThisPC/Browse/原重启，不把时限拒绝记作键打开失败，成功参考不重复。
+
 新增[公开开键首轮](key-open-first.md)：registered normal/cancel成功语义及参考close/2断点清理/协作退出通过；真实准入/IAT验证通过，5.609秒保护退出不计60秒或完整触发。实机0匹配且通知/ThisPC/Browse未执行；唯一断点/Detach/目标存活清理确认。前后20字段正确、最终20missing/8根双通知及SDK窗清理通过，原用户Explorer不重启。
 
 新增[通知触发纯准备](notify-trigger-plan.md)：固定guard323 SHA、唯一Add-Type文字块SHA5D65A429及两个薄包装AST通过；未执行包装/NotifyDrives、未编译提取C#、无注册/GUI/attach。仅确定3秒原join/10秒sender外限和异步日志衔接方案，真实通知成功及新RegOpen参考/实机均未计通过。

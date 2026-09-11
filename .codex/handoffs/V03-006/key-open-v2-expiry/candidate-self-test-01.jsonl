@@ -1,0 +1,3 @@
+{"kind":"offline_exception_budget_controls","passed":11,"exceptionRaised":false,"processOpened":false,"tick":296243125}
+{"kind":"offline_key_status_mapping_controls","passed":20,"registryApiCalled":false,"processOpened":false,"tick":296243125}
+{"kind":"offline_plan_controls","passed":19,"realProcessOpened":false,"guiOperated":false,"tick":296243125}
