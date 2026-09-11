@@ -58,8 +58,8 @@ void Bounds(){
     diagnostics::FolderState state;state.lastClone=std::numeric_limits<ULONGLONG>::max();state.enumerations=std::numeric_limits<ULONG>::max();state.enumThread=std::numeric_limits<ULONG>::max();
     auto signal=std::make_shared<loading::Signal>();signal->started=std::numeric_limits<ULONGLONG>::max();signal->published=std::numeric_limits<ULONGLONG>::max();
     auto& d=signal->diagnostic;d.reportedWindow=~UINT_PTR{};d.activeWindow=~UINT_PTR{};
-    for(auto* field:{&d.createSlots,&d.constructorThread,&d.siteCalls,&d.siteThread,&d.sitePresent,&d.windowCalls,&d.windowThread,&d.windowOwnerThread,&d.posts,&d.postError,&d.arms,&d.armThread,&d.armError,&d.timerActive,&d.ticks,&d.attempts,&d.refreshes,&d.detaches,&d.windowMatch,&d.skip})*field=std::numeric_limits<ULONG>::max();
-    for(auto* field:{&d.createResult,&d.siteResult,&d.windowResult,&d.serviceResult,&d.activeResult,&d.getWindowResult,&d.refreshResult})*field=E_FAIL;
+    for(auto* field:{&d.createSlots,&d.constructorThread,&d.siteCalls,&d.siteThread,&d.sitePresent,&d.windowCalls,&d.windowThread,&d.windowOwnerThread,&d.posts,&d.postError,&d.arms,&d.armThread,&d.armError,&d.timerActive,&d.ticks,&d.attempts,&d.refreshes,&d.detaches,&d.windowMatch,&d.skip,&d.itemCount,&d.pidlValid,&d.renderedKind,&d.renderedStatus})*field=std::numeric_limits<ULONG>::max();
+    for(auto* field:{&d.createResult,&d.siteResult,&d.windowResult,&d.serviceResult,&d.activeResult,&d.getWindowResult,&d.refreshResult,&d.folderViewResult,&d.countResult,&d.itemResult})*field=E_FAIL;
     VARIANT data{};Check(SUCCEEDED(diagnostics::Read(state,signal.get(),&data))&&SysStringLen(data.bstrVal)<=2048,"maximum-width counters fit fixed output cap");
     wprintf(L"sample_maximum=%ls\n",data.bstrVal);VariantClear(&data);
 }

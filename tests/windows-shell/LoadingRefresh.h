@@ -8,13 +8,12 @@ namespace loading {
 constexpr ULONGLONG IntervalMs=500, DurationMs=10000;
 constexpr unsigned MaxAttempts=20, MaxViews=4;
 
-// One view's monotonic Loading episode. Duplicate/late messages cannot extend it.
+// One window's initial observation. Only reopening may start another episode.
 struct Budget {
-    snapshot::Status previous=snapshot::Status::Unavailable;
     ULONGLONG deadline=0,next=0,episode=0;
     unsigned attempts=0;
     bool active=false;
-    bool Observe(snapshot::Status status,ULONGLONG now) noexcept;
+    void Start(ULONGLONG now) noexcept;
     bool Take(ULONGLONG now) noexcept;
     void Stop() noexcept {active=false;}
 };
@@ -24,6 +23,8 @@ struct Budget {
 struct DiagnosticState {
     std::atomic<HRESULT> createResult{E_PENDING},siteResult{E_PENDING},windowResult{E_PENDING};
     std::atomic<HRESULT> serviceResult{E_PENDING},activeResult{E_PENDING},getWindowResult{E_PENDING},refreshResult{E_PENDING};
+    std::atomic<HRESULT> folderViewResult{E_PENDING},countResult{E_PENDING},itemResult{E_PENDING};
+    std::atomic_ulong itemCount{0},pidlValid{0},renderedKind{0},renderedStatus{0};
     std::atomic_ulong createSlots{0},constructorThread{0},siteCalls{0},siteThread{0},sitePresent{0};
     std::atomic_ulong windowCalls{0},windowThread{0},windowOwnerThread{0},posts{0},postError{0};
     std::atomic_ulong arms{0},armThread{0},armError{0},timerActive{0},ticks{0},attempts{0},refreshes{0},detaches{0},windowMatch{0},skip{0};

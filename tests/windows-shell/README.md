@@ -40,9 +40,11 @@ ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^
 
 ## Loading 自动刷新与生命周期边界
 
-当前Loading使用每view独立的500ms自动刷新，固定10秒/最多20次、最多4个活动名额。连续Loading不延长预算；Ready/错误/站点清空/窗口销毁停止。超时后F5仍是单次查询，重开可获得新周期；Core五秒有效期及单次150ms IPC不变。确认Detach即归还名额，callback/DLL保活则跟随真实COM引用，不能把关窗等同于对象全部释放。
+窗口与站点就绪后，每view启动一次500ms观察，固定10秒/最多20次、最多4个活动名额。通过当前活动IShellView核对窗口，再读取IFolderView的条目数（上限101）和首项私有PIDL；只有实际显示的Loading状态行允许Refresh。普通项和错误状态停止；首次枚举尚无条目时只观察，不触发查询或声称Core成功。枚举副本Signal仅用于诊断，不控制刷新。
 
-`explorer_loading_refresh`检查预算、代次、重入、owner线程、独立view及名额复用；`explorer_loading_view_wiring`使用真实Desktop owner检查系统自动site/window回调与活动view记录器，不代表proof数据验收。
+持续Loading不延长预算；站点变化/清空或窗口销毁停止。停止后F5仍是单次查询，重开可获得新周期；Core五秒有效期及单次150ms IPC不变。确认Detach即归还名额，callback/DLL保活则跟随真实COM引用，不能把关窗等同于对象全部释放。
+
+`explorer_loading_refresh`检查实际条目状态、Signal矛盾、空视图期限、畸形PIDL、预算、代次、重入、owner线程、独立view及名额复用；包含真实十秒期限负控，外限60秒。`explorer_loading_view_wiring`使用真实Desktop owner检查系统自动site/window回调与活动view记录器，不代表proof数据验收。
 
 严格proof-owner卸载诊断独立运行，当前仍返回exit1、保留callback1/DLL S_FALSE：
 

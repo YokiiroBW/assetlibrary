@@ -28,6 +28,8 @@ HRESULT Read(const FolderState& folder,const loading::Signal* signal,VARIANT* va
             field(L"post_n",d.posts.load());field(L"post_error",d.postError.load());field(L"arm_n",d.arms.load());field(L"arm_tid",d.armThread.load());field(L"arm_error",d.armError.load());field(L"timer",d.timerActive.load());
             field(L"tick_n",d.ticks.load());field(L"attempt_n",d.attempts.load());field(L"service_hr",static_cast<ULONG>(d.serviceResult.load()));field(L"active_hr",static_cast<ULONG>(d.activeResult.load()));
             field(L"getwindow_hr",static_cast<ULONG>(d.getWindowResult.load()));field(L"active_hwnd",d.activeWindow.load());field(L"match",d.windowMatch.load());field(L"skip",d.skip.load());
+            field(L"folderview_hr",static_cast<ULONG>(d.folderViewResult.load()));field(L"count_hr",static_cast<ULONG>(d.countResult.load()));field(L"item_hr",static_cast<ULONG>(d.itemResult.load()));
+            field(L"rendered_n",d.itemCount.load());field(L"pidl_valid",d.pidlValid.load());field(L"rendered_kind",d.renderedKind.load());field(L"rendered_status",d.renderedStatus.load());
             field(L"refresh_n",d.refreshes.load());field(L"refresh_hr",static_cast<ULONG>(d.refreshResult.load()));field(L"detach_n",d.detaches.load());
             text.pop_back();text+=L"}}";
         }

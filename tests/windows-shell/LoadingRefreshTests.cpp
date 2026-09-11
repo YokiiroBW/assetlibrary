@@ -1,4 +1,5 @@
 #include "LoadingRefresh.h"
+#include "SnapshotPidl.h"
 #include "RefreshTestBrowser.h"
 #include <thread>
 
@@ -21,18 +22,26 @@ void Pump(DWORD milliseconds){
         if(GetTickCount64()>=end)return;MsgWaitForMultipleObjectsEx(0,nullptr,5,QS_ALLINPUT,MWMO_INPUTAVAILABLE);
     }while(true);
 }
-class View final : public IShellView {
+class View final : public IShellView, public IFolderView {
 public:
     ULONG refs=1,refreshes=0;DWORD refreshThread=0;HWND window=nullptr;
-    std::function<void()> onRefresh,onGetWindow;
-    HRESULT refreshResult=S_OK;
+    std::function<void()> onRefresh,onGetWindow,onFolderView,onCount,onItem,onRelease;
+    HRESULT refreshResult=S_OK,folderViewResult=S_OK,countResult=S_OK,itemResult=S_OK;
+    int count=1;ULONG countReads=0,itemReads=0;bool malformed=false,nullItem=false;
+    snapshot::Entry rendered{{},{},snapshot::Kind::StatusRow,L"Loading",snapshot::Status::Loading};
+    void Show(snapshot::Status status){
+        rendered.status=status;rendered.kind=status==snapshot::Status::Ready?snapshot::Kind::Library:snapshot::Kind::StatusRow;
+        rendered.epoch={1,0,0,{}};rendered.node={status==snapshot::Status::Ready?2ul:0ul,0,0,{}};
+    }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** result) override {
         if(!result)return E_POINTER;*result=nullptr;
-        if(iid!=IID_IUnknown&&iid!=IID_IShellView&&iid!=IID_IOleWindow)return E_NOINTERFACE;
-        *result=static_cast<IShellView*>(this);AddRef();return S_OK;
+        if(iid==IID_IFolderView){if(onFolderView)onFolderView();if(folderViewResult!=S_OK)return folderViewResult;*result=static_cast<IFolderView*>(this);}
+        else if(iid==IID_IUnknown||iid==IID_IShellView||iid==IID_IOleWindow)*result=static_cast<IShellView*>(this);
+        else return E_NOINTERFACE;
+        AddRef();return S_OK;
     }
     ULONG STDMETHODCALLTYPE AddRef() override {return ++refs;}
-    ULONG STDMETHODCALLTYPE Release() override {auto count=--refs;if(!count)delete this;return count;}
+    ULONG STDMETHODCALLTYPE Release() override {auto callback=std::move(onRelease);if(callback)callback();auto remaining=--refs;if(!remaining)delete this;return remaining;}
     HRESULT STDMETHODCALLTYPE GetWindow(HWND* result) override {if(!result)return E_POINTER;if(onGetWindow)onGetWindow();*result=window;return window?S_OK:E_FAIL;}
     HRESULT STDMETHODCALLTYPE Refresh() override {++refreshes;refreshThread=GetCurrentThreadId();if(onRefresh)onRefresh();return refreshResult;}
     HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL) override {return E_NOTIMPL;}
@@ -46,6 +55,27 @@ public:
     HRESULT STDMETHODCALLTYPE SaveViewState() override {return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE SelectItem(PCUITEMID_CHILD,SVSIF) override {return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE GetItemObject(UINT,REFIID,void** result) override {if(result)*result=nullptr;return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetCurrentViewMode(UINT*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE SetCurrentViewMode(UINT) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetFolder(REFIID,void** result) override {if(result)*result=nullptr;return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE Item(int index,PITEMID_CHILD* result) override {
+        if(!result)return E_POINTER;*result=nullptr;++itemReads;Check(index==0,"only first rendered item read");if(onItem)onItem();
+        if(itemResult!=S_OK||nullItem)return itemResult;
+        *result=snapshot::MakePidl(rendered);if(*result&&malformed)(*result)->mkid.cb=0;
+        return *result?S_OK:E_OUTOFMEMORY;
+    }
+    HRESULT STDMETHODCALLTYPE ItemCount(UINT flags,int* result) override {
+        if(!result)return E_POINTER;++countReads;Check(flags==SVGIO_ALLVIEW,"count all rendered items");if(onCount)onCount();*result=count;return countResult;
+    }
+    HRESULT STDMETHODCALLTYPE Items(UINT,REFIID,void** result) override {if(result)*result=nullptr;return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetSelectionMarkedItem(int*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetFocusedItem(int*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetItemPosition(PCUITEMID_CHILD,POINT*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetSpacing(POINT*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetDefaultSpacing(POINT*) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE GetAutoArrange() override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE SelectItem(int,DWORD) override {return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE SelectAndPositionItems(UINT,PCUITEMID_CHILD_ARRAY,POINT*,DWORD) override {return E_NOTIMPL;}
 };
 struct Fixture {
     HiddenWindow window;
@@ -57,7 +87,7 @@ struct Fixture {
     Fixture(){
         view.value=new View();view.value->window=window.value;
         browser.value=new RefreshBrowser();browser.value->active=view.value;
-        Check(SUCCEEDED(loading::CreateCallback(view.value,signal,&callback.value)),"callback create");
+        Check(SUCCEEDED(loading::CreateCallback(static_cast<IShellView*>(view.value),signal,&callback.value)),"callback create");
         Check(SUCCEEDED(callback.value->QueryInterface(IID_PPV_ARGS(&site.value))),"callback site");
         Check(SUCCEEDED(site.value->SetSite(static_cast<IShellBrowser*>(browser.value))),"attach site");
         Check(SUCCEEDED(callback.value->MessageSFVCB(SFVM_WINDOWCREATED,reinterpret_cast<WPARAM>(window.value),0)),"attach owner window");
@@ -67,27 +97,29 @@ struct Fixture {
 };
 void Budgets(){
     loading::Budget budget;
-    Check(budget.Observe(snapshot::Status::Loading,100),"first Loading starts episode");
+    budget.Start(100);
     Check(!budget.Take(599)&&budget.Take(600)&&!budget.Take(600),"500ms pacing including queued duplicate timer");
-    Check(budget.Observe(snapshot::Status::Loading,10099)&&budget.deadline==10100,"continuous Loading cannot extend deadline");
-    Check(!budget.Take(10100)&&!budget.Observe(snapshot::Status::Loading,20000),"ten second exhaustion and no same-Loading restart");
-    Check(!budget.Observe(snapshot::Status::Ready,20001)&&budget.Observe(snapshot::Status::Loading,20002),"new Loading after Ready can retry");
+    Check(budget.Take(10099)&&budget.deadline==10100,"observations cannot extend deadline");
+    Check(!budget.Take(10100)&&!budget.Take(20000),"ten second exhaustion cannot restart");
+    budget.Start(20002);Check(budget.episode==2,"new window starts a distinct episode");
     unsigned taken=0;for(ULONGLONG at=20002;at<=40002;++at)if(budget.Take(at))++taken;
     Check(taken<=20&&!budget.active,"hard attempt/time ceiling");
-    for(auto status:{snapshot::Status::Ready,snapshot::Status::Unavailable,snapshot::Status::AccessDenied,snapshot::Status::Expired,snapshot::Status::InvalidResponse,snapshot::Status::Busy}){
-        loading::Budget one;one.Observe(snapshot::Status::Loading,0);Check(!one.Observe(status,10)&&!one.Take(500),"all terminal states stop");
-    }
+    budget.Start(0);budget.deadline=100000;for(unsigned i=1;i<=20;++i)Check(budget.Take(i*500),"twenty paced observations");
+    Check(!budget.Take(10500)&&!budget.active,"attempt ceiling independent of duration");
+    budget.Start(0);budget.Stop();Check(!budget.Take(500),"stopped episode stays stopped");
     puts("budget=passed; interval=500ms; duration=10s; maximum_attempts=20");
 }
 void Completion(){
     for(auto terminal:{snapshot::Status::Ready,snapshot::Status::AccessDenied}){
         Fixture fixture;
-        fixture.view.value->onRefresh=[&]{fixture.signal->Publish(terminal);};
-        std::thread producer([&]{fixture.signal->Publish(snapshot::Status::Loading);});producer.join();
+        fixture.view.value->onRefresh=[&]{fixture.view.value->Show(terminal);};
+        std::thread producer([&]{fixture.signal->Publish(snapshot::Status::Ready);});producer.join();
         Pump(1150);
         Check(fixture.view.value->refreshes==1&&fixture.view.value->refreshThread==GetCurrentThreadId(),"Loading completes on owner UI thread then stops");
         PostMessageW(fixture.window.value,WM_TIMER,fixture.signal->cookie,0);Pump(50);
         Check(fixture.view.value->refreshes==1,"queued timer after kill is ignored");
+        fixture.view.value->Show(snapshot::Status::Loading);fixture.signal->Publish(snapshot::Status::Loading);Pump(550);
+        Check(fixture.view.value->refreshes==1,"later Loading and F5 do not restart initial observation");
     }
     Check(loading::ActiveViews()==0,"completion callback cleanup");
 }
@@ -116,13 +148,13 @@ void ReentryAndMismatch(){
 }
 void IndependentAndCapacity(){
     {Fixture first,second;
-        first.view.value->onRefresh=[&]{first.signal->Publish(snapshot::Status::Ready);};
-        second.view.value->onRefresh=[&]{if(second.view.value->refreshes==2)second.signal->Publish(snapshot::Status::Ready);};
+        first.view.value->onRefresh=[&]{first.view.value->Show(snapshot::Status::Ready);};
+        second.view.value->onRefresh=[&]{if(second.view.value->refreshes==2)second.view.value->Show(snapshot::Status::Ready);};
         first.signal->Publish(snapshot::Status::Loading);second.signal->Publish(snapshot::Status::Loading);Pump(1250);
         Check(first.view.value->refreshes==1&&second.view.value->refreshes==2,"each view has an independent Loading state");}
     {proof::Com<View> owner;owner.value=new View();std::vector<proof::Com<IShellFolderViewCB>> callbacks;
-        for(unsigned i=0;i<4;++i){proof::Com<IShellFolderViewCB> callback;Check(SUCCEEDED(loading::CreateCallback(owner.value,std::make_shared<loading::Signal>(),&callback.value)),"capacity slot");callbacks.push_back(std::move(callback));}
-        proof::Com<IShellFolderViewCB> fifth;Check(loading::CreateCallback(owner.value,std::make_shared<loading::Signal>(),&fifth.value)==HRESULT_FROM_WIN32(ERROR_BUSY)&&!fifth.value,"fifth automatic view refused");
+        for(unsigned i=0;i<4;++i){proof::Com<IShellFolderViewCB> callback;Check(SUCCEEDED(loading::CreateCallback(static_cast<IShellView*>(owner.value),std::make_shared<loading::Signal>(),&callback.value)),"capacity slot");callbacks.push_back(std::move(callback));}
+        proof::Com<IShellFolderViewCB> fifth;Check(loading::CreateCallback(static_cast<IShellView*>(owner.value),std::make_shared<loading::Signal>(),&fifth.value)==HRESULT_FROM_WIN32(ERROR_BUSY)&&!fifth.value,"fifth automatic view refused");
     }
     Check(!loading::ActiveViews(),"capacity returns to zero");
     {Fixture first,second,third,fourth;Check(loading::ActiveViews()==4,"four active windows");
@@ -131,7 +163,7 @@ void IndependentAndCapacity(){
     Check(!loading::ActiveViews()&&!loading::LiveCallbacks(),"capacity and callback counts independently return to zero");
 }
 void Generations(){
-    Fixture fixture;auto old=fixture.signal->Begin(),current=fixture.signal->Begin();snapshot::Status status;
+    Fixture fixture;fixture.view.value->Show(snapshot::Status::Ready);auto old=fixture.signal->Begin(),current=fixture.signal->Begin();snapshot::Status status;
     Check(!fixture.signal->Read(status),"in-flight enumeration has no completed current publication");
     fixture.signal->Publish(current,snapshot::Status::Ready);Pump(20);
     fixture.signal->Publish(old,snapshot::Status::Loading);Pump(550);
@@ -141,27 +173,67 @@ void Generations(){
     fixture.signal->Publish(next,snapshot::Status::AccessDenied);Pump(20);
     Check(fixture.signal->Read(status)&&status==snapshot::Status::AccessDenied,"newest terminal publication retained");
 }
+void RenderedBoundaries(){
+    for(auto status:{snapshot::Status::Ready,snapshot::Status::Unavailable,snapshot::Status::AccessDenied,snapshot::Status::Expired,snapshot::Status::InvalidResponse,snapshot::Status::Busy}){
+        Fixture fixture;fixture.view.value->Show(status);fixture.signal->Publish(snapshot::Status::Loading);Pump(550);
+        Check(fixture.view.value->countReads==1&&fixture.view.value->itemReads==1&&!fixture.view.value->refreshes&&!fixture.signal->diagnostic.timerActive,"rendered ordinary/error item stops despite Loading source signal");
+    }
+    for(unsigned mode=0;mode<8;++mode){
+        Fixture fixture;
+        if(mode==0)fixture.view.value->folderViewResult=E_NOINTERFACE;
+        else if(mode==1)fixture.view.value->countResult=E_FAIL;
+        else if(mode==2)fixture.view.value->count=-1;
+        else if(mode==3)fixture.view.value->count=102;
+        else if(mode==4)fixture.view.value->itemResult=E_FAIL;
+        else if(mode==5)fixture.view.value->nullItem=true;
+        else if(mode==6)fixture.view.value->malformed=true;
+        else fixture.view.value->countResult=S_FALSE;
+        Pump(550);
+        Check(!fixture.view.value->refreshes&&!fixture.signal->diagnostic.timerActive,"unknown/malformed rendered metadata fails closed");
+        if(mode<4||mode==7)Check(!fixture.view.value->itemReads,"failed or out-of-bounds count never reads item");
+    }
+    {Fixture fixture;fixture.view.value->count=101;fixture.view.value->Show(snapshot::Status::Ready);Pump(550);
+        Check(fixture.view.value->itemReads==1&&!fixture.view.value->refreshes,"bounded full page reads only first item");}
+    {Fixture fixture;fixture.view.value->refreshResult=E_FAIL;Pump(550);
+        Check(fixture.view.value->refreshes==1&&!fixture.signal->diagnostic.timerActive,"failed Refresh terminates observation");}
+}
+void EmptyAndDeadline(){
+    {Fixture empty,delayed;
+        empty.view.value->count=0;delayed.view.value->count=0;
+        empty.signal->Publish(snapshot::Status::Loading);delayed.signal->Publish(snapshot::Status::Ready);
+        Pump(600);Check(!empty.view.value->refreshes&&!delayed.view.value->refreshes&&!empty.view.value->itemReads,"unpainted first enumeration makes no refresh or item call");
+        delayed.view.value->count=1;delayed.view.value->onRefresh=[&]{delayed.view.value->Show(snapshot::Status::Ready);};
+        Pump(10200);
+        Check(!empty.view.value->refreshes&&!empty.view.value->itemReads&&empty.view.value->countReads>1&&empty.view.value->countReads<=20&&!empty.signal->diagnostic.timerActive,"zero items observes until fixed deadline without inventing success");
+        Check(delayed.view.value->refreshes==1&&!delayed.signal->diagnostic.timerActive,"painted Loading after empty starts refresh and Ready stops");
+        PostMessageW(empty.window.value,WM_TIMER,empty.signal->cookie,0);Pump(0);
+        Check(!empty.view.value->refreshes,"expired queued tick cannot query");
+    }
+    {Fixture fixture;fixture.view.value->onItem=[] {Sleep(static_cast<DWORD>(loading::DurationMs));};Pump(550);
+        Check(fixture.view.value->itemReads==1&&!fixture.view.value->refreshes&&!fixture.signal->diagnostic.timerActive,"call-out crossing fixed deadline cannot Refresh or rearm");}
+}
 void CalloutChanges(){
     {Fixture fixture;proof::Com<RefreshBrowser> replacement;replacement.value=new RefreshBrowser();replacement.value->active=fixture.view.value;
         fixture.browser.value->duringRelease=[&]{fixture.site.value->SetSite(nullptr);};
         Check(SUCCEEDED(fixture.site.value->SetSite(static_cast<IShellBrowser*>(replacement.value))),"reentrant SetSite replacement");
         proof::Com<IUnknown> current;Check(FAILED(fixture.site.value->GetSite(IID_PPV_ARGS(&current.value)))&&!current.value&&!fixture.signal->window,"old site Release revocation cannot be overwritten");
         Check(replacement.value->refs==1,"revoked replacement reference released");}
-    for(unsigned mode=0;mode<5;++mode){
+    for(unsigned mode=0;mode<7;++mode){
         Fixture fixture;proof::Com<RefreshBrowser> replacement;replacement.value=new RefreshBrowser();replacement.value->active=fixture.view.value;
         bool called=false;
         auto change=[&]{if(called)return;called=true;
-            if(mode==0){fixture.signal->Publish(snapshot::Status::Ready);Pump(0);}
-            else if(mode==1){fixture.signal->Publish(snapshot::Status::AccessDenied);Pump(0);}
-            else if(mode==2)fixture.site.value->SetSite(nullptr);
-            else if(mode==3)fixture.site.value->SetSite(static_cast<IShellBrowser*>(replacement.value));
-            else {fixture.signal->Publish(snapshot::Status::Ready);Pump(0);fixture.signal->Publish(snapshot::Status::Loading);Pump(0);}
+            if(mode%2==0)fixture.site.value->SetSite(static_cast<IShellBrowser*>(replacement.value));
+            else fixture.window.Close();
         };
         if(mode==1)fixture.browser.value->duringActive=change;
         else if(mode==2)fixture.view.value->onGetWindow=change;
+        else if(mode==3)fixture.view.value->onFolderView=change;
+        else if(mode==4)fixture.view.value->onCount=change;
+        else if(mode==5)fixture.view.value->onItem=change;
+        else if(mode==6){fixture.view.value->count=0;fixture.view.value->onRelease=change;}
         else fixture.browser.value->duringQuery=change;
         fixture.signal->Publish(snapshot::Status::Loading);Pump(650);
-        Check(called&&!fixture.view.value->refreshes,"call-out changed status/site/episode prevents captured refresh");
+        Check(called&&!fixture.view.value->refreshes&&!fixture.signal->diagnostic.timerActive,"call-out changed site/window prevents captured refresh and rearming");
     }
 }
 void DefViewWiring(const wchar_t* path){
@@ -209,8 +281,8 @@ void RealDefView(proof::Library& library,bool proofOwner){
         Check(signal->window==child,"system SFVM_WINDOWCREATED supplies actual child HWND");
         {proof::Com<IUnknown> supplied;Check(SUCCEEDED(site.value->GetSite(IID_PPV_ARGS(&supplied.value)))&&supplied.value,"system automatically calls SetSite");}
         proof::Com<View> recorder;recorder.value=new View();recorder.value->window=child;
-        recorder.value->onRefresh=[&]{signal->Publish(snapshot::Status::Ready);};browser.value->active=recorder.value;
-        signal->Publish(snapshot::Status::Loading);Pump(1150);
+        recorder.value->onRefresh=[&]{recorder.value->Show(snapshot::Status::Ready);};browser.value->active=recorder.value;
+        signal->Publish(snapshot::Status::AccessDenied);Pump(1150);
         Check(recorder.value->refreshes==1&&recorder.value->refreshThread==GetCurrentThreadId(),"automatic system callback reaches active view recorder once then stops");
         browser.value->active=view.value;
         puts("system_SetSite=passed; system_WINDOWCREATED=passed; auto_recorded_refresh=1; proof_data_acceptance=false");
@@ -237,7 +309,7 @@ int wmain(int argc,wchar_t** argv){
     std::unique_ptr<proof::Library> moduleLifetime;
     int result=0;try{
         if(wiring){moduleLifetime=std::make_unique<proof::Library>(argv[1]);RealDefView(*moduleLifetime,proofOwner);}
-        else{Budgets();Completion();Teardown();ReentryAndMismatch();IndependentAndCapacity();Generations();CalloutChanges();DefViewWiring(argv[1]);ControlledDllOwner(argv[1]);}
+        else{Budgets();Completion();Teardown();ReentryAndMismatch();IndependentAndCapacity();Generations();RenderedBoundaries();EmptyAndDeadline();CalloutChanges();DefViewWiring(argv[1]);ControlledDllOwner(argv[1]);}
         puts(wiring?"loading_refresh_mechanism=passed; native_lifetime=pending; registry=0; explorer=0; pipe=0"
             :"loading_refresh_unit=passed; hidden_owned_windows_only; registry=0; explorer=0; pipe=0");
     }

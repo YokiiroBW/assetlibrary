@@ -1,4 +1,5 @@
 #include "LoadingRefresh.h"
+#include "SnapshotPidl.h"
 #include <commctrl.h>
 #include <shlwapi.h>
 #include <shlguid.h>
@@ -16,6 +17,14 @@ template<class T> struct Reference {
     ~Reference(){if(value)value->Release();}
     Reference(const Reference&)=delete;Reference& operator=(const Reference&)=delete;
 };
+template<class T> struct ResultReference {
+    T* value=nullptr;
+    ~ResultReference(){if(value)value->Release();}
+};
+struct ItemReference {
+    PITEMID_CHILD value=nullptr;
+    ~ItemReference(){CoTaskMemFree(value);}
+};
 class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     std::atomic_ulong refs_{1};
     const DWORD thread_=GetCurrentThreadId();
@@ -25,7 +34,7 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     std::shared_ptr<Signal> signal_;
     HWND window_=nullptr;
     Budget budget_;
-    bool timer_=false,refreshing_=false;
+    bool timer_=false,refreshing_=false,started_=false;
     std::atomic_bool slotHeld_{true};
     void ReleaseSlot() noexcept {if(slotHeld_.exchange(false))activeViews.fetch_sub(1);}
     bool ReserveSlot() noexcept {
@@ -45,10 +54,8 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
             if(!timer_)budget_.Stop();
         }
     }
-    void StatusChanged() noexcept {
-        signal_->queued=false;
-        snapshot::Status status;if(!signal_->Read(status))return;
-        if(!budget_.Observe(status,GetTickCount64()))StopTimer();else Arm();
+    void StartObservation() noexcept {
+        if(!started_&&window_&&site_){started_=true;budget_.Start(GetTickCount64());Arm();}
     }
     void Detach() noexcept {
         ++signal_->diagnostic.detaches;
@@ -65,44 +72,70 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
         auto& diagnostic=signal_->diagnostic;++diagnostic.ticks;
         if(!timer_){diagnostic.skip=1;return;}if(refreshing_){diagnostic.skip=2;return;}
         StopTimer();
-        const auto now=GetTickCount64();
-        snapshot::Status status;ULONGLONG generation=0;
-        if(!signal_->Read(status,&generation)){diagnostic.skip=3;if(now>=budget_.deadline)budget_.Stop();Arm();return;}
-        if(!budget_.Observe(status,now)){diagnostic.skip=4;return;}
-        if(!budget_.Take(now)){diagnostic.skip=5;Arm();return;}
+        if(!budget_.Take(GetTickCount64())){diagnostic.skip=5;Arm();return;}
         ++diagnostic.attempts;diagnostic.skip=0;diagnostic.activeWindow=0;diagnostic.windowMatch=0;
         diagnostic.serviceResult=E_PENDING;diagnostic.activeResult=E_PENDING;diagnostic.getWindowResult=E_PENDING;diagnostic.refreshResult=E_PENDING;
+        diagnostic.folderViewResult=E_PENDING;diagnostic.countResult=E_PENDING;diagnostic.itemResult=E_PENDING;
+        diagnostic.itemCount=0;diagnostic.pidlValid=0;diagnostic.renderedKind=0;diagnostic.renderedStatus=0;
         refreshing_=true;
         const HWND expected=window_;
         const auto episode=budget_.episode,siteRevision=siteRevision_;
-        Reference<IUnknown> site(site_);IShellBrowser* browser=nullptr;IShellView* view=nullptr;
-        auto hr=site.value?IUnknown_QueryService(site.value,SID_STopLevelBrowser,IID_PPV_ARGS(&browser)):E_NOINTERFACE;
-        diagnostic.serviceResult=hr;
-        if(SUCCEEDED(hr)&&browser){hr=browser->QueryActiveShellView(&view);diagnostic.activeResult=hr;}
-        else if(SUCCEEDED(hr))hr=E_NOINTERFACE;
-        HWND actual=nullptr;
-        if(SUCCEEDED(hr)&&view){hr=view->GetWindow(&actual);diagnostic.getWindowResult=hr;}else if(SUCCEEDED(hr))hr=E_NOINTERFACE;
-        diagnostic.activeWindow=reinterpret_cast<UINT_PTR>(actual);diagnostic.windowMatch=expected&&actual==expected?1:0;
-        if(SUCCEEDED(hr)){
-            snapshot::Status current;ULONGLONG currentGeneration=0;
-            const bool valid=expected&&actual==expected&&window_==expected&&site_==site.value
-                &&siteRevision_==siteRevision&&budget_.active&&budget_.episode==episode
-                &&GetTickCount64()<budget_.deadline&&signal_->Read(current,&currentGeneration)
-                &&current==snapshot::Status::Loading&&currentGeneration==generation;
-            if(valid){++diagnostic.refreshes;hr=view->Refresh();diagnostic.refreshResult=hr;}
-            else{diagnostic.skip=6;hr=S_FALSE;}
+        IUnknown* const expectedSite=site_;
+        const auto live=[&]{return expected&&window_==expected&&IsWindow(expected)&&site_==expectedSite
+            &&siteRevision_==siteRevision&&budget_.active&&budget_.episode==episode&&GetTickCount64()<budget_.deadline;};
+        bool observeAgain=false;
+        HRESULT hr=E_ABORT;
+        {
+            Reference<IUnknown> site(expectedSite);
+            ResultReference<IShellBrowser> browser;ResultReference<IShellView> view;ResultReference<IFolderView> folderView;
+            const auto current=[&]{return hr==S_OK&&live();};
+            if(live())hr=site.value?IUnknown_QueryService(site.value,SID_STopLevelBrowser,IID_PPV_ARGS(&browser.value)):E_NOINTERFACE;
+            diagnostic.serviceResult=hr;
+            if(current()){hr=browser.value?browser.value->QueryActiveShellView(&view.value):E_NOINTERFACE;diagnostic.activeResult=hr;}
+            const auto sameWindow=[&]{
+                HWND actual=nullptr;hr=view.value?view.value->GetWindow(&actual):E_NOINTERFACE;diagnostic.getWindowResult=hr;
+                diagnostic.activeWindow=reinterpret_cast<UINT_PTR>(actual);diagnostic.windowMatch=actual==expected?1:0;
+                if(hr==S_OK&&actual!=expected)hr=E_ABORT;
+                return current();
+            };
+            if(current()&&sameWindow()){
+                hr=view.value->QueryInterface(IID_PPV_ARGS(&folderView.value));diagnostic.folderViewResult=hr;
+                int count=-1;
+                if(current()){hr=folderView.value?folderView.value->ItemCount(SVGIO_ALLVIEW,&count):E_NOINTERFACE;diagnostic.countResult=hr;diagnostic.itemCount=static_cast<ULONG>(count);}
+                if(current()){
+                    if(count==0)observeAgain=true; // Initial enumeration may not have painted any item yet.
+                    else if(count>0&&count<=static_cast<int>(snapshot::MaxItems)){
+                        ItemReference item;hr=folderView.value->Item(0,&item.value);diagnostic.itemResult=hr;
+                        if(current()){
+                            snapshot::Entry entry;
+                            try {
+                                if(!snapshot::ReadPidl(item.value,entry))hr=E_INVALIDARG;
+                                else {
+                                    diagnostic.pidlValid=1;diagnostic.renderedKind=static_cast<ULONG>(entry.kind);diagnostic.renderedStatus=static_cast<ULONG>(entry.status);
+                                    if(entry.kind==snapshot::Kind::StatusRow&&entry.status==snapshot::Status::Loading&&sameWindow()){
+                                        ++diagnostic.refreshes;hr=view.value->Refresh();diagnostic.refreshResult=hr;observeAgain=current();
+                                    }
+                                }
+                            }catch(const std::bad_alloc&){hr=E_OUTOFMEMORY;}
+                        }
+                    }else hr=E_INVALIDARG;
+                }
+            }
         }
-        if(view)view->Release();if(browser)browser->Release();
+        // COM Release can also revoke the site or destroy the window.
+        observeAgain=observeAgain&&hr==S_OK&&live()&&budget_.attempts<MaxAttempts;
         refreshing_=false;
-        if(FAILED(hr)){diagnostic.skip=7;budget_.Stop();StopTimer();return;}
-        StatusChanged();
+        if(budget_.episode!=episode){Arm();return;}
+        if(!observeAgain){diagnostic.skip=FAILED(hr)?7:6;budget_.Stop();StopTimer();return;}
+        Arm();
     }
     static LRESULT CALLBACK WindowProc(HWND window,UINT message,WPARAM wParam,LPARAM lParam,UINT_PTR,DWORD_PTR data) noexcept {
         auto self=reinterpret_cast<Callback*>(data);Reference<Callback> invocation(self);
         if(message==WM_NCDESTROY){
             self->Detach();const auto result=DefSubclassProc(window,message,wParam,lParam);self->ClearSite();return result;
         }
-        if(message==self->signal_->notification&&wParam==self->signal_->cookie){self->StatusChanged();return 0;}
+        // Clone enumeration is diagnostic only; it cannot change this view's episode.
+        if(message==self->signal_->notification&&wParam==self->signal_->cookie){self->signal_->queued=false;return 0;}
         if(message==WM_TIMER&&wParam==self->signal_->cookie){self->Tick();return 0;}
         return DefSubclassProc(window,message,wParam,lParam);
     }
@@ -120,11 +153,13 @@ public:
     HRESULT STDMETHODCALLTYPE SetSite(IUnknown* site) override {
         auto& diagnostic=signal_->diagnostic;++diagnostic.siteCalls;diagnostic.siteThread=GetCurrentThreadId();
         if(GetCurrentThreadId()!=thread_){diagnostic.siteResult=RPC_E_WRONG_THREAD;return RPC_E_WRONG_THREAD;}
-        Reference<Callback> invocation(this);if(site)site->AddRef();auto previous=site_;site_=site;++siteRevision_;
+        Reference<Callback> invocation(this);if(site)site->AddRef();auto previous=site_;
+        if(started_&&site!=previous){StopTimer();budget_.Stop();}
+        site_=site;++siteRevision_;
         diagnostic.sitePresent=site_?1:0;
         if(previous)previous->Release();
         if(!site_){Detach();diagnostic.siteResult=S_OK;return S_OK;}
-        if(window_)StatusChanged();diagnostic.siteResult=S_OK;return S_OK;
+        StartObservation();diagnostic.siteResult=S_OK;return S_OK;
     }
     HRESULT STDMETHODCALLTYPE GetSite(REFIID iid,void** result) override {
         if(!result)return E_POINTER;*result=nullptr;
@@ -142,15 +177,13 @@ public:
         if(!window||window_||windowThread!=thread_)return done(E_INVALIDARG);
         if(!ReserveSlot())return done(HRESULT_FROM_WIN32(ERROR_BUSY));
         if(!SetWindowSubclass(window,WindowProc,signal_->cookie,reinterpret_cast<DWORD_PTR>(this))){ReleaseSlot();return done(E_FAIL);}
-        budget_=Budget{};
-        AddRef();window_=window;signal_->window=window;StatusChanged();return done(S_OK);
+        started_=false;
+        AddRef();window_=window;signal_->window=window;StartObservation();return done(S_OK);
     }
 };
 }
-bool Budget::Observe(snapshot::Status status,ULONGLONG now) noexcept {
-    if(status!=snapshot::Status::Loading){previous=status;active=false;return false;}
-    if(previous!=status){deadline=now+DurationMs;next=now+IntervalMs;attempts=0;++episode;active=true;}
-    previous=status;if(now>=deadline||attempts>=MaxAttempts)active=false;return active;
+void Budget::Start(ULONGLONG now) noexcept {
+    deadline=now+DurationMs;next=now+IntervalMs;attempts=0;++episode;active=true;
 }
 bool Budget::Take(ULONGLONG now) noexcept {
     if(!active||now>=deadline||attempts>=MaxAttempts){active=false;return false;}
