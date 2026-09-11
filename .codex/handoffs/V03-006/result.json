@@ -989,6 +989,10 @@
     "notification_actions": 0,
     "explorer_restarts": 0,
     "root_retains_gui_ownership": true,
-    "product_gates_closed": false
+    "product_gates_closed": false,
+    "self_token_query_duplicate_required_verified": true,
+    "current_process_native_query_regression": 1,
+    "probe_failure_stream_evidence_added": true,
+    "initial_external_verify_refused_before_registration": true
   }
 }

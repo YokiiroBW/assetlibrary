@@ -1,5 +1,7 @@
 # V03-006 — Explorer 入口诊断交接
 
+包外proof首次verify在登记前因self token成员查询SecurityException拒绝，原件保留。已由只读8/10权限对照确认仅self需QUERY|DUPLICATE，parent保持QUERY，修后当前包内上下文查询成功但仍因父来源拒绝，准入不降级。probe失败/超时原始流和exit先落盘；runtime guard计时前移至register调用前，并加包外只读HKLM2根冲突前置。新verify标签待审后执行，当前无新增登记/GUI guard。
+
 最新：[本项目注册入口修正与下一实机计划](proof-native-registration-plan.md)已落代码：包内局部读回不再晋级system Explorer注册/清理，register与verify在写入前要求已核普通系统Explorer直接父路线；NoPackage本身不放行。owner当前视图cleanup保留，通知补STA/COM，CLI说明同步。19上下文/报告案例、2接线检查和帮助类型编译、17 Shell契约及仓库相关检查通过；本轮无GUI/注册/通知/重启，root仍是唯一GUI操作者。微软样例恢复仅解除环境阻断，本项目G1..G4待包外实机。
 
 最新：[异常V2到期交接](key-open-v2-expiry.md)新registered normal/cancel各32真C++自行捕获、total33/详16、status0/句柄close/清理均通过；实机调用发生在600秒自然到期后被拒绝，observer/额外notify/ThisPC/Browse均未启动。8根双通知/20missing与专属SDK窗清理确认，原PID已不存在。按root排他协调交接后停止GUI/登记/实机，保留代码owner；脚本、SDK创建方法和接管边界已列明。

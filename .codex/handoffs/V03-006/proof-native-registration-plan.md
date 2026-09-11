@@ -30,7 +30,11 @@ root的同周期A/B显示包内323 guard写后20字段正确，普通同用户/�
 
 ## 本轮验证与限制
 
-新增 `pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1` 使用合成上下文逐条件允许/拒绝，覆盖NoPackage+same-user/session仍拒绝、非布尔/缺失证据拒绝、包内/原生来源的presence和absence均不晋级系统证明、缺失owner保持null；只编译帮助类型和通知文字块，不做原生查询、注册或通知。实际父进程/权限查询与通知正确性仍须包外下一周期验证。
+新增 `pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1` 使用合成上下文逐条件允许/拒绝，覆盖NoPackage+same-user/session仍拒绝、非布尔/缺失证据拒绝、包内/原生来源的presence和absence均不晋级系统证明、缺失owner保持null；另对当前测试进程做一次只读令牌路径回归，不注册或通知。实际父进程来源与通知正确性仍须包外下一周期验证。
+
+首次获准包外独立verify在来源查询阶段遇SecurityException，尚未登记；原失败保留。只读对照确认WindowsPrincipal成员查询在QUERY-only self token上失败，QUERY|DUPLICATE可成功，因此仅self token访问由8改10，parent仍8，所有准入判据不变。修正后当前包内执行器QuerySucceeded=true、OrdinaryUser=true，仍因父来源非Explorer而拒绝。没有据默认false误判提权，也没有通过修改准入降级。
+
+后续薄guard的600秒起点在调用register之前，包含登记和通知耗时。包外另查两个同名HKLM根不存在，作为独立冲突前置，不混入9个HKCU字段或写HKLM。verify的probe输出以新GUID目录流式保留，exit/timeout和捕获状态落盘后才断言；旧失败输出不覆盖。
 
 复用现有HKCU owner注册、原COM/DefView probe、系统进程/令牌API和普通Explorer执行方式，没有公开契约、数据库、核心权限或Provider变化。每次来源检查只涉及执行器和一个父进程，CIM查询限5秒；无需50万资产索引或扫描。当前成功/失败字段属于局部工具证据，不宣布产品Windows完成。
 

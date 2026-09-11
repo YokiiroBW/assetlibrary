@@ -24,19 +24,44 @@ try {
   $probeStart.CreateNoWindow = $true
   $probeStart.RedirectStandardOutput = $true
   $probeStart.RedirectStandardError = $true
-  $process = [Diagnostics.Process]::Start($probeStart)
+  $evidenceDirectory = Join-Path $resolvedBuild ('verify-evidence/' + [Guid]::NewGuid().ToString('N'))
+  New-Item -ItemType Directory -Path $evidenceDirectory -ErrorAction Stop | Out-Null
+  $stdoutPath = Join-Path $evidenceDirectory 'stdout.txt'
+  $stderrPath = Join-Path $evidenceDirectory 'stderr.txt'
+  $stdoutFile = $null; $stderrFile = $null; $process = $null
+  $started = [DateTimeOffset]::UtcNow
+  $timedOut = $false; $exitConfirmed = $false; $streamsCompleted = $false; $captureError = $null
   try {
-    $output = $process.StandardOutput.ReadToEndAsync()
-    $errors = $process.StandardError.ReadToEndAsync()
-    if (!$process.WaitForExit(10000)) { $process.Kill($true); $process.WaitForExit(3000) | Out-Null; throw 'Isolated proof exceeded 10 seconds.' }
-    $text = $output.GetAwaiter().GetResult()
-    $errorText = $errors.GetAwaiter().GetResult()
-    if ($process.ExitCode -ne 0 -or $errorText.Length -ne 0) { throw 'Isolated COM/DefView probe failed.' }
+    $stdoutFile = [IO.FileStream]::new($stdoutPath,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read,1,[IO.FileOptions]::WriteThrough)
+    $stderrFile = [IO.FileStream]::new($stderrPath,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::Read,1,[IO.FileOptions]::WriteThrough)
+    $process = [Diagnostics.Process]::Start($probeStart)
+    # Preserve bytes as they arrive, including output preceding a failure/timeout.
+    $output = $process.StandardOutput.BaseStream.CopyToAsync($stdoutFile)
+    $errors = $process.StandardError.BaseStream.CopyToAsync($stderrFile)
+    $timedOut = -not $process.WaitForExit(10000)
+    if ($timedOut) { $process.Kill($true); $exitConfirmed = $process.WaitForExit(3000) } else { $exitConfirmed = $true }
+    $streamsCompleted = [Threading.Tasks.Task]::WaitAll([Threading.Tasks.Task[]]@($output,$errors),3000)
+  } catch { $captureError = $_.Exception.Message }
+  finally {
+    if ($process -and -not $process.HasExited) {
+      try { $process.Kill($true); $exitConfirmed = $process.WaitForExit(3000) }
+      catch { $captureError = 'Owned probe termination failed: ' + $_.Exception.Message }
+    }
+    if ($stdoutFile) { $stdoutFile.Dispose() }; if ($stderrFile) { $stderrFile.Dispose() }
+    [ordered]@{ StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Pid=if($process){$process.Id}else{$null};ExitCode=if($process -and $process.HasExited){$process.ExitCode}else{$null};TimedOut=$timedOut;ExitConfirmed=$exitConfirmed;StreamsCompleted=$streamsCompleted;CaptureError=$captureError;StdoutFile=$stdoutPath;StderrFile=$stderrPath } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $evidenceDirectory 'result.json') -Encoding utf8
+  }
+  try {
+    if ($captureError -or -not $exitConfirmed -or -not $streamsCompleted) { throw "Isolated proof capture/exit incomplete; evidence: $evidenceDirectory" }
+    if ($timedOut) { throw "Isolated proof exceeded 10 seconds; evidence: $evidenceDirectory" }
+    $text = [IO.File]::ReadAllText($stdoutPath)
+    $errorText = [IO.File]::ReadAllText($stderrPath)
+    if ($process.ExitCode -ne 0 -or $errorText.Length -ne 0) { throw "Isolated COM/DefView probe failed; evidence: $evidenceDirectory" }
     foreach ($expected in @('CoCreateInstance=00000000','SHParseDisplayName=00000000','RootAssociationArray=00000000','RootAttributes=a8000000; Result=00000000','DesktopEnumeratesRoot=true','CreateDefView=00000000','BindChild=00000000')) {
       if (!$text.Contains($expected)) { throw "Missing proof result: $expected" }
     }
     Write-Output $text.Trim()
-  } finally { $process.Dispose() }
+    Write-Output "Proof evidence: $evidenceDirectory"
+  } finally { if ($process) { $process.Dispose() } }
 } finally {
   if ($registeredByThisRun) { & $registration -Action unregister | Out-Null }
   $after = & $registration -Action verify | ConvertFrom-Json

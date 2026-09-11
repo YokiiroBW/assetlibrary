@@ -16,7 +16,9 @@ pwsh -NoProfile -File tests/windows-shell/verify.ps1 -BuildDirectory .runtime/ex
 pwsh -NoProfile -File tests/windows-shell/test-registration-context.ps1
 ```
 
-测试使用合成来源证据检查允许/拒绝与presence/absence报告边界，编译帮助类型但不调用原生上下文查询、通知或注册。当前CI的Shell入口仍仅构建C++；测试注册不是未授权的CI桌面动作。
+测试使用合成来源证据检查允许/拒绝与presence/absence报告边界，并只对当前测试进程读取令牌，验证成员查询所需访问权限；不查询其他进程、不通知或注册。当前CI的Shell入口仍仅构建C++；测试注册不是未授权的CI桌面动作。
+
+独立probe的原始stdout/stderr和exit/timeout结果先写入本次build目录的`verify-evidence/<新GUID>/`，再判断成功与失败。超时也保留此前已收到的字节；目录不复用。查看错误中给出的evidence位置，不能把缺少控制台输出当作probe没有执行。
 
 ### 注册表视图与启动路线
 

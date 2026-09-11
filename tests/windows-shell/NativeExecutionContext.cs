@@ -54,7 +54,9 @@ namespace AssetLibraryExplorerProof
                 Require(ProcessIdToSessionId(parentPid, out parentSession));
                 Require(ProcessIdToSessionId(GetProcessId(self), out selfSession));
                 result.SameSession = parentSession == selfSession;
-                Require(OpenProcessToken(parent, 8, out parentToken) && OpenProcessToken(self, 8, out selfToken));
+                // WindowsPrincipal duplicates a primary token for its membership
+                // query. QUERY alone permits SID reads but makes IsInRole throw.
+                Require(OpenProcessToken(parent, 8, out parentToken) && OpenProcessToken(self, 10, out selfToken));
                 using (var parentIdentity = new WindowsIdentity(parentToken))
                 using (var selfIdentity = new WindowsIdentity(selfToken))
                 {

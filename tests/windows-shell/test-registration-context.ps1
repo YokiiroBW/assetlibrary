@@ -52,8 +52,12 @@ foreach ($context in @($inside, $valid)) {
 $missingOwner = New-ProofRegistryReport -Context $inside -ClassPresent $false -NamespacePresent $false -Owner $null
 if ($null -ne $missingOwner.Owner) { throw 'Missing owner was replaced by an empty string or default' }
 $count++
-# Compile both helpers, without invoking context queries, Shell notifications or registration.
+# Compile both helpers and exercise only the current process token query below;
+# no Shell notifications, registry access or external process query is performed.
 Add-Type -Path (Join-Path $PSScriptRoot 'NativeExecutionContext.cs')
+$selfRead = [AssetLibraryExplorerProof.ExecutionContextReader]::Read([uint32]$PID)
+if (-not $selfRead.QuerySucceeded) { throw 'Own-token membership query failed; QUERY-only token regression' }
+if (Test-ProofNativeLaunch -Context $selfRead) { throw 'A process must not certify itself as its Explorer launch origin' }
 foreach ($scriptName in @('execution-context.ps1','registration.ps1','verify.ps1')) {
     $tokens = $null; $parseErrors = $null
     $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot $scriptName), [ref]$tokens, [ref]$parseErrors)
@@ -76,4 +80,4 @@ foreach ($scriptName in @('execution-context.ps1','registration.ps1','verify.ps1
         }
     }
 }
-[pscustomobject]@{ ContextPolicyCases=$count; AdmissionWiringChecks=2; NativeHelpersCompiled=$true; ScriptSyntaxPassed=$true; RegistryWrites=0; ContextQueries=0; Notifications=0; ExplorerActions=0 } | ConvertTo-Json
+[pscustomobject]@{ ContextPolicyCases=$count; AdmissionWiringChecks=2; NativeHelpersCompiled=$true; ScriptSyntaxPassed=$true; RegistryWrites=0; ContextQueries=1; ContextQueryScope='Current process used as both query subjects; no external process or registry query'; Notifications=0; ExplorerActions=0 } | ConvertTo-Json
