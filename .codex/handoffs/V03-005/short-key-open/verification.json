@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "archived_provenance_entries": 60,
+  "original_copies": 43,
+  "redacted_copies": 17,
+  "source_hashes_rechecked": 65,
+  "copy_hashes_verified": true,
+  "six_reader_runs_each_20_fields_verified": true,
+  "both_8_root_cleanups_verified": true,
+  "failed_capture_flags_preserved": true,
+  "exception_trigger_and_final_totals_verified": true,
+  "native_thispc_3_items_verified": true,
+  "native_after_capture_ms": 15.049999999999999,
+  "known_private_tokens_absent": true,
+  "json_and_jsonl_parsed": true,
+  "full_ui_tree_excluded": true,
+  "summary_sha256": "413F0391DFD75A112D15A6D0C747E5628CC30A13D6CC317C83D4A8B1BFAA2B25",
+  "evidence_sha256": "EC92CFD53A28FE3D356AA1FD815C53C2D129DF7ACEE99C3D73BED69B1584DA57",
+  "source_files_modified": false,
+  "live_actions": 0,
+  "coordinator_wording_alignment": "Clarified the interval between the threshold trigger and final cleanup snapshot; aligned notification code identity with the SDK supplement while preserving unknown payload and origin. Raw artifacts unchanged."
+}

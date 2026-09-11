@@ -1,0 +1,2 @@
+{"kind":"stage","stage":"planned_setup_failed","hr":"0x80004005","tick":1000187}
+{"kind":"result","mode":"plan","passed":false,"matchedEntries":0,"matchedReturns":0,"nonMatchingDiscarded":0,"finiteWaitTimeouts":0,"exitInterruptObserved":false,"attachCompleted":false,"cleanupVerified":false,"targetAliveAfterDetach":false,"existingProcessAttached":false,"tick":1000187}

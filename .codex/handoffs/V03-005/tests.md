@@ -201,3 +201,13 @@ a118fbe合入1d00321，25份原件SHA独立核对。A20/B26共46query、两来�
 首次参考e169e51合入56bca99，33归档/32来源/5脱敏映射核对：两合法嵌套cache与return正确，exact1计数断言错误导致passed=false；已清理、未cancel/real。V2仅修计数条件及固定路径，38纯检查与独立review通过。3ec6f1f合入29078b5，59归档/58来源/7脱敏映射核对；normal/cancel各2逐call完整配对、cache flags1/attrsA0000020/callFor0/restricted0、S_OK/20000000。real4逐call缓存四字段全0；前后reader20实际类型和值相同，HKCU/readerHKCR均A0000020；最终20missing。ready领先唯一Browse约429ms，59.438秒保护结束非完整60秒；6BP清零、detach、目标健康、UI/8根双通知清理、用户窗保留经独立审查。
 
 下一公开RegOpen候选39纯检查及normal/cancel缺失键参考通过，原生成功路径与真实SHCORE IAT尚待owner验证。该阶段不将API准备当实机根因证据。
+
+## 精确开键观察、异常预算与short执行
+
+公开入口由本地APIset及advapi thunk定位KernelBase RVA2BBF0，固定SHCORE IAT在真实目标核验通过。原26件manifest、缺失键normal/cancel均独立核对；registered正控也通过。b37eb4e合入7f64135，60归档/59来源逐字节核对：5.609秒旧首机会门槛在触发前结束，0match不是键缺失。原通知literal仅编译已核，没有增加或修改系统策略。
+
+异常预算V2的19件manifest与三原始参考独立核对：50纯、normal/cancel32真实C++ targetcatch/total33/详16，status2与清理通过；超限trigger257/final258仍failed/exit1、cleanup和handler257通过。随后registered32CPP正控通过；dcbb48a合入0d9e84f，45归档/45来源核对，登记到期在attach前拒绝，未伪造实机通过。
+
+short-key-open归档60件（43原字节/17明确脱敏），root重核75个来源含排除/重复源。第一次18行plan附加前拒绝；修正生成器320B样例与10负例后第二次11行321B已执行ready/原通知/首次ThisPC。other阈值40080201在25.813秒触发（81=64+17），26.797秒结果、cleanup总177=132+45、second0；0match/3896discard。nativeThisPC为3项、在capture结果后15.05ms启动，不宣称完整导航覆盖；Browse未dispatch且独立拒绝回执未保存，限制原样记录。两cycle前后20字段匹配、清理后20missing/8根/双通知、自有窗关闭均核对。SDK roerrorapi.h294明确此码为EXCEPTION_RO_ORIGINATEERROR，未记录其payload或caller，不作根因推断。
+
+最终仓库验证日志：.runtime/v03-005-final-tests/repository-key-open-final.log。没有重跑未改产品套件或关闭G1..G4。

@@ -1,0 +1,23 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "sources": [
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/actual-thispc-cua.txt",
+      "source_sha256": "94BFA9FAE6F7336C63B9D0078AACEF64DA9295E000BB9AE4C7701598702E636F"
+    }
+  ],
+  "transformation": "Keep only count, broad item categories, and sample-label presence. Omit full UI tree, SDK UI content, selected item text, network host/share names, and storage labels.",
+  "payload": {
+    "WindowKind": "Native Explorer ThisPC",
+    "ItemCountText": 3,
+    "ObservedListItemCount": 3,
+    "ObservedItemCategories": [
+      "local volume",
+      "existing NAS resource",
+      "existing mapped resource"
+    ],
+    "SampleLabelPresentInCapturedTree": false,
+    "PreciseObservationUtc": null,
+    "Limitation": "Exact navigation/snapshot UTC was not persisted."
+  }
+}

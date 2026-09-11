@@ -1,0 +1,110 @@
+{
+  "sourceSha256": "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153",
+  "sourceSize": 1005544,
+  "machine": 34404,
+  "timestamp": 1467776254,
+  "imageBase": 6442450944,
+  "imageSize": 1011712,
+  "sections": [
+    {
+      "name": ".text",
+      "rva": 4096,
+      "virtualSize": 624472,
+      "rawSize": 626688,
+      "rawOffset": 4096,
+      "flags": 1610612768
+    },
+    {
+      "name": "fothk",
+      "rva": 630784,
+      "virtualSize": 4096,
+      "rawSize": 4096,
+      "rawOffset": 630784,
+      "flags": 1610612768
+    },
+    {
+      "name": ".rdata",
+      "rva": 634880,
+      "virtualSize": 271700,
+      "rawSize": 274432,
+      "rawOffset": 634880,
+      "flags": 1073741888
+    },
+    {
+      "name": ".data",
+      "rva": 909312,
+      "virtualSize": 26016,
+      "rawSize": 4096,
+      "rawOffset": 909312,
+      "flags": 3221225536
+    },
+    {
+      "name": ".pdata",
+      "rva": 937984,
+      "virtualSize": 36048,
+      "rawSize": 36864,
+      "rawOffset": 913408,
+      "flags": 1073741888
+    },
+    {
+      "name": ".didat",
+      "rva": 974848,
+      "virtualSize": 1096,
+      "rawSize": 4096,
+      "rawOffset": 950272,
+      "flags": 3221225536
+    },
+    {
+      "name": ".rsrc",
+      "rva": 978944,
+      "virtualSize": 1264,
+      "rawSize": 4096,
+      "rawOffset": 954368,
+      "flags": 1073741888
+    },
+    {
+      "name": ".reloc",
+      "rva": 983040,
+      "virtualSize": 24832,
+      "rawSize": 28672,
+      "rawOffset": 958464,
+      "flags": 1107296320
+    }
+  ],
+  "targetRva": 219216,
+  "targetExport": {
+    "ordinal": 120,
+    "names": [],
+    "rva": 219216,
+    "dllName": "SHCORE.dll",
+    "forwarder": null
+  },
+  "targetPrefix32Sha256": "6c16a4ed973d9bb17ad97493d3ad04f3ca78ec044dc1752434724e6cc07ca92c",
+  "targetRuntimeFunction": {
+    "beginRva": 219216,
+    "endRva": 219550,
+    "codeSize": 334,
+    "unwindRva": 792844,
+    "unwind": {
+      "version": 1,
+      "flags": 3,
+      "prologSize": 37,
+      "codeCount": 9,
+      "frameByte": 0,
+      "handlerRva": 622608
+    },
+    "vaBegin": "0x180035850",
+    "vaEndExclusive": "0x18003599E"
+  },
+  "codeView": [
+    {
+      "signature": "RSDS",
+      "guid": "4A074CBB-8DDA-73D1-4173-103398F65C39",
+      "age": 1,
+      "pdbName": "shcore.pdb",
+      "symbolKey": "4A074CBB8DDA73D14173103398F65C391"
+    }
+  ],
+  "normalAndDelayImportCount": 372,
+  "runtimeFunctionCount": 3004
+}

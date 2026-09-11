@@ -1,0 +1,664 @@
+#include "Shared.h"
+#include "Plan.h"
+#include "Fingerprint.h"
+#include "ExceptionBudget.h"
+#include <dbgeng.h>
+#include <wrl/client.h>
+#include <atomic>
+#include <cstdio>
+#include <string>
+#include <thread>
+#include <vector>
+#include <cwchar>
+#include <cstring>
+#include <optional>
+
+using Microsoft::WRL::ComPtr;
+static std::atomic<bool> outputFailed{false};
+static void Record(const char* stage, HRESULT result = S_OK) noexcept {
+    if (printf("{\"kind\":\"stage\",\"stage\":\"%s\",\"hr\":\"0x%08lX\",\"tick\":%llu}\n", stage, static_cast<ULONG>(result),GetTickCount64()) < 0 || fflush(stdout) != 0)
+        outputFailed = true;
+}
+static void Need(bool condition, const char* stage) {
+    if (!condition) { Record(stage, E_FAIL); throw E_FAIL; }
+}
+static void Checked(HRESULT hr, const char* stage) {
+    if (FAILED(hr)) { Record(stage, hr); throw hr; }
+}
+inline constexpr DWORD TargetProcessAccess=PROCESS_QUERY_INFORMATION|SYNCHRONIZE;
+static HRESULT QueryDebugger(HANDLE process,const char* stage,BOOL& present) {
+    present=FALSE;
+    BOOL ok=CheckRemoteDebuggerPresent(process,&present);
+    DWORD error=ok?ERROR_SUCCESS:GetLastError();
+    HRESULT hr=ok?S_OK:(error?HRESULT_FROM_WIN32(error):E_FAIL);
+    if(printf("{\"kind\":\"debugger_query\",\"stage\":\"%s\",\"querySucceeded\":%s,\"win32Error\":%lu,\"hr\":\"0x%08lX\",\"debuggerPresent\":%s,\"tick\":%llu}\n",stage,ok?"true":"false",error,static_cast<ULONG>(hr),ok?(present?"true":"false"):"null",GetTickCount64())<0||fflush(stdout)!=0) outputFailed=true;
+    return hr;
+}
+struct Handle {
+    HANDLE value = nullptr;
+    ~Handle() { if (value && value != INVALID_HANDLE_VALUE) CloseHandle(value); }
+    Handle() = default;
+    explicit Handle(HANDLE h) : value(h) {}
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
+};
+
+struct OwnedTarget {
+    Handle mapping, start, stop, process, thread, imageLock;
+    SharedState* state = nullptr;
+    DWORD pid = 0;
+    ULONGLONG created = 0;
+    std::optional<Plan> plan;
+    bool Synthetic() const { return !plan.has_value(); }
+    const char* Profile() const { return plan ? plan->profile.c_str() : "synthetic"; }
+    void ValidateAdmission() {
+        if(plan) VerifyExplorerPlan(*plan,process.value,true);
+        else Need(CreationTime(process.value)==created&&WaitForSingleObject(process.value,0)==WAIT_TIMEOUT,"synthetic_identity");
+    }
+    void OpenPlanTarget(const Plan& input) {
+        Need(input.profile=="official","fixed_official_profile_only");
+        plan=input; pid=input.pid; created=input.creation;
+        process.value=OpenProcess(TargetProcessAccess,FALSE,pid);
+        if(!process.value) { DWORD error=GetLastError(); Checked(HRESULT_FROM_WIN32(error?error:ERROR_ACCESS_DENIED),"open_planned_target_query_handle"); }
+        ValidateAdmission();
+        BOOL debugged=FALSE;
+        Checked(QueryDebugger(process.value,"planned_pre_attach",debugged),"planned_debugger_query_failed");
+        Need(!debugged,"planned_target_already_debugged");
+        Record("planned_target_admission_passed");
+    }
+    ~OwnedTarget() {
+        if (stop.value) SetEvent(stop.value);
+        if (state) UnmapViewOfFile(state);
+    }
+    void Launch(bool exceptionLimit) {
+        wchar_t executable[32768]{};
+        DWORD length = GetModuleFileNameW(nullptr, executable, 32768);
+        Need(length > 0 && length < 32768, "observer_path");
+        std::wstring targetPath(executable, length);
+        auto slash = targetPath.find_last_of(L'\\');
+        Need(slash != std::wstring::npos, "observer_directory");
+        targetPath.resize(slash + 1); targetPath += L"ClsidKeyOpenReferenceTargetV2.exe";
+        Need((GetFileAttributesW(targetPath.c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) == 0, "synthetic_image_not_reparse");
+        imageLock.value = CreateFileW(targetPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        Need(imageLock.value != INVALID_HANDLE_VALUE, "synthetic_image_lock");
+        SECURITY_ATTRIBUTES security{sizeof(security), nullptr, TRUE};
+        mapping.value = CreateFileMappingW(INVALID_HANDLE_VALUE, &security, PAGE_READWRITE, 0, sizeof(SharedState), nullptr);
+        start.value = CreateEventW(&security, TRUE, FALSE, nullptr);
+        stop.value = CreateEventW(&security, TRUE, FALSE, nullptr);
+        Need(mapping.value && start.value && stop.value, "owned_ipc");
+        state = static_cast<SharedState*>(MapViewOfFile(mapping.value, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SharedState)));
+        Need(state != nullptr, "owned_mapping");
+        ZeroMemory(state, sizeof(*state)); state->magic = SharedMagic;
+        state->cppRequested=exceptionLimit?257:32;
+        HANDLE inherited[] = {mapping.value, start.value, stop.value};
+        SIZE_T size = 0;
+        InitializeProcThreadAttributeList(nullptr, 1, 0, &size);
+        std::vector<BYTE> attributes(size);
+        auto list = reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(attributes.data());
+        Need(InitializeProcThreadAttributeList(list, 1, 0, &size) != FALSE, "handle_list_initialize");
+        BOOL updated = UpdateProcThreadAttribute(list, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST, inherited, sizeof(inherited), nullptr, nullptr);
+        if (!updated) { DeleteProcThreadAttributeList(list); Need(false, "handle_list_update"); }
+        STARTUPINFOEXW startup{}; startup.StartupInfo.cb = sizeof(startup); startup.lpAttributeList = list;
+        wchar_t handles[160]{};
+        swprintf_s(handles, L" --synthetic-child %llx %llx %llx", reinterpret_cast<ULONGLONG>(mapping.value), reinterpret_cast<ULONGLONG>(start.value), reinterpret_cast<ULONGLONG>(stop.value));
+        std::wstring command = L"\"" + targetPath + L"\"" + handles;
+        PROCESS_INFORMATION info{};
+        BOOL launched = CreateProcessW(targetPath.c_str(), command.data(), nullptr, nullptr, TRUE,
+            CREATE_NO_WINDOW | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr, &startup.StartupInfo, &info);
+        DWORD launchError = GetLastError();
+        DeleteProcThreadAttributeList(list);
+        if (!launched) { Record("create_owned_synthetic", HRESULT_FROM_WIN32(launchError)); throw E_FAIL; }
+        process.value = info.hProcess; thread.value = info.hThread; pid = info.dwProcessId;
+        created = CreationTime(process.value);
+        Need(created != 0, "owned_creation_time");
+        ULONGLONG deadline = GetTickCount64() + 5000;
+        while (!InterlockedCompareExchange(&state->ready, 0, 0) && GetTickCount64() < deadline && WaitForSingleObject(process.value, 0) == WAIT_TIMEOUT) Sleep(10);
+        Need(state->ready && state->targetPid == pid && state->targetCreation == created && state->methodAddress && state->apiPathsEqual, "owned_target_ready_identity");
+        wchar_t actual[32768]{}; DWORD actualLength = 32768;
+        Need(QueryFullProcessImageNameW(process.value, 0, actual, &actualLength) && targetPath == actual, "owned_fixed_image_identity");
+        // Reproduce the former access mask against our own child, then use the
+        // real adapter's exact reopened mask for all remaining synthetic checks.
+        Handle limited(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid));
+        Need(limited.value!=nullptr,"synthetic_limited_query_handle");
+        BOOL debugged=FALSE;
+        HRESULT limitedHr=QueryDebugger(limited.value,"synthetic_old_limited_mask",debugged);
+        Need(limitedHr==HRESULT_FROM_WIN32(ERROR_ACCESS_DENIED),"limited_mask_regression_reproduced");
+        HANDLE reopened=OpenProcess(TargetProcessAccess,FALSE,pid);
+        Need(reopened!=nullptr,"synthetic_real_mask_reopen");
+        CloseHandle(process.value); process.value=reopened;
+        Need(PinnedProcessIdentity(pid,created,process.value),"reopened_handle_same_creation");
+        Checked(QueryDebugger(process.value,"synthetic_real_mask_pre_attach",debugged),"synthetic_real_mask_query_failed");
+        Need(!debugged,"synthetic_target_already_debugged");
+        printf("{\"kind\":\"query_access_regression\",\"oldMask\":\"0x%08lX\",\"actualMask\":\"0x%08lX\",\"sameCreation\":true,\"passed\":true,\"tick\":%llu}\n",static_cast<ULONG>(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE),TargetProcessAccess,GetTickCount64()); fflush(stdout);
+        printf("{\"kind\":\"owned_target\",\"pid\":%lu,\"creationFiletime\":%llu,\"syntheticOnly\":true}\n", pid, created); fflush(stdout);
+    }
+    bool HealthyDetached() {
+        if(!Synthetic()) {
+            if(!PinnedProcessIdentity(pid,created,process.value)) { Record("planned_post_detach_identity_failed",E_FAIL); return false; }
+            BOOL debugged=FALSE;
+            HRESULT hr=QueryDebugger(process.value,"planned_post_detach",debugged);
+            if(FAILED(hr)) return false;
+            if(debugged) Record("planned_post_detach_still_debugged",E_FAIL);
+            return !debugged;
+        }
+        LONG before = state->heartbeat;
+        ULONGLONG deadline = GetTickCount64() + 3000;
+        while (GetTickCount64() < deadline) {
+            if (WaitForSingleObject(process.value, 0) != WAIT_TIMEOUT || CreationTime(process.value) != created) return false;
+            if(state->heartbeat>=before+3&&state->noDebuggerAfterWork>=3&&state->callsFinished) {
+                BOOL debugged=FALSE;
+                HRESULT hr=QueryDebugger(process.value,"synthetic_real_mask_post_detach",debugged);
+                if(FAILED(hr)) return false;
+                if(debugged) Record("synthetic_post_detach_still_debugged",E_FAIL);
+                return !debugged;
+            }
+            Sleep(20);
+        }
+        return false;
+    }
+    bool StopNormally() {
+        if(!Synthetic()) return true;
+        if (!process.value) return true;
+        SetEvent(stop.value);
+        DWORD code = 99;
+        return WaitForSingleObject(process.value, 5000) == WAIT_OBJECT_0 && GetExitCodeProcess(process.value, &code) && code == 0;
+    }
+};
+
+struct Capture;
+class Events final : public IDebugEventCallbacks {
+    LONG refs = 1;
+    Capture& capture;
+public:
+    explicit Events(Capture& c) : capture(c) {}
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** out) override {
+        if (!out) return E_POINTER; *out = nullptr;
+        if (iid == __uuidof(IUnknown) || iid == __uuidof(IDebugEventCallbacks)) { *out = this; AddRef(); return S_OK; }
+        return E_NOINTERFACE;
+    }
+    ULONG STDMETHODCALLTYPE AddRef() override { return InterlockedIncrement(&refs); }
+    ULONG STDMETHODCALLTYPE Release() override { ULONG count = InterlockedDecrement(&refs); if (!count) delete this; return count; }
+    HRESULT STDMETHODCALLTYPE GetInterestMask(PULONG mask) override { *mask = DEBUG_EVENT_BREAKPOINT | DEBUG_EVENT_EXCEPTION | DEBUG_EVENT_CREATE_PROCESS | DEBUG_EVENT_EXIT_PROCESS | DEBUG_EVENT_LOAD_MODULE; return S_OK; }
+    HRESULT STDMETHODCALLTYPE Breakpoint(PDEBUG_BREAKPOINT bp) override;
+    HRESULT STDMETHODCALLTYPE Exception(PEXCEPTION_RECORD64 record, ULONG first) override;
+    HRESULT STDMETHODCALLTYPE CreateProcess(ULONG64,ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG,ULONG64,ULONG64,ULONG64) override;
+    HRESULT STDMETHODCALLTYPE ExitProcess(ULONG) override;
+    HRESULT STDMETHODCALLTYPE CreateThread(ULONG64,ULONG64,ULONG64) override { return DEBUG_STATUS_NO_CHANGE; }
+    HRESULT STDMETHODCALLTYPE ExitThread(ULONG) override { return DEBUG_STATUS_NO_CHANGE; }
+    HRESULT STDMETHODCALLTYPE LoadModule(ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG) override;
+    HRESULT STDMETHODCALLTYPE UnloadModule(PCSTR,ULONG64) override { return DEBUG_STATUS_NO_CHANGE; }
+    HRESULT STDMETHODCALLTYPE SystemError(ULONG,ULONG) override { return DEBUG_STATUS_NO_CHANGE; }
+    HRESULT STDMETHODCALLTYPE SessionStatus(ULONG) override { return S_OK; }
+    HRESULT STDMETHODCALLTYPE ChangeDebuggeeState(ULONG,ULONG64) override { return S_OK; }
+    HRESULT STDMETHODCALLTYPE ChangeEngineState(ULONG,ULONG64) override { return S_OK; }
+    HRESULT STDMETHODCALLTYPE ChangeSymbolState(ULONG,ULONG64) override { return S_OK; }
+};
+
+struct Capture {
+    OwnedTarget& target;
+    bool cancelMode;
+    HMODULE engine = nullptr;
+    ComPtr<IDebugClient> client;
+    ComPtr<IDebugControl6> control;
+    ComPtr<IDebugRegisters> registers;
+    ComPtr<IDebugDataSpaces> memory;
+    ComPtr<IDebugSystemObjects> system;
+    FixedModuleFile fixedModule,shcoreFile;
+    Events* events = nullptr;
+    std::array<PDEBUG_BREAKPOINT,1> entries{};
+    struct ReturnSite { ULONG64 address; ULONG thread; PDEBUG_BREAKPOINT bp; };
+    struct PendingCall { ULONG site,thread,callId; ULONG64 expectedRsp,outputAddress; };
+    std::vector<ReturnSite> returnSites;
+    std::vector<PendingCall> pending;
+    bool attachRequested = false, createdEvent = false, apiSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+    ULONG64 candidateAddress=0,shcoreBase=0;bool shcoreSeen=false;
+    bool successHandlePresent=false,outputHandleRead=false;
+    ExceptionBudget exceptionBudget;
+    HANDLE externalCancel = nullptr;
+    std::atomic<bool> cancelled{false};
+    std::atomic<HRESULT> interruptResult{E_PENDING};
+    bool interruptObserved = false, callbackFailed = false, unexpectedExit = false;
+    ULONG regRsp=0,regRax=0,regRcx=0,regRdx=0,regR8=0,regR9=0;
+    ULONG entryCount = 0, unmatched = 0, matched = 0, returns = 0, waitTimeouts = 0;
+    LSTATUS observed=ERROR_IO_PENDING;
+    explicit Capture(OwnedTarget& t, bool c) : target(t), cancelMode(c) {}
+    ~Capture() {
+        if (!cleanupDone) Cleanup();
+        if (client) client->SetEventCallbacks(nullptr);
+        if (events) events->Release();
+        system.Reset(); memory.Reset(); registers.Reset(); control.Reset(); client.Reset();
+        if (engine) FreeLibrary(engine);
+    }
+    void ValidatePid() {
+        ULONG actual = 0;
+        Checked(system->GetCurrentProcessSystemId(&actual), "debuggee_pid_query");
+        Need(actual == target.pid && CreationTime(target.process.value) == target.created && WaitForSingleObject(target.process.value, 0) == WAIT_TIMEOUT, "debuggee_owned_identity");
+    }
+    ULONG64 Reg(ULONG index) {
+        DEBUG_VALUE value{};
+        Checked(registers->GetValue(index, &value), "register_read");
+        Need(value.Type == DEBUG_VALUE_INT64, "register_x64");
+        return value.I64;
+    }
+    template<typename T> T Read(ULONG64 address) {
+        T value{}; ULONG bytes = 0;
+        Checked(memory->ReadVirtual(address, &value, sizeof(value), &bytes), "bounded_memory_read");
+        Need(bytes == sizeof(value), "bounded_memory_length");
+        return value;
+    }
+    void PrintExceptionSummary(const char* stage) noexcept {
+        const auto& b=exceptionBudget;
+        ULONG detailed=b.total<ExceptionDetailLimit?b.total:ExceptionDetailLimit;
+        int written=printf("{\"kind\":\"target_exception_summary\",\"stage\":\"%s\",\"total\":%lu,\"cxxFirstChance\":%lu,\"otherFirstChance\":%lu,\"secondChance\":%lu,\"detailedLogs\":%lu,\"totalLimit\":256,\"otherFirstChanceLimit\":16,\"stopReason\":\"%s\",\"triggerCode\":\"0x%08lX\",\"triggerFirstChance\":%s,\"triggerTotal\":%lu,\"lastCode\":\"0x%08lX\",\"lastFirstChance\":%s,\"tick\":%llu}\n",stage,b.total,b.cppFirst,b.otherFirst,b.second,detailed,ExceptionStopName(b.stop),b.triggerCode,b.triggerFirst?"true":"false",b.triggerTotal,b.lastCode,b.lastFirst?"true":"false",GetTickCount64());
+        if(written<0||fflush(stdout)!=0)outputFailed=true;
+    }
+    void Start() {
+        fixedModule.Verify(L"KernelBase.dll",ExpectedFileHash);
+        if(!target.Synthetic())shcoreFile.Verify(L"SHCORE.dll",ExpectedShcoreFileHash);
+        Record("fixed_system_file_hash_verified_before_attach");
+        SetEnvironmentVariableW(L"_NT_SYMBOL_PATH", nullptr);
+        SetEnvironmentVariableW(L"_NT_ALT_SYMBOL_PATH", nullptr);
+        SetEnvironmentVariableW(L"_NT_SOURCE_PATH", nullptr);
+        engine = LoadLibraryExW(L"dbgeng.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+        Need(engine != nullptr, "system32_dbgeng_load");
+        auto create = reinterpret_cast<HRESULT(WINAPI*)(REFIID,PVOID*)>(GetProcAddress(engine, "DebugCreate"));
+        Need(create != nullptr, "debugcreate_export");
+        Checked(create(__uuidof(IDebugClient), reinterpret_cast<void**>(client.GetAddressOf())), "debugcreate");
+        Checked(client.As(&control), "debugcontrol"); Checked(client.As(&registers), "debugregisters");
+        Checked(client.As(&memory), "debugdataspaces"); Checked(client.As(&system), "debugsystemobjects");
+        Checked(client->SetOutputMask(0), "disable_raw_engine_output");
+        Checked(control->AddEngineOptions(DEBUG_ENGOPT_DISALLOW_NETWORK_PATHS | DEBUG_ENGOPT_DISABLE_MANAGED_SUPPORT), "engine_no_network_or_managed");
+        Checked(control->SetInterruptTimeout(2), "interrupt_timeout");
+        ULONG options = 0;
+        events = new Events(*this); Checked(client->SetEventCallbacks(events), "set_event_callbacks");
+        target.ValidateAdmission();
+        attachRequested = true;
+        Checked(client->AttachProcess(0, target.pid, DEBUG_ATTACH_INVASIVE_NO_INITIAL_BREAK), "attach_owned_target");
+        ULONGLONG deadline = GetTickCount64() + 8000;
+        while (!createdEvent && GetTickCount64() < deadline) {
+            HRESULT hr = control->WaitForEvent(0, 100);
+            if (hr == S_FALSE) { waitTimeouts++; continue; }
+            Checked(hr, "wait_attach");
+            Need(!callbackFailed && !unexpectedExit, "attach_callback_state");
+        }
+        Need(createdEvent, "attach_event_deadline"); ValidatePid();
+        ULONG processes = 0; Checked(system->GetNumberProcesses(&processes), "debuggee_count"); Need(processes == 1, "single_owned_debuggee");
+        Checked(client->GetProcessOptions(&options), "attached_process_options");
+        Need((options & (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS)) == (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS), "attached_safe_options_readback");
+        Record("only_this_process_and_detach_on_exit_verified");
+        // Consume only to the fixed module events; a second initial
+        // exception is not guaranteed by DbgEng's initial-event break contract.
+        atEventBreak=false;
+        Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"consume_initial_module_events");
+        deadline=GetTickCount64()+5000;
+        while((!apiSeen||(!target.Synthetic()&&!shcoreSeen))&&GetTickCount64()<deadline) {
+            HRESULT hr=control->WaitForEvent(0,100);
+            if(hr==S_FALSE) { waitTimeouts++; Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"resume_module_wait"); continue; }
+            Checked(hr,"fixed_module_wait"); Need(!callbackFailed&&!unexpectedExit,"fixed_module_event_health");
+            if(!apiSeen||(!target.Synthetic()&&!shcoreSeen)) { atEventBreak=false; Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"continue_module_wait"); }
+        }
+        Need(apiSeen&&(target.Synthetic()||shcoreSeen)&&atEventBreak&&candidateAddress,"fixed_required_module_events"); ValidatePid();
+        Checked(registers->GetIndexByName("rsp", &regRsp), "rsp_index");
+        Checked(registers->GetIndexByName("rax", &regRax), "rax_index");
+        Checked(registers->GetIndexByName("rcx",&regRcx),"rcx_index");
+        Checked(registers->GetIndexByName("rdx", &regRdx), "rdx_index");
+        Checked(registers->GetIndexByName("r8", &regR8), "r8_index");
+        Checked(registers->GetIndexByName("r9", &regR9), "r9_index");
+        if(!target.Synthetic())VerifyShcoreIat();
+        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"reg_open_entry_breakpoint_add");
+        Checked(entries[0]->SetOffset(candidateAddress),"reg_open_entry_breakpoint_offset");
+        Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"reg_open_entry_breakpoint_enable");
+        armed=true;
+        Record("single_reg_open_breakpoint_installed");
+    }
+    void VerifyModule(ULONG64 base,const char* image) {
+        ValidatePid();Need(fixedModule.MatchesImage(image),"target_fixed_system_image_path");
+        auto dos=Read<IMAGE_DOS_HEADER>(base);Need(dos.e_magic==IMAGE_DOS_SIGNATURE&&dos.e_lfanew>0&&dos.e_lfanew<4096,"target_dos_header");
+        auto nt=Read<IMAGE_NT_HEADERS64>(base+dos.e_lfanew);
+        Need(nt.Signature==IMAGE_NT_SIGNATURE&&nt.FileHeader.Machine==IMAGE_FILE_MACHINE_AMD64&&nt.OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR64_MAGIC&&nt.OptionalHeader.SizeOfImage==ExpectedImageSize&&nt.FileHeader.TimeDateStamp==ExpectedTimestamp,"target_fixed_pe_identity");
+        Need(nt.FileHeader.NumberOfSections>0&&nt.FileHeader.NumberOfSections<=96&&nt.FileHeader.SizeOfOptionalHeader>=sizeof(IMAGE_OPTIONAL_HEADER64),"target_bounded_sections");
+        ULONG64 sections=base+dos.e_lfanew+offsetof(IMAGE_NT_HEADERS64,OptionalHeader)+nt.FileHeader.SizeOfOptionalHeader;
+        Need(sections-base+nt.FileHeader.NumberOfSections*sizeof(IMAGE_SECTION_HEADER)<=nt.OptionalHeader.SizeOfHeaders,"target_sections_within_headers");
+        bool code=false;
+        for(WORD i=0;i<nt.FileHeader.NumberOfSections;i++) {
+            auto section=Read<IMAGE_SECTION_HEADER>(sections+i*sizeof(IMAGE_SECTION_HEADER));
+            ULONG64 end=static_cast<ULONG64>(section.VirtualAddress)+section.Misc.VirtualSize;
+            if(RegOpenRva>=section.VirtualAddress&&static_cast<ULONG64>(RegOpenRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
+        }
+        Need(code,"target_candidate_inside_code_range");
+        auto bytes=Read<std::array<BYTE,32>>(base+RegOpenRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
+        candidateAddress=base+RegOpenRva;
+        if(target.Synthetic())Need(candidateAddress==target.state->methodAddress,"remote_candidate_matches_reference_public_export");
+        Record("target_candidate_identity_verified");
+    }
+    void VerifyShcoreModule(ULONG64 base,const char* image) {
+        ValidatePid();Need(shcoreFile.MatchesImage(image),"target_fixed_shcore_image_path");
+        auto dos=Read<IMAGE_DOS_HEADER>(base);Need(dos.e_magic==IMAGE_DOS_SIGNATURE&&dos.e_lfanew>0&&dos.e_lfanew<4096,"shcore_dos_header");
+        auto nt=Read<IMAGE_NT_HEADERS64>(base+dos.e_lfanew);
+        Need(nt.Signature==IMAGE_NT_SIGNATURE&&nt.FileHeader.Machine==IMAGE_FILE_MACHINE_AMD64&&nt.OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR64_MAGIC&&nt.OptionalHeader.SizeOfImage==ShcoreImageSize&&nt.FileHeader.TimeDateStamp==ShcoreTimestamp,"target_fixed_shcore_pe_identity");
+        Need(ShcoreIatRva+sizeof(ULONG64)<=nt.OptionalHeader.SizeOfImage,"shcore_iat_inside_image");
+        shcoreBase=base;shcoreSeen=true;Record("target_shcore_file_and_pe_verified");
+    }
+    void VerifyShcoreIat() {
+        Need(shcoreSeen&&shcoreBase&&candidateAddress,"real_shcore_mapping_required");
+        Need(FixedImportMatches(Read<ULONG64>(shcoreBase+ShcoreIatRva),candidateAddress),"real_shcore_iat_matches_fixed_public_entry");
+        Record("real_shcore_iat_matches_fixed_public_entry");
+    }
+    bool KeyMatches(ULONG64 address) {
+        if(!address||address>~ULONG64{0}-sizeof(FixedKey))return false;
+        for(size_t i=0;i<=FixedKeyLength;i++)if(!FixedKeyCharacter(i,Read<wchar_t>(address+i*sizeof(wchar_t))))return false;
+        return true;
+    }
+    bool AllSyntheticReturns() const {return returns>0&&pending.empty()&&(observed==ERROR_FILE_NOT_FOUND||(observed==ERROR_SUCCESS&&successHandlePresent&&outputHandleRead));}
+    HRESULT OnBreakpoint(PDEBUG_BREAKPOINT bp) {
+        ValidatePid();ULONG id=0;Checked(bp->GetId(&id),"breakpoint_id");
+        if(id==1) {
+            entryCount++;Need(entryCount<=4096,"bounded_entry_count");
+            if(!FixedRootMatches(Reg(regRcx))){unmatched++;return DEBUG_STATUS_GO;}
+            if(!KeyMatches(Reg(regRdx))){unmatched++;return DEBUG_STATUS_GO;}
+            Need(pending.size()<32&&matched<128,"bounded_matching_calls");matched++;
+            ULONG64 rsp=Reg(regRsp),returnAddress=Read<ULONG64>(rsp);
+            ULONG threadId=0;Checked(system->GetCurrentThreadId(&threadId),"matching_thread");
+            ULONG site=0;
+            while(site<returnSites.size()&&(returnSites[site].address!=returnAddress||returnSites[site].thread!=threadId))site++;
+            if(site==returnSites.size()) {
+                Need(site<64,"bounded_return_sites");returnSites.push_back({returnAddress,threadId,nullptr});auto& created=returnSites.back();
+                Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,100+site,&created.bp),"return_breakpoint_add");
+                Checked(created.bp->SetOffset(returnAddress),"return_breakpoint_offset");
+                Checked(created.bp->SetMatchThreadId(threadId),"return_thread_scope");
+                Checked(created.bp->AddFlags(DEBUG_BREAKPOINT_ENABLED),"return_breakpoint_enable");
+            }
+            ULONG options=static_cast<ULONG>(Reg(regR8)),access=static_cast<ULONG>(Reg(regR9));
+            ULONG64 output=Read<ULONG64>(rsp+0x28);pending.push_back({site,threadId,matched,rsp+8,output});
+            printf("{\"kind\":\"matching_reg_open_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"ulOptions\":\"0x%08lX\",\"samDesired\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,options,access,GetTickCount64());fflush(stdout);
+            return DEBUG_STATUS_GO;
+        }
+        Need(id>=100&&id-100<returnSites.size(),"owned_return_breakpoint");
+        ULONG threadId=0;Checked(system->GetCurrentThreadId(&threadId),"return_thread");ULONG64 rsp=Reg(regRsp);
+        size_t found=pending.size();
+        while(found>0){found--;const auto& call=pending[found];if(call.site==id-100&&call.thread==threadId&&call.expectedRsp==rsp)break;}
+        if(pending.empty()||pending[found].site!=id-100||pending[found].thread!=threadId||pending[found].expectedRsp!=rsp)return DEBUG_STATUS_GO;
+        auto call=pending[found];observed=static_cast<LSTATUS>(static_cast<ULONG>(Reg(regRax)));returns++;
+        successHandlePresent=false;outputHandleRead=false;
+        if(RegistryOpenSucceeded(observed)&&call.outputAddress){successHandlePresent=Read<ULONG64>(call.outputAddress)!=0;outputHandleRead=true;}
+        pending.erase(pending.begin()+static_cast<ptrdiff_t>(found));
+        printf("{\"kind\":\"matching_reg_open_return\",\"callId\":%lu,\"status\":%lu,\"statusHex\":\"0x%08lX\",\"successfulOpen\":%s,\"outputHandleNonNull\":%s,\"outputHandleRead\":%s,\"tick\":%llu}\n",call.callId,static_cast<ULONG>(observed),static_cast<ULONG>(observed),observed==ERROR_SUCCESS?"true":"false",observed==ERROR_SUCCESS?(successHandlePresent?"true":"false"):"null",outputHandleRead?"true":"false",GetTickCount64());fflush(stdout);
+        atEventBreak=target.Synthetic()&&!cancelMode&&AllSyntheticReturns();return atEventBreak?DEBUG_STATUS_BREAK:DEBUG_STATUS_GO;
+    }
+    void Run() {
+        Handle timerDone(CreateEventW(nullptr, TRUE, FALSE, nullptr)); Need(timerDone.value != nullptr, "cancel_timer_event");
+        std::thread timer;
+        if (cancelMode) timer = std::thread([&] {
+            if (WaitForSingleObject(timerDone.value, 1500) == WAIT_TIMEOUT) {
+                cancelled = true;
+                interruptResult = control->SetInterrupt(DEBUG_INTERRUPT_EXIT);
+            }
+        });
+        try {
+            atEventBreak = false;
+            Checked(control->SetExecutionStatus(DEBUG_STATUS_GO), "run_owned_target");
+            printf("{\"kind\":\"capture_ready\",\"pid\":%lu,\"creationFiletime\":%llu,\"profile\":\"%s\",\"tick\":%llu}\n",target.pid,target.created,target.Profile(),GetTickCount64()); fflush(stdout);
+            if(target.Synthetic()) Need(SetEvent(target.start.value) != FALSE,"signal_owned_work");
+            ULONGLONG deadline = GetTickCount64() + (target.Synthetic()?8000:60000);
+            while (GetTickCount64() < deadline && !cancelled && !outputFailed && !callbackFailed && !unexpectedExit && (!target.Synthetic() || cancelMode || !AllSyntheticReturns())) {
+                if(externalCancel&&WaitForSingleObject(externalCancel,0)==WAIT_OBJECT_0) { cancelled=true; interruptResult=control->SetInterrupt(DEBUG_INTERRUPT_EXIT); break; }
+                HRESULT hr = control->WaitForEvent(0, 100);
+                if (hr == S_FALSE) {
+                    waitTimeouts++;
+                    HRESULT resumed = control->SetExecutionStatus(DEBUG_STATUS_GO);
+                    if (waitTimeouts == 1) Record("resume_after_finite_wait", resumed);
+                    if (resumed != E_ACCESSDENIED) Checked(resumed, "resume_after_wait_failed");
+                }
+                else if (hr == E_PENDING && cancelled) interruptObserved = true;
+                else Checked(hr, "capture_wait");
+            }
+            Need(!outputFailed && !callbackFailed && !unexpectedExit, "capture_callback_health");
+            Need(pending.empty()&&returns==matched,"matching_returns_complete");
+            if(target.Synthetic()) {
+                Need(AllSyntheticReturns()&&unmatched>=1,"reg_open_target_and_nonmatching_control");
+                printf("{\"kind\":\"nonmatching_control_discarded\",\"count\":%lu,\"payloadRetained\":false,\"tick\":%llu}\n",unmatched,GetTickCount64());fflush(stdout);
+                Need(cancelMode ? cancelled.load() : !cancelled.load(),"end_reason");
+            }
+        } catch (...) {
+            SetEvent(timerDone.value); if (timer.joinable()) timer.join(); throw;
+        }
+        SetEvent(timerDone.value); if (timer.joinable()) timer.join();
+        if (cancelled) { Checked(interruptResult, "cancel_exit_interrupt"); Record("cancel_requested"); }
+    }
+    bool Cleanup() noexcept {
+        cleanupDone = true;
+        bool ok = true;
+        if (attachRequested && control) {
+            ULONG status = DEBUG_STATUS_NO_DEBUGGEE;
+            HRESULT hr = control->GetExecutionStatusEx(&status);
+            Record("cleanup_status_query", hr);
+            printf("{\"kind\":\"cleanup_execution_state\",\"status\":%lu}\n", status); fflush(stdout);
+            ULONG currentPid = 0, processCount = 0;
+            HRESULT pidHr = system->GetCurrentProcessSystemId(&currentPid);
+            HRESULT countHr = system->GetNumberProcesses(&processCount);
+            printf("{\"kind\":\"cleanup_target_context\",\"pidHr\":\"0x%08lX\",\"ownedPidMatch\":%s,\"countHr\":\"0x%08lX\",\"processCount\":%lu}\n", static_cast<ULONG>(pidHr), currentPid == target.pid ? "true" : "false", static_cast<ULONG>(countHr), processCount); fflush(stdout);
+            // A finite timeout/EXIT may report BREAK while breakpoint editing
+            // still has no stopped-event context. Require an actual event break.
+            if (!atEventBreak) {
+                HRESULT resumed = control->SetExecutionStatus(DEBUG_STATUS_GO); Record("cleanup_resume_wait_state", resumed);
+                if (FAILED(resumed) && resumed != E_ACCESSDENIED) ok = false;
+                hr = control->SetInterrupt(DEBUG_INTERRUPT_ACTIVE); Record("cleanup_interrupt", hr);
+                interruptArmed=SUCCEEDED(hr);
+                ULONGLONG deadline = GetTickCount64() + 3000;
+                while (SUCCEEDED(hr) && GetTickCount64() < deadline) {
+                    HRESULT waited = control->WaitForEvent(0, 100);
+                    if (waited == S_FALSE) waitTimeouts++;
+                    if (waited == E_PENDING || waited == S_FALSE) continue;
+                    if (FAILED(waited)) { Record("cleanup_wait_failed", waited); hr = waited; break; }
+                    if (atEventBreak) break;
+                }
+                if (FAILED(hr) || !atEventBreak) { Record("cleanup_break_unconfirmed", E_FAIL); ok = false; }
+            }
+            ULONG pausedPid = 0;
+            HRESULT pausedIdentity = system->GetCurrentProcessSystemId(&pausedPid);
+            bool ownedPause = atEventBreak && SUCCEEDED(pausedIdentity) && pausedPid == target.pid && CreationTime(target.process.value) == target.created;
+            Record("cleanup_paused_owned_identity", ownedPause ? S_OK : E_FAIL); ok = ok && ownedPause;
+            for(auto& site:returnSites) if(site.bp) { hr=control->RemoveBreakpoint(site.bp); Record("return_breakpoint_remove",hr); ok=ok&&SUCCEEDED(hr); site.bp=nullptr; }
+            for(auto& entry:entries) if(entry) { hr=control->RemoveBreakpoint(entry); Record("entry_breakpoint_remove",hr); ok=ok&&SUCCEEDED(hr); entry=nullptr; }
+            ULONG count = 0; hr = control->GetNumberBreakpoints(&count);
+            Record("remaining_breakpoints_zero", SUCCEEDED(hr) && count == 0 ? S_OK : E_FAIL); ok = ok && SUCCEEDED(hr) && count == 0;
+            hr = client->DetachProcesses(); Record("detach_owned_target", hr); ok = ok && SUCCEEDED(hr);
+            attachRequested = false;
+        }
+        cleanupOk = ok;
+        return ok;
+    }
+};
+
+HRESULT Events::Breakpoint(PDEBUG_BREAKPOINT bp) {
+    try { return capture.OnBreakpoint(bp); }
+    catch (...) { capture.callbackFailed = true; capture.atEventBreak = true; return DEBUG_STATUS_BREAK; }
+}
+HRESULT Events::Exception(PEXCEPTION_RECORD64 record, ULONG firstChance) {
+    if (record->ExceptionCode == EXCEPTION_BREAKPOINT && firstChance) {
+        if(capture.interruptArmed) { capture.interruptArmed=false; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
+    }
+    bool firstStop=capture.exceptionBudget.Observe(record->ExceptionCode,firstChance!=0);
+    if(capture.exceptionBudget.total<=ExceptionDetailLimit)Record(firstChance?"target_first_chance_not_handled":"target_second_chance_not_handled",static_cast<HRESULT>(record->ExceptionCode));
+    if(firstStop)capture.PrintExceptionSummary("exception_budget_stop");
+    if(capture.exceptionBudget.stop!=ExceptionStop::None)capture.callbackFailed=true;
+    // Let the target's handlers/OS decide; do not swallow first-chance exceptions.
+    return DEBUG_STATUS_GO_NOT_HANDLED;
+}
+HRESULT Events::CreateProcess(ULONG64,ULONG64,ULONG64,ULONG,PCSTR,PCSTR,ULONG,ULONG,ULONG64,ULONG64,ULONG64) {
+    try {
+        capture.ValidatePid();
+        capture.createdEvent = true;
+        // DbgEng requires an established current target for these process options.
+        // This is the first target event, before enabling any diagnostic breakpoint.
+        Checked(capture.client->SetProcessOptions(DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS), "set_safe_process_options");
+        ULONG options = 0;
+        Checked(capture.client->GetProcessOptions(&options), "first_event_process_options");
+        Need((options & (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS)) == (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS), "first_event_safe_options_readback");
+        capture.target.ValidateAdmission();
+        capture.atEventBreak = true;
+        return DEBUG_STATUS_BREAK;
+    }
+    catch (...) { capture.callbackFailed = true; capture.atEventBreak = true; return DEBUG_STATUS_BREAK; }
+}
+HRESULT Events::ExitProcess(ULONG) { capture.unexpectedExit = true; return DEBUG_STATUS_BREAK; }
+HRESULT Events::LoadModule(ULONG64,ULONG64 base,ULONG,PCSTR module,PCSTR image,ULONG,ULONG) {
+    if(!capture.armed&&module&&(_stricmp(module,"KernelBase")==0||_stricmp(module,"KernelBase.dll")==0)) {
+        try { capture.VerifyModule(base,image);capture.apiSeen=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK; }
+        catch(...) { capture.callbackFailed=true; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
+    }
+    if(!capture.armed&&!capture.target.Synthetic()&&module&&(_stricmp(module,"SHCORE")==0||_stricmp(module,"SHCORE.dll")==0)) {
+        try {capture.VerifyShcoreModule(base,image);capture.atEventBreak=true;return DEBUG_STATUS_BREAK;}
+        catch(...) {capture.callbackFailed=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK;}
+    }
+    return DEBUG_STATUS_NO_CHANGE;
+}
+
+static std::string IdArgument(const wchar_t* argument) {
+    std::wstring wide(argument); PlanNeed(wide.size()==32);
+    std::string id; for(wchar_t c:wide) { PlanNeed(c<=127); id+=static_cast<char>(c); }
+    PlanNeed(PlanIdValid(id)); return id;
+}
+static std::wstring CancelName(const std::string& id) { return L"Local\\AssetLibrary.TargetDebug."+std::wstring(id.begin(),id.end()); }
+struct PlanInput {
+    Handle file, used, cancellation;
+    Plan plan;
+    void Read(const std::string& id) {
+        std::wstring path=std::wstring(TaskDirectory)+L"\\"+std::wstring(id.begin(),id.end())+L".plan";
+        PlanNeed((GetFileAttributesW(TaskDirectory)&FILE_ATTRIBUTE_REPARSE_POINT)==0);
+        file.value=CreateFileW(path.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_FLAG_OPEN_REPARSE_POINT,nullptr);
+        PlanNeed(file.value!=INVALID_HANDLE_VALUE);
+        wchar_t finalPath[32768]{}; DWORD length=GetFinalPathNameByHandleW(file.value,finalPath,32768,0);
+        PlanNeed(length>0&&length<32768&&CompareStringOrdinal(finalPath,-1,(L"\\\\?\\"+path).c_str(),-1,TRUE)==CSTR_EQUAL);
+        PlanNeed((GetFileAttributesW(path.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)==0);
+        LARGE_INTEGER size{}; PlanNeed(GetFileSizeEx(file.value,&size)&&size.QuadPart>0&&size.QuadPart<=2048);
+        std::string bytes(static_cast<size_t>(size.QuadPart),'\0'); DWORD read=0;
+        PlanNeed(ReadFile(file.value,bytes.data(),static_cast<DWORD>(bytes.size()),&read,nullptr)&&read==bytes.size());
+        plan=ParsePlan(bytes,id,NowFiletime());
+    }
+    void Consume() {
+        std::wstring path=std::wstring(TaskDirectory)+L"\\"+std::wstring(plan.id.begin(),plan.id.end())+L".used";
+        used.value=CreateFileW(path.c_str(),GENERIC_WRITE,FILE_SHARE_READ,nullptr,CREATE_NEW,FILE_ATTRIBUTE_NORMAL,nullptr);
+        PlanNeed(used.value!=INVALID_HANDLE_VALUE);
+        cancellation.value=CreateEventW(nullptr,TRUE,FALSE,CancelName(plan.id).c_str());
+        PlanNeed(cancellation.value!=nullptr&&GetLastError()!=ERROR_ALREADY_EXISTS);
+    }
+};
+static void KeyChecks() {
+    ULONG passed=0;auto test=[&](bool ok){Need(ok,"offline_fixed_key_control");passed++;};
+    auto matches=[](std::wstring_view text){for(size_t i=0;i<=FixedKeyLength;i++){wchar_t c=i<text.size()?text[i]:L'\0';if(!FixedKeyCharacter(i,c))return false;}return true;};
+    test(FixedRootMatches(reinterpret_cast<ULONG64>(HKEY_CLASSES_ROOT)));
+    test(!FixedRootMatches(reinterpret_cast<ULONG64>(HKEY_CURRENT_USER)));
+    test(!FixedRootMatches(0x80000000)&&!FixedRootMatches(0));
+    test(matches(FixedKey));std::wstring lower(FixedKey);for(auto& c:lower)if(c>=L'A'&&c<=L'Z')c=static_cast<wchar_t>(c+32);test(matches(lower));
+    test(!matches(L""));test(!matches(std::wstring(FixedKey,FixedKeyLength-1)));
+    test(!matches(std::wstring(FixedKey)+L"\\"));test(!matches(std::wstring(FixedKey)+L"X"));
+    auto altered=std::wstring(FixedKey);altered[8]=L'0';test(!matches(altered));
+    altered=FixedKey;altered[1]=0;test(!matches(altered));
+    altered=FixedKey;altered[1]=0x212A;test(!matches(altered));
+    test(!FixedKeyCharacter(FixedKeyLength+1,0));
+    test(RegistryOpenSucceeded(0));test(!RegistryOpenSucceeded(2));test(!RegistryOpenSucceeded(5));test(!RegistryOpenSucceeded(-1));
+    test(FixedImportMatches(123,123));test(!FixedImportMatches(123,124));test(!FixedImportMatches(0,0));
+    printf("{\"kind\":\"offline_key_status_mapping_controls\",\"passed\":%lu,\"registryApiCalled\":false,\"processOpened\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
+}
+static void BudgetChecks() {
+    ULONG passed=0;auto test=[&](bool ok){Need(ok,"offline_exception_budget_control");passed++;};
+    ExceptionBudget cpp;bool allowed=true;
+    for(ULONG i=0;i<256;i++)allowed=allowed&&!cpp.Observe(CppExceptionCode,true);
+    test(allowed&&cpp.total==256&&cpp.cppFirst==256&&cpp.otherFirst==0&&cpp.stop==ExceptionStop::None);
+    test(cpp.Observe(CppExceptionCode,true)&&cpp.total==257&&cpp.stop==ExceptionStop::TotalLimit&&cpp.triggerTotal==257);
+    test(cpp.triggerCode==CppExceptionCode&&cpp.triggerFirst);
+    test(!cpp.Observe(0xC0000005,false)&&cpp.stop==ExceptionStop::TotalLimit&&cpp.triggerCode==CppExceptionCode&&cpp.triggerTotal==257&&cpp.second==1);
+    ExceptionBudget other;allowed=true;
+    for(ULONG i=0;i<16;i++)allowed=allowed&&!other.Observe(0xE0424242,true);
+    test(allowed&&other.otherFirst==16&&other.stop==ExceptionStop::None);
+    test(other.Observe(0xE0424242,true)&&other.otherFirst==17&&other.stop==ExceptionStop::OtherFirstChanceLimit);
+    ExceptionBudget second;
+    test(second.Observe(CppExceptionCode,false)&&second.stop==ExceptionStop::SecondChance&&second.second==1&&second.cppFirst==0&&second.total==1);
+    ExceptionBudget normal;normal.Observe(0xE0424242,true);for(ULONG i=0;i<32;i++)normal.Observe(CppExceptionCode,true);
+    test(normal.stop==ExceptionStop::None&&normal.total==33&&normal.cppFirst==32&&normal.otherFirst==1);
+    ExceptionBudget priority;for(ULONG i=0;i<240;i++)priority.Observe(CppExceptionCode,true);for(ULONG i=0;i<16;i++)priority.Observe(0xE0424242,true);
+    ExceptionBudget secondPriority=priority;
+    test(priority.Observe(0xE0424242,true)&&priority.total==257&&priority.stop==ExceptionStop::OtherFirstChanceLimit);
+    test(secondPriority.Observe(0xC0000005,false)&&secondPriority.total==257&&secondPriority.stop==ExceptionStop::SecondChance);
+    test(ExceptionDetailLimit==16&&ExceptionTotalLimit==256&&OtherFirstChanceLimit==16);
+    printf("{\"kind\":\"offline_exception_budget_controls\",\"passed\":%lu,\"exceptionRaised\":false,\"processOpened\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
+}
+static int PlanChecks() {
+    const std::string id="0123456789abcdef0123456789abcdef";
+    ULONGLONG now=NowFiletime();
+    std::string good="AssetLibrary.Explorer.DebugPlan.v1\nid="+id+"\nprofile=official\npid=99\ncreationFiletime="+std::to_string(now-Second)+"\nhwndHex=1234\nownershipStartFiletime="+std::to_string(now-2*Second)+"\nissuedFiletime="+std::to_string(now)+"\nexpiresFiletime="+std::to_string(now+90*Second)+"\ndurationSeconds=60\npurpose=owned-explorer-namespace-diagnostic\n";
+    PlanNeed(ParsePlan(good,id,now).Clsid()==OfficialClsid);
+    auto replace=[&](std::string_view from,std::string_view to){ auto s=good; auto p=s.find(from); PlanNeed(p!=std::string::npos); s.replace(p,from.size(),to); return s; };
+    std::vector<std::string> bad={replace("profile=official","profile=proof"),replace("profile=official","profile=other"),replace("durationSeconds=60","durationSeconds=600"),replace("pid=99","pid=0"),replace("pid=99","pid=99999999999999999999999"),replace("hwndHex=1234","hwndHex=0"),good+"command=x\n",replace("issuedFiletime="+std::to_string(now),"issuedFiletime="+std::to_string(now+Second)),replace("expiresFiletime="+std::to_string(now+90*Second),"expiresFiletime="+std::to_string(now-Second)),replace("ownershipStartFiletime="+std::to_string(now-2*Second),"ownershipStartFiletime="+std::to_string(now)),replace("id="+id,"id=0123456789abcdef0123456789abcdee")};
+    ULONG rejected=0;
+    for(const auto& item:bad) { try { (void)ParsePlan(item,id,now); } catch(HRESULT) { rejected++; } }
+    PlanNeed(rejected==bad.size());
+    PlanNeed(!PlanIdValid("../other")&&!PlanIdValid(std::string(32,'z')));
+    PlanNeed(FrameEligibility(1,0,true,false));
+    PlanNeed(!FrameEligibility(2,0,true,false)&&!FrameEligibility(1,1,true,false)&&!FrameEligibility(1,0,false,false)&&!FrameEligibility(1,0,true,true));
+    printf("{\"kind\":\"offline_plan_controls\",\"passed\":19,\"realProcessOpened\":false,\"guiOperated\":false,\"tick\":%llu}\n",GetTickCount64()); fflush(stdout);
+    return 0;
+}
+int wmain(int argc, wchar_t** argv) {
+    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { BudgetChecks();KeyChecks();return PlanChecks(); } catch(...) { Record("offline_controls_failed",E_FAIL); return 1; } }
+    bool real=argc==3&&wcscmp(argv[1],L"--run-plan")==0;
+    bool cancel = argc==2&&wcscmp(argv[1],L"--cancel")==0;
+    bool normal = argc==2&&wcscmp(argv[1],L"--normal")==0;
+    bool exceptionLimit=argc==2&&wcscmp(argv[1],L"--exception-limit")==0;
+    if(argc==3&&wcscmp(argv[1],L"--cancel-plan")==0) {
+        try { auto id=IdArgument(argv[2]); Handle event(OpenEventW(EVENT_MODIFY_STATE,FALSE,CancelName(id).c_str())); PlanNeed(event.value&&SetEvent(event.value)); Record("planned_cancel_signalled"); return 0; }
+        catch(...) { Record("planned_cancel_failed",E_FAIL); return 1; }
+    }
+    if(!real&&!cancel&&!normal&&!exceptionLimit) { Record("fixed_modes_only",E_INVALIDARG); return 2; }
+    OwnedTarget target;
+    PlanInput input;
+    bool passed = false, detachedAlive = false, stopped = false, cleaned = false, attached = false;
+    ULONG matched = 0, returns = 0, discarded = 0, waits = 0;
+    bool interrupted = false,expectedBudgetFailure=false;
+    try {
+        if(real) { input.Read(IdArgument(argv[2])); target.OpenPlanTarget(input.plan); input.Consume(); }
+        else {
+            target.Launch(exceptionLimit);
+            Plan wrong; wrong.pid=target.pid; wrong.creation=target.created; wrong.expires=NowFiletime()+90*Second;
+            bool rejected=false; try { VerifyExplorerPlan(wrong,target.process.value,true); } catch(HRESULT) { rejected=true; }
+            Need(rejected,"synthetic_image_rejected_for_real_plan");
+            Need(PinnedProcessIdentity(target.pid,target.created,target.process.value),"pinned_process_identity_positive");
+            Need(!PinnedProcessIdentity(target.pid,target.created+1,target.process.value),"creation_mismatch_rejected"); Record("owned_process_identity_negative_controls_passed");
+        }
+        Capture capture(target, cancel);
+        capture.externalCancel=input.cancellation.value;
+        try { capture.Start(); capture.Run(); passed = true; }
+        catch (...) { Record(real?"planned_capture_failed":"synthetic_capture_failed", E_FAIL); }
+        attached = capture.createdEvent;
+        cleaned = capture.Cleanup() && attached;
+        capture.PrintExceptionSummary("after_capture_cleanup");
+        matched = capture.matched; returns = capture.returns; discarded = capture.unmatched; waits = capture.waitTimeouts; interrupted = capture.interruptObserved;
+        detachedAlive = target.HealthyDetached();
+        Record(real?"planned_target_alive_and_no_debugger":"synthetic_alive_heartbeats_and_no_debugger", detachedAlive ? S_OK : E_FAIL);
+        passed = passed && cleaned && detachedAlive && !capture.callbackFailed && !capture.unexpectedExit;
+        if(target.Synthetic()) {
+            passed=passed&&target.state->debuggerObserved&&!target.state->targetError&&target.state->ownExceptionHandled;
+            passed=passed&&target.state->matchResult==capture.observed&&target.state->apiPathsEqual;
+            passed=passed&&(capture.observed!=ERROR_SUCCESS||(target.state->matchHandleNonNull&&target.state->matchHandleClosed));
+            printf("{\"kind\":\"reference_reg_open_result\",\"status\":%lu,\"successHandleClosedByReference\":%s,\"apiPathsEqual\":true,\"tick\":%llu}\n",static_cast<ULONG>(target.state->matchResult),capture.observed==ERROR_SUCCESS?(target.state->matchHandleClosed?"true":"false"):"null",GetTickCount64());fflush(stdout);
+            bool caughtAll=target.state->cppCaught==target.state->cppRequested;
+            printf("{\"kind\":\"reference_cpp_handlers\",\"requested\":%ld,\"caughtByTarget\":%ld,\"debuggerObservedCxxFirstChance\":%lu,\"originalSehHandlerRan\":%s,\"tick\":%llu}\n",target.state->cppRequested,target.state->cppCaught,capture.exceptionBudget.cppFirst,target.state->ownExceptionHandled?"true":"false",GetTickCount64());fflush(stdout);
+            if(exceptionLimit) {
+                expectedBudgetFailure=!passed&&capture.callbackFailed&&capture.exceptionBudget.stop==ExceptionStop::TotalLimit&&capture.exceptionBudget.triggerTotal==257&&cleaned&&detachedAlive&&!capture.unexpectedExit&&caughtAll&&target.state->cppCaught==257&&target.state->ownExceptionHandled&&!target.state->targetError;
+            } else passed=passed&&caughtAll&&target.state->cppCaught==32&&capture.exceptionBudget.cppFirst==32&&capture.exceptionBudget.otherFirst==1&&capture.exceptionBudget.second==0;
+        }
+    } catch (...) { Record(real?"planned_setup_failed":"synthetic_setup_failed", E_FAIL); }
+    stopped = target.StopNormally();
+    if(!real) Record("synthetic_target_cooperative_exit", stopped ? S_OK : E_FAIL);
+    passed = passed && stopped && !outputFailed;
+    if(exceptionLimit) {
+        expectedBudgetFailure=expectedBudgetFailure&&stopped&&!outputFailed;
+        printf("{\"kind\":\"expected_exception_limit_control\",\"validated\":%s,\"observerExitRemainsFailure\":true,\"tick\":%llu}\n",expectedBudgetFailure?"true":"false",GetTickCount64());fflush(stdout);
+        passed=false;
+    }
+    int written = printf("{\"kind\":\"result\",\"mode\":\"%s\",\"passed\":%s,\"matchedEntries\":%lu,\"matchedReturns\":%lu,\"nonMatchingDiscarded\":%lu,\"finiteWaitTimeouts\":%lu,\"exitInterruptObserved\":%s,\"attachCompleted\":%s,\"cleanupVerified\":%s,\"targetAliveAfterDetach\":%s,\"existingProcessAttached\":%s,\"tick\":%llu}\n",
+        real?"plan":exceptionLimit?"exception-limit":cancel ? "cancel" : "normal", passed ? "true" : "false", matched, returns, discarded, waits, interrupted ? "true" : "false", attached ? "true" : "false", cleaned ? "true" : "false", detachedAlive ? "true" : "false",real&&attached?"true":"false",GetTickCount64());
+    bool flushed = fflush(stdout) == 0;
+    return passed && written >= 0 && flushed ? 0 : 1;
+}

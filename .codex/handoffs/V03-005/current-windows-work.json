@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-10T15:45:46.482371+00:00",
-  "status": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
+  "updatedAtUtc": "2026-09-11T11:42:12.310031+00:00",
+  "status": "windows_key_open_trace_inconclusive_scene_clean",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -24,7 +24,7 @@
       "evidence": "official-control-build/evidence.json"
     }
   ],
-  "active_instruction": "Same registration period: reader HKCU/HKCR values correct before/after, reference normal/cancel cache flags1/A0000020, real four cache snapshots all zero with entry failure. Registry-open cause is unknown. Prepare the reviewed fixed HKCR BA16 ShellFolder RegOpenKeyExW probe, registered positive controls, and ready -> original STA notification pair -> first ThisPC -> one Browse. No new original Explorer restart or system-policy change.",
+  "active_instruction": "All latest test sites and owned windows cleaned; no operator is running a new cycle. Real cache divergence remains established, but exact key-open calls are still unobserved. The corrected short trace reached ready/notification/ThisPC, then other-first-chance threshold code40080201 ended it before Browse;0 matches/3896 discards is inconclusive. Next review SDK-documented WinRT debugger notification classification and a narrower or less intrusive observation boundary; do not repeat unchanged global RegOpen captures or simply increase thresholds. No system policy or original Explorer restart is authorized by this next-step note.",
   "approved_control_roots": [
     "HKCU Software/Classes/CLSID/{BA16CE0E-728C-4FC9-98E5-D0B35B384597}",
     "HKCU Software/Classes/CLSID/{BB8F539D-3B97-4473-9E07-C8248C53248E}",
@@ -51,9 +51,9 @@
     "cleanup": "Verified complete in integrated V03-006 official-sta-runtime-control evidence."
   },
   "next_steps": [
-    "Prepare a minimal observer for actual Explorer reads of the target CLSID/ShellFolder attributes; review before real capture.",
-    "Compare the concrete lookup/result path with the existing successful independent control, without changing registry attributes or system policy.",
-    "Keep product Shell/AssetHost/installer and G1..G4 separate from diagnostic evidence."
+    "Review EXCEPTION_RO_ORIGINATEERROR using SDK and current raw records; do not infer its embedded HRESULT or caller when those were not captured.",
+    "Select a narrower/less intrusive observation method to establish actual Explorer registry access and avoid another unchanged global entry capture.",
+    "Resume live work only with a concrete reviewed experiment and fresh session/identity; preserve all completed reference/cleanup evidence."
   ],
   "additional_readonly_context": {
     "UMCI": 0,
@@ -348,6 +348,33 @@
     "rva": "0x2BBF0",
     "key": "HKCR\\CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder",
     "preparation": "Root/independent review and39 pure cases; normal/cancel own-reference missing-key status2/failed PHKEY unread/2BP cleanup/healthy cooperative exit verified; registered positive and real mapping still pending",
-    "notification": "Original STA pair once after ready; wrapper static review passed, capture phase handshake in preparation"
+    "notification": "Original STA pair once after ready; wrapper static review passed, capture phase handshake in preparation",
+    "preparation_evidence": "clsid-key-open-debug/evidence.json",
+    "caller_analysis": "clsid-key-open-path/evidence.json",
+    "first_real": "../V03-006/key-open-first/evidence.json",
+    "first_real_integrated": "7f64135",
+    "first_real_result": "Registered positive normal/cancel and actual SHCORE IAT passed, but5.609s old exception threshold stopped before notify/ThisPC/Browse;0match is not key evidence.",
+    "exception_v2_evidence": "clsid-key-open-debug-v2/evidence.json",
+    "exception_v2_observer_sha256": "75f1ab60e25283fab42a87ddbc716339da94417e18315054c021fa53e60541fc",
+    "exception_v2_validation": "50pure;normal/cancel each32 target-caught CPP +1 other; threshold first257/final258 staysfailed with cleanup verified. Registered32CPP success controls subsequently passed.",
+    "expired_cycle": "../V03-006/key-open-v2-expiry/evidence.json",
+    "expired_cycle_integrated": "0d9e84f",
+    "expired_cycle_result": "Guard naturally cleaned before SDK preparation ended; observer not started, no new key result.",
+    "short_evidence": "short-key-open/evidence.json",
+    "short_result": {
+      "first": "Plan formatting error refused before attach, independent target healthy; cleaned.",
+      "corrected": "11-line321B plan;attach/ready/original notification pair/firstThisPC;other_first_chance_limit triggered code40080201;0matching pairs/3896nonmatching.",
+      "trigger": "total81/cxx64/other17/second0",
+      "final": "total177/cxx132/other45/second0",
+      "trigger_after_ready_ms": 25813,
+      "result_after_ready_ms": 26797,
+      "native_thispc": "20D04/22B/3items; native probe started15.05ms after capture result, CUA exact submit time unrecorded.",
+      "browse": "not dispatched; gate refused after capture ended; no standalone failure gate receipt, evidence limitation retained.",
+      "cleanup": "0breakpoints/detach/target alive/no debugger;bothcycles8roots absent/20missing/notification returned;owned windows closed;desktop6212 preserved;no original Explorer restart.",
+      "artifact_hashes_verified": 60,
+      "source_hashes_including_exclusions_verified": 75
+    },
+    "notification_code_mapping": "winrt-error-notification.json",
+    "gui_owner": "none; Windows code-owner thread paused live actions and short operator returned exclusivity to root after cleanup"
   }
 }

@@ -1,0 +1,84 @@
+import hashlib
+import json
+from pathlib import Path
+import re
+
+ROOT = Path(r"C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-path")
+SOURCE = Path(r"C:\Windows\System32\SHCORE.dll")
+EXPECTED = "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153"
+SELECTED = [(0x35850, 0), (0x359A4, 1), (0x62A44, 2)]
+
+
+def main():
+    data = SOURCE.read_bytes()
+    assert hashlib.sha256(data).hexdigest() == EXPECTED
+    index = json.loads((ROOT / "index.json").read_text())
+    functions = json.loads((ROOT / "runtime-functions.json").read_text())
+    imports = {i["iatRva"]: i for i in json.loads((ROOT / "imports.json").read_text())}
+    base = index["imageBase"]
+
+    def offset(rva, size=1):
+        for section in index["sections"]:
+            delta = rva - section["rva"]
+            if 0 <= delta and delta + size <= section["rawSize"]:
+                position = section["rawOffset"] + delta
+                assert position + size <= len(data)
+                return position
+        raise ValueError("Unbacked RVA")
+
+    def wide(rva):
+        position = offset(rva)
+        for end in range(position, min(position + 2048, len(data) - 1), 2):
+            if data[end:end + 2] == b"\0\0":
+                return data[position:end].decode("utf-16-le")
+        raise ValueError("Bounded UTF-16 terminator absent")
+
+    selected = []
+    total = 0
+    for begin, depth in SELECTED:
+        matches = [f for f in functions if f["beginRva"] == begin]
+        assert len(matches) == 1
+        function = dict(matches[0])
+        total += function["codeSize"]
+        assert depth <= 2 and total <= 16 * 1024
+        name = f"function-{begin:08x}.raw.txt"
+        raw = (ROOT / name).read_bytes()
+        text = raw.decode("utf-16") if raw.startswith((b"\xff\xfe", b"\xfe\xff")) else raw.decode("utf-8-sig")
+        instructions, calls = [], []
+        for line in text.splitlines():
+            match = re.match(r"\s*([0-9A-F]{16}):", line)
+            if not match:
+                continue
+            rva = int(match[1], 16) - base
+            assert begin <= rva < function["endRva"]
+            instructions.append(rva)
+            direct = re.search(r"\bcall\s+([0-9A-F]{16})\s*$", line)
+            indirect = re.search(r"\bcall\s+qword ptr \[([0-9A-F]{16})h\]", line)
+            if direct:
+                target = int(direct[1], 16) - base
+                calls.append({"callRva": rva, "kind": "direct", "targetRva": target,
+                              "expanded": any(item[0] == target for item in SELECTED)})
+            elif indirect:
+                iat = int(indirect[1], 16) - base
+                calls.append({"callRva": rva, "kind": "iat", "iatRva": iat, "import": imports.get(iat)})
+        assert instructions and instructions[0] == begin
+        position = offset(begin, function["codeSize"])
+        code = data[position:position + function["codeSize"]]
+        function.update(depth=depth, rawFile=name, rawSha256=hashlib.sha256(raw).hexdigest(),
+                        codeSha256=hashlib.sha256(code).hexdigest(),
+                        prefix32Sha256=hashlib.sha256(code[:32]).hexdigest(),
+                        instructionCount=len(instructions), calls=calls)
+        selected.append(function)
+
+    strings = [{"rva": rva, "utf16": wide(rva)} for rva in (0xAF968, 0xAFC00, 0xAFC68, 0xAFC80)]
+    result = {"sourceSha256": EXPECTED, "imageBase": base, "maxDepth": 2,
+              "totalUniqueCodeBytes": total, "codeBudgetBytes": 16384,
+              "selectedFunctions": selected, "referencedStrings": strings,
+              "boundaries": "Exact PE runtime-function ranges; no complete source-function or private-ABI claim."}
+    (ROOT / "local-analysis-index.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"selectedFunctions": len(selected), "totalUniqueCodeBytes": total,
+                      "maxDepth": 2, "ordinal120Prefix32Sha256": selected[0]["prefix32Sha256"]}))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,173 @@
+{
+  "stage": "v2_bounded_exception_accounting_validated_on_owned_references",
+  "observerSha256": "75f1ab60e25283fab42a87ddbc716339da94417e18315054c021fa53e60541fc",
+  "targetSha256": "ec9936c5a4b2b5d6d20f6e6c2b69b8c19fab2c46dc8bc99817e2f88dc5c13ef9",
+  "rationale": "The prior real attempt exhausted the old small exception budget before a GUI trigger. This is a fixed bounded calibration, not a frequency or benign-exception guarantee.",
+  "budget": {
+    "detailedLogs": 16,
+    "otherFirstChanceEvents": 16,
+    "cppFirstChanceCode": "0xE06D7363",
+    "totalExclusion": "already-armed tool cleanup breakpoint only",
+    "stopPriority": [
+      "second_chance",
+      "other_first_chance_limit",
+      "total_exception_limit"
+    ],
+    "firstStopReasonAndTriggerLocked": true,
+    "targetExceptionDelivery": "unchanged DEBUG_STATUS_GO_NOT_HANDLED",
+    "totalEventTriggerThreshold": 256,
+    "deliveryBoundary": "Not an immediate hard cap. Trigger at observed event257; this run delivered final258 including one additional C++ and then a matching RegOpen before the outer WaitForEvent protection loop cleaned up. Raw totalLimit field denotes the trigger threshold."
+  },
+  "build": {
+    "exitCode": 0,
+    "raw": "build-01.log",
+    "toolchain": "MSVC 14.44.35207 / SDK 10.0.26100.0 / W4 WX / MT"
+  },
+  "offline": {
+    "raw": "self-test-01.jsonl",
+    "exceptionBudgetPredicates": 11,
+    "keyStatusMappingPredicates": 20,
+    "planParserAndFramePredicates": 19,
+    "nativeExceptionOrPermissionScenariosClaimed": false
+  },
+  "sourceReview": {
+    "unchangedObserverBlocks": [
+      "Start and module/IAT verification",
+      "key matcher and entry/return handling",
+      "Run and Cleanup"
+    ],
+    "FingerprintByteIdentical": true
+  },
+  "ownedReferenceRuns": [
+    {
+      "mode": "normal",
+      "raw": "normal-01.jsonl",
+      "ownedPid": 45636,
+      "creationFiletime": 134335308150884378,
+      "resultPassed": true,
+      "exitCode": 0,
+      "expectedProtectionFailure": false,
+      "finalExceptionSummary": {
+        "kind": "target_exception_summary",
+        "stage": "after_capture_cleanup",
+        "total": 33,
+        "cxxFirstChance": 32,
+        "otherFirstChance": 1,
+        "secondChance": 0,
+        "detailedLogs": 16,
+        "totalLimit": 256,
+        "otherFirstChanceLimit": 16,
+        "stopReason": "none",
+        "triggerCode": "0x00000000",
+        "triggerFirstChance": false,
+        "triggerTotal": 0,
+        "lastCode": "0xE06D7363",
+        "lastFirstChance": true,
+        "tick": 296264187
+      },
+      "targetHandlers": {
+        "kind": "reference_cpp_handlers",
+        "requested": 32,
+        "caughtByTarget": 32,
+        "debuggerObservedCxxFirstChance": 32,
+        "originalSehHandlerRan": true,
+        "tick": 296264296
+      },
+      "cleanupVerified": true,
+      "cooperativeTargetExit": true,
+      "finiteWaitTimeouts": 0,
+      "exitInterruptObserved": false
+    },
+    {
+      "mode": "cancel",
+      "raw": "cancel-01.jsonl",
+      "ownedPid": 44492,
+      "creationFiletime": 134335308245007269,
+      "resultPassed": true,
+      "exitCode": 0,
+      "expectedProtectionFailure": false,
+      "finalExceptionSummary": {
+        "kind": "target_exception_summary",
+        "stage": "after_capture_cleanup",
+        "total": 33,
+        "cxxFirstChance": 32,
+        "otherFirstChance": 1,
+        "secondChance": 0,
+        "detailedLogs": 16,
+        "totalLimit": 256,
+        "otherFirstChanceLimit": 16,
+        "stopReason": "none",
+        "triggerCode": "0x00000000",
+        "triggerFirstChance": false,
+        "triggerTotal": 0,
+        "lastCode": "0xE06D7363",
+        "lastFirstChance": true,
+        "tick": 296274953
+      },
+      "targetHandlers": {
+        "kind": "reference_cpp_handlers",
+        "requested": 32,
+        "caughtByTarget": 32,
+        "debuggerObservedCxxFirstChance": 32,
+        "originalSehHandlerRan": true,
+        "tick": 296275046
+      },
+      "cleanupVerified": true,
+      "cooperativeTargetExit": true,
+      "finiteWaitTimeouts": 14,
+      "exitInterruptObserved": false
+    },
+    {
+      "mode": "exception-limit",
+      "raw": "exception-limit-01.jsonl",
+      "ownedPid": 44136,
+      "creationFiletime": 134335308397386017,
+      "resultPassed": false,
+      "exitCode": 1,
+      "expectedProtectionFailure": true,
+      "finalExceptionSummary": {
+        "kind": "target_exception_summary",
+        "stage": "after_capture_cleanup",
+        "total": 258,
+        "cxxFirstChance": 257,
+        "otherFirstChance": 1,
+        "secondChance": 0,
+        "detailedLogs": 16,
+        "totalLimit": 256,
+        "otherFirstChanceLimit": 16,
+        "stopReason": "total_exception_limit",
+        "triggerCode": "0xE06D7363",
+        "triggerFirstChance": true,
+        "triggerTotal": 257,
+        "lastCode": "0xE06D7363",
+        "lastFirstChance": true,
+        "tick": 296288718
+      },
+      "targetHandlers": {
+        "kind": "reference_cpp_handlers",
+        "requested": 257,
+        "caughtByTarget": 257,
+        "debuggerObservedCxxFirstChance": 257,
+        "originalSehHandlerRan": true,
+        "tick": 296288812
+      },
+      "cleanupVerified": true,
+      "cooperativeTargetExit": true,
+      "finiteWaitTimeouts": 0,
+      "exitInterruptObserved": false
+    }
+  ],
+  "postExitIdentity": "post-exit-identity.json",
+  "baselinePreserved": {
+    "observerSha256": "73a3807982d087f7e67e1789d85a02c2f7e588b908bc6faad8c0201dff0ebf81",
+    "manifestSha256": "268b29e575878d3c711aafa0a4775ac59a710ef064f5a74595213b4d4a9672f4"
+  },
+  "limits": [
+    "The first budget breach is latched at observed total257; DbgEng can deliver additional events before the current wait returns. This run delivered total258, which is retained accurately.",
+    "The exception-limit observer is failed with exit1 even though protective behavior and safe cleanup validated. Its original stop reason is not rewritten.",
+    "Other-first17 and second-chance priorities were checked by pure budget tests, not by crashing a target.",
+    "New version real Explorer/SHCORE mapping and registered-success coverage are not claimed by these missing-key reference runs.",
+    "No live wrapper, guard, original tool, registry, GUI, existing process or debugger filter was changed.",
+    "Native Attach/Detach still lack a hard completion guarantee."
+  ]
+}

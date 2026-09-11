@@ -1,0 +1,12 @@
+REDACTED_COPY_NOT_ORIGINAL
+Source SHA256: 80CB70EC9CFA840C035FD58FA08341B61706C4C25F4AC042FFDA7C1C8C2CC06C
+Replace account/profile/host/SID tokens; preserve diagnostic values and failures.
+Source stderr is not valid UTF-8. Replacement decoding used only for the labelled redacted display copy; original SHA256 identifies the unchanged byte stream.
+Source encoding replacement used: True
+Archival path placeholders are not executable paths.
+
+Exception: <USER_PROFILE>\.codex\worktrees\6f7b\AssetLibrary\.runtime\explorer-short-live\capture-fixed.ps1:69
+Line |
+  69 |  �� upVerified){throw 'Capture incomplete/failed; inspect preserved clean ��
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Capture incomplete/failed; inspect preserved cleanup evidence

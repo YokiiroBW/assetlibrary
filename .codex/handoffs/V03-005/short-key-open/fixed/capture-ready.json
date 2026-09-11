@@ -1,0 +1,13 @@
+{
+  "Utc": "2026-09-11T11:14:38.6806261+00:00",
+  "PlanId": "641fd1d613be423cb5454827bd939fdc",
+  "Payload": {
+    "kind": "capture_ready",
+    "pid": 7392,
+    "creationFiletime": 134335987993635186,
+    "profile": "official",
+    "tick": 1547437
+  },
+  "CaptureDeadlineTick": 1607437,
+  "RegistrationDeadlineUtc": "2026-09-11T19:24:12.5251299+08:00"
+}

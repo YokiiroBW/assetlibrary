@@ -1,0 +1,11 @@
+{
+  "sourceSha256": "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153",
+  "imageBase": 6442450944,
+  "export": {
+    "ordinal": 120,
+    "names": [],
+    "rva": 219216,
+    "dllName": "SHCORE.dll",
+    "forwarder": null
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "source_sha256": "7575DDA2E4195D646D051E86AFF74F2B69FFD59381F15E552C556ABB9E943889",
+  "redactions": [
+    "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+  ],
+  "payload": [
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-reg-open-stage-v2\\capture.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\capture.ps1",
+      "ExpectedChange": "cycle path only",
+      "SourceHash": "4B2C576DF9C81C912217CC20549DB995BD9C8540654BCC2420DC1C17F5C27D33",
+      "CopyHash": "EA72AD3084C7B8F07DC9A27B91E2D06CD4F290B7AAB99ECB0E437862945D3563",
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-v2'",
+          "SideIndicator": "<="
+        }
+      ]
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-reg-open-stage-v2\\assert-live.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\assert-live.ps1",
+      "ExpectedChange": "cycle path only",
+      "SourceHash": "ECAD486483A5847692647F79BF203DCF2320E33147558D3BE3C72039C5827A53",
+      "CopyHash": "6185339242651582A1B62CDE06ACD6E61A97E402D91D8A31B560FBF5E87C4943",
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-v2'",
+          "SideIndicator": "<="
+        }
+      ]
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-official-observer\\run-clsid-key-open-v2.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-native.ps1",
+      "ExpectedChange": "cycle path and fixed original probe directory only",
+      "SourceHash": "F261CEF902CCD7745DD3BFCBA1A3CA12A3579493E51F9E9040978229DC261C2A",
+      "CopyHash": "FCE49196206C57DA70F1929A23639E7B1385D29E76C8DE9BE66A746557F27994",
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$probe=Join-Path '<USER_PROFILE>/.codex/worktrees/6f7b/AssetLibrary/.runtime/explorer-official-observer' $(if($Mode -eq 'browse'){'build/Release/OfficialBrowseControl.exe'}else{'build/Release/OfficialActiveView.exe'})",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-v2'",
+          "SideIndicator": "<="
+        },
+        {
+          "InputObject": "$probe=Join-Path $PSScriptRoot $(if($Mode -eq 'browse'){'build/Release/OfficialBrowseControl.exe'}else{'build/Release/OfficialActiveView.exe'})",
+          "SideIndicator": "<="
+        }
+      ]
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-reg-open-stage-v2\\StageClock.cs",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\StageClock.cs",
+      "ExpectedChange": "identical bytes",
+      "SourceHash": "F4797CC6BBE57C6DA6C168E3F3B2C993F6BC288DDD5062FAD3C7DFE8537E1FA6",
+      "CopyHash": "F4797CC6BBE57C6DA6C168E3F3B2C993F6BC288DDD5062FAD3C7DFE8537E1FA6",
+      "LineChanges": []
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-registry-readback\\run-readback.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-readback.ps1",
+      "ExpectedChange": "identical bytes",
+      "SourceHash": "BA62DE638654AFAB91247E11810200A439876DB74E547888A718C3C04ECE587C",
+      "CopyHash": "BA62DE638654AFAB91247E11810200A439876DB74E547888A718C3C04ECE587C",
+      "LineChanges": []
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-registry-readback\\read-fields.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\read-fields.ps1",
+      "ExpectedChange": "identical bytes",
+      "SourceHash": "F282B79AA0D121B4E0A60537E8A9603FAA25604145FF7DDF59597DD8946E3453",
+      "CopyHash": "F282B79AA0D121B4E0A60537E8A9603FAA25604145FF7DDF59597DD8946E3453",
+      "LineChanges": []
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-registry-readback\\FixedRegistryValueReadback.cs",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\FixedRegistryValueReadback.cs",
+      "ExpectedChange": "identical bytes",
+      "SourceHash": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379",
+      "CopyHash": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379",
+      "LineChanges": []
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260911-clsid-key-open-v2\\guard.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-live\\20260911-clsid-key-open-short\\guard.ps1",
+      "ExpectedChange": "identical bytes",
+      "SourceHash": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "CopyHash": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "LineChanges": []
+    }
+  ]
+}

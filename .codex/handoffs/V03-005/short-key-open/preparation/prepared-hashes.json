@@ -1,0 +1,37 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "source_sha256": "684B04D9755B50215E3C1E646CEC318930CD6A348C231204E2A6EBD0F13658B0",
+  "redactions": [
+    "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+  ],
+  "payload": [
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\assert-live.ps1",
+      "Hash": "6185339242651582A1B62CDE06ACD6E61A97E402D91D8A31B560FBF5E87C4943"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\capture.ps1",
+      "Hash": "EA72AD3084C7B8F07DC9A27B91E2D06CD4F290B7AAB99ECB0E437862945D3563"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\FixedRegistryValueReadback.cs",
+      "Hash": "5A37EAB04575B4E2DEEBF28AB762E4B435ED7BCE32827BBCEC477F6480EDB379"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\read-fields.ps1",
+      "Hash": "F282B79AA0D121B4E0A60537E8A9603FAA25604145FF7DDF59597DD8946E3453"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-native.ps1",
+      "Hash": "FCE49196206C57DA70F1929A23639E7B1385D29E76C8DE9BE66A746557F27994"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-readback.ps1",
+      "Hash": "BA62DE638654AFAB91247E11810200A439876DB74E547888A718C3C04ECE587C"
+    },
+    {
+      "Path": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\StageClock.cs",
+      "Hash": "F4797CC6BBE57C6DA6C168E3F3B2C993F6BC288DDD5062FAD3C7DFE8537E1FA6"
+    }
+  ]
+}

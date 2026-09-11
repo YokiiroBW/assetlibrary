@@ -1,0 +1,110 @@
+REDACTED_COPY_NOT_ORIGINAL
+Source SHA256: 3BA09A78118D0E2D6EFB686FF281E4E40EDBCF726F88C3B7631E28DAFBC1B624
+Replace account/profile/host/SID tokens; preserve diagnostic values and failures.
+Source encoding replacement used: False
+Archival path placeholders are not executable paths.
+
+"""Create only the fixed Explorer diagnostic plan; never launch or attach."""
+import argparse
+import json
+import re
+import time
+import uuid
+from pathlib import Path
+
+PLAN_DIR = Path("C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-clsid-key-open-debug-v2")
+RUN_DIR = Path("<USER_PROFILE>/.codex/worktrees/6f7b/AssetLibrary/.runtime/explorer-live/20260911-clsid-key-open-short-fixed")
+KEYS = ["id", "profile", "pid", "creationFiletime", "hwndHex", "ownershipStartFiletime", "issuedFiletime", "expiresFiletime", "durationSeconds", "purpose"]
+HEADER = "AssetLibrary.Explorer.DebugPlan.v1"
+
+
+def validate(data):
+    if len(data) > 2048 or data.startswith(b"\xef\xbb\xbf"):
+        raise ValueError("Plan size or BOM refused")
+    lines = data.decode("utf-8").splitlines()
+    if len(lines) != 11 or lines[0] != HEADER or any(not line for line in lines):
+        raise ValueError("Exactly 11 nonempty lines required")
+    fields = {}
+    for key, line in zip(KEYS, lines[1:]):
+        name, separator, value = line.partition("=")
+        if name != key or separator != "=" or not value or "=" in value:
+            raise ValueError("Ordered single-value field required")
+        fields[key] = value
+    if not re.fullmatch(r"[0-9a-f]{32}", fields["id"]):
+        raise ValueError("Invalid plan id")
+    for key in ["pid", "creationFiletime", "ownershipStartFiletime", "issuedFiletime", "expiresFiletime"]:
+        if not re.fullmatch(r"[1-9][0-9]*", fields[key]) or int(fields[key]) > 2**63 - 1:
+            raise ValueError("Invalid positive decimal field: " + key)
+    if int(fields["pid"]) > 2**32 - 1 or not re.fullmatch(r"[1-9A-F][0-9A-F]{0,15}", fields["hwndHex"]):
+        raise ValueError("Invalid PID or HWND")
+    own, created, issued, expires = [int(fields[k]) for k in ["ownershipStartFiletime", "creationFiletime", "issuedFiletime", "expiresFiletime"]]
+    if not own <= created <= issued or issued - own > 6000000000 or expires - issued != 1200000000:
+        raise ValueError("Invalid ownership or plan time limits")
+    if fields["profile"] != "official" or fields["durationSeconds"] != "60" or fields["purpose"] != "owned-explorer-namespace-diagnostic":
+        raise ValueError("Frozen plan settings changed")
+    return fields
+
+
+def build(plan_id, identity, issued):
+    hwnd = str(identity["NativeHwnd"])
+    if not re.fullmatch(r"[1-9][0-9]*", hwnd):
+        raise ValueError("Identity HWND must be one positive decimal value")
+    lines = [
+        HEADER,
+        "id=" + plan_id,
+        "profile=official",
+        "pid=" + str(identity["Pid"]),
+        "creationFiletime=" + str(identity["CreationFileTime"]),
+        "hwndHex=" + format(int(hwnd), "X"),
+        "ownershipStartFiletime=" + str(identity["OwnershipStartFiletime"]),
+        "issuedFiletime=" + str(issued),
+        "expiresFiletime=" + str(issued + 1200000000),
+        "durationSeconds=60",
+        "purpose=owned-explorer-namespace-diagnostic",
+    ]
+    data = ("\n".join(lines) + "\n").encode("utf-8")
+    validate(data)
+    return data
+
+
+def self_test():
+    identity = {"Pid": 1234, "NativeHwnd": "4660", "CreationFileTime": "134335982470000000", "OwnershipStartFiletime": "134335982410000000"}
+    data = build("0123456789abcdef0123456789abcdef", identity, 134335983310000000)
+    expected = b"AssetLibrary.Explorer.DebugPlan.v1\nid=0123456789abcdef0123456789abcdef\nprofile=official\npid=1234\ncreationFiletime=134335982470000000\nhwndHex=1234\nownershipStartFiletime=134335982410000000\nissuedFiletime=134335983310000000\nexpiresFiletime=134335984510000000\ndurationSeconds=60\npurpose=owned-explorer-namespace-diagnostic\n"
+    if data != expected:
+        raise AssertionError("Fixed fixture bytes differ")
+    invalid = [data.replace(b"id=0123", b"id=\n0123"), b"\xef\xbb\xbf" + data, data.replace(b"pid=1234", b"pid=1234=5"), data.replace(b"pid=1234", b"pid=1234,5"), data.replace(b"pid=1234", b"pid=0"), data.replace(b"hwndHex=1234", b"hwndHex=0x1234"), data.replace(b"durationSeconds=60", b"durationSeconds=61"), data + b"\n", data.replace(b"profile=official\npid=1234", b"pid=1234\nprofile=official"), data.replace(b"id=0123456789abcdef0123456789abcdef", b"id=x" * 1000)]
+    for malformed in invalid:
+        try:
+            validate(malformed)
+        except (ValueError, UnicodeError):
+            continue
+        raise AssertionError("Malformed plan accepted")
+    print(json.dumps({"passed": True, "fixedFixtureBytes": len(data), "lines": len(data.splitlines()), "negativeCasesRejected": len(invalid), "writes": 0, "launches": 0, "registryOperations": 0}))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
+    identity = json.loads((RUN_DIR / "identity.json").read_text(encoding="utf-8-sig"))
+    plan_id = uuid.uuid4().hex
+    issued = time.time_ns() // 100 + 116444736000000000
+    data = build(plan_id, identity, issued)
+    files = [(PLAN_DIR / (plan_id + ".plan"), data), (RUN_DIR / "plan.txt", data), (RUN_DIR / "plan-id.txt", plan_id.encode("ascii"))]
+    if any(path.exists() for path, _ in files):
+        raise FileExistsError("Preserve prior plan artifacts")
+    for path, content in files:
+        with path.open("xb") as stream:
+            stream.write(content)
+        if path.read_bytes() != content:
+            raise IOError("Written artifact readback differs: " + str(path))
+    validate(files[0][0].read_bytes())
+    print(json.dumps({"planId": plan_id, "planPath": str(files[0][0]), "lines": 11, "bytes": len(data), "readbackMatched": True, "bom": False}))
+
+
+if __name__ == "__main__":
+    main()

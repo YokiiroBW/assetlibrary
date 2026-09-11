@@ -1,0 +1,145 @@
+{
+  "sourceSha256": "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153",
+  "imageBase": 6442450944,
+  "maxDepth": 2,
+  "totalUniqueCodeBytes": 540,
+  "codeBudgetBytes": 16384,
+  "selectedFunctions": [
+    {
+      "beginRva": 219216,
+      "endRva": 219550,
+      "codeSize": 334,
+      "unwindRva": 792844,
+      "depth": 0,
+      "rawFile": "function-00035850.raw.txt",
+      "rawSha256": "e3570dcac0a8e37221ec3aeda9530295e5728c392604a9bbadb13f2ebd5580e0",
+      "codeSha256": "42bba9a539a335c52657eff5415c26a4052cc50fe97d946f90ed3044729d314a",
+      "prefix32Sha256": "6c16a4ed973d9bb17ad97493d3ad04f3ca78ec044dc1752434724e6cc07ca92c",
+      "instructionCount": 75,
+      "calls": [
+        {
+          "callRva": 219281,
+          "kind": "iat",
+          "iatRva": 975064,
+          "import": {
+            "dll": "api-ms-win-core-com-l1-1-0.dll",
+            "iatRva": 975064,
+            "iatVa": "0x1800EE0D8",
+            "delayImport": true,
+            "hint": 84,
+            "name": "StringFromGUID2"
+          }
+        },
+        {
+          "callRva": 219356,
+          "kind": "direct",
+          "targetRva": 219556,
+          "expanded": true
+        },
+        {
+          "callRva": 219400,
+          "kind": "iat",
+          "iatRva": 700120,
+          "import": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 700120,
+            "iatVa": "0x1800AAED8",
+            "delayImport": false,
+            "hint": 30,
+            "name": "RegOpenKeyExW"
+          }
+        },
+        {
+          "callRva": 219435,
+          "kind": "direct",
+          "targetRva": 400896,
+          "expanded": false
+        },
+        {
+          "callRva": 219481,
+          "kind": "direct",
+          "targetRva": 219556,
+          "expanded": true
+        },
+        {
+          "callRva": 219533,
+          "kind": "iat",
+          "iatRva": 700088,
+          "import": {
+            "dll": "api-ms-win-core-registry-l1-1-0.dll",
+            "iatRva": 700088,
+            "iatVa": "0x1800AAEB8",
+            "delayImport": false,
+            "hint": 3,
+            "name": "RegCreateKeyExW"
+          }
+        }
+      ]
+    },
+    {
+      "beginRva": 219556,
+      "endRva": 219664,
+      "codeSize": 108,
+      "unwindRva": 792876,
+      "depth": 1,
+      "rawFile": "function-000359a4.raw.txt",
+      "rawSha256": "bf0edda662cd43ab4679871adebad2b5a4d9ac7f768a208b64b937a0a9f7b9c4",
+      "codeSha256": "586a516d01eaef8c5c8c5060cc694e72d676f3ec142b0ad01f64a3d6173b381a",
+      "prefix32Sha256": "1f56732f5e94ca6fe2c3973047ccf9ec91b4b817d826fbe96ebd10c5a87ce8d9",
+      "instructionCount": 39,
+      "calls": [
+        {
+          "callRva": 219606,
+          "kind": "direct",
+          "targetRva": 404036,
+          "expanded": true
+        }
+      ]
+    },
+    {
+      "beginRva": 404036,
+      "endRva": 404134,
+      "codeSize": 98,
+      "unwindRva": 773056,
+      "depth": 2,
+      "rawFile": "function-00062a44.raw.txt",
+      "rawSha256": "1a303b9237ba08ef5b87c66d1a20b759aed444c18b602b6ba7043999434b9ca4",
+      "codeSha256": "88d8e16815f99dda470db27a650d4a893df49341558994a20708f9f34eeb4eb0",
+      "prefix32Sha256": "3f4f2acee65b78677ba6ce328854687bd0f7f93dd27ce0d09c290721fbc0880b",
+      "instructionCount": 27,
+      "calls": [
+        {
+          "callRva": 404068,
+          "kind": "direct",
+          "targetRva": 399908,
+          "expanded": false
+        },
+        {
+          "callRva": 404100,
+          "kind": "direct",
+          "targetRva": 403782,
+          "expanded": false
+        }
+      ]
+    }
+  ],
+  "referencedStrings": [
+    {
+      "rva": 719208,
+      "utf16": ""
+    },
+    {
+      "rva": 719872,
+      "utf16": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\"
+    },
+    {
+      "rva": 719976,
+      "utf16": "%sCLSID\\%s"
+    },
+    {
+      "rva": 720000,
+      "utf16": "%sCLSID\\%s\\%s"
+    }
+  ],
+  "boundaries": "Exact PE runtime-function ranges; no complete source-function or private-ABI claim."
+}

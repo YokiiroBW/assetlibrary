@@ -1,0 +1,36 @@
+#pragma once
+#include <Windows.h>
+#include <objbase.h>
+#include <cstddef>
+inline constexpr DWORD SharedMagic=0x414C4B4F;
+inline constexpr ULONG64 FixedRootValue=0xFFFFFFFF80000000ULL;
+inline constexpr wchar_t FixedKey[]=L"CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder";
+inline constexpr size_t FixedKeyLength=(sizeof(FixedKey)/sizeof(wchar_t))-1;
+static_assert(sizeof(HKEY)==8&&sizeof(LSTATUS)==4&&sizeof(REGSAM)==4);
+inline bool FixedRootMatches(ULONG64 value){return value==FixedRootValue;}
+inline bool RegistryOpenSucceeded(LSTATUS value){return value==ERROR_SUCCESS;}
+inline bool FixedImportMatches(ULONG64 imported,ULONG64 candidate){return candidate!=0&&imported==candidate;}
+inline constexpr ULONG RegOpenRva=0x2BBF0;
+inline constexpr ULONG ExpectedImageSize=4132864;
+inline constexpr ULONG ExpectedTimestamp=214081667;
+inline constexpr char ExpectedFileHash[]="7131d449316ce66a5059f9d07265b2baec91000741e897bae4dda804c13a4972";
+inline constexpr char ExpectedCodeHash[]="6b963eec632c3324ab1c264c023d04482b72ae71a026806b0e3c137560c1355c";
+inline constexpr ULONG ShcoreImageSize=1011712,ShcoreTimestamp=1467776254,ShcoreIatRva=0xAAED8;
+inline constexpr char ExpectedShcoreFileHash[]="15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153";
+inline constexpr wchar_t FoldFixedAscii(wchar_t value) {return value>=L'a'&&value<=L'z'?static_cast<wchar_t>(value-32):value;}
+inline bool FixedKeyCharacter(size_t index,wchar_t value) {
+    return index<=FixedKeyLength&&value<=127&&FoldFixedAscii(value)==FoldFixedAscii(FixedKey[index]);
+}
+struct SharedState {
+    DWORD magic,targetPid;
+    ULONGLONG targetCreation,methodAddress;
+    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult;
+    volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
+    volatile LONG apiPathsEqual,matchHandleNonNull,matchHandleClosed;
+    volatile LONG cppRequested,cppCaught;
+};
+inline ULONGLONG CreationTime(HANDLE process) {
+    FILETIME created{},exited{},kernel{},user{};
+    if(!GetProcessTimes(process,&created,&exited,&kernel,&user))return 0;
+    return(static_cast<ULONGLONG>(created.dwHighDateTime)<<32)|created.dwLowDateTime;
+}

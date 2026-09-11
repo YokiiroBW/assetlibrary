@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
-  "next_action": "Same registration period: reader HKCU/HKCR values correct before/after, reference normal/cancel cache flags1/A0000020, real four cache snapshots all zero with entry failure. Registry-open cause is unknown. Prepare the reviewed fixed HKCR BA16 ShellFolder RegOpenKeyExW probe, registered positive controls, and ready -> original STA notification pair -> first ThisPC -> one Browse. No new original Explorer restart or system-policy change.",
+  "status": "windows_key_open_trace_inconclusive_scene_clean",
+  "next_action": "All latest test sites and owned windows cleaned; no operator is running a new cycle. Real cache divergence remains established, but exact key-open calls are still unobserved. The corrected short trace reached ready/notification/ThisPC, then other-first-chance threshold code40080201 ended it before Browse;0 matches/3896 discards is inconclusive. Next review SDK-documented WinRT debugger notification classification and a narrower or less intrusive observation boundary; do not repeat unchanged global RegOpen captures or simply increase thresholds. No system policy or original Explorer restart is authorized by this next-step note.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -87,7 +87,7 @@
       "V03-008",
       "V03-009"
     ],
-    "stage": "explorer_zero_cache_confirmed_reg_open_probe_preparation",
+    "stage": "windows_key_open_trace_inconclusive_scene_clean",
     "windows_entry": "native Explorer only; existing G1..G4 remain open",
     "command_approvals": "User approved and completed before/after current-user Explorer restarts; continued diagnostic work remains scoped and reversible.",
     "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",

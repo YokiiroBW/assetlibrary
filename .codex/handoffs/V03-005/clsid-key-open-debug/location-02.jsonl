@@ -1,0 +1,3 @@
+{"kind":"stage","stage":"advapi_iat_and_shcore_public_contract_same_entry","hr":"0x00000000","tick":292559625}
+{"kind":"reg_open_location_candidate","module":"KernelBase.dll","rva":179184,"rvaHex":"0x0002BBF0","api":"RegOpenKeyExW","codeStartRva":4096,"codeLength":1718053,"imageSize":4132864,"timestamp":214081667,"machine":"0x8664","memoryType":"MEM_IMAGE","fileSize":4141768,"fileSha256":"7131d449316ce66a5059f9d07265b2baec91000741e897bae4dda804c13a4972","codePrefix32Sha256":"6b963eec632c3324ab1c264c023d04482b72ae71a026806b0e3c137560c1355c","version":"6.2.26100.7920","absoluteAddressRetained":false,"userPathRetained":false,"apiInvoked":false,"tick":292559640}
+{"kind":"result","passed":true,"ownProcessOnly":true,"registryApiInvoked":false,"debuggerAttached":false}

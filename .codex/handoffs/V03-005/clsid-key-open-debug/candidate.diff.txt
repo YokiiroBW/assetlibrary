@@ -1,0 +1,547 @@
+--- B41/Shared.h
++++ RegOpen/Shared.h
+@@ -1,24 +1,32 @@
+ #pragma once
+ #include <Windows.h>
+ #include <objbase.h>
+-#include <cstdint>
+-inline constexpr GUID ComputerClsid{0x20d04fe0,0x3aea,0x1069,{0xa2,0xd8,0x08,0x00,0x2b,0x30,0x30,0x9d}};
+-inline constexpr DWORD SharedMagic=0x414C4244;
+-inline constexpr ULONG PidlLimit=2048;
+-inline constexpr ULONG AttributesRva=0x1188E0;
+-inline constexpr ULONG RequestedAttributes=0x68180000;
+-inline constexpr ULONG ExpectedReferenceAttributes=0x60000000;
+-inline constexpr ULONG ExpectedImageSize=8798208;
+-inline constexpr ULONG ExpectedTimestamp=2800646882;
+-inline constexpr char ExpectedFileHash[]="22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b";
+-inline constexpr char ExpectedCodeHash[]="991cf0c259bf70e99b9b2d34fe48ea5e4675e48cfd1c7bfb55eac5f3e612ca64";
++#include <cstddef>
++inline constexpr DWORD SharedMagic=0x414C4B4F;
++inline constexpr ULONG64 FixedRootValue=0xFFFFFFFF80000000ULL;
++inline constexpr wchar_t FixedKey[]=L"CLSID\\{BA16CE0E-728C-4FC9-98E5-D0B35B384597}\\ShellFolder";
++inline constexpr size_t FixedKeyLength=(sizeof(FixedKey)/sizeof(wchar_t))-1;
++static_assert(sizeof(HKEY)==8&&sizeof(LSTATUS)==4&&sizeof(REGSAM)==4);
++inline bool FixedRootMatches(ULONG64 value){return value==FixedRootValue;}
++inline bool RegistryOpenSucceeded(LSTATUS value){return value==ERROR_SUCCESS;}
++inline bool FixedImportMatches(ULONG64 imported,ULONG64 candidate){return candidate!=0&&imported==candidate;}
++inline constexpr ULONG RegOpenRva=0x2BBF0;
++inline constexpr ULONG ExpectedImageSize=4132864;
++inline constexpr ULONG ExpectedTimestamp=214081667;
++inline constexpr char ExpectedFileHash[]="7131d449316ce66a5059f9d07265b2baec91000741e897bae4dda804c13a4972";
++inline constexpr char ExpectedCodeHash[]="6b963eec632c3324ab1c264c023d04482b72ae71a026806b0e3c137560c1355c";
++inline constexpr ULONG ShcoreImageSize=1011712,ShcoreTimestamp=1467776254,ShcoreIatRva=0xAAED8;
++inline constexpr char ExpectedShcoreFileHash[]="15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153";
++inline constexpr wchar_t FoldFixedAscii(wchar_t value) {return value>=L'a'&&value<=L'z'?static_cast<wchar_t>(value-32):value;}
++inline bool FixedKeyCharacter(size_t index,wchar_t value) {
++    return index<=FixedKeyLength&&value<=127&&FoldFixedAscii(value)==FoldFixedAscii(FixedKey[index]);
++}
+ struct SharedState {
+     DWORD magic,targetPid;
+     ULONGLONG targetCreation,methodAddress;
+-    ULONG expectedPidlLength;
+-    BYTE expectedPidl[PidlLimit];
+-    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult,matchMask,otherMask;
++    volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult;
+     volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
++    volatile LONG apiPathsEqual,matchHandleNonNull,matchHandleClosed;
+ };
+ inline ULONGLONG CreationTime(HANDLE process) {
+     FILETIME created{},exited{},kernel{},user{};
+--- B41/Fingerprint.h
++++ RegOpen/Fingerprint.h
+@@ -24,9 +24,9 @@
+     HANDLE file=INVALID_HANDLE_VALUE;
+     std::wstring dosPath,extendedPath,ntPath;
+     ~FixedModuleFile(){if(file!=INVALID_HANDLE_VALUE)CloseHandle(file);}
+-    void Verify(){
++    void Verify(const wchar_t* basename,const char* expectedHash){
+         wchar_t system[32768]{};UINT size=GetSystemDirectoryW(system,32768);FingerprintNeed(size>0&&size<32768);
+-        dosPath=std::wstring(system)+L"\\windows.storage.dll";extendedPath=L"\\\\?\\"+dosPath;
++        dosPath=std::wstring(system)+L"\\"+basename;extendedPath=L"\\\\?\\"+dosPath;
+         FingerprintNeed((GetFileAttributesW(dosPath.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)==0);
+         file=CreateFileW(dosPath.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);FingerprintNeed(file!=INVALID_HANDLE_VALUE);
+         wchar_t finalPath[32768]{};DWORD length=GetFinalPathNameByHandleW(file,finalPath,32768,0);
+@@ -35,7 +35,7 @@
+         LARGE_INTEGER bytes{};FingerprintNeed(GetFileSizeEx(file,&bytes)&&bytes.QuadPart>0&&bytes.QuadPart<=128*1024*1024);
+         Sha256 hash;std::array<BYTE,65536> buffer{};ULONGLONG total=0;
+         for(;;){DWORD read=0;FingerprintNeed(ReadFile(file,buffer.data(),static_cast<DWORD>(buffer.size()),&read,nullptr)!=FALSE);if(!read)break;total+=read;FingerprintNeed(total<=static_cast<ULONGLONG>(bytes.QuadPart));hash.Add(buffer.data(),read);}
+-        FingerprintNeed(total==static_cast<ULONGLONG>(bytes.QuadPart)&&hash.Finish()==ExpectedFileHash);
++        FingerprintNeed(total==static_cast<ULONGLONG>(bytes.QuadPart)&&hash.Finish()==expectedHash);
+     }
+     bool MatchesImage(const char* image)const{
+         if(!image)return false;
+--- B41/Plan.h
++++ RegOpen/Plan.h
+@@ -7,7 +7,7 @@
+ #include <string_view>
+ #include <vector>
+ 
+-inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-attributes-debug";
++inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug";
+ inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+ inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ inline constexpr ULONGLONG Second = 10000000;
+--- B41/Target.cpp
++++ RegOpen/Target.cpp
+@@ -1,44 +1,44 @@
+-#define CINTERFACE
+ #include "Shared.h"
+-#include <Shlobj.h>
+-#include <KnownFolders.h>
+-#include <cstddef>
++#include <array>
+ #include <cwchar>
+-#include <cstring>
+-static_assert(offsetof(IShellFolderVtbl,GetAttributesOf)==9*sizeof(void*));
+-static_assert((SFGAO_FOLDER|SFGAO_FILESYSTEM|SFGAO_BROWSABLE|SFGAO_HIDDEN|SFGAO_NONENUMERATED)==RequestedAttributes);
+-template<typename T>struct Com{T* value=nullptr;~Com(){if(value)value->lpVtbl->Release(value);}};
+-struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}};
+ static void Need(bool ok){if(!ok)throw E_FAIL;}
+-static void Check(HRESULT hr){if(FAILED(hr))throw hr;}
++struct Module {HMODULE value=nullptr;~Module(){if(value)FreeLibrary(value);}};
++template<typename T>static T ReadSelf(ULONG_PTR address){
++    T result{};SIZE_T bytes=0;
++    Need(ReadProcessMemory(GetCurrentProcess(),reinterpret_cast<LPCVOID>(address),&result,sizeof(result),&bytes)&&bytes==sizeof(result));return result;
++}
+ static void ExceptionControl(SharedState* state){
+     __try{RaiseException(0xE0424242,0,0,nullptr);}
+     __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+ }
+ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+-    Com<IShellFolder> desktop,computer;Pidl computerPidl,rootPidl;
+-    Check(SHGetDesktopFolder(&desktop.value));Check(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&computerPidl.value));
+-    Check(desktop.value->lpVtbl->BindToObject(desktop.value,computerPidl.value,nullptr,IID_IShellFolder,reinterpret_cast<void**>(&computer.value)));
+-    Com<IPersist> persist;Check(computer.value->lpVtbl->QueryInterface(computer.value,IID_IPersist,reinterpret_cast<void**>(&persist.value)));
+-    GUID clsid{};Check(persist.value->lpVtbl->GetClassID(persist.value,&clsid));Need(clsid==ComputerClsid);
+-    wchar_t windows[32768]{},root[32768]{};UINT count=GetWindowsDirectoryW(windows,32768);Need(count>0&&count<32768);
+-    Need(GetVolumePathNameW(windows,root,32768)&&wcslen(root)==3&&root[1]==L':'&&root[2]==L'\\');
+-    ULONG eaten=0,attributes=0;
+-    Check(computer.value->lpVtbl->ParseDisplayName(computer.value,nullptr,nullptr,root,&eaten,&rootPidl.value,&attributes));
+-    UINT rootSize=ILGetSize(rootPidl.value);Need(rootSize>=2&&rootSize<=PidlLimit&&!ILIsEmpty(rootPidl.value)&&ILFindLastID(rootPidl.value)==rootPidl.value);
+-    state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());
+-    auto method=computer.value->lpVtbl->GetAttributesOf;state->methodAddress=reinterpret_cast<ULONGLONG>(method);
+-    state->expectedPidlLength=rootSize;memcpy(state->expectedPidl,rootPidl.value,rootSize);
+-    InterlockedExchange(&state->ready,1);
++    Module advapi,contract;
++    advapi.value=LoadLibraryExW(L"advapi32.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
++    contract.value=LoadLibraryExW(L"api-ms-win-core-registry-l1-1-0.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
++    Need(advapi.value&&contract.value);
++    FARPROC stub=GetProcAddress(advapi.value,"RegOpenKeyExW"),entry=GetProcAddress(contract.value,"RegOpenKeyExW");
++    Need(stub&&entry);
++    ULONG_PTR base=reinterpret_cast<ULONG_PTR>(advapi.value),address=reinterpret_cast<ULONG_PTR>(entry);
++    Need(reinterpret_cast<ULONG_PTR>(stub)==base+0x27300);
++    const std::array<BYTE,7> bytes{0x48,0xff,0x25,0x89,0xdf,0x05,0x00};
++    Need(ReadSelf<std::array<BYTE,7>>(reinterpret_cast<ULONG_PTR>(stub))==bytes&&ReadSelf<ULONG_PTR>(base+0x85290)==address);
++    auto open=reinterpret_cast<decltype(&RegOpenKeyExW)>(entry);
++    state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());state->methodAddress=address;
++    state->apiPathsEqual=1;InterlockedExchange(&state->ready,1);
+     ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+     while(GetTickCount64()<deadline&&WaitForSingleObject(stop,0)==WAIT_TIMEOUT){
+         InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+         if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+             ExceptionControl(state);
+-            SFGAOF other=RequestedAttributes;PCUITEMID_CHILD duplicate[]={rootPidl.value,rootPidl.value};
+-            state->otherResult=method(computer.value,2,duplicate,&other);state->otherMask=other;
+-            SFGAOF matching=RequestedAttributes;PCUITEMID_CHILD single[]={rootPidl.value};
+-            state->matchResult=method(computer.value,1,single,&matching);state->matchMask=matching;
++            HKEY other=nullptr;
++            state->otherResult=open(HKEY_CLASSES_ROOT,L"CLSID\\{00000000-0000-0000-0000-000000000000}\\AssetLibraryDiagnosticNonTarget",0,KEY_QUERY_VALUE,&other);
++            if(state->otherResult==ERROR_SUCCESS)Need(other&&RegCloseKey(other)==ERROR_SUCCESS);
++            HKEY matching=nullptr;
++            state->matchResult=open(HKEY_CLASSES_ROOT,FixedKey,0,KEY_QUERY_VALUE,&matching);
++            if(state->matchResult==ERROR_SUCCESS){
++                state->matchHandleNonNull=matching?1:0;Need(matching!=nullptr);
++                LSTATUS closed=RegCloseKey(matching);state->matchHandleClosed=closed==ERROR_SUCCESS?1:0;Need(closed==ERROR_SUCCESS);
++            }
+             worked=true;InterlockedExchange(&state->callsFinished,1);
+         }
+         if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+@@ -48,7 +48,6 @@
+     if(argc!=5||wcscmp(argv[1],L"--synthetic-child")!=0)return 2;
+     HANDLE mapping=reinterpret_cast<HANDLE>(_wcstoui64(argv[2],nullptr,16)),start=reinterpret_cast<HANDLE>(_wcstoui64(argv[3],nullptr,16)),stop=reinterpret_cast<HANDLE>(_wcstoui64(argv[4],nullptr,16));
+     auto state=static_cast<SharedState*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedState)));if(!state||state->magic!=SharedMagic)return 3;
+-    HRESULT init=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);if(FAILED(init)){state->targetError=init;return 4;}
+     bool ok=true;try{Work(state,start,stop);}catch(HRESULT hr){state->targetError=hr;ok=false;}catch(...){state->targetError=E_FAIL;ok=false;}
+-    CoUninitialize();UnmapViewOfFile(state);CloseHandle(stop);CloseHandle(start);CloseHandle(mapping);return ok?0:1;
++    UnmapViewOfFile(state);CloseHandle(stop);CloseHandle(start);CloseHandle(mapping);return ok?0:1;
+ }
+--- B41/Observer.cpp
++++ RegOpen/Observer.cpp
+@@ -1,8 +1,6 @@
+ #include "Shared.h"
+ #include "Plan.h"
+ #include "Fingerprint.h"
+-#include <Shlobj.h>
+-#include <KnownFolders.h>
+ #include <dbgeng.h>
+ #include <wrl/client.h>
+ #include <atomic>
+@@ -50,9 +48,6 @@
+     DWORD pid = 0;
+     ULONGLONG created = 0;
+     std::optional<Plan> plan;
+-    std::vector<BYTE> expectedPidl;
+-    ComPtr<IShellFolder> referenceParent;
+-    bool referenceComInitialized=false;
+     bool Synthetic() const { return !plan.has_value(); }
+     const char* Profile() const { return plan ? plan->profile.c_str() : "synthetic"; }
+     void ValidateAdmission() {
+@@ -60,6 +55,7 @@
+         else Need(CreationTime(process.value)==created&&WaitForSingleObject(process.value,0)==WAIT_TIMEOUT,"synthetic_identity");
+     }
+     void OpenPlanTarget(const Plan& input) {
++        Need(input.profile=="official","fixed_official_profile_only");
+         plan=input; pid=input.pid; created=input.creation;
+         process.value=OpenProcess(TargetProcessAccess,FALSE,pid);
+         if(!process.value) { DWORD error=GetLastError(); Checked(HRESULT_FROM_WIN32(error?error:ERROR_ACCESS_DENIED),"open_planned_target_query_handle"); }
+@@ -69,26 +65,7 @@
+         Need(!debugged,"planned_target_already_debugged");
+         Record("planned_target_admission_passed");
+     }
+-    void BuildOfficialPidl() {
+-        Need(plan&&plan->profile=="official","official_profile_only");
+-        Checked(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED),"reference_sta_initialize");referenceComInitialized=true;
+-        ComPtr<IShellFolder> desktop;Checked(SHGetDesktopFolder(&desktop),"reference_desktop");
+-        struct Pidl{PIDLIST_ABSOLUTE value=nullptr;~Pidl(){CoTaskMemFree(value);}} parent,absolute,parentCopy,child;
+-        Checked(SHGetKnownFolderIDList(FOLDERID_ComputerFolder,0,nullptr,&parent.value),"reference_computer_pidl");
+-        Checked(desktop->BindToObject(parent.value,nullptr,IID_PPV_ARGS(&referenceParent)),"reference_computer_bind");
+-        ComPtr<IPersist> persist;Checked(referenceParent.As(&persist),"reference_persist");GUID clsid{};Checked(persist->GetClassID(&clsid),"reference_class_id");Need(clsid==ComputerClsid,"reference_fixed_computer");
+-        constexpr wchar_t name[]=L"::{20D04FE0-3AEA-1069-A2D8-08002B30309D}\\::{BA16CE0E-728C-4FC9-98E5-D0B35B384597}";
+-        Checked(SHParseDisplayName(name,nullptr,&absolute.value,0,nullptr),"reference_same_browse_absolute_parse");
+-        Need(absolute.value!=nullptr,"reference_absolute_pidl_present");
+-        parentCopy.value=ILClone(absolute.value);
+-        Need(parentCopy.value&&ILRemoveLastID(parentCopy.value)&&ILIsEqual(parentCopy.value,parent.value),"reference_browse_parent_is_computer");
+-        child.value=ILClone(ILFindLastID(absolute.value));Need(child.value!=nullptr,"reference_relative_leaf_clone");
+-        UINT size=ILGetSize(child.value);Need(size>=2&&size<=PidlLimit,"reference_bounded_opaque_pidl");
+-        auto bytes=reinterpret_cast<const BYTE*>(child.value);expectedPidl.assign(bytes,bytes+size);
+-        Record("reference_official_pidl_ready_not_host_identity");
+-    }
+     ~OwnedTarget() {
+-        referenceParent.Reset();if(referenceComInitialized)CoUninitialize();
+         if (stop.value) SetEvent(stop.value);
+         if (state) UnmapViewOfFile(state);
+     }
+@@ -99,7 +76,7 @@
+         std::wstring targetPath(executable, length);
+         auto slash = targetPath.find_last_of(L'\\');
+         Need(slash != std::wstring::npos, "observer_directory");
+-        targetPath.resize(slash + 1); targetPath += L"AttributesReferenceTarget.exe";
++        targetPath.resize(slash + 1); targetPath += L"ClsidKeyOpenReferenceTarget.exe";
+         Need((GetFileAttributesW(targetPath.c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) == 0, "synthetic_image_not_reparse");
+         imageLock.value = CreateFileW(targetPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+         Need(imageLock.value != INVALID_HANDLE_VALUE, "synthetic_image_lock");
+@@ -134,8 +111,7 @@
+         Need(created != 0, "owned_creation_time");
+         ULONGLONG deadline = GetTickCount64() + 5000;
+         while (!InterlockedCompareExchange(&state->ready, 0, 0) && GetTickCount64() < deadline && WaitForSingleObject(process.value, 0) == WAIT_TIMEOUT) Sleep(10);
+-        Need(state->ready && state->targetPid == pid && state->targetCreation == created && state->methodAddress && state->expectedPidlLength>=2&&state->expectedPidlLength<=PidlLimit, "owned_target_ready_identity");
+-        expectedPidl.assign(state->expectedPidl,state->expectedPidl+state->expectedPidlLength);
++        Need(state->ready && state->targetPid == pid && state->targetCreation == created && state->methodAddress && state->apiPathsEqual, "owned_target_ready_identity");
+         wchar_t actual[32768]{}; DWORD actualLength = 32768;
+         Need(QueryFullProcessImageNameW(process.value, 0, actual, &actualLength) && targetPath == actual, "owned_fixed_image_identity");
+         // Reproduce the former access mask against our own child, then use the
+@@ -225,25 +201,24 @@
+     ComPtr<IDebugRegisters> registers;
+     ComPtr<IDebugDataSpaces> memory;
+     ComPtr<IDebugSystemObjects> system;
+-    FixedModuleFile fixedModule;
++    FixedModuleFile fixedModule,shcoreFile;
+     Events* events = nullptr;
+     std::array<PDEBUG_BREAKPOINT,1> entries{};
+     struct ReturnSite { ULONG64 address; ULONG thread; PDEBUG_BREAKPOINT bp; };
+-    struct PendingCall { ULONG site, thread,callId; ULONG64 expectedRsp,maskAddress; };
++    struct PendingCall { ULONG site,thread,callId; ULONG64 expectedRsp,outputAddress; };
+     std::vector<ReturnSite> returnSites;
+     std::vector<PendingCall> pending;
+-    bool attachRequested = false, createdEvent = false, storageSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+-    ULONG64 candidateAddress=0;
+-    ULONG observedOutputMask=0;bool outputMaskValid=false;
+-    ULONG multiItemDiscarded=0;
++    bool attachRequested = false, createdEvent = false, apiSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
++    ULONG64 candidateAddress=0,shcoreBase=0;bool shcoreSeen=false;
++    bool successHandlePresent=false,outputHandleRead=false;
+     ULONG exceptionCount=0;
+     HANDLE externalCancel = nullptr;
+     std::atomic<bool> cancelled{false};
+     std::atomic<HRESULT> interruptResult{E_PENDING};
+     bool interruptObserved = false, callbackFailed = false, unexpectedExit = false;
+-    ULONG regRsp = 0, regRax = 0, regRdx = 0, regR8 = 0, regR9 = 0;
++    ULONG regRsp=0,regRax=0,regRcx=0,regRdx=0,regR8=0,regR9=0;
+     ULONG entryCount = 0, unmatched = 0, matched = 0, returns = 0, waitTimeouts = 0;
+-    HRESULT observed = E_PENDING;
++    LSTATUS observed=ERROR_IO_PENDING;
+     explicit Capture(OwnedTarget& t, bool c) : target(t), cancelMode(c) {}
+     ~Capture() {
+         if (!cleanupDone) Cleanup();
+@@ -270,8 +245,9 @@
+         return value;
+     }
+     void Start() {
+-        fixedModule.Verify();Record("fixed_system_file_hash_verified_before_attach");
+-        Need(!target.expectedPidl.empty()&&target.expectedPidl.size()<=PidlLimit,"expected_opaque_pidl_available");
++        fixedModule.Verify(L"KernelBase.dll",ExpectedFileHash);
++        if(!target.Synthetic())shcoreFile.Verify(L"SHCORE.dll",ExpectedShcoreFileHash);
++        Record("fixed_system_file_hash_verified_before_attach");
+         SetEnvironmentVariableW(L"_NT_SYMBOL_PATH", nullptr);
+         SetEnvironmentVariableW(L"_NT_ALT_SYMBOL_PATH", nullptr);
+         SetEnvironmentVariableW(L"_NT_SOURCE_PATH", nullptr);
+@@ -302,28 +278,30 @@
+         Checked(client->GetProcessOptions(&options), "attached_process_options");
+         Need((options & (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS)) == (DEBUG_PROCESS_DETACH_ON_EXIT | DEBUG_PROCESS_ONLY_THIS_PROCESS), "attached_safe_options_readback");
+         Record("only_this_process_and_detach_on_exit_verified");
+-        // Consume only to the fixed storage module event; a second initial
++        // Consume only to the fixed module events; a second initial
+         // exception is not guaranteed by DbgEng's initial-event break contract.
+         atEventBreak=false;
+         Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"consume_initial_module_events");
+         deadline=GetTickCount64()+5000;
+-        while(!storageSeen&&GetTickCount64()<deadline) {
++        while((!apiSeen||(!target.Synthetic()&&!shcoreSeen))&&GetTickCount64()<deadline) {
+             HRESULT hr=control->WaitForEvent(0,100);
+             if(hr==S_FALSE) { waitTimeouts++; Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"resume_module_wait"); continue; }
+             Checked(hr,"fixed_module_wait"); Need(!callbackFailed&&!unexpectedExit,"fixed_module_event_health");
+-            if(!storageSeen) { atEventBreak=false; Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"continue_module_wait"); }
+-        }
+-        Need(storageSeen&&atEventBreak&&candidateAddress,"fixed_storage_module_event"); ValidatePid();
++            if(!apiSeen||(!target.Synthetic()&&!shcoreSeen)) { atEventBreak=false; Checked(control->SetExecutionStatus(DEBUG_STATUS_GO),"continue_module_wait"); }
++        }
++        Need(apiSeen&&(target.Synthetic()||shcoreSeen)&&atEventBreak&&candidateAddress,"fixed_required_module_events"); ValidatePid();
+         Checked(registers->GetIndexByName("rsp", &regRsp), "rsp_index");
+         Checked(registers->GetIndexByName("rax", &regRax), "rax_index");
++        Checked(registers->GetIndexByName("rcx",&regRcx),"rcx_index");
+         Checked(registers->GetIndexByName("rdx", &regRdx), "rdx_index");
+         Checked(registers->GetIndexByName("r8", &regR8), "r8_index");
+         Checked(registers->GetIndexByName("r9", &regR9), "r9_index");
+-        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"attributes_entry_breakpoint_add");
+-        Checked(entries[0]->SetOffset(candidateAddress),"attributes_entry_breakpoint_offset");
+-        Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"attributes_entry_breakpoint_enable");
++        if(!target.Synthetic())VerifyShcoreIat();
++        Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,1,&entries[0]),"reg_open_entry_breakpoint_add");
++        Checked(entries[0]->SetOffset(candidateAddress),"reg_open_entry_breakpoint_offset");
++        Checked(entries[0]->AddFlags(DEBUG_BREAKPOINT_ENABLED),"reg_open_entry_breakpoint_enable");
+         armed=true;
+-        Record("single_attributes_breakpoint_installed");
++        Record("single_reg_open_breakpoint_installed");
+     }
+     void VerifyModule(ULONG64 base,const char* image) {
+         ValidatePid();Need(fixedModule.MatchesImage(image),"target_fixed_system_image_path");
+@@ -337,75 +315,67 @@
+         for(WORD i=0;i<nt.FileHeader.NumberOfSections;i++) {
+             auto section=Read<IMAGE_SECTION_HEADER>(sections+i*sizeof(IMAGE_SECTION_HEADER));
+             ULONG64 end=static_cast<ULONG64>(section.VirtualAddress)+section.Misc.VirtualSize;
+-            if(AttributesRva>=section.VirtualAddress&&static_cast<ULONG64>(AttributesRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
++            if(RegOpenRva>=section.VirtualAddress&&static_cast<ULONG64>(RegOpenRva)+32<=end)code=(section.Characteristics&IMAGE_SCN_MEM_EXECUTE)&&(section.Characteristics&IMAGE_SCN_CNT_CODE)&&end<=ExpectedImageSize;
+         }
+         Need(code,"target_candidate_inside_code_range");
+-        auto bytes=Read<std::array<BYTE,32>>(base+AttributesRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
+-        candidateAddress=base+AttributesRva;
+-        if(target.Synthetic())Need(candidateAddress==target.state->methodAddress,"remote_candidate_matches_reference_vtable");
++        auto bytes=Read<std::array<BYTE,32>>(base+RegOpenRva);Sha256 hash;hash.Add(bytes.data(),static_cast<ULONG>(bytes.size()));Need(hash.Finish()==ExpectedCodeHash,"target_candidate_prefix_hash");
++        candidateAddress=base+RegOpenRva;
++        if(target.Synthetic())Need(candidateAddress==target.state->methodAddress,"remote_candidate_matches_reference_public_export");
+         Record("target_candidate_identity_verified");
+     }
+-    bool PidlMatches(ULONG64 address) {
+-        if(!address)return false;
+-        ULONG length=0;bool terminated=false;
+-        for(ULONG items=0;items<64;items++) {
+-            if(length>PidlLimit-sizeof(USHORT))return false;
+-            USHORT cb=Read<USHORT>(address+length);
+-            if(cb==0){length+=sizeof(USHORT);terminated=true;break;}
+-            if(cb<sizeof(USHORT)||cb>PidlLimit-length)return false;
+-            length+=cb;
+-        }
+-        if(!terminated||length!=target.expectedPidl.size())return false;
+-        std::array<BYTE,PidlLimit> bytes{};ULONG copied=0;
+-        Checked(memory->ReadVirtual(address,bytes.data(),length,&copied),"bounded_complete_pidl_read");
+-        Need(copied==length,"complete_pidl_length");
+-        return memcmp(bytes.data(),target.expectedPidl.data(),length)==0;
+-    }
+-    bool AllSyntheticReturns() const { return returns>0&&pending.empty()&&observed==S_OK&&outputMaskValid&&observedOutputMask==ExpectedReferenceAttributes; }
++    void VerifyShcoreModule(ULONG64 base,const char* image) {
++        ValidatePid();Need(shcoreFile.MatchesImage(image),"target_fixed_shcore_image_path");
++        auto dos=Read<IMAGE_DOS_HEADER>(base);Need(dos.e_magic==IMAGE_DOS_SIGNATURE&&dos.e_lfanew>0&&dos.e_lfanew<4096,"shcore_dos_header");
++        auto nt=Read<IMAGE_NT_HEADERS64>(base+dos.e_lfanew);
++        Need(nt.Signature==IMAGE_NT_SIGNATURE&&nt.FileHeader.Machine==IMAGE_FILE_MACHINE_AMD64&&nt.OptionalHeader.Magic==IMAGE_NT_OPTIONAL_HDR64_MAGIC&&nt.OptionalHeader.SizeOfImage==ShcoreImageSize&&nt.FileHeader.TimeDateStamp==ShcoreTimestamp,"target_fixed_shcore_pe_identity");
++        Need(ShcoreIatRva+sizeof(ULONG64)<=nt.OptionalHeader.SizeOfImage,"shcore_iat_inside_image");
++        shcoreBase=base;shcoreSeen=true;Record("target_shcore_file_and_pe_verified");
++    }
++    void VerifyShcoreIat() {
++        Need(shcoreSeen&&shcoreBase&&candidateAddress,"real_shcore_mapping_required");
++        Need(FixedImportMatches(Read<ULONG64>(shcoreBase+ShcoreIatRva),candidateAddress),"real_shcore_iat_matches_fixed_public_entry");
++        Record("real_shcore_iat_matches_fixed_public_entry");
++    }
++    bool KeyMatches(ULONG64 address) {
++        if(!address||address>~ULONG64{0}-sizeof(FixedKey))return false;
++        for(size_t i=0;i<=FixedKeyLength;i++)if(!FixedKeyCharacter(i,Read<wchar_t>(address+i*sizeof(wchar_t))))return false;
++        return true;
++    }
++    bool AllSyntheticReturns() const {return returns>0&&pending.empty()&&(observed==ERROR_FILE_NOT_FOUND||(observed==ERROR_SUCCESS&&successHandlePresent&&outputHandleRead));}
+     HRESULT OnBreakpoint(PDEBUG_BREAKPOINT bp) {
+-        ValidatePid();
+-        ULONG id = 0; Checked(bp->GetId(&id), "breakpoint_id");
+-        if (id==1) {
+-            entryCount++;
+-            Need(entryCount <= 4096, "bounded_entry_count");
+-            ULONG cidl=static_cast<ULONG>(Reg(regRdx));
+-            if(cidl!=1){unmatched++;if(cidl==2)multiItemDiscarded++;return DEBUG_STATUS_GO;}
+-            ULONG64 array=Reg(regR8);
+-            if(!array||!PidlMatches(Read<ULONG64>(array))){unmatched++;return DEBUG_STATUS_GO;}
+-            Need(pending.size()<32&&matched<128,"bounded_matching_calls");
+-            matched++;
+-            ULONG64 returnAddress = Read<ULONG64>(Reg(regRsp));
+-            ULONG threadId = 0; Checked(system->GetCurrentThreadId(&threadId), "matching_thread");
++        ValidatePid();ULONG id=0;Checked(bp->GetId(&id),"breakpoint_id");
++        if(id==1) {
++            entryCount++;Need(entryCount<=4096,"bounded_entry_count");
++            if(!FixedRootMatches(Reg(regRcx))){unmatched++;return DEBUG_STATUS_GO;}
++            if(!KeyMatches(Reg(regRdx))){unmatched++;return DEBUG_STATUS_GO;}
++            Need(pending.size()<32&&matched<128,"bounded_matching_calls");matched++;
++            ULONG64 rsp=Reg(regRsp),returnAddress=Read<ULONG64>(rsp);
++            ULONG threadId=0;Checked(system->GetCurrentThreadId(&threadId),"matching_thread");
+             ULONG site=0;
+-            while(site<returnSites.size()&&(returnSites[site].address!=returnAddress||returnSites[site].thread!=threadId)) site++;
++            while(site<returnSites.size()&&(returnSites[site].address!=returnAddress||returnSites[site].thread!=threadId))site++;
+             if(site==returnSites.size()) {
+-                Need(site<64,"bounded_return_sites");
+-                returnSites.push_back({returnAddress,threadId,nullptr});
+-                auto& created=returnSites.back();
++                Need(site<64,"bounded_return_sites");returnSites.push_back({returnAddress,threadId,nullptr});auto& created=returnSites.back();
+                 Checked(control->AddBreakpoint(DEBUG_BREAKPOINT_CODE,100+site,&created.bp),"return_breakpoint_add");
+                 Checked(created.bp->SetOffset(returnAddress),"return_breakpoint_offset");
+                 Checked(created.bp->SetMatchThreadId(threadId),"return_thread_scope");
+                 Checked(created.bp->AddFlags(DEBUG_BREAKPOINT_ENABLED),"return_breakpoint_enable");
+             }
+-            ULONG64 rsp=Reg(regRsp),maskAddress=Reg(regR9);Need(maskAddress!=0,"matched_attribute_mask_pointer_required");
+-            ULONG inputMask=Read<ULONG>(maskAddress);pending.push_back({site,threadId,matched,rsp+8,maskAddress});
+-            printf("{\"kind\":\"matching_attributes_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"inputMask\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,inputMask,GetTickCount64());fflush(stdout);
++            ULONG options=static_cast<ULONG>(Reg(regR8)),access=static_cast<ULONG>(Reg(regR9));
++            ULONG64 output=Read<ULONG64>(rsp+0x28);pending.push_back({site,threadId,matched,rsp+8,output});
++            printf("{\"kind\":\"matching_reg_open_entry\",\"callId\":%lu,\"profile\":\"%s\",\"pid\":%lu,\"ulOptions\":\"0x%08lX\",\"samDesired\":\"0x%08lX\",\"tick\":%llu}\n",matched,target.Profile(),target.pid,options,access,GetTickCount64());fflush(stdout);
+             return DEBUG_STATUS_GO;
+         }
+         Need(id>=100&&id-100<returnSites.size(),"owned_return_breakpoint");
+-        ULONG threadId=0; Checked(system->GetCurrentThreadId(&threadId),"return_thread");
+-        ULONG64 rsp=Reg(regRsp);
++        ULONG threadId=0;Checked(system->GetCurrentThreadId(&threadId),"return_thread");ULONG64 rsp=Reg(regRsp);
+         size_t found=pending.size();
+-        while(found>0) { found--; const auto& call=pending[found]; if(call.site==id-100&&call.thread==threadId&&call.expectedRsp==rsp) break; }
+-        if(pending.empty()||pending[found].site!=id-100||pending[found].thread!=threadId||pending[found].expectedRsp!=rsp) return DEBUG_STATUS_GO;
+-        ULONG64 maskAddress=pending[found].maskAddress;
+-        ULONG callId=pending[found].callId;
+-        observed = static_cast<HRESULT>(static_cast<ULONG>(Reg(regRax)));
+-        returns++;observedOutputMask=Read<ULONG>(maskAddress);outputMaskValid=SUCCEEDED(observed);
++        while(found>0){found--;const auto& call=pending[found];if(call.site==id-100&&call.thread==threadId&&call.expectedRsp==rsp)break;}
++        if(pending.empty()||pending[found].site!=id-100||pending[found].thread!=threadId||pending[found].expectedRsp!=rsp)return DEBUG_STATUS_GO;
++        auto call=pending[found];observed=static_cast<LSTATUS>(static_cast<ULONG>(Reg(regRax)));returns++;
++        successHandlePresent=false;outputHandleRead=false;
++        if(RegistryOpenSucceeded(observed)&&call.outputAddress){successHandlePresent=Read<ULONG64>(call.outputAddress)!=0;outputHandleRead=true;}
+         pending.erase(pending.begin()+static_cast<ptrdiff_t>(found));
+-        printf("{\"kind\":\"matching_attributes_return\",\"callId\":%lu,\"hr\":\"0x%08lX\",\"outputMask\":\"0x%08lX\",\"outputMaskValid\":%s,\"tick\":%llu}\n",callId,static_cast<ULONG>(observed),observedOutputMask,outputMaskValid?"true":"false",GetTickCount64());fflush(stdout);
+-        atEventBreak = target.Synthetic()&&!cancelMode&&AllSyntheticReturns();
+-        return atEventBreak ? DEBUG_STATUS_BREAK : DEBUG_STATUS_GO;
++        printf("{\"kind\":\"matching_reg_open_return\",\"callId\":%lu,\"status\":%lu,\"statusHex\":\"0x%08lX\",\"successfulOpen\":%s,\"outputHandleNonNull\":%s,\"outputHandleRead\":%s,\"tick\":%llu}\n",call.callId,static_cast<ULONG>(observed),static_cast<ULONG>(observed),observed==ERROR_SUCCESS?"true":"false",observed==ERROR_SUCCESS?(successHandlePresent?"true":"false"):"null",outputHandleRead?"true":"false",GetTickCount64());fflush(stdout);
++        atEventBreak=target.Synthetic()&&!cancelMode&&AllSyntheticReturns();return atEventBreak?DEBUG_STATUS_BREAK:DEBUG_STATUS_GO;
+     }
+     void Run() {
+         Handle timerDone(CreateEventW(nullptr, TRUE, FALSE, nullptr)); Need(timerDone.value != nullptr, "cancel_timer_event");
+@@ -437,8 +407,8 @@
+             Need(!outputFailed && !callbackFailed && !unexpectedExit, "capture_callback_health");
+             Need(pending.empty()&&returns==matched,"matching_returns_complete");
+             if(target.Synthetic()) {
+-                Need(AllSyntheticReturns()&&unmatched>=1&&multiItemDiscarded>=1,"attributes_single_and_multi_item_control");
+-                printf("{\"kind\":\"multi_item_control_discarded\",\"count\":%lu,\"extraItemDataRead\":false,\"tick\":%llu}\n",multiItemDiscarded,GetTickCount64());fflush(stdout);
++                Need(AllSyntheticReturns()&&unmatched>=1,"reg_open_target_and_nonmatching_control");
++                printf("{\"kind\":\"nonmatching_control_discarded\",\"count\":%lu,\"payloadRetained\":false,\"tick\":%llu}\n",unmatched,GetTickCount64());fflush(stdout);
+                 Need(cancelMode ? cancelled.load() : !cancelled.load(),"end_reason");
+             }
+         } catch (...) {
+@@ -524,9 +494,13 @@
+ }
+ HRESULT Events::ExitProcess(ULONG) { capture.unexpectedExit = true; return DEBUG_STATUS_BREAK; }
+ HRESULT Events::LoadModule(ULONG64,ULONG64 base,ULONG,PCSTR module,PCSTR image,ULONG,ULONG) {
+-    if(!capture.armed&&module&&(_stricmp(module,"windows.storage")==0||_stricmp(module,"windows.storage.dll")==0||_stricmp(module,"windows_storage")==0||_stricmp(module,"windows_storage.dll")==0)) {
+-        try { capture.VerifyModule(base,image);capture.storageSeen=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK; }
++    if(!capture.armed&&module&&(_stricmp(module,"KernelBase")==0||_stricmp(module,"KernelBase.dll")==0)) {
++        try { capture.VerifyModule(base,image);capture.apiSeen=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK; }
+         catch(...) { capture.callbackFailed=true; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
++    }
++    if(!capture.armed&&!capture.target.Synthetic()&&module&&(_stricmp(module,"SHCORE")==0||_stricmp(module,"SHCORE.dll")==0)) {
++        try {capture.VerifyShcoreModule(base,image);capture.atEventBreak=true;return DEBUG_STATUS_BREAK;}
++        catch(...) {capture.callbackFailed=true;capture.atEventBreak=true;return DEBUG_STATUS_BREAK;}
+     }
+     return DEBUG_STATUS_NO_CHANGE;
+ }
+@@ -561,6 +535,23 @@
+         PlanNeed(cancellation.value!=nullptr&&GetLastError()!=ERROR_ALREADY_EXISTS);
+     }
+ };
++static void KeyChecks() {
++    ULONG passed=0;auto test=[&](bool ok){Need(ok,"offline_fixed_key_control");passed++;};
++    auto matches=[](std::wstring_view text){for(size_t i=0;i<=FixedKeyLength;i++){wchar_t c=i<text.size()?text[i]:L'\0';if(!FixedKeyCharacter(i,c))return false;}return true;};
++    test(FixedRootMatches(reinterpret_cast<ULONG64>(HKEY_CLASSES_ROOT)));
++    test(!FixedRootMatches(reinterpret_cast<ULONG64>(HKEY_CURRENT_USER)));
++    test(!FixedRootMatches(0x80000000)&&!FixedRootMatches(0));
++    test(matches(FixedKey));std::wstring lower(FixedKey);for(auto& c:lower)if(c>=L'A'&&c<=L'Z')c=static_cast<wchar_t>(c+32);test(matches(lower));
++    test(!matches(L""));test(!matches(std::wstring(FixedKey,FixedKeyLength-1)));
++    test(!matches(std::wstring(FixedKey)+L"\\"));test(!matches(std::wstring(FixedKey)+L"X"));
++    auto altered=std::wstring(FixedKey);altered[8]=L'0';test(!matches(altered));
++    altered=FixedKey;altered[1]=0;test(!matches(altered));
++    altered=FixedKey;altered[1]=0x212A;test(!matches(altered));
++    test(!FixedKeyCharacter(FixedKeyLength+1,0));
++    test(RegistryOpenSucceeded(0));test(!RegistryOpenSucceeded(2));test(!RegistryOpenSucceeded(5));test(!RegistryOpenSucceeded(-1));
++    test(FixedImportMatches(123,123));test(!FixedImportMatches(123,124));test(!FixedImportMatches(0,0));
++    printf("{\"kind\":\"offline_key_status_mapping_controls\",\"passed\":%lu,\"registryApiCalled\":false,\"processOpened\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
++}
+ static int PlanChecks() {
+     const std::string id="0123456789abcdef0123456789abcdef";
+     ULONGLONG now=NowFiletime();
+@@ -578,7 +569,7 @@
+     return 0;
+ }
+ int wmain(int argc, wchar_t** argv) {
+-    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { return PlanChecks(); } catch(...) { Record("plan_controls_failed",E_FAIL); return 1; } }
++    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { KeyChecks();return PlanChecks(); } catch(...) { Record("offline_controls_failed",E_FAIL); return 1; } }
+     bool real=argc==3&&wcscmp(argv[1],L"--run-plan")==0;
+     bool cancel = argc==2&&wcscmp(argv[1],L"--cancel")==0;
+     bool normal = argc==2&&wcscmp(argv[1],L"--normal")==0;
+@@ -593,7 +584,7 @@
+     ULONG matched = 0, returns = 0, discarded = 0, waits = 0;
+     bool interrupted = false;
+     try {
+-        if(real) { input.Read(IdArgument(argv[2])); target.OpenPlanTarget(input.plan);target.BuildOfficialPidl(); input.Consume(); }
++        if(real) { input.Read(IdArgument(argv[2])); target.OpenPlanTarget(input.plan); input.Consume(); }
+         else {
+             target.Launch();
+             Plan wrong; wrong.pid=target.pid; wrong.creation=target.created; wrong.expires=NowFiletime()+90*Second;
+@@ -614,7 +605,9 @@
+         passed = passed && cleaned && detachedAlive && !capture.callbackFailed && !capture.unexpectedExit;
+         if(target.Synthetic()) {
+             passed=passed&&target.state->debuggerObserved&&!target.state->targetError&&target.state->ownExceptionHandled;
+-            passed=passed&&target.state->matchResult==S_OK&&target.state->otherResult==S_OK&&static_cast<ULONG>(target.state->matchMask)==ExpectedReferenceAttributes&&static_cast<ULONG>(target.state->otherMask)==ExpectedReferenceAttributes;
++            passed=passed&&target.state->matchResult==capture.observed&&target.state->apiPathsEqual;
++            passed=passed&&(capture.observed!=ERROR_SUCCESS||(target.state->matchHandleNonNull&&target.state->matchHandleClosed));
++            printf("{\"kind\":\"reference_reg_open_result\",\"status\":%lu,\"successHandleClosedByReference\":%s,\"apiPathsEqual\":true,\"tick\":%llu}\n",static_cast<ULONG>(target.state->matchResult),capture.observed==ERROR_SUCCESS?(target.state->matchHandleClosed?"true":"false"):"null",GetTickCount64());fflush(stdout);
+         }
+     } catch (...) { Record(real?"planned_setup_failed":"synthetic_setup_failed", E_FAIL); }
+     stopped = target.StopNormally();
+--- B41/build.ps1
++++ RegOpen/build.ps1
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference = 'Stop'
+-$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-attributes-debug'
++$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-debug'
+ if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+ $toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk = 'C:\Program Files (x86)\Windows Kits\10'
+@@ -13,8 +13,8 @@
+ $libraries = @('/link',"/LIBPATH:$toolset\lib\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64",'kernel32.lib','ole32.lib','uuid.lib','user32.lib','advapi32.lib','dwmapi.lib','shell32.lib','bcrypt.lib')
+ Push-Location $taskRoot
+ try {
+-  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\AttributesReferenceTarget.exe" @libraries
++  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\ClsidKeyOpenReferenceTarget.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Synthetic target compilation failed.' }
+-  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\AttributesObserver.exe" @libraries
++  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\ClsidKeyOpenObserver.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Observer compilation failed.' }
+ } finally { Pop-Location }

@@ -1,0 +1,139 @@
+{
+  "stage": "offline_preparation_and_own_reference_only_no_Explorer_probe_yet",
+  "manifest_sha256": "268b29e575878d3c711aafa0a4775ac59a710ef064f5a74595213b4d4a9672f4",
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "02e97fd0b85c0311d8abe83cc23472c862a852024902da2a52fb39a41cd1342d",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Shared.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "cb8333ab20712a6920b20d6078a30b40cbf3ede379b93187a98eb40325597b10",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Plan.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Fingerprint.h.txt",
+      "sha256": "b3df4947105cc6aba5851584db09169a7b445153b4ae3b7e544025b08a33449d",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Fingerprint.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "d39ed1f78a8c2ca998fb82eed68003b02ec8675446db6f0535b591970376c62a",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Target.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "5e1499ee836dc5a75e169ac24637acfd3b59244b73a23033ae8202a1b0621cec",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Observer.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "43e29020505593017ce816382b92bfed53bee262a6fa968fe5ef11ac1ed57ee4",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\build.ps1",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "candidate.diff.txt",
+      "sha256": "075807cf34051bb33daec19b67bcc3e9986a86ea95642d4bc414606ffa16f04c",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\candidate.diff",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Locator.cpp.txt",
+      "sha256": "35550d777604b0326a68bbcd04e1910fd1082e83a2a99dc4b95e8f5ffa610458",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\Locator.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "LocatorAdvapi.cpp.txt",
+      "sha256": "95d340beec161cffb01093326c1170856cd7fa63a183e00b69d899d2de0ef1a1",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\LocatorAdvapi.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build-locator.ps1.txt",
+      "sha256": "7b490daf9519f4bdeb609193c4258405f0706c016dfd6066640135b3a5114229",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\build-locator.ps1",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "advapi-entry-32.raw.txt",
+      "sha256": "3908738fceb981b99932745355a15ff3ee712f5148faadf1a6d900059347ad52",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\advapi-entry-32.raw.txt",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build-locator-01.log",
+      "sha256": "ff1faf51eda093daab14bf4e5d1db0d367937207f90ec2dcaaa6742ef605721f",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\build-locator-01.log",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build-locator-02.log",
+      "sha256": "ff1faf51eda093daab14bf4e5d1db0d367937207f90ec2dcaaa6742ef605721f",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\build-locator-02.log",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build-01.log",
+      "sha256": "8666ed67cef444cbe1933e7ac8bddcb7b46319fd0ad2278659976e386d3f3767",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\build-01.log",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "location-01.jsonl",
+      "sha256": "6092d15bc0986cbd566d3704b70f758e8f56f0f0aa231810a385b6e7cfac3637",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\location-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "location-02.jsonl",
+      "sha256": "f801c748655161e0f9d565294453a3eaee6709d6f41231dcca752103e2328dc2",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\location-02.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "self-test-01.jsonl",
+      "sha256": "f415441cf1ddb445a739558356759bcffba57843fa3fea331f9af1e67d785679",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\self-test-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "normal-01.jsonl",
+      "sha256": "e61110128fe9d55fd9421d9785f0cb4f01415c967753f62e01da55c7bea49ccc",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\normal-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "cancel-01.jsonl",
+      "sha256": "f7da0abceafc3ab0d4b64d034da3f05de80b62446f72009550098b465338450a",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\cancel-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "post-exit-identity.json",
+      "sha256": "30f06d51f5a977595f57fea70edc38177aec7ecd5155d30e3ba3dee21c047c8a",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\post-exit-identity.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "12ee51f33879bd2f7e116d5678ec410a42056c29bbbe93f7260b391434907865",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\validation.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "README.md",
+      "sha256": "c0075850c72334b49d55f965df05c0c12769c0ef902c13ffc1d8465d226460f1",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug\\README.md",
+      "kind": "unmodified_preparation_file"
+    }
+  ],
+  "runtime_only": "Compiled executables and full import/.pdata inventories are not distributed as product dependencies."
+}

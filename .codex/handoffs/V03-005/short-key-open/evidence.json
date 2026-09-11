@@ -1,0 +1,869 @@
+{
+  "schema": "AssetLibrary.ShortKeyOpenEvidence.v1",
+  "packaged_utc": "2026-09-11T11:31:36.640621+00:00",
+  "scope": "Archive only. No new GUI, registry operation, attachment, compilation, live cycle, commit, or external handoff state update.",
+  "source_root_alias": "<WINDOWS_OWNER_WORKTREE> denotes the existing Windows-owner checkout; its user-profile prefix is intentionally omitted.",
+  "artifact_provenance_rule": "original_copy preserves exact bytes. redacted_copy_not_original is labelled and maps original SHA256 to archived copy SHA256; originals remain unchanged.",
+  "frozen_tool_reference": {
+    "manifest": "../clsid-key-open-debug-v2/manifest.json",
+    "manifest_sha256": "F9CA737F2BB5C0E4B977FFD5DB28F1C40DCCEDA4E7C0EA945F71BDE201935E32",
+    "observer_sha256": "75F1AB60E25283FAB42A87DDBC716339DA94417E18315054C021FA53E60541FC",
+    "reference_target_sha256": "EC9936C5A4B2B5D6D20F6E6C2B69B8C19FAB2C46DC8BC99817E2F88DC5C13EF9",
+    "guard_sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+    "official_dll_sha256": "F298A352439C6209D274B567081191819BD55A45BC2F63A025EE28FC69C42E96",
+    "run_notify_sha256": "D0FA51C55D9E3A5C4F71609C18B3AC3716F6AE87A120FFC5AF2114483D14F57B",
+    "invoke_notify_sha256": "8B7C6F3D7701CA637FA9E02D340952B69F9254ED76E191C50B86C24EA216C69D",
+    "existing_reference_runs_repeated": false
+  },
+  "cycles": {
+    "first": {
+      "source_cycle": "20260911-clsid-key-open-short",
+      "identity": {
+        "RecordedUtc": "2026-09-11T11:04:34.1148848+00:00",
+        "CuaWindowId": 3147082,
+        "NativeHwnd": "3147082",
+        "Pid": 9520,
+        "CreationFileTime": "134335982471480875",
+        "OwnershipStartFiletime": "134335982411020262",
+        "DesktopPid": 6212,
+        "CuaTabCount": 1
+      },
+      "plan_lines": 18,
+      "plan_bytes": 328,
+      "plan_utf8_bom": false,
+      "plan_id": "0c0f3bcdf6e04aa082cf2bf618d33ee5",
+      "window_epoch": {
+        "Utc": "2026-09-11T11:04:01.1020262+00:00",
+        "OwnershipStartFiletime": "134335982411020262",
+        "DesktopPid": 6212
+      },
+      "registration_utc_raw": "2026-09-11T11:04:55.1940594+00:00",
+      "capture": {
+        "Utc": "2026-09-11T11:05:31.4542446+00:00",
+        "PlanId": "0c0f3bcdf6e04aa082cf2bf618d33ee5",
+        "ObserverPid": 3744,
+        "ObserverCreationFileTime": "134335983314153239",
+        "ExitCode": 1,
+        "Ready": false,
+        "CancelAttempted": false,
+        "RunnerFailure": "planned_setup_failed",
+        "AutomaticNotify": false,
+        "AutomaticBrowse": false,
+        "Final": {
+          "kind": "result",
+          "mode": "plan",
+          "passed": false,
+          "matchedEntries": 0,
+          "matchedReturns": 0,
+          "nonMatchingDiscarded": 0,
+          "finiteWaitTimeouts": 0,
+          "exitInterruptObserved": false,
+          "attachCompleted": false,
+          "cleanupVerified": false,
+          "targetAliveAfterDetach": false,
+          "existingProcessAttached": false,
+          "tick": 1000187
+        }
+      },
+      "cleanup_utc_raw": "2026-09-11T11:06:27.2747713+00:00",
+      "final_window_cleanup": {
+        "Utc": "2026-09-11T11:07:15.9626399+00:00",
+        "OwnedWindowClosedByCua": true,
+        "OwnedOriginalProcessStillPresent": true,
+        "GuardProcessAbsent": true,
+        "CollectorProcessAbsent": true,
+        "DesktopProcessPresent": true,
+        "NoOriginalUserWindowOperated": true,
+        "OwnedWindowAbsentOnSecondFreshCuaRead": true
+      },
+      "browse_dispatched_marker_exists_at_packaging": false,
+      "after_ready_notify_marker_exists_at_packaging": false,
+      "gate_browse_receipt_exists_at_packaging": false
+    },
+    "fixed": {
+      "source_cycle": "20260911-clsid-key-open-short-fixed",
+      "identity": {
+        "RecordedUtc": "2026-09-11T11:13:53.9325768+00:00",
+        "CuaWindowId": 656266,
+        "NativeHwnd": "656266",
+        "Pid": 7392,
+        "CreationFileTime": "134335987993635186",
+        "OwnershipStartFiletime": "134335987989402933",
+        "DesktopPid": 6212,
+        "CuaTabCount": 1
+      },
+      "plan_lines": 11,
+      "plan_bytes": 321,
+      "plan_utf8_bom": false,
+      "plan_id": "641fd1d613be423cb5454827bd939fdc",
+      "window_epoch": {
+        "Utc": "2026-09-11T11:13:18.9402933+00:00",
+        "OwnershipStartFiletime": "134335987989402933",
+        "DesktopPid": 6212
+      },
+      "registration_utc_raw": "2026-09-11T11:14:12.5251299+00:00",
+      "capture": {
+        "Utc": "2026-09-11T11:15:05.4776688+00:00",
+        "PlanId": "641fd1d613be423cb5454827bd939fdc",
+        "ObserverPid": 7004,
+        "ObserverCreationFileTime": "134335988782740019",
+        "ExitCode": 1,
+        "Ready": true,
+        "CancelAttempted": false,
+        "RunnerFailure": "planned_capture_failed",
+        "AutomaticNotify": false,
+        "AutomaticBrowse": false,
+        "Final": {
+          "kind": "result",
+          "mode": "plan",
+          "passed": false,
+          "matchedEntries": 0,
+          "matchedReturns": 0,
+          "nonMatchingDiscarded": 3896,
+          "finiteWaitTimeouts": 220,
+          "exitInterruptObserved": false,
+          "attachCompleted": true,
+          "cleanupVerified": true,
+          "targetAliveAfterDetach": true,
+          "existingProcessAttached": true,
+          "tick": 1574234
+        }
+      },
+      "cleanup_utc_raw": "2026-09-11T11:15:52.6337336+00:00",
+      "final_window_cleanup": {
+        "Utc": "2026-09-11T11:17:07.7368310+00:00",
+        "OwnedWindowAbsentNative": true,
+        "OwnedWindowAbsentSecondFreshCua": true,
+        "TargetOriginalProcessStillPresent": true,
+        "TargetDebuggerPresent": false,
+        "GuardProcessAbsent": true,
+        "CollectorProcessAbsent": true,
+        "ObserverProcessAbsent": true,
+        "DesktopSamePidPreserved": true,
+        "SessionActive": true,
+        "InputDesktopIsDefault": true,
+        "NoUserWindowOperated": true
+      },
+      "browse_dispatched_marker_exists_at_packaging": false,
+      "after_ready_notify_marker_exists_at_packaging": true,
+      "gate_browse_receipt_exists_at_packaging": false,
+      "exception_budget_trigger": {
+        "kind": "target_exception_summary",
+        "stage": "exception_budget_stop",
+        "total": 81,
+        "cxxFirstChance": 64,
+        "otherFirstChance": 17,
+        "secondChance": 0,
+        "detailedLogs": 16,
+        "totalLimit": 256,
+        "otherFirstChanceLimit": 16,
+        "stopReason": "other_first_chance_limit",
+        "triggerCode": "0x40080201",
+        "triggerFirstChance": true,
+        "triggerTotal": 81,
+        "lastCode": "0x40080201",
+        "lastFirstChance": true,
+        "tick": 1573250
+      },
+      "exception_summary_after_cleanup": {
+        "kind": "target_exception_summary",
+        "stage": "after_capture_cleanup",
+        "total": 177,
+        "cxxFirstChance": 132,
+        "otherFirstChance": 45,
+        "secondChance": 0,
+        "detailedLogs": 16,
+        "totalLimit": 256,
+        "otherFirstChanceLimit": 16,
+        "stopReason": "other_first_chance_limit",
+        "triggerCode": "0x40080201",
+        "triggerFirstChance": true,
+        "triggerTotal": 81,
+        "lastCode": "0xE06D7363",
+        "lastFirstChance": true,
+        "tick": 1574234
+      },
+      "ready_to_budget_trigger_ms": 25813,
+      "ready_to_final_result_ms": 26797,
+      "native_thispc_read_started_utc": "2026-09-11T11:15:05.4927188+00:00",
+      "precise_cua_navigation_utc": null,
+      "thispc_native_class": "{20D04FE0-3AEA-1069-A2D8-08002B30309D}",
+      "thispc_native_pidl_bytes": 22,
+      "thispc_native_item_count": 3
+    }
+  },
+  "limitations": [
+    "First cycle was refused before attach; retain cleanupVerified=false and targetAliveAfterDetach=false as no-attach tool defaults. Independent refusal-health showed alive/no debugger.",
+    "Second cycle's 0 matches and 3896 discarded nonmatches do not prove registry absence or provide target API LSTATUS/PHKEY.",
+    "SDK identifies 0x40080201 as EXCEPTION_RO_ORIGINATEERROR; the actual embedded HRESULT, message and originating stack were not captured. See ../winrt-error-notification.json; no particular error or caller is established.",
+    "Native ThisPC read began at 11:15:05.4927188Z, about 15.05 ms after capture-result 11:15:05.4776688Z. Precise CUA navigation UTC was not saved; full navigation coverage by capture is unproven.",
+    "Browse gate refusal is recorded in execution-summary and the original conversation tool output; dispatch marker is absent. No standalone failed gate-browse receipt exists.",
+    "SHCORE IAT/public-entry equality does not attribute every call to SHCORE; non-FLUSH notification success does not prove cache refresh.",
+    "Current native ThisPC has 3 items, not the historical 2-item baseline.",
+    "Both windows closed; original Explorer processes remained resident without debuggers in the final snapshots and were not force-killed.",
+    "Both process creations preceded registration; neither cycle is registration-before-process evidence.",
+    "Source capture.stderr files are not valid UTF-8; their explicitly redacted display copies use replacement decoding. Raw source hashes remain recorded."
+  ],
+  "artifacts": [
+    {
+      "path": "first/plan.txt",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/plan.txt",
+      "source_sha256": "4C06EECFAC6316746812FA9951D4FABD17F5655141147F8016597E76889C2462",
+      "copy_sha256": "4C06EECFAC6316746812FA9951D4FABD17F5655141147F8016597E76889C2462",
+      "bytes": 328,
+      "transformations": []
+    },
+    {
+      "path": "first/identity.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/identity.json",
+      "source_sha256": "8C473FCA595EB910FBE32E87942CB4F11BE49DFB822B20B03C03D31A52B6039F",
+      "copy_sha256": "8C473FCA595EB910FBE32E87942CB4F11BE49DFB822B20B03C03D31A52B6039F",
+      "bytes": 271,
+      "transformations": []
+    },
+    {
+      "path": "first/window-epoch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/window-epoch.json",
+      "source_sha256": "997F581E8E930E4A22E88D93EF0D622458B51C5A51779658A2F91DDFDD24F07D",
+      "copy_sha256": "997F581E8E930E4A22E88D93EF0D622458B51C5A51779658A2F91DDFDD24F07D",
+      "bytes": 126,
+      "transformations": []
+    },
+    {
+      "path": "first/sdk-baseline.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/sdk-baseline.json",
+      "source_sha256": "63F0BE7B2163221CED166C99CC9D53298FBA3FF9B8E7C3E2DFAE2C03125287CB",
+      "copy_sha256": "63F0BE7B2163221CED166C99CC9D53298FBA3FF9B8E7C3E2DFAE2C03125287CB",
+      "bytes": 2877,
+      "transformations": []
+    },
+    {
+      "path": "first/register.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/register.json",
+      "source_sha256": "F8678DD50A489979EFF86E35A3FE840DF9C9D138E4A813F2B4F7485C4E2BAFBB",
+      "copy_sha256": "64BFCAA05F8CA9A163BCE24683D24048AF4918DC1AB2AE0F54596AB606F0139F",
+      "bytes": 3102,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "first/preflight.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/preflight.json",
+      "source_sha256": "CE18623780B1B033A98BF6BC22BF2D408DB2DBD1FBA70593A908D6EC2A2C6693",
+      "copy_sha256": "CE18623780B1B033A98BF6BC22BF2D408DB2DBD1FBA70593A908D6EC2A2C6693",
+      "bytes": 1523,
+      "transformations": []
+    },
+    {
+      "path": "first/guard-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/guard-launch.json",
+      "source_sha256": "6EF8532828EFA248A8C692283E4FAAA43B3C63B4677C7A3D9D2227A356CBDF12",
+      "copy_sha256": "6EF8532828EFA248A8C692283E4FAAA43B3C63B4677C7A3D9D2227A356CBDF12",
+      "bytes": 118,
+      "transformations": []
+    },
+    {
+      "path": "first/collector-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/collector-launch.json",
+      "source_sha256": "74079D0732641B6F39945CD57E843257818FFB62FC5B71ACBBA4C00744EE1501",
+      "copy_sha256": "74079D0732641B6F39945CD57E843257818FFB62FC5B71ACBBA4C00744EE1501",
+      "bytes": 163,
+      "transformations": []
+    },
+    {
+      "path": "first/capture-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/capture-launch.json",
+      "source_sha256": "F5F6E5FCE3CFEF97F33E172598A0C1F8F9E4355112F8C3267FAF7E29900719B8",
+      "copy_sha256": "F5F6E5FCE3CFEF97F33E172598A0C1F8F9E4355112F8C3267FAF7E29900719B8",
+      "bytes": 332,
+      "transformations": []
+    },
+    {
+      "path": "first/capture-failed.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/capture-failed.json",
+      "source_sha256": "2809FBE5C7122EB6582A8B13BC0021EC304322E3A9F35C57615B4613B9164402",
+      "copy_sha256": "2809FBE5C7122EB6582A8B13BC0021EC304322E3A9F35C57615B4613B9164402",
+      "bytes": 137,
+      "transformations": []
+    },
+    {
+      "path": "first/capture-result.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/capture-result.json",
+      "source_sha256": "5EA84BFAEC258110B08B7A4E5E05E24B5C855C76961481486EFDC18AA267760A",
+      "copy_sha256": "5EA84BFAEC258110B08B7A4E5E05E24B5C855C76961481486EFDC18AA267760A",
+      "bytes": 743,
+      "transformations": []
+    },
+    {
+      "path": "first/capture.stderr.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/capture.stderr.txt",
+      "source_sha256": "BFAA34A9B2CD6525A22CEDC2D8199DFA87488AB4AF6494286E119D95E81A03B9",
+      "copy_sha256": "CFFBBFECF5EA578176133CB3E3062B0723BFDCEEA0DCA7EF10CFDF5B415B45CC",
+      "bytes": 799,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures.",
+        "Source stderr is not valid UTF-8. Replacement decoding used only for the labelled redacted display copy; original SHA256 identifies the unchanged byte stream."
+      ]
+    },
+    {
+      "path": "first/observer.jsonl",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/observer.jsonl",
+      "source_sha256": "16E27A422061D419DAC64133AED53ED5E1AC99912ED4ED15A846116590C92962",
+      "copy_sha256": "16E27A422061D419DAC64133AED53ED5E1AC99912ED4ED15A846116590C92962",
+      "bytes": 372,
+      "transformations": []
+    },
+    {
+      "path": "first/observer.stderr.txt",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/observer.stderr.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "copy_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0,
+      "transformations": []
+    },
+    {
+      "path": "first/cleanup.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/cleanup.json",
+      "source_sha256": "6BC211A7B03F6A63F1E1CFEE043D69B6A1C707C74C044E38250E634DC38C1D24",
+      "copy_sha256": "6BC211A7B03F6A63F1E1CFEE043D69B6A1C707C74C044E38250E634DC38C1D24",
+      "bytes": 2204,
+      "transformations": []
+    },
+    {
+      "path": "first/final-roots.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/final-roots.json",
+      "source_sha256": "2E3FB834B0629A07530CFF5ED4E93A96F39A5F82CCF33CA23CB1EB5B53198CC6",
+      "copy_sha256": "2E3FB834B0629A07530CFF5ED4E93A96F39A5F82CCF33CA23CB1EB5B53198CC6",
+      "bytes": 1361,
+      "transformations": []
+    },
+    {
+      "path": "first/final-window-cleanup.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/final-window-cleanup.json",
+      "source_sha256": "F52CE6096909C98E214377307EA66E7D28E38C112B7FE263E6BCD95633F29237",
+      "copy_sha256": "F52CE6096909C98E214377307EA66E7D28E38C112B7FE263E6BCD95633F29237",
+      "bytes": 323,
+      "transformations": []
+    },
+    {
+      "path": "first/execution-summary.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/execution-summary.json",
+      "source_sha256": "4DCF95BA0002E7957A62179E6F5AC3D85ED40EA822E72FB3D36378F165561611",
+      "copy_sha256": "4DCF95BA0002E7957A62179E6F5AC3D85ED40EA822E72FB3D36378F165561611",
+      "bytes": 571,
+      "transformations": []
+    },
+    {
+      "path": "first/refusal-health.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/refusal-health.json",
+      "source_sha256": "E5722949937579A1DF8E5C9EA8F8744EFA6DCB701CC7D96347A160B96BA1057B",
+      "copy_sha256": "E5722949937579A1DF8E5C9EA8F8744EFA6DCB701CC7D96347A160B96BA1057B",
+      "bytes": 286,
+      "transformations": []
+    },
+    {
+      "path": "first/actual-sdk-after-refusal.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/actual-sdk-after-refusal.json",
+      "source_sha256": "EF5933C6582C3DEB759446862F24CEB376D7EBD35ED223D2D1A4612F25EBEA4C",
+      "copy_sha256": "EF5933C6582C3DEB759446862F24CEB376D7EBD35ED223D2D1A4612F25EBEA4C",
+      "bytes": 2888,
+      "transformations": []
+    },
+    {
+      "path": "first/session-checks.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-after-refusal.json",
+          "source_sha256": "4987CE9B1B18CA5FF3C3493C36856EAB94841DA4ADA2878AA9CD7526ADA9AC28"
+        },
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-before.json",
+          "source_sha256": "6D01A3A667C4A36999BAB5BC4B0F086D9C32D66D62771B0C3C77594AD1C72FA9"
+        },
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-owned.json",
+          "source_sha256": "B1A93AE9D4AFF08DE866A82FBD0F0105DAEF3F4C3E408114E81DF6621CBC2308"
+        }
+      ],
+      "copy_sha256": "D5E29DFE5C4F17C4FFFFBD414B16EC601E945EE28B0064776D9AE91087999D34",
+      "bytes": 2719,
+      "transformations": [
+        "Selected session/admission/owned-process booleans only. Omit account/SID strings, unrelated process identities, and complete window inventories."
+      ]
+    },
+    {
+      "path": "fixed/plan.txt",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/plan.txt",
+      "source_sha256": "4B21B9DE1CDB8763A9044844ABD38F4EED62F84569CF54BDAE2DE0CE8B86F18F",
+      "copy_sha256": "4B21B9DE1CDB8763A9044844ABD38F4EED62F84569CF54BDAE2DE0CE8B86F18F",
+      "bytes": 321,
+      "transformations": []
+    },
+    {
+      "path": "fixed/identity.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/identity.json",
+      "source_sha256": "8960E4F07536489FDB47C03BC2C10C33A96FF9F5CC6D883E72200C5834AFFBB6",
+      "copy_sha256": "8960E4F07536489FDB47C03BC2C10C33A96FF9F5CC6D883E72200C5834AFFBB6",
+      "bytes": 269,
+      "transformations": []
+    },
+    {
+      "path": "fixed/window-epoch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/window-epoch.json",
+      "source_sha256": "1D07949DEBD7EB38E15C976B47401E1AC388BC308345BEEA3A8F98ED07F3DA97",
+      "copy_sha256": "1D07949DEBD7EB38E15C976B47401E1AC388BC308345BEEA3A8F98ED07F3DA97",
+      "bytes": 126,
+      "transformations": []
+    },
+    {
+      "path": "fixed/sdk-baseline.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/sdk-baseline.json",
+      "source_sha256": "56BDBEB81B478997B1EDDECEC607F7CCC96B39D8A6A06DC45ECE186FC7AC7B1D",
+      "copy_sha256": "56BDBEB81B478997B1EDDECEC607F7CCC96B39D8A6A06DC45ECE186FC7AC7B1D",
+      "bytes": 2875,
+      "transformations": []
+    },
+    {
+      "path": "fixed/register.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/register.json",
+      "source_sha256": "90908E4783EA85A53346263523BBD1BE4A94BF3F6D496F02824360E7D6713A5B",
+      "copy_sha256": "382AC6DC44044B3CBB7F24DE398AB1140369D9DA4CC31EAC10E365B575A3DDEF",
+      "bytes": 3102,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "fixed/preflight.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/preflight.json",
+      "source_sha256": "B85DD096C3173D8DE6528F8388F4D27519C5533D5B5524B581E5085611D57446",
+      "copy_sha256": "B85DD096C3173D8DE6528F8388F4D27519C5533D5B5524B581E5085611D57446",
+      "bytes": 1523,
+      "transformations": []
+    },
+    {
+      "path": "fixed/guard-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/guard-launch.json",
+      "source_sha256": "6712B125B01A7D3F6C7C1B4CC7EADF41E9521532F733735BF18C6BA8BE4C6374",
+      "copy_sha256": "6712B125B01A7D3F6C7C1B4CC7EADF41E9521532F733735BF18C6BA8BE4C6374",
+      "bytes": 118,
+      "transformations": []
+    },
+    {
+      "path": "fixed/collector-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/collector-launch.json",
+      "source_sha256": "CC1C842EC08827C9833D6887B07C325D10F7F63FBBF70F8426A573A1EE24B799",
+      "copy_sha256": "CC1C842EC08827C9833D6887B07C325D10F7F63FBBF70F8426A573A1EE24B799",
+      "bytes": 163,
+      "transformations": []
+    },
+    {
+      "path": "fixed/capture-launch.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture-launch.json",
+      "source_sha256": "A3D5239BC1360F3027649CD39090302FB7A01A2590CF12A93458318E9F54C93F",
+      "copy_sha256": "A3D5239BC1360F3027649CD39090302FB7A01A2590CF12A93458318E9F54C93F",
+      "bytes": 332,
+      "transformations": []
+    },
+    {
+      "path": "fixed/capture-failed.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture-failed.json",
+      "source_sha256": "DCB0FB51B25645D0C452BF2D19BBC17E8D366A87B2C5128B8E3AC8A6EE1802F4",
+      "copy_sha256": "DCB0FB51B25645D0C452BF2D19BBC17E8D366A87B2C5128B8E3AC8A6EE1802F4",
+      "bytes": 139,
+      "transformations": []
+    },
+    {
+      "path": "fixed/capture-result.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture-result.json",
+      "source_sha256": "5D0BEAD75A527977AC22F1A1D82FED32053257329985CCAF37F738B2834E4D9A",
+      "copy_sha256": "5D0BEAD75A527977AC22F1A1D82FED32053257329985CCAF37F738B2834E4D9A",
+      "bytes": 745,
+      "transformations": []
+    },
+    {
+      "path": "fixed/capture.stderr.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture.stderr.txt",
+      "source_sha256": "80CB70EC9CFA840C035FD58FA08341B61706C4C25F4AC042FFDA7C1C8C2CC06C",
+      "copy_sha256": "07EBA87621F90347294643B6B05EFDEB4CC64902DE9B7044B7BCC8157C30F150",
+      "bytes": 805,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures.",
+        "Source stderr is not valid UTF-8. Replacement decoding used only for the labelled redacted display copy; original SHA256 identifies the unchanged byte stream."
+      ]
+    },
+    {
+      "path": "fixed/observer.jsonl",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/observer.jsonl",
+      "source_sha256": "4025535D476E67D33F387112FBEAC34F4D79D81D15ECD843B42A88A672B1FD88",
+      "copy_sha256": "4025535D476E67D33F387112FBEAC34F4D79D81D15ECD843B42A88A672B1FD88",
+      "bytes": 4753,
+      "transformations": []
+    },
+    {
+      "path": "fixed/observer.stderr.txt",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/observer.stderr.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "copy_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "bytes": 0,
+      "transformations": []
+    },
+    {
+      "path": "fixed/cleanup.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/cleanup.json",
+      "source_sha256": "CF80589CBFF3E614F34BD29B120EAE663D624E711CC36BA9511E540CB8FEFA29",
+      "copy_sha256": "CF80589CBFF3E614F34BD29B120EAE663D624E711CC36BA9511E540CB8FEFA29",
+      "bytes": 2203,
+      "transformations": []
+    },
+    {
+      "path": "fixed/final-roots.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/final-roots.json",
+      "source_sha256": "2E3FB834B0629A07530CFF5ED4E93A96F39A5F82CCF33CA23CB1EB5B53198CC6",
+      "copy_sha256": "2E3FB834B0629A07530CFF5ED4E93A96F39A5F82CCF33CA23CB1EB5B53198CC6",
+      "bytes": 1361,
+      "transformations": []
+    },
+    {
+      "path": "fixed/final-window-cleanup.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/final-window-cleanup.json",
+      "source_sha256": "F5979D981F0AEAF017CCD278BA4FA78399B18962F8BD956599A0128E06C54649",
+      "copy_sha256": "F5979D981F0AEAF017CCD278BA4FA78399B18962F8BD956599A0128E06C54649",
+      "bytes": 442,
+      "transformations": []
+    },
+    {
+      "path": "fixed/execution-summary.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/execution-summary.json",
+      "source_sha256": "ED0F42FE46A4D6F0E04F4976CF04FE623A3A39D44F04A189E44E8C868293FAD8",
+      "copy_sha256": "ED0F42FE46A4D6F0E04F4976CF04FE623A3A39D44F04A189E44E8C868293FAD8",
+      "bytes": 2102,
+      "transformations": []
+    },
+    {
+      "path": "fixed/capture-ready.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture-ready.json",
+      "source_sha256": "3AF357AB9BA758D97AA7C98C0F47AA3381FB73DE43FCD98941A8CFE759608474",
+      "copy_sha256": "3AF357AB9BA758D97AA7C98C0F47AA3381FB73DE43FCD98941A8CFE759608474",
+      "bytes": 367,
+      "transformations": []
+    },
+    {
+      "path": "fixed/after-ready-notify.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/after-ready-notify.json",
+      "source_sha256": "717BED3E7AF5F789C87C7F30C3D71002EDB0AC98E60C4D9D0364AB4AEE6C89B8",
+      "copy_sha256": "717BED3E7AF5F789C87C7F30C3D71002EDB0AC98E60C4D9D0364AB4AEE6C89B8",
+      "bytes": 1354,
+      "transformations": []
+    },
+    {
+      "path": "fixed/after-ready-notify-process.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/after-ready-notify-process.json",
+      "source_sha256": "DEB67F38893E5685D0B5922AF14C5E6FD9F176A4CEA307232269CC4B3EA8361B",
+      "copy_sha256": "DEB67F38893E5685D0B5922AF14C5E6FD9F176A4CEA307232269CC4B3EA8361B",
+      "bytes": 1902,
+      "transformations": []
+    },
+    {
+      "path": "fixed/gate-notify.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/gate-notify.json",
+      "source_sha256": "C1A384E1141D5FC7DFBC9044394256E86FAD9B5B37F2A90A9573327ED558104D",
+      "copy_sha256": "C1A384E1141D5FC7DFBC9044394256E86FAD9B5B37F2A90A9573327ED558104D",
+      "bytes": 391,
+      "transformations": []
+    },
+    {
+      "path": "fixed/gate-thispc.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/gate-thispc.json",
+      "source_sha256": "6BFF919F657B1DA0E71E8537F628490716447B87607C52C171900FD15E3554B1",
+      "copy_sha256": "6BFF919F657B1DA0E71E8537F628490716447B87607C52C171900FD15E3554B1",
+      "bytes": 391,
+      "transformations": []
+    },
+    {
+      "path": "fixed/thispc-baseline.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/thispc-baseline.json",
+      "source_sha256": "23D5D49E0143831DEE390B72805AE5BE95CB9BC16815B6A799906293480C606C",
+      "copy_sha256": "23D5D49E0143831DEE390B72805AE5BE95CB9BC16815B6A799906293480C606C",
+      "bytes": 2878,
+      "transformations": []
+    },
+    {
+      "path": "fixed/detach-health.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/detach-health.json",
+      "source_sha256": "4DF87563601940EE5A3C40DE213608F9F2B375F55573CF35104BF97FA3BA8DDC",
+      "copy_sha256": "4DF87563601940EE5A3C40DE213608F9F2B375F55573CF35104BF97FA3BA8DDC",
+      "bytes": 206,
+      "transformations": []
+    },
+    {
+      "path": "fixed/session-checks.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/session-after-detach.json",
+          "source_sha256": "2CBF5D68206FE46735796614B7BA0F7F2A844174A7F54B5535226C9EF019878B"
+        },
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/session-before.json",
+          "source_sha256": "6847F7641936D22D1F2C81C7FB4570633D0BA3859DFABCEAC720A2DABE3B59DE"
+        },
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/session-final.json",
+          "source_sha256": "77DB6EF6B0EFAFC02C11490A1ED081F77A76F317E781811B49B8FC31659CED7F"
+        },
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/session-owned.json",
+          "source_sha256": "98D640AB1EA9DAD180D93E3384834C0766008C618EF46B6029B301C247D784D7"
+        }
+      ],
+      "copy_sha256": "636DE73516812D48F96DC4C7BD5C48819A4F9719C5378A641B4E84BAE688159F",
+      "bytes": 3556,
+      "transformations": [
+        "Selected session/admission/owned-process booleans only. Omit account/SID strings, unrelated process identities, and complete window inventories."
+      ]
+    },
+    {
+      "path": "first/reader/short-fields-before.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/short-fields-before.json",
+      "source_sha256": "1536633A35E579E40E968FAA5708357D689581A5128827A3BDA26394150DBC2D",
+      "copy_sha256": "1826D72C4188C30E609E2E839C36F00687690999FDFAB0A1E77C8FD65972DA19",
+      "bytes": 21044,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "first/reader/short-fields-after-refusal.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/short-fields-after-refusal.json",
+      "source_sha256": "C458F06D55DA2E94D40199A9792287AD6055D63AEC00F4C4193228B63A62CF72",
+      "copy_sha256": "84BD10F6275D16C3B3AA44585F037A4D5C4C960216F4623E2E4C85DF2CEDA1EF",
+      "bytes": 21053,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "first/reader/short-fields-cleanup.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/short-fields-cleanup.json",
+      "source_sha256": "54A23FC966118289C9094C268981F2EACD32D25375BF92910912BDC72D477442",
+      "copy_sha256": "81F672F212F7DB581E444FC8957C8F881CDD72D5805A9F56613DC0602E698892",
+      "bytes": 20326,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "fixed/reader/fixed-fields-before.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/fixed-fields-before.json",
+      "source_sha256": "849091D2CBD3B3712168DE9AFE6387CD208CED6D8484FFFB33762EAD665C8DBA",
+      "copy_sha256": "699B8BACED383EE570C1C57D1D99F91FA9D65EEC3CC20D34E903D5A2C6C2B860",
+      "bytes": 21046,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "fixed/reader/fixed-fields-after.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/fixed-fields-after.json",
+      "source_sha256": "962A81CD0B24EC5977DB17A3586BD4419EFF2FE3A18BCE17ED016501AECBFE08",
+      "copy_sha256": "86535D5119BA5E8C9115976A19F1D57FA43386438CD6E301B99F6012F0CC22DE",
+      "bytes": 21043,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "fixed/reader/fixed-fields-cleanup.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/fixed-fields-cleanup.json",
+      "source_sha256": "561A3D2671612DE14CC9029C7EFCCFD8A19E6AFBFAEEB5423E12A4490ADB719C",
+      "copy_sha256": "A145437574CE1E5519D5E1A11D7998373CF5E20E1EC837181D944D15194F768D",
+      "bytes": 20326,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "fixed/actual-thispc-cua.redacted.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "sources": [
+        {
+          "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/actual-thispc-cua.txt",
+          "source_sha256": "94BFA9FAE6F7336C63B9D0078AACEF64DA9295E000BB9AE4C7701598702E636F"
+        }
+      ],
+      "copy_sha256": "1B2F870DA33A39F70E77DB68BA80B74F740F97E6346C843ED6FCCF01F49F9151",
+      "bytes": 886,
+      "transformations": [
+        "Keep only count, broad item categories, and sample-label presence. Omit full UI tree, SDK UI content, selected item text, network host/share names, and storage labels."
+      ]
+    },
+    {
+      "path": "preparation/copy-provenance.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/copy-provenance.json",
+      "source_sha256": "7575DDA2E4195D646D051E86AFF74F2B69FFD59381F15E552C556ABB9E943889",
+      "copy_sha256": "A53ADF0873659E531B75D58E07B09B88F234CBFD528F99C7EB026AE6D474C470",
+      "bytes": 5842,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "preparation/fixed-copy-provenance.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/fixed-copy-provenance.json",
+      "source_sha256": "4BA218794E15891E5BC476F77432DADC0E4119CE3BB6A56D9C56215DB71D1E16",
+      "copy_sha256": "32512493D8E06C5A70374FA709F833FD0186729736973DD5F66F3FBC0817BC87",
+      "bytes": 2809,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "preparation/prepared-hashes.json",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/prepared-hashes.json",
+      "source_sha256": "684B04D9755B50215E3C1E646CEC318930CD6A348C231204E2A6EBD0F13658B0",
+      "copy_sha256": "3FEEA4C6A7A9472C78358FA9B7E89FEC6B0D8D3ECB647173E41BC3BE7F137B7C",
+      "bytes": 1768,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    },
+    {
+      "path": "preparation/prepared-syntax.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/prepared-syntax.json",
+      "source_sha256": "768ACF57062B2B511A9396082AA25819DC6A2AC42064D90326CB3112F2372940",
+      "copy_sha256": "768ACF57062B2B511A9396082AA25819DC6A2AC42064D90326CB3112F2372940",
+      "bytes": 262,
+      "transformations": []
+    },
+    {
+      "path": "preparation/plan-generator-self-test.json",
+      "artifact_kind": "original_copy",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/plan-generator-self-test.json",
+      "source_sha256": "3CA0EEDAE6C285FF78E4A414360C67C92C7A76AF15734F35F1711D76C5C04FD4",
+      "copy_sha256": "3CA0EEDAE6C285FF78E4A414360C67C92C7A76AF15734F35F1711D76C5C04FD4",
+      "bytes": 139,
+      "transformations": []
+    },
+    {
+      "path": "preparation/create-plan.py.redacted.txt",
+      "artifact_kind": "redacted_copy_not_original",
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-short-live/create-plan.py",
+      "source_sha256": "3BA09A78118D0E2D6EFB686FF281E4E40EDBCF726F88C3B7631E28DAFBC1B624",
+      "copy_sha256": "01FCA8587E16A42919BC18930D5457B9B4D85A9A4DFB35209E65702F15B48A39",
+      "bytes": 5979,
+      "transformations": [
+        "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+      ]
+    }
+  ],
+  "excluded_duplicate_or_frozen_sources": [
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/guard.ps1",
+      "source_sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/capture.stdout.txt",
+      "source_sha256": "16E27A422061D419DAC64133AED53ED5E1AC99912ED4ED15A846116590C92962",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/guard.stdout.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/guard.stderr.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/plan-id.txt",
+      "source_sha256": "F99289471C26E79685DC223B2BD3E65F74491188CA81DA144A2BB39DA4EBBCF5",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/guard.ps1",
+      "source_sha256": "323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/capture.stdout.txt",
+      "source_sha256": "4025535D476E67D33F387112FBEAC34F4D79D81D15ECD843B42A88A672B1FD88",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/guard.stdout.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/guard.stderr.txt",
+      "source_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short-fixed/plan-id.txt",
+      "source_sha256": "A29AA2DB7046573DDA500D92D7347E380ED1AD3C75F1EB2788851527176CE7F4",
+      "reason": "Frozen source, duplicate output, empty process stream, or identifier already represented."
+    }
+  ]
+}

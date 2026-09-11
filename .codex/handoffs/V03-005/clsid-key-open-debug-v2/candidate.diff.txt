@@ -1,0 +1,264 @@
+--- v1/Shared.h
++++ v2/Shared.h
+@@ -27,6 +27,7 @@
+     volatile LONG ready,heartbeat,callsFinished,matchResult,otherResult;
+     volatile LONG debuggerObserved,noDebuggerAfterWork,targetError,ownExceptionHandled;
+     volatile LONG apiPathsEqual,matchHandleNonNull,matchHandleClosed;
++    volatile LONG cppRequested,cppCaught;
+ };
+ inline ULONGLONG CreationTime(HANDLE process) {
+     FILETIME created{},exited{},kernel{},user{};
+--- v1/Plan.h
++++ v2/Plan.h
+@@ -7,7 +7,7 @@
+ #include <string_view>
+ #include <vector>
+ 
+-inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug";
++inline constexpr wchar_t TaskDirectory[] = L"C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2";
+ inline constexpr GUID OfficialClsid{0xba16ce0e,0x728c,0x4fc9,{0x98,0xe5,0xd0,0xb3,0x5b,0x38,0x45,0x97}};
+ inline constexpr GUID ProofClsid{0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+ inline constexpr ULONGLONG Second = 10000000;
+--- v1/Target.cpp
++++ v2/Target.cpp
+@@ -10,6 +10,15 @@
+ static void ExceptionControl(SharedState* state){
+     __try{RaiseException(0xE0424242,0,0,nullptr);}
+     __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
++}
++struct OwnedCppControl {ULONG marker;};
++__declspec(noinline) static void ThrowOwnedCppControl(){throw OwnedCppControl{0x414C4332};}
++static void CppExceptionControl(SharedState* state){
++    Need(state->cppRequested==32||state->cppRequested==257);
++    for(LONG i=0;i<state->cppRequested;i++) {
++        try {ThrowOwnedCppControl();}
++        catch(const OwnedCppControl& value){Need(value.marker==0x414C4332);InterlockedIncrement(&state->cppCaught);}
++    }
+ }
+ static void Work(SharedState* state,HANDLE start,HANDLE stop){
+     Module advapi,contract;
+@@ -30,6 +39,7 @@
+         InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+         if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+             ExceptionControl(state);
++            CppExceptionControl(state);
+             HKEY other=nullptr;
+             state->otherResult=open(HKEY_CLASSES_ROOT,L"CLSID\\{00000000-0000-0000-0000-000000000000}\\AssetLibraryDiagnosticNonTarget",0,KEY_QUERY_VALUE,&other);
+             if(state->otherResult==ERROR_SUCCESS)Need(other&&RegCloseKey(other)==ERROR_SUCCESS);
+--- v1/Observer.cpp
++++ v2/Observer.cpp
+@@ -1,6 +1,7 @@
+ #include "Shared.h"
+ #include "Plan.h"
+ #include "Fingerprint.h"
++#include "ExceptionBudget.h"
+ #include <dbgeng.h>
+ #include <wrl/client.h>
+ #include <atomic>
+@@ -69,14 +70,14 @@
+         if (stop.value) SetEvent(stop.value);
+         if (state) UnmapViewOfFile(state);
+     }
+-    void Launch() {
++    void Launch(bool exceptionLimit) {
+         wchar_t executable[32768]{};
+         DWORD length = GetModuleFileNameW(nullptr, executable, 32768);
+         Need(length > 0 && length < 32768, "observer_path");
+         std::wstring targetPath(executable, length);
+         auto slash = targetPath.find_last_of(L'\\');
+         Need(slash != std::wstring::npos, "observer_directory");
+-        targetPath.resize(slash + 1); targetPath += L"ClsidKeyOpenReferenceTarget.exe";
++        targetPath.resize(slash + 1); targetPath += L"ClsidKeyOpenReferenceTargetV2.exe";
+         Need((GetFileAttributesW(targetPath.c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) == 0, "synthetic_image_not_reparse");
+         imageLock.value = CreateFileW(targetPath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+         Need(imageLock.value != INVALID_HANDLE_VALUE, "synthetic_image_lock");
+@@ -88,6 +89,7 @@
+         state = static_cast<SharedState*>(MapViewOfFile(mapping.value, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(SharedState)));
+         Need(state != nullptr, "owned_mapping");
+         ZeroMemory(state, sizeof(*state)); state->magic = SharedMagic;
++        state->cppRequested=exceptionLimit?257:32;
+         HANDLE inherited[] = {mapping.value, start.value, stop.value};
+         SIZE_T size = 0;
+         InitializeProcThreadAttributeList(nullptr, 1, 0, &size);
+@@ -211,7 +213,7 @@
+     bool attachRequested = false, createdEvent = false, apiSeen = false, armed = false, cleanupDone = false, cleanupOk = false, atEventBreak = false, interruptArmed = false;
+     ULONG64 candidateAddress=0,shcoreBase=0;bool shcoreSeen=false;
+     bool successHandlePresent=false,outputHandleRead=false;
+-    ULONG exceptionCount=0;
++    ExceptionBudget exceptionBudget;
+     HANDLE externalCancel = nullptr;
+     std::atomic<bool> cancelled{false};
+     std::atomic<HRESULT> interruptResult{E_PENDING};
+@@ -243,6 +245,12 @@
+         Checked(memory->ReadVirtual(address, &value, sizeof(value), &bytes), "bounded_memory_read");
+         Need(bytes == sizeof(value), "bounded_memory_length");
+         return value;
++    }
++    void PrintExceptionSummary(const char* stage) noexcept {
++        const auto& b=exceptionBudget;
++        ULONG detailed=b.total<ExceptionDetailLimit?b.total:ExceptionDetailLimit;
++        int written=printf("{\"kind\":\"target_exception_summary\",\"stage\":\"%s\",\"total\":%lu,\"cxxFirstChance\":%lu,\"otherFirstChance\":%lu,\"secondChance\":%lu,\"detailedLogs\":%lu,\"totalLimit\":256,\"otherFirstChanceLimit\":16,\"stopReason\":\"%s\",\"triggerCode\":\"0x%08lX\",\"triggerFirstChance\":%s,\"triggerTotal\":%lu,\"lastCode\":\"0x%08lX\",\"lastFirstChance\":%s,\"tick\":%llu}\n",stage,b.total,b.cppFirst,b.otherFirst,b.second,detailed,ExceptionStopName(b.stop),b.triggerCode,b.triggerFirst?"true":"false",b.triggerTotal,b.lastCode,b.lastFirst?"true":"false",GetTickCount64());
++        if(written<0||fflush(stdout)!=0)outputFailed=true;
+     }
+     void Start() {
+         fixedModule.Verify(L"KernelBase.dll",ExpectedFileHash);
+@@ -470,9 +478,10 @@
+     if (record->ExceptionCode == EXCEPTION_BREAKPOINT && firstChance) {
+         if(capture.interruptArmed) { capture.interruptArmed=false; capture.atEventBreak=true; return DEBUG_STATUS_BREAK; }
+     }
+-    capture.exceptionCount++;
+-    if(capture.exceptionCount<=16) Record(firstChance?"target_first_chance_not_handled":"target_second_chance_not_handled",static_cast<HRESULT>(record->ExceptionCode));
+-    if(!firstChance||capture.exceptionCount>16) capture.callbackFailed=true;
++    bool firstStop=capture.exceptionBudget.Observe(record->ExceptionCode,firstChance!=0);
++    if(capture.exceptionBudget.total<=ExceptionDetailLimit)Record(firstChance?"target_first_chance_not_handled":"target_second_chance_not_handled",static_cast<HRESULT>(record->ExceptionCode));
++    if(firstStop)capture.PrintExceptionSummary("exception_budget_stop");
++    if(capture.exceptionBudget.stop!=ExceptionStop::None)capture.callbackFailed=true;
+     // Let the target's handlers/OS decide; do not swallow first-chance exceptions.
+     return DEBUG_STATUS_GO_NOT_HANDLED;
+ }
+@@ -552,6 +561,29 @@
+     test(FixedImportMatches(123,123));test(!FixedImportMatches(123,124));test(!FixedImportMatches(0,0));
+     printf("{\"kind\":\"offline_key_status_mapping_controls\",\"passed\":%lu,\"registryApiCalled\":false,\"processOpened\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
+ }
++static void BudgetChecks() {
++    ULONG passed=0;auto test=[&](bool ok){Need(ok,"offline_exception_budget_control");passed++;};
++    ExceptionBudget cpp;bool allowed=true;
++    for(ULONG i=0;i<256;i++)allowed=allowed&&!cpp.Observe(CppExceptionCode,true);
++    test(allowed&&cpp.total==256&&cpp.cppFirst==256&&cpp.otherFirst==0&&cpp.stop==ExceptionStop::None);
++    test(cpp.Observe(CppExceptionCode,true)&&cpp.total==257&&cpp.stop==ExceptionStop::TotalLimit&&cpp.triggerTotal==257);
++    test(cpp.triggerCode==CppExceptionCode&&cpp.triggerFirst);
++    test(!cpp.Observe(0xC0000005,false)&&cpp.stop==ExceptionStop::TotalLimit&&cpp.triggerCode==CppExceptionCode&&cpp.triggerTotal==257&&cpp.second==1);
++    ExceptionBudget other;allowed=true;
++    for(ULONG i=0;i<16;i++)allowed=allowed&&!other.Observe(0xE0424242,true);
++    test(allowed&&other.otherFirst==16&&other.stop==ExceptionStop::None);
++    test(other.Observe(0xE0424242,true)&&other.otherFirst==17&&other.stop==ExceptionStop::OtherFirstChanceLimit);
++    ExceptionBudget second;
++    test(second.Observe(CppExceptionCode,false)&&second.stop==ExceptionStop::SecondChance&&second.second==1&&second.cppFirst==0&&second.total==1);
++    ExceptionBudget normal;normal.Observe(0xE0424242,true);for(ULONG i=0;i<32;i++)normal.Observe(CppExceptionCode,true);
++    test(normal.stop==ExceptionStop::None&&normal.total==33&&normal.cppFirst==32&&normal.otherFirst==1);
++    ExceptionBudget priority;for(ULONG i=0;i<240;i++)priority.Observe(CppExceptionCode,true);for(ULONG i=0;i<16;i++)priority.Observe(0xE0424242,true);
++    ExceptionBudget secondPriority=priority;
++    test(priority.Observe(0xE0424242,true)&&priority.total==257&&priority.stop==ExceptionStop::OtherFirstChanceLimit);
++    test(secondPriority.Observe(0xC0000005,false)&&secondPriority.total==257&&secondPriority.stop==ExceptionStop::SecondChance);
++    test(ExceptionDetailLimit==16&&ExceptionTotalLimit==256&&OtherFirstChanceLimit==16);
++    printf("{\"kind\":\"offline_exception_budget_controls\",\"passed\":%lu,\"exceptionRaised\":false,\"processOpened\":false,\"tick\":%llu}\n",passed,GetTickCount64());fflush(stdout);
++}
+ static int PlanChecks() {
+     const std::string id="0123456789abcdef0123456789abcdef";
+     ULONGLONG now=NowFiletime();
+@@ -569,24 +601,25 @@
+     return 0;
+ }
+ int wmain(int argc, wchar_t** argv) {
+-    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { KeyChecks();return PlanChecks(); } catch(...) { Record("offline_controls_failed",E_FAIL); return 1; } }
++    if(argc==2&&wcscmp(argv[1],L"--self-test")==0) { try { BudgetChecks();KeyChecks();return PlanChecks(); } catch(...) { Record("offline_controls_failed",E_FAIL); return 1; } }
+     bool real=argc==3&&wcscmp(argv[1],L"--run-plan")==0;
+     bool cancel = argc==2&&wcscmp(argv[1],L"--cancel")==0;
+     bool normal = argc==2&&wcscmp(argv[1],L"--normal")==0;
++    bool exceptionLimit=argc==2&&wcscmp(argv[1],L"--exception-limit")==0;
+     if(argc==3&&wcscmp(argv[1],L"--cancel-plan")==0) {
+         try { auto id=IdArgument(argv[2]); Handle event(OpenEventW(EVENT_MODIFY_STATE,FALSE,CancelName(id).c_str())); PlanNeed(event.value&&SetEvent(event.value)); Record("planned_cancel_signalled"); return 0; }
+         catch(...) { Record("planned_cancel_failed",E_FAIL); return 1; }
+     }
+-    if(!real&&!cancel&&!normal) { Record("fixed_modes_only",E_INVALIDARG); return 2; }
++    if(!real&&!cancel&&!normal&&!exceptionLimit) { Record("fixed_modes_only",E_INVALIDARG); return 2; }
+     OwnedTarget target;
+     PlanInput input;
+     bool passed = false, detachedAlive = false, stopped = false, cleaned = false, attached = false;
+     ULONG matched = 0, returns = 0, discarded = 0, waits = 0;
+-    bool interrupted = false;
++    bool interrupted = false,expectedBudgetFailure=false;
+     try {
+         if(real) { input.Read(IdArgument(argv[2])); target.OpenPlanTarget(input.plan); input.Consume(); }
+         else {
+-            target.Launch();
++            target.Launch(exceptionLimit);
+             Plan wrong; wrong.pid=target.pid; wrong.creation=target.created; wrong.expires=NowFiletime()+90*Second;
+             bool rejected=false; try { VerifyExplorerPlan(wrong,target.process.value,true); } catch(HRESULT) { rejected=true; }
+             Need(rejected,"synthetic_image_rejected_for_real_plan");
+@@ -599,6 +632,7 @@
+         catch (...) { Record(real?"planned_capture_failed":"synthetic_capture_failed", E_FAIL); }
+         attached = capture.createdEvent;
+         cleaned = capture.Cleanup() && attached;
++        capture.PrintExceptionSummary("after_capture_cleanup");
+         matched = capture.matched; returns = capture.returns; discarded = capture.unmatched; waits = capture.waitTimeouts; interrupted = capture.interruptObserved;
+         detachedAlive = target.HealthyDetached();
+         Record(real?"planned_target_alive_and_no_debugger":"synthetic_alive_heartbeats_and_no_debugger", detachedAlive ? S_OK : E_FAIL);
+@@ -608,13 +642,23 @@
+             passed=passed&&target.state->matchResult==capture.observed&&target.state->apiPathsEqual;
+             passed=passed&&(capture.observed!=ERROR_SUCCESS||(target.state->matchHandleNonNull&&target.state->matchHandleClosed));
+             printf("{\"kind\":\"reference_reg_open_result\",\"status\":%lu,\"successHandleClosedByReference\":%s,\"apiPathsEqual\":true,\"tick\":%llu}\n",static_cast<ULONG>(target.state->matchResult),capture.observed==ERROR_SUCCESS?(target.state->matchHandleClosed?"true":"false"):"null",GetTickCount64());fflush(stdout);
++            bool caughtAll=target.state->cppCaught==target.state->cppRequested;
++            printf("{\"kind\":\"reference_cpp_handlers\",\"requested\":%ld,\"caughtByTarget\":%ld,\"debuggerObservedCxxFirstChance\":%lu,\"originalSehHandlerRan\":%s,\"tick\":%llu}\n",target.state->cppRequested,target.state->cppCaught,capture.exceptionBudget.cppFirst,target.state->ownExceptionHandled?"true":"false",GetTickCount64());fflush(stdout);
++            if(exceptionLimit) {
++                expectedBudgetFailure=!passed&&capture.callbackFailed&&capture.exceptionBudget.stop==ExceptionStop::TotalLimit&&capture.exceptionBudget.triggerTotal==257&&cleaned&&detachedAlive&&!capture.unexpectedExit&&caughtAll&&target.state->cppCaught==257&&target.state->ownExceptionHandled&&!target.state->targetError;
++            } else passed=passed&&caughtAll&&target.state->cppCaught==32&&capture.exceptionBudget.cppFirst==32&&capture.exceptionBudget.otherFirst==1&&capture.exceptionBudget.second==0;
+         }
+     } catch (...) { Record(real?"planned_setup_failed":"synthetic_setup_failed", E_FAIL); }
+     stopped = target.StopNormally();
+     if(!real) Record("synthetic_target_cooperative_exit", stopped ? S_OK : E_FAIL);
+     passed = passed && stopped && !outputFailed;
++    if(exceptionLimit) {
++        expectedBudgetFailure=expectedBudgetFailure&&stopped&&!outputFailed;
++        printf("{\"kind\":\"expected_exception_limit_control\",\"validated\":%s,\"observerExitRemainsFailure\":true,\"tick\":%llu}\n",expectedBudgetFailure?"true":"false",GetTickCount64());fflush(stdout);
++        passed=false;
++    }
+     int written = printf("{\"kind\":\"result\",\"mode\":\"%s\",\"passed\":%s,\"matchedEntries\":%lu,\"matchedReturns\":%lu,\"nonMatchingDiscarded\":%lu,\"finiteWaitTimeouts\":%lu,\"exitInterruptObserved\":%s,\"attachCompleted\":%s,\"cleanupVerified\":%s,\"targetAliveAfterDetach\":%s,\"existingProcessAttached\":%s,\"tick\":%llu}\n",
+-        real?"plan":cancel ? "cancel" : "normal", passed ? "true" : "false", matched, returns, discarded, waits, interrupted ? "true" : "false", attached ? "true" : "false", cleaned ? "true" : "false", detachedAlive ? "true" : "false",real&&attached?"true":"false",GetTickCount64());
++        real?"plan":exceptionLimit?"exception-limit":cancel ? "cancel" : "normal", passed ? "true" : "false", matched, returns, discarded, waits, interrupted ? "true" : "false", attached ? "true" : "false", cleaned ? "true" : "false", detachedAlive ? "true" : "false",real&&attached?"true":"false",GetTickCount64());
+     bool flushed = fflush(stdout) == 0;
+     return passed && written >= 0 && flushed ? 0 : 1;
+ }
+--- v1/build.ps1
++++ v2/build.ps1
+@@ -1,5 +1,5 @@
+ $ErrorActionPreference = 'Stop'
+-$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-debug'
++$taskRoot = 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-debug-v2'
+ if ($PSScriptRoot -ne $taskRoot) { throw 'Fixed task directory required.' }
+ $toolset = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+ $sdk = 'C:\Program Files (x86)\Windows Kits\10'
+@@ -13,8 +13,8 @@
+ $libraries = @('/link',"/LIBPATH:$toolset\lib\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64","/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64",'kernel32.lib','ole32.lib','uuid.lib','user32.lib','advapi32.lib','dwmapi.lib','shell32.lib','bcrypt.lib')
+ Push-Location $taskRoot
+ try {
+-  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\ClsidKeyOpenReferenceTarget.exe" @libraries
++  & $compiler @options 'Target.cpp' "/Fo$bin\Target.obj" "/Fe$bin\ClsidKeyOpenReferenceTargetV2.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Synthetic target compilation failed.' }
+-  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\ClsidKeyOpenObserver.exe" @libraries
++  & $compiler @options 'Observer.cpp' "/Fo$bin\Observer.obj" "/Fe$bin\ClsidKeyOpenObserverV2.exe" @libraries
+   if ($LASTEXITCODE -ne 0) { throw 'Observer compilation failed.' }
+ } finally { Pop-Location }
+--- v1/ExceptionBudget.h
++++ v2/ExceptionBudget.h
+@@ -0,0 +1,30 @@
++#pragma once
++#include <Windows.h>
++inline constexpr ULONG CppExceptionCode=0xE06D7363;
++inline constexpr ULONG ExceptionTotalLimit=256,OtherFirstChanceLimit=16,ExceptionDetailLimit=16;
++enum class ExceptionStop {None,SecondChance,OtherFirstChanceLimit,TotalLimit};
++inline const char* ExceptionStopName(ExceptionStop reason) {
++    switch(reason) {
++    case ExceptionStop::None:return "none";
++    case ExceptionStop::SecondChance:return "second_chance";
++    case ExceptionStop::OtherFirstChanceLimit:return "other_first_chance_limit";
++    case ExceptionStop::TotalLimit:return "total_exception_limit";
++    }
++    return "invalid";
++}
++struct ExceptionBudget {
++    ULONG total=0,cppFirst=0,otherFirst=0,second=0,lastCode=0;
++    bool lastFirst=false;
++    ExceptionStop stop=ExceptionStop::None;
++    ULONG triggerCode=0,triggerTotal=0;bool triggerFirst=false;
++    bool Observe(ULONG code,bool first) {
++        total++;lastCode=code;lastFirst=first;
++        if(!first)second++;else if(code==CppExceptionCode)cppFirst++;else otherFirst++;
++        if(stop!=ExceptionStop::None)return false;
++        if(!first)stop=ExceptionStop::SecondChance;
++        else if(otherFirst>OtherFirstChanceLimit)stop=ExceptionStop::OtherFirstChanceLimit;
++        else if(total>ExceptionTotalLimit)stop=ExceptionStop::TotalLimit;
++        if(stop==ExceptionStop::None)return false;
++        triggerCode=code;triggerFirst=first;triggerTotal=total;return true;
++    }
++};

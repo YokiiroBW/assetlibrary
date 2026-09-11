@@ -1,0 +1,10 @@
+{
+  "Utc": "2026-09-11T11:07:15.9626399+00:00",
+  "OwnedWindowClosedByCua": true,
+  "OwnedOriginalProcessStillPresent": true,
+  "GuardProcessAbsent": true,
+  "CollectorProcessAbsent": true,
+  "DesktopProcessPresent": true,
+  "NoOriginalUserWindowOperated": true,
+  "OwnedWindowAbsentOnSecondFreshCuaRead": true
+}

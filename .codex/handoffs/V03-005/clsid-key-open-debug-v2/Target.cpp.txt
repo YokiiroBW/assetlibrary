@@ -1,0 +1,63 @@
+#include "Shared.h"
+#include <array>
+#include <cwchar>
+static void Need(bool ok){if(!ok)throw E_FAIL;}
+struct Module {HMODULE value=nullptr;~Module(){if(value)FreeLibrary(value);}};
+template<typename T>static T ReadSelf(ULONG_PTR address){
+    T result{};SIZE_T bytes=0;
+    Need(ReadProcessMemory(GetCurrentProcess(),reinterpret_cast<LPCVOID>(address),&result,sizeof(result),&bytes)&&bytes==sizeof(result));return result;
+}
+static void ExceptionControl(SharedState* state){
+    __try{RaiseException(0xE0424242,0,0,nullptr);}
+    __except(GetExceptionCode()==0xE0424242?EXCEPTION_EXECUTE_HANDLER:EXCEPTION_CONTINUE_SEARCH){InterlockedExchange(&state->ownExceptionHandled,1);}
+}
+struct OwnedCppControl {ULONG marker;};
+__declspec(noinline) static void ThrowOwnedCppControl(){throw OwnedCppControl{0x414C4332};}
+static void CppExceptionControl(SharedState* state){
+    Need(state->cppRequested==32||state->cppRequested==257);
+    for(LONG i=0;i<state->cppRequested;i++) {
+        try {ThrowOwnedCppControl();}
+        catch(const OwnedCppControl& value){Need(value.marker==0x414C4332);InterlockedIncrement(&state->cppCaught);}
+    }
+}
+static void Work(SharedState* state,HANDLE start,HANDLE stop){
+    Module advapi,contract;
+    advapi.value=LoadLibraryExW(L"advapi32.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
+    contract.value=LoadLibraryExW(L"api-ms-win-core-registry-l1-1-0.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
+    Need(advapi.value&&contract.value);
+    FARPROC stub=GetProcAddress(advapi.value,"RegOpenKeyExW"),entry=GetProcAddress(contract.value,"RegOpenKeyExW");
+    Need(stub&&entry);
+    ULONG_PTR base=reinterpret_cast<ULONG_PTR>(advapi.value),address=reinterpret_cast<ULONG_PTR>(entry);
+    Need(reinterpret_cast<ULONG_PTR>(stub)==base+0x27300);
+    const std::array<BYTE,7> bytes{0x48,0xff,0x25,0x89,0xdf,0x05,0x00};
+    Need(ReadSelf<std::array<BYTE,7>>(reinterpret_cast<ULONG_PTR>(stub))==bytes&&ReadSelf<ULONG_PTR>(base+0x85290)==address);
+    auto open=reinterpret_cast<decltype(&RegOpenKeyExW)>(entry);
+    state->targetPid=GetCurrentProcessId();state->targetCreation=CreationTime(GetCurrentProcess());state->methodAddress=address;
+    state->apiPathsEqual=1;InterlockedExchange(&state->ready,1);
+    ULONGLONG deadline=GetTickCount64()+45000;bool worked=false;
+    while(GetTickCount64()<deadline&&WaitForSingleObject(stop,0)==WAIT_TIMEOUT){
+        InterlockedIncrement(&state->heartbeat);if(IsDebuggerPresent())InterlockedExchange(&state->debuggerObserved,1);
+        if(!worked&&WaitForSingleObject(start,0)==WAIT_OBJECT_0){
+            ExceptionControl(state);
+            CppExceptionControl(state);
+            HKEY other=nullptr;
+            state->otherResult=open(HKEY_CLASSES_ROOT,L"CLSID\\{00000000-0000-0000-0000-000000000000}\\AssetLibraryDiagnosticNonTarget",0,KEY_QUERY_VALUE,&other);
+            if(state->otherResult==ERROR_SUCCESS)Need(other&&RegCloseKey(other)==ERROR_SUCCESS);
+            HKEY matching=nullptr;
+            state->matchResult=open(HKEY_CLASSES_ROOT,FixedKey,0,KEY_QUERY_VALUE,&matching);
+            if(state->matchResult==ERROR_SUCCESS){
+                state->matchHandleNonNull=matching?1:0;Need(matching!=nullptr);
+                LSTATUS closed=RegCloseKey(matching);state->matchHandleClosed=closed==ERROR_SUCCESS?1:0;Need(closed==ERROR_SUCCESS);
+            }
+            worked=true;InterlockedExchange(&state->callsFinished,1);
+        }
+        if(worked&&!IsDebuggerPresent())InterlockedIncrement(&state->noDebuggerAfterWork);Sleep(20);
+    }
+}
+int wmain(int argc,wchar_t** argv){
+    if(argc!=5||wcscmp(argv[1],L"--synthetic-child")!=0)return 2;
+    HANDLE mapping=reinterpret_cast<HANDLE>(_wcstoui64(argv[2],nullptr,16)),start=reinterpret_cast<HANDLE>(_wcstoui64(argv[3],nullptr,16)),stop=reinterpret_cast<HANDLE>(_wcstoui64(argv[4],nullptr,16));
+    auto state=static_cast<SharedState*>(MapViewOfFile(mapping,FILE_MAP_ALL_ACCESS,0,0,sizeof(SharedState)));if(!state||state->magic!=SharedMagic)return 3;
+    bool ok=true;try{Work(state,start,stop);}catch(HRESULT hr){state->targetError=hr;ok=false;}catch(...){state->targetError=E_FAIL;ok=false;}
+    UnmapViewOfFile(state);CloseHandle(stop);CloseHandle(start);CloseHandle(mapping);return ok?0:1;
+}

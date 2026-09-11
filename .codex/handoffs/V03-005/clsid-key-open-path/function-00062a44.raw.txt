@@ -1,0 +1,39 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file C:\Windows\System32\SHCORE.dll
+
+File Type: DLL
+
+  0000000180062A44: 48 89 5C 24 08     mov         qword ptr [rsp+8],rbx
+  0000000180062A49: 48 89 6C 24 10     mov         qword ptr [rsp+10h],rbp
+  0000000180062A4E: 48 89 74 24 18     mov         qword ptr [rsp+18h],rsi
+  0000000180062A53: 57                 push        rdi
+  0000000180062A54: 48 83 EC 30        sub         rsp,30h
+  0000000180062A58: 49 8B D9           mov         rbx,r9
+  0000000180062A5B: 49 8B F8           mov         rdi,r8
+  0000000180062A5E: 48 8B F2           mov         rsi,rdx
+  0000000180062A61: 48 8B E9           mov         rbp,rcx
+  0000000180062A64: E8 BB EF FF FF     call        0000000180061A24
+  0000000180062A69: 48 89 5C 24 28     mov         qword ptr [rsp+28h],rbx
+  0000000180062A6E: 4C 8B CF           mov         r9,rdi
+  0000000180062A71: 48 83 64 24 20 00  and         qword ptr [rsp+20h],0
+  0000000180062A77: 4C 8B C6           mov         r8,rsi
+  0000000180062A7A: 48 8B D5           mov         rdx,rbp
+  0000000180062A7D: 48 8B 08           mov         rcx,qword ptr [rax]
+  0000000180062A80: 48 83 C9 01        or          rcx,1
+  0000000180062A84: E8 BD FE FF FF     call        0000000180062946
+  0000000180062A89: 48 8B 5C 24 40     mov         rbx,qword ptr [rsp+40h]
+  0000000180062A8E: 83 C9 FF           or          ecx,0FFFFFFFFh
+  0000000180062A91: 48 8B 6C 24 48     mov         rbp,qword ptr [rsp+48h]
+  0000000180062A96: 85 C0              test        eax,eax
+  0000000180062A98: 48 8B 74 24 50     mov         rsi,qword ptr [rsp+50h]
+  0000000180062A9D: 0F 48 C1           cmovs       eax,ecx
+  0000000180062AA0: 48 83 C4 30        add         rsp,30h
+  0000000180062AA4: 5F                 pop         rdi
+  0000000180062AA5: C3                 ret
+
+  Summary
+
+       99000 .text

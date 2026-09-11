@@ -1,0 +1,39 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file C:\Windows\System32\advapi32.dll
+
+File Type: DLL
+
+  0000000180027300: 48 FF 25 89 DF 05  jmp         qword ptr [0000000180085290h]
+                    00
+  0000000180027307: CC                 int         3
+  0000000180027308: CC                 int         3
+  0000000180027309: CC                 int         3
+  000000018002730A: CC                 int         3
+  000000018002730B: CC                 int         3
+  000000018002730C: CC                 int         3
+  000000018002730D: CC                 int         3
+  000000018002730E: CC                 int         3
+  000000018002730F: CC                 int         3
+  0000000180027310: CC                 int         3
+  0000000180027311: CC                 int         3
+  0000000180027312: CC                 int         3
+  0000000180027313: CC                 int         3
+  0000000180027314: CC                 int         3
+  0000000180027315: CC                 int         3
+  0000000180027316: CC                 int         3
+  0000000180027317: CC                 int         3
+  0000000180027318: CC                 int         3
+  0000000180027319: CC                 int         3
+  000000018002731A: CC                 int         3
+  000000018002731B: CC                 int         3
+  000000018002731C: CC                 int         3
+  000000018002731D: CC                 int         3
+  000000018002731E: CC                 int         3
+  000000018002731F: CC                 int         3
+
+  Summary
+
+       72000 .text

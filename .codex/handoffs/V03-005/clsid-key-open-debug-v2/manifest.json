@@ -1,0 +1,99 @@
+{
+  "artifacts": [
+    {
+      "path": "Shared.h",
+      "size": 2187,
+      "sha256": "adb2113f60e0e16ad0e0f36124a31ce6149aacb34c9e990183b22d4a743fddc7"
+    },
+    {
+      "path": "Fingerprint.h",
+      "size": 3515,
+      "sha256": "b3df4947105cc6aba5851584db09169a7b445153b4ae3b7e544025b08a33449d"
+    },
+    {
+      "path": "Plan.h",
+      "size": 6161,
+      "sha256": "eb9ac50e65da8c9dd06e08a1ca6ef7b03216f3902ee2ca898bc0381e6c2d5e6f"
+    },
+    {
+      "path": "Target.cpp",
+      "size": 4224,
+      "sha256": "bf6f0cf9cb6ddf34cee6cd40682ecc5576c8bcb7f19f7b6718c427f8f1b9169e"
+    },
+    {
+      "path": "Observer.cpp",
+      "size": 50065,
+      "sha256": "5e77bce290eae923fdf2459a2bc13cc3265daf99af177fcfdd2feba79000326b"
+    },
+    {
+      "path": "ExceptionBudget.h",
+      "size": 1431,
+      "sha256": "6f11dc3e7d36a1ebb452eac20f39386a11f6d4a681a017715d9bf4f1a70a2eaa"
+    },
+    {
+      "path": "build.ps1",
+      "size": 1599,
+      "sha256": "a40f62b61a8b5d300f738f2389cf00758ed32e60fed73e9ab0584c1b8cf080d6"
+    },
+    {
+      "path": "candidate.diff",
+      "size": 18689,
+      "sha256": "2bdabf0c812dab309b033f5c0a17ded6812767827b0b40ed79616bc30a839051"
+    },
+    {
+      "path": "build-01.log",
+      "size": 26,
+      "sha256": "8666ed67cef444cbe1933e7ac8bddcb7b46319fd0ad2278659976e386d3f3767"
+    },
+    {
+      "path": "self-test-01.jsonl",
+      "size": 355,
+      "sha256": "27d7f4dccdbc54acb54d3fbddb31d5f00221a66fc568fd6211e4ffcf58ae04d1"
+    },
+    {
+      "path": "normal-01.jsonl",
+      "size": 5115,
+      "sha256": "c3eeb6ec307efdedb31c9e2a8334eab791d7302d5347365f8e71b32fa3250da3"
+    },
+    {
+      "path": "cancel-01.jsonl",
+      "size": 5455,
+      "sha256": "93356875e43c349839229d0fd7855b66acb644c95656edc631be8fb326a29cee"
+    },
+    {
+      "path": "exception-limit-01.jsonl",
+      "size": 5718,
+      "sha256": "e62798ce3896ef443d555279fac7498141be02ee0cfa9b61c729264cdd4e75c8"
+    },
+    {
+      "path": "exception-limit-01.exit.json",
+      "size": 55,
+      "sha256": "a4b1f6a2410ebe554a98e1e586a5db7aa2cf91f6d50b32f813efc4993f383c0d"
+    },
+    {
+      "path": "post-exit-identity.json",
+      "size": 311,
+      "sha256": "494389a5095d1db7be9bb3b9a3d5ad47c575ad5d9bf37913fcb8b27b692b4e33"
+    },
+    {
+      "path": "validation.json",
+      "size": 6534,
+      "sha256": "fe56a228378a3df3298f32f7e7d82295d862899324e3533b9701a69abbca21c7"
+    },
+    {
+      "path": "README.md",
+      "size": 2953,
+      "sha256": "8a59630fe1735a2c021589ea4f50731619c62208b02f46ae57a3a6184283a973"
+    },
+    {
+      "path": "bin/ClsidKeyOpenObserverV2.exe",
+      "size": 261632,
+      "sha256": "75f1ab60e25283fab42a87ddbc716339da94417e18315054c021fa53e60541fc"
+    },
+    {
+      "path": "bin/ClsidKeyOpenReferenceTargetV2.exe",
+      "size": 120832,
+      "sha256": "ec9936c5a4b2b5d6d20f6e6c2b69b8c19fab2c46dc8bc99817e2f88dc5c13ef9"
+    }
+  ]
+}

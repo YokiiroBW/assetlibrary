@@ -1,0 +1,63 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "source_sha256": "4BA218794E15891E5BC476F77432DADC0E4119CE3BB6A56D9C56215DB71D1E16",
+  "redactions": [
+    "Replace account/profile/host/SID tokens; preserve diagnostic values and failures."
+  ],
+  "payload": [
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\capture.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\capture-fixed.ps1",
+      "ExpectedChange": "cycle path only",
+      "SourceHash": "EA72AD3084C7B8F07DC9A27B91E2D06CD4F290B7AAB99ECB0E437862945D3563",
+      "CopyHash": "97F3EBFBDD82C6AE124CC7AD2380B59C2F360FA25258A20DDB9FC058B29AF504",
+      "ParseErrors": 0,
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short-fixed'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "<="
+        }
+      ]
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\assert-live.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\assert-live-fixed.ps1",
+      "ExpectedChange": "cycle path only",
+      "SourceHash": "6185339242651582A1B62CDE06ACD6E61A97E402D91D8A31B560FBF5E87C4943",
+      "CopyHash": "7AAE7492ADD5466CC3AE1EEFF1252A9DC48D0E1CCB7E0F979DC3BD170E632659",
+      "ParseErrors": 0,
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short-fixed'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "<="
+        }
+      ]
+    },
+    {
+      "Source": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-native.ps1",
+      "Copy": "<USER_PROFILE>\\.codex\\worktrees\\6f7b\\AssetLibrary\\.runtime\\explorer-short-live\\run-native-fixed.ps1",
+      "ExpectedChange": "cycle path only",
+      "SourceHash": "FCE49196206C57DA70F1929A23639E7B1385D29E76C8DE9BE66A746557F27994",
+      "CopyHash": "3E51E2EBDF55D03CBC65CC792E2AAEDB3C561AA8C04657543D3C739C89B7EA3D",
+      "ParseErrors": 0,
+      "LineChanges": [
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short-fixed'",
+          "SideIndicator": "=>"
+        },
+        {
+          "InputObject": "$run=Join-Path $repo '.runtime/explorer-live/20260911-clsid-key-open-short'",
+          "SideIndicator": "<="
+        }
+      ]
+    }
+  ]
+}

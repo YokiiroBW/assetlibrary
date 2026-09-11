@@ -1,0 +1,73 @@
+{
+  "stage": "offline_preparation_and_own_reference_only_no_Explorer_probe_yet",
+  "manifest_sha256": "5291ba9fdba3861343c054627e401cafb651d74ae7a8d4e86bcd86105c7947be",
+  "artifacts": [
+    {
+      "file": "pe_index.py.txt",
+      "sha256": "666c592a133ff5aeb60b49d2b56fa98c0231bd5006baa6638da0aa1324145e95",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\pe_index.py",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "index.json",
+      "sha256": "f981c9e27b92a76e29a2ea20ca2ba8f9472da3dd6f97911d55d89596a8a33958",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\index.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "export-120.json",
+      "sha256": "fac2c433aa33825738cb3b47e561213d5b4490263454f1febac910c1df6d7f30",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\export-120.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "ordinal120-local-index.json",
+      "sha256": "3ae6795aef864f8396eb8f19db1c5adc85188ce9d8b0221ff394dc9e2562b9ca",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\ordinal120-local-index.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "local_index.py.txt",
+      "sha256": "612295e7406688a7bcc12400018d061a5b1ea11e31f57ccf2cdbb223eb5e8b12",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\local_index.py",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "local-analysis-index.json",
+      "sha256": "771a6d87ac98820543b1ad73370e18e02c06b2c7b6e9866a646ffeb06c8e64b1",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\local-analysis-index.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "function-00035850.raw.txt",
+      "sha256": "e3570dcac0a8e37221ec3aeda9530295e5728c392604a9bbadb13f2ebd5580e0",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\function-00035850.raw.txt",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "function-000359a4.raw.txt",
+      "sha256": "bf0edda662cd43ab4679871adebad2b5a4d9ac7f768a208b64b937a0a9f7b9c4",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\function-000359a4.raw.txt",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "function-00062a44.raw.txt",
+      "sha256": "1a303b9237ba08ef5b87c66d1a20b759aed444c18b602b6ba7043999434b9ca4",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\function-00062a44.raw.txt",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "findings.json",
+      "sha256": "dabc96e5ad8ab934e676b170cfdb7d6192f89ea28d19e64373b965bcc1465078",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\findings.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "README.md",
+      "sha256": "977048dafc87919a9cbe26c9299c2fe95f3ca3b3b346327b28d534651b4c6fc8",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-path\\README.md",
+      "kind": "unmodified_preparation_file"
+    }
+  ],
+  "runtime_only": "Compiled executables and full import/.pdata inventories are not distributed as product dependencies."
+}

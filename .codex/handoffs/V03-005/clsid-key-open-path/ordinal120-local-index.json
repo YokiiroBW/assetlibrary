@@ -1,0 +1,70 @@
+{
+  "directCallTargets": [
+    {
+      "rva": "0x359a4",
+      "runtimeFunction": [
+        {
+          "beginRva": 219556,
+          "endRva": 219664,
+          "codeSize": 108,
+          "unwindRva": 792876
+        }
+      ]
+    },
+    {
+      "rva": "0x61e00",
+      "runtimeFunction": [
+        {
+          "beginRva": 400896,
+          "endRva": 400926,
+          "codeSize": 30,
+          "unwindRva": 804552
+        }
+      ]
+    }
+  ],
+  "iatCalls": [
+    {
+      "dll": "api-ms-win-core-registry-l1-1-0.dll",
+      "iatRva": 700088,
+      "iatVa": "0x1800AAEB8",
+      "delayImport": false,
+      "hint": 3,
+      "name": "RegCreateKeyExW"
+    },
+    {
+      "dll": "api-ms-win-core-registry-l1-1-0.dll",
+      "iatRva": 700120,
+      "iatVa": "0x1800AAED8",
+      "delayImport": false,
+      "hint": 30,
+      "name": "RegOpenKeyExW"
+    },
+    {
+      "dll": "api-ms-win-core-com-l1-1-0.dll",
+      "iatRva": 975064,
+      "iatVa": "0x1800EE0D8",
+      "delayImport": true,
+      "hint": 84,
+      "name": "StringFromGUID2"
+    }
+  ],
+  "strings": [
+    {
+      "rva": "0xaf968",
+      "text": ""
+    },
+    {
+      "rva": "0xafc00",
+      "text": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\"
+    },
+    {
+      "rva": "0xafc68",
+      "text": "%sCLSID\\%s"
+    },
+    {
+      "rva": "0xafc80",
+      "text": "%sCLSID\\%s\\%s"
+    }
+  ]
+}

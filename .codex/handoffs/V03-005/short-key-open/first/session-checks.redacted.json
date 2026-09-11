@@ -1,0 +1,77 @@
+{
+  "artifact_kind": "redacted_copy_not_original",
+  "sources": [
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-after-refusal.json",
+      "source_sha256": "4987CE9B1B18CA5FF3C3493C36856EAB94841DA4ADA2878AA9CD7526ADA9AC28"
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-before.json",
+      "source_sha256": "6D01A3A667C4A36999BAB5BC4B0F086D9C32D66D62771B0C3C77594AD1C72FA9"
+    },
+    {
+      "source": "<WINDOWS_OWNER_WORKTREE>/.runtime/explorer-live/20260911-clsid-key-open-short/session-owned.json",
+      "source_sha256": "B1A93AE9D4AFF08DE866A82FBD0F0105DAEF3F4C3E408114E81DF6621CBC2308"
+    }
+  ],
+  "transformation": "Selected session/admission/owned-process booleans only. Omit account/SID strings, unrelated process identities, and complete window inventories.",
+  "payload": [
+    {
+      "source_filename": "session-after-refusal.json",
+      "Utc": "2026-09-11T11:06:26.2810732+00:00",
+      "SessionActive": true,
+      "SessionConnectState": 0,
+      "InputDesktopIsDefault": true,
+      "InputDesktopError": 0,
+      "ShellPid": 6212,
+      "TaskbarPid": 6212,
+      "Errors": [],
+      "OwnedSameCreationPresent": true,
+      "OwnedAlive": true,
+      "OwnedDebuggerPresent": false,
+      "OwnedSameSession": true,
+      "OwnedSameSidBooleanOnly": true,
+      "OwnedSystemExplorerImage": true,
+      "OwnedVisibleCabinetCount": 1,
+      "OwnedExactHwndPresent": true
+    },
+    {
+      "source_filename": "session-before.json",
+      "Utc": "2026-09-11T11:03:50.4099903+00:00",
+      "SessionActive": true,
+      "SessionConnectState": 0,
+      "InputDesktopIsDefault": true,
+      "InputDesktopError": 0,
+      "ShellPid": 6212,
+      "TaskbarPid": 6212,
+      "Errors": [],
+      "OwnedSameCreationPresent": false,
+      "OwnedAlive": null,
+      "OwnedDebuggerPresent": null,
+      "OwnedSameSession": null,
+      "OwnedSameSidBooleanOnly": null,
+      "OwnedSystemExplorerImage": null,
+      "OwnedVisibleCabinetCount": 0,
+      "OwnedExactHwndPresent": false
+    },
+    {
+      "source_filename": "session-owned.json",
+      "Utc": "2026-09-11T11:04:34.0194935+00:00",
+      "SessionActive": true,
+      "SessionConnectState": 0,
+      "InputDesktopIsDefault": true,
+      "InputDesktopError": 0,
+      "ShellPid": 6212,
+      "TaskbarPid": 6212,
+      "Errors": [],
+      "OwnedSameCreationPresent": true,
+      "OwnedAlive": true,
+      "OwnedDebuggerPresent": false,
+      "OwnedSameSession": true,
+      "OwnedSameSidBooleanOnly": true,
+      "OwnedSystemExplorerImage": true,
+      "OwnedVisibleCabinetCount": 1,
+      "OwnedExactHwndPresent": true
+    }
+  ]
+}

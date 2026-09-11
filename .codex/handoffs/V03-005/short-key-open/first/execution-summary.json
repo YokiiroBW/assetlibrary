@@ -1,0 +1,17 @@
+{
+  "Utc": "2026-09-11T11:06:52.3781218+00:00",
+  "Status": "pre-attach-plan-format-refusal",
+  "Cause": "PowerShell array expression precedence split concatenated plan fields into extra lines",
+  "ExpectedPlanLines": 11,
+  "ActualPlanLines": 18,
+  "AttachCompleted": false,
+  "Ready": false,
+  "AfterReadyNotifyAttempted": false,
+  "ThisPcNavigationAttempted": false,
+  "BrowseAttempted": false,
+  "RetryAttempted": false,
+  "RegistrationCleaned": true,
+  "FinalEightRootsAbsent": true,
+  "FinalTwentyFieldsMissing": true,
+  "OwnedWindowClosed": true
+}

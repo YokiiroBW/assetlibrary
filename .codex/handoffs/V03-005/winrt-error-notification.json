@@ -1,0 +1,16 @@
+{
+  "code": "0x40080201",
+  "sdkName": "EXCEPTION_RO_ORIGINATEERROR",
+  "source": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\winrt\\roerrorapi.h",
+  "sourceSha256": "0d24722c95a57e408f2f8dd099c6a5d68d5d1d3671f6d9de2c6e5f38625a0e19",
+  "definitionLine": 294,
+  "descriptionLine": 302,
+  "definition": "#define EXCEPTION_RO_ORIGINATEERROR  ((DWORD)((0x1 << 30) | (FACILITY_WINDOWS << 16) | 0x201))",
+  "sdkMeaning": "RoOriginateError variants raise and catch this structured exception to deliver error information to a debugger.",
+  "officialDocs": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/roerrorapi/nf-roerrorapi-rooriginateerrorw",
+    "https://learn.microsoft.com/en-us/windows/win32/debug/exception-handling-functions-for-debugging"
+  ],
+  "observedMeaningLimit": "The observed code matches this SDK notification code. No actual embedded HRESULT/message or originating stack was recorded, so no particular reported error or API caller is established. First chance is not proof of an unhandled crash.",
+  "nextInvestigation": "Review debugger-notification classification and a narrower observation boundary instead of repeating the unchanged global RegOpen probe. Do not suppress target reporting or change system policy; new real work requires a new reviewed, bounded experiment."
+}

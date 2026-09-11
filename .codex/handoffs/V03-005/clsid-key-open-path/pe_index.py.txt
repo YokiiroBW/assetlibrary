@@ -1,0 +1,143 @@
+import hashlib
+import json
+import ntpath
+from pathlib import Path
+import struct
+import uuid
+
+ROOT = Path(r"C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-path")
+SOURCE = Path(r"C:\Windows\System32\SHCORE.dll")
+EXPECTED = "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153"
+TARGET_ORDINAL = 120
+
+def save(name, value):
+    (ROOT / name).write_text(json.dumps(value, indent=2), encoding="utf-8")
+
+def index():
+    data = SOURCE.read_bytes()
+    assert hashlib.sha256(data).hexdigest() == EXPECTED
+    def unpack(fmt, off):
+        assert 0 <= off <= len(data) - struct.calcsize(fmt)
+        return struct.unpack_from(fmt, data, off)
+    assert data[:2] == b"MZ"
+    pe = unpack("<I", 0x3C)[0]
+    assert data[pe:pe+4] == b"PE\0\0"
+    machine, nsections, timestamp, _, _, optsize, _ = unpack("<HHIIIHH", pe+4)
+    assert machine == 0x8664 and 0 < nsections <= 96
+    opt = pe + 24
+    assert unpack("<H", opt)[0] == 0x20B
+    image_base = unpack("<Q", opt+24)[0]
+    image_size, headers_size = unpack("<II", opt+56)
+    count = unpack("<I", opt+108)[0]
+    assert 14 <= count <= 32 and optsize >= 112 + count*8
+    dirs = [unpack("<II", opt+112+i*8) for i in range(count)]
+    sections = []
+    for i in range(nsections):
+        off = opt+optsize+40*i
+        name = data[off:off+8].split(b"\0")[0].decode("ascii")
+        vsize, va, rawsize, raw = unpack("<IIII", off+8)
+        flags = unpack("<I", off+36)[0]
+        sections.append(dict(name=name, rva=va, virtualSize=vsize, rawSize=rawsize, rawOffset=raw, flags=flags))
+    def offset(rva, size=1):
+        assert rva >= 0 and size >= 0 and rva+size <= image_size
+        if rva+size <= headers_size:
+            return rva
+        for s in sections:
+            delta = rva-s["rva"]
+            if 0 <= delta and delta+size <= s["rawSize"]:
+                result = s["rawOffset"]+delta
+                assert result+size <= len(data)
+                return result
+        raise ValueError("RVA is not backed by file bytes")
+    def cstr(rva, maximum=1024):
+        off = offset(rva)
+        end = data.find(b"\0", off, min(len(data), off+maximum))
+        assert end >= off
+        return data[off:end].decode("ascii", errors="strict")
+    export_rva, export_size = dirs[0]
+    _, _, _, _, dll_name, ordinal_base, function_count, name_count, function_table, name_table, ordinal_table = unpack("<IIHHIIIIIII", offset(export_rva, 40))
+    assert 0 < function_count <= 16384 and name_count <= function_count
+    ordinal_index = TARGET_ORDINAL - ordinal_base
+    assert 0 <= ordinal_index < function_count
+    TARGET = unpack("<I", offset(function_table+4*ordinal_index,4))[0]
+    names = []
+    for i in range(name_count):
+        index = unpack("<H",offset(ordinal_table+2*i,2))[0]
+        assert index < function_count
+        if index == ordinal_index:
+            names.append(cstr(unpack("<I",offset(name_table+4*i,4))[0]))
+    export = dict(ordinal=TARGET_ORDINAL, names=names, rva=TARGET, dllName=cstr(dll_name), forwarder=cstr(TARGET) if export_rva<=TARGET<export_rva+export_size else None)
+    save("export-120.json",dict(sourceSha256=EXPECTED,imageBase=image_base,export=export))
+    assert export["forwarder"] is None
+    functions = []
+    pdata, pdata_size = dirs[3]
+    assert pdata_size % 12 == 0
+    for i in range(pdata_size//12):
+        begin, end, unwind = unpack("<III", offset(pdata+12*i, 12))
+        if begin == end == unwind == 0:
+            continue
+        assert begin < end <= image_size
+        functions.append(dict(beginRva=begin, endRva=end, codeSize=end-begin, unwindRva=unwind))
+    containing = [f for f in functions if f["beginRva"] <= TARGET < f["endRva"]]
+    assert len(containing) == 1
+    target = dict(containing[0])
+    uoff = offset(target["unwindRva"], 4)
+    version_flags, prolog, ncodes, frame = unpack("<BBBB", uoff)
+    unwind_info = dict(version=version_flags & 7, flags=version_flags >> 3, prologSize=prolog, codeCount=ncodes, frameByte=frame)
+    optional = target["unwindRva"] + 4 + ((ncodes+1)//2)*4
+    if unwind_info["flags"] & 4:
+        unwind_info["chainedRuntimeFunction"] = unpack("<III", offset(optional, 12))
+    elif unwind_info["flags"] & 3:
+        unwind_info["handlerRva"] = unpack("<I", offset(optional, 4))[0]
+    target["unwind"] = unwind_info
+    target["vaBegin"] = f"0x{image_base+target['beginRva']:X}"
+    target["vaEndExclusive"] = f"0x{image_base+target['endRva']:X}"
+    prefix_hash = hashlib.sha256(data[offset(TARGET,32):offset(TARGET,32)+32]).hexdigest()
+    imports = []
+    def thunks(dll, lookup, iat, delayed):
+        for i in range(8192):
+            value = unpack("<Q", offset(lookup+8*i, 8))[0]
+            if value == 0:
+                return
+            row = dict(dll=dll, iatRva=iat+8*i, iatVa=f"0x{image_base+iat+8*i:X}", delayImport=delayed)
+            if value & (1 << 63):
+                row["ordinal"] = value & 0xFFFF
+            else:
+                row["hint"] = unpack("<H", offset(value,2))[0]
+                row["name"] = cstr(value+2)
+            imports.append(row)
+        raise ValueError("Import thunk bound exceeded")
+    imp, imp_size = dirs[1]
+    for i in range(imp_size//20):
+        lookup, _, _, name, iat = unpack("<IIIII", offset(imp+20*i,20))
+        if lookup == name == iat == 0:
+            break
+        thunks(cstr(name), lookup or iat, iat, False)
+    delay, delay_size = dirs[13]
+    if delay:
+        for i in range(delay_size//32):
+            attrs, name, _, iat, lookup, _, _, _ = unpack("<IIIIIIII", offset(delay+32*i,32))
+            if not name:
+                break
+            assert attrs & 1  # This fixed PE uses RVA-based delay import records.
+            thunks(cstr(name), lookup or iat, iat, True)
+    codeview = []
+    debug, debug_size = dirs[6]
+    assert debug_size % 28 == 0
+    for i in range(debug_size//28):
+        _, _, _, _, kind, size, _, pointer = unpack("<IIHHIIII", offset(debug+28*i,28))
+        if kind != 2:
+            continue
+        assert 24 <= size <= 4096 and pointer+size <= len(data)
+        record = data[pointer:pointer+size]
+        if record[:4] == b"RSDS":
+            guid = uuid.UUID(bytes_le=record[4:20])
+            age = struct.unpack_from("<I",record,20)[0]
+            pdb = ntpath.basename(record[24:].split(b"\0")[0].decode("utf-8"))
+            codeview.append(dict(signature="RSDS", guid=str(guid).upper(), age=age, pdbName=pdb, symbolKey=guid.hex.upper()+f"{age:X}"))
+    result = dict(sourceSha256=EXPECTED, sourceSize=len(data), machine=machine, timestamp=timestamp, imageBase=image_base, imageSize=image_size, sections=sections, targetRva=TARGET, targetExport=export, targetPrefix32Sha256=prefix_hash, targetRuntimeFunction=target, codeView=codeview, normalAndDelayImportCount=len(imports), runtimeFunctionCount=len(functions))
+    save("index.json",result); save("imports.json",imports); save("runtime-functions.json",functions)
+    print(json.dumps(dict(sourceSha256=EXPECTED, imageBase=image_base, targetExport=export, targetRuntimeFunction=target,codeView=codeview,imports=len(imports),runtimeFunctions=len(functions))))
+
+if __name__ == "__main__":
+    index()

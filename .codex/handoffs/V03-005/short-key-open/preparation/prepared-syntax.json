@@ -1,0 +1,18 @@
+[
+  {
+    "Name": "assert-live.ps1",
+    "ParseErrors": 0
+  },
+  {
+    "Name": "capture.ps1",
+    "ParseErrors": 0
+  },
+  {
+    "Name": "read-fields.ps1",
+    "ParseErrors": 0
+  },
+  {
+    "Name": "run-readback.ps1",
+    "ParseErrors": 0
+  }
+]

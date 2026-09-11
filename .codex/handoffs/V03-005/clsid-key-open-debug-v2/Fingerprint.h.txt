@@ -1,0 +1,47 @@
+#pragma once
+#include "Shared.h"
+#include <bcrypt.h>
+#include <array>
+#include <string>
+#include <vector>
+inline void FingerprintNeed(bool ok){if(!ok)throw E_FAIL;}
+struct Sha256 {
+    BCRYPT_ALG_HANDLE algorithm=nullptr;BCRYPT_HASH_HANDLE hash=nullptr;std::vector<BYTE> state;
+    Sha256(){
+        FingerprintNeed(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)>=0);
+        DWORD size=0,received=0;FingerprintNeed(BCryptGetProperty(algorithm,BCRYPT_OBJECT_LENGTH,reinterpret_cast<PUCHAR>(&size),sizeof(size),&received,0)>=0&&received==sizeof(size)&&size<65536);
+        state.resize(size);FingerprintNeed(BCryptCreateHash(algorithm,&hash,state.data(),size,nullptr,0,0)>=0);
+    }
+    ~Sha256(){if(hash)BCryptDestroyHash(hash);if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0);}
+    void Add(BYTE* bytes,ULONG size){FingerprintNeed(BCryptHashData(hash,bytes,size,0)>=0);}
+    std::string Finish(){
+        std::array<BYTE,32> bytes{};FingerprintNeed(BCryptFinishHash(hash,bytes.data(),static_cast<ULONG>(bytes.size()),0)>=0);
+        static constexpr char digits[]="0123456789abcdef";std::string result;
+        for(BYTE b:bytes){result+=digits[b>>4];result+=digits[b&15];}return result;
+    }
+};
+struct FixedModuleFile {
+    HANDLE file=INVALID_HANDLE_VALUE;
+    std::wstring dosPath,extendedPath,ntPath;
+    ~FixedModuleFile(){if(file!=INVALID_HANDLE_VALUE)CloseHandle(file);}
+    void Verify(const wchar_t* basename,const char* expectedHash){
+        wchar_t system[32768]{};UINT size=GetSystemDirectoryW(system,32768);FingerprintNeed(size>0&&size<32768);
+        dosPath=std::wstring(system)+L"\\"+basename;extendedPath=L"\\\\?\\"+dosPath;
+        FingerprintNeed((GetFileAttributesW(dosPath.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)==0);
+        file=CreateFileW(dosPath.c_str(),GENERIC_READ,FILE_SHARE_READ,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);FingerprintNeed(file!=INVALID_HANDLE_VALUE);
+        wchar_t finalPath[32768]{};DWORD length=GetFinalPathNameByHandleW(file,finalPath,32768,0);
+        FingerprintNeed(length>0&&length<32768&&CompareStringOrdinal(finalPath,-1,extendedPath.c_str(),-1,TRUE)==CSTR_EQUAL);
+        length=GetFinalPathNameByHandleW(file,finalPath,32768,VOLUME_NAME_NT);FingerprintNeed(length>0&&length<32768);ntPath.assign(finalPath,length);
+        LARGE_INTEGER bytes{};FingerprintNeed(GetFileSizeEx(file,&bytes)&&bytes.QuadPart>0&&bytes.QuadPart<=128*1024*1024);
+        Sha256 hash;std::array<BYTE,65536> buffer{};ULONGLONG total=0;
+        for(;;){DWORD read=0;FingerprintNeed(ReadFile(file,buffer.data(),static_cast<DWORD>(buffer.size()),&read,nullptr)!=FALSE);if(!read)break;total+=read;FingerprintNeed(total<=static_cast<ULONGLONG>(bytes.QuadPart));hash.Add(buffer.data(),read);}
+        FingerprintNeed(total==static_cast<ULONGLONG>(bytes.QuadPart)&&hash.Finish()==expectedHash);
+    }
+    bool MatchesImage(const char* image)const{
+        if(!image)return false;
+        int count=MultiByteToWideChar(CP_ACP,MB_ERR_INVALID_CHARS,image,-1,nullptr,0);
+        if(count<=0||count>32768)return false;
+        std::vector<wchar_t> wide(count);if(!MultiByteToWideChar(CP_ACP,MB_ERR_INVALID_CHARS,image,-1,wide.data(),count))return false;
+        return CompareStringOrdinal(wide.data(),-1,dosPath.c_str(),-1,TRUE)==CSTR_EQUAL||CompareStringOrdinal(wide.data(),-1,extendedPath.c_str(),-1,TRUE)==CSTR_EQUAL||CompareStringOrdinal(wide.data(),-1,ntPath.c_str(),-1,TRUE)==CSTR_EQUAL;
+    }
+};

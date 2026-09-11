@@ -1,0 +1,85 @@
+{
+  "source": {
+    "sha256": "15ce6da9fc51fb8dae803e74ae687b19a1966f5c8ecc2fe65295c32d02fb0153",
+    "fileVersion": "10.0.26100.1",
+    "imageSize": 1011712,
+    "timestamp": 1467776254,
+    "codeView": [
+      {
+        "signature": "RSDS",
+        "guid": "4A074CBB-8DDA-73D1-4173-103398F65C39",
+        "age": 1,
+        "pdbName": "shcore.pdb",
+        "symbolKey": "4A074CBB8DDA73D14173103398F65C391"
+      }
+    ]
+  },
+  "ordinal120": {
+    "exportName": null,
+    "forwarder": null,
+    "rva": "0x35850",
+    "runtimeRange": [
+      "0x35850",
+      "0x3599E"
+    ],
+    "codeBytes": 334,
+    "prefix32Sha256": "6c16a4ed973d9bb17ad97493d3ad04f3ca78ec044dc1752434724e6cc07ca92c"
+  },
+  "knownCaller": {
+    "module": "windows.storage.dll",
+    "moduleSha256": "22aff66094747a65ea1b5390e60dd423cf3bfd897781a6347ccf7f6234d0388b",
+    "callRva": "0x11B949",
+    "returnRva": "0x11B950",
+    "rawSha256": "56fc2a816d05322e8a9e3d1baa0ee0473f9b90e2171ce23f08460b8226dbf316",
+    "argumentsFromInstructions": {
+      "rcx": "cache record first16 GUID",
+      "rdx": "fixed ShellFolder string",
+      "r8d": 0,
+      "r9d": 0,
+      "fifthStackDword": 1,
+      "sixthStackQword": "output HKEY slot pointer"
+    }
+  },
+  "currentZeroZeroBranch": {
+    "rootValue": "0xFFFFFFFF80000000",
+    "rootNameFromSdkWinreg": "HKEY_CLASSES_ROOT",
+    "prefix": "",
+    "format": "%sCLSID\\%s\\%s",
+    "expectedConstructedSubkey": "CLSID\\{GUID}\\ShellFolder",
+    "formatCallRva": "0x35959",
+    "openCallRva": "0x35908",
+    "openReturnRva": "0x3590F",
+    "openIatRva": "0xAAED8",
+    "openImport": "RegOpenKeyExW",
+    "accessMask": 1,
+    "createBranchTaken": false,
+    "errorConversionRvas": [
+      "0x35914",
+      "0x35916",
+      "0x35918",
+      "0x3591B"
+    ],
+    "errorConversion": "positive Win32 result -> 0x80070000 | LOWORD(result); zero/negative unchanged"
+  },
+  "otherBranchesObservedStatically": {
+    "thirdArgumentNonzero": "HKCU + Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ prefix",
+    "fourthArgumentNonzero": "RegCreateKeyExW at 0x3598D instead of RegOpenKeyExW",
+    "nullSecondArgument": "%sCLSID\\%s format"
+  },
+  "limits": [
+    "ordinal has no PE export name; no public signature/semantic contract claimed",
+    "constructed subkey is static dataflow interpretation, not an observed live API argument",
+    "actual Explorer HKCR merge, override or cached handle behavior not observed",
+    "no conclusion that the zero cached attributes came from a specific open failure",
+    "symbols for anonymous direct callees are pending coordinator lookup; deeper callees not expanded"
+  ],
+  "scope": {
+    "maxDepth": 2,
+    "uniqueCodeBytes": 540,
+    "codeBudget": 16384,
+    "dllLoadedOrCalled": false,
+    "registryAccessPerformed": false,
+    "debugAttachPerformed": false,
+    "guiOperated": false
+  }
+}

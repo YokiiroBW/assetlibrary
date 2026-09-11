@@ -1,0 +1,51 @@
+Microsoft (R) COFF/PE Dumper Version 14.44.35228.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file C:\Windows\System32\SHCORE.dll
+
+File Type: DLL
+
+  00000001800359A4: 4C 89 44 24 18     mov         qword ptr [rsp+18h],r8
+  00000001800359A9: 4C 89 4C 24 20     mov         qword ptr [rsp+20h],r9
+  00000001800359AE: 53                 push        rbx
+  00000001800359AF: 56                 push        rsi
+  00000001800359B0: 57                 push        rdi
+  00000001800359B1: 41 56              push        r14
+  00000001800359B3: 48 83 EC 38        sub         rsp,38h
+  00000001800359B7: 48 8D 42 FF        lea         rax,[rdx-1]
+  00000001800359BB: 33 DB              xor         ebx,ebx
+  00000001800359BD: 4C 8B F1           mov         r14,rcx
+  00000001800359C0: 48 3D FE FF FF 7F  cmp         rax,7FFFFFFEh
+  00000001800359C6: 77 39              ja          0000000180035A01
+  00000001800359C8: 48 8D 72 FF        lea         rsi,[rdx-1]
+  00000001800359CC: 8B FB              mov         edi,ebx
+  00000001800359CE: 48 8B D6           mov         rdx,rsi
+  00000001800359D1: 4C 8D 4C 24 78     lea         r9,[rsp+78h]
+  00000001800359D6: E8 69 D0 02 00     call        0000000180062A44
+  00000001800359DB: 85 C0              test        eax,eax
+  00000001800359DD: 78 16              js          00000001800359F5
+  00000001800359DF: 48 98              cdqe
+  00000001800359E1: 48 3B C6           cmp         rax,rsi
+  00000001800359E4: 77 0F              ja          00000001800359F5
+  00000001800359E6: 74 12              je          00000001800359FA
+  00000001800359E8: 8B C7              mov         eax,edi
+  00000001800359EA: 48 83 C4 38        add         rsp,38h
+  00000001800359EE: 41 5E              pop         r14
+  00000001800359F0: 5F                 pop         rdi
+  00000001800359F1: 5E                 pop         rsi
+  00000001800359F2: 5B                 pop         rbx
+  00000001800359F3: C3                 ret
+  00000001800359F4: CC                 int         3
+  00000001800359F5: BF 7A 00 07 80     mov         edi,8007007Ah
+  00000001800359FA: 66 41 89 1C 76     mov         word ptr [r14+rsi*2],bx
+  00000001800359FF: EB E7              jmp         00000001800359E8
+  0000000180035A01: BF 57 00 07 80     mov         edi,80070057h
+  0000000180035A06: 48 85 D2           test        rdx,rdx
+  0000000180035A09: 74 DD              je          00000001800359E8
+  0000000180035A0B: 66 89 19           mov         word ptr [rcx],bx
+  0000000180035A0E: EB D8              jmp         00000001800359E8
+
+  Summary
+
+       99000 .text

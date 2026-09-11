@@ -1,0 +1,115 @@
+{
+  "stage": "reviewed_cpp_exception_threshold_calibration_reference_verified_real_pending",
+  "manifest_sha256": "f9ca737f2bb5c0e4b977ffd5db28f1c40dcceda4e7c0ea945f71bde201935e32",
+  "observer_sha256": "75f1ab60e25283fab42a87ddbc716339da94417e18315054c021fa53e60541fc",
+  "artifacts": [
+    {
+      "file": "Shared.h.txt",
+      "sha256": "adb2113f60e0e16ad0e0f36124a31ce6149aacb34c9e990183b22d4a743fddc7",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\Shared.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Fingerprint.h.txt",
+      "sha256": "b3df4947105cc6aba5851584db09169a7b445153b4ae3b7e544025b08a33449d",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\Fingerprint.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Plan.h.txt",
+      "sha256": "eb9ac50e65da8c9dd06e08a1ca6ef7b03216f3902ee2ca898bc0381e6c2d5e6f",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\Plan.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Target.cpp.txt",
+      "sha256": "bf6f0cf9cb6ddf34cee6cd40682ecc5576c8bcb7f19f7b6718c427f8f1b9169e",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\Target.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "Observer.cpp.txt",
+      "sha256": "5e77bce290eae923fdf2459a2bc13cc3265daf99af177fcfdd2feba79000326b",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\Observer.cpp",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "ExceptionBudget.h.txt",
+      "sha256": "6f11dc3e7d36a1ebb452eac20f39386a11f6d4a681a017715d9bf4f1a70a2eaa",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\ExceptionBudget.h",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build.ps1.txt",
+      "sha256": "a40f62b61a8b5d300f738f2389cf00758ed32e60fed73e9ab0584c1b8cf080d6",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\build.ps1",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "candidate.diff.txt",
+      "sha256": "2bdabf0c812dab309b033f5c0a17ded6812767827b0b40ed79616bc30a839051",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\candidate.diff",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "build-01.log",
+      "sha256": "8666ed67cef444cbe1933e7ac8bddcb7b46319fd0ad2278659976e386d3f3767",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\build-01.log",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "self-test-01.jsonl",
+      "sha256": "27d7f4dccdbc54acb54d3fbddb31d5f00221a66fc568fd6211e4ffcf58ae04d1",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\self-test-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "normal-01.jsonl",
+      "sha256": "c3eeb6ec307efdedb31c9e2a8334eab791d7302d5347365f8e71b32fa3250da3",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\normal-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "cancel-01.jsonl",
+      "sha256": "93356875e43c349839229d0fd7855b66acb644c95656edc631be8fb326a29cee",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\cancel-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "exception-limit-01.jsonl",
+      "sha256": "e62798ce3896ef443d555279fac7498141be02ee0cfa9b61c729264cdd4e75c8",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\exception-limit-01.jsonl",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "exception-limit-01.exit.json",
+      "sha256": "a4b1f6a2410ebe554a98e1e586a5db7aa2cf91f6d50b32f813efc4993f383c0d",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\exception-limit-01.exit.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "post-exit-identity.json",
+      "sha256": "494389a5095d1db7be9bb3b9a3d5ad47c575ad5d9bf37913fcb8b27b692b4e33",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\post-exit-identity.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "fe56a228378a3df3298f32f7e7d82295d862899324e3533b9701a69abbca21c7",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\validation.json",
+      "kind": "unmodified_preparation_file"
+    },
+    {
+      "file": "README.md",
+      "sha256": "8a59630fe1735a2c021589ea4f50731619c62208b02f46ae57a3a6184283a973",
+      "source": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-clsid-key-open-debug-v2\\README.md",
+      "kind": "unmodified_preparation_file"
+    }
+  ],
+  "checks": {
+    "pure": 50,
+    "normal_cancel": "each32 real C++ firstChance passed to32 target catches;total33;16 details;API status2;cleanup and cooperative exit verified",
+    "threshold_control": "First threshold crossing257,final258;expectedfailed/exit1 retained;targetcaught257;cleanup/cooperative exit verified"
+  },
+  "limits": "256 is a stop threshold, not a hard synchronous cap. Future exceptions are not assumed benign. Target matching/time/entry budgets and system policies unchanged."
+}

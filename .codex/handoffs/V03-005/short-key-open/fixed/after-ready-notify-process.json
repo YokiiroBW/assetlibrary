@@ -1,0 +1,13 @@
+{
+  "PlanId": "641fd1d613be423cb5454827bd939fdc",
+  "StartedUtc": "2026-09-11T11:14:38.9422525+00:00",
+  "CompletedUtc": "2026-09-11T11:14:39.5977214+00:00",
+  "SenderPid": 14040,
+  "SenderCreationFileTime": "134335988789439959",
+  "ExitCode": 0,
+  "TimedOut": false,
+  "Stdout": "{\r\n  \"PlanId\": \"641fd1d613be423cb5454827bd939fdc\",\r\n  \"SenderPid\": 14040,\r\n  \"TargetPid\": 7392,\r\n  \"TargetCreationFileTime\": \"134335987993635186\",\r\n  \"ReadyUtc\": \"2026-09-11T19:14:38.6806261+08:00\",\r\n  \"StartedUtc\": \"2026-09-11T11:14:39.4958340+00:00\",\r\n  \"CompletedUtc\": \"2026-09-11T11:14:39.4995581+00:00\",\r\n  \"RegistrationDeadlineUtc\": \"2026-09-11T19:24:12.5251299+08:00\",\r\n  \"RemainingBeforeSeconds\": 573.0431296,\r\n  \"RemainingAfterSeconds\": 573.0255718,\r\n  \"GuardSourceSha256\": \"323CD843CE402405C07102B7950A201617B372AE7A3E7DA0A62ED602BACD3A76\",\r\n  \"CSharpLiteralSha256\": \"5D65A4295A3915FD241E3101A8835F08F2F03EB4B845F950F061A031ECA9DE6A\",\r\n  \"Notification\": {\r\n    \"Apartment\": \"STA\",\r\n    \"ApartmentHr\": 0,\r\n    \"ApartmentType\": 0,\r\n    \"CoInitializeHr\": 1,\r\n    \"FolderHr\": 0,\r\n    \"PidlPresent\": true,\r\n    \"NotifyInvoked\": true,\r\n    \"NotifyReturned\": true,\r\n    \"Joined\": true,\r\n    \"AssocNotifyInvoked\": true,\r\n    \"AssocNotifyReturned\": true,\r\n    \"ManagedThreadId\": 10,\r\n    \"NativeThreadId\": 16296,\r\n    \"AssocStartedElapsedMs\": 2,\r\n    \"AssocReturnedElapsedMs\": 2,\r\n    \"Stage\": \"SHCNE_ASSOCCHANGED-returned\",\r\n    \"ExceptionType\": null,\r\n    \"ElapsedMs\": 2,\r\n    \"CoInitializeHex\": \"00000001\",\r\n    \"FolderHex\": \"00000000\",\r\n    \"Success\": true\r\n  },\r\n  \"RegistryWrites\": 0,\r\n  \"GuardExecuted\": false,\r\n  \"CacheRefreshProven\": false\r\n}\r\n",
+  "Stderr": "",
+  "GuardInvoked": false,
+  "DebuggerTerminated": false
+}

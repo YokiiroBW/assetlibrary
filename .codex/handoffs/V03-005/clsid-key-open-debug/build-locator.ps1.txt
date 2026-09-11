@@ -1,0 +1,16 @@
+$ErrorActionPreference='Stop'
+$taskRoot='C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-clsid-key-open-debug'
+if($PSScriptRoot-ne $taskRoot){throw 'Fixed task directory required.'}
+$toolset='C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.44.35207'
+$sdk='C:\Program Files (x86)\Windows Kits\10'
+$bin=Join-Path $taskRoot 'bin'
+$temp=Join-Path $taskRoot 'compiler-temp'
+New-Item -ItemType Directory -Path $bin,$temp -Force|Out-Null
+$env:TEMP=$temp
+$env:TMP=$temp
+$options=@('/nologo','/std:c++20','/W4','/WX','/EHsc','/MT','/O2','/utf-8','/DUNICODE','/D_UNICODE','/DWIN32_LEAN_AND_MEAN','/DNOMINMAX','/D_WIN32_WINNT=0x0A00',"/I$toolset\include","/I$sdk\Include\10.0.26100.0\ucrt","/I$sdk\Include\10.0.26100.0\shared","/I$sdk\Include\10.0.26100.0\um","/I$sdk\Include\10.0.26100.0\winrt")
+Push-Location $taskRoot
+try {
+ & "$toolset\bin\Hostx64\x64\cl.exe" @options 'Locator.cpp' "/Fo$bin\Locator.obj" "/Fe$bin\ClsidKeyOpenLocator.exe" '/link' "/LIBPATH:$toolset\lib\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\ucrt\x64" "/LIBPATH:$sdk\Lib\10.0.26100.0\um\x64" 'kernel32.lib' 'ole32.lib' 'shell32.lib' 'uuid.lib' 'bcrypt.lib' 'version.lib'
+ if($LASTEXITCODE-ne 0){throw 'Locator compilation failed.'}
+} finally {Pop-Location}

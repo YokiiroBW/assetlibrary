@@ -1,0 +1,12 @@
+{
+  "PlanId": "641fd1d613be423cb5454827bd939fdc",
+  "Step": "thispc",
+  "Utc": "2026-09-11T11:14:39.6203396+00:00",
+  "Tick": 1548390,
+  "ObserverPid": 7004,
+  "ObserverCreationFileTime": "134335988782740019",
+  "TargetPid": 7392,
+  "TargetCreationFileTime": "134335987993635186",
+  "RemainingCaptureMs": 59047,
+  "RegistrationDeadlineUtc": "2026-09-11T19:24:12.5251299+08:00"
+}
