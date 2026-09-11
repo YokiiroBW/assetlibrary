@@ -19,3 +19,5 @@ dotnet apps/windows-client/AssetHost/bin/Release/net10.0/AssetLibrary.Windows.As
 新测试位于 `tests/windows-client/Host*.cs`。普通测试的真实命名管道使用随机后缀，不占用默认端点。`HostLiveTests` 使用 `ASSETLIBRARY_NATIVE_TEST_PROFILE` 和真实 HTTPS Core 验证库、100 项跨页、相册/夏日嵌套导航及无权限账号；没有支架时明确 Inconclusive，不能作为通过。C++ 实际进程互通、真实 Explorer 画面、原文件哈希和受控注册清理由主协调统一验收。
 
 生产登录/设置/自动启动、安装签名、预览/文件打开、推送失效、G2/G3/G4 全部证据仍属后续工作。
+
+连接被接受后，即使managed状态已为Broken/IsConnected=false，也总是先Disconnect再重用。接受阶段失败停止监听并退出Host，避免对损坏实例空转；坏请求断开后退避100ms，单监听器错误日志最多每秒一条。

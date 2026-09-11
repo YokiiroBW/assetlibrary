@@ -13,3 +13,9 @@
 仍需主协调验证实际 C++ 进程互通、原生 Explorer 可见导航、Host 缺失/重启及文件哈希和注册清理。未声明生产 Shell、安装包、WinUI 登录设置、预览/打开、推送失效或 G2/G3/G4 完成。Host 测试已关闭随机后缀管道；本任务从未占用默认端点或操作 GUI/注册表/服务支架。
 
 实现提交：`0be1438e66534086028147a5e0122e1a876e5181`。
+
+## 原生管道连续连接修正（381ee21）
+
+主协调首次 C++ 实际互通读到真实库后出现 Busy 和大量错误日志，发现已关闭的 native client 令 managed pipe 不再 IsConnected，但服务器仍必须 Disconnect 后才能重新 accept。按 [Microsoft DisconnectNamedPipe 说明](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-disconnectnamedpipe) 及 [.NET Windows pipe 实现](https://github.com/dotnet/runtime/blob/v10.0.0/src/libraries/System.IO.Pipes/src/System/IO/Pipes/NamedPipeServerStream.Windows.cs) 修正生命周期：跟踪已接受连接，在 finally 必定断开；接受失败停止该监听并由 Host 统一退出；错误交换先断开再退避100ms，每实例最多每秒一条错误日志。
+
+新增 CreateFileW + Identification/overlapped 原生句柄回归，原代码98ms记录5232次错误，修正后64次顺序读完整帧并关闭、0错误；20次畸形请求限速/日志界限/后续正常恢复通过。最终普通56项通过、453文件源码检查通过；本次未重复输入不变的2项 Core NativeLive。累计新 Host36项不同用例（35普通+1NativeLive），继续由主协调重新验证 C++ 与 Explorer。补丁没有打开默认端点或 GUI。

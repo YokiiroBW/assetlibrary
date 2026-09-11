@@ -7,7 +7,7 @@
   "owner": "assethost-agent",
   "branch": "codex/v03-010-explorer-assethost",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-009",
-  "commit": "0be1438e66534086028147a5e0122e1a876e5181",
+  "commit": "381ee211ff8e061ee927d18bea893bf4c8e40e82",
   "changed_files": [
     ".codex/handoffs/V03-010/result.json",
     ".codex/handoffs/V03-010/summary.md",
@@ -26,7 +26,9 @@
     "apps/windows-client/AssetLibrary.Windows.slnx",
     "tests/windows-client/AssetLibrary.Windows.Tests.csproj",
     "tests/windows-client/HostLiveTests.cs",
+    "tests/windows-client/HostNativePipeClient.cs",
     "tests/windows-client/HostPipeFixture.cs",
+    "tests/windows-client/HostPipeReconnectTests.cs",
     "tests/windows-client/HostPipeSecurityTests.cs",
     "tests/windows-client/HostPipeTestSupport.cs",
     "tests/windows-client/HostPipeTests.cs",
@@ -41,11 +43,11 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 56,
+    "passed": 58,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "scope": "Final54ordinary+2realHTTPSCore; newHost33ordinary+1NativeLive. Earlier corrected failures retained in tests.md; no C++/Explorer acceptance claimed."
+    "scope": "Pipefix381ee21:56ordinary passed including2new native read-close/error-cadence cases;2priorNativeLive remain valid on unchangedStore/ClientTransport inputs, not rerun for this pipe-onlyfix. No C++/Explorer final acceptance claimed."
   },
   "risks": [
     "Controlled private-profile executable only; production login/settings/startup/installer remain pending.",
@@ -77,7 +79,9 @@
       "validate_dotnet_source.py:451files passed",
       "validate_dotnet_dependencies.py:4projects15lockedpackages passed",
       "Windows solution locked restore,format,Release build,54ordinary tests and2realHTTPSCore NativeLive passed",
-      "verify_repository.py passed (M0-009 fast architecture gate)"
+      "verify_repository.py passed (M0-009 fast architecture gate)",
+      "Pipe lifecycle fix: native CreateFileW64 sequential read-close operations withzeroerrors,20malformed exchanges throttle/logbound/recovery;56ordinary passed",
+      "validate_dotnet_source.py:453files passed afterpipefix"
     ],
     "technical_debt": [
       "V03-005/V03-006: actual C++/Explorer integration and source hashes/owned registration cleanup",
