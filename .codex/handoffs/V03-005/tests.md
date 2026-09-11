@@ -231,3 +231,7 @@ ad84644合入4479bcb。root审查12文件的完整改动：写前执行来源准
 ## 自有最小Shell真实入口与清理信号
 
 bafd144合入f1443a0，self token QUERY|DUPLICATE查询修复及原始probe流留证已复核。worker verify-02实际普通Explorer父来源全部成立，独立COM/DefView和同进程清理通过；source对应运行的stdout310字节、stderr0、exit0/无timeout/流完成/退出确认。root读取本次cycle原件确认：target10088正常GUI双击后actual4FF/22B PIDL binary与canonical相等/1项；后续同包外guard清理、另一包外reader9字段missing、实际Desktop00021400/2B/32项及CUA入口消失，guard进程不存在。owner报告两自有窗口已关并移交GUI权，原desktop未重启。证据归档由V03-006继续完成，不将最小test-only闭环计作AssetHost/Core/G2..G4或完整客户端通过。
+
+## 自有入口证据归档统一复核
+
+aa17c04合入96c798d，54项原件/副本/Git内容SHA由root逐项核对（48原字节、6明确脱敏），独立review确认4FF/22B/1项、9字段和Desktop33→32及清理时序一致。末次模块快照未重核creation，相关总结已限定，不作持续卸载或稳定性通过。原SecurityException、只读权限对照、verify-02原始流和环境来源证据完整保留。最终仓库验证日志：.runtime/v03-005-final-tests/repository-own-entry-final.log；未重跑未变的C++/.NET/Web/Android套件或本次实机周期。

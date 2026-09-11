@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer，V03-002 已完成协议组件与测试验证，但实际入口尚未接通，没有 Windows 安装包。按 ADR-0018 从真实 Explorer 发现/界面输入阻断继续，不能退回以独立应用代替交付。
-   当前接续V03-005：Windows最高优先级。注册视图隔离已定位并经官方样例恢复验证；自有test-only扩展随后也在真实Explorer中正常双击进入4FF类/22B PIDL/1个“示例资源库”，注销后包外9字段缺失、Desktop32项及入口消失，owner已清理自有窗口。执行来源与令牌查询/失败留证修正已合入f1443a0。当前收齐自有实机归档，下一步是进程外AssetHost和真实Core只读接入；最小入口闭环不代表G2..G4、正式安装包或完整Windows首版完成。
+   当前接续V03-005：Windows最高优先级。注册视图隔离已定位并经官方样例恢复验证；自有test-only扩展随后也在真实Explorer中正常双击进入4FF类/22B PIDL/1个“示例资源库”，注销后包外9字段缺失、Desktop32项及入口消失，owner已清理自有窗口。执行来源与令牌查询/失败留证修正已合入f1443a0。自有54项实机证据已核对并合入96c798d，下一步是进程外AssetHost和真实Core只读接入；最小入口闭环不代表G2..G4、正式安装包或完整Windows首版完成。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 
