@@ -1,0 +1,103 @@
+{
+  "scope": "exact Microsoft packages; WinAppSDK files binplaced by NuGet for Windows application redistribution; preserve full licenses; no AI/ML API use",
+  "files": [
+    {
+      "id": "Microsoft.WindowsAppSDK",
+      "version": "2.4.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.2.4.0.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.Web.WebView2",
+      "version": "1.0.3719.77",
+      "path": "LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55",
+      "notice": "infra/windows-client/notices/Microsoft.Web.WebView2.1.0.3719.77.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.Windows.AI.MachineLearning",
+      "version": "2.1.74",
+      "path": "license.txt",
+      "sha256": "66395f8cb219087fae2bd025010bd9076b736c14f03b48f20295471c0c376814",
+      "notice": "infra/windows-client/notices/Microsoft.Windows.AI.MachineLearning.2.1.74.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.Windows.SDK.BuildTools.MSIX",
+      "version": "1.7.251221100",
+      "path": "sdk_license.txt",
+      "sha256": "a7a5c7e7ff998558983d6aca2702117c328aeb0c6404d298cb275f5623c6fd13",
+      "notice": "infra/windows-client/notices/Microsoft.Windows.SDK.BuildTools.MSIX.1.7.251221100.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.AI",
+      "version": "2.4.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.AI.2.4.4.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Base",
+      "version": "2.0.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.Base.2.0.4.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.DWrite",
+      "version": "2.1.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.DWrite.2.1.0.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Foundation",
+      "version": "2.3.9",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.Foundation.2.3.9.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.InteractiveExperiences",
+      "version": "2.1.6",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.InteractiveExperiences.2.1.6.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.ML",
+      "version": "2.1.74",
+      "path": "license.txt",
+      "sha256": "656aab74c15aa9f9964bcdcc993eb2755cbdb4822d5e0e3bc61d2e281897f758",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.ML.2.1.74.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Runtime",
+      "version": "2.4.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.Runtime.2.4.0.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Search",
+      "version": "2.4.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.Search.2.4.4.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Widgets",
+      "version": "2.0.5",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.Widgets.2.0.5.LICENSE.txt"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.WinUI",
+      "version": "2.3.6",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501",
+      "notice": "infra/windows-client/notices/Microsoft.WindowsAppSDK.WinUI.2.3.6.LICENSE.txt"
+    }
+  ]
+}

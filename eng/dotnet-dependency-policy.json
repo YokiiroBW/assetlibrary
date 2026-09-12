@@ -7,7 +7,92 @@
     "MIT",
     "PostgreSQL"
   ],
-  "license_file_exceptions": [],
+  "license_file_exceptions": [
+    {
+      "id": "Microsoft.WindowsAppSDK",
+      "version": "2.4.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.Web.WebView2",
+      "version": "1.0.3719.77",
+      "path": "LICENSE.txt",
+      "sha256": "0af8f1b807512aae39c2ac1aa4d0cae65cabecb6fd554b8439a5162a0d6eca55"
+    },
+    {
+      "id": "Microsoft.Windows.AI.MachineLearning",
+      "version": "2.1.74",
+      "path": "license.txt",
+      "sha256": "66395f8cb219087fae2bd025010bd9076b736c14f03b48f20295471c0c376814"
+    },
+    {
+      "id": "Microsoft.Windows.SDK.BuildTools.MSIX",
+      "version": "1.7.251221100",
+      "path": "sdk_license.txt",
+      "sha256": "a7a5c7e7ff998558983d6aca2702117c328aeb0c6404d298cb275f5623c6fd13"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.AI",
+      "version": "2.4.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Base",
+      "version": "2.0.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.DWrite",
+      "version": "2.1.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Foundation",
+      "version": "2.3.9",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.InteractiveExperiences",
+      "version": "2.1.6",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.ML",
+      "version": "2.1.74",
+      "path": "license.txt",
+      "sha256": "656aab74c15aa9f9964bcdcc993eb2755cbdb4822d5e0e3bc61d2e281897f758"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Runtime",
+      "version": "2.4.0",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Search",
+      "version": "2.4.4",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.Widgets",
+      "version": "2.0.5",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    },
+    {
+      "id": "Microsoft.WindowsAppSDK.WinUI",
+      "version": "2.3.6",
+      "path": "license.txt",
+      "sha256": "5b11e6347756e40fe0274bc08c97f89201b94f0d50181a09a00f1f4740840501"
+    }
+  ],
   "project_target_groups": {
     "apps/windows-client/Settings/AssetLibrary.Windows.Settings.csproj": [
       "net10.0-windows10.0.26100",
@@ -19,5 +104,13 @@
     "tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj": [
       "net10.0-windows7.0"
     ]
-  }
+  },
+  "legacy_license_url_exceptions": [
+    {
+      "url": "https://aka.ms/WinSDKLicenseURL",
+      "id": "Microsoft.Windows.SDK.BuildTools",
+      "nuspec_sha256": "aac383f40ed26caedb6b748ae1470722380039baec34923bb37006517cada5a7",
+      "version": "10.0.26100.4654"
+    }
+  ]
 }

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import importlib.util
 import json
 import tempfile
@@ -416,6 +417,22 @@ class DotnetDependencyPolicyTests(unittest.TestCase):
         errors, _, _ = self.validate()
 
         self.assertTrue(any("unapproved license expression" in error for error in errors), errors)
+
+    def test_legacy_license_requires_exact_metadata_and_version(self) -> None:
+        self.nuspec.write_text('<package><metadata><licenseUrl>https://example.invalid/license</licenseUrl></metadata></package>', encoding="utf-8")
+        policy = json.loads(self.policy_path.read_text(encoding="utf-8"))
+        policy["legacy_license_url_exceptions"] = [{
+            "id": "Example.Package", "version": "1.2.3", "url": "https://example.invalid/license",
+            "nuspec_sha256": hashlib.sha256(self.nuspec.read_bytes()).hexdigest(),
+        }]
+        self.policy_path.write_text(json.dumps(policy), encoding="utf-8")
+        self.assertEqual(self.validate()[0], [])
+        self.nuspec.write_text(self.nuspec.read_text(encoding="utf-8") + " ", encoding="utf-8")
+        self.assertTrue(any("no machine-readable license" in error for error in self.validate()[0]))
+        policy["legacy_license_url_exceptions"][0]["nuspec_sha256"] = hashlib.sha256(self.nuspec.read_bytes()).hexdigest()
+        policy["legacy_license_url_exceptions"][0]["version"] = "1.2.4"
+        self.policy_path.write_text(json.dumps(policy), encoding="utf-8")
+        self.assertTrue(any("no machine-readable license" in error for error in self.validate()[0]))
 
 
 if __name__ == "__main__":

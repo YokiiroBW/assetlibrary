@@ -221,6 +221,14 @@ def validate_licenses(
         if str(value).strip()
     }
     exceptions = license_file_exceptions(policy)
+    legacy = policy.get("legacy_license_url_exceptions", [])
+    if not isinstance(legacy, list) or any(
+        not isinstance(item, dict) or set(item) != {"id", "version", "url", "nuspec_sha256"}
+        or not all(isinstance(value, str) and value for value in item.values())
+        or not re.fullmatch(r"[0-9a-f]{64}", item.get("nuspec_sha256", ""))
+        for item in legacy
+    ):
+        raise ValueError("invalid legacy license URL exception")
     errors: list[str] = []
     for key, (package, version) in sorted(packages.items()):
         package_root = packages_dir / key / version.lower()
@@ -236,6 +244,12 @@ def validate_licenses(
             None,
         )
         if license_element is None or not (license_element.text or "").strip():
+            url = next((element.text for element in ET.parse(nuspec).iter()
+                        if element.tag.rsplit("}", 1)[-1] == "licenseUrl"), None)
+            if any(item["id"].lower() == key and item["version"] == version
+                   and item["url"] == url and item["nuspec_sha256"] == hashlib.sha256(nuspec.read_bytes()).hexdigest()
+                   for item in legacy):
+                continue
             errors.append(f"package has no machine-readable license: {package} {version}")
             continue
         license_value = (license_element.text or "").strip()
