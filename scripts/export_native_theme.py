@@ -17,7 +17,7 @@ KEYS = {
     "accent-soft", "on-accent", "danger", "positive", "folder", "focus",
 }
 OUTPUT = ROOT / "packages/ui/workspace-theme.json"
-CPP_OUTPUT = ROOT / "packages/ui/WorkspaceTheme.generated.h"
+CPP_OUTPUT = ROOT / "apps/windows-shell/generated/WorkspaceTheme.generated.h"
 
 
 def render() -> str:
@@ -64,6 +64,7 @@ def main() -> int:
             return 1
     else:
         for path, content in outputs.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8")
     print("Native semantic theme is current.")
     return 0
