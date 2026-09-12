@@ -69,7 +69,7 @@ int main() {
         RECT bounds{0, 0, 1000, 700};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "surface creation"); scenario.surface = surface;
         const auto page = Page(); Require(SUCCEEDED(surface->SetPage(page, 1)), "page commit");
-        auto files = surface->VisibleFileItems(); Require(files.count > 0 && files.count <= 16, "visible files");
+        auto files = surface->VisibleFileItems(); Require(files.count > 0 && files.count <= gallery::MaxVisibleFiles, "visible files");
         Require(SUCCEEDED(surface->SetThumbnail(files.indices[0], 1, Image())), "thumbnail accepted");
         Require(surface->RetainedImageBytes() > 0 && surface->RetainedImageBytes() <= gallery::MaxImageBytes, "image budget");
         Require(surface->SetThumbnail(files.indices[0], 0, Image()) == S_FALSE, "late image rejected");

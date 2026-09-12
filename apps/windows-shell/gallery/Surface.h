@@ -8,7 +8,8 @@
 
 namespace gallery {
 
-constexpr UINT MaxVisibleImages = 16;
+constexpr UINT MaxImageRequestsPerView = 16;
+constexpr UINT MaxVisibleFiles = static_cast<UINT>(snapshot::MaxItems);
 constexpr size_t MaxImageBytes = 16u * 1024u * 1024u;
 constexpr UINT MinimumDensityDip = 96, MaximumDensityDip = 256, DefaultDensityDip = 176;
 
@@ -27,7 +28,7 @@ struct Selection {
 };
 
 struct VisibleFiles {
-    std::array<UINT, MaxVisibleImages> indices{};
+    std::array<UINT, MaxVisibleFiles> indices{};
     UINT count = 0;
 };
 

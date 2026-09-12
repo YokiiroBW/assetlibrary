@@ -30,7 +30,7 @@ int main() {
         for (int width : {1, 120, 320, 640, 1100, 3840}) for (UINT dpi : {96u, 144u, 192u}) for (auto mode : {gallery::Mode::Gallery, gallery::Mode::List}) {
             const auto layout = gallery::Arrange(items, width, 176, dpi, mode); Check(layout, width, items.size());
             const auto visible = gallery::Visible(layout, items, 0, 10000);
-            Require(visible.count <= 16, "thumbnail candidate budget");
+            Require(visible.count <= gallery::MaxVisibleFiles, "complete visible-file set remains page bounded");
             for (UINT at = 0; at < visible.count; ++at) Require(items[visible.indices[at]].kind == snapshot::Kind::File, "only ordinary files");
         }
         auto empty = gallery::Arrange({}, 640, 176, 96, gallery::Mode::Gallery); Require(empty.height == 0 && empty.items.empty(), "empty layout");
@@ -46,6 +46,9 @@ int main() {
             Require(std::abs(ratio - 2.0) < 0.04, "preserved aspect ratio rounding");
         }
         Require(gallery::Visible(row, ratios, row.height + 1, 100).count == 0, "outside viewport");
+        std::vector<gallery::LayoutItem> all(snapshot::MaxItems, {snapshot::Kind::File, 1});
+        const auto complete = gallery::Arrange(all, 1800, 96, 96, gallery::Mode::Gallery);
+        Require(gallery::Visible(complete, all, 0, complete.height + 1).count == snapshot::MaxItems, "all 101 visible files are candidates");
         std::cout << "gallery_layout: 36 viewport/dpi/mode matrices plus bounds, ratios and visibility passed\n";
         return 0;
     } catch (const char* error) { std::cerr << error << '\n'; return 1; }

@@ -91,7 +91,7 @@ VisibleFiles Visible(const Layout& layout, const std::vector<LayoutItem>& items,
         if (item.index < items.size() && items[item.index].kind == snapshot::Kind::File &&
             item.bounds.bottom > top && item.bounds.top < top + height) {
             result.indices[result.count++] = item.index;
-            if (result.count == MaxVisibleImages) break;
+            if (result.count == MaxVisibleFiles) break;
         }
     }
     return result;

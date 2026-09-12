@@ -496,7 +496,12 @@ HRESULT Surface::SetThumbnail(UINT index, std::uint64_t generation, std::shared_
     if (image && !PixelsValid(*image)) return E_INVALIDARG;
     size_t retained = 0;
     for (UINT at = 0; at < state->images.size(); ++at) if (at != index && state->images[at]) retained += state->images[at]->pixels.capacity();
-    if (image && image->pixels.capacity() > MaxImageBytes - retained) return E_OUTOFMEMORY;
+    if (image && image->pixels.capacity() > MaxImageBytes - retained) {
+        state->images[index].reset(); state->model->thumbnailReady[index] = false; state->model->thumbnailUnavailable[index] = true;
+        InvalidateRect(state->canvas, &state->model->bounds[index], FALSE);
+        NotifyWinEvent(EVENT_OBJECT_DESCRIPTIONCHANGE, state->canvas, OBJID_CLIENT, static_cast<LONG>(index + 1));
+        return E_OUTOFMEMORY;
+    }
     try {
         state->images[index] = std::move(image); state->model->thumbnailReady[index] = !!state->images[index];
         state->model->thumbnailUnavailable[index] = !state->images[index];
