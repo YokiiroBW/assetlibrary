@@ -1,4 +1,5 @@
 #include "SnapshotTestSupport.h"
+#include "G3Measurements.h"
 #include <sddl.h>
 #include <atomic>
 #include <functional>
@@ -117,7 +118,12 @@ public:
     Server(const Server&)=delete;Server& operator=(const Server&)=delete;
 };
 void Send(HANDLE pipe,HANDLE stop,Bytes bytes){Transfer(pipe,stop,true,bytes.data(),static_cast<DWORD>(bytes.size()));}
-void Reaped(){const auto end=GetTickCount64()+2000;while(snapshot::PendingOperations()&&GetTickCount64()<end)Sleep(1);Check(!snapshot::PendingOperations(),"all cancelled operations reaped");}
+void Reaped(){
+    const auto end=GetTickCount64()+2000;auto& m=g3::measurements;
+    while((snapshot::PendingOperations()||m.cancelLive)&&GetTickCount64()<end)Sleep(1);
+    Check(!snapshot::PendingOperations()&&!m.cancelLive&&m.cancels==m.reaped,"all cancelled operations have completed resource destruction");
+    Check(m.cancelMaximum<=g3::Frequency()*2&&m.deferred<=m.cancels,"actual cancellation drain within existing two-second Reaped bound");
+}
 void Pipes(){
     Check(snapshot::Query({}).status==snapshot::Status::Unavailable,"absent Host is unavailable");
     {Server server([](HANDLE p,HANDLE s,const Bytes& r){Send(p,s,Frame(Get(r.data()+12),0,{{1,1,L"library"}}));WaitForSingleObject(s,300);});
@@ -129,15 +135,25 @@ void Pipes(){
     Reaped();
     {Server server([](HANDLE p,HANDLE s,const Bytes& r){auto b=Frame(Get(r.data()+12));b.resize(20);Send(p,s,b);});Check(snapshot::Query({}).status==snapshot::Status::Unavailable,"partial body");}
     {Server server([](HANDLE,HANDLE s,const Bytes&){WaitForSingleObject(s,1000);});Handle cancel(CreateEventW(nullptr,TRUE,FALSE,nullptr));
+        const auto canceledBefore=g3::measurements.cancels.load(),queriesBefore=g3::measurements.query.calls.load();
         std::thread trigger([&]{Sleep(25);SetEvent(cancel.value);});auto start=GetTickCount64();auto page=snapshot::Query({},cancel.value);auto elapsed=GetTickCount64()-start;trigger.join();
-        Check(page.status==snapshot::Status::Unavailable&&elapsed<130,"cancel prompt return");}
+        Check(page.status==snapshot::Status::Unavailable&&elapsed<130,"cancel prompt return");
+        const auto& m=g3::measurements;
+        Check(m.cancels==canceledBefore+1&&m.query.calls==queriesBefore+1&&m.query.thread==GetCurrentThreadId()&&!m.query.active,"actual pending pipe cancel and caller recorded once");
+        Check(m.query.end>m.query.start&&m.query.last==m.query.end-m.query.start&&m.query.maximum>=m.query.last,"completed Query measures full actual call");}
     Reaped();
     {Server server([](HANDLE,HANDLE s,const Bytes&){WaitForSingleObject(s,1000);},4);
         std::vector<std::thread> callers;for(int i=0;i<4;++i)callers.emplace_back([]{Check(snapshot::Query({}).status==snapshot::Status::Unavailable,"held caller timeout");});
         const auto end=GetTickCount64()+100;while(server.requests<4&&GetTickCount64()<end)Sleep(1);
         Check(server.requests==4&&snapshot::PendingOperations()==4,"four in-flight operations");Check(snapshot::Query({}).status==snapshot::Status::Busy,"fifth operation busy");
         for(auto& caller:callers)caller.join();}
-    Reaped();puts("pipe=passed; peer_same_user_session=passed; cancel_and_capacity=passed");
+    Reaped();
+    {Server server([](HANDLE p,HANDLE s,const Bytes& r){Send(p,s,Frame(Get(r.data()+12),0,{{1,1,L"recovered"}}));});
+        Check(snapshot::Query({}).status==snapshot::Status::Ready,"fresh Host query recovers after canceled capacity returns");}
+    Reaped();
+    const auto& m=g3::measurements;
+    printf("g3_query_n=%llu; cancel_n=%llu; defer_n=%llu; reap_n=%llu; cancel_max_ticks=%llu; hz=%llu; op_live=%lu; pins=%lu\n",m.query.calls.load(),m.cancels.load(),m.deferred.load(),m.reaped.load(),m.cancelMaximum.load(),g3::Frequency(),snapshot::PendingOperations(),m.pins.load());
+    Check(!m.pins,"static executable queries need no DLL pins");puts("pipe=passed; peer_same_user_session=passed; cancel_and_capacity=passed");
 }
 void ComTests(const wchar_t* dll,const wchar_t* probe){
     std::atomic<ULONG> status{0};std::atomic_bool restart{false};

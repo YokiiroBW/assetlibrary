@@ -12,6 +12,7 @@
 #include "SnapshotIcon.h"
 #include "LoadingRefresh.h"
 #include "ProbeDiagnostics.h"
+#include "G3Measurements.h"
 #include <cstring>
 
 namespace {
@@ -101,6 +102,7 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
   }
   HRESULT STDMETHODCALLTYPE EnumObjects(HWND, SHCONTF flags, IEnumIDList** value) override {
+    g3::Call measured(g3::measurements.enumeration);
     if(!value)return E_POINTER;*value=nullptr;
     ++diagnostic_.enumerations;diagnostic_.enumThread=GetCurrentThreadId();
     const auto generation=viewState_?viewState_->Begin():0;
@@ -199,6 +201,7 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   HRESULT STDMETHODCALLTYPE GetDetailsEx(PCUITEMID_CHILD item, const SHCOLUMNID* key, VARIANT* value) override {
     if(!key||!value)return E_POINTER;VariantInit(value);
     if(IsEqualPropertyKey(*key,diagnostics::Key))return (!item||!item->mkid.cb)?diagnostics::Read(diagnostic_,viewState_.get(),value):E_INVALIDARG;
+    if(IsEqualPropertyKey(*key,diagnostics::G3Key))return (!item||!item->mkid.cb)?diagnostics::ReadG3(diagnostic_,viewState_.get(),objects.load(),locks.load(),value):E_INVALIDARG;
     if(!IsEqualPropertyKey(*key,PKEY_ItemNameDisplay)&&!IsEqualPropertyKey(*key,PKEY_ItemTypeText))return E_INVALIDARG;
     try {snapshot::Entry entry;if(!snapshot::ReadPidl(item,entry))return E_INVALIDARG;
       value->bstrVal=SysAllocString(IsEqualPropertyKey(*key,PKEY_ItemNameDisplay)?entry.name.c_str():snapshot::TypeText(entry.kind));

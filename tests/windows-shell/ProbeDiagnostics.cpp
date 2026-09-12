@@ -1,5 +1,6 @@
 #include "ProbeDiagnostics.h"
 #include "LoadingRefresh.h"
+#include "G3Measurements.h"
 #include <new>
 
 namespace diagnostics {
@@ -33,6 +34,31 @@ HRESULT Read(const FolderState& folder,const loading::Signal* signal,VARIANT* va
             field(L"refresh_n",d.refreshes.load());field(L"refresh_hr",static_cast<ULONG>(d.refreshResult.load()));field(L"detach_n",d.detaches.load());
             text.pop_back();text+=L"}}";
         }
+        if(text.size()>MaxCharacters)return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
+        value->bstrVal=SysAllocStringLen(text.data(),static_cast<UINT>(text.size()));if(!value->bstrVal)return E_OUTOFMEMORY;
+        value->vt=VT_BSTR;return S_OK;
+    }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
+}
+HRESULT ReadG3(const FolderState& folder,const loading::Signal* signal,LONG objects,LONG locks,VARIANT* value) noexcept {
+    if(!value)return E_POINTER;VariantInit(value);
+    try {
+        std::wstring text=L"{";text.reserve(MaxCharacters);
+        const auto field=[&](const wchar_t* name,ULONGLONG number){text+=L"\"";text+=name;text+=L"\":";text+=std::to_wstring(number);text+=L",";};
+        field(L"v",1);field(L"pid",GetCurrentProcessId());field(L"qpc",g3::Now());field(L"hz",g3::Frequency());
+        field(L"folder",folder.instance);field(L"objects",objects);field(L"locks",locks);
+        field(L"callbacks",loading::LiveCallbacks());field(L"slots",loading::ActiveViews());field(L"op_live",snapshot::PendingOperations());
+        const auto timing=[&](const wchar_t* prefix,const g3::Timing& measured){
+            const auto part=[&](const wchar_t* suffix,ULONGLONG number){field((std::wstring(prefix)+suffix).c_str(),number);};
+            part(L"_n",measured.calls.load());part(L"_start",measured.start.load());part(L"_end",measured.end.load());
+            part(L"_last",measured.last.load());part(L"_max",measured.maximum.load());part(L"_tid",measured.thread.load());part(L"_live",measured.active.load());
+        };
+        const auto& m=g3::measurements;timing(L"enum",m.enumeration);timing(L"query",m.query);timing(L"refresh",m.refresh);
+        field(L"cancel_n",m.cancels.load());field(L"defer_n",m.deferred.load());field(L"reap_n",m.reaped.load());field(L"cancel_live",m.cancelLive.load());
+        field(L"cancel_last",m.cancelLast.load());field(L"cancel_max",m.cancelMaximum.load());
+        field(L"pins",m.pins.load());field(L"pin_sync",m.pinSync.load());field(L"pin_pool",m.pinPool.load());
+        field(L"view",signal?signal->cookie:0);field(L"obs_start",signal?signal->diagnostic.observationStart.load():0);
+        field(L"ready_qpc",signal?signal->diagnostic.renderedReady.load():0);field(L"ready_tid",signal?signal->diagnostic.readyThread.load():0);
+        text.pop_back();text+=L"}";
         if(text.size()>MaxCharacters)return HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
         value->bstrVal=SysAllocStringLen(text.data(),static_cast<UINT>(text.size()));if(!value->bstrVal)return E_OUTOFMEMORY;
         value->vt=VT_BSTR;return S_OK;

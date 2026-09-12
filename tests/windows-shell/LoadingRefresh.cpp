@@ -1,5 +1,6 @@
 #include "LoadingRefresh.h"
 #include "SnapshotPidl.h"
+#include "G3Measurements.h"
 #include <commctrl.h>
 #include <shlwapi.h>
 #include <shlguid.h>
@@ -55,7 +56,11 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
         }
     }
     void StartObservation() noexcept {
-        if(!started_&&window_&&site_){started_=true;budget_.Start(GetTickCount64());Arm();}
+        if(!started_&&window_&&site_){
+            started_=true;signal_->diagnostic.observationStart=g3::Now();
+            signal_->diagnostic.renderedReady=0;signal_->diagnostic.readyThread=0;
+            budget_.Start(GetTickCount64());Arm();
+        }
     }
     void Detach() noexcept {
         ++signal_->diagnostic.detaches;
@@ -112,8 +117,13 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
                                 if(!snapshot::ReadPidl(item.value,entry))hr=E_INVALIDARG;
                                 else {
                                     diagnostic.pidlValid=1;diagnostic.renderedKind=static_cast<ULONG>(entry.kind);diagnostic.renderedStatus=static_cast<ULONG>(entry.status);
+                                    if(entry.kind!=snapshot::Kind::StatusRow&&entry.status==snapshot::Status::Ready&&current()&&!diagnostic.renderedReady){
+                                        diagnostic.renderedReady=g3::Now();diagnostic.readyThread=GetCurrentThreadId();
+                                    }
                                     if(entry.kind==snapshot::Kind::StatusRow&&entry.status==snapshot::Status::Loading&&sameWindow()){
-                                        ++diagnostic.refreshes;hr=view.value->Refresh();diagnostic.refreshResult=hr;observeAgain=current();
+                                        ++diagnostic.refreshes;
+                                        {g3::Call measured(g3::measurements.refresh);hr=view.value->Refresh();}
+                                        diagnostic.refreshResult=hr;observeAgain=current();
                                     }
                                 }
                             }catch(const std::bad_alloc&){hr=E_OUTOFMEMORY;}

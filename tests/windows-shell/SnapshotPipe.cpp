@@ -1,4 +1,5 @@
 #include "Snapshot.h"
+#include "G3Measurements.h"
 #include <sddl.h>
 #include <atomic>
 #include <memory>
@@ -46,6 +47,7 @@ struct Operation {
     OVERLAPPED overlapped{};
     PTP_WAIT wait=nullptr;
     HMODULE module=nullptr;
+    ULONGLONG cancelStarted=0;
     bool pending=false;
     std::array<BYTE,48> request{};
     std::array<BYTE,16> header{};
@@ -56,22 +58,43 @@ struct Operation {
     }
     ~Operation(){
         if(wait)CloseThreadpoolWait(wait);
-        active.fetch_sub(1);
-        if(module)FreeLibrary(module);
     }
     bool Pin(){
         HMODULE owner=nullptr;
         const auto address=reinterpret_cast<LPCWSTR>(&Reap);
         if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,address,&owner))return false;
-        return owner==GetModuleHandleW(nullptr)||GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,address,&module)!=FALSE;
+        if(owner==GetModuleHandleW(nullptr))return true;
+        if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,address,&module))return false;
+        ++g3::measurements.pins;return true;
     }
 };
+HMODULE ReleaseResources(Operation* operation) noexcept {
+    const auto module=operation->module;const auto canceled=operation->cancelStarted;
+    // Publish completion only after all handles, buffers AND object storage end.
+    // The module remains pinned while member destructors and this code execute.
+    delete operation;
+    if(canceled){
+        const auto elapsed=g3::Now()-canceled;auto& m=g3::measurements;
+        m.cancelLast=elapsed;g3::Maximum(m.cancelMaximum,elapsed);++m.reaped;--m.cancelLive;
+    }
+    active.fetch_sub(1);return module;
+}
+struct ReleaseOperation {
+    void operator()(Operation* operation) const noexcept {
+        const auto module=ReleaseResources(operation);
+        // Synchronous DLL Query is called only by a live Folder::EnumObjects.
+        // That COM owner keeps the caller's code alive after this final pin return;
+        // statically linked test callers belong to the process executable.
+        if(module){++g3::measurements.pinSync;--g3::measurements.pins;FreeLibrary(module);}
+    }
+};
+using OwnedOperation=std::unique_ptr<Operation,ReleaseOperation>;
 void CALLBACK Reap(PTP_CALLBACK_INSTANCE instance,void* context,PTP_WAIT,TP_WAIT_RESULT){
     auto operation=static_cast<Operation*>(context);
     // The private manual-reset event is signalled only by completion of our I/O.
-    HMODULE module=operation->module;operation->module=nullptr;
-    delete operation;
-    if(module)FreeLibraryWhenCallbackReturns(instance,module);
+    const auto module=ReleaseResources(operation);
+    // This is a return scheduled with the pool, not an observation of DLL unload.
+    if(module){++g3::measurements.pinPool;--g3::measurements.pins;FreeLibraryWhenCallbackReturns(instance,module);}
 }
 struct Deadline {
     ULONGLONG end=GetTickCount64()+WaitBudgetMs;
@@ -100,12 +123,14 @@ Io Transfer(Operation& operation,bool write,BYTE* buffer,DWORD length,const Dead
     }
     return deadline.Remaining()?Io::Complete:Io::Expired;
 }
-void Finish(std::unique_ptr<Operation>& operation){
+void Finish(OwnedOperation& operation){
     if(!operation||!operation->pending)return;
+    operation->cancelStarted=g3::Now();++g3::measurements.cancels;++g3::measurements.cancelLive;
     CancelIoEx(operation->pipe.value,&operation->overlapped);
     DWORD ignored=0;
     if(GetOverlappedResult(operation->pipe.value,&operation->overlapped,&ignored,FALSE)||GetLastError()!=ERROR_IO_INCOMPLETE){operation->pending=false;return;}
     // No foreground wait for cancellation completion. Four slots bound retained storage.
+    ++g3::measurements.deferred;
     Operation* retained=operation.release();SetThreadpoolWait(retained->wait,retained->event.value,nullptr);
 }
 }
@@ -120,11 +145,12 @@ std::wstring PipeName(){
     return name+L"."+std::to_wstring(session);
 }
 Page Query(const Location& location,HANDLE cancel) noexcept {
+    g3::Call measured(g3::measurements.query);
     Deadline deadline;FILETIME now{};GetSystemTimeAsFileTime(&now);
     const ULONGLONG started=(static_cast<ULONGLONG>(now.dwHighDateTime)<<32)|now.dwLowDateTime;
     Page page;ULONG count=active.load();
     do{if(count>=4){page.status=Status::Busy;return page;}}while(!active.compare_exchange_weak(count,count+1));
-    std::unique_ptr<Operation> operation(new(std::nothrow) Operation());
+    OwnedOperation operation(new(std::nothrow) Operation());
     if(!operation){active.fetch_sub(1);page.status=Status::Busy;return page;}
     try{
         do{

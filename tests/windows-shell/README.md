@@ -96,6 +96,42 @@ ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^
 
 ## Loading 自动刷新与生命周期边界
 
+### G3 只读进程内量测（V03-014）
+
+`IShellFolder2::GetDetailsEx` 的原 test-only fmtid
+`{2F242D38-C686-4E35-87C3-36C9BAF44EFE}` 保留 pid1/v1，新增独立 pid2/v1。
+两键均只接受空 item；未知 pid3 与非空 item 返回 E_INVALIDARG。pid2 是最多2048字符、仅数字值的 JSON，
+读取不枚举、不查询、不Refresh、不触碰文件/网络；不注册属性、不改变IPC/AssetLink契约。
+读取者必须把 `pid` 与实际目标 Explorer PID 核对，静态测试 EXE 的计数是另一份进程/模块状态。
+
+| 字段 | 含义 |
+|---|---|
+| `v,pid,qpc,hz,folder` | 版本、实际进程、读取时QPC ticks、每秒ticks、读取的Folder实例 |
+| `enum/query/refresh` 的 `_n,_live` | 全模块累计调用开始次数、尚未返回的调用数，含错误返回 |
+| 同前缀 `_start,_end,_last,_max,_tid` | 最近完成调用的QPC起止、持续ticks、历史最大ticks和实际调用线程；Refresh只量既有UI回调内的IShellView::Refresh |
+| `objects,locks,callbacks,slots,op_live` | 原COM对象/锁、LiveCallbacks、ActiveViews、在途或尚未结束资源析构的快照操作数 |
+| `cancel_n,defer_n,reap_n,cancel_live` | 实际CancelIoEx调用数、转入既有线程池等待的次数、已完成取消资源析构数、尚未完成取消资源析构数 |
+| `cancel_last,cancel_max` | 从调用CancelIoEx前到完成确认后delete Operation结束（全部句柄、缓冲、wait及对象存储）的最近/最大ticks |
+| `pins,pin_sync,pin_pool` | 操作当前自持有的DLL pin、同步交还次数、线程池回调返回时交还的安排次数；不能解释为OS已完成卸载 |
+| `view,obs_start,ready_qpc,ready_tid` | 读取Folder的view cookie、该窗口/站点初始观察起点、首次实际有效非状态Ready PIDL的观察时点/线程；未观察或未Ready为0 |
+
+所有时间均使用QPC单调ticks，秒数为ticks差除以 `hz`。固定原子计数是非事务快照：并发调用可能令最近起止/线程来自交叠更新，
+`_live=0` 只能说明当前无调用，不能把曾并发交叠写入的 `_end-_start` 当作单次时延；
+单独 `_last/_max` 始终来自一次真实时长。全模块计数可包含同进程其它自有视图，不能仅凭同时段归因。
+最大值记录单次实际时长；没有trace、额外线程、锁或I/O日志。`ready_qpc` 是500ms既有观察中的首次有效呈现证据，
+并非网络完成/精确绘制时刻；空列表不冒充Ready。不改变预算、重试、站点重入或刷新策略。
+
+资源释放顺序经协调者批准：保留模块pin，delete Operation结束全部成员/对象存储后才减少 `op_live`；
+同步FreeLibrary为deleter最后动作，既有Folder::EnumObjects的有效COM引用维持调用者模块生命期。
+其余Query调用者均为静态EXE测试，没有新可脱离模块生命期的导出入口。异步仍以
+FreeLibraryWhenCallbackReturns作最后交还，资源结束与回调/loader收尾严格分开。
+真实取消可能同步完成，`defer_n=0`不是测试失败，不为增加它注入延迟或伪造完成事件。
+
+本次实机G3采用原250ms返回边界，保留Query150ms/4操作与500ms/10秒/20观察/4视图；
+取消资源回收采用既有SnapshotTests的2000ms Reaped外限，新正常Host重开根的初始观察至Ready上界预定10秒。
+后两项为本次夹具预定义口径，不改写原门禁。五个预定恢复样本由协调者取得，组件通过不关闭G3；不执行G4。
+`explorer_diagnostics`增加一次显式EnumObjects验证全模块计数，因此与snapshot/fault_harness一起由协调者保留默认pipe。
+
 窗口与站点就绪后，每view启动一次500ms观察，固定10秒/最多20次、最多4个活动名额。通过当前活动IShellView核对窗口，再读取IFolderView的条目数（上限101）和首项私有PIDL；只有实际显示的Loading状态行允许Refresh。普通项和错误状态停止；首次枚举尚无条目时只观察，不触发查询或声称Core成功。枚举副本Signal仅用于诊断，不控制刷新。
 
 持续Loading不延长预算；站点变化/清空或窗口销毁停止。停止后F5仍是单次查询，重开可获得新周期；Core五秒有效期及单次150ms IPC不变。确认Detach即归还名额，callback/DLL保活则跟随真实COM引用，不能把关窗等同于对象全部释放。

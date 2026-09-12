@@ -2,6 +2,7 @@
 #include "SnapshotPidl.h"
 #include "RefreshTestBrowser.h"
 #include "EnumDoneTestFolder.h"
+#include "G3Measurements.h"
 #include <commctrl.h>
 #include <array>
 #include <thread>
@@ -119,10 +120,15 @@ void Completion(){
         std::thread producer([&]{fixture.signal->Publish(snapshot::Status::Ready);});producer.join();
         Pump(1150);
         Check(fixture.view.value->refreshes==1&&fixture.view.value->refreshThread==GetCurrentThreadId(),"Loading completes on owner UI thread then stops");
+        const auto& d=fixture.signal->diagnostic;const auto& timing=g3::measurements.refresh;
+        Check(d.observationStart>0&&timing.thread==GetCurrentThreadId()&&timing.end>=timing.start&&timing.maximum>=timing.last&&!timing.active,"Refresh measures real owner call and initial observation");
+        Check(terminal==snapshot::Status::Ready?(d.renderedReady>d.observationStart&&d.readyThread==GetCurrentThreadId()):!d.renderedReady,"only actual valid rendered Ready completes observation");
+        const auto firstReady=d.renderedReady.load();
         PostMessageW(fixture.window.value,WM_TIMER,fixture.signal->cookie,0);Pump(50);
         Check(fixture.view.value->refreshes==1,"queued timer after kill is ignored");
         fixture.view.value->Show(snapshot::Status::Loading);fixture.signal->Publish(snapshot::Status::Loading);Pump(550);
         Check(fixture.view.value->refreshes==1,"later Loading and F5 do not restart initial observation");
+        Check(d.renderedReady==firstReady,"first rendered Ready timestamp stays fixed within view episode");
     }
     Check(loading::ActiveViews()==0,"completion callback cleanup");
 }

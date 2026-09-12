@@ -21,6 +21,8 @@ struct Budget {
 // Enumeration can publish from a worker; only the owner UI thread touches the view.
 // Fixed last-values/counters only: no trace buffer, pointers, paths or UI call-outs.
 struct DiagnosticState {
+    std::atomic<ULONGLONG> observationStart{0},renderedReady{0};
+    std::atomic_ulong readyThread{0};
     std::atomic<HRESULT> createResult{E_PENDING},siteResult{E_PENDING},windowResult{E_PENDING};
     std::atomic<HRESULT> serviceResult{E_PENDING},activeResult{E_PENDING},getWindowResult{E_PENDING},refreshResult{E_PENDING};
     std::atomic<HRESULT> folderViewResult{E_PENDING},countResult{E_PENDING},itemResult{E_PENDING};
