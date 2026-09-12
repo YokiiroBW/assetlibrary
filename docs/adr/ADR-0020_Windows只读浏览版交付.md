@@ -16,6 +16,8 @@ Settings采用既有预算的C#/.NET10、WinUI3与Microsoft.WindowsAppSDK **2.4.
 
 安装器是C#/.NET10部署OS适配，最小交互可使用系统TaskDialog/MessageBox，不引入WPF、WinForms、Electron或第三方安装框架。不把小型首次设置窗口视为独立浏览客户端。
 
+生产Shell及其静态库统一采用MSVC Release `/MT` 静态CRT，以仅保留系统UCRT/Win32导入；Proof测试目标可以保留原动态CRT。包构建检查实际导入并保留VS/SDK适用许可，不要求用户另装开发环境或提升权限安装VC redistributable。此生产构建变体必须用实际产物验收，不能拿旧Proof DLL的hash代替。
+
 ## 安装、升级、卸载
 
 固定每用户安装根 `%LOCALAPPDATA%/Programs/AssetLibrary`，版本目录 `versions/0.3.0-preview.1`，组件同目录发布。完整payload逐文件尺寸/SHA256/规范路径检查，拒绝绝对路径、逃逸、重解析点与foreign owner。同名文件来自多个发布输出时必须字节一致，不能静默覆盖依赖冲突。新版本完整写入验证后才切换HKCU注册及版本元数据，保留旧版本回滚能力。

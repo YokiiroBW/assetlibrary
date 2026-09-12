@@ -285,6 +285,55 @@ class DotnetDependencyPolicyTests(unittest.TestCase):
         self.assertEqual(projects, 1)
         self.assertEqual(packages, 1)
 
+    def windows_groups(self, *, approve: bool = True) -> dict:
+        lock = json.loads(self.lock_path.read_text(encoding="utf-8"))
+        base = "net10.0-windows10.0.26100"
+        dependencies = lock["dependencies"].pop("net10.0")
+        lock["dependencies"] = {base: dependencies, base + "/win-x64": {}}
+        self.lock_path.write_text(json.dumps(lock), encoding="utf-8")
+        if approve:
+            policy = json.loads(self.policy_path.read_text(encoding="utf-8"))
+            policy["project_target_groups"] = {
+                "services/core-server/Fixture.csproj": [base, base + "/win-x64"]
+            }
+            self.policy_path.write_text(json.dumps(policy), encoding="utf-8")
+        return lock
+
+    def test_exact_windows_and_rid_groups_require_project_approval(self) -> None:
+        self.windows_groups(approve=False)
+        errors, _, _ = self.validate()
+        self.assertTrue(any("lock groups differ" in error for error in errors), errors)
+        self.setUp_windows_approval()
+        self.assertEqual(self.validate()[0], [])
+
+    def setUp_windows_approval(self) -> None:
+        policy = json.loads(self.policy_path.read_text(encoding="utf-8"))
+        policy["project_target_groups"] = {
+            "services/core-server/Fixture.csproj": [
+                "net10.0-windows10.0.26100", "net10.0-windows10.0.26100/win-x64"
+            ]
+        }
+        self.policy_path.write_text(json.dumps(policy), encoding="utf-8")
+
+    def test_rid_packages_still_require_valid_content_hash(self) -> None:
+        lock = self.windows_groups()
+        lock["dependencies"]["net10.0-windows10.0.26100/win-x64"] = {
+            "Example.Package": {"type": "Transitive", "resolved": "1.2.3", "contentHash": "invalid"}
+        }
+        self.lock_path.write_text(json.dumps(lock), encoding="utf-8")
+        errors, _, _ = self.validate()
+        self.assertTrue(any("SHA-512" in error for error in errors), errors)
+
+    def test_unapproved_rid_and_escaping_policy_project_fail(self) -> None:
+        lock = self.windows_groups()
+        lock["dependencies"]["net10.0-windows10.0.26100/linux-x64"] = {}
+        self.lock_path.write_text(json.dumps(lock), encoding="utf-8")
+        self.assertTrue(any("lock groups differ" in error for error in self.validate()[0]))
+        policy = json.loads(self.policy_path.read_text(encoding="utf-8"))
+        policy["project_target_groups"] = {"../outside.csproj": ["net10.0"]}
+        self.policy_path.write_text(json.dumps(policy), encoding="utf-8")
+        self.assertTrue(any("invalid exact project" in error for error in self.validate()[0]))
+
     def test_central_transitive_dependency_passes_without_becoming_direct(self) -> None:
         self.add_central_transitive_dependency()
 

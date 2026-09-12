@@ -7,5 +7,17 @@
     "MIT",
     "PostgreSQL"
   ],
-  "license_file_exceptions": []
+  "license_file_exceptions": [],
+  "project_target_groups": {
+    "apps/windows-client/Settings/AssetLibrary.Windows.Settings.csproj": [
+      "net10.0-windows10.0.26100",
+      "net10.0-windows10.0.26100/win-x64"
+    ],
+    "apps/windows-client/Setup/AssetLibrary.Windows.Setup.csproj": [
+      "net10.0-windows7.0"
+    ],
+    "tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj": [
+      "net10.0-windows7.0"
+    ]
+  }
 }

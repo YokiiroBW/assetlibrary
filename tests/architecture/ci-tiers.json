@@ -99,7 +99,12 @@
         "dotnet package list --project apps/windows-client/AssetLibrary.Windows.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1 > .runtime/windows-vulnerabilities.json",
         "python scripts/validate_dotnet_dependencies.py --solution apps/windows-client/AssetLibrary.Windows.slnx --packages-dir .runtime/nuget --vulnerability-report .runtime/windows-vulnerabilities.json",
         "cmake -S tests/windows-shell -B .runtime/explorer-proof -G \"Visual Studio 17 2022\" -A x64",
-        "cmake --build .runtime/explorer-proof --config Release --parallel 2"
+        "cmake --build .runtime/explorer-proof --config Release --parallel 2",
+        "ctest --test-dir .runtime/explorer-proof -C Release --output-on-failure",
+        "python tests/architecture/check_release_gates.py --target explorer-v0.5",
+        "cmake -S apps/windows-shell -B .runtime/explorer-product -G \"Visual Studio 17 2022\" -A x64",
+        "cmake --build .runtime/explorer-product --config Release --parallel 2",
+        "dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release"
       ],
       "skip_policy": "A platform skip is evidence of a missing gate, never a pass for that platform."
     },

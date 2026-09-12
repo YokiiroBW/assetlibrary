@@ -18,10 +18,12 @@ Host `--user-session` 为常驻模式，生产快照pipe `AssetLibrary.Explorer.
 
 ## 安装包
 
-包根Setup.exe、`payload/`、`manifest.json`；manifest `formatVersion=1`、`version=0.3.0-preview.1`、`rid=win-x64`、files数组(path/size/sha256)。所有路径相对payload，拒绝逃逸/绝对/重解析/大小或hash不符；包中组件同目录，重复依赖必须hash相同。CLI install --package <dir> [--quiet]、uninstall [--quiet]、status；sandbox模式只在临时根用文件注册后端且不启动用户程序/触发真实注册。Setup交互使用平台原生对话框，quiet仍返回准确退出码/错误/延期清理。
+包根Setup.exe、`payload/`、`manifest.json`；manifest `formatVersion=1`、`owner=AssetLibrary.Windows.Explorer`、`version=0.3.0-preview.1`、`rid=win-x64`、files数组(path/size/sha256)。所有路径相对payload，拒绝逃逸/绝对/重解析/大小或hash不符；包中组件同目录，重复依赖必须hash相同。CLI install --package <dir> [--quiet]、uninstall [--quiet]、status；sandbox模式只在临时根用文件注册后端且不启动用户程序/触发真实注册。Setup交互使用平台原生对话框，quiet仍返回准确退出码/错误/延期清理。
 
 HKCU只注册上述生产CLSID及Desktop NameSpace；产品元数据和Run/Uninstall位置按ADR-0020。owner不匹配拒覆盖或删除，不改HKLM/UAC，不终止Explorer。先完整安装新版本再切注册，失败回滚。卸载已加载DLL的延期清理必须显式记录。
 
 ## 会话变化的视图更新
 
 生产浏览必须在退出/换身份/失效后使已显示旧数据退出可用状态。具体公开Shell通知接线由V03-016/V03-015向root提交补充方案，未经冻结不得悄悄改变wire或使用私有Shell消息。最终实际安装验收必须覆盖此行为；不能用“服务端已拒权”代替旧画面清理。
+
+已批准补充：Host先完成会话/epoch/快照状态提交或清空，再由有界自有短命通知进程解析固定生产root并发 `SHChangeNotify(SHCNE_UPDATEDIR, SHCNF_IDLIST|SHCNF_FLUSHNOWAIT, root, nullptr)`；无凭据或任意路径参数，父进程最多3秒等待并回收该自有通知进程，不阻塞会话控制或复活旧数据。生产Shell callback用公开 `SFVM_GETNOTIFY` 持有并监听该root，`SFVM_FSNOTIFY`核事件/root后合并一次自己的UI消息、再核site/HWND；root视图单次Refresh并启动一段有界初始观察，子目录返回root清当前条目/面包屑。错误/新连接/退出/会话失效触发该过程。旧位置仍由epoch拒绝；不宣称清理Windows自身历史缓存。重复待处理通知合并，不建立持续Loading无限循环。生产第5个活动视图因无callback名额明确ERROR_BUSY，不静默绕过失效处理；Proof行为保持不变。最终以真实已安装组件的通知/切换/注销结果验收。

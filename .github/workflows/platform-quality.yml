@@ -9,8 +9,12 @@ on:
       - 'tests/spikes/provider-sandbox/**'
       - 'apps/android/**'
       - 'apps/windows-client/**'
+      - 'apps/windows-shell/**'
+      - 'infra/windows-client/**'
       - 'tests/windows-client/**'
+      - 'tests/windows-setup/**'
       - 'tests/windows-shell/**'
+      - 'contracts/windows-shell/**'
       - 'packages/sdk/assetlink/**'
       - 'packages/ui/**'
       - 'scripts/validate_android_dependencies.py'
@@ -145,6 +149,16 @@ jobs:
         run: cmake -S tests/windows-shell -B .runtime/explorer-proof -G "Visual Studio 17 2022" -A x64
       - name: Compile test-only native Shell adapter
         run: cmake --build .runtime/explorer-proof --config Release --parallel 2
+      - name: Native Shell regression tests
+        run: ctest --test-dir .runtime/explorer-proof -C Release --output-on-failure
+      - name: Explorer release permission
+        run: python tests/architecture/check_release_gates.py --target explorer-v0.5
+      - name: Configure production Explorer component
+        run: cmake -S apps/windows-shell -B .runtime/explorer-product -G "Visual Studio 17 2022" -A x64
+      - name: Compile production Explorer component
+        run: cmake --build .runtime/explorer-product --config Release --parallel 2
+      - name: Windows setup contracts
+        run: dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release
       - name: Preserve adapter build evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -134,7 +134,10 @@ def project_package_references(project: Path, central: dict[str, str]) -> set[st
     return references
 
 
-def locked_packages(projects: list[Path], central: dict[str, str]) -> dict[str, tuple[str, str]]:
+def locked_packages(
+    projects: list[Path], central: dict[str, str],
+    group_overrides: dict[Path, list[str]] | None = None,
+) -> dict[str, tuple[str, str]]:
     packages: dict[str, tuple[str, str]] = {}
     for project in projects:
         references = project_package_references(project, central)
@@ -145,48 +148,50 @@ def locked_packages(projects: list[Path], central: dict[str, str]) -> dict[str, 
         if lock.get("version") != 2:
             raise ValueError(f"lock file must use central-package-management version 2: {lock_path}")
         target_groups = lock.get("dependencies")
-        if not isinstance(target_groups, dict) or set(target_groups) != {"net10.0"}:
-            raise ValueError(f"lock file must contain only net10.0: {lock_path}")
-        target = target_groups["net10.0"]
-        if not isinstance(target, dict):
-            raise ValueError(f"invalid dependency group: {lock_path}")
-        direct: set[str] = set()
-        for package, details in target.items():
-            if not isinstance(details, dict):
-                raise ValueError(f"invalid locked dependency: {lock_path} / {package}")
-            if details.get("type") == "Project":
-                continue
-            resolved = details.get("resolved")
-            content_hash = details.get("contentHash")
-            if not isinstance(resolved, str) or not EXACT_VERSION_RE.fullmatch(resolved):
-                raise ValueError(f"dependency is not locked to an exact stable version: {package}")
-            if not has_sha512_content_hash(content_hash):
-                raise ValueError(f"dependency lacks a valid SHA-512 content hash: {package} {resolved}")
-            dependency_type = details.get("type")
-            if dependency_type not in {"Direct", "Transitive", "CentralTransitive"}:
-                raise ValueError(f"dependency has an unsupported lock type: {package}")
-            key = package.lower()
-            if dependency_type == "Direct":
-                direct.add(key)
-            if dependency_type in {"Direct", "CentralTransitive"}:
-                expected = central.get(key)
-                if expected != resolved:
-                    raise ValueError(
-                        f"centrally managed dependency drift: "
-                        f"{package} resolves {resolved}, expected {expected}"
-                    )
-            prior = packages.get(key)
-            current = (package, resolved)
-            if prior is not None and prior[1] != resolved:
-                raise ValueError(f"inconsistent dependency versions: {package} {prior[1]} / {resolved}")
-            packages[key] = current
-        if direct != references:
-            missing = sorted(references - direct)
-            unexpected = sorted(direct - references)
-            raise ValueError(
-                f"project and lock direct dependencies differ for {project}: "
-                f"missing={missing}, unexpected={unexpected}"
-            )
+        expected_groups = (group_overrides or {}).get(project.resolve(), ["net10.0"])
+        if not isinstance(target_groups, dict) or set(target_groups) != set(expected_groups):
+            raise ValueError(f"lock groups differ from approved project groups {expected_groups}: {lock_path}")
+        for group_name, target in target_groups.items():
+            if not isinstance(target, dict):
+                raise ValueError(f"invalid dependency group: {lock_path}")
+            direct: set[str] = set()
+            for package, details in target.items():
+                if not isinstance(details, dict):
+                    raise ValueError(f"invalid locked dependency: {lock_path} / {package}")
+                if details.get("type") == "Project":
+                    continue
+                resolved = details.get("resolved")
+                content_hash = details.get("contentHash")
+                if not isinstance(resolved, str) or not EXACT_VERSION_RE.fullmatch(resolved):
+                    raise ValueError(f"dependency is not locked to an exact stable version: {package}")
+                if not has_sha512_content_hash(content_hash):
+                    raise ValueError(f"dependency lacks a valid SHA-512 content hash: {package} {resolved}")
+                dependency_type = details.get("type")
+                if dependency_type not in {"Direct", "Transitive", "CentralTransitive"}:
+                    raise ValueError(f"dependency has an unsupported lock type: {package}")
+                key = package.lower()
+                if dependency_type == "Direct":
+                    direct.add(key)
+                if dependency_type in {"Direct", "CentralTransitive"}:
+                    expected = central.get(key)
+                    if expected != resolved:
+                        raise ValueError(
+                            f"centrally managed dependency drift: "
+                            f"{package} resolves {resolved}, expected {expected}"
+                        )
+                prior = packages.get(key)
+                current = (package, resolved)
+                if prior is not None and prior[1] != resolved:
+                    raise ValueError(f"inconsistent dependency versions: {package} {prior[1]} / {resolved}")
+                packages[key] = current
+            expected_direct = references if "/" not in group_name else set()
+            if direct != expected_direct:
+                missing = sorted(expected_direct - direct)
+                unexpected = sorted(direct - expected_direct)
+                raise ValueError(
+                    f"project and lock direct dependencies differ for {project}: "
+                    f"missing={missing}, unexpected={unexpected}"
+                )
     return packages
 
 
@@ -342,7 +347,25 @@ def validate(
             )
         projects = solution_projects(root, solution)
         central = central_package_versions(root / "Directory.Packages.props")
-        packages = locked_packages(projects, central)
+        group_overrides: dict[Path, list[str]] = {}
+        configured_groups = policy.get("project_target_groups", {})
+        if not isinstance(configured_groups, dict):
+            raise ValueError("project_target_groups must be an object")
+        for relative, groups in configured_groups.items():
+            project_path = (root / relative).resolve()
+            if (Path(relative).is_absolute() or not project_path.is_relative_to(root.resolve())
+                    or not isinstance(groups, list) or not groups
+                    or not all(isinstance(group, str) and re.fullmatch(
+                        r"net10\.0(?:-windows[0-9]+(?:\.[0-9]+){1,3})?(?:/win-x64)?", group
+                    ) for group in groups)
+                    or len(set(groups)) != len(groups)
+                    or sum("/" not in group for group in groups) != 1):
+                raise ValueError(f"invalid exact project target groups: {relative}")
+            base_group = next(group for group in groups if "/" not in group)
+            if any(group != base_group and group != base_group + "/win-x64" for group in groups):
+                raise ValueError(f"mismatched project target groups: {relative}")
+            group_overrides[project_path] = groups
+        packages = locked_packages(projects, central, group_overrides)
         errors.extend(validate_licenses(packages, packages_dir.resolve(), policy))
         report = load_json(vulnerability_report)
         errors.extend(validate_vulnerability_report(report, approved_sources, projects))
