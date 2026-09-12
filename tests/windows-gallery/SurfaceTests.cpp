@@ -1,4 +1,5 @@
 #include "gallery/Surface.h"
+#include "gallery/Uia.h"
 #include "TestOwner.h"
 #include <shlobj.h>
 #include <oleacc.h>
@@ -112,7 +113,18 @@ int main() {
         Require(scenario.viewportChanges > beforeScroll && surface->RetainedImageBytes() == 0, "scroll cancels old viewport and releases its pixels");
         key.wParam = VK_HOME; surface->TranslateAccelerator(key);
         child.lVal = 2; Require(SUCCEEDED(accessible->accSelect(SELFLAG_TAKESELECTION, child)), "MSAA selection replace");
+        const auto beforeRange = gallery::InspectUia().selectionNotifications;
         child.lVal = 5; Require(SUCCEEDED(accessible->accSelect(SELFLAG_EXTENDSELECTION, child)) && surface->SelectedItems().count >= 4, "MSAA range selection");
+        Require(gallery::InspectUia().selectionNotifications > beforeRange, "range selection requests native UIA notification");
+        BYTE keys[256]{}; Require(GetKeyboardState(keys) != FALSE, "read STA keyboard state");
+        BYTE controlKeys[256]{}; CopyMemory(controlKeys,keys,sizeof(keys)); controlKeys[VK_CONTROL] = 0x80;
+        Require(SetKeyboardState(controlKeys) != FALSE, "set test-only STA Ctrl state");
+        const auto beforeAll = gallery::InspectUia().selectionNotifications; key.wParam = 'A'; const bool handledAll = surface->TranslateAccelerator(key);
+        const bool restoredKeys = SetKeyboardState(keys) != FALSE;
+        Require(restoredKeys && handledAll && surface->SelectedItems().count == 30 && gallery::InspectUia().selectionNotifications > beforeAll, "Ctrl+A publishes native selection notification");
+        const auto beforeBlank = gallery::InspectUia().selectionNotifications;
+        SendMessageW(canvas,WM_LBUTTONDOWN,0,MAKELPARAM(1,1));
+        Require(surface->SelectedItems().count == 0 && gallery::InspectUia().selectionNotifications > beforeBlank, "blank canvas clears and publishes native selection notification");
         surface->SetVisible(false); Require(surface->VisibleFileItems().count == 0 && surface->RetainedImageBytes() == 0, "hidden releases images");
         scenario.verifyEmpty = true;
         surface->Clear(snapshot::Status::AccessDenied, 2);
@@ -151,7 +163,8 @@ int main() {
         ShowWindow(surface->Window(), SW_SHOWNA); Require(scenario.viewportChanges == visibilityChanges + 2, "native empty-page show notification");
         surface->SetPage(page, 1); scenario.deleteOnViewport = true;
         surface->SetVisible(false); surface = scenario.surface;
-        Require(surface == nullptr && owner.references == 1, "callback may delete the C++ Surface while its public method is running");
+        Require(surface == nullptr, "callback may delete the C++ Surface while its public method is running");
+        Drain(owner); Require(owner.references == 1 && gallery::InspectUia().dispatcherWindows == 0, "reentrant retirement drains providers and dispatcher");
         DestroyWindow(parent); parent = nullptr;
         std::cout << "gallery_surface: hidden HWND/page/image/selection/MSAA/retirement checks passed\n";
         CoUninitialize(); return 0;

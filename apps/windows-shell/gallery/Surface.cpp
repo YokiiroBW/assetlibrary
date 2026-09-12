@@ -194,6 +194,21 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (item.top < 0) ScrollTo(scroll + item.top);
         else if (item.bottom > client.bottom) ScrollTo(scroll + item.bottom - client.bottom);
     }
+    void PublishSelection(int focused = -1) noexcept {
+        if (!Alive()) return;
+        const auto revision = model->presentation;
+        InvalidateRect(canvas, nullptr, FALSE);
+        NotifyWinEvent(EVENT_OBJECT_SELECTIONWITHIN, canvas, OBJID_CLIENT, CHILDID_SELF);
+        if (!Alive() || revision != model->presentation) return;
+        RaiseUiaEvent(model, UIA_Selection_InvalidatedEventId);
+        if (!Alive() || revision != model->presentation) return;
+        if (focused >= 0) {
+            NotifyWinEvent(EVENT_OBJECT_FOCUS, canvas, OBJID_CLIENT, focused + 1);
+            if (!Alive() || revision != model->presentation) return;
+            RaiseUiaEvent(model, UIA_AutomationFocusChangedEventId, focused);
+        }
+        if (Alive() && revision == model->presentation) Notify(callbacks.selectionChanged);
+    }
     HRESULT Select(UINT index, UINT flags) {
         if (!Alive() || index >= model->page.entries.size()) return E_INVALIDARG;
         if ((flags & SVSI_EDIT) == SVSI_EDIT) return E_ACCESSDENIED;
@@ -206,12 +221,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (anchor < 0) anchor = static_cast<int>(index);
         if (flags & SVSI_ENSUREVISIBLE) EnsureVisible(index);
         if (!Alive()) return S_OK;
-        InvalidateRect(canvas, nullptr, FALSE);
-        NotifyWinEvent(EVENT_OBJECT_SELECTIONWITHIN, canvas, OBJID_CLIENT, CHILDID_SELF);
-        if (flags & SVSI_FOCUSED) NotifyWinEvent(EVENT_OBJECT_FOCUS, canvas, OBJID_CLIENT, static_cast<LONG>(index + 1));
-        RaiseUiaEvent(model, UIA_Selection_InvalidatedEventId);
-        if (Alive() && (flags & SVSI_FOCUSED)) RaiseUiaEvent(model, UIA_AutomationFocusChangedEventId, static_cast<int>(index));
-        if (Alive()) Notify(callbacks.selectionChanged); return S_OK;
+        PublishSelection(flags & SVSI_FOCUSED ? static_cast<int>(index) : -1); return S_OK;
     }
     void SelectFromInput(UINT index, bool control, bool shift) {
         if (!Alive() || index >= model->page.entries.size()) return;
@@ -243,8 +253,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (key == VK_RETURN && model->focus >= 0) { Activate(static_cast<UINT>(model->focus)); return true; }
         if (key == 'A' && control) {
             for (UINT index = 0; index < model->page.entries.size(); ++index) model->selected[index] = true;
-            InvalidateRect(canvas, nullptr, FALSE); NotifyWinEvent(EVENT_OBJECT_SELECTIONWITHIN, canvas, OBJID_CLIENT, CHILDID_SELF);
-            Notify(callbacks.selectionChanged); return true;
+            PublishSelection(); return true;
         }
         if (key == VK_SPACE && model->focus >= 0) { SelectFromInput(static_cast<UINT>(model->focus), true, shift); return true; }
         LONG direction = 0;
@@ -424,7 +433,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
             if (index >= 0) {
                 SelectFromInput(static_cast<UINT>(index), (wParam & MK_CONTROL) != 0, (wParam & MK_SHIFT) != 0);
                 if (Alive() && message == WM_LBUTTONDBLCLK) Activate(static_cast<UINT>(index));
-            } else { model->selected.fill(false); SetFocus(canvas); if (Alive()) { InvalidateRect(canvas, nullptr, FALSE); Notify(callbacks.selectionChanged); } }
+            } else { model->selected.fill(false); SetFocus(canvas); if (Alive()) PublishSelection(); }
             return 0;
         }
         if (message == WM_CONTEXTMENU) {
@@ -523,7 +532,7 @@ HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) n
         for (const auto& item : state->model->page.entries) state->layoutItems.push_back({item.kind, 4.0 / 3.0});
         state->Reflow(false);
         if (state->Alive() && state->visible.count == 0) state->Notify(state->callbacks.viewportChanged);
-        if (state->Alive()) { NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF); state->Notify(state->callbacks.selectionChanged); }
+        if (state->Alive()) { NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF); state->PublishSelection(); }
         return S_OK;
     } catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, generation); if (state->Alive()) state->Notify(state->callbacks.viewportChanged); return E_OUTOFMEMORY; }
 }
@@ -533,7 +542,7 @@ void Surface::Clear(snapshot::Status status, std::uint64_t generation) noexcept 
     if (generation < state->model->generation) return;
     state->Empty(status, generation); NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
     InvalidateRect(state->canvas, nullptr, FALSE); state->Notify(state->callbacks.viewportChanged);
-    if (state->Alive()) state->Notify(state->callbacks.selectionChanged);
+    if (state->Alive()) state->PublishSelection();
 }
 HRESULT Surface::SetThumbnail(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image) noexcept {
     if (!state_ || !state_->Alive()) return S_FALSE;

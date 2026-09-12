@@ -31,13 +31,32 @@ int wmain() {
     gallery::Surface* surface = nullptr;
     int result = 1;
     try {
-        Require(window != nullptr,"test parent");
+        if (!window) throw "test parent";
         auto model = Model(providerOwner,window); models.push_back(model);
         IRawElementProviderSimple* root = nullptr; Require(SUCCEEDED(gallery::CreateUiaRoot(model,&root)),"native root"); retained.push_back(root);
         IRawElementProviderFragment* tree = nullptr; root->QueryInterface(IID_PPV_ARGS(&tree)); Require(tree != nullptr,"root fragment");
         IRawElementProviderFragment* child = nullptr; tree->Navigate(NavigateDirection_FirstChild,&child); tree->Release(); Require(child != nullptr,"native first child");
         IRawElementProviderSimple* item = nullptr; child->QueryInterface(IID_PPV_ARGS(&item)); retained.push_back(item);
         IInvokeProvider* invoke = nullptr; Require(SUCCEEDED(child->QueryInterface(IID_PPV_ARGS(&invoke))),"directory immutable Invoke capability"); invoke->Release();
+        IRawElementProviderFragmentRoot* fragmentRoot = nullptr; root->QueryInterface(IID_PPV_ARGS(&fragmentRoot));
+        POINT origin{}; ClientToScreen(window,&origin); model->bounds[0] = {0,-100,100,10};
+        IRawElementProviderFragment* outside = nullptr;
+        Require(SUCCEEDED(fragmentRoot->ElementProviderFromPoint(origin.x+5,origin.y-5,&outside)) && !outside,"negative-scroll item cannot hit toolbar/outside canvas");
+        Require(fragmentRoot->ElementProviderFromPoint(std::numeric_limits<double>::quiet_NaN(),0,&outside) == E_INVALIDARG,"invalid point rejected"); fragmentRoot->Release();
+        for (const auto status : {snapshot::Status::Loading,snapshot::Status::Unavailable,snapshot::Status::AccessDenied}) {
+            model->page.status = status; VARIANT text{};
+            Require(SUCCEEDED(root->GetPropertyValue(UIA_HelpTextPropertyId,&text)) && text.vt == VT_BSTR && wcscmp(text.bstrVal,snapshot::StatusText(status)) == 0,"root status is distinguishable from empty folder"); VariantClear(&text);
+        }
+        model->page.status = snapshot::Status::Ready;
+        IRawElementProviderFragment* fileFragment = nullptr; child->Navigate(NavigateDirection_NextSibling,&fileFragment);
+        IRawElementProviderSimple* file = nullptr; fileFragment->QueryInterface(IID_PPV_ARGS(&file)); fileFragment->Release();
+        VARIANT waiting{}; Require(SUCCEEDED(file->GetPropertyValue(UIA_ItemStatusPropertyId,&waiting)) && waiting.vt == VT_BSTR && wcscmp(waiting.bstrVal,L"等待预览") == 0,"pending file has honest status"); VariantClear(&waiting); file->Release();
+        ::SetFocus(window); Require(::GetFocus() == window,"synthetic control focus"); model->focus = 0;
+        VARIANT focused{}; root->GetPropertyValue(UIA_HasKeyboardFocusPropertyId,&focused); Require(focused.vt == VT_BOOL && focused.boolVal == VARIANT_FALSE,"virtual child focus does not also focus root"); VariantClear(&focused);
+        item->GetPropertyValue(UIA_HasKeyboardFocusPropertyId,&focused); Require(focused.vt == VT_BOOL && focused.boolVal == VARIANT_TRUE,"exact child reports focus"); VariantClear(&focused);
+        auto emptyModel = Model(providerOwner,window); emptyModel->page.entries.clear(); IRawElementProviderSimple* emptyRoot = nullptr;
+        Require(SUCCEEDED(gallery::CreateUiaRoot(emptyModel,&emptyRoot)),"empty root"); VARIANT emptyStatus{};
+        emptyRoot->GetPropertyValue(UIA_ItemStatusPropertyId,&emptyStatus); const bool empty = emptyStatus.vt == VT_BSTR && wcscmp(emptyStatus.bstrVal,L"此文件夹为空") == 0; VariantClear(&emptyStatus); emptyRoot->Release(); Require(empty,"empty folder status");
         SAFEARRAY* identity = nullptr; Require(SUCCEEDED(child->GetRuntimeId(&identity)) && identity,"item runtime identity"); SafeArrayDestroy(identity);
         Require(SUCCEEDED(gallery::RetireUia(model)),"retire presentation"); ++model->presentation;
         model->page.entries[0].name = L"replacement name must not escape";

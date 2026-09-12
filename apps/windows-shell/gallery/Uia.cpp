@@ -88,7 +88,7 @@ public:
         } else if (property == UIA_IsControlElementPropertyId || property == UIA_IsContentElementPropertyId || property == UIA_IsKeyboardFocusablePropertyId || property == UIA_IsEnabledPropertyId) {
             value->vt = VT_BOOL; value->boolVal = VARIANT_TRUE;
         } else if (property == UIA_HasKeyboardFocusPropertyId) {
-            value->vt = VT_BOOL; value->boolVal = ::GetFocus() == model_->window && (index_ < 0 || model_->focus == index_) ? VARIANT_TRUE : VARIANT_FALSE;
+            value->vt = VT_BOOL; value->boolVal = ::GetFocus() == model_->window && (index_ < 0 ? model_->focus < 0 : model_->focus == index_) ? VARIANT_TRUE : VARIANT_FALSE;
         } else if (property == UIA_IsOffscreenPropertyId) {
             RECT client{}, overlap{}; GetClientRect(model_->window, &client);
             const bool visible = model_->visible && IsWindowVisible(model_->window) &&
@@ -97,8 +97,16 @@ public:
         } else if (property == UIA_AutomationIdPropertyId && index_ >= 0) {
             wchar_t identity[40]{}; if (StringFromGUID2(model_->page.entries[static_cast<size_t>(index_)].node, identity, 40) == 0) return E_FAIL;
             value->vt = VT_BSTR; value->bstrVal = SysAllocString(identity); if (!value->bstrVal) return E_OUTOFMEMORY;
-        } else if (property == UIA_ItemStatusPropertyId && index_ >= 0) {
-            const auto at = static_cast<size_t>(index_); const wchar_t* status = model_->thumbnailReady[at] ? L"缩略图已就绪" : model_->thumbnailUnavailable[at] ? L"预览不可用" : L"";
+        } else if (property == UIA_ItemStatusPropertyId || property == UIA_HelpTextPropertyId) {
+            const wchar_t* status = nullptr;
+            if (index_ < 0) status = model_->page.status != snapshot::Status::Ready ? snapshot::StatusText(model_->page.status) :
+                model_->page.entries.empty() ? L"此文件夹为空" : L"只读浏览";
+            else {
+                const auto at = static_cast<size_t>(index_);
+                status = model_->page.entries[at].kind == snapshot::Kind::File ?
+                    model_->thumbnailReady[at] ? L"缩略图已就绪" : model_->thumbnailUnavailable[at] ? L"预览不可用" : L"等待预览" :
+                    snapshot::StatusText(model_->page.entries[at].status);
+            }
             value->vt = VT_BSTR; value->bstrVal = SysAllocString(status); if (!value->bstrVal) return E_OUTOFMEMORY;
         }
         return S_OK;
@@ -149,7 +157,8 @@ public:
     HRESULT STDMETHODCALLTYPE ElementProviderFromPoint(double x, double y, IRawElementProviderFragment** value) override {
         if (!value) return E_POINTER; *value = nullptr; if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
         if (!std::isfinite(x) || !std::isfinite(y) || x < LONG_MIN || x > LONG_MAX || y < LONG_MIN || y > LONG_MAX) return E_INVALIDARG;
-        POINT point{static_cast<LONG>(x), static_cast<LONG>(y)}; ScreenToClient(model_->window, &point);
+        POINT point{static_cast<LONG>(x), static_cast<LONG>(y)}; ScreenToClient(model_->window, &point); RECT client{}; GetClientRect(model_->window, &client);
+        if (!PtInRect(&client, point)) return S_OK;
         for (UINT index = 0; index < model_->page.entries.size(); ++index) if (PtInRect(&model_->bounds[index], point)) return Related(static_cast<int>(index), value);
         return Related(-1, value);
     }
@@ -314,6 +323,7 @@ HRESULT RetireUia(const std::shared_ptr<AccessibleModel>& model) noexcept {
 }
 UiaDiagnostics InspectUia() noexcept { return diagnostics; }
 void RaiseUiaEvent(const std::shared_ptr<AccessibleModel>& model, EVENTID event, int index) noexcept {
+    if (event == UIA_Selection_InvalidatedEventId) ++diagnostics.selectionNotifications;
     if (!UiaClientsAreListening()) return;
     Element* element = nullptr; if (FAILED(Make(model,index,&element))) return;
     UiaRaiseAutomationEvent(static_cast<IRawElementProviderSimple*>(element),event); element->Release();

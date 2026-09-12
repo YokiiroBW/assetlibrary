@@ -17,6 +17,7 @@ struct UiaDiagnostics {
     UINT dispatcherWindows = 0;
     UINT pendingRetirements = 0;
     UINT disconnected = 0;
+    UINT selectionNotifications = 0; // Requests, even when no external client is listening.
     HRESULT lastResult = S_OK;
 };
 UiaDiagnostics InspectUia() noexcept;
