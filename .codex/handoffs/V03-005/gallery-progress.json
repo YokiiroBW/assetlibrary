@@ -25,26 +25,28 @@
     "complete_visible_surface": "75074f8",
     "batched_image_admission": "22e88f4",
     "shell_handoff": "c8df1a4",
-    "native_uia_decision": "9d46429"
+    "native_uia_decision": "9d46429",
+    "provider_lifetime_header": "329d824",
+    "independent_folder_pin": "f8a2269"
   },
   "agents": [
     {
       "task": "V03-019",
       "agent": "windows_package_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-019",
-      "scope": "Surface throughf9acd9f integrated; final outstanding lifecycle now adopting owned nativeUIA root/items, reusing same AccessibleModel. One systemwrapper factory trial had0x22/FragmentRoot/List but real externalFindAll0 of30 (stage100); abandoned, not installed. Header provider-lifetime/API design and sourceUia*.h/cpp pending; root owns production CMake/ADR/import changes."
+      "scope": "NativeUIA draft compiled and List/30children/Selection works. Found real underlying bug: explicit Surface.Destroy clears canvas beforeWM_DESTROY, so old/new UIA event-map clearing was skipped. Stable canvasIdentity makes nativeUIA normal/action-close and3 sameSTA cycles return owners1/providers0/pending0. Old MSAA map-clear negative experiment had no invocation counter, so conclusion unreliable. NOW running ONE isolated old-MSAA+correct-identity+explicit-map-call-count control (normal/action/3cycles), nativeUIA draft preserved; root must select smallest actually passing path. NativeUIA4-batch deferred-queue admission bug also found; approved single prebuiltSTA STATIC window/fixed512 slots if nativeUIA chosen."
     },
     {
       "task": "V03-020",
       "agent": "windows_session_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-020",
-      "scope": "V03-020 fully integrated/completed; handoff27bb79b includes final62d39d3 test reuse and independent MSAA diagnosis."
+      "scope": "V03-020 completed27bb79b; now independent read-only reviewUia.cpp. Found4-batch retired queue drops final blocked model with no dead-window retry. Owner acknowledged and simplifying if nativeUIA selected."
     },
     {
       "task": "V03-021",
       "agent": "windows_shell_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-021",
-      "scope": "V03-021 full-visible101/16unfinished/64modulework/2IO/plain pixel lease integrated22e88f4+handoffc8df1a4. All affected tests passed. Possible follow-up to set separate providerLifetimeOwner=folder_ after Surface header approved; no current worker writes."
+      "scope": "V03-021 source complete throughf8a2269 (provider pinsFolder notView). Await finalSurface to test realView afterMTA UIA access with heldroot/child acrossDestroy/lastRelease and finalFolder/slot return. No current GUI/source writes."
     }
   ],
   "real_core": {
@@ -73,6 +75,8 @@
     "windows_tests": "prior101/101; helper-only change24/24 in owner",
     "real_images": "Core LPAC/AOT2/2 + native image pipe1/1 passed; fixture148 assets unchanged and cleaned",
     "visual": "partial: mouse mode/density and keyboard multiselect passed; scroll canvas clipping failed, provider retirement unresolved",
-    "native_tests": "Root original12/12 passed69.14s; after full-visible/lease fix targetedRequests/View/imports3/3 passed1.47s and Surface/Layout/Budget/Rendering4/4 passed0.22s; repository-batch.log passed."
-  }
+    "native_tests": "Root original12/12 passed69.14s; after full-visible/lease fix targetedRequests/View/imports3/3 passed1.47s and Surface/Layout/Budget/Rendering4/4 passed0.22s; repository-batch.log passed.",
+    "setup": "preview.3 identity: locked restore/format/zero-warning build +23 Setup tests;6 package tests;16 release-lock tests;17 RID package license audit all passed in .runtime/gallery-validation."
+  },
+  "critical_decision": "Do not blindly finish nativeUIA rewrite before old-MSAA corrected-WM_DESTROY control completes. Prior map-clear failed result lacked actual-call evidence. Prefer smallest tested fix while preserving prototype/evidence."
 }
