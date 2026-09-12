@@ -1,4 +1,6 @@
 #pragma once
+#include <windows.h>
+#include <objbase.h>
 #include <UIAutomation.h>
 #include <memory>
 
@@ -17,4 +19,5 @@ struct UiaDiagnostics {
     HRESULT lastResult = S_OK;
 };
 UiaDiagnostics InspectUia() noexcept;
+void RaiseUiaEvent(const std::shared_ptr<AccessibleModel>& model, EVENTID event, int index = -1) noexcept;
 } // namespace gallery

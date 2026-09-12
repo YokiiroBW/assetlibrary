@@ -47,7 +47,7 @@ int main() {
         parent = CreateWindowExW(0, L"STATIC", L"AssetLibrary test-only hidden harness", WS_OVERLAPPEDWINDOW, 0, 0, 1000, 700,
             nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!parent) throw "parent creation";
-        gallery::Callbacks callbacks; callbacks.context = &scenario; callbacks.lifetimeOwner = &owner;
+        gallery::Callbacks callbacks; callbacks.context = &scenario; callbacks.lifetimeOwner = &owner; callbacks.providerLifetimeOwner = &owner;
         callbacks.viewportChanged = [](void* context) noexcept {
             auto& state = *static_cast<Scenario*>(context); ++state.viewportChanges;
             if (state.surface) state.observedShown = state.surface->Shown();
@@ -101,6 +101,10 @@ int main() {
         key.wParam = VK_RETURN; Require(surface->TranslateAccelerator(key) && scenario.activations == 1, "Enter activates existing navigation callback");
         key.wParam = VK_APPS; Require(surface->TranslateAccelerator(key) && scenario.menus == 1, "keyboard context menu");
         surface->SetPage(page, 1); files = surface->VisibleFileItems();
+        name = nullptr; Require(FAILED(accessible->get_accName(child, &name)) && !name, "old MSAA presentation cannot read replacement page");
+        accessible->Release(); accessible = nullptr;
+        Require(SUCCEEDED(AccessibleObjectFromWindow(canvas, static_cast<DWORD>(OBJID_CLIENT), IID_IAccessible, reinterpret_cast<void**>(&accessible))), "replacement MSAA identity");
+        scenario.accessible = accessible;
         Require(files.count > 0, "scroll test visible candidates");
         surface->SetThumbnail(files.indices[0], 1, Image());
         const UINT beforeScroll = scenario.viewportChanges;

@@ -1,6 +1,7 @@
 #include "Surface.h"
 #include "Layout.h"
 #include "Accessible.h"
+#include "Uia.h"
 #include "../generated/WorkspaceTheme.generated.h"
 #include <commctrl.h>
 #include <shlobj.h>
@@ -42,7 +43,7 @@ bool PixelsValid(const Pbgra& image) noexcept {
 }
 
 struct Surface::State : std::enable_shared_from_this<State> {
-    HWND window = nullptr, canvas = nullptr;
+    HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr;
     std::array<HWND, 6> buttons{};
     Callbacks callbacks;
     std::shared_ptr<AccessibleModel> model = std::make_shared<AccessibleModel>();
@@ -53,7 +54,10 @@ struct Surface::State : std::enable_shared_from_this<State> {
     Mode mode = Mode::Gallery;
     UINT density = DefaultDensityDip, dpi = 96;
     int scroll = 0, hover = -1, anchor = -1;
-    bool shown = true, retiring = false;
+    bool shown = true, retiring = false, activationQueued = false;
+    std::uint64_t pageRevision = 0, activationRevision = 0;
+    UINT activationIndex = 0;
+    static constexpr UINT ActivationMessage = WM_APP + 0x119;
     HFONT font = nullptr;
     HICON folderIcon = nullptr, fileIcon = nullptr;
     workspace_theme::Colors colors = workspace_theme::light;
@@ -76,12 +80,24 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const auto callback = callbacks.activateItem; const auto context = callbacks.context;
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index); }
     }
+    HRESULT QueueActivation(UINT index) noexcept {
+        if (!Alive() || index >= model->page.entries.size()) return E_INVALIDARG;
+        if (activationQueued) return HRESULT_FROM_WIN32(ERROR_BUSY);
+        activationQueued = true; activationRevision = pageRevision; activationIndex = index;
+        if (!PostMessageW(canvas, ActivationMessage, index, static_cast<LPARAM>(pageRevision))) {
+            activationQueued = false; return HRESULT_FROM_WIN32(GetLastError());
+        }
+        return S_OK;
+    }
     void Menu(int index, POINT point) noexcept {
         if (!Alive()) return;
         const auto retained = shared_from_this(); const auto callback = callbacks.contextMenu; const auto context = callbacks.context;
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index, point); }
     }
     void Empty(snapshot::Status status, std::uint64_t generation) noexcept {
+        RetireUia(model);
+        ++model->presentation; model->accessible = nullptr;
+        ++pageRevision; activationQueued = false;
         images.fill(nullptr); model->thumbnailReady.fill(false); model->thumbnailUnavailable.fill(false); visible = {};
         model->page.entries.clear(); model->page.status = status; model->page.epoch = {};
         model->generation = generation; model->selected.fill(false); model->bounds.fill({}); model->focus = -1;
@@ -91,9 +107,12 @@ struct Surface::State : std::enable_shared_from_this<State> {
     void Retire() noexcept {
         if (retiring) return;
         retiring = true; Empty(snapshot::Status::Unavailable, model->generation + 1);
+        const HWND retiredCanvas = canvas;
         model->alive = false; model->visible = false; model->window = nullptr; model->context = nullptr;
         model->select = nullptr; model->extend = nullptr; model->activate = nullptr;
+        model->focusControl = nullptr; model->scrollTo = nullptr;
         window = nullptr; canvas = nullptr;
+        if (retiredCanvas) NotifyWinEvent(EVENT_OBJECT_DESTROY, retiredCanvas, OBJID_CLIENT, CHILDID_SELF);
         Notify(callbacks.viewportChanged);
     }
     void UpdateTheme() noexcept {
@@ -190,7 +209,9 @@ struct Surface::State : std::enable_shared_from_this<State> {
         InvalidateRect(canvas, nullptr, FALSE);
         NotifyWinEvent(EVENT_OBJECT_SELECTIONWITHIN, canvas, OBJID_CLIENT, CHILDID_SELF);
         if (flags & SVSI_FOCUSED) NotifyWinEvent(EVENT_OBJECT_FOCUS, canvas, OBJID_CLIENT, static_cast<LONG>(index + 1));
-        Notify(callbacks.selectionChanged); return S_OK;
+        RaiseUiaEvent(model, UIA_Selection_InvalidatedEventId);
+        if (Alive() && (flags & SVSI_FOCUSED)) RaiseUiaEvent(model, UIA_AutomationFocusChangedEventId, static_cast<int>(index));
+        if (Alive()) Notify(callbacks.selectionChanged); return S_OK;
     }
     void SelectFromInput(UINT index, bool control, bool shift) {
         if (!Alive() || index >= model->page.entries.size()) return;
@@ -307,6 +328,9 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const bool isCanvas = hwnd == state->canvas;
         const bool isRoot = hwnd == state->window;
         try {
+            if (message == WM_DESTROY && hwnd == state->canvasIdentity) {
+                state->Retire(); UiaReturnRawElementProvider(hwnd, 0, 0, nullptr);
+            }
             if (message == WM_NCDESTROY) {
                 if (isCanvas || isRoot) state->Retire(); RemoveWindowSubclass(hwnd, WindowProc, id); delete stored;
                 return DefSubclassProc(hwnd, message, wParam, lParam);
@@ -353,7 +377,22 @@ struct Surface::State : std::enable_shared_from_this<State> {
         SendMessageW(buttons[1], BM_SETCHECK, mode == Mode::List ? BST_CHECKED : BST_UNCHECKED, 0);
     }
     LRESULT CanvasMessage(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+        if (message == ActivationMessage) {
+            const auto revision = static_cast<std::uint64_t>(lParam);
+            if (activationQueued && wParam == activationIndex && revision == activationRevision) {
+                activationQueued = false;
+                if (Alive() && revision == pageRevision) Activate(activationIndex);
+            }
+            return 0;
+        }
+        if (message == WM_GETOBJECT && static_cast<LONG>(lParam) == UiaRootObjectId) {
+            IRawElementProviderSimple* provider = nullptr;
+            const auto created = CreateUiaRoot(model, &provider); model->uiaUnavailable = FAILED(created);
+            if (FAILED(created)) return 0;
+            const LRESULT result = UiaReturnRawElementProvider(hwnd, wParam, lParam, provider); provider->Release(); return result;
+        }
         if (message == WM_GETOBJECT && static_cast<LONG>(lParam) == OBJID_CLIENT) {
+            if (model->uiaUnavailable) return 0;
             IAccessible* accessible = nullptr;
             if (FAILED(CreateAccessible(model, &accessible))) return 0;
             const LRESULT result = LresultFromObject(IID_IAccessible, wParam, accessible); accessible->Release(); return result;
@@ -414,10 +453,10 @@ Surface::~Surface() { Destroy(); }
 
 HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callbacks, Surface** result) noexcept {
     if (!result) return E_POINTER; *result = nullptr;
-    if (!parent || !callbacks.lifetimeOwner || bounds.right < bounds.left || bounds.bottom < bounds.top ||
+    if (!parent || !callbacks.lifetimeOwner || !callbacks.providerLifetimeOwner || bounds.right < bounds.left || bounds.bottom < bounds.top ||
         (callbacks.completion && (callbacks.completionMessage < WM_APP || callbacks.completionMessage > 0xBFFF))) return E_INVALIDARG;
     try {
-        auto state = std::make_shared<State>(); state->callbacks = callbacks; state->model->lifetimeOwner = callbacks.lifetimeOwner;
+        auto state = std::make_shared<State>(); state->callbacks = callbacks; state->model->lifetimeOwner = callbacks.providerLifetimeOwner;
         auto hr = PrepareAccessibility(*state->model); if (FAILED(hr)) return hr;
         state->window = CreateWindowExW(WS_EX_CONTROLPARENT, L"STATIC", L"资产库", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN,
             bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, parent, nullptr, GetModuleHandleW(nullptr), nullptr);
@@ -427,7 +466,7 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             0, 0, 1, 1, state->window, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!state->canvas) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
         hr = state->Attach(state->canvas); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
-        state->model->window = state->canvas; state->model->context = state.get();
+        state->canvasIdentity = state->canvas; state->model->window = state->canvas; state->model->context = state.get();
         state->model->select = [](void* context, UINT index, UINT flags) noexcept -> HRESULT {
             auto retained = static_cast<State*>(context)->shared_from_this();
             try { return retained->Select(index, flags); } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
@@ -436,7 +475,15 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             auto retained = static_cast<State*>(context)->shared_from_this();
             try { retained->SelectFromInput(index, false, true); return S_OK; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
         };
-        state->model->activate = [](void* context, UINT index) noexcept { auto retained = static_cast<State*>(context)->shared_from_this(); retained->Activate(index); };
+        state->model->activate = [](void* context, UINT index) noexcept -> HRESULT { auto retained = static_cast<State*>(context)->shared_from_this(); return retained->QueueActivation(index); };
+        state->model->focusControl = [](void* context) noexcept -> HRESULT {
+            auto retained = static_cast<State*>(context)->shared_from_this();
+            if (!retained->Alive()) return UIA_E_ELEMENTNOTAVAILABLE; SetFocus(retained->canvas); return S_OK;
+        };
+        state->model->scrollTo = [](void* context, int top) noexcept -> HRESULT {
+            auto retained = static_cast<State*>(context)->shared_from_this();
+            try { retained->ScrollTo(top); return S_OK; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+        };
         const wchar_t* labels[] = {L"图库", L"列表", L"缩小", L"放大", L"刷新", L"连接设置"};
         for (size_t index = 0; index < state->buttons.size(); ++index) {
             const DWORD buttonStyle = index < 2 ? BS_AUTORADIOBUTTON | BS_PUSHLIKE : BS_PUSHBUTTON;

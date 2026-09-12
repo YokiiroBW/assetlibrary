@@ -36,7 +36,7 @@ int wmain(int argc, wchar_t** argv) {
         parent = CreateWindowExW(0, L"STATIC", L"test-only hidden rendering", WS_OVERLAPPEDWINDOW, 0, 0, 1000, 700,
             nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!parent) throw "rendering parent";
-        gallery::Callbacks callbacks; callbacks.lifetimeOwner = &owner; RECT bounds{0, 0, 1000, 700};
+        gallery::Callbacks callbacks; callbacks.lifetimeOwner = &owner; callbacks.providerLifetimeOwner = &owner; RECT bounds{0, 0, 1000, 700};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "rendering surface");
         const HWND canvas = FindWindowExW(surface->Window(), nullptr, L"STATIC", nullptr); if (!canvas) throw "rendering canvas";
         snapshot::Page page; page.status = snapshot::Status::Ready; page.epoch.Data1 = 1;

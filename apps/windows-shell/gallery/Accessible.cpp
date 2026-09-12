@@ -43,6 +43,7 @@ int SpatialNeighbor(const AccessibleModel& model, int index, LONG direction) noe
 }
 
 namespace {
+thread_local AccessibilityDiagnostics accessibleDiagnostics;
 class SelectionEnumerator final : public IEnumVARIANT {
     std::atomic_ulong references_{1};
     std::shared_ptr<AccessibleModel> model_;
@@ -52,9 +53,9 @@ class SelectionEnumerator final : public IEnumVARIANT {
     UINT position_ = 0;
 public:
     SelectionEnumerator(std::shared_ptr<AccessibleModel> model, Selection selection, UINT position = 0) noexcept
-        : model_(std::move(model)), owner_(model_->lifetimeOwner), generation_(model_->generation),
-          selection_(selection), position_(position) { if (owner_) owner_->AddRef(); }
-    ~SelectionEnumerator() { model_.reset(); if (owner_) owner_->Release(); }
+        : model_(std::move(model)), owner_(model_->lifetimeOwner), generation_(model_->presentation),
+          selection_(selection), position_(position) { ++accessibleDiagnostics.enumerators; if (owner_) owner_->AddRef(); }
+    ~SelectionEnumerator() { --accessibleDiagnostics.enumerators; model_.reset(); if (owner_) owner_->Release(); }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
         if (!result) return E_POINTER; *result = nullptr;
         if (iid != IID_IUnknown && iid != IID_IEnumVARIANT) return E_NOINTERFACE;
@@ -67,7 +68,7 @@ public:
         if (!values || (!fetched && requested != 1)) return E_POINTER;
         if (requested > snapshot::MaxItems) return E_INVALIDARG;
         ULONG taken = 0;
-        if (model_->alive && generation_ == model_->generation) {
+        if (model_->alive && generation_ == model_->presentation) {
             while (taken < requested && position_ < selection_.count) {
                 VariantInit(&values[taken]); values[taken].vt = VT_I4;
                 values[taken++].lVal = static_cast<LONG>(selection_.indices[position_++] + 1);
@@ -92,18 +93,20 @@ class Accessible final : public IAccessible {
     std::atomic_ulong references_{1};
     std::shared_ptr<AccessibleModel> model_;
     IUnknown* owner_;
+    const std::uint64_t presentation_;
+    bool Live() const noexcept { return model_->alive && presentation_ == model_->presentation; }
     bool Valid(VARIANT child, bool self = true) const noexcept {
-        return model_->alive && child.vt == VT_I4 && child.lVal >= (self ? 0 : 1) &&
+        return Live() && child.vt == VT_I4 && child.lVal >= (self ? 0 : 1) &&
             static_cast<size_t>(child.lVal) <= model_->page.entries.size();
     }
     HRESULT Text(const wchar_t* text, BSTR* value) const noexcept {
         if (!value) return E_POINTER; *value = SysAllocString(text); return *value ? S_OK : E_OUTOFMEMORY;
     }
 public:
-    explicit Accessible(std::shared_ptr<AccessibleModel> model) noexcept : model_(std::move(model)), owner_(model_->lifetimeOwner) {
-        if (owner_) owner_->AddRef();
+    explicit Accessible(std::shared_ptr<AccessibleModel> model) noexcept : model_(std::move(model)), owner_(model_->lifetimeOwner), presentation_(model_->presentation) {
+        ++accessibleDiagnostics.providers; if (owner_) owner_->AddRef();
     }
-    ~Accessible() { model_.reset(); if (owner_) owner_->Release(); }
+    ~Accessible() { --accessibleDiagnostics.providers; if (model_->accessible == this) model_->accessible = nullptr; model_.reset(); if (owner_) owner_->Release(); }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
         if (!result) return E_POINTER; *result = nullptr;
         if (iid != IID_IUnknown && iid != IID_IDispatch && iid != IID_IAccessible) return E_NOINTERFACE;
@@ -124,23 +127,23 @@ public:
     HRESULT STDMETHODCALLTYPE Invoke(DISPID id, REFIID iid, LCID, WORD flags, DISPPARAMS* parameters,
         VARIANT* value, EXCEPINFO* exception, UINT* argument) override {
         if (iid != IID_NULL) return DISP_E_UNKNOWNINTERFACE;
-        if (!model_->alive) return CO_E_OBJNOTCONNECTED;
+        if (!Live()) return CO_E_OBJNOTCONNECTED;
         return DispInvoke(static_cast<IAccessible*>(this), model_->typeInfo, id, flags, parameters, value, exception, argument);
     }
     HRESULT STDMETHODCALLTYPE get_accParent(IDispatch** parent) override {
         if (!parent) return E_POINTER; *parent = nullptr;
-        if (!model_->alive || !model_->window) return CO_E_OBJNOTCONNECTED;
+        if (!Live() || !model_->window) return CO_E_OBJNOTCONNECTED;
         return AccessibleObjectFromWindow(GetParent(model_->window), static_cast<DWORD>(OBJID_CLIENT), IID_IDispatch, reinterpret_cast<void**>(parent));
     }
     HRESULT STDMETHODCALLTYPE get_accChildCount(LONG* count) override {
-        if (!count) return E_POINTER; *count = model_->alive ? static_cast<LONG>(model_->page.entries.size()) : 0; return S_OK;
+        if (!count) return E_POINTER; *count = Live() ? static_cast<LONG>(model_->page.entries.size()) : 0; return S_OK;
     }
     HRESULT STDMETHODCALLTYPE get_accChild(VARIANT child, IDispatch** result) override {
         if (!result) return E_POINTER; *result = nullptr; return Valid(child, false) ? S_FALSE : E_INVALIDARG;
     }
     HRESULT STDMETHODCALLTYPE get_accName(VARIANT child, BSTR* value) override {
         if (!value) return E_POINTER; *value = nullptr;
-        if (!Valid(child)) return model_->alive ? E_INVALIDARG : CO_E_OBJNOTCONNECTED;
+        if (!Valid(child)) return Live() ? E_INVALIDARG : CO_E_OBJNOTCONNECTED;
         return Text(child.lVal ? model_->page.entries[static_cast<size_t>(child.lVal - 1)].name.c_str() : model_->title.c_str(), value);
     }
     HRESULT STDMETHODCALLTYPE get_accValue(VARIANT, BSTR* value) override { if (!value) return E_POINTER; *value = nullptr; return S_FALSE; }
@@ -181,12 +184,12 @@ public:
     HRESULT STDMETHODCALLTYPE get_accKeyboardShortcut(VARIANT, BSTR* value) override { if (!value) return E_POINTER; *value = nullptr; return S_FALSE; }
     HRESULT STDMETHODCALLTYPE get_accFocus(VARIANT* value) override {
         if (!value) return E_POINTER; VariantInit(value);
-        if (!model_->alive) return CO_E_OBJNOTCONNECTED;
+        if (!Live()) return CO_E_OBJNOTCONNECTED;
         if (GetFocus() == model_->window) { value->vt = VT_I4; value->lVal = model_->focus + 1; }
         return S_OK;
     }
     HRESULT STDMETHODCALLTYPE get_accSelection(VARIANT* value) override {
-        if (!value) return E_POINTER; VariantInit(value); if (!model_->alive) return CO_E_OBJNOTCONNECTED;
+        if (!value) return E_POINTER; VariantInit(value); if (!Live()) return CO_E_OBJNOTCONNECTED;
         Selection selected;
         for (UINT index = 0; index < model_->page.entries.size(); ++index) if (model_->selected[index]) selected.indices[selected.count++] = index;
         if (selected.count == 1) { value->vt = VT_I4; value->lVal = static_cast<LONG>(selected.indices[0] + 1); }
@@ -211,7 +214,7 @@ public:
         if (flags & SELFLAG_REMOVESELECTION) {
             const auto generation = model_->generation;
             const auto hr = model_->select(model_->context, static_cast<UINT>(child.lVal - 1), SVSI_DESELECT);
-            if (FAILED(hr) || !(flags & SELFLAG_TAKEFOCUS) || !model_->alive || model_->generation != generation || !model_->select) return hr;
+            if (FAILED(hr) || !(flags & SELFLAG_TAKEFOCUS) || !Live() || model_->generation != generation || !model_->select) return hr;
             return model_->select(model_->context, static_cast<UINT>(child.lVal - 1), SVSI_FOCUSED | SVSI_ENSUREVISIBLE);
         }
         UINT selection = 0;
@@ -239,7 +242,7 @@ public:
         if (index < 0) return S_FALSE; end->vt = VT_I4; end->lVal = index + 1; return S_OK;
     }
     HRESULT STDMETHODCALLTYPE accHitTest(LONG x, LONG y, VARIANT* result) override {
-        if (!result) return E_POINTER; VariantInit(result); if (!model_->alive || !model_->window) return CO_E_OBJNOTCONNECTED;
+        if (!result) return E_POINTER; VariantInit(result); if (!Live() || !model_->window) return CO_E_OBJNOTCONNECTED;
         POINT point{x, y}; ScreenToClient(model_->window, &point); RECT client{}; GetClientRect(model_->window, &client);
         if (!PtInRect(&client, point)) return S_FALSE;
         result->vt = VT_I4; result->lVal = CHILDID_SELF;
@@ -250,7 +253,7 @@ public:
         if (!Valid(child, false) || !model_->activate) return E_INVALIDARG;
         const UINT index = static_cast<UINT>(child.lVal - 1);
         if (!snapshot::Navigable(model_->page.entries[index].kind)) return E_ACCESSDENIED;
-        model_->activate(model_->context, index); return S_OK;
+        return model_->activate(model_->context, index);
     }
     HRESULT STDMETHODCALLTYPE put_accName(VARIANT, BSTR) override { return E_ACCESSDENIED; }
     HRESULT STDMETHODCALLTYPE put_accValue(VARIANT, BSTR) override { return E_ACCESSDENIED; }
@@ -260,7 +263,9 @@ public:
 HRESULT CreateAccessible(const std::shared_ptr<AccessibleModel>& model, IAccessible** result) noexcept {
     if (!result) return E_POINTER; *result = nullptr;
     if (!model || !model->alive || !model->typeInfo) return CO_E_OBJNOTCONNECTED;
+    if (model->accessible) { model->accessible->AddRef(); *result = model->accessible; return S_OK; }
     auto provider = new(std::nothrow) Accessible(model);
-    if (!provider) return E_OUTOFMEMORY; *result = provider; return S_OK;
+    if (!provider) return E_OUTOFMEMORY; model->accessible = provider; *result = provider; return S_OK;
 }
+AccessibilityDiagnostics InspectAccessibility() noexcept { return accessibleDiagnostics; }
 } // namespace gallery

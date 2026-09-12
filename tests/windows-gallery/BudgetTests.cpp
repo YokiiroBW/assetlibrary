@@ -17,7 +17,7 @@ int main() {
         parent = CreateWindowExW(0, L"STATIC", L"test-only hidden large viewport", WS_OVERLAPPEDWINDOW, 0, 0, 1800, 10000,
             nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!parent) throw "budget parent";
-        gallery::Callbacks callbacks; callbacks.lifetimeOwner = &owner; RECT bounds{0, 0, 1750, 9900};
+        gallery::Callbacks callbacks; callbacks.lifetimeOwner = &owner; callbacks.providerLifetimeOwner = &owner; RECT bounds{0, 0, 1750, 9900};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "budget surface");
         snapshot::Page page; page.status = snapshot::Status::Ready; page.epoch.Data1 = 1;
         for (UINT index = 0; index < snapshot::MaxItems; ++index) {

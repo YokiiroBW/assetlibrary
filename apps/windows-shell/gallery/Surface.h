@@ -34,9 +34,8 @@ struct VisibleFiles {
 
 struct Callbacks {
     void* context = nullptr;
-    // Borrowed while the HWND exists. Retained across each callback and by any
-    // external accessibility provider; the View must Destroy before releasing
-    // its owned surface. The surface itself does not create an owner cycle.
+    // Borrowed View owner, retained only while window messages/public calls
+    // and event callbacks execute. The Surface does not own the View.
     IUnknown* lifetimeOwner = nullptr;
     // Independent DLL lifetime (production: Folder), never an object owning
     // the View/Surface. Accessibility providers retain this, not lifetimeOwner.
