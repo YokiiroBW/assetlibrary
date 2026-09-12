@@ -51,5 +51,7 @@ HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,ISh
 HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result,
     PCIDLIST_ABSOLUTE notificationRoot=nullptr,bool rootView=true) noexcept;
 ULONG ActiveViews() noexcept;
+bool TryReserveViewSlot(ULONG& previous) noexcept;
+void ReleaseViewSlot() noexcept;
 ULONG LiveCallbacks() noexcept;
 }

@@ -42,10 +42,10 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     const bool rootView_;
     bool changePending_=false,changeQueued_=false;
     std::atomic_bool slotHeld_{true};
-    void ReleaseSlot() noexcept {if(slotHeld_.exchange(false))activeViews.fetch_sub(1);}
+    void ReleaseSlot() noexcept {if(slotHeld_.exchange(false))ReleaseViewSlot();}
     bool ReserveSlot() noexcept {
         if(slotHeld_)return true;
-        ULONG count=activeViews.load();do{if(count>=MaxViews)return false;}while(!activeViews.compare_exchange_weak(count,count+1));
+        ULONG count=0;if(!TryReserveViewSlot(count))return false;
         slotHeld_=true;return true;
     }
     void StopTimer() noexcept {
@@ -290,6 +290,12 @@ bool Signal::Read(snapshot::Status& value,ULONGLONG* resultGeneration) const noe
     value=static_cast<snapshot::Status>(current&7);if(resultGeneration)*resultGeneration=generation;return true;
 }
 ULONG ActiveViews() noexcept {return activeViews.load();}
+bool TryReserveViewSlot(ULONG& previous) noexcept {
+    previous=activeViews.load();
+    do{if(previous>=MaxViews)return false;}while(!activeViews.compare_exchange_weak(previous,previous+1));
+    return true;
+}
+void ReleaseViewSlot() noexcept {activeViews.fetch_sub(1);}
 ULONG LiveCallbacks() noexcept {return liveCallbacks.load();}
 HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,IShellFolderViewCB** result,
     PCIDLIST_ABSOLUTE notificationRoot,bool rootView) noexcept {
@@ -302,10 +308,10 @@ HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,ISh
         if(!signal->sessionNotification||!snapshot::BoundedList(notificationRoot,bytes,count)||count!=1)return done(E_INVALIDARG);
         root=ILCloneFull(notificationRoot);if(!root)return done(E_OUTOFMEMORY);
     }
-    ULONG count=activeViews.load();do{if(count>=MaxViews){CoTaskMemFree(root);signal->diagnostic.createSlots=count;return done(HRESULT_FROM_WIN32(ERROR_BUSY));}}while(!activeViews.compare_exchange_weak(count,count+1));
+    ULONG count=0;if(!TryReserveViewSlot(count)){CoTaskMemFree(root);signal->diagnostic.createSlots=count;return done(HRESULT_FROM_WIN32(ERROR_BUSY));}
     signal->diagnostic.createSlots=count;
     auto callback=new(std::nothrow) Callback(owner,signal,root,rootView);
-    if(!callback){CoTaskMemFree(root);activeViews.fetch_sub(1);return done(E_OUTOFMEMORY);}*result=callback;return done(S_OK);
+    if(!callback){CoTaskMemFree(root);ReleaseViewSlot();return done(E_OUTOFMEMORY);}*result=callback;return done(S_OK);
 }
 HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result,
     PCIDLIST_ABSOLUTE notificationRoot,bool rootView) noexcept {

@@ -15,6 +15,7 @@
 #include "G3Measurements.h"
 #include "ProductIdentity.h"
 #include "SettingsMenu.h"
+#include "gallery/View.h"
 #include <cstring>
 
 namespace {
@@ -167,6 +168,9 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
     if constexpr(product::Production){if(iid==IID_IContextMenu)return CreateSettingsMenu(static_cast<IShellFolder2*>(this),iid,value);}
     if (iid != IID_IShellView) return E_NOINTERFACE;
     if(!absolute_)return E_UNEXPECTED;
+    if constexpr(product::Production){
+      if(!snapshot::Zero(location_.node))return gallery::CreateView(static_cast<IShellFolder2*>(this),absolute_,location_,reinterpret_cast<IShellView**>(value));
+    }
     try {
       auto state=std::make_shared<loading::Signal>();auto folder=new(std::nothrow) Folder(state,diagnostic_.instance);if(!folder)return E_OUTOFMEMORY;
       diagnostic_.lastClone=folder->diagnostic_.instance;
@@ -262,7 +266,10 @@ class Factory final : public IClassFactory {
   HRESULT STDMETHODCALLTYPE LockServer(BOOL value) override { if(value) ++locks; else --locks; return S_OK; }
 };
 }
-__control_entrypoint(DllExport) STDAPI DllCanUnloadNow() { return objects == 0 && locks == 0 && snapshot::PendingOperations() == 0 ? S_OK : S_FALSE; }
+__control_entrypoint(DllExport) STDAPI DllCanUnloadNow() {
+  if constexpr(product::Production){if(gallery::PendingWork()||thumbnail::PendingOperations())return S_FALSE;}
+  return objects == 0 && locks == 0 && snapshot::PendingOperations() == 0 ? S_OK : S_FALSE;
+}
 _Check_return_ STDAPI DllGetClassObject(_In_ REFCLSID clsid, _In_ REFIID iid, _Outptr_ void** value) {
   if (!value) return E_POINTER; *value = nullptr; if (clsid != kClsid) return CLASS_E_CLASSNOTAVAILABLE;
   auto factory = new(std::nothrow) Factory(); if (!factory) return E_OUTOFMEMORY;

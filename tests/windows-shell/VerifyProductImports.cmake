@@ -12,7 +12,7 @@ string(REGEX MATCHALL "[\r\n][ \t]+[a-z0-9_.-]+\\.dll" dependencies "${imports}"
 if(NOT dependencies)
   message(FATAL_ERROR "Import inspection found no DLL dependencies; no pass can be inferred.")
 endif()
-set(allowed ole32.dll oleaut32.dll shell32.dll user32.dll shlwapi.dll advapi32.dll comctl32.dll kernel32.dll)
+set(allowed ole32.dll oleaut32.dll shell32.dll user32.dll shlwapi.dll advapi32.dll comctl32.dll kernel32.dll gdi32.dll msimg32.dll oleacc.dll)
 foreach(dependency IN LISTS dependencies)
   string(STRIP "${dependency}" dependency)
   string(TOLOWER "${dependency}" dependency)
