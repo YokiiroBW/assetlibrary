@@ -1,4 +1,5 @@
 #include "SnapshotPidl.h"
+#include "ProductIdentity.h"
 #include <cstring>
 #include <limits>
 #include <string_view>
@@ -63,8 +64,9 @@ bool ParseName(const wchar_t* name,PIDLIST_RELATIVE* result,ULONG* eaten,Kind& l
     constexpr size_t MaxChars=MaxPayload*2+64*18+64;
     const size_t length=wcsnlen_s(name,MaxChars+1);if(!length||length>MaxChars)return false;
     std::wstring_view remaining(name,length);
-    constexpr std::wstring_view root=L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}\\";
-    if(remaining.substr(0,root.size())==root)remaining.remove_prefix(root.size());
+    constexpr std::wstring_view root=product::ParsingRoot;
+    if(remaining.size()>root.size()&&remaining.substr(0,root.size())==root&&remaining[root.size()]==L'\\')
+        remaining.remove_prefix(root.size()+1);
     constexpr std::wstring_view prefix=L"snapshot-pidl-v1:";
     std::vector<BYTE> bytes;UINT count=0;
     while(!remaining.empty()){

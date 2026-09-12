@@ -20,7 +20,22 @@ void Identity(const wchar_t* path,const CLSID& accepted,const CLSID& rejected,bo
     proof::Item item(snapshot::MakePidl(entry));STRRET name{};
     Check(root.value->GetDisplayNameOf(item.value,SHGDN_FORPARSING,&name)==S_OK,"absolute parsing name");
     const std::wstring expected=production?product::ParsingRoot:L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}";
-    Check(name.uType==STRRET_WSTR&&std::wstring(name.pOleStr).find(expected+L"\\snapshot-pidl-v1:")==0,"matching parsing root");CoTaskMemFree(name.pOleStr);
+    Check(name.uType==STRRET_WSTR&&std::wstring(name.pOleStr).find(expected+L"\\snapshot-pidl-v1:")==0,"matching parsing root");
+    {
+        auto fresh=library.Root();proof::Item parsed;
+        Check(fresh.value->ParseDisplayName(nullptr,nullptr,name.pOleStr,nullptr,&parsed.value,nullptr)==S_OK
+            &&ILIsEqual(parsed.value,item.value),"fresh instance parses its variant absolute name");
+        const std::wstring otherRoot=production?L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}":product::ParsingRoot;
+        auto foreign=otherRoot+std::wstring(name.pOleStr).substr(expected.size());proof::Item denied;
+        Check(FAILED(fresh.value->ParseDisplayName(nullptr,nullptr,foreign.data(),nullptr,&denied.value,nullptr))&&!denied.value,"other variant absolute parsing root rejected");
+        auto parent=proof::Bind(root.value,item);
+        proof::Item child(snapshot::MakePidl({{101},{103},snapshot::Kind::Directory,L"nested"}));STRRET nested{};
+        Check(parent.value->GetDisplayNameOf(child.value,SHGDN_FORPARSING,&nested)==S_OK,"nested absolute name");
+        proof::Item chain,combined(ILCombine(item.value,child.value));
+        Check(fresh.value->ParseDisplayName(nullptr,nullptr,nested.pOleStr,nullptr,&chain.value,nullptr)==S_OK
+            &&ILIsEqual(chain.value,combined.value),"nested absolute name roundtrip is variant-safe");CoTaskMemFree(nested.pOleStr);
+    }
+    CoTaskMemFree(name.pOleStr);
     proof::Com<IContextMenu> menu;
     const auto hr=root.value->CreateViewObject(nullptr,IID_PPV_ARGS(&menu.value));
     Check(production?hr==S_OK:hr==E_NOINTERFACE,"production-only settings menu");
