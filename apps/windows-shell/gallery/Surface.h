@@ -38,6 +38,9 @@ struct Callbacks {
     // external accessibility provider; the View must Destroy before releasing
     // its owned surface. The surface itself does not create an owner cycle.
     IUnknown* lifetimeOwner = nullptr;
+    // Independent DLL lifetime (production: Folder), never an object owning
+    // the View/Surface. Accessibility providers retain this, not lifetimeOwner.
+    IUnknown* providerLifetimeOwner = nullptr;
     void (*activateItem)(void*, UINT index) noexcept = nullptr;
     void (*contextMenu)(void*, int index, POINT screenPoint) noexcept = nullptr; // -1 means background.
     void (*viewportChanged)(void*) noexcept = nullptr;
