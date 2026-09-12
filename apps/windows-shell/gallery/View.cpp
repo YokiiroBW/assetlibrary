@@ -257,6 +257,7 @@ public:
         if(generation_!=creation||!slot_){ReleaseSlot();return E_ABORT;}
         browser_=browser;browser_->AddRef();
         Callbacks callbacks;callbacks.context=this;callbacks.lifetimeOwner=static_cast<IShellView*>(this);
+        callbacks.providerLifetimeOwner=folder_;
         callbacks.activateItem=[](void* p,UINT index)noexcept{static_cast<View*>(p)->Activate(index);};
         callbacks.contextMenu=[](void* p,int index,POINT point)noexcept{static_cast<View*>(p)->Context(index,point);};
         callbacks.viewportChanged=[](void* p)noexcept{static_cast<View*>(p)->Viewport();};
