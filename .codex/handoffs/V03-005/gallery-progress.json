@@ -27,14 +27,16 @@
     "shell_handoff": "c8df1a4",
     "native_uia_decision": "9d46429",
     "provider_lifetime_header": "329d824",
-    "independent_folder_pin": "f8a2269"
+    "independent_folder_pin": "f8a2269",
+    "native_uia": "802730a/206e8e9/c4516ca/017c1c8",
+    "final_browse_fixes": "bb4cf4b/1250a7b"
   },
   "agents": [
     {
       "task": "V03-019",
       "agent": "windows_package_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-019",
-      "scope": "NativeUIA draft compiled and List/30children/Selection works. Found real underlying bug: explicit Surface.Destroy clears canvas beforeWM_DESTROY, so old/new UIA event-map clearing was skipped. Stable canvasIdentity makes nativeUIA normal/action-close and3 sameSTA cycles return owners1/providers0/pending0. Old MSAA map-clear negative experiment had no invocation counter, so conclusion unreliable. NOW running ONE isolated old-MSAA+correct-identity+explicit-map-call-count control (normal/action/3cycles), nativeUIA draft preserved; root must select smallest actually passing path. NativeUIA4-batch deferred-queue admission bug also found; approved single prebuiltSTA STATIC window/fixed512 slots if nativeUIA chosen."
+      "scope": "V03-019 source done throughd215431/f2ad8e3 (rootbb4cf4b/1250a7b); docs62c3ca9 integrated4bafa3c; laterdocs3023e72/a365976 awaitpick. No sourcewrites."
     },
     {
       "task": "V03-020",
@@ -46,7 +48,7 @@
       "task": "V03-021",
       "agent": "windows_shell_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-021",
-      "scope": "V03-021 source complete throughf8a2269 (provider pinsFolder notView). Await finalSurface to test realView afterMTA UIA access with heldroot/child acrossDestroy/lastRelease and finalFolder/slot return. No current GUI/source writes."
+      "scope": "V03-021 finishingnewMTA realView UIA retirement tests and investigating actualExplorer stalefooter1item/selected1in100-itemgallery. rootrequested publicIShellBrowser statusmethod fix only; mayneednewpreview4. Waitingreport/commit."
     }
   ],
   "real_core": {
@@ -55,7 +57,7 @@
     "ready_file": ".runtime/gallery-server-20260913/core/20260912T192618Z-02d21811/ready.json",
     "origin": "https://localhost:64171",
     "host_pid": 36424,
-    "expires_at_utc": "2026-09-12T21:26:28.6215079+00:00",
+    "expires_at_utc": "2026-09-13T05:26:28.6215079+08:00",
     "worker": ".runtime/gallery-server-20260913/worker/AssetLibrary.ImagePreview.Worker.exe",
     "corpus": "tests/integration/native-clients/fixtures/image-preview-v1",
     "validation": "Prior fixture actualLPAC/Core2/2 and nativepipe1/1 remain evidence; this new fixture ready for final realExplorer run.",
@@ -69,7 +71,7 @@
     "new versioned package and final handoff"
   ],
   "nas": "unchanged; lacks required seccomp for original image worker; no server/security changes authorized or performed",
-  "desktop": "No owned GUI. Latest harness25084 exited via close button. Complete 29-image wide page visually passed in .runtime/gallery-validation/harness-wide-all-images.png; previous starvation screenshot preserved. Narrow toolbar wrapping and scroll clipping passed. Test synthetic pixels only; installed realExplorer gallery still pending. OriginalExplorer6212 untouched.",
+  "desktop": "ACTIVE owned Explorer browserPID31248/HWND593012, creation134337171227407406, loadedinstalledpreview3DLL and verifiedhash. Current location: AssetLibrary/library/NextPage/images/Chinese directory; justF5 refresh of duplicate.dat (PNG content) picture. Owned brokerPID33636/HWND17370144 creation134337168614595925 staysatWindowsKits10, carriesoldpreview2DLL; use onlyfornative installer/API helpers. OriginalExplorer6212 untouched. Settings29456 closed afterconnected readback; allharness windows closed. Nativebroker/view records andscreenshots in .runtime/gallery-native-01. Root ownsallGUI.",
   "verification": {
     "repository": "passed after shared test fixture correction",
     "native_build": "passed strict Release/W4/WX/analyze after04d81cf",
@@ -77,7 +79,21 @@
     "real_images": "Core LPAC/AOT2/2 + native image pipe1/1 passed; fixture148 assets unchanged and cleaned",
     "visual": "partial: mouse mode/density and keyboard multiselect passed; scroll canvas clipping failed, provider retirement unresolved",
     "native_tests": "Root original12/12 passed69.14s; after full-visible/lease fix targetedRequests/View/imports3/3 passed1.47s and Surface/Layout/Budget/Rendering4/4 passed0.22s; repository-batch.log passed.",
-    "setup": "preview.3 identity: locked restore/format/zero-warning build +23 Setup tests;6 package tests;16 release-lock tests;17 RID package license audit all passed in .runtime/gallery-validation."
+    "setup": "preview.3 identity: locked restore/format/zero-warning build +23 Setup tests;6 package tests;16 release-lock tests;17 RID package license audit all passed in .runtime/gallery-validation.",
+    "actual_explorer": "Preview3 installed via verifiedunpackagedbroker; fresh31248loaded3; Core64171 connectedRememberfalse viaControl.dll. RootDefView, customlibrarypage, listmode, keyboardEnd/EnterNextPage, Chinese folders/title, JPG/PNG/WebP/orientation/transparent5validimages and4bad/unsupportedfallback, same-rowShiftRightmulti andlistselectionpreservation, PNG renamed.dat allpassed. F5 immediateoldpixelsclear seen; refreshsettle/logout/history/closecleanup stillpending.",
+    "latest_native": "Root10/10 fullUIA suite passed1.14s aftereventlistenerfix; lastready-description+horizontalnav root3/3 passed0.16s. FinalEXE syntheticCLI8/8 passed withno realHKCU; installer23/package6/lock16/audit17already passed."
   },
-  "critical_decision": "CONFIRMED: corrected old-MSAA control explicitly executed CoDisconnect+correct ownHWND mapclear eachcycle;3 cycles still providers3/owners2 after30s, onlyCoUninit clears. Continue owned nativeUIA. New native correctedcanvasIdentity+explicitmapclear+per-providerdisconnect passes normal/action/3cycles; fixed512-slotSTA retirement capacity negative tests now running."
+  "critical_decision": "Continue ownednativeUIA; oldcorrect-mapbridgecontrolstillleaks withactualcallcounts. Currentremainingfunctionalissue is stalehostfooter/count. Do notoverwriteinstalledpreview3DLL/package ifproductionfix; bumpnewversion. RealCoreactive30648 mustcleanupatend; noG4.",
+  "package": {
+    "version": "0.3.0-preview.3",
+    "source": "1250a7b7d64759ffb515d69b9272453a13d65da9",
+    "zip": ".runtime/releases/windows/AssetLibrary-0.3.0-preview.3-win-x64.zip",
+    "bytes": 155479812,
+    "sha256": "97fa2942de8be6016861d03b2d9276534cd4e418b110ddcd210debbdc8240fb4",
+    "build_session": "79272 completed",
+    "build_root": ".runtime/gallery-package-build-01",
+    "installed": true,
+    "installed_dll_sha256": "0168F3387010993258BD3FFB73CE60757F7B76A36404265A1840A0F977DB8FAB",
+    "status": "INTERNAL candidate: real gallery works; stale Explorer status bar count identified; Shell owner checking supported fix which may require preview.4 final package"
+  }
 }
