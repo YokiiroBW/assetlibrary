@@ -6,6 +6,82 @@
 
 namespace {
 using proof::Check;
+std::wstring DisplayName(IShellFolder2* folder,PCUITEMID_CHILD item,SHGDNF flags){
+    STRRET value{};
+    if(folder->GetDisplayNameOf(item,flags,&value)!=S_OK||value.uType!=STRRET_WSTR||!value.pOleStr)
+        throw std::runtime_error("display name contract");
+    std::wstring result(value.pOleStr);CoTaskMemFree(value.pOleStr);return result;
+}
+void FriendlyNames(proof::Library& library,bool production){
+    auto root=library.Root();
+    // SIGDN desktop editing/address-bar forms include FORPARSING in their low flags.
+    const SHGDNF friendly[]={SHGDN_NORMAL,SHGDN_INFOLDER,SHGDN_FOREDITING,
+        SHGDN_INFOLDER|SHGDN_FOREDITING,SHGDN_FORADDRESSBAR,SHGDN_INFOLDER|SHGDN_FORADDRESSBAR,
+        SHGDN_FORPARSING|SHGDN_FORADDRESSBAR,SHGDN_INFOLDER|SHGDN_FORPARSING|SHGDN_FORADDRESSBAR,
+        SHGDN_FORPARSING|SHGDN_FOREDITING,SHGDN_INFOLDER|SHGDN_FORPARSING|SHGDN_FOREDITING};
+    for(const auto flags:friendly){
+        if(production)Check(DisplayName(root.value,nullptr,flags)==L"资产库","product root UI name is friendly");
+        for(const auto kind:{snapshot::Kind::Library,snapshot::Kind::Directory,snapshot::Kind::File,snapshot::Kind::Reparse,snapshot::Kind::NextPage}){
+            const snapshot::Entry entry{{101},{201},kind,L"中文 图像📷.jpg"};proof::Item item(snapshot::MakePidl(entry));
+            Check(DisplayName(root.value,item.value,flags)==entry.name,"UI flags never expose GUID or PIDL hex");
+        }
+    }
+    proof::Item parentItem(snapshot::MakePidl({{101},{202},snapshot::Kind::Library,L"父资源库"}));
+    auto parent=proof::Bind(root.value,parentItem);
+    const snapshot::Entry entry{{101},{203},snapshot::Kind::Directory,std::wstring(255,L'图')};
+    proof::Item child(snapshot::MakePidl(entry));
+    for(const auto flags:friendly)Check(DisplayName(parent.value,child.value,flags)==entry.name,"nested long UI name is preserved");
+    for(const SHGDNF flags:{SHGDNF(SHGDN_FORPARSING),SHGDNF(SHGDN_FORPARSING|SHGDN_INFOLDER)}){
+        auto name=DisplayName(parent.value,child.value,flags);proof::Item parsed;
+        auto fresh=library.Root();
+        Check(fresh.value->ParseDisplayName(nullptr,nullptr,name.data(),nullptr,&parsed.value,nullptr)==S_OK,"pure parsing still works in a fresh instance");
+        proof::Item expected((flags&SHGDN_INFOLDER)?ILClone(child.value):ILCombine(parentItem.value,child.value));
+        Check(ILIsEqual(parsed.value,expected.value),"pure parsing preserves the full identity chain");
+    }
+    auto display=DisplayName(parent.value,child.value,SHGDN_FORPARSING|SHGDN_FORADDRESSBAR);
+    proof::Item denied;Check(FAILED(parent.value->ParseDisplayName(nullptr,nullptr,display.data(),nullptr,&denied.value,nullptr))&&!denied.value,"friendly name is not treated as identity");
+    if(production)Check(DisplayName(root.value,nullptr,SHGDN_FORPARSING)==product::ParsingRoot,"root pure parsing identity unchanged");
+    puts("friendly_names=passed; UI_flag_combinations=10; leaf_kinds=5; long_UTF16_name=255; pure_parsing=roundtrip");
+}
+short Compare(IShellFolder2* folder,LPARAM flags,PCUIDLIST_RELATIVE left,PCUIDLIST_RELATIVE right){
+    const auto hr=folder->CompareIDs(flags,left,right);Check(SUCCEEDED(hr),"successful comparison");return static_cast<short>(HRESULT_CODE(hr));
+}
+void DisplayOrdering(proof::Library& library){
+    auto root=library.Root();
+    for(const LPARAM column:{LPARAM(0),LPARAM(1)}){
+        for(const auto folderKind:{snapshot::Kind::Library,snapshot::Kind::Directory}){
+            proof::Item folder(snapshot::MakePidl({{101},{250},folderKind,L"zz 目录"}));
+            for(const auto otherKind:{snapshot::Kind::File,snapshot::Kind::Reparse,snapshot::Kind::NextPage}){
+                proof::Item other(snapshot::MakePidl({{101},{1},otherKind,L"00 文件或分页"}));
+                Check(Compare(root.value,column,folder.value,other.value)<0&&Compare(root.value,column,other.value,folder.value)>0,"folders precede ordinary items and next page despite names and tokens");
+            }
+        }
+        for(const auto kind:{snapshot::Kind::File,snapshot::Kind::Reparse}){
+            proof::Item item(snapshot::MakePidl({{101},{250},kind,L"zz 文件"}));
+            proof::Item next(snapshot::MakePidl({{101},{1},snapshot::Kind::NextPage,L"00 下一页"}));
+            Check(Compare(root.value,column,item.value,next.value)<0&&Compare(root.value,column,next.value,item.value)>0,"next page sorts after files and non-navigable links");
+        }
+        proof::Item first(snapshot::MakePidl({{101},{250},snapshot::Kind::File,L"a"}));
+        proof::Item last(snapshot::MakePidl({{101},{1},snapshot::Kind::File,L"z"}));
+        Check(Compare(root.value,column,first.value,last.value)<0,"same-group name order stays ahead of identity");
+        Check(Compare(root.value,column,first.value,first.value)==0,"display comparison reflexive");
+    }
+    proof::Item file(snapshot::MakePidl({{101},{1},snapshot::Kind::File,L"z"}));
+    proof::Item link(snapshot::MakePidl({{101},{2},snapshot::Kind::Reparse,L"a"}));
+    Check(Compare(root.value,0,file.value,link.value)>0&&Compare(root.value,1,file.value,link.value)<0,"selected name/type column still matters within ordinary group");
+    proof::Item folder(snapshot::MakePidl({{101},{250},snapshot::Kind::Directory,L"z"}));
+    Check(Compare(root.value,0,folder.value,file.value)<0&&Compare(root.value,SHCIDS_CANONICALONLY,folder.value,file.value)>0,"canonical order is not display grouping");
+    proof::Item renamed(snapshot::MakePidl({{101},{250},snapshot::Kind::Directory,L"a"}));
+    Check(Compare(root.value,SHCIDS_CANONICALONLY,folder.value,renamed.value)==0&&Compare(root.value,0,folder.value,renamed.value)>0,"canonical equality ignores display names");
+    proof::Item duplicate(snapshot::MakePidl({{101},{251},snapshot::Kind::Directory,L"z"}));
+    Check(Compare(root.value,0,folder.value,duplicate.value)<0,"same display name keeps stable opaque tie-break");
+    proof::Item prefix(snapshot::MakePidl({{101},{252},snapshot::Kind::Library,L"父目录"}));
+    proof::Item nestedFolder(ILCombine(prefix.value,folder.value)),nestedFile(ILCombine(prefix.value,file.value));
+    Check(Compare(root.value,0,nestedFolder.value,nestedFile.value)<0
+        &&Compare(root.value,SHCIDS_CANONICALONLY,nestedFolder.value,nestedFile.value)>0,"comparison walks nested identities with the selected rule");
+    Check(root.value->CompareIDs(2,folder.value,file.value)==E_INVALIDARG,"unknown column still fails");
+    puts("display_order=folders_then_files_then_next_page; columns=2; canonical_identity=preserved; scope=current_page_ascending_comparison");
+}
 void Identity(const wchar_t* path,const CLSID& accepted,const CLSID& rejected,bool production){
     proof::Library library(path,accepted);
     auto root=library.Root();proof::Com<IPersist> persist;
@@ -39,6 +115,7 @@ void Identity(const wchar_t* path,const CLSID& accepted,const CLSID& rejected,bo
     proof::Com<IContextMenu> menu;
     const auto hr=root.value->CreateViewObject(nullptr,IID_PPV_ARGS(&menu.value));
     Check(production?hr==S_OK:hr==E_NOINTERFACE,"production-only settings menu");
+    FriendlyNames(library,production);DisplayOrdering(library);
     if(!production)return;
     name=STRRET{};
     if(root.value->GetDisplayNameOf(nullptr,SHGDN_NORMAL,&name)!=S_OK)throw std::runtime_error("product root title");

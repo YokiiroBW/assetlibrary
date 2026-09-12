@@ -142,7 +142,13 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
       while(a->mkid.cb&&b->mkid.cb){snapshot::Entry left,right;
         if(!snapshot::ReadPidl(a,left)||!snapshot::ReadPidl(b,right))return E_INVALIDARG;
         if(!(flags&SHCIDS_CANONICALONLY)){
-          if(column==1)result=wcscmp(snapshot::TypeText(left.kind),snapshot::TypeText(right.kind));
+          // Rank only the loaded page's display order; canonical identity stays independent.
+          const auto group=[](snapshot::Kind kind){
+            if(kind==snapshot::Kind::Library||kind==snapshot::Kind::Directory)return 0;
+            return kind==snapshot::Kind::NextPage?2:1;
+          };
+          result=group(left.kind)-group(right.kind);
+          if(!result&&column==1)result=wcscmp(snapshot::TypeText(left.kind),snapshot::TypeText(right.kind));
           if(!result)result=left.name.compare(right.name);
         }
         if(!result)result=std::memcmp(&left.epoch,&right.epoch,16);
@@ -188,14 +194,17 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   }
   HRESULT STDMETHODCALLTYPE GetDisplayNameOf(PCUITEMID_CHILD pidl, SHGDNF flags, STRRET* value) override {
     if(!value)return E_POINTER;
+    // Desktop editing/address-bar requests include FORPARSING but are UI names.
+    // Only pure parsing requests expose the opaque, round-trippable PIDL encoding.
+    const bool forParsing=(flags&SHGDN_FORPARSING)&&!(flags&(SHGDN_FORADDRESSBAR|SHGDN_FOREDITING));
     if constexpr(product::Production){
       if((!pidl||!pidl->mkid.cb)&&snapshot::Zero(location_.epoch)){
-        value->uType=STRRET_WSTR;return SHStrDupW((flags&SHGDN_FORPARSING)?product::ParsingRoot:product::Title,&value->pOleStr);
+        value->uType=STRRET_WSTR;return SHStrDupW(forParsing?product::ParsingRoot:product::Title,&value->pOleStr);
       }
     }
     try {snapshot::Entry entry;if(!snapshot::ReadPidl(pidl,entry))return E_INVALIDARG;
       std::wstring name=entry.name;
-      if(flags&SHGDN_FORPARSING){name=snapshot::ParsingName(entry);if(name.empty())return E_ACCESSDENIED;
+      if(forParsing){name=snapshot::ParsingName(entry);if(name.empty())return E_ACCESSDENIED;
         if(!(flags&SHGDN_INFOLDER)){
           std::wstring prefix=product::ParsingRoot;
           if(absolute_){auto at=reinterpret_cast<PCUIDLIST_RELATIVE>(absolute_);
