@@ -9,6 +9,7 @@
 #include <windowsx.h>
 #include <algorithm>
 #include <cstring>
+#include <cwchar>
 #include <new>
 
 namespace gallery {
@@ -43,7 +44,7 @@ bool PixelsValid(const Pbgra& image) noexcept {
 }
 
 struct Surface::State : std::enable_shared_from_this<State> {
-    HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr;
+    HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr, statusText = nullptr;
     std::array<HWND, 6> buttons{};
     Callbacks callbacks;
     std::shared_ptr<AccessibleModel> model = std::make_shared<AccessibleModel>();
@@ -95,6 +96,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index, point); }
     }
     void Empty(snapshot::Status status, std::uint64_t generation) noexcept {
+        if (statusText) { SetWindowTextW(statusText,L""); ShowWindow(statusText,SW_HIDE); }
         RetireUia(model);
         ++model->presentation; model->accessible = nullptr;
         ++pageRevision; activationQueued = false;
@@ -133,6 +135,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
             OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
         if (!next) return;
         for (HWND button : buttons) if (button) SendMessageW(button, WM_SETFONT, reinterpret_cast<WPARAM>(next), TRUE);
+        if (statusText) SendMessageW(statusText, WM_SETFONT, reinterpret_cast<WPARAM>(next), TRUE);
         const auto previous = font; font = next; if (previous) DeleteObject(previous);
     }
     void Resize() {
@@ -142,12 +145,34 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const int rowHeight = Scale(34), gap = Scale(6), desired = Scale(72);
         const int columns = std::max(1, std::min(6, (width - gap) / std::max(1, desired + gap)));
         const int rows = (6 + columns - 1) / columns;
-        const int toolbarHeight = rows * rowHeight + gap * 2;
+        int toolbarHeight = rows * rowHeight + gap * 2;
         for (size_t index = 0; index < buttons.size(); ++index) {
             const int column = static_cast<int>(index) % columns, row = static_cast<int>(index) / columns;
             const int buttonWidth = std::max(1, std::min(desired, (width - gap * (columns + 1)) / columns));
             MoveWindow(buttons[index], gap + column * (buttonWidth + gap), gap + row * rowHeight, buttonWidth, rowHeight - gap, TRUE);
         }
+        if (!Alive()) return;
+        wchar_t summary[MaxStatusTextChars + 1]{};
+        const int summaryLength = statusText ? GetWindowTextW(statusText,summary,static_cast<int>(MaxStatusTextChars + 1)) : 0;
+        if (statusText && summaryLength > 0) {
+            const int beside = gap + 6 * (desired + gap);
+            const bool sameRow = rows == 1 && width - beside - gap >= Scale(180);
+            const int left = sameRow ? beside : gap;
+            const int top = sameRow ? gap : rows * rowHeight + gap;
+            const int available = std::max(1,width - left - gap);
+            RECT measure{0,0,available,0}; const HDC dc = GetDC(statusText);
+            int height = Scale(20);
+            if (dc) {
+                const auto previous = font ? SelectObject(dc,font) : nullptr;
+                const int measured = DrawTextW(dc,summary,summaryLength,&measure,DT_CALCRECT|DT_WORDBREAK|DT_NOPREFIX);
+                if (measured > 0) height = measured;
+                if (previous) SelectObject(dc,previous); ReleaseDC(statusText,dc);
+            }
+            MoveWindow(statusText,left,top,available,height,TRUE);
+            if (!Alive()) return;
+            ShowWindow(statusText,SW_SHOWNA); toolbarHeight = std::max(toolbarHeight,top + height + gap);
+        } else if (statusText) ShowWindow(statusText,SW_HIDE);
+        if (!Alive()) return;
         MoveWindow(canvas, 0, toolbarHeight, std::max(1, width), std::max<int>(1, client.bottom - toolbarHeight), TRUE);
         Reflow(true);
     }
@@ -361,6 +386,11 @@ struct Surface::State : std::enable_shared_from_this<State> {
                 if (isCanvas || isRoot) return 0;
             }
             if (message == WM_KILLFOCUS) { InvalidateRect(state->canvas, nullptr, FALSE); return 0; }
+            if (message == WM_CTLCOLORSTATIC && isRoot && reinterpret_cast<HWND>(lParam) == state->statusText) {
+                const auto dc = reinterpret_cast<HDC>(wParam); SetTextColor(dc,state->colors.muted);
+                SetBkColor(dc,state->colors.surface_strong); SetDCBrushColor(dc,state->colors.surface_strong);
+                return reinterpret_cast<LRESULT>(GetStockObject(DC_BRUSH));
+            }
             if (message == WM_COMMAND && isRoot && HIWORD(wParam) == BN_CLICKED) { state->Command(LOWORD(wParam)); return 0; }
             if (message == WM_PAINT && isRoot) {
                 PAINTSTRUCT paint{}; const HDC dc = BeginPaint(hwnd, &paint); if (dc) Fill(dc, paint.rcPaint, state->colors.surface_strong); EndPaint(hwnd, &paint); return 0;
@@ -501,6 +531,9 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             if (!state->buttons[index]) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
             hr = state->Attach(state->buttons[index]); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
         }
+        state->statusText = CreateWindowExW(0,L"STATIC",L"",WS_CHILD|SS_LEFT|SS_NOPREFIX,
+            0,0,1,1,state->window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(StatusTextControlId)),GetModuleHandleW(nullptr),nullptr);
+        if (!state->statusText) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
         state->dpi = std::clamp(GetDpiForWindow(parent), 48u, 768u); state->UpdateTheme(); state->UpdateFont();
         state->UpdateModeButtons();
         SHSTOCKICONINFO icon{sizeof(icon)};
@@ -605,6 +638,19 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
     }
     if (message.hwnd != state->canvas && message.hwnd != state->window) return false;
     try { return state->Key(message.wParam); } catch (const std::bad_alloc&) { return false; }
+}
+void Surface::SetStatusText(const std::wstring& text) noexcept {
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
+    wchar_t bounded[MaxStatusTextChars + 1]{}, current[MaxStatusTextChars + 1]{};
+    size_t length = std::min(text.size(),MaxStatusTextChars);
+    if (length < text.size() && length > 0 && text[length-1] >= 0xD800 && text[length-1] <= 0xDBFF && text[length] >= 0xDC00 && text[length] <= 0xDFFF) --length;
+    std::copy_n(text.data(),length,bounded);
+    GetWindowTextW(state->statusText,current,static_cast<int>(MaxStatusTextChars + 1));
+    if (bounded[0] && std::wcscmp(current,bounded) == 0) return;
+    if (!SetWindowTextW(state->statusText,bounded) || !state->Alive()) return;
+    try { state->Resize(); }
+    catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable,state->model->generation + 1); if (state->Alive()) state->Notify(state->callbacks.viewportChanged); }
 }
 void Surface::SetVisible(bool visible) noexcept {
     if (!state_ || !state_->Alive()) return;

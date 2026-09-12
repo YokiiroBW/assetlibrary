@@ -10,6 +10,8 @@ namespace gallery {
 
 constexpr UINT MaxImageRequestsPerView = 16;
 constexpr UINT MaxVisibleFiles = static_cast<UINT>(snapshot::MaxItems);
+constexpr int StatusTextControlId = 106;
+constexpr size_t MaxStatusTextChars = 256;
 constexpr size_t MaxImageBytes = 16u * 1024u * 1024u;
 constexpr UINT MinimumDensityDip = 96, MaximumDensityDip = 256, DefaultDensityDip = 176;
 
@@ -85,6 +87,8 @@ public:
     void Focus() noexcept;
     bool TranslateAccelerator(const MSG& message) noexcept; // Internal Tab only; boundary/Ctrl/Alt+Tab remain with host.
 
+    // Presentation only: caller owns counts. Empty clears; max 256 UTF-16 units.
+    void SetStatusText(const std::wstring& text) noexcept;
     void SetVisible(bool visible) noexcept; // Hidden means zero image candidates and immediate image release.
     void SetMode(Mode mode) noexcept;
     Mode CurrentMode() const noexcept;
