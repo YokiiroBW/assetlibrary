@@ -3,10 +3,31 @@
 #include <UIAutomation.h>
 #include <iostream>
 #include <cwchar>
+#include <atomic>
 
-namespace { void Require(bool value, const char* message) { if (!value) throw message; } }
+namespace {
+void Require(bool value, const char* message) { if (!value) throw message; }
+class Listener final : public IUIAutomationEventHandler, public IUIAutomationFocusChangedEventHandler {
+    std::atomic_ulong references_{1};
+public:
+    std::atomic_uint selections{0}, focuses{0}, focusCalls{0}; std::atomic_int lastProcess{0}; DWORD process = 0;
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
+        if (!result) return E_POINTER; *result = nullptr;
+        if (iid == IID_IUnknown || iid == __uuidof(IUIAutomationEventHandler)) *result = static_cast<IUIAutomationEventHandler*>(this);
+        else if (iid == __uuidof(IUIAutomationFocusChangedEventHandler)) *result = static_cast<IUIAutomationFocusChangedEventHandler*>(this);
+        else return E_NOINTERFACE; AddRef(); return S_OK;
+    }
+    ULONG STDMETHODCALLTYPE AddRef() override { return ++references_; }
+    ULONG STDMETHODCALLTYPE Release() override { const auto count = --references_; if (!count) delete this; return count; }
+    HRESULT STDMETHODCALLTYPE HandleAutomationEvent(IUIAutomationElement*, EVENTID event) override { if (event == UIA_Selection_InvalidatedEventId) ++selections; return S_OK; }
+    HRESULT STDMETHODCALLTYPE HandleFocusChangedEvent(IUIAutomationElement* sender) override {
+        ++focusCalls; int senderProcess = 0; if (sender && SUCCEEDED(sender->get_CurrentProcessId(&senderProcess)) && static_cast<DWORD>(senderProcess) == process) ++focuses; lastProcess = senderProcess; return S_OK;
+    }
+};
+}
 int wmain(int argc, wchar_t** argv) {
     if (argc != 2 && argc != 3) return 2;
+    const bool listen = argc == 3 && wcscmp(argv[2], L"--listener") == 0;
     const bool replace = argc == 3 && wcscmp(argv[2], L"--page") == 0;
     const bool retire = argc == 3;
     const bool msaaOnly = retire && wcscmp(argv[2], L"--msaa-retire") == 0;
@@ -18,8 +39,20 @@ int wmain(int argc, wchar_t** argv) {
     IUIAutomationCondition* condition = nullptr; IUIAutomationElementArray* children = nullptr;
     IUIAutomationSelectionPattern* rootSelection = nullptr; IUIAutomationElement* firstItem = nullptr;
     IUIAutomationInvokePattern* invoke = nullptr;
+    Listener* listener = nullptr;
+    const auto stopListening = [&]() {
+        if (!listener) return;
+        if (automation) { if (element) automation->RemoveAutomationEventHandler(UIA_Selection_InvalidatedEventId,element,listener); automation->RemoveFocusChangedEventHandler(listener); }
+        listener->Release(); listener = nullptr;
+    };
     int stage = 10;
     try {
+        if (listen) Require(SUCCEEDED(CoCreateInstance(CLSID_CUIAutomation,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&automation))),"controlled listener automation");
+        if (listen) {
+            listener = new Listener(); GetWindowThreadProcessId(window,&listener->process);
+            Require(SUCCEEDED(automation->AddFocusChangedEventHandler(nullptr,listener)),"controlled global focus listener");
+            Require(SendMessageW(GetParent(window),WM_APP+0x231,1,0) == 1,"unobserved gallery does not create root for global listener");
+        }
         Require(SUCCEEDED(AccessibleObjectFromWindow(window, static_cast<DWORD>(OBJID_CLIENT), IID_IAccessible,
             reinterpret_cast<void**>(&accessible))), "external MSAA retrieval");
         LONG count = 0; Require(SUCCEEDED(accessible->get_accChildCount(&count)) && count == 30, "external MSAA children");
@@ -34,12 +67,21 @@ int wmain(int argc, wchar_t** argv) {
         Require((selectedState & STATE_SYSTEM_SELECTED) && !(rawState.lVal & STATE_SYSTEM_SELECTED), "MSAA selected/unselected contrast"); VariantClear(&rawState);
         if (!msaaOnly) {
         stage = 11;
-        Require(SUCCEEDED(CoCreateInstance(CLSID_CUIAutomation, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&automation))), "UIA client creation");
+        if (!automation) Require(SUCCEEDED(CoCreateInstance(CLSID_CUIAutomation, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&automation))), "UIA client creation");
         stage = 12;
         Require(SUCCEEDED(automation->ElementFromHandle(window, &element)), "UIA bridge element");
         stage = 13;
         CONTROLTYPEID type = 0; Require(SUCCEEDED(element->get_CurrentControlType(&type)) && type == UIA_ListControlTypeId, "UIA bridge List role");
         stage = 14;
+        if (listen) {
+            Require(SUCCEEDED(automation->AddAutomationEventHandler(UIA_Selection_InvalidatedEventId,element,TreeScope_Element,nullptr,listener)),"controlled selection listener");
+            child.lVal = 4; Require(SUCCEEDED(accessible->accSelect(SELFLAG_TAKESELECTION|SELFLAG_TAKEFOCUS,child)),"observed selection/focus action");
+            child.lVal = 3; Require(SUCCEEDED(accessible->accSelect(SELFLAG_TAKESELECTION|SELFLAG_TAKEFOCUS,child)),"restore observed selection");
+            const ULONGLONG eventDeadline = GetTickCount64()+2000;
+            while (listener->selections == 0 && GetTickCount64()<eventDeadline) Sleep(10);
+            std::cout << "controlled_listener selection_events=" << listener->selections.load() << " focus_events=" << listener->focuses.load() << " calls=" << listener->focusCalls.load() << " sender_process=" << listener->lastProcess.load() << " expected_process=" << listener->process << "\n";
+            Require(listener->selections > 0,"native selection event actually delivered with controlled focus subscription");
+        }
         if (!elementOnly) {
         VARIANT itemType{}; itemType.vt = VT_I4; itemType.lVal = UIA_ListItemControlTypeId;
         Require(SUCCEEDED(automation->CreatePropertyCondition(UIA_ControlTypePropertyId, itemType, &condition)), "UIA list-item condition");
@@ -126,11 +168,11 @@ int wmain(int argc, wchar_t** argv) {
             }
             std::cout << "retired_names_unavailable_and_selection_empty=1\n";
         }
-        if (invoke) invoke->Release(); if (firstItem) firstItem->Release(); if (rootSelection) rootSelection->Release();
+        stopListening(); if (invoke) invoke->Release(); if (firstItem) firstItem->Release(); if (rootSelection) rootSelection->Release();
         if (children) children->Release(); if (condition) condition->Release(); if (element) element->Release(); if (automation) automation->Release(); accessible->Release();
         CoUninitialize(); std::cout << "external MSAA/native UIA selection, invocation and retirement checks passed\n"; return 0;
     } catch (const char* error) {
-        std::cerr << error << '\n'; if (invoke) invoke->Release(); if (firstItem) firstItem->Release(); if (rootSelection) rootSelection->Release();
+        std::cerr << error << '\n'; stopListening(); if (invoke) invoke->Release(); if (firstItem) firstItem->Release(); if (rootSelection) rootSelection->Release();
         if (children) children->Release(); if (condition) condition->Release();
         if (element) element->Release(); if (automation) automation->Release(); if (accessible) accessible->Release(); CoUninitialize(); return stage;
     }

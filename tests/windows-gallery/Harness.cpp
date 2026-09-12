@@ -4,6 +4,7 @@
 #include "TestOwner.h"
 #include "Capture.h"
 #include <commctrl.h>
+#include <shlobj.h>
 #include <iostream>
 #include <cwchar>
 
@@ -105,7 +106,7 @@ DWORD RunExternal(const wchar_t* executable, HWND canvas, bool retire, const wch
 
 int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic) {
     const bool show = argc == 2 && wcscmp(argv[1], L"--show") == 0;
-    const bool variant = argc == 3 && (wcscmp(argv[1], L"--msaa-retire") == 0 || wcscmp(argv[1], L"--element-retire") == 0 || wcscmp(argv[1], L"--released-retire") == 0);
+    const bool variant = argc == 3 && (wcscmp(argv[1], L"--msaa-retire") == 0 || wcscmp(argv[1], L"--element-retire") == 0 || wcscmp(argv[1], L"--released-retire") == 0 || wcscmp(argv[1], L"--listener") == 0);
     const bool replace = argc == 3 && wcscmp(argv[1], L"--external-page") == 0;
     const bool retire = argc == 3 && (wcscmp(argv[1], L"--external-retire") == 0 || variant);
     const bool external = argc == 3 && (wcscmp(argv[1], L"--external") == 0 || retire || replace);
@@ -118,6 +119,13 @@ int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic
     if (frame) {
         SetWindowSubclass(frame, FrameProc, 1, reinterpret_cast<DWORD_PTR>(&harness));
         gallery::Callbacks callbacks; callbacks.context = &harness; callbacks.lifetimeOwner = &harness.owner; callbacks.providerLifetimeOwner = &harness.owner;
+        callbacks.completionMessage = WM_APP+0x231;
+        callbacks.completion = [](void* context, WPARAM command, LPARAM payload) noexcept -> LRESULT {
+            auto& state = *static_cast<Harness*>(context);
+            if (command != 1 || payload != 0 || !state.surface || gallery::InspectUia().providers != 0) return 0;
+            state.surface->SelectItem(2,SVSI_SELECT|SVSI_DESELECTOTHERS);
+            return gallery::InspectUia().providers == 0 ? 1 : 0;
+        };
         callbacks.activateItem = [](void* context, UINT) noexcept {
             auto& state = *static_cast<Harness*>(context); ++state.activated;
             if (state.retireOnAction && state.surface) state.surface->Destroy();

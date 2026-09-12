@@ -113,6 +113,7 @@ int main() {
         Require(scenario.viewportChanges > beforeScroll && surface->RetainedImageBytes() == 0, "scroll cancels old viewport and releases its pixels");
         key.wParam = VK_HOME; surface->TranslateAccelerator(key);
         child.lVal = 2; Require(SUCCEEDED(accessible->accSelect(SELFLAG_TAKESELECTION, child)), "MSAA selection replace");
+        const auto providersBeforeRange = gallery::InspectUia().providers;
         const auto beforeRange = gallery::InspectUia().selectionNotifications;
         child.lVal = 5; Require(SUCCEEDED(accessible->accSelect(SELFLAG_EXTENDSELECTION, child)) && surface->SelectedItems().count >= 4, "MSAA range selection");
         Require(gallery::InspectUia().selectionNotifications > beforeRange, "range selection requests native UIA notification");
@@ -125,6 +126,7 @@ int main() {
         const auto beforeBlank = gallery::InspectUia().selectionNotifications;
         SendMessageW(canvas,WM_LBUTTONDOWN,0,MAKELPARAM(1,1));
         Require(surface->SelectedItems().count == 0 && gallery::InspectUia().selectionNotifications > beforeBlank, "blank canvas clears and publishes native selection notification");
+        Require(gallery::InspectUia().providers == providersBeforeRange, "MSAA/input-only actions do not create native roots for unrelated listeners");
         surface->SetVisible(false); Require(surface->VisibleFileItems().count == 0 && surface->RetainedImageBytes() == 0, "hidden releases images");
         scenario.verifyEmpty = true;
         surface->Clear(snapshot::Status::AccessDenied, 2);

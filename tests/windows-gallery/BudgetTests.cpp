@@ -46,6 +46,7 @@ int main() {
             MsgWaitForMultipleObjects(0,nullptr,FALSE,10,QS_ALLINPUT);
             MSG message{}; while (PeekMessageW(&message,nullptr,0,0,PM_REMOVE)) { TranslateMessage(&message); DispatchMessageW(&message); }
         }
+        Require(owner.references == 1 && !owner.wrongThread, "all budget-test owner pins returned on STA");
         Require(gallery::InspectUia().providers == 0 && gallery::InspectUia().pendingRetirements == 0 && gallery::InspectUia().dispatcherWindows == 0, "retired provider/queue/dispatcher fully drained");
         DestroyWindow(parent); parent = nullptr; CoUninitialize();
         std::cout << "gallery_budget: 101 candidates, 29 small images, item17 and honest 16MiB rejection passed\n"; return 0;

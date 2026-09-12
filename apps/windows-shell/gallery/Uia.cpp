@@ -324,7 +324,10 @@ HRESULT RetireUia(const std::shared_ptr<AccessibleModel>& model) noexcept {
 UiaDiagnostics InspectUia() noexcept { return diagnostics; }
 void RaiseUiaEvent(const std::shared_ptr<AccessibleModel>& model, EVENTID event, int index) noexcept {
     if (event == UIA_Selection_InvalidatedEventId) ++diagnostics.selectionNotifications;
-    if (!UiaClientsAreListening()) return;
+    // UiaClientsAreListening is process-global. Another application's listener
+    // must not manufacture a provider for an unobserved gallery. Existing root
+    // clients still receive this gallery's normal selection/focus events.
+    if (!model || !model->uia[0] || !UiaClientsAreListening()) return;
     Element* element = nullptr; if (FAILED(Make(model,index,&element))) return;
     UiaRaiseAutomationEvent(static_cast<IRawElementProviderSimple*>(element),event); element->Release();
 }
