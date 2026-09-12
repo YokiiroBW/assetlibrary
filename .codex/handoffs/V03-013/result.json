@@ -7,7 +7,7 @@
   "owner": "windows-shell-refresh-owner",
   "branch": "codex/v03-013-explicit-refresh-loading",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-013",
-  "commit": "",
+  "commit": "99a2d472225426566c907a39da1e4d21676f9766",
   "changed_files": [".codex/tasks/V03-013.md", ".codex/handoffs/V03-013/summary.md", ".codex/handoffs/V03-013/result.json", ".codex/handoffs/V03-013/tests.md", "tests/windows-shell/LoadingRefreshTests.cpp", "tests/windows-shell/EnumDoneTestFolder.h", "tests/windows-shell/README.md"],
   "changed_contracts": [],
   "tests": {
