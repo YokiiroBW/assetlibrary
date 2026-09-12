@@ -2,6 +2,16 @@
 
 2026-09-13 Windows x64；MSVC19.44.35228.0/工具14.44.35207，WindowsSDK10.0.26100.0；生产/MT、Proof/MD不变。所有构建保持/W4 /WX /permissive- /analyze /utf-8。
 
+## 最新自有摘要 475d415
+
+消费Surface4d29fc6（公开SetStatusText、原生STATIC ID106）后，执行与下节相同的严格AssetLibraryExplorer/ExplorerGalleryViewTests构建及View/imports CTest正则。2/2通过：View0.71s、imports0.02s，共0.73s；日志own-summary-build.log、own-summary-tests.log。最终DLL SHA256 F138E0BB04ACE0A42E114C5CD7EDBE175C3C4AF7584586CF06FE5FBFD730C936。
+
+直接GetDlgItem/GetWindowText读取自有摘要，确认Loading、100普通项+分页、0/1/2项选择、Expired正确；fake host E_NOTIMPL时保留host旧字符串但图库摘要更新，active返回不同IShellView身份时同样正确；退役QueryActive前自有摘要已经空串。原MTA/UIA跨View退出、Folder/provider/dispatcher归零及实际DLL S_FALSE→S_OK全部随View测试通过。没有GUI/生产pipe/注册操作。
+
+首次静态分析指出可重入循环需要显式surface_空值检查，测试GetDlgItem也改为显式失败分支；未禁用C6011/C6387或降低/WX。最终构建通过。root的preview.4实际宿主底部旧计数是已确认兼容性限制，此测试只证明自有摘要；以自有摘要为权威，不把公开host调用成功等同于Windows11底部已刷新。
+
+最终verify_repository通过，日志own-summary-verify.log；工作流、handoff、依赖与架构门禁保持有效，Alpha仍blocked。
+
 ## 最终状态栏与原生UIA接线 2515309
 
 消费Surface最终原生UIA系列和root批准的Uia.cpp/uiautomationcore构建提交后，实际命令（工具绝对路径见下文）为：

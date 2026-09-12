@@ -8,6 +8,7 @@
 - View接入：dbb4a42fd44db38829a1251a8cced4b7e6d40714。
 - 同屏完整加载与共享像素预算：d6ea45fc4776544b17c07d86b2ba3a33052fcc7c；消费Surface f9acd9f和裁剪/测试frame 037457a。root已有前两笔实现，只需取此修复及交接更新。
 - provider独立Folder保活接线：b57c7f250c56f812df8e6c7ed263d58c2415c27d（root已合）；最终状态栏与MTA UIA回收：2515309b5c0d265da997995a1b8f788c4b8dd9a0。
+- 自有图库权威摘要：475d415220b91c7d4a070ecd66589caa33617d8a，依Surface摘要4d29fc6；root已收到此前全部实现，只需取此小补与交接。
 - 本交接为后续独立提交；请按上述本任务提交合并，不重复合入分支中其它owner的共享提交副本。
 
 明确消费的其它owner源：Surface.h582b907；thumbnail独立向量7fae7a0；主题8ec1fed/4697374；Surface实现31f26c2、生命周期fd17678、空候选显隐通知831dc34、Shown接口406c958。Surface/Layout/Accessible代码由V03-019维护，Host/Session/解码由V03-020维护，本任务未修改其实现或根contracts/CI/版本。
@@ -21,6 +22,8 @@
 自定义View负责窗口/焦点/选择/模式、IFolderView内存枚举、GetItemObject、默认导航/背景菜单、Refresh与销毁。UIActivate失去焦点不隐藏页面。首次/每次进入非根默认Gallery；目录切换暂重置模式/密度，按root决定不推断其它自定义视图或新增全局偏好。
 
 状态栏采用公开IShellBrowser::SetStatusTextSB：Loading/失效复用Snapshot状态文案，Ready显示“当前页 N 项，已选 M 项”，不把NextPage/StatusRow当资产计数，分页另提示。Clear/Apply/选择/激活刷新文字，Destroy只在仍active时清空。每次写前QueryActiveShellView核当前View，并在COM调用后复验HWND/generation/browser/revision；重入最多重读一次，旧视图不覆盖新active视图。host不支持状态接口时不干扰浏览，不操作分栏、Explorer私有XAML或全局设置。此公开接口为微软[自定义Folder View状态栏契约](https://learn.microsoft.com/en-us/windows/win32/lwef/nse-folderview)，活动视图判定依据[QueryActiveShellView](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishellbrowser-queryactiveshellview)；最终Windows11宿主显示由root实机验收。
+
+root已实测preview.4的Windows11底部仍继承旧计数，公开SetStatusTextSB没有反映出来。本次改为先将同一UpdateStatus文本提交给仍Live的Surface::SetStatusText，再复验状态并继续host best effort；没有复制计数逻辑。以图库自有工具栏摘要为权威，即使host E_NOTIMPL或active IShellView包装身份不相同，也照常更新当前页/选择/Loading/失效文字，clear同步清空。系统Explorer底部旧计数明确为兼容性限制，不再追私有XAML/其它猜测接口。
 
 page和thumbnail均在后台；Paint、辅助技术和输入不等待IPC。后台只持plain共享State、取消event、不可变结果及HMODULE pin，绝不从后台AddRef/Release Folder/View/Surface COM。page最多4工作，Loading固定10s/20次尝试，Ready不轮询；图像专用池最多2线程、最多64待处理ticket/module。当前页最多101个可见File候选，每视图最多16个未完成ticket；正常结果经UI取走且任务真正退出后释放slot，取消任务也必须退出才归还slot。离视口ticket立即取消，窗口实际隐藏/销毁取消page与图像；显示或F5开始新generation。已取出的完成批次也逐项复验当前ticket，防止重排/滚动重入后旧响应恢复像素。
 
@@ -44,6 +47,8 @@ root DefView与custom View共用LoadingRefresh的同一四活动视图atomic配�
 
 同屏修复后严格构建和受影响Requests/View/imports 3/3通过1.46s；新增真实View假Sources的29同屏、4×29管道、失败不重试、旧取消slot唤醒新generation及跨generation驻留预算回归。最终2515309严格构建与View/imports 2/2通过0.63s，包括全部旧View回归、新100+分页状态/多选/重入及外部MTA UIA回收。没有重复运行未改的旧9项或真实pipe20s测试。最终生产DLL：.runtime/explorer-gallery/product-shell/Release/AssetLibrary.Explorer.dll，SHA256 E054E952ABD6B6EFEB767055143923919363977F92F97909885548773EDDEF58。受限imports含root批准的gdi32/msimg32/oleacc/uiautomationcore；无动态CRT、网络/媒体/.NET依赖。最终整包须按实际重建hash验收。
 
+最新475d415自有摘要严格构建通过，View/imports 2/2通过0.73s（含全部UIA/MTA回收和真实DLL卸载回归），摘要ID106实际读回覆盖host拒绝/身份不一致/多选/失效/先清文字。最终DLL SHA256更新为F138E0BB04ACE0A42E114C5CD7EDBE175C3C4AF7584586CF06FE5FBFD730C936；此前hash仅属历史checkpoint。
+
 ## 架构与安全影响
 
 依赖仍为Shell展示适配→版本化本机投影→Host/既有Core用例。复用Folder/PIDL/排序/导航/Settings和同源Surface，无权限/路径/传输领域规则复制，无数据库、主语言/框架或第三方依赖新增。两种独立frame/预算的OVERLAPPED回收机制沿用相同已证明模式；安全peer检查仅一份。
@@ -52,8 +57,8 @@ root DefView与custom View共用LoadingRefresh的同一四活动视图atomic配�
 
 ## 未完成/风险
 
-真实Explorer+真实Core图片、图库/列表输入和实际退出清理、祖先窗口行为及外部辅助技术运行环境仍由root整包验收。本任务的假Sources/屏外测试不是实际Explorer或NAS预览。先前系统MSAA桥的保留引用方案已被Surface自有原生UIA替换；本任务的外部client跨View退出和实际DLL回收测试已通过，不把旧失败方案继续当现实现。最终状态栏文字在Windows11实际宿主是否显示仍需root验收，接口不支持时保持浏览可用。
+真实Explorer+真实Core图片、图库/列表输入和实际退出清理、祖先窗口行为及外部辅助技术运行环境仍由root整包验收。本任务的假Sources/屏外测试不是实际Explorer或NAS预览。先前系统MSAA桥的保留引用方案已被Surface自有原生UIA替换；本任务的外部client跨View退出和实际DLL回收测试已通过，不把旧失败方案继续当现实现。Windows11底部计数已知可能停留在旧值，当前页/选择请以图库自有摘要为准；保留公开host best effort，不修改私有宿主UI。
 
-G4仍用户豁免未测；未跑20轮/8小时。模式跨目录暂不保留，完整预览/下载/资产写入/全部V0.3未交付。root已有此前checkpoint，最终建议合并最新Surface/root构建提交 → b57c7f2（已合）→ 2515309 → 本交接；root负责版本和安装包，不覆盖已安装同版本DLL。
+G4仍用户豁免未测；未跑20轮/8小时。模式跨目录暂不保留，完整预览/下载/资产写入/全部V0.3未交付。root已有此前checkpoint，最终建议合并Surface4d29fc6 → 475d415 → 本交接；root负责版本和安装包，不覆盖已安装同版本DLL。
 
 公开依据：[IShellView](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-ishellview)、[SHChangeNotifyRegister](https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotifyregister)、[WM_SHOWWINDOW](https://learn.microsoft.com/en-us/windows/win32/winmsg/wm-showwindow)、[CloseThreadpoolWork](https://learn.microsoft.com/en-us/windows/win32/api/threadpoolapiset/nf-threadpoolapiset-closethreadpoolwork)、[CloseThreadpool](https://learn.microsoft.com/en-us/windows/win32/api/threadpoolapiset/nf-threadpoolapiset-closethreadpool)。
