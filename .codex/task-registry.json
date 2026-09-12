@@ -955,6 +955,67 @@
       "thread_deep_link": "",
       "integrated_commit": "c256893",
       "execution_status": "preview.2 delivered; root native browse/session acceptance; documented manual and title limitations"
+    },
+    {
+      "id": "V03-018",
+      "title": "windows-browse-polish",
+      "module": "windows-browse-polish",
+      "status": "completed",
+      "depends_on": [
+        "V03-016"
+      ],
+      "owner": "windows-browse-owner",
+      "branch": "codex/v03-018-windows-browse-polish",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-018",
+      "task_file": ".codex/tasks/V03-018.md",
+      "handoff": ".codex/handoffs/V03-018/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "b32680c"
+    },
+    {
+      "id": "V03-019",
+      "title": "native-gallery-surface",
+      "module": "native-gallery-surface",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-018"
+      ],
+      "owner": "windows-gallery-surface-owner",
+      "branch": "codex/v03-019-native-gallery-surface",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-019",
+      "task_file": ".codex/tasks/V03-019.md",
+      "handoff": ".codex/handoffs/V03-019/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "V03-020",
+      "title": "gallery-thumbnail-host",
+      "module": "gallery-thumbnail-host",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-018"
+      ],
+      "owner": "windows-thumbnail-host-owner",
+      "branch": "codex/v03-020-gallery-thumbnail-host",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-020",
+      "task_file": ".codex/tasks/V03-020.md",
+      "handoff": ".codex/handoffs/V03-020/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "V03-021",
+      "title": "explorer-gallery-view",
+      "module": "explorer-gallery-view",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-018"
+      ],
+      "owner": "windows-gallery-shell-owner",
+      "branch": "codex/v03-021-explorer-gallery-view",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-021",
+      "task_file": ".codex/tasks/V03-021.md",
+      "handoff": ".codex/handoffs/V03-021/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }

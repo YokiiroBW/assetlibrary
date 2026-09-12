@@ -1,0 +1,28 @@
+{
+  "status": "implementation_in_progress",
+  "request": "Improve Windows native Explorer browsing, especially photo-gallery waterfall layout",
+  "coordinator_worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005",
+  "keep": "preview.2 already delivered/installed; original Explorer must not be restarted; G4 user-waived/not performed",
+  "contracts": ["docs/adr/ADR-0021_Explorer原生图库与缩略图边界.md", "contracts/windows-shell/thumbnail-v1.md", "contracts/windows-shell/thumbnail-vectors-v1.json"],
+  "integrated": {"browse_names_and_order": "b32680c", "gallery_header": "6fb2aed", "semantic_cpp_colors": "8ec1fed", "thumbnail_host": "6245ab4"},
+  "agents": [
+    {"task":"V03-019","agent":"windows_package_delivery","worktree":"C:/YOKI/Codex/AssetLibrary-worktrees/V03-019","scope":"Surface/Layout/Accessible and standalone tests/windows-gallery; header582b907 integrated; implementation and real UIA bridge tests pending"},
+    {"task":"V03-020","agent":"windows_session_delivery","worktree":"C:/YOKI/Codex/AssetLibrary-worktrees/V03-020","scope":"Thumbnail Host/Core transport/helper; code09effe7 integrated,100 tests and real thumb1 passed; follow-up must guarantee LoadAsync starts outside coordinator lock; handoff pending"},
+    {"task":"V03-021","agent":"windows_shell_delivery","worktree":"C:/YOKI/Codex/AssetLibrary-worktrees/V03-021","scope":"IShellView/IFolderView+background page/thumb client; common LocalPipePeer and shared four-view quota approved; old root/Proof DefView preserved; implementation pending"}
+  ],
+  "real_core": {
+    "session_id": 9256,
+    "evidence": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f",
+    "ready_file": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f/ready.json",
+    "origin": "https://localhost:56529",
+    "host_pid": 30400,
+    "expires_at_utc": "2026-09-12T18:31:46.5187613+00:00",
+    "worker": ".runtime/gallery-server-20260913/worker/AssetLibrary.ImagePreview.Worker.exe",
+    "corpus": "tests/integration/native-clients/fixtures/image-preview-v1",
+    "validation": "LiveImageEndpointTests 2/2 passed with EXPECT_AVAILABLE=1; genuine Windows LPAC/AOT server-generated PNG; .runtime/gallery-server-20260913/live-images.trx",
+    "cleanup": "root must write stop_file from ready.json and wait NATIVE_CLIENT_CLEANUP verified; never log connection credentials"
+  },
+  "remaining": ["finish module reviews/merges", "independent native gallery control visual/keyboard/UIA acceptance", "real installed Explorer gallery/thumbnails/navigation/viewport cancellation/session clearing/resource recovery", "new versioned package and final handoff"],
+  "nas": "unchanged; lacks required seccomp for original image worker; no server/security changes authorized or performed",
+  "desktop": "No GUI opened during gallery work yet; all previous-turn owned test windows/Host stopped. Root solely owns desktop tests. Use computer-use @oai/sky, not generic UI Automation scripts."
+}

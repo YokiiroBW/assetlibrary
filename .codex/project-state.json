@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_explorer_installable_read_only_preview_delivered",
-  "next_action": "Use preview.2 installer/Explorer connection settings with the user NAS. Address child tab friendly names and manual authentication/system-uninstall UI acceptance next; content preview depends on the NAS isolation decision. G1/G2/G3 measured; G4 user-waived, never schedule its 20 cycles/8 hours. Full V0.3/Android physical devices/signing remain independent.",
+  "status": "windows_native_gallery_in_progress",
+  "next_action": "User authorized gallery/waterfall browsing. V03-018 names/order merged; V03-019 native surface, V03-020 thumbnail Host and V03-021 IShellView/client are implementing under ADR-0021/thumbnail-v1. Root owns integration and real Core/Explorer acceptance; preserve preview.2 and no G4.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -84,11 +84,11 @@
     "coordinator_thread": "01a0801a-4c6c-7d92-b0be-ce0150f8b115",
     "tasks": [
       "V03-005",
-      "V03-015",
-      "V03-016",
-      "V03-017"
+      "V03-019",
+      "V03-020",
+      "V03-021"
     ],
-    "stage": "windows_preview_2_delivered",
+    "stage": "native_gallery_surface_host_shell_parallel",
     "windows_entry": "native Explorer; G1/G2/G3 measured, G4 waived/not performed",
     "command_approvals": "User authorized owned desktop tests and delivery. Original Explorer was not restarted; no HKLM/UAC/security-policy changes.",
     "contract_commit": "2ebda30",

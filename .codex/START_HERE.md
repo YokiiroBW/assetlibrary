@@ -27,6 +27,7 @@
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/WINDOWS_EXPLORER_PREVIEW.md` 与 `docs/releases/NATIVE_CLIENT_TRIAL.md`：Windows11 x64原生Explorer只读浏览安装包preview.2及Android只读APK已交付。Windows采用进程外Host和辅助WinUI连接设置；没有独立资产浏览客户端。
    当前接续V03-005：Windows最高优先级。preview.2安装、设置启动、原生分页/中文目录与会话清理实机通过，证据见 `.codex/handoffs/V03-005/windows-product-delivery/README.md`；手工认证/系统卸载UI、标题、内容预览及签名仍有明确后续项。测试Core138原件/6角色与窗口/Host已清理，正式安装保留，测试配置已移除。G1/G2/G3实测通过；G4按用户要求豁免且未执行，不得安排20轮/8小时。原Explorer未重启。完整V0.3和Android真机门禁未宣布完成。
+   2026-09-13用户继续要求浏览体验/图库瀑布流，当前V03-019/020/021正在并行实现，状态与活跃真实图片夹具见 `.codex/handoffs/V03-005/gallery-progress.json`。先从该检查点接续，不重建已有worktree、不重跑旧门禁。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 
