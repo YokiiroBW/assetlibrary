@@ -96,7 +96,6 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index, point); }
     }
     void Empty(snapshot::Status status, std::uint64_t generation) noexcept {
-        if (statusText) { SetWindowTextW(statusText,L""); ShowWindow(statusText,SW_HIDE); }
         RetireUia(model);
         ++model->presentation; model->accessible = nullptr;
         ++pageRevision; activationQueued = false;
@@ -104,6 +103,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         model->page.entries.clear(); model->page.status = status; model->page.epoch = {};
         model->generation = generation; model->selected.fill(false); model->bounds.fill({}); model->focus = -1;
         layout.items.clear(); layout.height = 0; layoutItems.clear(); scroll = 0; hover = anchor = -1;
+        if (statusText) { SetWindowTextW(statusText,L""); ShowWindow(statusText,SW_HIDE); }
         if (canvas) { SCROLLINFO info{sizeof(info), SIF_RANGE | SIF_POS, 0, 0, 0, 0, 0}; SetScrollInfo(canvas, SB_VERT, &info, TRUE); }
     }
     void Retire() noexcept {

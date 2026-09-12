@@ -55,7 +55,8 @@ int main() {
             if (state.verifyEmpty && state.surface && state.accessible) {
                 LONG count = -1;
                 state.observedEmpty = state.surface->RetainedImageBytes() == 0 && state.surface->SelectedItems().count == 0 &&
-                    SUCCEEDED(state.accessible->get_accChildCount(&count)) && count == 0;
+                    SUCCEEDED(state.accessible->get_accChildCount(&count)) && count == 0 &&
+                    GetWindowTextLengthW(GetDlgItem(state.surface->Window(),gallery::StatusTextControlId)) == 0;
             }
             if (state.destroyOnViewport && state.surface) state.surface->Destroy();
             if (state.deleteOnViewport && state.surface) { auto* victim = state.surface; state.surface = nullptr; delete victim; }
@@ -70,6 +71,31 @@ int main() {
         RECT bounds{0, 0, 1000, 700};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "surface creation"); scenario.surface = surface;
         const auto page = Page(); Require(SUCCEEDED(surface->SetPage(page, 1)), "page commit");
+        const HWND summary = GetDlgItem(surface->Window(),gallery::StatusTextControlId);
+        const HWND summaryCanvas = FindWindowExW(surface->Window(),nullptr,L"STATIC",nullptr);
+        if (!summary || !summaryCanvas || summary == summaryCanvas) throw "native summary is a distinct toolbar STATIC";
+        const std::wstring callerSummary = L"当前页30项，已选2项（还有下一页）";
+        surface->SetStatusText(callerSummary); wchar_t readSummary[gallery::MaxStatusTextChars + 1]{};
+        GetWindowTextW(summary,readSummary,static_cast<int>(gallery::MaxStatusTextChars + 1));
+        Require(callerSummary == readSummary && surface->SelectedItems().count == 0,"summary preserves caller text without counting selection");
+        Require(SendMessageW(summary,WM_GETFONT,0,0) == SendMessageW(GetDlgItem(surface->Window(),100),WM_GETFONT,0,0),"summary reuses current toolbar font");
+        IAccessible* summaryAccessible = nullptr;
+        Require(SUCCEEDED(AccessibleObjectFromWindow(summary,static_cast<DWORD>(OBJID_CLIENT),IID_IAccessible,reinterpret_cast<void**>(&summaryAccessible))),"native summary accessibility");
+        VARIANT self{}; self.vt = VT_I4; self.lVal = CHILDID_SELF; BSTR summaryName = nullptr;
+        const HRESULT namedSummary = summaryAccessible->get_accName(self,&summaryName);
+        const bool summaryReadable = SUCCEEDED(namedSummary) && summaryName && callerSummary == summaryName;
+        if (summaryName) SysFreeString(summaryName); summaryAccessible->Release(); Require(summaryReadable,"native accessible summary carries exact current text");
+        RECT summaryRect{}, canvasRect{}, lastButtonRect{};
+        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),105),&lastButtonRect);
+        Require(summaryRect.left >= lastButtonRect.right && summaryRect.bottom <= canvasRect.top,"wide summary sits beside buttons without covering canvas");
+        MoveWindow(surface->Window(),0,0,MulDiv(320,static_cast<int>(GetDpiForWindow(parent)),96),700,FALSE);
+        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),105),&lastButtonRect);
+        Require(summaryRect.top >= lastButtonRect.bottom && summaryRect.bottom <= canvasRect.top,"narrow summary wraps below buttons without covering canvas");
+        surface->SetStatusText(std::wstring(300,L'图')); Require(GetWindowTextLengthW(summary) == 256,"summary length is capped at 256 UTF16 units");
+        std::wstring paired(255,L'A'); paired.push_back(static_cast<wchar_t>(0xD83D)); paired.push_back(static_cast<wchar_t>(0xDCC1));
+        surface->SetStatusText(paired); Require(GetWindowTextLengthW(summary) == 255,"bounded summary does not split a surrogate pair");
+        surface->SetStatusText(L""); Require(GetWindowTextLengthW(summary) == 0 && !(GetWindowLongPtrW(summary,GWL_STYLE)&WS_VISIBLE),"empty summary clears and hides text");
+        MoveWindow(surface->Window(),bounds.left,bounds.top,bounds.right-bounds.left,bounds.bottom-bounds.top,FALSE);
         auto files = surface->VisibleFileItems(); Require(files.count > 0 && files.count <= gallery::MaxVisibleFiles, "visible files");
         Require(SUCCEEDED(surface->SetThumbnail(files.indices[0], 1, Image())), "thumbnail accepted");
         Require(surface->RetainedImageBytes() > 0 && surface->RetainedImageBytes() <= gallery::MaxImageBytes, "image budget");
@@ -128,6 +154,7 @@ int main() {
         Require(surface->SelectedItems().count == 0 && gallery::InspectUia().selectionNotifications > beforeBlank, "blank canvas clears and publishes native selection notification");
         Require(gallery::InspectUia().providers == providersBeforeRange, "MSAA/input-only actions do not create native roots for unrelated listeners");
         surface->SetVisible(false); Require(surface->VisibleFileItems().count == 0 && surface->RetainedImageBytes() == 0, "hidden releases images");
+        surface->SetStatusText(callerSummary);
         scenario.verifyEmpty = true;
         surface->Clear(snapshot::Status::AccessDenied, 2);
         Require(scenario.observedEmpty, "clear names and images before callback"); scenario.verifyEmpty = false;
@@ -183,6 +210,12 @@ int main() {
         surface->SetVisible(false); surface = scenario.surface;
         Require(surface == nullptr, "callback may delete the C++ Surface while its public method is running");
         Drain(owner); Require(owner.references == 1 && gallery::InspectUia().dispatcherWindows == 0, "reentrant retirement drains providers and dispatcher");
+        scenario = {};
+        RECT summaryBounds{0,0,MulDiv(320,static_cast<int>(GetDpiForWindow(parent)),96),MulDiv(200,static_cast<int>(GetDpiForWindow(parent)),96)};
+        Require(SUCCEEDED(gallery::Surface::Create(parent,summaryBounds,callbacks,&surface)),"reentrant summary surface"); scenario.surface = surface;
+        surface->SetPage(page,0); Require(surface->VisibleFileItems().count > 0,"summary reflow starts with visible images");
+        scenario.deleteOnViewport = true; surface->SetStatusText(std::wstring(256,L'图')); surface = scenario.surface;
+        Require(surface == nullptr,"summary reflow callback may delete Surface"); Drain(owner); Require(owner.references == 1,"summary callback retirement returns owner lease");
         DestroyWindow(parent); parent = nullptr;
         std::cout << "gallery_surface: hidden HWND/page/image/selection/MSAA/retirement checks passed\n";
         CoUninitialize(); return 0;
