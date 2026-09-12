@@ -1,7 +1,7 @@
 # V03-020 — 派生缩略图Host链路
 
 状态ready_for_review。分支 `codex/v03-020-gallery-thumbnail-host`；基线fa1c8f9。
-代码依次为 `09effe7`（完整链路）、`1bf317b`（移出caller临界区）、`5e5ace2`（及时释放完成Task像素）、`4bbaa41`（root批准的旧到期测试完成边界修正）。Root的独立向量7fae7a0已先同步，不需要重复合并。
+代码依次为 `09effe7`（完整链路）、`1bf317b`（移出caller临界区）、`5e5ace2`（及时释放完成Task像素）、`4bbaa41`（root批准的旧到期测试完成边界修正）。最新实现提交为 `62d39d32f87cbd0f1020f76789275cf3c4d41fb5`，仅修复共享测试夹具；Root的独立向量7fae7a0已先同步，不需要重复合并。
 
 ## 最终行为
 
@@ -26,3 +26,11 @@
 root审核发现async链可以同步运行，1bf317b以同步HTTP/阻塞decoder临界区测试固定该边界；该测试在旧直调实现下会阻塞状态/page调用。旧SessionExpiryTests曾只等AccessDenied就读remembered.bin；该状态刻意先清展示，凭据删除完成通过RememberLogin=false表示。4bbaa41等待这个明确边界，仍严格检查AccessDenied/无数据/无blob；删除真正失败变Unavailable仍会失败，没有改权限或吞IO。
 
 Explorer自绘视图、可见范围、UIA与整包实际图片由root/V03-019/021集成；本任务没有宣告完整V0.3、NAS预览可用或G4实测完成。
+
+## 共享测试夹具收尾
+
+`62d39d3`将ThumbnailSessionTests与ThumbnailSchedulingTests中重复的成功image/page HTTP stub统一到既有ThumbnailTestSupport.SuccessfulTransport；只被协议用例使用的Repository定位器移回ThumbnailProtocolTests，以保持辅助类职责与耦合限额。实际只改上述4个测试文件，生产逻辑/契约/权限没有变化。
+
+该提交已完成validate_dotnet_source（521个C#文件）、format verify、Release build零警告、缩略图非NativeLive24/24及verify_repository验证。前述101项完整Windows与1项真实Core测试保留为原链路证据；此次测试夹具修复没有重复运行未变化Live测试，也未连接已结束的Core夹具。本次交接收尾仅写文档，没有重新启动资源或重跑测试。
+
+附加的MSAA/UIA只读协作诊断见[msaa-uia-diagnosis.md](msaa-uia-diagnosis.md)。这些是Surface owner的分流实测与本线程只读分析，不能当作V03-020新增实现或辅助技术关闭回收通过。

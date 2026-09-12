@@ -7,8 +7,9 @@
   "owner": "windows-thumbnail-host-owner",
   "branch": "codex/v03-020-gallery-thumbnail-host",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-020",
-  "commit": "4bbaa413299ef1981d9354aa05f66ac3f5f06394",
+  "commit": "62d39d32f87cbd0f1020f76789275cf3c4d41fb5",
   "changed_files": [
+    ".codex/handoffs/V03-020/msaa-uia-diagnosis.md",
     ".codex/handoffs/V03-020/result.json",
     ".codex/handoffs/V03-020/summary.md",
     ".codex/handoffs/V03-020/tests.md",
@@ -74,7 +75,8 @@
       "SnapshotStore epoch, 8192-token bound and session revocation",
       "LocalPipe actual TokenUser DACL/first-instance/session security (unchanged)",
       "Existing image-preview-v1 thumbnail GET only; no original-file fallback",
-      "Existing PipeListenerShutdown owned I/O reclamation"
+      "Existing PipeListenerShutdown owned I/O reclamation",
+      "62d39d3: ThumbnailTestSupport.SuccessfulTransport is shared by session and scheduling tests; repository fixture lookup stays with the protocol test only"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -90,7 +92,8 @@
       "Windows solution locked restore/format verify/Release build passed; zero compiler warnings",
       "Dependency audit passed: 6 projects/31 unchanged locked packages",
       "101 non-NativeLive Windows tests passed; separate real Core thumbnail test 1/1 passed",
-      "Production self-contained Host locked publish and real WIC Job smoke passed"
+      "Production self-contained Host locked publish and real WIC Job smoke passed",
+      "62d39d3 test-only repair: source policy (521 files), format verify, zero-warning Release build, 24/24 thumbnail non-Live tests and verify_repository passed; unchanged Live tests were not rerun"
     ],
     "technical_debt": [
       "Original metadata snapshots remain the existing bounded page model; this task adds no image-only query or local business classification",

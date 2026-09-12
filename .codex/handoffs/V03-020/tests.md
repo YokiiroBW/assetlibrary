@@ -31,3 +31,17 @@ Live命令额外要求ASSETLIBRARY_NATIVE_TEST_PROFILE指向root明确启动的�
 新增24个非Live用例包含：独立13向量逐条接受/拒绝；实际WIC精确alpha像素；无Job拒绝；APNG/超大IHDR/CRC/尾字节拒绝；401/403/404/302错误正文不读取；MIME/2MiB限制；429仅两次重试；一个图片不占导航保留容量；旧epoch不发HTTP、404不退出账号；late decode失效；实际pipe partial500ms与断开取消；实际Job终止阻塞stdin子进程；同步HTTP/decoder不能阻塞caller临界区。另有1个真实Core→WIC→pipe测试。
 
 没有执行GUI/已安装app/真实NAS/生产thumbnail端点，也没有把模拟pixel输入当作NAS预览证据。G4用户豁免未测。
+
+## 62d39d3 测试夹具复用修复
+
+修改文件恰为ThumbnailTestSupport.cs、ThumbnailSessionTests.cs、ThumbnailSchedulingTests.cs、ThumbnailProtocolTests.cs。复用成功HTTP transport，不改生产路径；协议fixture文件查找回到其唯一消费者。
+
+| 针对该提交的已有验证 | 结果 |
+|---|---|
+| validate_dotnet_source.py | 通过，521个C#文件；重复60-token块已消除 |
+| dotnet format Windows.Tests.csproj --verify-no-changes --no-restore | 通过 |
+| Windows.Tests.csproj Release build --no-restore | 通过，0 warning/0 error |
+| filter FullyQualifiedName~Thumbnail&TestCategory!=NativeLive | 24通过，0失败/跳过 |
+| verify_repository.py | 通过，无规则豁免 |
+
+这是此前实际执行结果的归档，本次仅更新交接文件，未复跑未变化测试、未连接旧Core端点或启动GUI/生产管道。
