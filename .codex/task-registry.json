@@ -904,6 +904,57 @@
       "thread_deep_link": "",
       "integrated_commit": "4ba8d31",
       "execution_status": "measurement_code_reviewed_and_component_tests_passed; real_G3_owned_by_coordinator"
+    },
+    {
+      "id": "V03-015",
+      "title": "windows-connection-session",
+      "module": "windows-connection-session",
+      "status": "completed",
+      "depends_on": [
+        "V03-014"
+      ],
+      "owner": "windows-session-owner",
+      "branch": "codex/v03-015-windows-connection-session",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-015",
+      "task_file": ".codex/tasks/V03-015.md",
+      "handoff": ".codex/handoffs/V03-015/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "c256893",
+      "execution_status": "preview.2 delivered; root native browse/session acceptance; documented manual and title limitations"
+    },
+    {
+      "id": "V03-016",
+      "title": "explorer-product",
+      "module": "explorer-product",
+      "status": "completed",
+      "depends_on": [
+        "V03-014"
+      ],
+      "owner": "windows-shell-product-owner",
+      "branch": "codex/v03-016-explorer-product",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-016",
+      "task_file": ".codex/tasks/V03-016.md",
+      "handoff": ".codex/handoffs/V03-016/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "c256893",
+      "execution_status": "preview.2 delivered; root native browse/session acceptance; documented manual and title limitations"
+    },
+    {
+      "id": "V03-017",
+      "title": "windows-setup-package",
+      "module": "windows-setup-package",
+      "status": "completed",
+      "depends_on": [
+        "V03-014"
+      ],
+      "owner": "windows-package-owner",
+      "branch": "codex/v03-017-windows-setup-package",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-017",
+      "task_file": ".codex/tasks/V03-017.md",
+      "handoff": ".codex/handoffs/V03-017/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "c256893",
+      "execution_status": "preview.2 delivered; root native browse/session acceptance; documented manual and title limitations"
     }
   ]
 }

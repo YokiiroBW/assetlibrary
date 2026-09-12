@@ -1,0 +1,36 @@
+Window: "资产库 · 连接设置", App: AssetLibrary.Settings.exe.
+	0 窗口 资产库 · 连接设置 Secondary Actions: Raise
+		1 窗格
+			2 窗格
+				3 窗格
+					4 文本 连接资产库
+					5 文本 在此登录 NAS，随后从资源管理器左侧的“资产库”浏览。
+					6 状态栏 ID: StatusBar
+						7 文本 信息图标 ID: StandardIcon
+						8 文本 已退出登录 ID: Title
+						9 文本 填写或检查下方配置，然后连接并登录。 ID: Message
+					10 编辑 NAS HTTPS 地址 ID: OriginBox
+						11 文本 NAS 地址（HTTPS）
+					12 编辑 证书 SHA-256 指纹 ID: CertificateBox
+						13 文本 证书 SHA-256 指纹（可选）
+					14 文本 自签证书请填写管理员提供的完整指纹；仍会验证主机名和有效期。
+					15 编辑 账号 ID: AccountBox
+						16 文本 账号
+					17 编辑 密码 ID: PasswordBox
+						18 文本 密码
+					19 复选框 在此 Windows 账号下记住登录 ID: RememberBox
+					20 文本 记住登录使用 Windows 用户加密保护；退出登录会删除保存的凭据。
+					21 按钮 连接并登录 ID: ConnectButton
+					22 按钮 退出登录 ID: DisconnectButton
+					23 文本 浏览入口位于资源管理器。关闭此窗口后，后台连接继续运行。
+					24 滚动条 垂直 ID: VerticalScrollBar
+		29 标题栏
+			30 菜单栏 系统 ID: MenuBar
+				31 菜单项目 系统
+			32 按钮 最小化
+			33 按钮 最大化
+			34 按钮 关闭
+
+Document text: ```
+trial-admin
+```

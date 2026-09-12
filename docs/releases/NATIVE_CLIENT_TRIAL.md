@@ -1,5 +1,7 @@
 # 原生客户端首版进度与 Android 试用
 
+2026-09-12更新：Windows11 x64 **原生Explorer只读浏览preview.2安装包已交付**，含连接设置/后台Host与会话失效清理；包、安装和实际验收边界见[Windows交付说明](WINDOWS_EXPLORER_PREVIEW.md)。下文2026-09-08的Windows状态仅保留为历史，不代表最新状态；Android状态不变。
+
 2026-09-08，V03-001..004。Android 手机/平板只读首版已交付；Windows 按用户要求以原生 Explorer 为入口，没有可用的 Windows/Explorer 安装包。最新排查与验证状态见下方 Windows 小节；没有改为要求用户另开独立 Windows 应用。
 
 2026-09-09补充：V03-005集成分支提供新的[Android图片兼容试用候选](../../.runtime/releases/native-clients/AssetLibrary-Android-0.3.0-preview.1-404-fallback.apk)，30,425,593字节，SHA256 `6d959b5ac000b6a7a932c9d50298b51a25c9992d92ed748c9371e7b710444ddb`，仍为APK v2调试试用签名。它包含已在真实Core验证过的图片交互代码，以及旧服务缺少图片接口时的准确降级提示；本次修订另通过11项状态和1项相关原生UI检查。现有NAS没有启用图片引擎，连接该NAS时仍作为基础文件浏览使用，不据此宣称NAS图片预览已上线。新旧候选与验证来源分别记录在[V03-009交接](../../.codex/handoffs/V03-009/summary.md)；下方保留原只读首版说明与旧包，不覆盖原证据。

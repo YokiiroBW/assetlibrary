@@ -1,0 +1,12 @@
+{
+  "report": {
+    "status": "uninstalled_pending_cleanup",
+    "version": null,
+    "installDir": null,
+    "pendingCleanup": [
+      "versions/0.3.0-preview.1"
+    ]
+  },
+  "warnings": [],
+  "unsignedPreview": true
+}

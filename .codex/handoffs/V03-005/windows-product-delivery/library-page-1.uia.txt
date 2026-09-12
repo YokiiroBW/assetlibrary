@@ -1,0 +1,307 @@
+Window: "::{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}\snapshot-pidl-v1:420041495031010001007d46f090cb5c404a8a4dd8cf39ab6e04fe878a4b6e04594ea46a4f9999ac36940900000000009f531f75a25b3762ef7a9496bb7937688b4f - 文件资源管理器", App: explorer.exe.
+	0 窗口 ::{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}\snapshot-pidl-v1:420041495031010001007d46f090cb5c404a8a4dd8cf39ab6e04fe878a4b6e04594ea46a4f9999ac36940900000000009f531f75a25b3762ef7a9496bb7937688b4f - 文件资源管理器 Secondary Actions: Raise
+		7 窗格
+		8 窗格 ::{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}\snapshot-pidl-v1:420041495031010001007d46f090cb5c404a8a4dd8cf39ab6e04fe878a4b6e04594ea46a4f9999ac36940900000000009f531f75a25b3762ef7a9496bb7937688b4f
+			257 窗格
+				258 工具栏 命令模块 ID: FolderBandModuleInner
+					259 按钮 帮助(&H) Description: 获取帮助。 ID: HelpButton
+					260 复选框 预览窗格 Description: 显示预览窗格。 ID: PreviewButton
+					261 拆分按钮 平铺 Description: 更改你的视图。 ID: ViewControl
+						262 按钮 视图滑块 Description: 更多选项 ID: SplitMenuButton
+					263 按钮 组织​​ Description: 组织该文件夹的内容。 ID: {7DDC1264-7E4D-4F74-BBC0-D191987C8D0F}
+				264 状态栏 状态栏 ID: StatusBarModuleInner
+					352 组 属性字段 ID: System.StatusBarViewItemCount
+						353 文本 101 个项目 Description: 项目总数 ID: PropertyValue
+					267 组 查看模式 ID: ViewButtonsGroup
+						268 单选按钮 (selectable) 详细信息 Description: 在窗口中显示每一项的相关信息。(Ctrl+Alt+6) ID: ViewMode_Details
+						269 单选按钮 (selectable) 大图标 Description: 使用大缩略图显示项。(Ctrl+Alt+2) ID: ViewMode_LargeIcons
+				270 窗格 控制项宿主 ID: ProperTreeHost
+					271 树 导航窗格 ID: 100
+						272 树项目 (selectable) 桌面
+							273 树项目 (selectable) 主文件夹
+							274 树项目 (selectable) 图库
+							275 树项目 (selectable) 快速访问开始 - 桌面 (已固定)
+							276 树项目 (selectable) 下载 (已固定)
+							277 树项目 (selectable) 文档 (已固定)
+							278 树项目 (selectable) 图片 (已固定)
+							279 树项目 (selectable) 音乐 (已固定)
+							280 树项目 (selectable) 快速访问结束 - 视频 (已固定)
+							281 树项目 (selectable) 此电脑
+							282 树项目 (selectable) 网络
+								283 树项目 (selectable) tsclient
+								284 树项目 (selectable) YokiiroNAS
+							285 树项目 (selectable) 资产库
+				331 窗格 Shell 文件夹视图 ID: listview
+					332 列表 项目视图
+						354 滚动条 垂直 ID: VerticalScrollBar
+							355 按钮 上一行 ID: UpButton
+							356 缩略图 位置 ID: ScrollbarThumb
+							357 按钮 向下翻页 ID: DownPageButton
+							358 按钮 下一行 ID: DownButton
+						359 列表项目 (selectable) empty.txt ID: 0
+							360 编辑 状态 ID: System.StorageProviderUIStatus
+							347 编辑 名称 ID: System.ItemNameDisplay
+						346 列表项目 (selectable) sample-001.txt ID: 1
+							361 编辑 状态 ID: System.StorageProviderUIStatus
+							362 编辑 名称 ID: System.ItemNameDisplay
+						363 列表项目 (selectable) sample-002.txt ID: 2
+							364 编辑 状态 ID: System.StorageProviderUIStatus
+							365 编辑 名称 ID: System.ItemNameDisplay
+						366 列表项目 (selectable) sample-003.txt ID: 3
+							367 编辑 状态 ID: System.StorageProviderUIStatus
+							368 编辑 名称 ID: System.ItemNameDisplay
+						369 列表项目 (selectable) sample-004.txt ID: 4
+							370 编辑 状态 ID: System.StorageProviderUIStatus
+							371 编辑 名称 ID: System.ItemNameDisplay
+						372 列表项目 (selectable) sample-005.txt ID: 5
+							373 编辑 状态 ID: System.StorageProviderUIStatus
+							374 编辑 名称 ID: System.ItemNameDisplay
+						375 列表项目 (selectable) sample-006.txt ID: 6
+							376 编辑 状态 ID: System.StorageProviderUIStatus
+							377 编辑 名称 ID: System.ItemNameDisplay
+						378 列表项目 (selectable) sample-007.txt ID: 7
+							379 编辑 状态 ID: System.StorageProviderUIStatus
+							380 编辑 名称 ID: System.ItemNameDisplay
+						381 列表项目 (selectable) sample-008.txt ID: 8
+							382 编辑 状态 ID: System.StorageProviderUIStatus
+							383 编辑 名称 ID: System.ItemNameDisplay
+						384 列表项目 (selectable) sample-009.txt ID: 9
+							385 编辑 状态 ID: System.StorageProviderUIStatus
+							386 编辑 名称 ID: System.ItemNameDisplay
+						387 列表项目 (selectable) sample-010.txt ID: 10
+							388 编辑 状态 ID: System.StorageProviderUIStatus
+							389 编辑 名称 ID: System.ItemNameDisplay
+						390 列表项目 (selectable) sample-011.txt ID: 11
+							391 编辑 状态 ID: System.StorageProviderUIStatus
+							392 编辑 名称 ID: System.ItemNameDisplay
+						393 列表项目 (selectable) sample-012.txt ID: 12
+							394 编辑 状态 ID: System.StorageProviderUIStatus
+							395 编辑 名称 ID: System.ItemNameDisplay
+						396 列表项目 (selectable) sample-013.txt ID: 13
+							397 编辑 状态 ID: System.StorageProviderUIStatus
+							398 编辑 名称 ID: System.ItemNameDisplay
+						399 列表项目 (selectable) sample-014.txt ID: 14
+							400 编辑 状态 ID: System.StorageProviderUIStatus
+							401 编辑 名称 ID: System.ItemNameDisplay
+						402 列表项目 (selectable) sample-015.txt ID: 15
+							403 编辑 状态 ID: System.StorageProviderUIStatus
+							404 编辑 名称 ID: System.ItemNameDisplay
+						405 列表项目 (selectable) sample-016.txt ID: 16
+							406 编辑 状态 ID: System.StorageProviderUIStatus
+							407 编辑 名称 ID: System.ItemNameDisplay
+						408 列表项目 (selectable) sample-017.txt ID: 17
+							409 编辑 状态 ID: System.StorageProviderUIStatus
+							410 编辑 名称 ID: System.ItemNameDisplay
+						411 列表项目 (selectable) sample-018.txt ID: 18
+							412 编辑 状态 ID: System.StorageProviderUIStatus
+							413 编辑 名称 ID: System.ItemNameDisplay
+						414 列表项目 (selectable) sample-019.txt ID: 19
+							415 编辑 状态 ID: System.StorageProviderUIStatus
+							416 编辑 名称 ID: System.ItemNameDisplay
+						417 列表项目 (selectable) sample-020.txt ID: 20
+							418 编辑 状态 ID: System.StorageProviderUIStatus
+							419 编辑 名称 ID: System.ItemNameDisplay
+						420 列表项目 (selectable) sample-021.txt ID: 21
+							421 编辑 状态 ID: System.StorageProviderUIStatus
+							422 编辑 名称 ID: System.ItemNameDisplay
+						423 列表项目 (selectable) sample-022.txt ID: 22
+							424 编辑 状态 ID: System.StorageProviderUIStatus
+							425 编辑 名称 ID: System.ItemNameDisplay
+						426 列表项目 (selectable) sample-023.txt ID: 23
+							427 编辑 状态 ID: System.StorageProviderUIStatus
+							428 编辑 名称 ID: System.ItemNameDisplay
+						429 列表项目 (selectable) sample-024.txt ID: 24
+							430 编辑 状态 ID: System.StorageProviderUIStatus
+							431 编辑 名称 ID: System.ItemNameDisplay
+						432 列表项目 (selectable) sample-025.txt ID: 25
+							433 编辑 状态 ID: System.StorageProviderUIStatus
+							434 编辑 名称 ID: System.ItemNameDisplay
+						435 列表项目 (selectable) sample-026.txt ID: 26
+							436 编辑 状态 ID: System.StorageProviderUIStatus
+							437 编辑 名称 ID: System.ItemNameDisplay
+						438 列表项目 (selectable) sample-027.txt ID: 27
+							439 编辑 状态 ID: System.StorageProviderUIStatus
+							440 编辑 名称 ID: System.ItemNameDisplay
+						441 列表项目 (selectable) sample-028.txt ID: 28
+							442 编辑 状态 ID: System.StorageProviderUIStatus
+							443 编辑 名称 ID: System.ItemNameDisplay
+						444 列表项目 (selectable) sample-029.txt ID: 29
+							445 编辑 状态 ID: System.StorageProviderUIStatus
+							446 编辑 名称 ID: System.ItemNameDisplay
+						447 列表项目 (selectable) sample-030.txt ID: 30
+							448 编辑 状态 ID: System.StorageProviderUIStatus
+							449 编辑 名称 ID: System.ItemNameDisplay
+						450 列表项目 (selectable) sample-031.txt ID: 31
+							451 编辑 状态 ID: System.StorageProviderUIStatus
+							452 编辑 名称 ID: System.ItemNameDisplay
+						453 列表项目 (selectable) sample-032.txt ID: 32
+							454 编辑 状态 ID: System.StorageProviderUIStatus
+							455 编辑 名称 ID: System.ItemNameDisplay
+						456 列表项目 (selectable) sample-033.txt ID: 33
+							457 编辑 状态 ID: System.StorageProviderUIStatus
+							458 编辑 名称 ID: System.ItemNameDisplay
+						459 列表项目 (selectable) sample-034.txt ID: 34
+							460 编辑 状态 ID: System.StorageProviderUIStatus
+							461 编辑 名称 ID: System.ItemNameDisplay
+						462 列表项目 (selectable) sample-035.txt ID: 35
+							463 编辑 状态 ID: System.StorageProviderUIStatus
+							464 编辑 名称 ID: System.ItemNameDisplay
+						465 列表项目 (selectable) sample-036.txt ID: 36
+							466 编辑 状态 ID: System.StorageProviderUIStatus
+							467 编辑 名称 ID: System.ItemNameDisplay
+						468 列表项目 (selectable) sample-037.txt ID: 37
+							469 编辑 状态 ID: System.StorageProviderUIStatus
+							470 编辑 名称 ID: System.ItemNameDisplay
+						471 列表项目 (selectable) sample-038.txt ID: 38
+							472 编辑 状态 ID: System.StorageProviderUIStatus
+							473 编辑 名称 ID: System.ItemNameDisplay
+						474 列表项目 (selectable) sample-039.txt ID: 39
+							475 编辑 状态 ID: System.StorageProviderUIStatus
+							476 编辑 名称 ID: System.ItemNameDisplay
+						477 列表项目 (selectable) sample-040.txt ID: 40
+							478 编辑 状态 ID: System.StorageProviderUIStatus
+							479 编辑 名称 ID: System.ItemNameDisplay
+						480 列表项目 (selectable) sample-041.txt ID: 41
+							481 编辑 状态 ID: System.StorageProviderUIStatus
+							482 编辑 名称 ID: System.ItemNameDisplay
+						483 列表项目 (selectable) sample-042.txt ID: 42
+							484 编辑 状态 ID: System.StorageProviderUIStatus
+							485 编辑 名称 ID: System.ItemNameDisplay
+						486 列表项目 (selectable) sample-043.txt ID: 43
+							487 编辑 状态 ID: System.StorageProviderUIStatus
+							488 编辑 名称 ID: System.ItemNameDisplay
+						489 列表项目 (selectable) sample-044.txt ID: 44
+							490 编辑 状态 ID: System.StorageProviderUIStatus
+							491 编辑 名称 ID: System.ItemNameDisplay
+						492 列表项目 (selectable) sample-045.txt ID: 45
+							493 编辑 状态 ID: System.StorageProviderUIStatus
+							494 编辑 名称 ID: System.ItemNameDisplay
+						495 列表项目 (selectable) sample-046.txt ID: 46
+							496 编辑 状态 ID: System.StorageProviderUIStatus
+							497 编辑 名称 ID: System.ItemNameDisplay
+						498 列表项目 (selectable) sample-047.txt ID: 47
+							499 编辑 状态 ID: System.StorageProviderUIStatus
+							500 编辑 名称 ID: System.ItemNameDisplay
+						501 列表项目 (selectable) sample-048.txt ID: 48
+							502 编辑 状态 ID: System.StorageProviderUIStatus
+							503 编辑 名称 ID: System.ItemNameDisplay
+						504 列表项目 (selectable) sample-049.txt ID: 49
+							505 编辑 状态 ID: System.StorageProviderUIStatus
+							506 编辑 名称 ID: System.ItemNameDisplay
+						507 列表项目 (selectable) sample-050.txt ID: 50
+							508 编辑 状态 ID: System.StorageProviderUIStatus
+							509 编辑 名称 ID: System.ItemNameDisplay
+						510 列表项目 (selectable) sample-051.txt ID: 51
+							511 编辑 状态 ID: System.StorageProviderUIStatus
+							512 编辑 名称 ID: System.ItemNameDisplay
+						513 列表项目 (selectable) sample-052.txt ID: 52
+							514 编辑 状态 ID: System.StorageProviderUIStatus
+							515 编辑 名称 ID: System.ItemNameDisplay
+						516 列表项目 (selectable) sample-053.txt ID: 53
+							517 编辑 状态 ID: System.StorageProviderUIStatus
+							518 编辑 名称 ID: System.ItemNameDisplay
+						519 列表项目 (selectable) sample-054.txt ID: 54
+							520 编辑 状态 ID: System.StorageProviderUIStatus
+							521 编辑 名称 ID: System.ItemNameDisplay
+						522 列表项目 (selectable) sample-055.txt ID: 55
+							523 编辑 状态 ID: System.StorageProviderUIStatus
+							524 编辑 名称 ID: System.ItemNameDisplay
+						525 列表项目 (selectable) sample-056.txt ID: 56
+							526 编辑 状态 ID: System.StorageProviderUIStatus
+							527 编辑 名称 ID: System.ItemNameDisplay
+						528 列表项目 (selectable) sample-057.txt ID: 57
+							529 编辑 状态 ID: System.StorageProviderUIStatus
+							530 编辑 名称 ID: System.ItemNameDisplay
+						531 列表项目 (selectable) sample-058.txt ID: 58
+							532 编辑 状态 ID: System.StorageProviderUIStatus
+							533 编辑 名称 ID: System.ItemNameDisplay
+						534 列表项目 (selectable) sample-059.txt ID: 59
+							535 编辑 状态 ID: System.StorageProviderUIStatus
+							536 编辑 名称 ID: System.ItemNameDisplay
+						537 列表项目 (selectable) sample-060.txt ID: 60
+							538 编辑 状态 ID: System.StorageProviderUIStatus
+							539 编辑 名称 ID: System.ItemNameDisplay
+						540 列表项目 (selectable) sample-061.txt ID: 61
+							541 编辑 状态 ID: System.StorageProviderUIStatus
+							542 编辑 名称 ID: System.ItemNameDisplay
+						543 列表项目 (selectable) sample-062.txt ID: 62
+							544 编辑 状态 ID: System.StorageProviderUIStatus
+							545 编辑 名称 ID: System.ItemNameDisplay
+						546 列表项目 (selectable) sample-063.txt ID: 63
+							547 编辑 状态 ID: System.StorageProviderUIStatus
+							548 编辑 名称 ID: System.ItemNameDisplay
+						549 列表项目 (selectable) sample-064.txt ID: 64
+							550 编辑 状态 ID: System.StorageProviderUIStatus
+							551 编辑 名称 ID: System.ItemNameDisplay
+						552 列表项目 (selectable) sample-065.txt ID: 65
+							553 编辑 状态 ID: System.StorageProviderUIStatus
+							554 编辑 名称 ID: System.ItemNameDisplay
+						555 列表项目 (selectable) sample-066.txt ID: 66
+							556 编辑 状态 ID: System.StorageProviderUIStatus
+							557 编辑 名称 ID: System.ItemNameDisplay
+						558 列表项目 (selectable) sample-067.txt ID: 67
+							559 编辑 状态 ID: System.StorageProviderUIStatus
+							560 编辑 名称 ID: System.ItemNameDisplay
+						561 列表项目 (selectable) sample-068.txt ID: 68
+							562 编辑 状态 ID: System.StorageProviderUIStatus
+							563 编辑 名称 ID: System.ItemNameDisplay
+						564 列表项目 (selectable) sample-069.txt ID: 69
+							565 编辑 状态 ID: System.StorageProviderUIStatus
+							566 编辑 名称 ID: System.ItemNameDisplay
+		125 窗格
+			126 窗格
+				127 选项卡 ID: TabView
+					128 列表 ID: TabListView
+						129 选项卡项目 (selectable) ::{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}\snapshot-pidl-v1:420041495031010001007d46f090cb5c404a8a4dd8cf39ab6e04fe878a4b6e04594ea46a4f9999ac36940900000000009f531f75a25b3762ef7a9496bb7937688b4f
+							335 图像
+							131 文本 ::{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}\snapshot-pidl-v1:420041495031010001007d46f090cb5c404a8a4dd8cf39ab6e04fe878a4b6e04594ea46a4f9999ac36940900000000009f531f75a25b3762ef7a9496bb7937688b4f
+							132 按钮 关闭标签页 ID: CloseButton
+					133 按钮 添加新标签页 ID: AddButton
+				134 应用栏 ID: NavigationCommands
+					135 应用栏按钮 后退 Description: 返回到 资产库 ID: backButton
+					136 应用栏按钮 (disabled) 前进 Description: 前进 ID: forwardButton
+					137 应用栏按钮 上移到“资产库”(Alt + 向上键) Description: 上移到“资产库”(Alt + 向上键) ID: upButton
+					138 应用栏按钮 刷新“原生客户端隔离样例”(F5) Description: 刷新“原生客户端隔离样例”(F5) ID: refreshButton
+				139 组 ID: PART_AutoSuggestBox
+					140 编辑 地址栏 ID: TextBox
+				141 拆分按钮 资产库 ID: FirstCrumbStackPanel
+					142 图像
+				143 组 ID: PART_BreadcrumbBar
+					336 拆分按钮 资产库
+						337 文本 资产库
+					338 拆分按钮 原生客户端隔离样例
+						339 文本 原生客户端隔离样例
+				154 组 ID: FileExplorerSearchBox
+					155 编辑 在 原生客户端隔离样例 中搜索 ID: TextBox
+						156 文本 在 原生客户端隔离样例 中搜索
+				157 应用栏 ID: FileExplorerCommandBar
+					158 应用栏按钮 (disabled) 新建
+						159 图像
+					160 应用栏按钮 (disabled) 剪切​​ Description: 将所选项目移动到剪贴板。
+						161 图像
+					162 应用栏按钮 (disabled) 复制​​ Description: 将所选项目复制到剪贴板。
+						163 图像
+					164 应用栏按钮 (disabled) 粘贴​​ Description: 将剪贴板中的内容粘贴到当前位置。
+						165 图像
+					166 应用栏按钮 (disabled) 重命名​​ Description: 重命名所选项目。
+						167 图像
+					168 应用栏按钮 (disabled) 共享
+						169 图像
+					170 应用栏按钮 (disabled) 删除​​ Description: 将所选项目移动到回收站或将其永久删除。
+						171 图像
+					172 应用栏按钮 排序 ID: SortAndGroupButton
+						173 图像
+					174 应用栏按钮 查看
+						175 图像
+					176 按钮 更多选项 ID: MoreButton
+				177 应用栏 ID: FileExplorerSecondaryCommandBar
+					178 应用栏按钮 详细信息 Description: 显示或隐藏详细信息窗格。 ID: DetailsPaneToggleButton
+						179 图像
+		1 标题栏
+			2 菜单栏 系统 ID: MenuBar
+				254 菜单项目 系统
+			4 按钮 最小化
+			5 按钮 最大化
+			6 按钮 关闭
+
+The focused UI element is 140 编辑 地址栏 ID: TextBox.

@@ -1,0 +1,11 @@
+test_build_passes_product_version_and_scopes_runtime_pin (test_package.PackageTests.test_build_passes_product_version_and_scopes_runtime_pin) ... ok
+test_conflicting_dependency_preserves_first_component (test_package.PackageTests.test_conflicting_dependency_preserves_first_component) ... ok
+test_existing_output_is_preserved (test_package.PackageTests.test_existing_output_is_preserved) ... ok
+test_identical_dependency_is_merged_once (test_package.PackageTests.test_identical_dependency_is_merged_once) ... ok
+test_missing_or_empty_settings_pri_is_rejected (test_package.PackageTests.test_missing_or_empty_settings_pri_is_rejected) ... ok
+test_non_pe_is_rejected_without_loading_it (test_package.PackageTests.test_non_pe_is_rejected_without_loading_it) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.013s
+
+OK

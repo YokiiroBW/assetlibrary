@@ -1,0 +1,12 @@
+  正在确定要还原的项目…
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Setup\AssetLibrary.Windows.Setup.csproj (用时 86 毫秒)。
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\tests\windows-setup\AssetLibrary.Windows.Setup.Tests.csproj (用时 295 毫秒)。
+  AssetLibrary.Windows.Setup -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Setup\bin\Release\net10.0-windows\AssetLibrary.Setup.dll
+  AssetLibrary.Windows.Setup.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+VSTest 版本 18.0.2 (x64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+
+已通过! - 失败:     0，通过:    23，已跳过:     0，总计:    23，持续时间: 234 ms - AssetLibrary.Windows.Setup.Tests.dll (net10.0)

@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_test_only_native_core_browse_cold_gui_and_defined_recovery_verified",
-  "next_action": "Controlled native Explorer/AssetHost/Core read-only connection is functionally accepted and all owned test resources cleaned. Next work is production login/settings/startup/install, file opening/preview, category/tree polish, push invalidation and G2..G4 lifecycle/soak; CViewSettings retained references remain an explicit unresolved unload gate. Do not repeat the resolved registry-view or clone-signal diagnosis.",
+  "status": "windows_explorer_installable_read_only_preview_delivered",
+  "next_action": "Use preview.2 installer/Explorer connection settings with the user NAS. Address child tab friendly names and manual authentication/system-uninstall UI acceptance next; content preview depends on the NAS isolation decision. G1/G2/G3 measured; G4 user-waived, never schedule its 20 cycles/8 hours. Full V0.3/Android physical devices/signing remain independent.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -74,7 +74,8 @@
     "The user corrected the Windows requirement during V03-001: it must be embedded in native Explorer, not a separately opened application. ADR-0018 selects native DefView/IShellFolder2 plus out-of-process C# AssetHost for the first supported view. Real HKCU discovery, fault and stability evidence are required; independent COM/hidden browser probes do not close Explorer gates.",
     "V03-003 Android and V03-004 real Core/PostgreSQL fixture are delivered. Android APK is 30064814 bytes/SHA256 afd7cbd3f387aebc1f2d00ec34c3f824909673615546404b81afd2a24a79b8cb, with real phone/tablet/API36/large-font and runtime dependency evidence. V03-002 remains partial: 22 unit cases and real HTTPS Core passed, but real Explorer reports no association before invoking the extension factory; cause undetermined. HKCU registration is clean. Native input is denied (0x80070005), with owned diagnostic windows awaiting verified UI access. No Windows installer or production Shell is enabled. NAS /readyz was read-only verified with its existing public certificate, without credentials or asset access.",
     "User explicitly authorized distinct development windows with final unified acceptance. V03-005 created four native Codex worktrees/threads for Windows (V03-006), image preview server (V03-007), Web (V03-008), Android (V03-009). Worktrees were verified against the same git-common-dir and assigned unique branches; task scaffolds reuse codex-new-task.py. Native window initial command approvals differ from this coordinator permission profile; startup analysis is in progress, preview contract not yet frozen, and no new product feature or release gate has been completed by this planning step.",
-    "V03-005 checkpoint3890793 integrates Android1838b96/815e2f6, Web238c61c/4e633e8/d944300/d11085e, and Windows diagnostics453e10b/ba9fcbb/046dbde. Frozen wire/ADR0019/pins38aedca and bounded real image fixture5edf25c are committed. Web65 distinct browser cases and Android77 distinct client/repository cases passed in owned worktrees; coordinator reviewed code and representative screenshots. Root fixture Python8 and .NET6/Release passed. Real Core image consumer acceptance, Windows LPAC/Linux sandbox validation, Explorer entry and production packaging/deployment remain uncompleted. Existing NAS and release gates unchanged."
+    "V03-005 checkpoint3890793 integrates Android1838b96/815e2f6, Web238c61c/4e633e8/d944300/d11085e, and Windows diagnostics453e10b/ba9fcbb/046dbde. Frozen wire/ADR0019/pins38aedca and bounded real image fixture5edf25c are committed. Web65 distinct browser cases and Android77 distinct client/repository cases passed in owned worktrees; coordinator reviewed code and representative screenshots. Root fixture Python8 and .NET6/Release passed. Real Core image consumer acceptance, Windows LPAC/Linux sandbox validation, Explorer entry and production packaging/deployment remain uncompleted. Existing NAS and release gates unchanged.",
+    "2026-09-12: Windows preview.2 ZIP delivered after real install, native sidebar/paging/Chinese folders/session invalidation and Settings startup. See docs/releases/WINDOWS_EXPLORER_PREVIEW.md and V03-005/windows-product-delivery. Failed preview.1 retained as negative evidence. Test Core138 sources unchanged and6 roles/resources cleaned; final installation retained, test configuration removed."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
   "active_work": {
@@ -82,15 +83,15 @@
     "coordinator_task": "V03-005",
     "coordinator_thread": "01a0801a-4c6c-7d92-b0be-ce0150f8b115",
     "tasks": [
-      "V03-006",
-      "V03-007",
-      "V03-008",
-      "V03-009"
+      "V03-005",
+      "V03-015",
+      "V03-016",
+      "V03-017"
     ],
-    "stage": "windows_own_minimal_explorer_entry_cleanup_passed_host_integration_pending",
-    "windows_entry": "native Explorer only; existing G1..G4 remain open",
-    "command_approvals": "User approved and completed before/after current-user Explorer restarts; continued diagnostic work remains scoped and reversible.",
-    "contract_commit": "38aedca57c0214349dc058d4c62deff805e953b3",
-    "integration_checkpoint": "163da1b"
+    "stage": "windows_preview_2_delivered",
+    "windows_entry": "native Explorer; G1/G2/G3 measured, G4 waived/not performed",
+    "command_approvals": "User authorized owned desktop tests and delivery. Original Explorer was not restarted; no HKLM/UAC/security-policy changes.",
+    "contract_commit": "2ebda30",
+    "integration_checkpoint": "c256893"
   }
 }

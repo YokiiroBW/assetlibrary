@@ -1,0 +1,49 @@
+{
+  "passed": 8,
+  "failed": 0,
+  "syntheticPayload": true,
+  "realHkcuUsed": false,
+  "setupSha256": "3f6479fc3c9f9de1af6f4cf096eef0205bbb6c7b6db357167b83208f8decfd41",
+  "steps": [
+    {
+      "command": "install",
+      "status": "installed",
+      "exitCode": 0
+    },
+    {
+      "command": "status",
+      "status": "registered_current_process_view",
+      "exitCode": 0
+    },
+    {
+      "command": "install",
+      "status": "installed",
+      "exitCode": 0
+    },
+    {
+      "command": "install",
+      "status": "installed",
+      "exitCode": 0
+    },
+    {
+      "command": "uninstall",
+      "status": "uninstalled",
+      "exitCode": 0
+    },
+    {
+      "command": "status",
+      "status": "not_installed",
+      "exitCode": 0
+    },
+    {
+      "command": "uninstall",
+      "status": "uninstalled",
+      "exitCode": 0
+    },
+    {
+      "command": "install-corrupted",
+      "status": "hash_mismatch",
+      "exitCode": 1
+    }
+  ]
+}

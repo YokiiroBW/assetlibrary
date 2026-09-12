@@ -1,0 +1,9 @@
+能力,preview.2状态,证据,边界
+用户级安装与原生侧栏,实机通过,V03-005/windows-product-delivery/install-02-stdout.json,Windows11 x64未签名
+WinUI设置启动与Explorer入口,实机通过,V03-005/windows-product-delivery/settings-from-explorer.json,认证表单人工提交尚未操作
+实际Core目录与分页,实机通过,V03-005/windows-product-delivery/library-page-2.png,只读；每页最多100条；标题部分显示解析标识
+登录退出与当前视图清理,正式API及实机通过,V03-005/windows-product-delivery/child-after-logout.png,Windows导航历史不清除；旧文件不再可读
+安装升级卸载与损坏拒绝,最终EXE沙箱通过,V03-005/windows-product-delivery/setup-cli-final.json,同实现内部候选真实注销；系统应用页卸载UI未操作；占用版本延期清理
+原文件安全与临时资源回收,实机通过,V03-005/windows-product-delivery/core-cleanup.json,138合成文件hash及mtime不变；不代表真实写入验收
+内容预览及原文件操作,未交付,docs/releases/WINDOWS_EXPLORER_PREVIEW.md,图片Worker平台阻断独立
+G4长期稳定性,用户豁免且未测试,docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md,不执行20轮或8小时

@@ -1,0 +1,9 @@
+{
+  "fixture_settings_removed": true,
+  "remembered_credentials_present": false,
+  "removed_settings_sha256": "26DBEFDF610063BFDC7053A57190FF5EDA01074BAE7997E61DE422841343CA04",
+  "production_host_stopped": true,
+  "installed_version": "0.3.0-preview.2",
+  "old_version_pending_cleanup": "0.3.0-preview.1",
+  "original_explorer_unchanged": true
+}

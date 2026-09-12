@@ -1,0 +1,24 @@
+Internal ctest changing into directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/windows-shell-verification-02
+Test project C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/windows-shell-verification-02
+    Start 1: explorer_snapshot
+1/9 Test #1: explorer_snapshot ................   Passed    0.72 sec
+    Start 2: explorer_fault_harness
+2/9 Test #2: explorer_fault_harness ...........   Passed    1.12 sec
+    Start 3: explorer_navigation_menu
+3/9 Test #3: explorer_navigation_menu .........   Passed    0.02 sec
+    Start 4: explorer_loading_refresh
+4/9 Test #4: explorer_loading_refresh .........   Passed   43.54 sec
+    Start 5: explorer_loading_view_wiring
+5/9 Test #5: explorer_loading_view_wiring .....   Passed    1.27 sec
+    Start 6: explorer_diagnostics
+6/9 Test #6: explorer_diagnostics .............   Passed    0.02 sec
+    Start 7: explorer_product
+7/9 Test #7: explorer_product .................   Passed    0.02 sec
+    Start 8: explorer_session_notification
+8/9 Test #8: explorer_session_notification ....   Passed    1.42 sec
+    Start 9: explorer_product_imports
+9/9 Test #9: explorer_product_imports .........   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =  48.18 sec

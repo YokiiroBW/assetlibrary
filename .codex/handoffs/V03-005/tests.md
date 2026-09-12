@@ -1,5 +1,11 @@
 # V03-005 当前验证记录
 
+## 2026-09-12 Windows可安装浏览版preview.2
+
+最终包从c256893构建，修复应用PRI缺失与通知助手MTA/STA冲突。77 Windows、23 Setup、9 CTest、6 packaging、8步最终EXE沙箱生命周期、16发行锁测试通过；默认依赖31/15包、发行17包许可和已知漏洞审核通过。2项NativeLive服务测试先前通过，最终真实Explorer分页/中文目录/根登出重连/子目录登出/历史无旧文件复验通过。Windows与Setup格式返回0，Windows格式器工作区加载警告如实保留。
+
+实际普通上下文安装preview.2、WinUI启动、Explorer菜单父进程和单实例证据已留存。preview.1原失败、真实注销与3010延期清理不改为通过；最终EXE有隔离卸载实跑，未自动点击系统应用页卸载/认证表单。自有GUI与测试服务清理、原Explorer未重启、138文件强hash/mtime不变、6角色回收。详细命令日志与验收范围见[windows-product-delivery](windows-product-delivery/README.md)。G4未做，完整V0.3保持独立。
+
 ## 2026-09-12 G3实测通过、G4用户豁免
 
 最终集成仓库架构/契约检查通过；explorer-v0.5返回0/RELEASE_GATE_ALLOWED。G3为verified，G4为waived_by_user/not_performed/exit_criteria_met=false；原退出条款未删改。239份原件/副本摘要及214条操作员索引已核验，Git采用局部-text保留原始字节。

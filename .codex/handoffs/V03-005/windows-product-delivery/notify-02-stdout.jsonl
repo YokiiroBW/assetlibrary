@@ -1,0 +1,3 @@
+{"operation":"session_notify","stage":"initialize_sta","hresult":1}
+{"operation":"session_notify","stage":"parse_root","hresult":0}
+{"operation":"session_notify","stage":"dispatched","hresult":0}

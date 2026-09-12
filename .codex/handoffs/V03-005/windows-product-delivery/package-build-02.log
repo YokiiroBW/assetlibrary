@@ -1,0 +1,57 @@
+  正在确定要还原的项目…
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Setup\AssetLibrary.Windows.Setup.csproj (用时 229 毫秒)。
+  AssetLibrary.Windows.Setup -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Setup\bin\Release\net10.0-windows\win-x64\AssetLibrary.Setup.dll
+  AssetLibrary.Windows.Setup -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\publish\Setup\
+  正在确定要还原的项目…
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\AssetHost\AssetLibrary.Windows.AssetHost.csproj (用时 147 毫秒)。
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\packages\sdk\assetlink\dotnet\AssetLibrary.AssetLink.csproj (用时 142 毫秒)。
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Core\AssetLibrary.Windows.Core.csproj (用时 147 毫秒)。
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Session\AssetLibrary.Windows.Session.csproj (用时 142 毫秒)。
+  AssetLibrary.Windows.Session -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Session\bin\Release\net10.0\AssetLibrary.Windows.Session.dll
+  AssetLibrary.AssetLink -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\packages\sdk\assetlink\dotnet\bin\Release\net10.0\AssetLibrary.AssetLink.dll
+  AssetLibrary.Windows.Core -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Core\bin\Release\net10.0\AssetLibrary.Windows.Core.dll
+  AssetLibrary.Windows.AssetHost -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\AssetHost\bin\Release\net10.0\win-x64\AssetLibrary.Host.dll
+  AssetLibrary.Windows.AssetHost -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\publish\Host\
+  正在确定要还原的项目…
+  已还原 C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Settings\AssetLibrary.Windows.Settings.csproj (用时 253 毫秒)。
+  1 个项目(共 2 个)是最新的，无法还原。
+  AssetLibrary.Windows.Session -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Session\bin\Release\net10.0\AssetLibrary.Windows.Session.dll
+  AssetLibrary.Windows.Settings -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Settings\bin\Release\net10.0-windows10.0.26100.0\win-x64\AssetLibrary.Settings.dll
+  AssetLibrary.Windows.Settings -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\publish\Settings\
+-- The CXX compiler identification is MSVC 19.44.35228.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (6.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/windows-package-build-02/shell
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  1>Checking Build System
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/apps/windows-shell/CMakeLists.txt
+  Snapshot.cpp
+  SnapshotPidl.cpp
+  SnapshotPipe.cpp
+  G3Measurements.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+  AssetLibrarySnapshot.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\shell\Release\AssetLibrarySnapshot.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/apps/windows-shell/CMakeLists.txt
+  LoadingRefresh.cpp
+  AssetLibraryLoadingRefresh.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\shell\Release\AssetLibraryLoadingRefresh.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/apps/windows-shell/CMakeLists.txt
+  ProbeDiagnostics.cpp
+  AssetLibraryDiagnostics.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\shell\Release\AssetLibraryDiagnostics.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/apps/windows-shell/CMakeLists.txt
+  ExplorerFolder.cpp
+  NavigationMenu.cpp
+  SnapshotIcon.cpp
+  SettingsMenu.cpp
+  SettingsCommand.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+    正在创建库 C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/windows-package-build-02/shell/Release/AssetLibrary.Explorer.lib 和对象 C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/windows-package-build-02/shell/Release/AssetLibrary.Explorer.exp
+  AssetLibraryExplorer.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\windows-package-build-02\shell\Release\AssetLibrary.Explorer.dll
+{"archive": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\releases\\windows\\AssetLibrary-0.3.0-preview.2-win-x64.zip", "sha256": "340d1e748fc713f8b8506fb686c79acaeab9a821ad7eb1cb38accd6a2e2a69b4", "unsignedPreview": true}
