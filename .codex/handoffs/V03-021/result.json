@@ -1,0 +1,92 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-021",
+  "title": "explorer-gallery-view",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-gallery-shell-owner",
+  "branch": "codex/v03-021-explorer-gallery-view",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-021",
+  "commit": "dbb4a42fd44db38829a1251a8cced4b7e6d40714",
+  "changed_files": [
+    ".codex/handoffs/V03-021/client-status.md",
+    ".codex/handoffs/V03-021/result.json",
+    ".codex/handoffs/V03-021/summary.md",
+    ".codex/handoffs/V03-021/tests.md",
+    ".codex/tasks/V03-021.md",
+    "apps/windows-shell/CMakeLists.txt",
+    "apps/windows-shell/ExplorerFolder.cpp",
+    "apps/windows-shell/gallery/ThumbnailClient.cpp",
+    "apps/windows-shell/gallery/ThumbnailClient.h",
+    "apps/windows-shell/gallery/View.cpp",
+    "apps/windows-shell/gallery/View.h",
+    "apps/windows-shell/gallery/ViewRequests.cpp",
+    "apps/windows-shell/gallery/ViewRequests.h",
+    "apps/windows-shell/LoadingRefresh.cpp",
+    "apps/windows-shell/LoadingRefresh.h",
+    "apps/windows-shell/LocalPipePeer.cpp",
+    "apps/windows-shell/LocalPipePeer.h",
+    "apps/windows-shell/SnapshotPipe.cpp",
+    "tests/windows-shell/CMakeLists.txt",
+    "tests/windows-shell/GalleryRequestTests.cpp",
+    "tests/windows-shell/GalleryThumbnailTests.cpp",
+    "tests/windows-shell/GalleryViewTests.cpp",
+    "tests/windows-shell/VerifyProductImports.cmake"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "Original nine CTests plus thumbnail/Requests/real View tests. Offscreen fake Sources and own Temp notification PIDL are not actual Explorer/Core acceptance.",
+    "strict_build": "Final Release /W4 /WX /permissive- /analyze /utf-8 passed; no weakened diagnostics",
+    "repository_verification": "Passed: 482 architecture inputs, 21 migration tests, 14 architecture tests; Alpha remains blocked",
+    "dll_sha256": "596F736528ADFC5C913D8F88B8B6C414C5A5121E26A4624E1745880E0054EEE7",
+    "final_followup": "After full12/12 suite, incoming AddRef generation capture was strengthened; affected strict build and gallery_view rerun passed0.23s."
+  },
+  "risks": [
+    "Root must validate real registered Explorer plus real Core thumbnails before default installation.",
+    "Surface external MSAA provider retention under v6/PerMonitorV2 remains separately tracked by V03-019/root; not recorded as reclaimed here.",
+    "Each new non-root view defaults to Gallery; mode/density do not persist across navigation, by coordinator decision.",
+    "Notification Temp-directory test verifies public mechanism, not production root binding or final actual UIA behavior.",
+    "No G4 soak, raw-file open/download, asset write, or complete V0.3 release claim."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/V03-021/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "apps/windows-shell gallery View, background Requests, bounded thumbnail adapter and shared local-pipe peer/view quota helpers; windows-gallery-shell-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Single Surface implementation owned by V03-019, generated semantic theme, original Folder/PIDL/CompareIDs/NavigationMenu/Settings command.",
+      "Snapshot wire v1/150ms/64KiB parser and cleanup; shared actual TokenUser/session/held server identity moved to LocalPipePeer without semantic relaxation.",
+      "Original four-active-view atomic shared between root DefView callback and custom View.",
+      "Independent coordinator thumbnail wire vectors and existing COM test recorders."
+    ],
+    "duplicated_logic": [
+      "Native OVERLAPPED transfer/reap mechanics follow the original proven pattern in the separately bounded20s/1MiB thumbnail transport; peer authentication is shared once and no domain rule is copied."
+    ],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [
+      "Only ADR-0021-approved Windows system gdi32/msimg32/oleacc imports; no third-party/runtime dependency."
+    ],
+    "contract_changes": [
+      "No shared wire or contract files authored by this owner. Consume root thumbnail-v1 and Surface owner Shown API; internal C++ test notificationRoot override is not exposed through COM/configuration/environment."
+    ],
+    "architecture_tests": [
+      "Full12 CTests passed69.14s, including original9 preservation and new malformed-frame/cancel/generation/quota/COM-reentry coverage.",
+      "Final incoming AddRef reentry negative control and strict gallery_view rebuild passed0.23s.",
+      "verify_repository passed with482 native/repository inputs and Alpha blocked.",
+      "Final diff review checked owner-only modifications, no backend COM references, DLL pins, no GUI IPC waits, unchanged original frame limits, and bounded queues."
+    ],
+    "technical_debt": [
+      "Actual Explorer/Core image and external accessibility retirement acceptance remains coordinator-owned.",
+      "Per-navigation mode preference is intentionally not persisted.",
+      "MSAA/v6/PMv2 retained-reference issue remains outside this adapter checkpoint; no forced Release or false unload assertion.",
+      "Visibility uses committed Surface intent and ancestor native visibility; real Explorer host behavior remains in final integration verification."
+    ]
+  }
+}
