@@ -7,8 +7,12 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "3284bf2",
+  "commit": "26d7446",
   "changed_files": [
+    "\"docs/05_\\346\\200\\273\\344\\275\\223\\346\\236\\266\\346\\236\\204\\344\\270\\216\\346\\212\\200\\346\\234\\257\\346\\241\\206\\346\\236\\266.md\"",
+    "\"docs/adr/ADR-0018_Windows\\345\\216\\237\\347\\224\\237Explorer\\345\\205\\245\\345\\217\\243\\344\\270\\216\\346\\234\\200\\345\\260\\217\\350\\247\\206\\345\\233\\276.md\"",
+    "\"docs/adr/ADR-0019_\\351\\246\\226\\346\\211\\271\\345\\233\\276\\347\\211\\207\\351\\242\\204\\350\\247\\210\\345\\245\\221\\347\\272\\246\\344\\270\\216\\351\\232\\224\\347\\246\\273\\350\\246\\201\\346\\261\\202.md\"",
+    "\"tests/integration/native-clients/fixtures/image-preview-v1/\\344\\270\\255\\346\\226\\207\\347\\233\\256\\345\\275\\225/\\351\\207\\215\\345\\244\\215\\345\\206\\205\\345\\256\\271.dat\"",
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attribute-read-path/.gitattributes",
     ".codex/handoffs/V03-005/attribute-read-path/README.md",
@@ -197,6 +201,10 @@
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.launch.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.plan.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/evidence.json",
+    ".codex/handoffs/V03-005/explorer-gate-review/README.md",
+    ".codex/handoffs/V03-005/explorer-gate-review/artifact-verification.json",
+    ".codex/handoffs/V03-005/explorer-gate-review/gates-after-g1.log",
+    ".codex/handoffs/V03-005/explorer-gate-review/repository-gate-review.log",
     ".codex/handoffs/V03-005/explorer-host-integration/.gitattributes",
     ".codex/handoffs/V03-005/explorer-host-integration/README.md",
     ".codex/handoffs/V03-005/explorer-host-integration/cleanup.json",
@@ -1437,9 +1445,6 @@
     "contracts/assetlink/image-preview-v1.md",
     "contracts/windows-shell/read-only-snapshot-v1.md",
     "contracts/windows-shell/wire-vectors-v1.json",
-    "docs/05_总体架构与技术框架.md",
-    "docs/adr/ADR-0018_Windows原生Explorer入口与最小视图.md",
-    "docs/adr/ADR-0019_首批图片预览契约与隔离要求.md",
     "docs/releases/NATIVE_CLIENT_TRIAL.md",
     "docs/releases/PARALLEL_BROWSE_PREVIEW_PLAN.md",
     "eng/README.md",
@@ -1506,6 +1511,7 @@
     "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.linux-x64.lock.json",
     "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.win-x64.lock.json",
     "services/worker-supervisor/ImagePreview/packages.lock.json",
+    "tests/architecture/m0-gates.json",
     "tests/dotnet/AssetLibrary.Packaging.Tests/DatabaseReadinessTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj",
     "tests/dotnet/AssetLibrary.Preview.Tests/AuthorizedImagePreviewTests.cs",
@@ -1547,7 +1553,6 @@
     "tests/integration/native-clients/fixtures/image-preview-v1/rotate-six.jpg",
     "tests/integration/native-clients/fixtures/image-preview-v1/transparent.png",
     "tests/integration/native-clients/fixtures/image-preview-v1/truncated.jpg",
-    "tests/integration/native-clients/fixtures/image-preview-v1/中文目录/重复内容.dat",
     "tests/integration/native-clients/serve.py",
     "tests/integration/native-clients/test_serve.py",
     "tests/integration/native-clients/verify_nas_worker.py",
@@ -1670,6 +1675,12 @@
       "owned_test_resource_cleanup": "verified",
       "strict_proof_owner_unload": "not_passed_CViewSettings_retains_reference",
       "evidence": "explorer-host-integration/final-cycle/evidence.json"
+    },
+    "windows_gate_review": {
+      "G1": "closed_original_criteria",
+      "G2_G3_G4": "open_release_blocked",
+      "archive_hashes_verified": 79,
+      "report": "explorer-gate-review/README.md"
     }
   },
   "risks": [
@@ -1733,7 +1744,8 @@
       "aa17c04 integrated as96c798d:54 source/copy/Git digests verified and independent read-only content review passed. Own 4FF/22B/one-item normal GUI entry and native unregister/Desktop negative retained; final PID-only module snapshot is qualified, not continuous unload evidence. Evidence/docs only; no product contract or dependency changes.",
       "External AssetHost/readonly snapshot code integrated after independent review;56 Windows ordinary and2 Core component tests, real nativeC++1/101/38/1interop. ActualExplorer root and defaultdirectory navigation verified with first/second-cycle cleanup; Loadingauto-refresh still pending and no release gate closure.",
       "Loading callback38002af integrated after thread/generation/reentry review; strict new build and4 scopedCtests passed. Original proof-owner lifetime diagnostic remains exit1/S_FALSE, active slots/window/site clean but finalCOMunload notpassed. Host12618ca clock fix57ordinary/454source checks passed; noCoreTTLweakening.",
-      "Rendered-view fix4e3f6bb replaces unobserved clone Enum signal with own IFolderView metadata; strict build/four affectedCtests/repository checks passed. Fifth realGUI cycle coldRoot,101/38 pages,nestedfolders,Hostunavailable/restart-oldEpoch/rootrecovery verified; auto600s nativeunregister,9missing/Desktop32,ownedwindows/Hostsclosed,Core138hash/mtime/6roles/runtime/listener/processcleanup verified. Observed intervals are upperbounds, notG3 performanceclaims."
+      "Rendered-view fix4e3f6bb replaces unobserved clone Enum signal with own IFolderView metadata; strict build/four affectedCtests/repository checks passed. Fifth realGUI cycle coldRoot,101/38 pages,nestedfolders,Hostunavailable/restart-oldEpoch/rootrecovery verified; auto600s nativeunregister,9missing/Desktop32,ownedwindows/Hostsclosed,Core138hash/mtime/6roles/runtime/listener/processcleanup verified. Observed intervals are upperbounds, notG3 performanceclaims.",
+      "Original Explorer gate audit: G1 approved HKCU route and actual own-DLL discovery proven; G2 crash/timeout/invalid-frame, G3 timing/lifetime and G4 real cycles/soak remain open. Historical G2 COM label corrected without modifying raw evidence."
     ],
     "technical_debt": [
       "Controlled native Explorer/AssetHost/Core read-only connection is functionally accepted and all owned test resources cleaned. Next work is production login/settings/startup/install, file opening/preview, category/tree polish, push invalidation and G2..G4 lifecycle/soak; CViewSettings retained references remain an explicit unresolved unload gate. Do not repeat the resolved registry-view or clone-signal diagnosis.",

@@ -813,6 +813,22 @@
       "thread_id": "01a0808d-7173-7722-86f0-91726c322f60",
       "milestone": "V0.3",
       "execution_status": "real_core_acceptance_and_image404_fallback_candidate_reviewed"
+    },
+    {
+      "id": "V03-012",
+      "title": "explorer-fault-harness",
+      "module": "explorer-fault-harness",
+      "status": "in_progress",
+      "depends_on": [
+        "V03-010",
+        "V03-011"
+      ],
+      "owner": "windows-shell-fault-owner",
+      "branch": "codex/v03-012-explorer-fault-harness",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-012",
+      "task_file": ".codex/tasks/V03-012.md",
+      "handoff": ".codex/handoffs/V03-012/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }

@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / Windows受控真实数据接入验收通过**。V03-006 Shell、V03-010 AssetHost与V03-011实际视图加载观察已集成；真实Explorer冷库根、分页、两级目录、Host不可用/重启与旧位置拒绝/根恢复通过，入口/自有窗口/Host/Core清理与合成原件完整性已核验。详见[本次接入验收](explorer-host-integration/README.md)。Web/Android既有证据保留，NAS图片发行仍受原目标内核阻断；正式登录安装、预览、CViewSettings引用保留和G2..G4/完整客户端门禁未完成。
+状态 **partial / Windows 受控功能通过，原生入口 G1 已关闭**。V03-006 Shell、V03-010 AssetHost与V03-011实际视图加载观察已集成；真实Explorer冷库根、分页、两级目录、Host不可用/重启与旧位置拒绝/根恢复通过，入口/自有窗口/Host/Core清理与合成原件完整性已核验。详见[本次接入验收](explorer-host-integration/README.md)和[原门禁裁决](explorer-gate-review/README.md)。下一步 V03-012 故障工具与 root 实机验收补 G2 crash/timeout/invalid frames；G3 计时/生命周期、G4 循环/八小时独立保留。Web/Android既有证据保留，NAS图片发行仍受原目标内核阻断；正式登录安装、预览及完整客户端未完成。
 
 ## 已集成与已验收
 

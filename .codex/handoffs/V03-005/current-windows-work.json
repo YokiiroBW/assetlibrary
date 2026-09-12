@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-11T20:20:55.164707+00:00",
-  "status": "windows_test_only_native_core_browse_cold_gui_and_defined_recovery_verified",
+  "updatedAtUtc": "2026-09-12T01:10:11.134131+00:00",
+  "status": "G1_closed_original_exit_criteria_G2_real_fault_recovery_next",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -433,6 +433,19 @@
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
   },
-  "gui_owner": "No active GUI task; all owned test windows closed, test registrations removed, Hosts and Core fixtures stopped. No further desktop action scheduled.",
-  "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json"
+  "gui_owner": "root; no live registration/Host/test window yet in this gate run",
+  "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json",
+  "gate_review": {
+    "document": "explorer-gate-review/README.md",
+    "closed": [
+      "M0-002-G1"
+    ],
+    "open": [
+      "M0-002-G2",
+      "M0-002-G3",
+      "M0-002-G4"
+    ],
+    "next_task": "V03-012",
+    "lifetime_criterion": "G3; historical G2_full_COM_unload label is incorrect, raw observations retained"
+  }
 }

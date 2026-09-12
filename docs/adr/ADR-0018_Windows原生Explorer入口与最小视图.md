@@ -28,7 +28,13 @@ M0-002-G1..G4 保留原有证据标准：批准的每用户注册与真实发现
 
 自有test-only入口及原生注册/注销闭环已取得真实Explorer证据。用户随后要求接入，V03-005冻结 [只读快照IPC](../../contracts/windows-shell/read-only-snapshot-v1.md)：进程外AssetHost复用现有HTTPS会话与ReadOnlyClient，Shell显示授权库/物理目录分页。真实冷页面证明clone枚举通知不足以驱动实际视图；最终使用公开IFolderView的呈现PIDL观察，只有Loading时执行有界刷新，500ms/10秒/20次/4活动视图，Core5秒有效期不变。根、分页、目录及Host停止/重启/旧位置拒绝已完成受控实机验收。主动权限失效清空、正式登录设置/安装与CViewSettings保留对象的最终卸载仍未完成；生命周期和稳定性门禁独立保留。
 
-## 依据
+## 2026-09-12 原入口门禁裁决
+
+M0-002-G1 两项原退出标准均已满足，现关闭该项。批准的每用户部署路径明确为：普通用户、包外执行器写入自有 `HKCU\Software\Classes\CLSID` 与 `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace`，原生 `InprocServer32` 指向已校验的 C++ DLL；保留 owner、拒覆盖、HKLM 冲突只读检查。本次受控验证另外使用限时 finally 注销与独立原生读回。当前 Codex 打包进程的注册表视图与 Explorer 不同；受控验证通过已核验的自有 Explorer 窗口 `ShellExecute` 启动包外执行器。无需 HKLM 或提权，不能以“无包身份”单一条件替代来源与实际读回证据。
+
+自有 DLL 的真实发现与进入采用 V03-006 原始证据，真实数据接入采用 V03-005 最终周期证据，详见[门禁逐项裁决](../../.codex/handoffs/V03-005/explorer-gate-review/README.md)。正式安装器、签名和登录设置仍是产品交付缺口，但不是 G1 原条款。G2 尚缺真实异常故障恢复；G3 包含最终 DLL 生命周期与取消/重连计时；G4 保留规定循环和八小时运行。没有改变门禁退出标准或启用生产 Shell。
+
+## 官方依据
 
 - [IShellFolder::CreateViewObject](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishellfolder-createviewobject)：Shell 的视图创建接口。
 - [Shell folder object](https://learn.microsoft.com/en-us/windows/win32/shell/nse-implement)：PIDL、导航和默认视图适配。
