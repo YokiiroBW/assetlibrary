@@ -21,6 +21,8 @@ internal sealed class ThumbnailSession(ClientTransport transport, SnapshotStore 
             // Even cached HTTP content or a synchronous decoder must never execute under the caller's session lock.
             var task = Task.Run(() => LoadAsync(request, token), CancellationToken.None);
             work.Add(task);
+            _ = task.ContinueWith(completed => { lock (gate) { work.Remove(completed); } }, CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             return task;
         }
     }
