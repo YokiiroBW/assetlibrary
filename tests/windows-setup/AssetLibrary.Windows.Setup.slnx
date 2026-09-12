@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../../apps/windows-client/Setup/AssetLibrary.Windows.Setup.csproj" />
+  <Project Path="AssetLibrary.Windows.Setup.Tests.csproj" />
+</Solution>
