@@ -1,6 +1,6 @@
 # V03-019 交接摘要
 
-状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `f2ad8e3`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
+状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `003d8b7`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
 
 ## 交付行为
 
@@ -37,3 +37,11 @@ root 已逐步合入 API、基础控件、主题、窗口/裁剪和 101 可见�
 ## 实际GUI左右导航复核补充
 
 `f2ad8e3` 限定Left/Right先找纵向bounds重叠的同一视觉行邻项；同排无邻项才沿既有order Next/Previous衔接。不改变Up/Down。宽目录行中心即使更近，也不会抢走图片的水平导航。纯几何负控覆盖两列图片、跨行首末与负滚动偏移；真实隐藏控件Shift+Right只选第一/第二张图、不选上方目录，左右跨行沿显示顺序。GalleryLayoutTests/GallerySurfaceTests严格构建和2/2定向CTest通过。
+
+## 自有当前摘要补充
+
+`4d29fc6` 增加 `Surface::SetStatusText(const std::wstring&) noexcept`。内容全部来自View既有UpdateStatus字符串，Surface不计算项目/选择/分页数。摘要为根子项原生STATIC（`StatusTextControlId=106`），使用当前字体和语义颜色；宽窗在按钮旁，窄窗下一行，测量折行高度后整体下移canvas。上限256个UTF-16单元，截断不拆末尾代理对；空串隐藏，SetPage/Clear/Destroy清文本。
+
+`003d8b7` 专项测试验证精确原文与native accName、字体一致、宽窄不盖canvas、长度/代理对/清空以及SetStatusText重排回调可销毁Surface。Empty先清模型再清native文本，避免通知重入读取旧页。严格全目标构建和完整10/10 CTest通过（1.22秒）。
+
+root已实证Windows11不显示IShellBrowser.SetStatusTextSB传入的当前文本而留下旧DefView底部缓存，因此以此自有摘要表达当前页信息；不操作宿主私有UI。View接线及preview5真实包验收归V03-021/root；Surface不复制计数，也不把系统底部兼容性限制伪称已修。

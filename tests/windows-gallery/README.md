@@ -47,3 +47,5 @@ ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure
 持久图像只保存不可变PBGRA共享缓冲，计数按vector容量而非仅长度；每视图≤101候选/16MiB；16仅请求批次上限。无持久GDI位图副本，单次AlphaBlend临时DIB≤1MiB，绘完即释放。布局对极端比例限制tile几何，但实际图像始终按原尺寸contain，不随tile比例拉伸。颜色来自生成的共享Web语义主题；高对比度用系统颜色覆盖。
 
 原生UIA和MSAA共用当前页模型。调度窗和provider只保留独立Folder/DLL pin；窗口事件只临时保留View。旧provider退役拒绝current名称，UIA客户端旧Selection可返回空数组S_OK。详见handoff生命周期对照。
+
+工具栏当前摘要由 `Surface::SetStatusText` 原样显示View计算结果，原生STATIC子项ID106，可通过GetDlgItem读取。最多256个UTF-16单元，宽窗旁置、窄窗换行，Clear/Destroy清空；测试覆盖native可访问名和重排回调销毁。不依赖Windows11宿主底部DefView缓存计数。

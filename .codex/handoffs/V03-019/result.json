@@ -7,7 +7,7 @@
   "owner": "windows-gallery-surface-owner",
   "branch": "codex/v03-019-native-gallery-surface",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-019",
-  "commit": "f2ad8e3",
+  "commit": "003d8b7",
   "changed_files": [
     ".codex/handoffs/V03-019/accessibility-investigation.md",
     ".codex/handoffs/V03-019/legacy-control-sources.json",
@@ -44,7 +44,7 @@
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
-    "scope": "same-source Windows CTest; repository validation recorded separately",
+    "scope": "same-source Windows CTest 10/10, including current-summary layout and lifecycle; repository verification retained from preceding baseline",
     "latest_targeted": [
       {
         "commit": "d215431",
@@ -64,14 +64,24 @@
         "passed": 2,
         "failed": 0,
         "scope": "Horizontal same-row navigation, order wrapping, and actual Shift+Right selection"
+      },
+      {
+        "commit": "003d8b7",
+        "names": [
+          "gallery_surface"
+        ],
+        "passed": 1,
+        "failed": 0,
+        "scope": "Caller-owned native status summary, accessible name, bounded UTF16, layout and reentrant clearing; also full 10/10 passed"
       }
     ],
-    "last_full_commit": "7446e99"
+    "last_full_commit": "003d8b7"
   },
   "risks": [
     "Actual Explorer/Core/package integration belongs to root and is not certified by the synthetic harness.",
     "Scheduler OS scheduling failure retains bounded DLL pins with diagnostics; never force unload.",
-    "G4 endurance is explicitly waived and not executed."
+    "G4 endurance is explicitly waived and not executed.",
+    "Windows11 stock Explorer bottom status may retain DefView cache; current toolbar summary is authoritative for this controlled preview, per root decision."
   ],
   "blocked_by": [],
   "recommended_merge_order": 1,
@@ -85,7 +95,8 @@
       "Root-provided generated Web semantic COLORREF theme; no separately maintained palette.",
       "One bounded AccessibleModel for painting, MSAA and native UIA.",
       "Ready navigation UIA descriptions reuse snapshot::TypeText; non-ready descriptions retain snapshot::StatusText unchanged.",
-      "Horizontal navigation uses current bounds/order and existing Next/Previous fallback; Up/Down spatial semantics are unchanged."
+      "Horizontal navigation uses current bounds/order and existing Next/Previous fallback; Up/Down spatial semantics are unchanged.",
+      "Caller-provided View.UpdateStatus text is presented unchanged in a standard STATIC using existing font/theme; Surface does not duplicate counting."
     ],
     "duplicated_logic": [],
     "cross_module_access": [
@@ -96,7 +107,8 @@
       "Only Windows system GDI/msimg32/oleacc/uiautomationcore, root approved ADR-0021."
     ],
     "contract_changes": [
-      "Root-approved Surface callbacks providerLifetimeOwner and complete visible-files API; no shared wire/DB contract edited by this owner."
+      "Root-approved Surface callbacks providerLifetimeOwner and complete visible-files API; no shared wire/DB contract edited by this owner.",
+      "Root-approved UI-only Surface::SetStatusText API, 256 UTF16-unit bound and stable STATIC child ID106; wire/permission contracts unchanged."
     ],
     "architecture_tests": [
       "scripts/verify_repository.py passed: 464 architecture inputs, 21 migration and 14 architecture tests; contract/theme/dependency/source policies passed.",

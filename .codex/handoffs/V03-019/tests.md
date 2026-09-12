@@ -46,3 +46,9 @@ Rendering/Budget在全局listener开启时曾实测Destroy后owner4/providers2/p
 ## f2ad8e3 GUI键盘补充验证
 
 严格构建 `cmake --build .runtime/gallery-tests --config Release --target GalleryLayoutTests GallerySurfaceTests --parallel 2` 通过；定向 `ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure -R '^gallery_(layout|surface)$'` 2/2通过（0.08秒）。几何夹具刻意让整行目录中心比同排下一图片更近，修复前会选错；验证Left/Right同排优先、末列/首列沿order跨行、页末无目标、负偏移稳定及Up原几何不变。真实控件两列布局下Shift+Right焦点2且仅选1/2；普通Right从2到3，Left从3回2。仅做相关定向验证，完整10项/快门禁沿用此前检查点；root负责实际Explorer合并后的总验收。
+
+## 003d8b7 自有摘要最终验证
+
+`cmake --build .runtime/gallery-tests --config Release --parallel 2` 全目标严格通过；`ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure` 完整10/10通过（1.22秒）。Surface专项新增：调用方30项/已选2文字在实际选择0时仍原样显示，证明没有Surface计数；STATIC原生accName与当前字体；宽窗按钮右侧和320DIP窄窗下一行的矩形不盖canvas；300字截至256、255字符加代理对不拆开；清空隐藏和Clear先清摘要再callback；长摘要改变视口时callback可删除Surface，owner最终归还。其它原生UIA关闭、换页、3轮和受控listener均保持通过。
+
+本轮没有运行真实Explorer或安装；Native状态条不刷新是root实机确认的宿主兼容性边界，自有摘要由View同一现有字符串驱动，发布证据由root汇总。
