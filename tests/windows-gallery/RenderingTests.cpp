@@ -1,4 +1,5 @@
 #include "gallery/Surface.h"
+#include "gallery/Uia.h"
 #include "TestOwner.h"
 #include "Capture.h"
 #include <iostream>
@@ -71,7 +72,14 @@ int wmain(int argc, wchar_t** argv) {
             Require(sentinel.pixels[at] == 255 && sentinel.pixels[at + 1] == 0 && sentinel.pixels[at + 2] == 255,
                 "negative-scroll printing stays inside canvas and preserves toolbar/outside sentinel");
         }
-        surface->Destroy(); delete surface; surface = nullptr; Require(owner.references == 1, "rendering owner references");
+        surface->Destroy(); delete surface; surface = nullptr;
+        std::cout << "after_destroy owner=" << owner.references.load() << " providers=" << gallery::InspectUia().providers << " pending=" << gallery::InspectUia().pendingRetirements << " dispatcher=" << gallery::InspectUia().dispatcherWindows << '\n';
+        const ULONGLONG drainDeadline = GetTickCount64() + 2000;
+        while (owner.references > 1 && GetTickCount64() < drainDeadline) {
+            MsgWaitForMultipleObjects(0,nullptr,FALSE,10,QS_ALLINPUT);
+            MSG message{}; while (PeekMessageW(&message,nullptr,0,0,PM_REMOVE)) { TranslateMessage(&message); DispatchMessageW(&message); }
+        }
+        Require(gallery::InspectUia().providers == 0 && gallery::InspectUia().pendingRetirements == 0 && gallery::InspectUia().dispatcherWindows == 0, "retired provider/queue/dispatcher fully drained"); Require(owner.references == 1, "rendering owner references");
         DestroyWindow(parent); parent = nullptr; CoUninitialize();
         std::cout << "gallery_rendering: extreme aspect, PBGRA alpha and 32-paint GDI/USER reclamation passed\n"; return 0;
     } catch (const char* error) {
