@@ -149,6 +149,7 @@ class View final:public IShellView,public IFolderView {
             }
         }catch(const std::bad_alloc&){if(Live(processingWindow,processingGeneration))Clear(snapshot::Status::Unavailable);}
         catch(HRESULT error){if(error!=E_ABORT&&Live(processingWindow,processingGeneration))Clear(snapshot::Status::InvalidResponse);}
+        if(Live(processingWindow,processingGeneration)&&!retired_)Viewport();
         return 0;
     }
     void Viewport() noexcept {

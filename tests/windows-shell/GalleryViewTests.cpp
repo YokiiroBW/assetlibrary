@@ -79,7 +79,9 @@ public:
 struct PageControl {
     DWORD ui=GetCurrentThreadId();
     std::atomic_ulong calls{0},canceled{0},uiCalls{0};
+    std::atomic_ulong images{0};
     std::atomic_bool blockAll{false},blockAfterFirst{false};
+    UINT items=2;
     ~PageControl(){const auto until=GetTickCount64()+2000;while(gallery::PendingWork()&&GetTickCount64()<until)Sleep(1);if(gallery::PendingWork())TerminateProcess(GetCurrentProcess(),70);}
 };
 PageControl* pageControl=nullptr;
@@ -87,10 +89,16 @@ snapshot::Page VisiblePage(const snapshot::Location& location,HANDLE cancel)noex
     const auto ordinal=++pageControl->calls;if(GetCurrentThreadId()==pageControl->ui)++pageControl->uiCalls;
     if(pageControl->blockAll||(pageControl->blockAfterFirst&&ordinal>1))if(WaitForSingleObject(cancel,5000)==WAIT_OBJECT_0)++pageControl->canceled;
     snapshot::Page page;page.status=snapshot::Status::Ready;page.epoch=location.epoch;
-    try{page.entries={ {location.epoch,{401},snapshot::Kind::File,L"fixture-b"},{location.epoch,{402},snapshot::Kind::File,L"fixture-a"} };}
+    try{page.entries={ {location.epoch,{401},snapshot::Kind::File,L"fixture-b"},{location.epoch,{402},snapshot::Kind::File,L"fixture-a"} };
+        for(UINT i=2;i<pageControl->items;++i)page.entries.push_back({location.epoch,{401+i},snapshot::Kind::File,L"fixture"});}
     catch(const std::bad_alloc&){page={};}return page;
 }
-thumbnail::Result VisibleImage(const snapshot::Location&,HANDLE)noexcept{thumbnail::Result image;image.status=thumbnail::Status::Unsupported;return image;}
+thumbnail::Result VisibleImage(const snapshot::Location& location,HANDLE)noexcept{
+    ++pageControl->images;if(GetCurrentThreadId()==pageControl->ui)++pageControl->uiCalls;
+    thumbnail::Result result;result.status=thumbnail::Status::Ready;result.location=location;
+    try{auto image=std::make_shared<gallery::Pbgra>();image->width=4;image->height=3;image->stride=16;image->pixels.resize(48);result.image=std::move(image);}
+    catch(const std::bad_alloc&){result={};}return result;
+}
 template<class F>void Await(F ready,const char* phase="quiesce"){
     const auto until=GetTickCount64()+2000;while(!ready()&&GetTickCount64()<until)Pump(5);
     if(!ready()){fprintf(stderr,"phase=%s pages=%lu canceled=%lu jobs=%lu\n",phase,pageControl->calls.load(),pageControl->canceled.load(),gallery::PendingWork());throw std::runtime_error("bounded visible-view condition");}
@@ -106,7 +114,8 @@ struct VisibleFixture {
         Check(gallery::CreateView(folder.value,root.value,{{501},{502}},&view.value,{VisiblePage,VisibleImage})==S_OK,"offscreen gallery create");
         Check(view.value->QueryInterface(IID_PPV_ARGS(&items.value))==S_OK,"offscreen IFolderView");browser.value->active=view.value;}
     ~VisibleFixture(){if(view.value)view.value->DestroyViewWindow();browser.value->active=nullptr;}
-    HWND Open(){RECT bounds{0,0,600,400};FOLDERSETTINGS settings{FVM_ICON,0};HWND window=nullptr;
+    HWND Open(int width=600,int height=400){RECT bounds{0,0,width,height};FOLDERSETTINGS settings{FVM_ICON,0};HWND window=nullptr;
+        SetWindowPos(parent.value,nullptr,0,0,width,height,SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE);
         Check(view.value->CreateViewWindow(nullptr,&settings,browser.value,&bounds,&window)==S_OK,"offscreen child created");
         ShowWindow(parent.value,SW_SHOWNOACTIVATE);ShowWindow(window,SW_SHOWNOACTIVATE);
         Check(IsWindowVisible(window),"only owned offscreen content is logically visible");return window;}
@@ -230,6 +239,14 @@ void LoadingVisibility(){
     proof::Item item;Check(fixture.items.value->Item(1,&item.value)==S_OK&&fixture.view.value->SelectItem(item.value,SVSI_SELECT|SVSI_DESELECTOTHERS)==S_OK,"PIDL selection reuses current memory identity");
     fixture.view.value->DestroyViewWindow();Await([]{return gallery::PendingWork()==0;});
 }
+void WideVisiblePage(){
+    PageControl control;pageControl=&control;control.items=29;VisibleFixture fixture;fixture.Open(2400,1800);
+    Await([&]{return fixture.Count()==29&&control.images==29&&gallery::PendingWork()==0;},"same-screen-completion-refill");
+    // All images keep the placeholder's 4:3 aspect, so SetThumbnail cannot rely
+    // on a changed visible set to enqueue the second batch.
+    Pump(20);Check(control.images==29&&!control.uiCalls,"unchanged visible set completes every image without polling or UI IPC");
+    fixture.view.value->DestroyViewWindow();Await([]{return gallery::PendingWork()==0;});
+}
 void ProductionRoute(const wchar_t* path){
     proof::Library library(path,product::ClassId);auto root=library.Root();
     proof::Item entry(snapshot::MakePidl({{301},{302},snapshot::Kind::Library,L"library route"}));auto child=proof::Bind(root.value,entry);
@@ -242,7 +259,7 @@ void ProductionRoute(const wchar_t* path){
 }
 int wmain(int argc,wchar_t** argv){
     if(argc!=2)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
-    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();ProductionRoute(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
+    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();ProductionRoute(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
         puts("gallery_view=passed; last_Release=retired_before_zero; external_destroy=idempotent; shared_quota=4; public_notification=NewDelivery; root_navigation=same_browser; hidden_IPC=0; registry_writes=0; real_Explorer=0");
     }catch(const std::exception& error){fprintf(stderr,"GalleryViewTests: %s\n",error.what());result=1;}
     CoUninitialize();return result;

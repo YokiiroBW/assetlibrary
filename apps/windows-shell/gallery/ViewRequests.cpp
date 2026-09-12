@@ -25,7 +25,27 @@ struct Ticket {
     const std::uint64_t serial=nextTicket.fetch_add(1);
     UINT index=0;
     snapshot::Location location;
+    std::atomic_bool finished{false};
+    bool resolved=false; // UI-owned terminal state until this item leaves the viewport.
 };
+struct PixelBudget {std::atomic_size_t bytes{0};};
+struct PixelLease {
+    std::shared_ptr<PixelBudget> budget;
+    std::shared_ptr<const Pbgra> image;
+    size_t bytes;
+    PixelLease(std::shared_ptr<PixelBudget> value,std::shared_ptr<const Pbgra> pixels,size_t size)
+        :budget(std::move(value)),image(std::move(pixels)),bytes(size){}
+    ~PixelLease(){image.reset();budget->bytes.fetch_sub(bytes);}
+};
+std::shared_ptr<const Pbgra> AdmitImage(const std::shared_ptr<PixelBudget>& budget,std::shared_ptr<const Pbgra> image){
+    if(!image)return {};
+    const auto bytes=image->pixels.capacity();auto current=budget->bytes.load();
+    do{if(bytes>MaxImageBytes-current)return {};}while(!budget->bytes.compare_exchange_weak(current,current+bytes));
+    try{
+        auto lease=std::make_shared<PixelLease>(budget,image,bytes);
+        return std::shared_ptr<const Pbgra>(std::move(lease),image.get());
+    }catch(const std::bad_alloc&){budget->bytes.fetch_sub(bytes);throw;}
+}
 struct Record {Completion value;std::shared_ptr<Ticket> ticket;};
 struct ImagePool {
     PTP_POOL pool=CreateThreadpool(nullptr);
@@ -50,6 +70,9 @@ struct RequestState {
     snapshot::Location location;
     std::shared_ptr<Cancellation> page;
     std::array<std::shared_ptr<Ticket>,snapshot::MaxItems> images{};
+    // Cancel retires viewport identity, but cannot release a still-running slot.
+    std::array<std::shared_ptr<Ticket>,MaxImageRequestsPerView> inFlight{};
+    const std::shared_ptr<PixelBudget> pixels=std::make_shared<PixelBudget>();
     std::mutex mutex;
     std::vector<Record> completed;
     explicit RequestState(Sources value):sources(value){completed.reserve(17);}
@@ -102,14 +125,27 @@ struct ImageWork {
 void CALLBACK ReadImage(PTP_CALLBACK_INSTANCE instance,void* context,PTP_WORK){
     std::unique_ptr<ImageWork> work(static_cast<ImageWork*>(context));const auto module=work->module;
     {
-        const auto ticket=work->ticket;
+        const auto ticket=work->ticket;const auto state=work->state;
         if(!ticket->cancel->Stopped()){
             Completion completed;completed.generation=ticket->generation;completed.ticket=ticket->serial;completed.index=ticket->index;
-            completed.thumbnail=work->state->sources.image(ticket->location,ticket->cancel->event.value);
-            if(!ticket->cancel->Stopped())work->state->Publish(std::move(completed),ticket);
+            completed.thumbnail=state->sources.image(ticket->location,ticket->cancel->event.value);
+            if(!ticket->cancel->Stopped()){
+                try{
+                    if(completed.thumbnail.image){
+                        completed.thumbnail.image=AdmitImage(state->pixels,std::move(completed.thumbnail.image));
+                        if(!completed.thumbnail.image)completed.thumbnail.status=thumbnail::Status::Busy;
+                    }
+                }catch(const std::bad_alloc&){completed.thumbnail.image.reset();completed.thumbnail.status=thumbnail::Status::Unavailable;}
+                state->Publish(std::move(completed),ticket);
+            }
         }
+        CloseThreadpoolWork(work->work);work.reset();ticket->finished=true;
+        // Even an obsolete task releases admission capacity. Wake the current UI
+        // generation without publishing any old response or borrowing UI state.
+        const auto generation=state->generation.load();const auto window=state->target.load();
+        if(window)PostMessageW(window,state->message,static_cast<WPARAM>(generation),0);
     }
-    CloseThreadpoolWork(work->work);work.reset();if(module)FreeLibraryWhenCallbackReturns(instance,module);
+    if(module)FreeLibraryWhenCallbackReturns(instance,module);
 }
 HRESULT QueueImage(const std::shared_ptr<RequestState>& state,const std::shared_ptr<Ticket>& ticket) noexcept {
     if(!Reserve(imageWorkCount,MaxImageWork))return HRESULT_FROM_WIN32(ERROR_BUSY);
@@ -150,17 +186,20 @@ HRESULT Requests::Begin(snapshot::Location location,std::uint64_t generation) no
 HRESULT Requests::Visible(const snapshot::Page& page,const VisibleFiles& visible,std::uint64_t generation) noexcept {
     if(GetCurrentThreadId()!=state_->thread)return RPC_E_WRONG_THREAD;
     if(generation!=state_->generation||page.status!=snapshot::Status::Ready||page.epoch!=state_->location.epoch)return S_FALSE;
-    if(visible.count>MaxVisibleImages||page.entries.size()>snapshot::MaxItems)return E_INVALIDARG;
+    if(visible.count>MaxVisibleFiles||page.entries.size()>snapshot::MaxItems)return E_INVALIDARG;
     std::array<bool,snapshot::MaxItems> keep{};
     for(UINT at=0;at<visible.count;++at){const auto index=visible.indices[at];
         if(index>=page.entries.size()||page.entries[index].kind!=snapshot::Kind::File||page.entries[index].epoch!=page.epoch||snapshot::Zero(page.entries[index].node)||keep[index])return E_INVALIDARG;keep[index]=true;}
     for(UINT index=0;index<snapshot::MaxItems;++index)if(!keep[index]&&state_->images[index]){state_->images[index]->cancel->Stop();state_->images[index].reset();}
+    for(auto& ticket:state_->inFlight)if(ticket&&ticket->finished&&(ticket->resolved||ticket->cancel->Stopped()))ticket.reset();
     try{
         for(UINT at=0;at<visible.count;++at){const auto index=visible.indices[at];if(state_->images[index])continue;
+            const auto slot=std::find(state_->inFlight.begin(),state_->inFlight.end(),nullptr);
+            if(slot==state_->inFlight.end())break;
             auto ticket=std::make_shared<Ticket>();ticket->generation=generation;ticket->index=index;ticket->location={page.entries[index].epoch,page.entries[index].node};
-            state_->images[index]=ticket;
+            state_->images[index]=ticket;*slot=ticket;
             const auto hr=QueueImage(state_,ticket);
-            if(FAILED(hr)){Completion completed;completed.generation=generation;completed.ticket=ticket->serial;completed.index=index;completed.thumbnail.status=thumbnail::Status::Busy;state_->Publish(std::move(completed),ticket);}
+            if(FAILED(hr)){ticket->finished=true;Completion completed;completed.generation=generation;completed.ticket=ticket->serial;completed.index=index;completed.thumbnail.status=thumbnail::Status::Busy;state_->Publish(std::move(completed),ticket);}
         }
         return S_OK;
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
@@ -173,6 +212,7 @@ std::vector<Completion> Requests::Take(){
     for(auto& record:records){
         if(record.value.generation!=state_->generation)continue;
         if(record.ticket&&(record.ticket->cancel->Stopped()||record.value.index>=snapshot::MaxItems||state_->images[record.value.index]!=record.ticket))continue;
+        if(record.ticket)record.ticket->resolved=true;
         result.push_back(std::move(record.value));
     }
     return result;
