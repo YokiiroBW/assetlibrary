@@ -8,7 +8,7 @@
 python -I -B infra/windows-client/build_package.py --dotnet <dotnet.exe> --cmake <cmake.exe> --build-root .runtime/windows-package-build-1 --output .runtime/AssetLibrary-0.3.0-preview.1-win-x64 --notice <applicable-license-or-notice-file>
 ```
 
-脚本逐个 locked restore / self-contained Release publish，然后调用生产 CMake target，校验 x64 PE 与 DLL import、运行时必需文件、重复依赖 SHA 相同，再生成完整 manifest、来源 commit/PE imports 证据、ZIP 与外部 SHA256。`--output` 和组件 publish 目录必须不存在；不会清空旧产物。
+脚本逐个 locked restore / self-contained Release publish，然后调用生产 CMake target，校验 x64 PE 与 DLL import、运行时必需文件、Settings 应用资源 AssetLibrary.Settings.pri 存在且非空、重复依赖 SHA 相同，再生成完整 manifest、来源 commit/PE imports 证据、ZIP 与外部 SHA256。`--output` 和组件 publish 目录必须不存在；不会清空旧产物。
 
 打包后的 zip 只需用户全部解压并双击 Setup。源码调试可对已真实构建的四组件执行同一 assemble 逻辑：
 

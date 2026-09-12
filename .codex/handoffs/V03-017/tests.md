@@ -25,3 +25,5 @@
 尚未执行：三个最终生产组件统一打包、系统TaskDialog、真实HKCU、原生Explorer用户闭环、生产DLL加载态卸载、登录重启启动恢复。均由主任务单一实机入口执行。没有执行G4，依用户豁免明确未测；未运行不相关的全仓库.NET/Android/前端套件。
 
 整包参数补充验证：最终diff检查后运行 `python -I -B -m unittest discover -s tests/windows-setup -p test_package.py -v` 一次，5/5通过。新增test_build_passes_product_version_and_scopes_runtime_pin在命令边界捕获三组件六个真实构建调用计划，要求每个调用传manifest同源Version，且Settings不传全局RuntimeFrameworkVersion；未执行被mock的dotnet/CMake。此为脚本回归，最终组件版本与Settings依赖实际还原由root统一build核验。C#安装逻辑未变，未重复此前通过的安装/CLI套件。
+
+应用资源打包补充：在final diff检查后运行打包unittest一次，6/6通过。test_missing_or_empty_settings_pri_is_rejected使用临时合成组件、仅替换PE imports读取以隔离本门禁，验证正式文件名AssetLibrary.Settings.pri缺失/空文件均拒绝，非空允许；未执行任何合成组件，未宣称PRI内容有效或真实Settings启动已通过。未重复无输入变化的.NET安装/CLI测试。

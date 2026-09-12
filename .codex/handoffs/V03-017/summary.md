@@ -21,3 +21,5 @@
 整包评审补充：所有 .NET 组件的 restore/publish 共同传入 Version=0.3.0-preview.1；RuntimeFrameworkVersion=10.0.11 只传 Setup/Host，Settings 依其项目的 Microsoft.NETCore.App 定点 metadata 固定运行时，避免污染 Windows SDK framework reference。新增边界回归验证三个项目六个调用，打包测试共5项通过。上文旧单文件安装器与SHA保留为首次安装逻辑证据，最终EXE必须使用本次版本参数重新发布。
 
 已静态复查 Windows 设置的卸载调用：带引号绝对路径 Setup.exe uninstall → Program.Parse/前置检查/非quiet确认 → UninstallAsync → 完整核验旧Host → --shutdown-user-session → 注销与清理。卸载不依赖外部payload，也不启动Settings/Host新会话；Host退出失败先保留注册，正在运行Setup自身造成3010延期符合已披露流程。未发现命令解析或分支接线新阻断，没有执行GUI或真实注册；Windows设置实际启动上下文仍由root实机验收。未改root维护的notices。
+
+Settings真实启动评审补充：正式组包现在要求 AssetLibrary.Settings.pri 存在且非空；缺失或空资源文件立即拒绝，不生成交付ZIP。新增最窄回归覆盖缺失、空文件与非空文件三个状态，打包测试共6项通过。该门禁只检查应用PRI的存在与大小，不将合成PRI fixture解读为WinUI启动验证；实际PRI生成及原生启动仍由Session/root闭环验证。未改组件实现、版本、root notices或已有ZIP。

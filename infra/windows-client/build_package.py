@@ -109,6 +109,9 @@ def validate_binaries(payload: Path) -> dict[str, list[str]]:
     for runtime in ("coreclr.dll", "hostfxr.dll", "hostpolicy.dll"):
         if not (payload / runtime).is_file():
             raise ValueError(f"Self-contained Host/Settings runtime is missing: {runtime}")
+    settings_resources = payload / "AssetLibrary.Settings.pri"
+    if not settings_resources.is_file() or settings_resources.stat().st_size == 0:
+        raise ValueError("Settings application resources are missing or empty: AssetLibrary.Settings.pri")
     return imports
 
 

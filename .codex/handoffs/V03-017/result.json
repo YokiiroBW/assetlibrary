@@ -50,7 +50,7 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 36,
+    "passed": 37,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
@@ -84,7 +84,7 @@
     "architecture_tests": [
       "verify_repository.py passed",
       "dotnet format/build/analyzers passed",
-      "23 installer fault/boundary tests + 5 packaging tests + 8 real EXE sandbox CLI steps",
+      "23 installer fault/boundary tests + 6 packaging tests + 8 real EXE sandbox CLI steps",
       "Central dependency/license/vulnerability validation passed (2 projects,15 locked packages)"
     ],
     "technical_debt": [
@@ -97,6 +97,7 @@
     "build_version": "All .NET restore/publish commands pass Version from the same frozen package VERSION constant.",
     "runtime_pin": "Setup/Host only use global RuntimeFrameworkVersion; Settings uses its project-level Microsoft.NETCore.App metadata.",
     "verification": "5 packaging tests passed once; one new command-boundary regression. No unchanged C# or CLI suite repeated.",
-    "uninstall": "Read-only review confirmed quoted absolute uninstall command reaches UninstallAsync without source-payload dependency or app restart. Current Setup file lock remains explicit pending cleanup; live SystemSettings launch is root-owned acceptance."
+    "uninstall": "Read-only review confirmed quoted absolute uninstall command reaches UninstallAsync without source-payload dependency or app restart. Current Setup file lock remains explicit pending cleanup; live SystemSettings launch is root-owned acceptance.",
+    "settings_resources": "Packaging rejects missing or zero-byte AssetLibrary.Settings.pri; 6 packaging unit tests passed once, including missing/empty/nonempty resource gate. Live WinUI startup remains root-owned."
   }
 }

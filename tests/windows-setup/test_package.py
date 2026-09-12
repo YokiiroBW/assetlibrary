@@ -13,6 +13,23 @@ SPEC.loader.exec_module(PACKAGE)
 
 
 class PackageTests(unittest.TestCase):
+    def test_missing_or_empty_settings_pri_is_rejected(self):
+        with tempfile.TemporaryDirectory(prefix="AssetLibrary-package-test-") as temporary:
+            payload = Path(temporary)
+            for name in ("AssetLibrary.Setup.exe", "AssetLibrary.Host.exe", "AssetLibrary.Settings.exe",
+                         "AssetLibrary.Explorer.dll", "coreclr.dll", "hostfxr.dll", "hostpolicy.dll"):
+                (payload / name).write_bytes(b"synthetic component fixture")
+            resources = payload / "AssetLibrary.Settings.pri"
+            with patch.object(PACKAGE, "pe_imports", return_value=set()):
+                for content in (None, b""):
+                    with self.subTest(content=content):
+                        if content is not None:
+                            resources.write_bytes(content)
+                        with self.assertRaisesRegex(ValueError, "AssetLibrary.Settings.pri"):
+                            PACKAGE.validate_binaries(payload)
+                resources.write_bytes(b"synthetic application resource fixture")
+                self.assertEqual(len(PACKAGE.validate_binaries(payload)), 4)
+
     def test_build_passes_product_version_and_scopes_runtime_pin(self):
         with tempfile.TemporaryDirectory(prefix="AssetLibrary-package-test-") as temporary:
             args = SimpleNamespace(build_root=Path(temporary), dotnet="dotnet", cmake="cmake")
