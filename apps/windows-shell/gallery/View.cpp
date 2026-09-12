@@ -94,7 +94,7 @@ class View final:public IShellView,public IFolderView {
             // that current state once; never recursively write stale status.
             for(unsigned attempt=0;attempt<2;++attempt){
                 const auto window=Window();const auto generation=generation_,revision=statusRevision_;const auto target=browser_;
-                if(!target||(!clear&&(!window||destroying_)))return;
+                if(!target||(!clear&&(!surface_||!window||destroying_)))return;
                 std::wstring text;
                 if(!clear){
                     if(page_.status!=snapshot::Status::Ready)text=snapshot::StatusText(page_.status);
@@ -107,6 +107,8 @@ class View final:public IShellView,public IFolderView {
                         if(more)text+=L"（还有下一页）";
                     }
                 }
+                if(surface_&&(clear||Live(window,generation)))surface_->SetStatusText(text);
+                if(browser_!=target||Window()!=window||generation_!=generation||statusRevision_!=revision)continue;
                 Reference<IShellBrowser> browser(target);Out<IShellView> active;
                 if(browser_!=target||Window()!=window||generation_!=generation)continue;
                 const auto queried=browser.value->QueryActiveShellView(&active.value);

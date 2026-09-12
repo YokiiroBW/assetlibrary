@@ -76,7 +76,7 @@ public:
     HRESULT STDMETHODCALLTYPE InsertMenusSB(HMENU,LPOLEMENUGROUPWIDTHS)override{return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE SetMenuSB(HMENU,HOLEMENU,HWND)override{return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE RemoveMenusSB(HMENU)override{return E_NOTIMPL;}
-    HRESULT STDMETHODCALLTYPE SetStatusTextSB(LPCWSTR text)override{try{status=text;statuses.push_back(status);}catch(const std::bad_alloc&){return E_OUTOFMEMORY;}return statusResult;}
+    HRESULT STDMETHODCALLTYPE SetStatusTextSB(LPCWSTR text)override{if(FAILED(statusResult))return statusResult;try{status=text;statuses.push_back(status);}catch(const std::bad_alloc&){return E_OUTOFMEMORY;}return statusResult;}
     HRESULT STDMETHODCALLTYPE EnableModelessSB(BOOL)override{return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE TranslateAcceleratorSB(MSG*,WORD)override{return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE BrowseObject(PCUIDLIST_RELATIVE,UINT)override{return E_NOTIMPL;}
@@ -261,15 +261,31 @@ void WideVisiblePage(){
     Pump(20);Check(control.images==29&&!control.uiCalls,"unchanged visible set completes every image without polling or UI IPC");
     fixture.view.value->DestroyViewWindow();Await([]{return gallery::PendingWork()==0;});
 }
+std::wstring OwnSummary(HWND window){
+    const auto summary=GetDlgItem(window,gallery::StatusTextControlId);if(!summary)throw std::runtime_error("owned gallery summary control");
+    wchar_t text[gallery::MaxStatusTextChars+1]{};GetWindowTextW(summary,text,static_cast<int>(gallery::MaxStatusTextChars+1));return text;
+}
 void BrowserStatus(){
-    PageControl control;pageControl=&control;control.items=100;control.more=true;control.blockAll=true;VisibleFixture fixture;fixture.Open();
+    PageControl control;pageControl=&control;control.items=100;control.more=true;control.blockAll=true;VisibleFixture fixture;const auto window=fixture.Open();
     auto& browser=*fixture.browser.value;
     Check(browser.status==snapshot::StatusText(snapshot::Status::Loading),"new active view replaces inherited status while loading");
+    Check(OwnSummary(window)==browser.status,"owned summary shows the same loading text");
     control.blockAll=false;Check(SUCCEEDED(fixture.view.value->Refresh()),"status ready refresh");
     Await([&]{return fixture.Count()==101;},"status-ready");
     Check(browser.status==L"当前页 100 项，已选 0 项（还有下一页）","status excludes pagination from current-page item count and inherited selection");
+    Check(OwnSummary(window)==browser.status,"owned summary shares the existing current-page count");
     Check(fixture.items.value->SelectItem(0,SVSI_SELECT)==S_OK&&fixture.items.value->SelectItem(1,SVSI_SELECT)==S_OK,"status two selections");
     Check(browser.status==L"当前页 100 项，已选 2 项（还有下一页）","status reflects current multi-selection");
+    browser.statusResult=E_NOTIMPL;browser.status=L"host stale count";
+    fixture.items.value->SelectItem(1,SVSI_DESELECT);
+    Check(browser.status==L"host stale count"&&OwnSummary(window)==L"当前页 100 项，已选 1 项（还有下一页）","owned summary updates selection when host rejects status text");
+    browser.statusResult=S_OK;
+    {
+        Fixture differentIdentity;browser.active=differentIdentity.view.value;browser.status=L"wrapper host count";
+        fixture.items.value->SelectItem(1,SVSI_SELECT);
+        Check(browser.status==L"wrapper host count"&&OwnSummary(window)==L"当前页 100 项，已选 2 项（还有下一页）","active IShellView identity mismatch does not suppress owned summary");
+        browser.active=fixture.view.value;
+    }
     Check(fixture.items.value->SelectItem(100,SVSI_SELECT|SVSI_DESELECTOTHERS)==S_OK,"select page navigation");
     Check(browser.status==L"当前页 100 项，已选 0 项（还有下一页）","navigation selection is not an asset selection");
     browser.querying=[&]{fixture.items.value->SelectItem(0,SVSI_SELECT|SVSI_DESELECTOTHERS);};
@@ -284,6 +300,8 @@ void BrowserStatus(){
     browser.statusResult=E_NOTIMPL;Check(fixture.view.value->UIActivate(SVUIA_DEACTIVATE)==S_OK,"host status support is optional and never breaks browsing");browser.statusResult=S_OK;
     control.status=snapshot::Status::Expired;control.blockAll=false;fixture.view.value->Refresh();
     Await([&]{return fixture.Count()==0&&browser.status==snapshot::StatusText(snapshot::Status::Expired);},"status-expired");
+    Check(OwnSummary(window)==snapshot::StatusText(snapshot::Status::Expired),"owned summary replaces obsolete counts with expiry");
+    browser.querying=[&]{Check(OwnSummary(window).empty(),"owned summary clears before retired view queries host");};
     fixture.view.value->DestroyViewWindow();Check(browser.status.empty(),"active retiring view clears its status");Await([]{return gallery::PendingWork()==0;});
     VisibleFixture inactive;inactive.Open();auto& inactiveBrowser=*inactive.browser.value;inactiveBrowser.active=nullptr;inactiveBrowser.status=L"new active status";
     inactive.view.value->DestroyViewWindow();Check(inactiveBrowser.status==L"new active status","inactive retirement does not clear replacement status");
