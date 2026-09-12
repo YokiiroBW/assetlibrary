@@ -57,15 +57,15 @@ bool Decode(const BYTE* payload, size_t bytes, Page& page) {
 }
 const wchar_t* StatusText(Status status) noexcept {
     switch(status){
-    case Status::Loading:return L"正在加载；按 F5 重试";
-    case Status::AccessDenied:return L"无权访问；重新登录后打开根目录，按 F5 重试";
-    case Status::Expired:return L"位置已过期；重新打开资产库根目录，按 F5 重试";
-    case Status::InvalidResponse:return L"响应无效；按 F5 重试";
-    case Status::Busy:return L"服务繁忙；按 F5 重试";
-    default:return L"后台连接服务不可用；启动并登录后按 F5 重试";
+    case Status::Loading:return L"正在加载；若未更新，请重新打开资产库";
+    case Status::AccessDenied:return L"无权访问；请在连接设置中登录，再重新打开资产库";
+    case Status::Expired:return L"位置已过期；请重新打开资产库";
+    case Status::InvalidResponse:return L"响应无效；请检查连接设置，再重新打开资产库";
+    case Status::Busy:return L"服务繁忙；请稍后重新打开资产库";
+    default:return L"后台连接服务不可用；请打开连接设置，登录后重新打开资产库";
     }
 }
 const wchar_t* TypeText(Kind kind) noexcept {
-    switch(kind){case Kind::Library:return L"资源库";case Kind::Directory:return L"文件夹";case Kind::File:return L"文件";case Kind::Reparse:return L"链接项目（不可进入）";case Kind::NextPage:return L"下一页导航";default:return L"状态（按 F5 重试）";}
+    switch(kind){case Kind::Library:return L"资源库";case Kind::Directory:return L"文件夹";case Kind::File:return L"文件（本版不打开内容）";case Kind::Reparse:return L"链接项目（不可进入）";case Kind::NextPage:return L"下一页导航";default:return L"状态（重新打开资产库）";}
 }
 }

@@ -1,4 +1,5 @@
 #include "Snapshot.h"
+#include "ProductIdentity.h"
 #include "G3Measurements.h"
 #include <sddl.h>
 #include <atomic>
@@ -140,7 +141,7 @@ std::wstring PipeName(){
     LPWSTR sid=nullptr;
     if(!ConvertSidToStringSidW(reinterpret_cast<TOKEN_USER*>(token.data())->User.Sid,&sid))return {};
     std::wstring name;
-    try{name=L"\\\\.\\pipe\\AssetLibrary.ExplorerProof.v1.";name+=sid;}catch(...){LocalFree(sid);throw;}
+    try{name=product::PipePrefix;name+=sid;}catch(...){LocalFree(sid);throw;}
     LocalFree(sid);DWORD session=0;if(!ProcessIdToSessionId(GetCurrentProcessId(),&session))return {};
     return name+L"."+std::to_wstring(session);
 }

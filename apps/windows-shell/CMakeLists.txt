@@ -1,0 +1,41 @@
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_SYSTEM_VERSION "10.0.26100.0")
+project(AssetLibraryExplorer LANGUAGES CXX)
+if(NOT MSVC OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+  message(FATAL_ERROR "AssetLibrary Explorer requires MSVC and Windows x64.")
+endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Used by the production build and the original registration-free Proof targets.
+function(assetlibrary_shell_variant dll snapshot refresh diagnostics proof)
+  set(source "${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
+  add_library(${snapshot} STATIC "${source}/Snapshot.cpp" "${source}/SnapshotPidl.cpp"
+    "${source}/SnapshotPipe.cpp" "${source}/G3Measurements.cpp")
+  target_include_directories(${snapshot} PUBLIC "${source}")
+  target_compile_definitions(${snapshot} PUBLIC UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+  if(proof)
+    target_compile_definitions(${snapshot} PUBLIC ASSETLIBRARY_EXPLORER_PROOF)
+  endif()
+  target_link_libraries(${snapshot} PUBLIC ole32 advapi32 uuid)
+  add_library(${refresh} STATIC "${source}/LoadingRefresh.cpp")
+  target_link_libraries(${refresh} PUBLIC ${snapshot} shell32 shlwapi comctl32)
+  add_library(${diagnostics} STATIC "${source}/ProbeDiagnostics.cpp")
+  target_link_libraries(${diagnostics} PUBLIC ${refresh} oleaut32)
+  add_library(${dll} SHARED "${source}/ExplorerFolder.cpp" "${source}/NavigationMenu.cpp"
+    "${source}/SnapshotIcon.cpp" "${source}/SettingsMenu.cpp" "${source}/SettingsCommand.cpp" "${source}/Explorer.def")
+  target_link_libraries(${dll} PRIVATE ${diagnostics} ${refresh} ${snapshot}
+    ole32 oleaut32 shell32 user32 propsys shlwapi)
+  foreach(target ${dll} ${snapshot} ${refresh} ${diagnostics})
+    target_compile_options(${target} PRIVATE /W4 /WX /permissive- /analyze /utf-8)
+    if(NOT proof)
+      # The installed component must not depend on a separately installed VC redist.
+      # Its boundary is COM and CoTaskMem/BSTR, never CRT-owned C++ objects.
+      set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+  endforeach()
+endfunction()
+
+assetlibrary_shell_variant(AssetLibraryExplorer AssetLibrarySnapshot
+  AssetLibraryLoadingRefresh AssetLibraryDiagnostics FALSE)
+set_target_properties(AssetLibraryExplorer PROPERTIES OUTPUT_NAME "AssetLibrary.Explorer")

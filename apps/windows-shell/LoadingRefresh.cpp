@@ -1,10 +1,12 @@
 #include "LoadingRefresh.h"
 #include "SnapshotPidl.h"
 #include "G3Measurements.h"
+#include "ProductIdentity.h"
 #include <commctrl.h>
 #include <shlwapi.h>
 #include <shlguid.h>
 #include <new>
+#include <cstring>
 
 namespace loading {
 namespace {
@@ -36,6 +38,9 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     HWND window_=nullptr;
     Budget budget_;
     bool timer_=false,refreshing_=false,started_=false;
+    PIDLIST_ABSOLUTE notificationRoot_=nullptr;
+    const bool rootView_;
+    bool changePending_=false,changeQueued_=false;
     std::atomic_bool slotHeld_{true};
     void ReleaseSlot() noexcept {if(slotHeld_.exchange(false))activeViews.fetch_sub(1);}
     bool ReserveSlot() noexcept {
@@ -46,6 +51,50 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     void StopTimer() noexcept {
         if(timer_&&window_)KillTimer(window_,signal_->cookie);
         timer_=false;signal_->diagnostic.timerActive=0;
+    }
+    void QueueChange() noexcept {
+        if(changePending_&&!changeQueued_&&!refreshing_&&window_&&site_)
+            changeQueued_=PostMessageW(window_,signal_->sessionNotification,signal_->cookie,0)!=FALSE;
+    }
+    void SessionChanged() noexcept {
+        changeQueued_=false;
+        if(!changePending_||refreshing_)return;
+        changePending_=false;
+        const HWND expected=window_;IUnknown* const expectedSite=site_;
+        const auto revision=siteRevision_,episode=budget_.episode;
+        const auto live=[&]{return expected&&window_==expected&&IsWindow(expected)&&site_==expectedSite
+            &&siteRevision_==revision&&budget_.episode==episode;};
+        if(!live())return;
+        refreshing_=true;StopTimer();
+        HRESULT hr=E_ABORT;
+        {
+            Reference<IUnknown> site(expectedSite);
+            ResultReference<IShellBrowser> browser;ResultReference<IShellView> view;
+            hr=site.value?IUnknown_QueryService(site.value,SID_STopLevelBrowser,IID_PPV_ARGS(&browser.value)):E_NOINTERFACE;
+            if(hr==S_OK&&live())hr=browser.value?browser.value->QueryActiveShellView(&view.value):E_NOINTERFACE;
+            HWND actual=nullptr;
+            if(hr==S_OK&&live())hr=view.value?view.value->GetWindow(&actual):E_NOINTERFACE;
+            if(hr==S_OK&&live()&&actual==expected){
+                if(rootView_){
+                    g3::Call measured(g3::measurements.refresh);hr=view.value->Refresh();
+                }else{
+                    // Session invalidation removes active child breadcrumbs as well
+                    // as their old rows. Explorer's navigation history stays owned by Shell.
+                    hr=browser.value->BrowseObject(notificationRoot_,SBSP_ABSOLUTE|SBSP_SAMEBROWSER);
+                    if(FAILED(hr)&&live()){
+                        // A failed navigation still revalidates the old node, which
+                        // the cleared Host epoch rejects; no stale-data fallback.
+                        g3::Call measured(g3::measurements.refresh);hr=view.value->Refresh();
+                    }
+                }
+            }else if(hr==S_OK)hr=E_ABORT;
+        }
+        refreshing_=false;
+        if(hr==S_OK&&live()&&rootView_){
+            // Notifications during a Loading episode never extend its deadline.
+            if(!budget_.active){started_=false;StartObservation();}else Arm();
+        }else if(live())Arm();
+        QueueChange();
     }
     void Arm() noexcept {
         if(!timer_&&!refreshing_&&window_&&site_&&budget_.active){
@@ -64,7 +113,7 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
     }
     void Detach() noexcept {
         ++signal_->diagnostic.detaches;
-        StopTimer();budget_.Stop();signal_->window=nullptr;signal_->queued=false;
+        StopTimer();budget_.Stop();signal_->window=nullptr;signal_->queued=false;changePending_=false;changeQueued_=false;
         if(window_){
             DWORD_PTR attached=0;
             if(RemoveWindowSubclass(window_,WindowProc,signal_->cookie)||!GetWindowSubclass(window_,WindowProc,signal_->cookie,&attached)){
@@ -135,6 +184,7 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
         // COM Release can also revoke the site or destroy the window.
         observeAgain=observeAgain&&hr==S_OK&&live()&&budget_.attempts<MaxAttempts;
         refreshing_=false;
+        QueueChange();
         if(budget_.episode!=episode){Arm();return;}
         if(!observeAgain){diagnostic.skip=FAILED(hr)?7:6;budget_.Stop();StopTimer();return;}
         Arm();
@@ -146,12 +196,14 @@ class Callback final : public IShellFolderViewCB, public IObjectWithSite {
         }
         // Clone enumeration is diagnostic only; it cannot change this view's episode.
         if(message==self->signal_->notification&&wParam==self->signal_->cookie){self->signal_->queued=false;return 0;}
+        if(message==self->signal_->sessionNotification&&wParam==self->signal_->cookie){self->SessionChanged();return 0;}
         if(message==WM_TIMER&&wParam==self->signal_->cookie){self->Tick();return 0;}
         return DefSubclassProc(window,message,wParam,lParam);
     }
 public:
-    Callback(IUnknown* owner,const std::shared_ptr<Signal>& signal):owner_(owner),signal_(signal){signal_->diagnostic.constructorThread=thread_;owner_->AddRef();liveCallbacks.fetch_add(1);}
-    ~Callback(){ClearSite();ReleaseSlot();liveCallbacks.fetch_sub(1);owner_->Release();}
+    Callback(IUnknown* owner,const std::shared_ptr<Signal>& signal,PIDLIST_ABSOLUTE root,bool rootView)
+        :owner_(owner),signal_(signal),notificationRoot_(root),rootView_(rootView){signal_->diagnostic.constructorThread=thread_;owner_->AddRef();liveCallbacks.fetch_add(1);}
+    ~Callback(){ClearSite();CoTaskMemFree(notificationRoot_);ReleaseSlot();liveCallbacks.fetch_sub(1);owner_->Release();}
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** result) override {
         if(!result)return E_POINTER;*result=nullptr;
         if(iid==IID_IUnknown||iid==IID_IShellFolderViewCB)*result=static_cast<IShellFolderViewCB*>(this);
@@ -164,7 +216,7 @@ public:
         auto& diagnostic=signal_->diagnostic;++diagnostic.siteCalls;diagnostic.siteThread=GetCurrentThreadId();
         if(GetCurrentThreadId()!=thread_){diagnostic.siteResult=RPC_E_WRONG_THREAD;return RPC_E_WRONG_THREAD;}
         Reference<Callback> invocation(this);if(site)site->AddRef();auto previous=site_;
-        if(started_&&site!=previous){StopTimer();budget_.Stop();}
+        if(site!=previous){changePending_=false;changeQueued_=false;if(started_){StopTimer();budget_.Stop();}}
         site_=site;++siteRevision_;
         diagnostic.sitePresent=site_?1:0;
         if(previous)previous->Release();
@@ -177,7 +229,24 @@ public:
         Reference<Callback> invocation(this);Reference<IUnknown> site(site_);
         return site.value?site.value->QueryInterface(iid,result):E_FAIL;
     }
-    HRESULT STDMETHODCALLTYPE MessageSFVCB(UINT message,WPARAM wParam,LPARAM) override {
+    HRESULT STDMETHODCALLTYPE MessageSFVCB(UINT message,WPARAM wParam,LPARAM lParam) override {
+        if(notificationRoot_&&(message==SFVM_GETNOTIFY||message==SFVM_FSNOTIFY)){
+            if(GetCurrentThreadId()!=thread_)return RPC_E_WRONG_THREAD;
+            if(!wParam||!lParam)return E_INVALIDARG;
+            if(message==SFVM_GETNOTIFY){
+                *reinterpret_cast<PIDLIST_ABSOLUTE*>(wParam)=notificationRoot_;
+                *reinterpret_cast<LONG*>(lParam)=SHCNE_UPDATEDIR;return S_OK;
+            }
+            if(lParam!=SHCNE_UPDATEDIR)return E_NOTIMPL;
+            const auto changed=*reinterpret_cast<PCIDLIST_ABSOLUTE const*>(wParam);
+            UINT changedBytes=0,changedCount=0,rootBytes=0,rootCount=0;
+            if(!snapshot::BoundedList(changed,changedBytes,changedCount)
+                ||!snapshot::BoundedList(notificationRoot_,rootBytes,rootCount)
+                ||changedBytes!=rootBytes||std::memcmp(changed,notificationRoot_,rootBytes)!=0)return E_INVALIDARG;
+            // This event is merely a refresh hint; authorization stays in Host/Core.
+            // No borrowed PIDL crosses the posted-message boundary.
+            changePending_=true;QueueChange();return S_OK;
+        }
         if(message!=SFVM_WINDOWCREATED)return E_NOTIMPL;
         auto& diagnostic=signal_->diagnostic;++diagnostic.windowCalls;diagnostic.windowThread=GetCurrentThreadId();
         diagnostic.reportedWindow=static_cast<UINT_PTR>(wParam);const DWORD windowThread=GetWindowThreadProcessId(reinterpret_cast<HWND>(wParam),nullptr);diagnostic.windowOwnerThread=windowThread;
@@ -199,7 +268,8 @@ bool Budget::Take(ULONGLONG now) noexcept {
     if(!active||now>=deadline||attempts>=MaxAttempts){active=false;return false;}
     if(now<next)return false;++attempts;next=now+IntervalMs;return true;
 }
-Signal::Signal():notification(RegisterWindowMessageW(L"AssetLibrary.ExplorerProof.LoadingState.v1")),cookie(nextCookie.fetch_add(1)){}
+Signal::Signal():notification(RegisterWindowMessageW(product::LoadingMessage)),
+    sessionNotification(RegisterWindowMessageW(product::SessionMessage)),cookie(nextCookie.fetch_add(1)){}
 void Signal::Publish(snapshot::Status value) noexcept {
     Publish(Begin(),value);
 }
@@ -221,20 +291,31 @@ bool Signal::Read(snapshot::Status& value,ULONGLONG* resultGeneration) const noe
 }
 ULONG ActiveViews() noexcept {return activeViews.load();}
 ULONG LiveCallbacks() noexcept {return liveCallbacks.load();}
-HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,IShellFolderViewCB** result) noexcept {
+HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,IShellFolderViewCB** result,
+    PCIDLIST_ABSOLUTE notificationRoot,bool rootView) noexcept {
     const auto done=[&](HRESULT hr){if(signal)signal->diagnostic.createResult=hr;return hr;};
     if(signal)signal->diagnostic.createSlots=activeViews.load();
     if(!result)return done(E_POINTER);*result=nullptr;if(!owner||!signal||!signal->notification)return done(E_INVALIDARG);
-    ULONG count=activeViews.load();do{if(count>=MaxViews){signal->diagnostic.createSlots=count;return done(HRESULT_FROM_WIN32(ERROR_BUSY));}}while(!activeViews.compare_exchange_weak(count,count+1));
+    PIDLIST_ABSOLUTE root=nullptr;
+    if(notificationRoot){
+        UINT bytes=0,count=0;
+        if(!signal->sessionNotification||!snapshot::BoundedList(notificationRoot,bytes,count)||count!=1)return done(E_INVALIDARG);
+        root=ILCloneFull(notificationRoot);if(!root)return done(E_OUTOFMEMORY);
+    }
+    ULONG count=activeViews.load();do{if(count>=MaxViews){CoTaskMemFree(root);signal->diagnostic.createSlots=count;return done(HRESULT_FROM_WIN32(ERROR_BUSY));}}while(!activeViews.compare_exchange_weak(count,count+1));
     signal->diagnostic.createSlots=count;
-    auto callback=new(std::nothrow) Callback(owner,signal);
-    if(!callback){activeViews.fetch_sub(1);return done(E_OUTOFMEMORY);}*result=callback;return done(S_OK);
+    auto callback=new(std::nothrow) Callback(owner,signal,root,rootView);
+    if(!callback){CoTaskMemFree(root);activeViews.fetch_sub(1);return done(E_OUTOFMEMORY);}*result=callback;return done(S_OK);
 }
-HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result) noexcept {
+HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result,
+    PCIDLIST_ABSOLUTE notificationRoot,bool rootView) noexcept {
     if(!result)return E_POINTER;*result=nullptr;if(!folder)return E_INVALIDARG;
     IShellFolderViewCB* callback=nullptr;
-    // Auto-refresh is a bounded enhancement; capacity failure preserves manual F5.
-    CreateCallback(folder,signal,&callback);
+    // Proof preserves its historical passive fallback. Product views must have
+    // an invalidation callback, including when the four-view limit is exhausted.
+    if constexpr(product::Production){if(!notificationRoot)return E_INVALIDARG;}
+    const auto callbackResult=CreateCallback(folder,signal,&callback,notificationRoot,rootView);
+    if constexpr(product::Production){if(FAILED(callbackResult))return callbackResult;}
     SFV_CREATE create{sizeof(create),folder,nullptr,callback};auto hr=SHCreateShellFolderView(&create,result);
     if(callback)callback->Release();return hr;
 }

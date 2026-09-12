@@ -13,10 +13,12 @@
 #include "LoadingRefresh.h"
 #include "ProbeDiagnostics.h"
 #include "G3Measurements.h"
+#include "ProductIdentity.h"
+#include "SettingsMenu.h"
 #include <cstring>
 
 namespace {
-constexpr CLSID kClsid = {0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+constexpr CLSID kClsid = product::ClassId;
 std::atomic_long objects{0};
 std::atomic_long locks{0};
 SFGAOF Attributes(snapshot::Kind kind) {
@@ -155,13 +157,20 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
   }
   HRESULT STDMETHODCALLTYPE CreateViewObject(HWND, REFIID iid, void** value) override {
-    if (!value) return E_POINTER; *value = nullptr; if (iid != IID_IShellView) return E_NOINTERFACE;
+    if (!value) return E_POINTER; *value = nullptr;
+    if constexpr(product::Production){if(iid==IID_IContextMenu)return CreateSettingsMenu(static_cast<IShellFolder2*>(this),iid,value);}
+    if (iid != IID_IShellView) return E_NOINTERFACE;
     if(!absolute_)return E_UNEXPECTED;
     try {
       auto state=std::make_shared<loading::Signal>();auto folder=new(std::nothrow) Folder(state,diagnostic_.instance);if(!folder)return E_OUTOFMEMORY;
       diagnostic_.lastClone=folder->diagnostic_.instance;
       auto hr=folder->Initialize(absolute_);
-      if(SUCCEEDED(hr))hr=loading::CreateView(static_cast<IShellFolder2*>(folder),state,reinterpret_cast<IShellView**>(value));
+      if(SUCCEEDED(hr)){
+        PIDLIST_ABSOLUTE root=nullptr;
+        if constexpr(product::Production){root=ILCloneFirst(absolute_);}
+        hr=loading::CreateView(static_cast<IShellFolder2*>(folder),state,reinterpret_cast<IShellView**>(value),root,snapshot::Zero(location_.epoch));
+        CoTaskMemFree(root);
+      }
       diagnostic_.lastCallbackResult=state->diagnostic.createResult.load();
       folder->Release();return hr;
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
@@ -179,11 +188,16 @@ class Folder final : public IShellFolder2, public IPersistFolder2 {
   }
   HRESULT STDMETHODCALLTYPE GetDisplayNameOf(PCUITEMID_CHILD pidl, SHGDNF flags, STRRET* value) override {
     if(!value)return E_POINTER;
+    if constexpr(product::Production){
+      if((!pidl||!pidl->mkid.cb)&&snapshot::Zero(location_.epoch)){
+        value->uType=STRRET_WSTR;return SHStrDupW((flags&SHGDN_FORPARSING)?product::ParsingRoot:product::Title,&value->pOleStr);
+      }
+    }
     try {snapshot::Entry entry;if(!snapshot::ReadPidl(pidl,entry))return E_INVALIDARG;
       std::wstring name=entry.name;
       if(flags&SHGDN_FORPARSING){name=snapshot::ParsingName(entry);if(name.empty())return E_ACCESSDENIED;
         if(!(flags&SHGDN_INFOLDER)){
-          std::wstring prefix=L"::{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}";
+          std::wstring prefix=product::ParsingRoot;
           if(absolute_){auto at=reinterpret_cast<PCUIDLIST_RELATIVE>(absolute_);
             while(at->mkid.cb){snapshot::Entry parent;if(snapshot::ReadPidl(at,parent))prefix+=L"\\"+snapshot::ParsingName(parent);
               at=reinterpret_cast<PCUIDLIST_RELATIVE>(reinterpret_cast<const BYTE*>(at)+at->mkid.cb);}}

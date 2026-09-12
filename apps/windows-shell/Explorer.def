@@ -1,4 +1,3 @@
-LIBRARY AssetLibraryExplorerProof
 EXPORTS
  DllGetClassObject PRIVATE
  DllCanUnloadNow PRIVATE

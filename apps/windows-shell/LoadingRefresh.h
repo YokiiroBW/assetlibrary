@@ -34,6 +34,7 @@ struct DiagnosticState {
 };
 struct Signal {
     const UINT notification;
+    const UINT sessionNotification;
     const UINT_PTR cookie;
     std::atomic<ULONGLONG> started{0},published{static_cast<ULONGLONG>(snapshot::Status::Unavailable)};
     std::atomic<HWND> window{nullptr};
@@ -45,8 +46,10 @@ struct Signal {
     void Publish(snapshot::Status value) noexcept;
     bool Read(snapshot::Status& value,ULONGLONG* generation=nullptr) const noexcept;
 };
-HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,IShellFolderViewCB** result) noexcept;
-HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result) noexcept;
+HRESULT CreateCallback(IUnknown* owner,const std::shared_ptr<Signal>& signal,IShellFolderViewCB** result,
+    PCIDLIST_ABSOLUTE notificationRoot=nullptr,bool rootView=true) noexcept;
+HRESULT CreateView(IShellFolder* folder,const std::shared_ptr<Signal>& signal,IShellView** result,
+    PCIDLIST_ABSOLUTE notificationRoot=nullptr,bool rootView=true) noexcept;
 ULONG ActiveViews() noexcept;
 ULONG LiveCallbacks() noexcept;
 }

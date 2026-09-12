@@ -1,10 +1,16 @@
 # Explorer 原生入口验证
 
+V03-016：运行实现已整体移入 [apps/windows-shell](../../apps/windows-shell/README.md) 作为唯一源，
+原CMake入口、Proof DLL/CLSID/pipe、Probe与六项CTest保持兼容；本目录只保留测试、夹具与历史注册工具。
+同一次测试构建另外生成生产DLL，新增 `explorer_product`、`explorer_session_notification` 与
+`explorer_product_imports`，分别检查生产/Proof身份隔离与纯设置命令、公开通知/配额负控及系统DLL依赖。
+无注册测试不能替代真实生产入口/设置启动/Host通知接线。以下Proof历史证据不代表生产安装包已验收。
+
 V03-002 的 test-only C++17/Windows SDK 10.0.26100 验证，复用系统 DefView。只有当前用户独占 CLSID `{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}`；拒绝已有注册，不修改 HKLM/UAC/系统策略，不重启 Explorer。代码无网络、资产 I/O、数据库、Provider 和 WinUI 运行时。
 
 ## 当前只读快照实现（2026-09-12）
 
-当前 DLL 已移除固定示例条目，按冻结的 `contracts/windows-shell/read-only-snapshot-v1.md` 从同用户/同会话的进程外 Host 读取一页。每页最多 100 条资产/目录与一个“下一页（导航）”；资源库、普通目录和下一页可进入，文件、链接项目及固定错误状态不可进入。缺少 Host、正在加载、权限拒绝、过期、协议错误和繁忙显示带 F5 指引的状态行；Ready 的零条目才表示真实空页。F5/重开刷新，不宣称推送失效。
+当前 DLL 已移除固定示例条目，按冻结的 `contracts/windows-shell/read-only-snapshot-v1.md` 从同用户/同会话的进程外 Host 读取一页。每页最多 100 条资产/目录与一个“下一页（导航）”；资源库、普通目录和下一页可进入，文件、链接项目及固定错误状态不可进入。缺少 Host、正在加载、权限拒绝、过期、协议错误和繁忙显示状态行；Ready 的零条目才表示真实空页。F5是单次查询，重新打开启动新有限观察；Proof不宣称推送失效。
 
 每次 EnumObjects 共用一个 150ms 单调等待预算，不等待 EOF；四个在途/待回收名额，取消后保留 OVERLAPPED、缓冲、句柄与 DLL 引用到完成。连接后核实际 TokenUser SID、session 与持有的服务进程身份；客户端只能被识别，不能被 Host 冒用身份。名称/类型/排序/解析从严格校验的私有 PIDL 完成，不做逐条 IPC。解析名称用有界的 `snapshot-pidl-v1:<完整私有PIDL hex>`，支持新实例、多层相对及完整名称还原；hex 中仍只有 epoch/token/kind/展示名，不包含 Core 路径或凭据。
 

@@ -88,10 +88,12 @@ struct Fixture {
     proof::Com<RefreshBrowser> browser;
     proof::Com<IShellFolderViewCB> callback;
     proof::Com<IObjectWithSite> site;
-    Fixture(){
+    proof::Item notificationRoot;
+    Fixture(bool notifications=false,bool rootView=true){
         view.value=new View();view.value->window=window.value;
         browser.value=new RefreshBrowser();browser.value->active=view.value;
-        Check(SUCCEEDED(loading::CreateCallback(static_cast<IShellView*>(view.value),signal,&callback.value)),"callback create");
+        if(notifications)notificationRoot.value=snapshot::MakePidl({{1},{2},snapshot::Kind::Library,L"synthetic notification root"});
+        Check(SUCCEEDED(loading::CreateCallback(static_cast<IShellView*>(view.value),signal,&callback.value,notificationRoot.value,rootView)),"callback create");
         Check(SUCCEEDED(callback.value->QueryInterface(IID_PPV_ARGS(&site.value))),"callback site");
         Check(SUCCEEDED(site.value->SetSite(static_cast<IShellBrowser*>(browser.value))),"attach site");
         Check(SUCCEEDED(callback.value->MessageSFVCB(SFVM_WINDOWCREATED,reinterpret_cast<WPARAM>(window.value),0)),"attach owner window");
@@ -99,6 +101,78 @@ struct Fixture {
     ~Fixture(){if(site.value)site.value->SetSite(nullptr);window.Close();}
     Fixture(const Fixture&)=delete;Fixture& operator=(const Fixture&)=delete;
 };
+void SessionNotifications(){
+    const auto notify=[](Fixture& fixture){
+        PCIDLIST_ABSOLUTE root=fixture.notificationRoot.value;
+        return fixture.callback.value->MessageSFVCB(SFVM_FSNOTIFY,reinterpret_cast<WPARAM>(&root),SHCNE_UPDATEDIR);
+    };
+    {
+        Fixture fixture(true);fixture.view.value->Show(snapshot::Status::Ready);
+        PIDLIST_ABSOLUTE root=nullptr;LONG events=0;
+        Check(fixture.callback.value->MessageSFVCB(SFVM_GETNOTIFY,reinterpret_cast<WPARAM>(&root),reinterpret_cast<LPARAM>(&events))==S_OK
+            &&root!=fixture.notificationRoot.value&&ILIsEqual(root,fixture.notificationRoot.value)&&events==SHCNE_UPDATEDIR,"GETNOTIFY owns independent exact root");
+        for(unsigned i=0;i<10;++i)Check(notify(fixture)==S_OK,"FSNOTIFY accepts root event");
+        Check(fixture.view.value->refreshes==0,"change callback only queues UI action");Pump(20);
+        Check(fixture.view.value->refreshes==1&&fixture.view.value->refreshThread==GetCurrentThreadId(),"duplicate notifications coalesce on owner thread");
+        Check(fixture.browser.value->calls==0,"root refresh remains in same view");
+        const auto observationStart=fixture.signal->diagnostic.observationStart.load();
+        Check(notify(fixture)==S_OK,"new event while observing");Pump(20);
+        Check(fixture.signal->diagnostic.observationStart==observationStart,"new notifications never extend active observation episode");
+        proof::Item wrong(snapshot::MakePidl({{2},{3},snapshot::Kind::Library,L"other root"}));PCIDLIST_ABSOLUTE other=wrong.value;
+        Check(fixture.callback.value->MessageSFVCB(SFVM_FSNOTIFY,reinterpret_cast<WPARAM>(&other),SHCNE_UPDATEDIR)==E_INVALIDARG,"unrelated root rejected");
+        Check(fixture.callback.value->MessageSFVCB(SFVM_FSNOTIFY,reinterpret_cast<WPARAM>(&root),SHCNE_CREATE)==E_NOTIMPL,"other events ignored");
+        Check(fixture.callback.value->MessageSFVCB(SFVM_GETNOTIFY,0,reinterpret_cast<LPARAM>(&events))==E_INVALIDARG,"null output rejected");
+        HRESULT crossThread=S_OK;std::thread otherThread([&]{crossThread=notify(fixture);});otherThread.join();
+        Check(crossThread==RPC_E_WRONG_THREAD,"notifications do not cross UI thread");
+        const auto before=fixture.view.value->refreshes;Pump(20);Check(fixture.view.value->refreshes==before,"negative events cause no action");
+        CoTaskMemFree(fixture.notificationRoot.value);fixture.notificationRoot.value=nullptr;
+        UINT bytes=0,count=0;Check(snapshot::BoundedList(root,bytes,count)&&count==1,"notification root survives caller input release");
+    }
+    {
+        Fixture fixture(true);fixture.view.value->Show(snapshot::Status::Ready);Pump(550);
+        Check(fixture.signal->diagnostic.timerActive==0,"Ready ended initial observation");
+        const auto before=fixture.signal->diagnostic.observationStart.load();
+        fixture.view.value->onRefresh=[&]{fixture.view.value->Show(snapshot::Status::Loading);};
+        Check(notify(fixture)==S_OK,"new session event after Ready");Pump(20);
+        Check(fixture.signal->diagnostic.observationStart>before&&fixture.signal->diagnostic.timerActive==1,"new state starts bounded Loading observation");
+        const auto refreshed=fixture.view.value->refreshes;Pump(520);
+        Check(fixture.view.value->refreshes>refreshed,"event reconnects existing Loading refresh path");
+    }
+    {
+        Fixture fixture(true,false);fixture.view.value->Show(snapshot::Status::Ready);
+        Check(notify(fixture)==S_OK,"child receives same root event");Pump(20);
+        Check(fixture.browser.value->calls==1&&fixture.browser.value->flags==(SBSP_ABSOLUTE|SBSP_SAMEBROWSER)
+            &&ILIsEqual(fixture.browser.value->last,fixture.notificationRoot.value)&&fixture.view.value->refreshes==0,"child navigates exact root in current window");
+    }
+    {
+        Fixture fixture(true,false);fixture.browser.value->browseResult=E_FAIL;
+        Check(notify(fixture)==S_OK,"failed child navigation event");Pump(20);
+        Check(fixture.browser.value->calls==1&&fixture.view.value->refreshes==1,"failed child navigation still revalidates old epoch");
+    }
+    {
+        Fixture fixture(true);HiddenWindow other;fixture.view.value->window=other.value;
+        Check(notify(fixture)==S_OK,"mismatched active view event");Pump(20);
+        Check(fixture.view.value->refreshes==0&&fixture.browser.value->calls==0,"never act on another active window");
+    }
+    {
+        Fixture fixture(true);Check(notify(fixture)==S_OK,"queued event before detach");fixture.site.value->SetSite(nullptr);Pump(20);
+        Check(fixture.view.value->refreshes==0&&!fixture.browser.value->calls,"detach discards queued event");
+    }
+    {
+        Fixture fixture(true);fixture.browser.value->duringQuery=[&]{fixture.site.value->SetSite(nullptr);};
+        Check(notify(fixture)==S_OK,"event before reentrant site removal");Pump(20);
+        Check(!fixture.view.value->refreshes&&!fixture.browser.value->calls,"reentrant site change prevents stale action");
+    }
+    {
+        std::array<std::unique_ptr<Fixture>,4> views;
+        for(auto& view:views)view=std::make_unique<Fixture>(true);
+        proof::Com<enum_done_test::Folder> folder;folder.value=new enum_done_test::Folder();
+        auto signal=std::make_shared<loading::Signal>();proof::Com<IShellView> denied;
+        Check(loading::CreateView(folder.value,signal,&denied.value,views[0]->notificationRoot.value)==HRESULT_FROM_WIN32(ERROR_BUSY)&&!denied.value,"fifth production view fails closed before DefView creation");
+    }
+    Check(!loading::ActiveViews()&&!loading::LiveCallbacks(),"notification callbacks and quota released");
+    puts("session_notification=passed; GETNOTIFY=owned_root; FSNOTIFY=validated_coalesced; root=refresh; child=same_window_root; quota=fail_closed; registry=0; pipe=0; real_Explorer=0");
+}
 void Budgets(){
     loading::Budget budget;
     budget.Start(100);
@@ -447,13 +521,15 @@ void EnumDoneMechanism(){
 
 }
 int wmain(int argc,wchar_t** argv){
+    const bool sessionOnly=argc==2&&wcscmp(argv[1],L"--session-only")==0;
     const bool enumDone=argc==2&&wcscmp(argv[1],L"--enum-done-mechanism")==0;
     const bool proofOwner=argc==3&&wcscmp(argv[2],L"--proof-owner-lifetime")==0;
     const bool wiring=proofOwner||(argc==3&&wcscmp(argv[2],L"--wiring-only")==0);
     if(argc!=2&&!wiring)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
     std::unique_ptr<proof::Library> moduleLifetime;
     int result=0;try{
-        if(enumDone)EnumDoneMechanism();
+        if(sessionOnly)SessionNotifications();
+        else if(enumDone)EnumDoneMechanism();
         else if(wiring){moduleLifetime=std::make_unique<proof::Library>(argv[1]);RealDefView(*moduleLifetime,proofOwner);}
         else{Budgets();Completion();Teardown();ReentryAndMismatch();IndependentAndCapacity();Generations();RenderedBoundaries();EmptyAndDeadline();CalloutChanges();DefViewWiring(argv[1]);ControlledDllOwner(argv[1]);}
         puts(enumDone?"enum_done_controls=passed; notification_delivery=see_recorded_result; native_explorer_acceptance=false":wiring?"loading_refresh_mechanism=passed; native_lifetime=pending; registry=0; explorer=0; pipe=0"

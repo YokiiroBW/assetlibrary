@@ -23,10 +23,12 @@ struct Item {
 };
 class Library {
     HMODULE module_=nullptr;
+    CLSID classId_;
 public:
+    inline static constexpr CLSID ProofClassId={0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
     using CanUnload=HRESULT(STDAPICALLTYPE*)();
     CanUnload canUnload=nullptr;
-    explicit Library(const wchar_t* path){
+    explicit Library(const wchar_t* path,const CLSID& classId=ProofClassId):classId_(classId){
         module_=LoadLibraryExW(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
         if(!module_)throw std::runtime_error("LoadLibrary");
         canUnload=reinterpret_cast<CanUnload>(GetProcAddress(module_,"DllCanUnloadNow"));
@@ -37,8 +39,7 @@ public:
     Com<IShellFolder2> Root(){
         using GetFactory=HRESULT(STDAPICALLTYPE*)(REFCLSID,REFIID,void**);
         auto get=reinterpret_cast<GetFactory>(GetProcAddress(module_,"DllGetClassObject"));if(!get)throw std::runtime_error("factory export");
-        constexpr CLSID clsid={0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
-        Com<IClassFactory> factory;Check(SUCCEEDED(get(clsid,IID_PPV_ARGS(&factory.value))),"factory");
+        Com<IClassFactory> factory;Check(SUCCEEDED(get(classId_,IID_PPV_ARGS(&factory.value))),"factory");
         Com<IShellFolder2> root;Check(SUCCEEDED(factory.value->CreateInstance(nullptr,IID_PPV_ARGS(&root.value))),"CreateInstance");
         Com<IPersistFolder2> persist;Check(SUCCEEDED(root.value->QueryInterface(IID_PPV_ARGS(&persist.value))),"persist");
         // Fixed empty Desktop-relative root. No shell parsing, registry or GUI involved.
