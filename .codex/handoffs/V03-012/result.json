@@ -1,0 +1,61 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-012",
+  "title": "explorer-fault-harness",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-shell-fault-owner",
+  "branch": "codex/v03-012-explorer-fault-harness",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-012",
+  "commit": "d3b2ba34cf0f991987630978d1e6faae8aebaf6d",
+  "changed_files": [
+    "tests/windows-shell/ExplorerFaultHost.cpp",
+    "tests/windows-shell/ExplorerFaultHarnessTests.cpp",
+    "tests/windows-shell/CMakeLists.txt",
+    "tests/windows-shell/README.md",
+    ".codex/tasks/V03-012.md",
+    ".codex/handoffs/V03-012/summary.md",
+    ".codex/handoffs/V03-012/result.json",
+    ".codex/handoffs/V03-012/tests.md"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Independent CLI/client tests do not establish real Explorer G2 or G3/G4 lifecycle and soak evidence.",
+    "Cross-user/session and remote denial are not exercised with external clients; the actual TokenUser DACL is inspected.",
+    "Blocked-output/OS-cancellation watchdog branch is implemented but not fault-injected."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-012/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "tests/windows-shell: test-only fault process and regression, owner windows-shell-fault-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Frozen snapshot-v1, snapshot::PipeName, snapshot::Request shape validation and existing snapshot::Query client.",
+      "SnapshotTests bounded OVERLAPPED cancellation and client-close observation pattern.",
+      "Existing C++17/Windows SDK/CMake strict Release and serial CTest entry."
+    ],
+    "duplicated_logic": [
+      "Only local test-executable handle ownership and minimal synthetic frame bytes; no Core business or production Host logic copied."
+    ],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "python -I -B scripts/verify_repository.py",
+      "Strict Release CMake build with /W4 /WX /permissive- /analyze /utf-8",
+      "explorer_snapshot and explorer_fault_harness; post-review changed-target build and explorer_fault_harness rerun"
+    ],
+    "technical_debt": [
+      "V03-005 retains real Explorer G2, G3 cancellation/COM growth and G4 soak acceptance; this tool closes no release gate."
+    ]
+  }
+}
