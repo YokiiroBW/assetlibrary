@@ -11,6 +11,7 @@ internal static class Program
         if (!OperatingSystem.IsWindows()) { Log("startup", "unsupported_platform", 0); return 2; }
         try
         {
+            if (args is ["--decode-thumbnail"]) { return await ThumbnailDecodeHelper.RunAsync().ConfigureAwait(false); }
             if (args is ["--user-session"]) { return await UserSessionHost.RunAsync().ConfigureAwait(false); }
             if (args is ["--shutdown-user-session"]) { return await UserSessionHost.ShutdownAsync().ConfigureAwait(false); }
             if (args is ["--notify-session-changed"]) { return ShellSessionNotifier.Notify(); }

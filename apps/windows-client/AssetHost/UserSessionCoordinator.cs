@@ -29,13 +29,21 @@ public sealed class UserSessionCoordinator : IAsyncDisposable
     }
 
     public ConnectionStatus Status { get { lock (gate) { return status; } } }
+    public Task<ThumbnailResponse> ReadThumbnailAsync(ThumbnailRequest request, CancellationToken token)
+    {
+        lock (gate)
+        {
+            return snapshots?.ReadThumbnailAsync(request, token) ?? Task.FromResult(new ThumbnailResponse(
+                status.State == ConnectionState.AccessDenied ? ThumbnailStatus.AccessDenied : ThumbnailStatus.Unavailable,
+                unavailableEpoch, request.Node));
+        }
+    }
 
     public SnapshotResponse Query(SnapshotRequest request)
     {
         lock (gate)
         {
-            return snapshots?.Query(request) ?? new SnapshotResponse(status.State == ConnectionState.AccessDenied
-                ? SnapshotStatus.AccessDenied : SnapshotStatus.Unavailable, unavailableEpoch, Array.Empty<SnapshotItem>());
+            return snapshots?.Query(request) ?? ConnectedSession.Unavailable(unavailableEpoch, status.State == ConnectionState.AccessDenied);
         }
     }
 

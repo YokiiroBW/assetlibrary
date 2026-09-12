@@ -8,12 +8,15 @@ internal sealed class OriginHttpSession : IDisposable
 {
     private readonly HttpClient client;
     private readonly TimeSpan timeout;
+    private readonly SemaphoreSlim admission = new(2, 2);
+    private readonly ThumbnailHttpReader thumbnails;
     public OriginHttpSession(ServerProfile profile, HttpMessageHandler handler, TimeSpan timeout)
     {
         this.timeout = timeout;
         client = new HttpClient(handler) { BaseAddress = profile.Endpoint, Timeout = Timeout.InfiniteTimeSpan };
         client.DefaultRequestHeaders.Add("Origin", profile.Origin);
         client.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoStore = true };
+        thumbnails = new ThumbnailHttpReader(client, admission);
     }
 
     internal static HttpClientHandler CreateHandler(ServerProfile profile)
@@ -37,8 +40,11 @@ internal sealed class OriginHttpSession : IDisposable
         request.Headers.Add("X-AssetLibrary-CSRF", csrfToken);
         if (requestId is not null) { request.Headers.Add("X-Request-Id", requestId); }
         if (body is not null) { request.Content = new StringContent(body, Encoding.UTF8, "application/json"); }
+        var admitted = false;
         try
         {
+            await admission.WaitAsync(deadline.Token).ConfigureAwait(false);
+            admitted = true;
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token).ConfigureAwait(false);
             // Rejection is authoritative even when an untrusted error body stalls or has no matching request id.
             if (!response.IsSuccessStatusCode) { throw Failure((int)response.StatusCode); }
@@ -51,7 +57,10 @@ internal sealed class OriginHttpSession : IDisposable
         { throw new ClientException(504, "timeout", "读取超时，已停止等待。可以重试。"); }
         catch (HttpRequestException)
         { throw new ClientException(503, "connection_failed", "连接失败。请检查网络、服务器地址及证书信任。"); }
+        finally { if (admitted) { admission.Release(); } }
     }
+
+    internal Task<byte[]> ThumbnailAsync(Guid library, Guid entry, CancellationToken token) => thumbnails.ReadAsync(library, entry, token);
 
     private static ClientException Failure(int status) => new(status, status switch
     {
@@ -72,5 +81,5 @@ internal sealed class OriginHttpSession : IDisposable
         _ => "服务器暂时不可用或响应无效，请重试。",
     });
 
-    public void Dispose() => client.Dispose();
+    public void Dispose() { client.Dispose(); thumbnails.Dispose(); admission.Dispose(); }
 }

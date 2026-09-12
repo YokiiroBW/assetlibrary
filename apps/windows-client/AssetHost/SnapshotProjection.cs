@@ -3,7 +3,8 @@ using AssetLibrary.Windows.Client;
 namespace AssetLibrary.Windows.AssetHost;
 
 internal sealed record PageLocation(WorkspaceLocation Workspace, string? Cursor);
-internal sealed record ProjectedItem(SnapshotKind Kind, string Name, PageLocation? Location);
+internal sealed record ThumbnailTarget(Guid Library, Guid Entry);
+internal sealed record ProjectedItem(SnapshotKind Kind, string Name, PageLocation? Location, ThumbnailTarget? Image = null);
 
 internal static class SnapshotProjection
 {
@@ -30,7 +31,11 @@ internal static class SnapshotProjection
                     _ => SnapshotKind.File,
                 };
                 var child = item.Entry.IsNavigable ? new PageLocation(new WorkspaceLocation(item.Library, item.Entry.RelativePath), null) : null;
-                result.Add(new ProjectedItem(kind, item.Name, child));
+                ThumbnailTarget? image = null;
+                if (kind == SnapshotKind.File && Guid.TryParseExact(item.Library.Id, "D", out var library)
+                    && Guid.TryParseExact(item.Entry.Id, "D", out var entry) && library != Guid.Empty && entry != Guid.Empty)
+                { image = new ThumbnailTarget(library, entry); }
+                result.Add(new ProjectedItem(kind, item.Name, child, image));
             }
             next = page.NextCursor;
         }

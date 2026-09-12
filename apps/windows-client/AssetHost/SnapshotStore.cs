@@ -12,7 +12,7 @@ public sealed class SnapshotStore : IAsyncDisposable
     private readonly DateTimeOffset sessionExpires;
     private readonly TimeProvider clock;
     private readonly Action<string, SnapshotStatus, long>? log;
-    private readonly Dictionary<Guid, PageLocation?> locations = [];
+    private readonly SnapshotNodeRegistry locations = new();
     private readonly Dictionary<Guid, PageState> pages = [];
     private readonly List<Task> work = [];
     private readonly ITimer expiryTimer;
@@ -68,8 +68,7 @@ public sealed class SnapshotStore : IAsyncDisposable
 
     private bool TryLocation(Guid node, out PageLocation? location)
     {
-        if (node == Guid.Empty) { location = new PageLocation(new WorkspaceLocation(), null); return true; }
-        return locations.TryGetValue(node, out location) && location is not null;
+        return locations.TryLocation(node, out location);
     }
 
     private async Task LoadAsync(PageLocation location, PageState page, Guid expectedEpoch, CancellationToken token)
@@ -83,13 +82,7 @@ public sealed class SnapshotStore : IAsyncDisposable
             {
                 if (!CanPublish(expectedEpoch)) { return; }
                 if (locations.Count + projection.Count > MaximumTokens) { ExpireLocationsLocked(); status = SnapshotStatus.Expired; return; }
-                var items = new List<SnapshotItem>(projection.Count);
-                foreach (var entry in projection)
-                {
-                    var node = Guid.NewGuid();
-                    locations.Add(node, entry.Location);
-                    items.Add(new SnapshotItem(node, entry.Kind, entry.Name));
-                }
+                var items = locations.Add(projection);
                 status = SnapshotStatus.Ready;
                 page.Response = new SnapshotResponse(status, epoch, items.AsReadOnly());
             }
@@ -168,6 +161,22 @@ public sealed class SnapshotStore : IAsyncDisposable
 
     internal (int Pages, int Tokens, int Running) Counts { get { lock (gate) { return (pages.Count, locations.Count, running); } } }
     internal bool IsRevoked { get { lock (gate) { return revoked; } } }
+    internal Guid CurrentEpoch { get { lock (gate) { return epoch; } } }
+    internal void RevokeSession() { lock (gate) { if (!revoked && !stopped) { RevokeLocked(); } } }
+    internal ThumbnailStatus ResolveThumbnail(ThumbnailRequest request, out ThumbnailTarget? target, out CancellationToken cancellation)
+    {
+        lock (gate)
+        {
+            target = null; cancellation = default;
+            if (!revoked && clock.GetUtcNow() >= sessionExpires) { RevokeLocked(); }
+            if (request.Epoch != epoch) { return ThumbnailStatus.Expired; }
+            if (revoked) { return ThumbnailStatus.AccessDenied; }
+            if (stopped) { return ThumbnailStatus.Unavailable; }
+            if (!locations.TryImage(request.Node, out target)) { return ThumbnailStatus.Unsupported; }
+            cancellation = epochCancellation.Token;
+            return ThumbnailStatus.Ready;
+        }
+    }
     private sealed class PageState
     {
         internal bool Pending { get; set; }

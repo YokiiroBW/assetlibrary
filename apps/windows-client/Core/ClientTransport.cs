@@ -11,6 +11,7 @@ public sealed class ClientTransport : IDisposable
     private readonly OriginHttpSession client;
 
     private string csrfToken = "";
+    public Task<byte[]> ThumbnailAsync(Guid library, Guid entry, CancellationToken token) => client.ThumbnailAsync(library, entry, token);
 
     public ClientTransport(ServerProfile profile) : this(profile, OriginHttpSession.CreateHandler(profile), RequestTimeout) { }
 
