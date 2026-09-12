@@ -1,0 +1,111 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-015",
+  "title": "windows-connection-session",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-session-owner",
+  "branch": "codex/v03-015-windows-connection-session",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-015",
+  "commit": "40091921e4249e922f4168959ab2bed8d56d2b25",
+  "changed_files": [
+    "apps/windows-client/AssetHost/AssetLibrary.Windows.AssetHost.csproj",
+    "apps/windows-client/AssetHost/ConnectedSession.cs",
+    "apps/windows-client/AssetHost/ControlPipeServer.cs",
+    "apps/windows-client/AssetHost/NativePipe.cs",
+    "apps/windows-client/AssetHost/PipeListenerShutdown.cs",
+    "apps/windows-client/AssetHost/Program.cs",
+    "apps/windows-client/AssetHost/ShellSessionNotifier.cs",
+    "apps/windows-client/AssetHost/SnapshotPipeServer.cs",
+    "apps/windows-client/AssetHost/SnapshotStore.cs",
+    "apps/windows-client/AssetHost/UserSessionCoordinator.cs",
+    "apps/windows-client/AssetHost/UserSessionHost.cs",
+    "apps/windows-client/AssetHost/packages.lock.json",
+    "apps/windows-client/AssetLibrary.Windows.slnx",
+    "apps/windows-client/Session/AssetLibrary.Windows.Session.csproj",
+    "apps/windows-client/Session/ControlClient.cs",
+    "apps/windows-client/Session/ControlJson.cs",
+    "apps/windows-client/Session/ControlProtocol.cs",
+    "apps/windows-client/Session/LocalPipe.cs",
+    "apps/windows-client/Session/PrivateStateFiles.cs",
+    "apps/windows-client/Session/README.md",
+    "apps/windows-client/Session/UserConnectionStore.cs",
+    "apps/windows-client/Session/UserDataProtection.cs",
+    "apps/windows-client/Session/packages.lock.json",
+    "apps/windows-client/Settings/App.xaml",
+    "apps/windows-client/Settings/App.xaml.cs",
+    "apps/windows-client/Settings/AssetLibrary.Windows.Settings.csproj",
+    "apps/windows-client/Settings/HostConnection.cs",
+    "apps/windows-client/Settings/MainWindow.xaml",
+    "apps/windows-client/Settings/MainWindow.xaml.cs",
+    "apps/windows-client/Settings/README.md",
+    "apps/windows-client/Settings/app.manifest",
+    "apps/windows-client/Settings/packages.lock.json",
+    "infra/windows-client/locks/AssetLibrary.AssetLink.win-x64.lock.json",
+    "infra/windows-client/locks/AssetLibrary.Windows.AssetHost.win-x64.lock.json",
+    "infra/windows-client/locks/AssetLibrary.Windows.Core.win-x64.lock.json",
+    "infra/windows-client/locks/AssetLibrary.Windows.Session.win-x64.lock.json",
+    "infra/windows-client/locks/AssetLibrary.Windows.Settings.win-x64.lock.json",
+    "tests/windows-client/ControlPipeTests.cs",
+    "tests/windows-client/ControlProtocolTests.cs",
+    "tests/windows-client/SessionCancellationTests.cs",
+    "tests/windows-client/SessionCoordinatorTests.cs",
+    "tests/windows-client/SessionExpiryTests.cs",
+    "tests/windows-client/SessionResumeTests.cs",
+    "tests/windows-client/SessionStorageTests.cs",
+    "tests/windows-client/SessionTestSupport.cs",
+    "tests/windows-client/packages.lock.json"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 76,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "WinUI窗口、真实生产Host启动及Explorer主动清空由V03-005统一实机验收，本任务未操作GUI/注册表/真实NAS。",
+    "G4为用户豁免未测；本任务不声明完整V0.3发布。",
+    "远端退出失败只保证本机清除，保留安全诊断server_unconfirmed_local_clear。",
+    "WinAppSDK自包含输出约223MiB，需保留root批准的EULA/第三方声明。"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-015/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Session/Settings/AssetHost adapters",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ServerProfile TLS/origin validation",
+      "ClientTransport 8-second HTTPS Cookie/CSRF session",
+      "ReadOnlyClient and generated AssetLink SDK",
+      "SnapshotStore paging/epoch/revocation bounds and wire v1",
+      "Shared TokenUser DACL/first-instance/session boundary extracted into LocalPipe",
+      "Shared bounded pipe listener shutdown"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Settings -> Session only; AssetHost -> Session + Core; Core unchanged"
+    ],
+    "new_language_or_framework": [
+      "WinUI 3 UI activates already frozen Windows App SDK 2.x budget; no second UI framework"
+    ],
+    "new_major_dependencies": [
+      "Microsoft.WindowsAppSDK 2.4.0 stable; root pin/ADR-0020 and exact reviewed licensing"
+    ],
+    "contract_changes": [
+      "Consumes root-owned contracts/windows-shell/user-session-v1.md; production fixed root notification; snapshot wire v1 unchanged"
+    ],
+    "architecture_tests": [
+      "verify_repository.py passed",
+      "validate_dotnet_dependencies.py: 6 projects/31 locked packages passed",
+      "Windows solution locked restore/format/build and 76 non-NativeLive tests passed",
+      "Settings/Host release locked restore/publish passed with 5 committed RID locks"
+    ],
+    "technical_debt": [
+      "Real install/UI/Explorer and Core integration acceptance owned by root, not claimed by component tests",
+      "No dedicated full-preview/sync/multi-origin implementation; beyond this read-only settings slice"
+    ]
+  }
+}

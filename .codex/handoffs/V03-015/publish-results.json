@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "files": 517,
+    "bytes": 233461207
+  },
+  "host": {
+    "files": 198,
+    "bytes": 80639897
+  },
+  "shared_files": 189,
+  "mismatches": [],
+  "executables": {
+    "AssetLibrary.Settings.exe": "53eb0d995af2b211571ecdb4269c3e09d37074944737e1771f73e4162dd2372e",
+    "AssetLibrary.Host.exe": "796af04543fe66c0f86934cf70c00d617a81c0bb28c97b1e43cd851dac7207e8"
+  }
+}
