@@ -28,6 +28,62 @@ probe 直接 LoadLibrary/factory/固定空根 PIDL，不注册、不调用桌面
 
 旧 registration/verify 仍保留包外来源准入与 owner 清理；旧 probe 改为验证只读页，允许无 Host 时的固定状态，不再要求示例库。以下历史原生证据只适用于其记录的旧 DLL；新 DLL 的真实 HTTPS/Core 与原生 Explorer 验收由协调任务执行，COM 通过不能关闭 G1..G4。
 
+## G2 故障 CLI（V03-012，test-only）
+
+`ExplorerFaultHost` 是独立故障进程，只使用冻结的 SID/session pipe；不读取 profile、资产或网络，不注册、不操作 Explorer。没有 `--execute` 只输出 `dry_run`，执行时必须显式指定 `--mode`。实际 TokenUser SID 独占 DACL、拒绝远程、检查客户端 session/PID、first-instance 拒绝占用已有 Host；同一进程持有一个 pipe 实例直到退出。不得同时运行真实 AssetHost、SnapshotTests 或另一份故障 CLI。
+
+```powershell
+cmake -S tests/windows-shell -B .runtime/explorer-fault-harness -G "Visual Studio 17 2022" -A x64
+cmake --build .runtime/explorer-fault-harness --config Release --parallel 2
+ctest --test-dir .runtime/explorer-fault-harness -C Release --output-on-failure -R '^explorer_(snapshot|fault_harness)$'
+
+& .runtime/explorer-fault-harness/Release/ExplorerFaultHost.exe --mode crash
+& .runtime/explorer-fault-harness/Release/ExplorerFaultHost.exe --execute --mode silent --lifetime-ms 30000 --max-connections 32
+```
+
+`--lifetime-ms` 默认 30000、范围 1..119000；最多另用 1000ms 确认取消，总驻留上限 120 秒。独立监护线程也约束日志接收端阻塞或异常清理。`--max-connections` 默认32、范围1..128，包含不完整/拒绝请求；并发固定1，每连接总预算500ms。连接上限、期限或 stop-event 触发后退出并释放端点；没有自动重试或常驻。正常停止取消并确认当前 OVERLAPPED 完成后释放存储；无法确认时仅终止自有故障进程。
+
+| mode | 实际注入 | 现有 Shell 客户端状态 |
+|---|---|---|
+| `silent` | 读完48字节请求后不响应，等待客户端关闭/连接期限 | `Unavailable` (2)，约150ms |
+| `invalid-version` | 回显真实 request-id，响应头 version=2 | `InvalidResponse` (5) |
+| `partial-frame` | 声明24字节body，只发16字节header和4字节status | `Unavailable` (2)，约150ms |
+| `crash` | 读完合法请求后以 `0xE0000012` 终止当前故障进程，不弹 WER | `Unavailable` (2) |
+| `ready` | 新随机epoch、零条目合成根；任意非根返回Expired | `Ready` (0)，仅用于工具正控 |
+
+`crash` 是有意自终止的异常退出模型，不能据此声称已触发真实 AssetHost 的任意内部崩溃路径。其它模式保持进程存活并有界观察客户端关闭，避免 `DisconnectNamedPipe` 丢弃尚未读出的响应。一次在途连接时其它调用可能立即得到 `Busy` (6)；等新 `listening` 再操作。CLI stdout 是限量 JSONL：mode、pid、client_pid、requests、elapsed_ms（进程内单调时钟）、response_bytes 和event；不记录request-id、请求正文、SID、名称、路径或凭据。`response_written` 只在响应完整写入管道后记录20/40字节；失败为 `response_failed`，其它事件的response_bytes为0，写入完成不代表客户端已读取。`client_pid=0` 表示尚未关联客户端，只有成功核session/PID后读取的请求才计数。`request_received`/`expected_crash` 的 client_pid 必须与已核验目标 Explorer 进程匹配，不能凭同时段请求归因。
+
+退出码：0=惰性或正常 `stopped`/`deadline`/`connection_limit`；1=初始化/I/O失败；2=参数拒绝；3=`pipe_unavailable`（已有端点或拒绝创建，不抢占）；70=取消或监护期限，可能无末尾日志；`0xE0000012`=预期故障自终止（PowerShell有符号值 -536870894）。没有 `listening` 不能视为已就绪。
+
+协调者的真实 GUI 周期：先正常停止其拥有的真实 Host，确认端点释放，再后台启动故障 CLI；等待该进程的 `listening` 后，才在已核验的自有 Explorer 窗口 F5/重开。不要用 probe 抢走 `crash` 的首请求。下面是启动/停止片段；GUI动作由协调者在就绪后执行，非自动化桌面授权：
+
+```powershell
+$faultExe = (Resolve-Path .runtime/explorer-fault-harness/Release/ExplorerFaultHost.exe).Path
+$faultLog = Join-Path (Split-Path $faultExe) ('fault-' + [guid]::NewGuid().ToString('N') + '.jsonl')
+$faultErr = $faultLog + '.stderr'
+$faultProcess = Start-Process -FilePath $faultExe -ArgumentList '--execute --mode silent --lifetime-ms 30000 --max-connections 32' -PassThru -WindowStyle Hidden -RedirectStandardOutput $faultLog -RedirectStandardError $faultErr
+try {
+    $faultWait = [Diagnostics.Stopwatch]::StartNew()
+    do {
+        if ($faultProcess.HasExited) { throw 'Fault CLI exited before readiness; inspect its JSONL/exit code.' }
+        $faultReady = (Get-Content -Raw -LiteralPath $faultLog) -match '"event":"listening"'
+        if (!$faultReady) { Start-Sleep -Milliseconds 50 }
+    } while (!$faultReady -and $faultWait.ElapsedMilliseconds -lt 5000)
+    if (!$faultReady) { throw 'Fault CLI readiness timeout.' }
+    # 此处由协调者完成真实窗口操作、记录状态和目标 Explorer PID。
+} finally {
+    if (!$faultProcess.HasExited) {
+        $faultStop = [Threading.EventWaitHandle]::OpenExisting('Local\AssetLibrary.ExplorerFault.Stop.' + $faultProcess.Id)
+        try { $null = $faultStop.Set() } finally { $faultStop.Dispose() }
+        if (!$faultProcess.WaitForExit(2500)) { throw 'Fault CLI stop timed out; retain evidence and await its bounded watchdog.' }
+    }
+}
+```
+
+记录故障状态、可交互性与请求PID后，正常 stop 或等待期限/预期crash，确认进程退出及端点释放，再启动原真实 Host、重新授权并重开根/F5 验证恢复。新Host不能复用旧epoch/node；只有真实Core内容和真实Explorer窗口证据能验证最终恢复。
+
+`explorer_fault_harness` 实际启动该 CLI，验证惰性/参数边界、端点拒占用、实际TokenUser DACL、真实请求PID、四模式状态和150ms边界、正常停止（含未完成请求）、期限/连接数退出、同进程再次请求和新Host重新占用。其30秒CTest外限以及成功结果不代替真实 Explorer G2。不同SID/session真实客户端、远程连接、真实GUI故障周期、G3保留对象/取消增长与G4循环/8小时证据仍需独立验收；G2不要求所有COM对象即时释放。
+
 ## 默认打开与图标
 
 单个资源库、目录、下一页提供唯一默认“打开”（双击/Enter），通过站点浏览器在当前窗口导航。文件、链接、状态、背景与多选不提供打开菜单；不增加写入、复制、新窗口或文件关联。图标来自Windows系统文件夹/通用文档资源，无资产访问或媒体解码。
