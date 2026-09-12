@@ -1,7 +1,7 @@
 #include "Snapshot.h"
 #include "ProductIdentity.h"
 #include "G3Measurements.h"
-#include <sddl.h>
+#include "LocalPipePeer.h"
 #include <atomic>
 #include <memory>
 #include <new>
@@ -10,37 +10,8 @@
 namespace snapshot {
 namespace {
 std::atomic_ulong active{0}, sequence{0};
-struct Handle {
-    HANDLE value=nullptr;
-    explicit Handle(HANDLE handle=nullptr):value(handle){}
-    ~Handle(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);}
-    Handle(const Handle&)=delete;Handle& operator=(const Handle&)=delete;
-};
-bool UserSid(HANDLE process,std::vector<BYTE>& storage){
-    HANDLE raw=nullptr;if(!OpenProcessToken(process,TOKEN_QUERY,&raw))return false;Handle token(raw);
-    DWORD needed=0;GetTokenInformation(token.value,TokenUser,nullptr,0,&needed);
-    if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER||needed<sizeof(TOKEN_USER)||needed>4096)return false;
-    storage.resize(needed);
-    if(!GetTokenInformation(token.value,TokenUser,storage.data(),needed,&needed))return false;
-    auto sid=reinterpret_cast<TOKEN_USER*>(storage.data())->User.Sid;
-    return IsValidSid(sid)!=FALSE;
-}
-bool SamePeer(HANDLE pipe,HANDLE& peer,ULONGLONG started){
-    ULONG pid=0;if(!GetNamedPipeServerProcessId(pipe,&pid)||!pid)return false;
-    Handle process(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid));if(!process.value)return false;
-    FILETIME created{},ended{},kernel{},user{};
-    if(!GetProcessTimes(process.value,&created,&ended,&kernel,&user))return false;
-    const ULONGLONG birth=(static_cast<ULONGLONG>(created.dwHighDateTime)<<32)|created.dwLowDateTime;
-    if(birth>started)return false;
-    DWORD ownSession=0,peerSession=0;
-    if(!ProcessIdToSessionId(GetCurrentProcessId(),&ownSession)||!ProcessIdToSessionId(pid,&peerSession)||ownSession!=peerSession)return false;
-    std::vector<BYTE> ownSid,peerSid;
-    if(!UserSid(GetCurrentProcess(),ownSid)||!UserSid(process.value,peerSid))return false;
-    if(!EqualSid(reinterpret_cast<TOKEN_USER*>(ownSid.data())->User.Sid,reinterpret_cast<TOKEN_USER*>(peerSid.data())->User.Sid))return false;
-    ULONG afterPid=0;
-    if(!GetNamedPipeServerProcessId(pipe,&afterPid)||afterPid!=pid||WaitForSingleObject(process.value,0)!=WAIT_TIMEOUT)return false;
-    peer=process.value;process.value=nullptr;return true;
-}
+using local_pipe::Handle;
+using local_pipe::SamePeer;
 struct Operation;
 void CALLBACK Reap(PTP_CALLBACK_INSTANCE instance,void* context,PTP_WAIT,TP_WAIT_RESULT);
 struct Operation {
@@ -83,7 +54,7 @@ HMODULE ReleaseResources(Operation* operation) noexcept {
 struct ReleaseOperation {
     void operator()(Operation* operation) const noexcept {
         const auto module=ReleaseResources(operation);
-        // Synchronous DLL Query is called only by a live Folder::EnumObjects.
+        // The Folder COM caller or gallery background callback owns a module pin.
         // That COM owner keeps the caller's code alive after this final pin return;
         // statically linked test callers belong to the process executable.
         if(module){++g3::measurements.pinSync;--g3::measurements.pins;FreeLibrary(module);}
@@ -136,15 +107,7 @@ void Finish(OwnedOperation& operation){
 }
 }
 ULONG PendingOperations() noexcept { return active.load(); }
-std::wstring PipeName(){
-    std::vector<BYTE> token;if(!UserSid(GetCurrentProcess(),token))return {};
-    LPWSTR sid=nullptr;
-    if(!ConvertSidToStringSidW(reinterpret_cast<TOKEN_USER*>(token.data())->User.Sid,&sid))return {};
-    std::wstring name;
-    try{name=product::PipePrefix;name+=sid;}catch(...){LocalFree(sid);throw;}
-    LocalFree(sid);DWORD session=0;if(!ProcessIdToSessionId(GetCurrentProcessId(),&session))return {};
-    return name+L"."+std::to_wstring(session);
-}
+std::wstring PipeName(){return local_pipe::Name(product::PipePrefix);}
 Page Query(const Location& location,HANDLE cancel) noexcept {
     g3::Call measured(g3::measurements.query);
     Deadline deadline;FILETIME now{};GetSystemTimeAsFileTime(&now);
