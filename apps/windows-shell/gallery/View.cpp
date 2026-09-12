@@ -73,6 +73,8 @@ class View final:public IShellView,public IFolderView {
     std::uint64_t generation_=Generation();
     ULONG notification_=0;
     bool slot_=false,creating_=false,destroying_=false,visible_=false,refreshing_=false,retired_=false;
+    bool statusUpdating_=false;
+    std::uint64_t statusRevision_=0;
     UINT active_=SVUIA_DEACTIVATE;
     bool OnThread()const noexcept {return GetCurrentThreadId()==thread_;}
     HWND Window()const noexcept {return surface_?surface_->Window():nullptr;}
@@ -84,6 +86,39 @@ class View final:public IShellView,public IFolderView {
     }
     bool Live(HWND window,std::uint64_t generation)const noexcept {return window&&Window()==window&&IsWindow(window)&&generation_==generation&&!destroying_;}
     void ReleaseSlot() noexcept {if(slot_){slot_=false;loading::ReleaseViewSlot();}}
+    void UpdateStatus(bool clear=false) noexcept {
+        ++statusRevision_;if(statusUpdating_||!browser_)return;
+        statusUpdating_=true;struct Updating {bool& value;~Updating(){value=false;}} updating{statusUpdating_};
+        try{
+            // A host call may synchronously change selection or refresh. Retry
+            // that current state once; never recursively write stale status.
+            for(unsigned attempt=0;attempt<2;++attempt){
+                const auto window=Window();const auto generation=generation_,revision=statusRevision_;const auto target=browser_;
+                if(!target||(!clear&&(!window||destroying_)))return;
+                std::wstring text;
+                if(!clear){
+                    if(page_.status!=snapshot::Status::Ready)text=snapshot::StatusText(page_.status);
+                    else{
+                        UINT count=0,selected=0;bool more=false;
+                        for(const auto& entry:page_.entries){if(entry.kind==snapshot::Kind::NextPage)more=true;else if(entry.kind!=snapshot::Kind::StatusRow)++count;}
+                        const auto selection=surface_->SelectedItems();for(UINT at=0;at<selection.count;++at){const auto index=selection.indices[at];
+                            if(index<page_.entries.size()&&page_.entries[index].kind!=snapshot::Kind::NextPage&&page_.entries[index].kind!=snapshot::Kind::StatusRow)++selected;}
+                        text=L"当前页 "+std::to_wstring(count)+L" 项，已选 "+std::to_wstring(selected)+L" 项";
+                        if(more)text+=L"（还有下一页）";
+                    }
+                }
+                Reference<IShellBrowser> browser(target);Out<IShellView> active;
+                if(browser_!=target||Window()!=window||generation_!=generation)continue;
+                const auto queried=browser.value->QueryActiveShellView(&active.value);
+                if(browser_!=target||Window()!=window||generation_!=generation||statusRevision_!=revision)continue;
+                if(FAILED(queried)||active.value!=static_cast<IShellView*>(this))return;
+                // SetStatusTextSB is the public folder-view status contract. A
+                // host without it may return E_NOTIMPL; do not edit its controls.
+                browser.value->SetStatusTextSB(text.c_str());
+                if(clear||statusRevision_==revision)return;
+            }
+        }catch(const std::bad_alloc&){return;}
+    }
     int Index(PCUIDLIST_RELATIVE pidl)const {
         snapshot::Entry item;if(!snapshot::ReadPidl(pidl,item))return -1;
         for(size_t index=0;index<page_.entries.size();++index){const auto& entry=page_.entries[index];
@@ -92,7 +127,7 @@ class View final:public IShellView,public IFolderView {
     }
     std::uint64_t Clear(snapshot::Status status) noexcept {
         const auto generation=Generation();generation_=generation;requests_.Cancel(generation);page_={};page_.status=status;
-        if(surface_)surface_->Clear(status,generation);return generation;
+        if(surface_)surface_->Clear(status,generation);if(generation_==generation)UpdateStatus();return generation;
     }
     void Root() noexcept {
         Reference<View> invocation(this);const auto window=Window();
@@ -121,7 +156,7 @@ class View final:public IShellView,public IFolderView {
         if(!Live(window,generation)||retired_)return;
         page_=std::move(page);
         if(surface_)surface_->SetPage(page_,generation);
-        if(Live(window,generation))Viewport();
+        if(Live(window,generation)){UpdateStatus();if(Live(window,generation))Viewport();}
     }
     LRESULT Completed(WPARAM value,LPARAM data) noexcept {
         Reference<View> invocation(this);
@@ -168,10 +203,12 @@ class View final:public IShellView,public IFolderView {
     void Focused() noexcept {
         if(active_==SVUIA_ACTIVATE_FOCUS)return;active_=SVUIA_ACTIVATE_FOCUS;
         Reference<IShellBrowser> browser(browser_);if(browser.value)browser.value->OnViewWindowActive(this);
+        UpdateStatus();
     }
     void SelectionChanged() noexcept {
         const auto window=Window();const auto generation=generation_;Reference<IShellBrowser> browser(browser_);Out<ICommDlgBrowser> common;
         if(browser.value&&SUCCEEDED(browser.value->QueryInterface(IID_PPV_ARGS(&common.value)))&&Live(window,generation))common.value->OnStateChange(this,CDBOSC_SELCHANGE);
+        if(Live(window,generation))UpdateStatus();
     }
     void Activate(UINT index) noexcept {
         if(index>=page_.entries.size()||!snapshot::Navigable(page_.entries[index].kind))return;
@@ -233,6 +270,7 @@ public:
         if(!OnThread())return RPC_E_WRONG_THREAD;Reference<View> invocation(this);active_=state;
         // Losing focus to the tree/address bar does not hide a visible view.
         if(state==SVUIA_ACTIVATE_FOCUS){Reference<IShellBrowser> browser(browser_);if(browser.value)browser.value->OnViewWindowActive(this);if(surface_)surface_->Focus();}
+        UpdateStatus();
         return S_OK;
     }
     HRESULT STDMETHODCALLTYPE Refresh() override {
@@ -282,6 +320,7 @@ public:
     HRESULT STDMETHODCALLTYPE DestroyViewWindow() override {
         if(!OnThread())return RPC_E_WRONG_THREAD;if(destroying_)return S_OK;Reference<View> invocation(this);destroying_=true;
         requests_.Close();generation_=Generation();page_={};visible_=false;retired_=true;
+        UpdateStatus(true);
         if(notification_){SHChangeNotifyDeregister(notification_);notification_=0;}
         auto surface=surface_;surface_=nullptr;if(surface){surface->Destroy();delete surface;}
         auto browser=browser_;browser_=nullptr;ReleaseSlot();if(browser)browser->Release();destroying_=false;return S_OK;
