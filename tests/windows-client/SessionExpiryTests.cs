@@ -25,8 +25,11 @@ public sealed class SessionExpiryTests
             }));
             Assert.IsTrue((await coordinator.ExecuteAsync(SessionTestSupport.Connect() with { Connection = SessionTestSupport.Connect().Connection! with { RememberLogin = true } }, CancellationToken.None)).Ok);
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(4));
-            while (coordinator.Status.State == ConnectionState.Connected) { await Task.Delay(20, deadline.Token); }
+            // AccessDenied clears presentation first; RememberLogin=false confirms the credential deletion finished.
+            while (coordinator.Status is { State: ConnectionState.Connected } or { RememberLogin: true })
+            { await Task.Delay(20, deadline.Token); }
             Assert.AreEqual(ConnectionState.AccessDenied, coordinator.Status.State);
+            Assert.IsFalse(coordinator.Status.RememberLogin);
             Assert.IsNull(coordinator.Status.DisplayName);
             Assert.HasCount(0, coordinator.Query(HostTestSupport.Root).Items);
             Assert.IsNull(await persistence.LoadRememberedAsync(CancellationToken.None));
