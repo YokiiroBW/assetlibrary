@@ -1,0 +1,28 @@
+{
+  "utc": "2026-09-12T21:03:24.4430244+00:00",
+  "ownedExplorers": [
+    {
+      "pid": 33636,
+      "processExited": false,
+      "mainWindow": 0
+    },
+    {
+      "pid": 31248,
+      "processExited": false,
+      "mainWindow": 0
+    },
+    {
+      "pid": 34056,
+      "processExited": false,
+      "mainWindow": 0
+    },
+    {
+      "pid": 29040,
+      "processExited": false,
+      "mainWindow": 0
+    }
+  ],
+  "originalExplorerPid": 6212,
+  "originalCreation": "134335976399732731",
+  "originalRestarted": false
+}

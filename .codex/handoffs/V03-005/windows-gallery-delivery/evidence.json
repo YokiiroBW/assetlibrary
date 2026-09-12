@@ -1,0 +1,57 @@
+{
+  "status": "accepted_with_documented_limits",
+  "version": "0.3.0-preview.6",
+  "source_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
+  "archive_sha256": "0e6a60d23fcaaa02f978ce816237f15930d801e0695bfbd837cb237d19be9810",
+  "archive_bytes": 155482299,
+  "unsigned": true,
+  "full_v03_release": false,
+  "final_native_shell_ctests": 12,
+  "final_gallery_ctests": 10,
+  "windows_component_tests": 101,
+  "setup_component_tests": 23,
+  "package_tests": 6,
+  "release_lock_tests": 16,
+  "final_exe_sandbox_steps": 8,
+  "real_explorer": {
+    "Pid": 29040,
+    "CreationFileTime": "134337200621387601",
+    "NativeHwnd": 3868050,
+    "SessionId": 2,
+    "OwnerSid": "S-1-5-21-3384776991-3993128263-1977130206-500",
+    "PackageStatus": 15700,
+    "ThreadId": 17056,
+    "Image": "C:\\Windows\\explorer.exe",
+    "AssetLibraryModules": [
+      "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.6\\AssetLibrary.Explorer.dll"
+    ]
+  },
+  "core_cleanup": {
+    "status": "passed",
+    "stop_reason": "explicit_stop",
+    "sample_file_count": 148,
+    "sample_hashes_and_mtimes": "unchanged",
+    "resource_cleanup": "verified",
+    "postgres_roles_removed": 6,
+    "runtime_removed": true,
+    "https_listener_closed": true,
+    "host_and_postgres_processes_exited": true,
+    "native_client_acceptance": "not asserted by this server fixture"
+  },
+  "session_cleanup": {
+    "utc": "2026-09-12T21:02:35.1193721+00:00",
+    "testConnectionRemoved": true,
+    "rememberedCredentialPresent": false,
+    "clientHostRunning": false,
+    "settingsRunning": false
+  },
+  "report": "windows-gallery-delivery/README.md",
+  "limitations": [
+    "NAS image engine not enabled by this work",
+    "Windows11 host status bar can retain stale counts; own toolbar summary is authoritative",
+    "mode and density reset on directory change",
+    "no full-image viewer, writes, full-library infinite scroll or timeline",
+    "manual authentication/system-uninstall UI and signing remain independent"
+  ],
+  "G4": "user_waived_not_performed"
+}

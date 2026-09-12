@@ -25,9 +25,9 @@
 3. 检查需求、ADR、矩阵与 `.codex/project-state.json` 是否一致；当前 M0-009 已完成架构冻结，V0.1 发布仍受阻断。
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
-   原生首版最新状态见 `docs/releases/WINDOWS_EXPLORER_PREVIEW.md` 与 `docs/releases/NATIVE_CLIENT_TRIAL.md`：Windows11 x64原生Explorer只读浏览安装包preview.2及Android只读APK已交付。Windows采用进程外Host和辅助WinUI连接设置；没有独立资产浏览客户端。
-   当前接续V03-005：Windows最高优先级。preview.2安装、设置启动、原生分页/中文目录与会话清理实机通过，证据见 `.codex/handoffs/V03-005/windows-product-delivery/README.md`；手工认证/系统卸载UI、标题、内容预览及签名仍有明确后续项。测试Core138原件/6角色与窗口/Host已清理，正式安装保留，测试配置已移除。G1/G2/G3实测通过；G4按用户要求豁免且未执行，不得安排20轮/8小时。原Explorer未重启。完整V0.3和Android真机门禁未宣布完成。
-   2026-09-13用户继续要求浏览体验/图库瀑布流，当前V03-019/020/021正在并行实现，状态与活跃真实图片夹具见 `.codex/handoffs/V03-005/gallery-progress.json`。先从该检查点接续，不重建已有worktree、不重跑旧门禁。
+   原生首版最新状态见 `docs/releases/WINDOWS_EXPLORER_PREVIEW.md` 与 `docs/releases/NATIVE_CLIENT_TRIAL.md`：Windows11 x64原生Explorer图库浏览preview.6及Android只读APK已交付。Windows采用进程外Host和辅助WinUI连接设置；没有独立资产浏览客户端。
+   V03-005本轮图库工作已完成：V03-019/020/021集成，实际图片/分页/中文导航/选择/自有计数摘要/宽窄/退出清理通过，证据 `.codex/handoffs/V03-005/windows-gallery-delivery/README.md`。测试Core148原件/6角色与服务清理，所有自有可见窗口关闭，测试配置移除，正式安装保留。Windows11底部旧计数以图库工具栏摘要为准；NAS图片引擎、完整大图/同步、手工认证/系统卸载UI、签名及Android真机仍独立。
+   `.codex/handoffs/V03-005/gallery-progress.json`仅用于恢复交付状态；无活跃图片夹具，不重建worktree或重跑旧门禁。G1/G2/G3沿用实测，G4用户豁免未执行，不得安排20轮/8小时。原Explorer未重启，完整V0.3未宣布完成。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

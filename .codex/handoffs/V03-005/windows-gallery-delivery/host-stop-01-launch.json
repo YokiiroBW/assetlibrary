@@ -1,0 +1,15 @@
+{
+  "utc": "2026-09-12T21:01:50.5902388+00:00",
+  "action": "host-stop",
+  "broker": {
+    "Pid": 33636,
+    "CreationFileTime": "134337168614595925",
+    "NativeHwnd": 17370144,
+    "SessionId": 2,
+    "OwnerSid": "S-1-5-21-3384776991-3993128263-1977130206-500",
+    "PackageStatus": 15700,
+    "ThreadId": 2204,
+    "Image": "C:\\Windows\\explorer.exe"
+  },
+  "script_sha256": "ABA85A628E25ECAA117466982D7F6D17607AC3D6C50F7188CEAA436807B21444"
+}

@@ -1,5 +1,7 @@
 # 原生客户端首版进度与 Android 试用
 
+2026-09-13更新：Windows原生Explorer图库浏览preview.6已交付，支持保比例瀑布流、列表/密度、可见范围缩略图、选择和自有计数摘要；真实Core/Explorer图片验收及清理已通过。NAS图片引擎限制、Android真机与完整V0.3仍独立。最新包见[Windows图库交付说明](WINDOWS_EXPLORER_PREVIEW.md)。
+
 2026-09-12更新：Windows11 x64 **原生Explorer只读浏览preview.2安装包已交付**，含连接设置/后台Host与会话失效清理；包、安装和实际验收边界见[Windows交付说明](WINDOWS_EXPLORER_PREVIEW.md)。下文2026-09-08的Windows状态仅保留为历史，不代表最新状态；Android状态不变。
 
 2026-09-08，V03-001..004。Android 手机/平板只读首版已交付；Windows 按用户要求以原生 Explorer 为入口，没有可用的 Windows/Explorer 安装包。最新排查与验证状态见下方 Windows 小节；没有改为要求用户另开独立 Windows 应用。

@@ -1,5 +1,7 @@
 # V03-005 — 并行浏览与预览协调
 
+2026-09-13最新：**Windows原生Explorer图库浏览preview.6已交付，本轮浏览体验工作完成**。V03-019/020/021已集成，保比例瀑布流/列表/密度、101可见候选分批、共享16MiB像素预算、原生UIA退出回收及自有计数摘要通过；实际Core/Explorer图片、中文目录、分页、多选、宽窄布局和退出清空有实机证据。148合成原件不变、6角色及临时服务清理；测试连接移除，正式安装保留。见[图库交付记录](windows-gallery-delivery/README.md)。NAS预览引擎、完整V0.3/Android真机/签名独立；G4仍用户豁免未测。下方preview.2及更早记录为历史。
+
 状态 **partial / Windows可安装只读浏览版preview.2已交付，完整V0.3未完成**。原生侧栏、WinUI连接设置、后台Host、分页与中文目录、根/子目录会话清理已在实机验收；测试窗口和服务已结束，138原件未变、6角色回收。正式安装保留，测试配置移除。包、人工验收缺口、标题显示与旧版本占用限制见[交付验收](windows-product-delivery/README.md)和[使用说明](../../../docs/releases/WINDOWS_EXPLORER_PREVIEW.md)。
 
 G1/G2/G3沿用实测证据，G4依用户要求豁免未执行；不再安排20轮/8小时。[G3量测验收](explorer-g3-live/README.md)保留原数值与边界。内容预览、传输、签名与Android指定真机仍独立待办。

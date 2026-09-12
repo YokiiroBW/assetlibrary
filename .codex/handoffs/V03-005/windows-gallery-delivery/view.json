@@ -1,0 +1,13 @@
+{
+  "Pid": 29040,
+  "CreationFileTime": "134337200621387601",
+  "NativeHwnd": 3868050,
+  "SessionId": 2,
+  "OwnerSid": "S-1-5-21-3384776991-3993128263-1977130206-500",
+  "PackageStatus": 15700,
+  "ThreadId": 17056,
+  "Image": "C:\\Windows\\explorer.exe",
+  "AssetLibraryModules": [
+    "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.6\\AssetLibrary.Explorer.dll"
+  ]
+}

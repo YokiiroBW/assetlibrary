@@ -1,5 +1,13 @@
 # V03-005 当前验证记录
 
+## 2026-09-13 原生Explorer图库preview.6
+
+最终源码03a95f9构建安装包；最终安装EXE合成沙箱8/8通过。Root最终完整Shell CTest12/12（69.69s）、同源图库10/10（1.23s）通过，均严格MSVC /W4 /WX /analyze；涵盖真实外部UIA监听、生命周期、实际DLL可卸载、512退休上限、队列/位图预算、标题/导航/状态摘要和越界绘制。此前受影响阶段失败保留在.runtime/gallery-validation，不将它们改成一次全绿。
+
+Windows101项、Setup23项、打包6项和发行锁16项分别在相应稳定输入通过；最后版本变更未改其业务逻辑，最终包重新执行锁定restore/publish和真实EXE验证。17个RID包许可证及普通31包依赖审计通过。真实Core图片端点2/2、Core→HTTP→WIC Job→本机pipe1/1是独立组件证据。
+
+最终包实机29040确认加载preview.6且组件hash匹配：实际资源库100/39分页、图片目录10项、所选0→1→2、键盘导航、多格式/方向/透明图片、窄窗摘要换行和滚动、退出清图通过。候选preview.3的额外列表/重命名dat内容识别/F5/历史拒绝证据单独保留。Root未自动操作认证表单/系统卸载UI，未执行G4。Core148文件hash/mtime未变、6角色/服务清理、测试配置移除。见[最终记录](windows-gallery-delivery/README.md)。
+
 ## 2026-09-12 Windows可安装浏览版preview.2
 
 最终包从c256893构建，修复应用PRI缺失与通知助手MTA/STA冲突。77 Windows、23 Setup、9 CTest、6 packaging、8步最终EXE沙箱生命周期、16发行锁测试通过；默认依赖31/15包、发行17包许可和已知漏洞审核通过。2项NativeLive服务测试先前通过，最终真实Explorer分页/中文目录/根登出重连/子目录登出/历史无旧文件复验通过。Windows与Setup格式返回0，Windows格式器工作区加载警告如实保留。

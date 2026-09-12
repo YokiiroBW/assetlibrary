@@ -1,5 +1,5 @@
 {
-  "status": "implementation_in_progress",
+  "status": "delivered",
   "request": "Improve Windows native Explorer browsing, especially photo-gallery waterfall layout",
   "coordinator_worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005",
   "keep": "preview.2 already delivered/installed; original Explorer must not be restarted; G4 user-waived/not performed",
@@ -36,23 +36,23 @@
       "task": "V03-019",
       "agent": "windows_package_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-019",
-      "scope": "V03-019 source done throughd215431/f2ad8e3 (rootbb4cf4b/1250a7b); docs62c3ca9 integrated4bafa3c; laterdocs3023e72/a365976 awaitpick. No sourcewrites."
+      "scope": "Completed and integrated; no active source work."
     },
     {
       "task": "V03-020",
       "agent": "windows_session_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-020",
-      "scope": "V03-020 completed27bb79b; now independent read-only reviewUia.cpp. Found4-batch retired queue drops final blocked model with no dead-window retry. Owner acknowledged and simplifying if nativeUIA selected."
+      "scope": "Completed and integrated; no active source work."
     },
     {
       "task": "V03-021",
       "agent": "windows_shell_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-021",
-      "scope": "V03-021 finishingnewMTA realView UIA retirement tests and investigating actualExplorer stalefooter1item/selected1in100-itemgallery. rootrequested publicIShellBrowser statusmethod fix only; mayneednewpreview4. Waitingreport/commit."
+      "scope": "Completed and integrated; no active source work."
     }
   ],
   "real_core": {
-    "session_id": 30648,
+    "session_id": null,
     "evidence": ".runtime/gallery-server-20260913/core/20260912T192618Z-02d21811",
     "ready_file": ".runtime/gallery-server-20260913/core/20260912T192618Z-02d21811/ready.json",
     "origin": "https://localhost:64171",
@@ -61,17 +61,12 @@
     "worker": ".runtime/gallery-server-20260913/worker/AssetLibrary.ImagePreview.Worker.exe",
     "corpus": "tests/integration/native-clients/fixtures/image-preview-v1",
     "validation": "Prior fixture actualLPAC/Core2/2 and nativepipe1/1 remain evidence; this new fixture ready for final realExplorer run.",
-    "cleanup": "ACTIVE new fixture for package/Explorer acceptance. Root must write its ready.stop_file and wait session30648 for NATIVE_CLIENT_CLEANUP verified; never log connection credentials.",
+    "cleanup": "Completed: NATIVE_CLIENT_CLEANUP verified;148 source hashes/mtimes unchanged;6 roles and runtime removed.",
     "previous_evidence": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f (cleaned:148 original hashes/mtimes unchanged and6 roles/resources removed)"
   },
-  "remaining": [
-    "finish module reviews/merges",
-    "independent native gallery control visual/keyboard/UIA acceptance",
-    "real installed Explorer gallery/thumbnails/navigation/viewport cancellation/session clearing/resource recovery",
-    "new versioned package and final handoff"
-  ],
+  "remaining": [],
   "nas": "unchanged; lacks required seccomp for original image worker; no server/security changes authorized or performed",
-  "desktop": "ACTIVE owned Explorer browserPID31248/HWND593012, creation134337171227407406, loadedinstalledpreview3DLL and verifiedhash. Current location: AssetLibrary/library/NextPage/images/Chinese directory; justF5 refresh of duplicate.dat (PNG content) picture. Owned brokerPID33636/HWND17370144 creation134337168614595925 staysatWindowsKits10, carriesoldpreview2DLL; use onlyfornative installer/API helpers. OriginalExplorer6212 untouched. Settings29456 closed afterconnected readback; allharness windows closed. Nativebroker/view records andscreenshots in .runtime/gallery-native-01. Root ownsallGUI.",
+  "desktop": "All owned visible windows closed; Host/Settings stopped; test connection removed. Preview.6 installation retained. OriginalExplorer6212 unchanged. Explorer processes may remain windowless; no forced termination/unload claim.",
   "verification": {
     "repository": "passed after shared test fixture correction",
     "native_build": "passed strict Release/W4/WX/analyze after04d81cf",
@@ -83,17 +78,62 @@
     "actual_explorer": "Preview3 installed via verifiedunpackagedbroker; fresh31248loaded3; Core64171 connectedRememberfalse viaControl.dll. RootDefView, customlibrarypage, listmode, keyboardEnd/EnterNextPage, Chinese folders/title, JPG/PNG/WebP/orientation/transparent5validimages and4bad/unsupportedfallback, same-rowShiftRightmulti andlistselectionpreservation, PNG renamed.dat allpassed. F5 immediateoldpixelsclear seen; refreshsettle/logout/history/closecleanup stillpending.",
     "latest_native": "Root10/10 fullUIA suite passed1.14s aftereventlistenerfix; lastready-description+horizontalnav root3/3 passed0.16s. FinalEXE syntheticCLI8/8 passed withno realHKCU; installer23/package6/lock16/audit17already passed."
   },
-  "critical_decision": "Continue ownednativeUIA; oldcorrect-mapbridgecontrolstillleaks withactualcallcounts. Currentremainingfunctionalissue is stalehostfooter/count. Do notoverwriteinstalledpreview3DLL/package ifproductionfix; bumpnewversion. RealCoreactive30648 mustcleanupatend; noG4.",
+  "critical_decision": "Current browsing request completed. No further UIA/status experiments pending; own summary authoritative; retain NAS/OS/manual/signing/full-version limits.",
   "package": {
-    "version": "0.3.0-preview.3",
-    "source": "1250a7b7d64759ffb515d69b9272453a13d65da9",
-    "zip": ".runtime/releases/windows/AssetLibrary-0.3.0-preview.3-win-x64.zip",
-    "bytes": 155479812,
-    "sha256": "97fa2942de8be6016861d03b2d9276534cd4e418b110ddcd210debbdc8240fb4",
-    "build_session": "79272 completed",
-    "build_root": ".runtime/gallery-package-build-01",
-    "installed": true,
-    "installed_dll_sha256": "0168F3387010993258BD3FFB73CE60757F7B76A36404265A1840A0F977DB8FAB",
-    "status": "INTERNAL candidate: real gallery works; stale Explorer status bar count identified; Shell owner checking supported fix which may require preview.4 final package"
+    "status": "accepted_with_documented_limits",
+    "version": "0.3.0-preview.6",
+    "source_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
+    "archive_sha256": "0e6a60d23fcaaa02f978ce816237f15930d801e0695bfbd837cb237d19be9810",
+    "archive_bytes": 155482299,
+    "unsigned": true,
+    "full_v03_release": false,
+    "final_native_shell_ctests": 12,
+    "final_gallery_ctests": 10,
+    "windows_component_tests": 101,
+    "setup_component_tests": 23,
+    "package_tests": 6,
+    "release_lock_tests": 16,
+    "final_exe_sandbox_steps": 8,
+    "real_explorer": {
+      "Pid": 29040,
+      "CreationFileTime": "134337200621387601",
+      "NativeHwnd": 3868050,
+      "SessionId": 2,
+      "OwnerSid": "S-1-5-21-3384776991-3993128263-1977130206-500",
+      "PackageStatus": 15700,
+      "ThreadId": 17056,
+      "Image": "C:\\Windows\\explorer.exe",
+      "AssetLibraryModules": [
+        "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.6\\AssetLibrary.Explorer.dll"
+      ]
+    },
+    "core_cleanup": {
+      "status": "passed",
+      "stop_reason": "explicit_stop",
+      "sample_file_count": 148,
+      "sample_hashes_and_mtimes": "unchanged",
+      "resource_cleanup": "verified",
+      "postgres_roles_removed": 6,
+      "runtime_removed": true,
+      "https_listener_closed": true,
+      "host_and_postgres_processes_exited": true,
+      "native_client_acceptance": "not asserted by this server fixture"
+    },
+    "session_cleanup": {
+      "utc": "2026-09-12T21:02:35.1193721+00:00",
+      "testConnectionRemoved": true,
+      "rememberedCredentialPresent": false,
+      "clientHostRunning": false,
+      "settingsRunning": false
+    },
+    "report": "windows-gallery-delivery/README.md",
+    "limitations": [
+      "NAS image engine not enabled by this work",
+      "Windows11 host status bar can retain stale counts; own toolbar summary is authoritative",
+      "mode and density reset on directory change",
+      "no full-image viewer, writes, full-library infinite scroll or timeline",
+      "manual authentication/system-uninstall UI and signing remain independent"
+    ],
+    "G4": "user_waived_not_performed"
   }
 }

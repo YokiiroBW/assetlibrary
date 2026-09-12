@@ -1,0 +1,12 @@
+  AssetLibrary.AssetLink -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\packages\sdk\assetlink\dotnet\bin\Release\net10.0\AssetLibrary.AssetLink.dll
+  AssetLibrary.Windows.Session -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Session\bin\Release\net10.0\AssetLibrary.Windows.Session.dll
+  AssetLibrary.Windows.Core -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\Core\bin\Release\net10.0\AssetLibrary.Windows.Core.dll
+  AssetLibrary.Windows.AssetHost -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\apps\windows-client\AssetHost\bin\Release\net10.0\AssetLibrary.Windows.AssetHost.dll
+  AssetLibrary.Windows.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+VSTest 版本 18.0.2 (x64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+
+已通过! - 失败:     0，通过:   101，已跳过:     0，总计:   101，持续时间: 2 s - AssetLibrary.Windows.Tests.dll (net10.0)

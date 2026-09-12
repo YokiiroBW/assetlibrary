@@ -1,0 +1,17 @@
+[
+  {
+    "component": "AssetLibrary.Host.exe",
+    "sha256": "9A965BE82AACDE2F8C903DA400B44E3B5A65E9CFC6278BD0DCED3463B1FA58AB",
+    "matchesManifest": true
+  },
+  {
+    "component": "AssetLibrary.Settings.exe",
+    "sha256": "81872CF70457466BBFB922A19E3B163CAE60754BF218B7C27ED8DDEC84F08087",
+    "matchesManifest": true
+  },
+  {
+    "component": "AssetLibrary.Explorer.dll",
+    "sha256": "2FA7D7B7277AFBF6D9F691A813F0F06AA0D1F8A96439F0937A38B79113027141",
+    "matchesManifest": true
+  }
+]

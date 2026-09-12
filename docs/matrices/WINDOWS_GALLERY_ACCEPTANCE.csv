@@ -1,13 +1,15 @@
-能力,图库候选状态,证据,边界
-原生Explorer入口与真实Core图库整合,待实机,.codex/handoffs/V03-005/gallery-progress.json,不能用独立harness替代真实已注册Explorer
-图库与列表切换和显示密度,独立控件桌面通过,.runtime/gallery-validation/harness-v6-dense.png,合成像素；不是已安装产品截图
-宽窄重排与滚动裁剪,独立控件桌面通过,.runtime/gallery-validation/harness-narrow-toolbar-wrap.png,已修复打印绘制越过工具栏；图片保持比例
-同屏29图片与第17项后继续显示,独立控件桌面通过,.runtime/gallery-validation/harness-wide-all-images.png,真实管道批次另有自动回归；整包实机待测
-全部可见项分批与取消回收,合并源码定向测试通过,.runtime/gallery-validation/shell-batch-tests.log,最多101候选及16未完成请求每视图；四视图共64任务和两图片I/O
-共享图片内存预算,合并源码定向测试通过,.codex/handoffs/V03-021/tests.md,已接纳图片跨缓存与完成队列共16MiB每视图；传输临时缓冲独立有界
-真实Core图片派生与原件安全,真实Core夹具通过,.runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f/acceptance.json,148合成文件hash和mtime不变且资源清理；NAS缺少的隔离能力未改变
-真实Core到Windows缩略图管道,独立原生通道通过,.codex/handoffs/V03-020/tests.md,实际PNG与透明图走WIC辅助Job；不等于最终Shell绘制验收
-辅助技术列表选择与关闭回收,原生UIA实现中,.codex/handoffs/V03-020/msaa-uia-diagnosis.md,MSAA桥接保留引用及手工wrapper丢失子项的失败证据保留；不得默认安装
-preview.3安装包与升级,待生成及实机,.codex/handoffs/V03-005/gallery-progress.json,版本身份已准备；不覆盖已交付preview.2记录
-完整预览与时间轴及全库连续滚动,后续范围,docs/adr/ADR-0021_Explorer原生图库与缩略图边界.md,本轮提供当前有界页缩略图；文件写入未启用
+能力,preview.6状态,证据,边界
+原生Explorer图库与真实Core,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/real-gallery-final.png,Windows11 x64；本机隔离Core图片非NAS引擎上线
+图库与列表切换及密度,同源与实机通过,.codex/handoffs/V03-005/windows-gallery-preview3/real-images-list.png,模式与密度不跨目录持久保存
+宽窄重排与滚动裁剪,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/narrow-scroll.png,工具栏摘要不盖canvas
+完整可见集合与分批加载,同源及桌面通过,.codex/handoffs/V03-021/tests.md,101候选与16未完成每视图；四视图共64任务和2图片I/O
+共享图片内存预算,回归通过,.codex/handoffs/V03-021/tests.md,已接纳图像跨缓存和队列共16MiB每视图；瞬态I/O单独有界
+当前页与选择数量,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/multi-summary.png,自有摘要为准；Windows11底部旧计数兼容限制保留
+真实图片格式与安全失败,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/real-gallery-final.uia.txt,JPG/PNG/WebP/EXIF/alpha；损坏超限及SVG不回退读原件
+中文目录和内容识别,实机通过,.codex/handoffs/V03-005/windows-gallery-preview3/real-image-dat-content.png,PNG内容的dat文件可预览；不以文件名判断身份
+辅助技术与退出回收,外部客户端及实际DLL测试通过,.codex/handoffs/V03-019/tests.md,独立MTA跨Destroy/lastRelease及dispatcher0；旧桥失败记录保留
+退出后清图与摘要,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/after-logout.png,系统导航历史未清除但不能恢复旧文件
+原件安全与临时服务清理,已验证,.codex/handoffs/V03-005/windows-gallery-delivery/core-cleanup.json,148源文件hash/mtime不变且6角色移除
+安装升级与发行完整性,最终EXE与实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/install-01-stdout.json,未签名；旧preview.1占用延期清理
+完整预览与时间轴及全库连续滚动,后续范围,docs/adr/ADR-0021_Explorer原生图库与缩略图边界.md,本轮当前有界页缩略图；文件写入未启用
 G4长期稳定性,用户豁免且未测试,docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md,不执行20轮或8小时

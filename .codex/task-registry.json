@@ -976,7 +976,7 @@
       "id": "V03-019",
       "title": "native-gallery-surface",
       "module": "native-gallery-surface",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-018"
       ],
@@ -985,7 +985,9 @@
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-019",
       "task_file": ".codex/tasks/V03-019.md",
       "handoff": ".codex/handoffs/V03-019/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
+      "execution_status": "Integrated and accepted in preview.6 with root real Core/Explorer evidence; documented OS/NAS/follow-up limits retained."
     },
     {
       "id": "V03-020",
@@ -1001,14 +1003,14 @@
       "task_file": ".codex/tasks/V03-020.md",
       "handoff": ".codex/handoffs/V03-020/summary.md",
       "thread_deep_link": "",
-      "integrated_commit": "6245ab4/4527e43/6588514/1606400/ce8cf12/2c994ea/27bb79b",
-      "execution_status": "Thumbnail Host and real Core-to-native pipe component accepted; gallery/actual Explorer acceptance remains with V03-005"
+      "integrated_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
+      "execution_status": "Integrated and accepted in preview.6 with root real Core/Explorer evidence; documented OS/NAS/follow-up limits retained."
     },
     {
       "id": "V03-021",
       "title": "explorer-gallery-view",
       "module": "explorer-gallery-view",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-018"
       ],
@@ -1017,7 +1019,9 @@
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-021",
       "task_file": ".codex/tasks/V03-021.md",
       "handoff": ".codex/handoffs/V03-021/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
+      "execution_status": "Integrated and accepted in preview.6 with root real Core/Explorer evidence; documented OS/NAS/follow-up limits retained."
     }
   ]
 }
