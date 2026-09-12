@@ -13,30 +13,35 @@
     "gallery_header": "6fb2aed",
     "semantic_cpp_colors": "8ec1fed/4697374",
     "thumbnail_host": "6245ab4/4527e43/6588514/1606400/ce8cf12",
-    "surface_visibility_fix": "fa52650"
+    "surface_visibility_fix": "fa52650",
+    "gallery_surface": "f2ae350/1cc4ddd/fa52650",
+    "thumbnail_cpp_requests": "0112fb4",
+    "surface_shown_v6": "802bed8",
+    "thumbnail_test_reuse": "2c994ea",
+    "native_shell_view": "04d81cf"
   },
   "agents": [
     {
       "task": "V03-019",
       "agent": "windows_package_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-019",
-      "scope": "Surface31f26c2,fd17678,831dc34 integrated; v6/DPI MSAA retired-provider cleanup pending (official per-HWND UIA event-map clear under validation)."
+      "scope": "Surface integrated through visibility notify; Shown authoritative WM_SHOWWINDOW state getter approved. v6/DPI cross-process default-action accessibility retired providers accumulate 1 per cycle until CoUninitialize: unresolved; no DLL-unload pass."
     },
     {
       "task": "V03-020",
       "agent": "windows_session_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-020",
-      "scope": "V03-020 implementation and handoff fully integrated; root101 tests passed after fixing pre-existing expiry-test completion boundary. Independent C++review found Apply reentry, Create reentry quota and empty-viewport hide notification; owners fixing."
+      "scope": "Thumbnail Host done; correcting shared test setup duplication found by root repository verification, then independent MSAA review."
     },
     {
       "task": "V03-021",
       "agent": "windows_shell_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-021",
-      "scope": "IShellView/Requests/ThumbnailClient implemented, tests passing before independent reentry findings; final guarded Create/Apply/visibility regressions and commit pending."
+      "scope": "View integrated04d81cf after strict native build; incoming AddRef/Create/CompareIDs reentry, authoritative hide/show cancellation, four-slot/shared DefView quota and real test-root NewDelivery coverage. Default per-directory Gallery; no persistent mode/density preference yet. Root merged-source CTest result in .runtime/gallery-validation/shell-tests.log."
     }
   ],
   "real_core": {
-    "session_id": 9256,
+    "session_id": null,
     "evidence": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f",
     "ready_file": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f/ready.json",
     "origin": "https://localhost:56529",
@@ -45,7 +50,7 @@
     "worker": ".runtime/gallery-server-20260913/worker/AssetLibrary.ImagePreview.Worker.exe",
     "corpus": "tests/integration/native-clients/fixtures/image-preview-v1",
     "validation": "LiveImageEndpointTests 2/2 passed with EXPECT_AVAILABLE=1; genuine Windows LPAC/AOT server-generated PNG; .runtime/gallery-server-20260913/live-images.trx",
-    "cleanup": "root must write stop_file from ready.json and wait NATIVE_CLIENT_CLEANUP verified; never log connection credentials"
+    "cleanup": "Completed 2026-09-13: NATIVE_CLIENT_CLEANUP verified. Fixture stopped; renew before actual Explorer images."
   },
   "remaining": [
     "finish module reviews/merges",
@@ -54,5 +59,12 @@
     "new versioned package and final handoff"
   ],
   "nas": "unchanged; lacks required seccomp for original image worker; no server/security changes authorized or performed",
-  "desktop": "Initial test-only visible harness inspected, then closed. Hidden launch was retired; visible harness PID23820 ended. No current owned GUI. Root exclusively owns native UI. Await final v6/DPI/per-HWND accessibility cleanup patch before final visual and Explorer acceptance."
+  "desktop": "Root v6/DPI harness19748 closed via Alt+F4 and process exit verified. Mouse gallery/list/density and Shift+Down multiselect visible passed. Scroll capture consistently overpaints toolbar: owner fixing explicit WM_PRINTCLIENT clip. Test frame maximize/resize ineffective; owner investigating. UIA child indices unstable and selected_elements empty despite visual selection; independent MSAA/UIA probe pending. Original Explorer6212 untouched; no active owned GUI.",
+  "verification": {
+    "repository": "passed after shared test fixture correction",
+    "native_build": "passed strict Release/W4/WX/analyze after04d81cf",
+    "windows_tests": "prior101/101; helper-only change24/24 in owner",
+    "real_images": "Core LPAC/AOT2/2 + native image pipe1/1 passed; fixture148 assets unchanged and cleaned",
+    "visual": "partial: mouse mode/density and keyboard multiselect passed; scroll canvas clipping failed, provider retirement unresolved"
+  }
 }
