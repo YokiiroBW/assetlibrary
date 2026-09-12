@@ -1,0 +1,12 @@
+{
+  "report": {
+    "status": "registered_current_process_view",
+    "version": "0.3.0-preview.2",
+    "installDir": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.2",
+    "pendingCleanup": [
+      "versions/0.3.0-preview.1"
+    ]
+  },
+  "warnings": [],
+  "unsignedPreview": true
+}

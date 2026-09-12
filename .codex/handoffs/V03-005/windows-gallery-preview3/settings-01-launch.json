@@ -1,0 +1,15 @@
+{
+  "utc": "2026-09-12T20:05:22.8765023+00:00",
+  "action": "settings",
+  "broker": {
+    "Pid": 33636,
+    "CreationFileTime": "134337168614595925",
+    "NativeHwnd": 17370144,
+    "SessionId": 2,
+    "OwnerSid": "S-1-5-21-3384776991-3993128263-1977130206-500",
+    "PackageStatus": 15700,
+    "ThreadId": 2204,
+    "Image": "C:\\Windows\\explorer.exe"
+  },
+  "script_sha256": "BCDFB5850B7AAAA02EA93B64616C3CD4A8D11E6DC9EBACB481216A0A475887A4"
+}
