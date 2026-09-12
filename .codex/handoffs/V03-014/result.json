@@ -1,0 +1,76 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-014",
+  "title": "g3-measurements",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-shell-g3-owner",
+  "branch": "codex/v03-014-g3-measurements",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-014",
+  "commit": "87a882a343f5fc4019b19ab6ace5005d7e05ba3a",
+  "changed_files": [
+    ".codex/tasks/V03-014.md",
+    ".codex/handoffs/V03-014/summary.md",
+    ".codex/handoffs/V03-014/result.json",
+    ".codex/handoffs/V03-014/tests.md",
+    "tests/windows-shell/CMakeLists.txt",
+    "tests/windows-shell/ExplorerProof.cpp",
+    "tests/windows-shell/G3Measurements.cpp",
+    "tests/windows-shell/G3Measurements.h",
+    "tests/windows-shell/LoadingRefresh.cpp",
+    "tests/windows-shell/LoadingRefresh.h",
+    "tests/windows-shell/LoadingRefreshTests.cpp",
+    "tests/windows-shell/ProbeDiagnostics.cpp",
+    "tests/windows-shell/ProbeDiagnostics.h",
+    "tests/windows-shell/ProbeDiagnosticsTests.cpp",
+    "tests/windows-shell/README.md",
+    "tests/windows-shell/SnapshotPipe.cpp",
+    "tests/windows-shell/SnapshotTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "Six affected CTests; no real Explorer G3 decision or G4 execution.",
+    "strict_build": "Final Release /W4 /WX /permissive- /analyze /utf-8 passed. Two intermediate test-source build failures were corrected without disabling checks.",
+    "repository_verification": "Passed; includes handoff, architecture, 21 migration manifest tests, 14 architecture tests, contract/SDK checks. Alpha remains blocked.",
+    "dll_sha256": "4AE3477602D7DDF15659A9C86C17C443630A986A933C6803CE17FF00C15184A5"
+  },
+  "risks": [
+    "Measurements are non-transactional; concurrent completion may mix last metadata fields. Individual last/max duration values are actual call durations.",
+    "Component samples had seven cancellations and seven completed resource destructions, but zero deferred reaps; deferred delay was not fabricated.",
+    "pins/pin_sync/pin_pool report ownership and handoff arrangements, not OS DLL unload completion.",
+    "Actual Explorer G3 timing, rendered recovery, bounded COM growth and final lifetime remain coordinator-owned evidence.",
+    "Historic proof-owner retention and optional research failures remain unresolved; no G4 was run."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-014/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "tests/windows-shell test-only diagnostic, snapshot lifecycle and existing Loading callback measurements; task handoff only",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing unregistered ProbeDiagnostics PROPERTYKEY channel; pid1/v1 unchanged",
+      "Snapshot Query peer checks, overlapped completion event, four slots and 150ms budget",
+      "Existing LoadingRefresh Budget, actual private PIDL observation and UI-thread Refresh",
+      "Existing CMake/CTest pipe, diagnostic, Loading and controlled DLL owner fixtures"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "python -I -B scripts/verify_repository.py: passed; architecture/handoff, contract/SDK and source/dependency checks; Alpha remains blocked",
+      "Six affected Release CTests passed with original strict static-analysis options"
+    ],
+    "technical_debt": [
+      "Target Explorer PID and five predefined G3 recovery observations still require coordinator acceptance.",
+      "Synchronous Query lifetime assumes its existing valid Folder COM caller; no new detached entry point was added.",
+      "No actual deferred reap occurred in component samples; pool-return scheduling is not final loader completion evidence."
+    ]
+  }
+}
