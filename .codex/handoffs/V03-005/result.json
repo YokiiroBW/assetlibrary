@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "731b176",
+  "commit": "9940be3",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attribute-read-path/.gitattributes",
@@ -1573,6 +1573,9 @@
     ".codex/handoffs/V03-013/result.json",
     ".codex/handoffs/V03-013/summary.md",
     ".codex/handoffs/V03-013/tests.md",
+    ".codex/handoffs/V03-014/result.json",
+    ".codex/handoffs/V03-014/summary.md",
+    ".codex/handoffs/V03-014/tests.md",
     ".codex/project-state.json",
     ".codex/task-graph.json",
     ".codex/task-registry.json",
@@ -1585,6 +1588,7 @@
     ".codex/tasks/V03-011.md",
     ".codex/tasks/V03-012.md",
     ".codex/tasks/V03-013.md",
+    ".codex/tasks/V03-014.md",
     ".gitattributes",
     ".github/workflows/handoff-quality.yml",
     "AssetLibrary.slnx",
@@ -1641,6 +1645,7 @@
     "docs/16_版本路线与验收门禁.md",
     "docs/adr/ADR-0018_Windows原生Explorer入口与最小视图.md",
     "docs/adr/ADR-0019_首批图片预览契约与隔离要求.md",
+    "docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md",
     "docs/releases/NATIVE_CLIENT_TRIAL.md",
     "docs/releases/PARALLEL_BROWSE_PREVIEW_PLAN.md",
     "eng/README.md",
@@ -1784,6 +1789,8 @@
     "tests/windows-shell/ExplorerFaultHarnessTests.cpp",
     "tests/windows-shell/ExplorerFaultHost.cpp",
     "tests/windows-shell/ExplorerProof.cpp",
+    "tests/windows-shell/G3Measurements.cpp",
+    "tests/windows-shell/G3Measurements.h",
     "tests/windows-shell/LoaderProbe.cpp",
     "tests/windows-shell/LoadingRefresh.cpp",
     "tests/windows-shell/LoadingRefresh.h",
@@ -1917,6 +1924,12 @@
       "failed_research_equivalence": 1,
       "default_ctest_added": false,
       "report": "../V03-013/tests.md"
+    },
+    "windows_g3_measurements": {
+      "status": "component6passed_actual_in_progress",
+      "component_ctests": 6,
+      "source": "4ba8d31",
+      "report": "../V03-014/tests.md"
     }
   },
   "risks": [
@@ -1983,7 +1996,8 @@
       "Rendered-view fix4e3f6bb replaces unobserved clone Enum signal with own IFolderView metadata; strict build/four affectedCtests/repository checks passed. Fifth realGUI cycle coldRoot,101/38 pages,nestedfolders,Hostunavailable/restart-oldEpoch/rootrecovery verified; auto600s nativeunregister,9missing/Desktop32,ownedwindows/Hostsclosed,Core138hash/mtime/6roles/runtime/listener/processcleanup verified. Observed intervals are upperbounds, notG3 performanceclaims.",
       "Original Explorer gate audit: G1 approved HKCU route and actual own-DLL discovery proven; G2 crash/timeout/invalid-frame, G3 timing/lifetime and G4 real cycles/soak remain open. Historical G2 COM label corrected without modifying raw evidence.",
       "V03-012 bounded fault CLI integrated88e6c21; existing Snapshot query/protocol/SID-session endpoint reused only by standalone test executables. Strict build and2 affected CTests accepted, partial20B/invalid40B writes independently reviewed. No Shell/production Host/contract change; original G2-G4 stay open. Existing V03-010/011 registry entries reconciled from integrated handoffs, not new execution.",
-      "Real Explorer G2 original criteria independently audited and closed:07crash/silent,08invalid40B/partial20B actual target requests, error/reopenedCoreRoot/native identity, owner cleanup/9missing/windows0 and138file integrity;175archive digests checked. G3/G4 remain open. V03-013 adds optional test-only notification research, two existing regressions pass but equivalent synthetic view control fails; no runtime DLL/Host/contract change."
+      "Real Explorer G2 original criteria independently audited and closed:07crash/silent,08invalid40B/partial20B actual target requests, error/reopenedCoreRoot/native identity, owner cleanup/9missing/windows0 and138file integrity;175archive digests checked. G3/G4 remain open. V03-013 adds optional test-only notification research, two existing regressions pass but equivalent synthetic view control fails; no runtime DLL/Host/contract change.",
+      "V03-014 QPC/ownership measurement key2 and completed-resource counter ordering reviewed, strict build and6 affected CTests passed; same-process realG3 five-sample profile frozen before data. G4 administratively closed by explicit user waiver, not a test pass; original exit criteria preserved."
     ],
     "technical_debt": [
       "Controlled native Explorer/AssetHost/Core read-only connection is functionally accepted and all owned test resources cleaned. Next work is production login/settings/startup/install, file opening/preview, category/tree polish, push invalidation and G2..G4 lifecycle/soak; CViewSettings retained references remain an explicit unresolved unload gate. Do not repeat the resolved registry-view or clone-signal diagnosis.",

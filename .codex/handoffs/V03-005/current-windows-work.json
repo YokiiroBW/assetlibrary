@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-12T10:48:56.507201+00:00",
-  "status": "G1_G2_closed_real_fault_recovery_cleaned_G3_G4_open",
+  "updatedAtUtc": "2026-09-12T13:26:06.073048+00:00",
+  "status": "G3_real_measurements_in_progress_G4_explicit_user_waiver",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -433,7 +433,7 @@
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
   },
-  "gui_owner": "none; all owned test windows closed, native registrations absent, Hosts/faults/Core stopped; no Explorer forced exit",
+  "gui_owner": "windows_live_short assigned sole G3 desktop ownership; root reads records and owns Core cleanup",
   "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json",
   "gate_review": {
     "document": "explorer-gate-review/README.md",
@@ -442,11 +442,13 @@
       "M0-002-G2"
     ],
     "open": [
-      "M0-002-G3",
-      "M0-002-G4"
+      "M0-002-G3"
     ],
-    "next_task": "G3 real view timing/cancellation and retained-COM growth evidence; G4 after lifecycle work",
-    "lifetime_criterion": "G3; historical G2_full_COM_unload label is incorrect, raw observations retained"
+    "next_task": "G3 only; do not run or schedule G4",
+    "lifetime_criterion": "G3; historical G2_full_COM_unload label is incorrect, raw observations retained",
+    "waived_not_tested": [
+      "M0-002-G4"
+    ]
   },
   "g2_fault_tool": {
     "worker_code_commit": "d3b2ba3",
@@ -482,5 +484,16 @@
     "report": "../V03-013/summary.md",
     "finding": "publicBGENUMDONE received in standaloneDesktopreboundfixture; actual33vs1 equivalence assertionfailed; no runtimeFSM/contractchange",
     "next": "Only a coordinator-scoped notification observation in the already verified own namespace can establish applicability; do not repeat emptyDesktopPIDL or generic filesystem controls"
+  },
+  "g3_measurement": {
+    "code": "4ba8d31",
+    "worker": "87a882a",
+    "component_ctests": 6,
+    "private_key": "samefmtid_pid2",
+    "profile": "docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md",
+    "planned_samples": 5,
+    "actual_result": "pending",
+    "core_ready": ".runtime/explorer-g3/core/20260912T131035Z-5ab31abe/ready.json",
+    "note": "Do not expose private connection content; stop fixture via returned stop_file at end"
   }
 }

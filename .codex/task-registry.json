@@ -733,7 +733,8 @@
         "V03-010",
         "V03-011",
         "V03-012",
-        "V03-013"
+        "V03-013",
+        "V03-014"
       ],
       "owner": "architecture-coordinator",
       "branch": "codex/v03-005-parallel-browse-preview-integration",
@@ -886,6 +887,23 @@
       "thread_deep_link": "",
       "execution_status": "official_event_research_and_optional_diagnostic_accepted; fixture_equivalence_failed; runtime_loading_experience_unchanged",
       "integrated_commit": "ac9171f"
+    },
+    {
+      "id": "V03-014",
+      "title": "g3-measurements",
+      "module": "g3-measurements",
+      "status": "completed",
+      "depends_on": [
+        "V03-012"
+      ],
+      "owner": "windows-shell-g3-owner",
+      "branch": "codex/v03-014-g3-measurements",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-014",
+      "task_file": ".codex/tasks/V03-014.md",
+      "handoff": ".codex/handoffs/V03-014/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "4ba8d31",
+      "execution_status": "measurement_code_reviewed_and_component_tests_passed; real_G3_owned_by_coordinator"
     }
   ]
 }
