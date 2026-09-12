@@ -104,7 +104,10 @@
         "python tests/architecture/check_release_gates.py --target explorer-v0.5",
         "cmake -S apps/windows-shell -B .runtime/explorer-product -G \"Visual Studio 17 2022\" -A x64",
         "cmake --build .runtime/explorer-product --config Release --parallel 2",
-        "dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release"
+        "dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release",
+        "python -I -B -m unittest discover -s tests/windows-setup -p test_package.py -v",
+        "python -I -B scripts/validate_windows_release_locks.py --packages-dir .runtime/nuget",
+        "python -I -B infra/windows-client/build_package.py --build-root .runtime/windows-package-build --output .runtime/AssetLibrary-win-x64 @notices"
       ],
       "skip_policy": "A platform skip is evidence of a missing gate, never a pass for that platform."
     },
@@ -136,7 +139,7 @@
     "dotnet": "Active in V01-001: fixed SDK, locked restore, format, Release build, non-empty MSTest, vulnerability, license, duplicate-code, Roslyn complexity and sensitive-log gates run in fast-merge. Integration, contract and migration suites must join the same solution when their owning production tasks activate them.",
     "typescript": "Active for the generated AssetLink SDK in V01-002 and the authenticated read-only Web consumer in V01-006: exact Node.js 24 LTS, pnpm and TypeScript versions; frozen installs, generator formatting/drift, lint, typecheck, production build, Node unit tests, Chromium browser regressions, audit, license, integrity, size and sensitive-log gates run in fast-merge.",
     "android": "Active in V03-003: fixed AGP/Kotlin/Compose and SDK packages, Gradle strict locks/verification, Debug/Release compile, Android lint, JVM protocol/state tests, selected real API36 Compose instrumentation, runtime POM-license/OSV/integrity/APK-size audit. Real Core/PostgreSQL client evidence is provided separately by V03-003/004; missing devices or skipped platform runs do not count as passing evidence.",
-    "cpp": "Production Shell activation remains blocked by M0-002-G1..G4. V03-002 activates a test-only C++17/Windows SDK10.0.26100.0 DefView build with MSVC warnings/errors/static analysis and owner-guarded HKCU probes. CI compiles the probe but does not register or claim real Explorer discovery, UI or soak evidence.",
+    "cpp": "Production source is active under apps/windows-shell after G1/G2/G3 measured acceptance and explicit user G4 waiver (not performed). CI builds production and test-only targets, runs CTest and preserves a self-contained preview package; CI does not register the component or replace actual Explorer installation, UI and session invalidation acceptance.",
     "database": "Active in V01-003: the production manifest and PostgreSQL 16.15 job enforce forward migration, verified pre-migration backup, empty-database restore/replay, checksum drift, serialized ownership and least privilege. Business data access libraries remain owned by their first real infrastructure use case.",
     "release_labs": "Capacity, sudden-power-loss, administrator SCM, Docker hardening, Provider hard-sandbox and soak commands may be added only after their task names an approved runner, fixed sandbox boundary, cleanup and artifact retention policy."
   }

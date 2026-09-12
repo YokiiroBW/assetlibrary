@@ -159,6 +159,15 @@ jobs:
         run: cmake --build .runtime/explorer-product --config Release --parallel 2
       - name: Windows setup contracts
         run: dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release
+      - name: Windows package boundary tests
+        run: python -I -B -m unittest discover -s tests/windows-setup -p test_package.py -v
+      - name: Build complete self-contained Windows preview
+        shell: pwsh
+        run: |
+          $notices = @(Get-ChildItem infra/windows-client/notices -File | Where-Object { $_.Name -ne '.gitattributes' } | ForEach-Object { '--notice'; $_.FullName })
+          python -I -B infra/windows-client/build_package.py --build-root .runtime/windows-package-build --output .runtime/AssetLibrary-win-x64 @notices
+      - name: Audit exact Windows release locks and licenses
+        run: python -I -B scripts/validate_windows_release_locks.py --packages-dir .runtime/nuget
       - name: Preserve adapter build evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -167,5 +176,8 @@ jobs:
           path: |
             .runtime/windows-vulnerabilities.json
             .runtime/explorer-proof/CMakeCache.txt
+            .runtime/AssetLibrary-win-x64.zip
+            .runtime/AssetLibrary-win-x64.zip.sha256
+            .runtime/AssetLibrary-win-x64/build-evidence.json
           if-no-files-found: error
           retention-days: 14
