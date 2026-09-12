@@ -54,6 +54,23 @@ int wmain(int argc, wchar_t** argv) {
         Require(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS) == gdi, "temporary DIB/DC resources reclaimed after every paint");
         Require(GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS) == user, "painting creates no persistent USER objects");
         if (argc == 2) image.Save(argv[1]);
+        for (UINT index = 1; index < 30; ++index) page.entries.push_back(item);
+        surface->SetPage(page, 2);
+        auto visible = surface->VisibleFileItems();
+        for (UINT at = 0; at < visible.count; ++at) surface->SetThumbnail(visible.indices[at], 2, Red(128, 64));
+        SendMessageW(canvas, WM_VSCROLL, SB_LINEDOWN, 0);
+        GetClientRect(canvas, &client);
+        ImageBuffer sentinel(client.right + 40, client.bottom + 100);
+        RECT entire{0, 0, sentinel.width, sentinel.height}; HBRUSH marker = CreateSolidBrush(RGB(255, 0, 255));
+        if (!marker) throw "sentinel brush"; FillRect(sentinel.dc, &entire, marker); DeleteObject(marker);
+        const int saved = SaveDC(sentinel.dc); Require(saved != 0, "sentinel DC state"); SetViewportOrgEx(sentinel.dc, 20, 80, nullptr);
+        sentinel.Draw(canvas); RestoreDC(sentinel.dc, saved);
+        for (int y = 0; y < sentinel.height; ++y) for (int x = 0; x < sentinel.width; ++x) {
+            if (x >= 20 && x < 20 + client.right && y >= 80 && y < 80 + client.bottom) continue;
+            const auto at = static_cast<size_t>((y * sentinel.width + x) * 4);
+            Require(sentinel.pixels[at] == 255 && sentinel.pixels[at + 1] == 0 && sentinel.pixels[at + 2] == 255,
+                "negative-scroll printing stays inside canvas and preserves toolbar/outside sentinel");
+        }
         surface->Destroy(); delete surface; surface = nullptr; Require(owner.references == 1, "rendering owner references");
         DestroyWindow(parent); parent = nullptr; CoUninitialize();
         std::cout << "gallery_rendering: extreme aspect, PBGRA alpha and 32-paint GDI/USER reclamation passed\n"; return 0;

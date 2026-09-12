@@ -263,6 +263,10 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (source) DeleteDC(source); if (bitmap) DeleteObject(bitmap);
     }
     void Paint(HDC dc, const RECT& clip) noexcept {
+        const int saved = SaveDC(dc);
+        if (saved == 0) return;
+        RECT client{}; GetClientRect(canvas, &client);
+        if (IntersectClipRect(dc, client.left, client.top, client.right, client.bottom) == ERROR) { RestoreDC(dc, saved); return; }
         Fill(dc, clip, colors.surface);
         const HGDIOBJ previous = font ? SelectObject(dc, font) : nullptr; SetBkMode(dc, TRANSPARENT);
         if (model->page.entries.empty()) {
@@ -295,6 +299,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
             if (model->focus == static_cast<int>(index) && GetFocus() == canvas) { InflateRect(&card, -1, -1); DrawFocusRect(dc, &card); }
         }
         if (previous) SelectObject(dc, previous);
+        RestoreDC(dc, saved);
     }
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR id, DWORD_PTR reference) noexcept {
         auto* stored = reinterpret_cast<std::shared_ptr<State>*>(reference);

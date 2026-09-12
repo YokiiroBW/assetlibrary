@@ -6,6 +6,13 @@
 #include <cwchar>
 
 namespace {
+constexpr wchar_t FrameClass[] = L"AssetLibrary.GalleryHarness.Frame";
+bool RegisterFrame() noexcept {
+    WNDCLASSW type{}; type.style = CS_DBLCLKS; type.lpfnWndProc = DefWindowProcW;
+    type.hInstance = GetModuleHandleW(nullptr); type.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    type.hbrBackground = GetSysColorBrush(COLOR_WINDOW); type.lpszClassName = FrameClass;
+    return RegisterClassW(&type) != 0;
+}
 struct Harness {
     gallery_test::Owner owner;
     gallery::Surface* surface = nullptr;
@@ -78,9 +85,10 @@ int wmain(int argc, wchar_t** argv) {
     const bool render = argc == 4 && wcscmp(argv[1], L"--render") == 0;
     if (!show && !external && !render) { std::cerr << "test-only harness: --show, --external <probe.exe>, or --render <new.bmp> <width>\n"; return 2; }
     if (FAILED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED))) return 2;
+    if (!RegisterFrame()) { CoUninitialize(); return 3; }
     Harness harness; int result = 1;
     const int width = render ? std::max(240, std::min(1920, _wtoi(argv[3]))) : 1040;
-    HWND frame = CreateWindowExW(0, L"STATIC", L"AssetLibrary 图库验证 — 合成图像 / 非产品客户端", WS_OVERLAPPEDWINDOW,
+    HWND frame = CreateWindowExW(0, FrameClass, L"AssetLibrary 图库验证 — 合成图像 / 非产品客户端", WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, width, 760, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
     if (frame) {
         SetWindowSubclass(frame, FrameProc, 1, reinterpret_cast<DWORD_PTR>(&harness));
@@ -122,5 +130,5 @@ int wmain(int argc, wchar_t** argv) {
         }
         if (harness.owner.wrongThread || harness.owner.references != 1) { std::cerr << "external provider owner release did not complete on creating STA\n"; result = 5; }
     }
-    CoUninitialize(); return result;
+    UnregisterClassW(FrameClass, GetModuleHandleW(nullptr)); CoUninitialize(); return result;
 }
