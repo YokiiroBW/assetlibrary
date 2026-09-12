@@ -1,0 +1,2 @@
+# Preserve original evidence bytes across Windows/Linux checkouts.
+** -text whitespace=cr-at-eol

@@ -2,6 +2,8 @@
 
 ## 2026-09-12 G2 实机故障恢复完成
 
+原始归档加最终验证日志共177个摘要在Git索引逐项匹配；局部.gitattributes关闭换行转换，保留原始CRLF/LF字节，解决首次git add规范化造成的索引摘要差异。
+
 最终集成verify_repository通过，原exit_criteria逐条未改，只有G2状态变化；explorer-v0.5返回3且仅列G3/G4。运行时DLL/Host/契约源码与4059e40一致，合入的V03-013仅测试EXE/研究交接。相关构建/回归沿用已审owner结果，不重复无变化成功检查。
 
 07目标22692完成crash/silent错误及真实根恢复；08目标16108补齐invalid40B/partial20B错误与恢复，四份原生错误/恢复均在guard内。G2按原三条关闭，G3/G4仍open。175项归档摘要逐项复核；Application1000/1001/1002区间读取成功且无记录。所有自有窗口、Host/fault/Core与两轮注册清理；138原件hash/mtime不变、6角色回收。07晚于注销的invalid原生失败保留，由08补齐；08清理预留48.479821s未达计划60s，两guard按600s自然到期，不能记为后来stop触发。参见[实机验收](explorer-g2-live/README.md)。

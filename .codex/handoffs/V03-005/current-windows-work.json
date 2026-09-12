@@ -470,8 +470,8 @@
       "partial_frame"
     ],
     "recovery": "new real Core Host and reopen root in same Explorer; no singleRefresh automatic completion claim",
-    "archive_digests_verified": 175,
-    "cleanup": "two600s guards auto-cleaned; native9missing; ownedwindows0; alltestprocessesstopped;138filesunchanged;6rolesremoved",
+    "archive_digests_verified": 177,
+    "cleanup": "two600s guards auto-cleaned; native9missing; ownedwindows0; alltestHost/fault/Corestopped;Explorerprocessesmayremainresident;138filesunchanged;6rolesremoved",
     "execution_limit": "07 invalid native probe expired and failed, replaced by08;08 reserve48.479821s belowplanned60s; do not rewrite cleanup asstop-triggered",
     "runtime_changes": "none; optionalV03-013 research only"
   },

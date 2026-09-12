@@ -7,7 +7,7 @@
   "owner": "architecture-coordinator",
   "branch": "codex/v03-005-parallel-browse-preview-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005",
-  "commit": "936847a",
+  "commit": "731b176",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/attribute-read-path/.gitattributes",
@@ -197,6 +197,7 @@
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.launch.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/10e5e38864d647508cad03c9b0748022.plan.json",
     ".codex/handoffs/V03-005/explorer-first-live-trace/evidence.json",
+    ".codex/handoffs/V03-005/explorer-g2-live/.gitattributes",
     ".codex/handoffs/V03-005/explorer-g2-live/README.md",
     ".codex/handoffs/V03-005/explorer-g2-live/application-events.json",
     ".codex/handoffs/V03-005/explorer-g2-live/core-cleanup.json",
@@ -1900,14 +1901,15 @@
       "invalid_and_partial": "cycle08_verified_before_guard_deadline",
       "prior_missing_Host": "previous_final_cycle_reused",
       "retained_failed_observation": "07invalid_expectedPathParse_after_unregistration_not_passed",
-      "archive_digests_verified": 175,
+      "archive_digests_verified": 177,
       "owned_window_and_service_cleanup": "verified",
       "source_files_unchanged": 138,
       "roles_removed": 6,
       "G3_G4": "open",
       "report": "explorer-g2-live/README.md",
       "repository_verification": "passed",
-      "release_gate": "exit3_G3_G4_open"
+      "release_gate": "exit3_G3_G4_open",
+      "git_blob_original_bytes": "verified_after_scoped_gitattributes_fix"
     },
     "windows_refresh_research": {
       "status": "partial_no_runtime_change",
