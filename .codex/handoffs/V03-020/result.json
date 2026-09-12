@@ -1,0 +1,100 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-020",
+  "title": "gallery-thumbnail-host",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-thumbnail-host-owner",
+  "branch": "codex/v03-020-gallery-thumbnail-host",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-020",
+  "commit": "4bbaa413299ef1981d9354aa05f66ac3f5f06394",
+  "changed_files": [
+    ".codex/handoffs/V03-020/result.json",
+    ".codex/handoffs/V03-020/summary.md",
+    ".codex/handoffs/V03-020/tests.md",
+    ".codex/tasks/V03-020.md",
+    "apps/windows-client/AssetHost/ConnectedSession.cs",
+    "apps/windows-client/AssetHost/PngThumbnailContainer.cs",
+    "apps/windows-client/AssetHost/Program.cs",
+    "apps/windows-client/AssetHost/README.md",
+    "apps/windows-client/AssetHost/SnapshotNodeRegistry.cs",
+    "apps/windows-client/AssetHost/SnapshotProjection.cs",
+    "apps/windows-client/AssetHost/SnapshotStore.cs",
+    "apps/windows-client/AssetHost/THUMBNAILS.md",
+    "apps/windows-client/AssetHost/ThumbnailDecodeHelper.cs",
+    "apps/windows-client/AssetHost/ThumbnailDecodeJob.cs",
+    "apps/windows-client/AssetHost/ThumbnailDecodeStartup.cs",
+    "apps/windows-client/AssetHost/ThumbnailDecodeWire.cs",
+    "apps/windows-client/AssetHost/ThumbnailDecoder.cs",
+    "apps/windows-client/AssetHost/ThumbnailPipeServer.cs",
+    "apps/windows-client/AssetHost/ThumbnailProtocol.cs",
+    "apps/windows-client/AssetHost/ThumbnailSession.cs",
+    "apps/windows-client/AssetHost/UserSessionCoordinator.cs",
+    "apps/windows-client/AssetHost/UserSessionHost.cs",
+    "apps/windows-client/AssetHost/WicThumbnailDecoder.cs",
+    "apps/windows-client/Core/ClientTransport.cs",
+    "apps/windows-client/Core/OriginHttpSession.cs",
+    "apps/windows-client/Core/ThumbnailHttpReader.cs",
+    "tests/windows-client/SessionExpiryTests.cs",
+    "tests/windows-client/ThumbnailAdmissionTests.cs",
+    "tests/windows-client/ThumbnailDecoderTests.cs",
+    "tests/windows-client/ThumbnailHttpTests.cs",
+    "tests/windows-client/ThumbnailJobTests.cs",
+    "tests/windows-client/ThumbnailLiveFixture.cs",
+    "tests/windows-client/ThumbnailLiveSupport.cs",
+    "tests/windows-client/ThumbnailLiveTests.cs",
+    "tests/windows-client/ThumbnailPipeTests.cs",
+    "tests/windows-client/ThumbnailProtocolTests.cs",
+    "tests/windows-client/ThumbnailSchedulingTests.cs",
+    "tests/windows-client/ThumbnailSessionTests.cs",
+    "tests/windows-client/ThumbnailTestSupport.cs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 102,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Explorer图库/可见范围/安装集成由root与V03-019/021验收，本任务未操作GUI/生产pipe/注册/真实NAS。",
+    "短时WIC子进程是崩溃与资源隔离，不构成同用户强安全主体隔离；NAS原件Provider隔离不变。",
+    "G4用户豁免未测；此任务不声明完整V0.3发布或NAS已具备预览。"
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-020/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Core read adapter / AssetHost thumbnail pipeline",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ClientTransport same-origin Cookie/Origin/TLS pin/no-redirect session",
+      "ReadOnlyClient authorized page queries and generated AssetLink SDK",
+      "SnapshotStore epoch, 8192-token bound and session revocation",
+      "LocalPipe actual TokenUser DACL/first-instance/session security (unchanged)",
+      "Existing image-preview-v1 thumbnail GET only; no original-file fallback",
+      "Existing PipeListenerShutdown owned I/O reclamation"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "AssetHost -> Core/Session public adapters; no server Infrastructure reference or direct database/file access"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Consumes root-frozen thumbnail-v1 and independent vectors; snapshot v1 and service contract unchanged"
+    ],
+    "architecture_tests": [
+      "verify_repository.py passed including architecture and source policy",
+      "Windows solution locked restore/format verify/Release build passed; zero compiler warnings",
+      "Dependency audit passed: 6 projects/31 unchanged locked packages",
+      "101 non-NativeLive Windows tests passed; separate real Core thumbnail test 1/1 passed",
+      "Production self-contained Host locked publish and real WIC Job smoke passed"
+    ],
+    "technical_debt": [
+      "Original metadata snapshots remain the existing bounded page model; this task adds no image-only query or local business classification",
+      "Real Explorer UIA/layout/viewport cancellation and product packaging are root integration responsibilities"
+    ]
+  }
+}

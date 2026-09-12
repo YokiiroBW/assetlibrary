@@ -33,7 +33,12 @@ internal sealed class ThumbnailDecodeStartup : IDisposable
     {
         var startup = new Startup
         {
-            Size = 112, Flags = 0x100, Input = pipes[0], Output = pipes[1], Error = pipes[2], Attributes = attributes,
+            Size = 112,
+            Flags = 0x100,
+            Input = pipes[0],
+            Output = pipes[1],
+            Error = pipes[2],
+            Attributes = attributes,
         };
         var environment = Marshal.StringToHGlobalUni(EnvironmentBlock());
         try

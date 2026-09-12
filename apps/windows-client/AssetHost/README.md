@@ -1,5 +1,10 @@
 # Explorer 受控 AssetHost
 
+当前生产`--user-session`提供只读快照、连接控制及[派生缩略图](THUMBNAILS.md)。
+生产入口状态与实机证据由上层Windows发布说明管理；以下保留V03-010的原始Proof使用说明。
+
+## V03-010 原始Proof说明
+
 V03-010 为 test-only 原生 Explorer 命名空间提供进程外只读页面。复用现有 Windows Core 适配器与生成 AssetLink SDK，不在 Explorer 中加载 .NET、HTTP、凭据、数据库或媒体处理。协议由 `contracts/windows-shell/read-only-snapshot-v1.md` 冻结；此入口不解除正式 Shell 发布门禁。
 
 构建和测试使用 `apps/windows-client/README.md` 的独立 Windows solution 命令。产物为 `AssetHost/bin/Release/net10.0/AssetLibrary.Windows.AssetHost.dll`，以及同目录生成的 Windows 可执行入口。选择仓库 `global.json` 冻结的 .NET SDK/运行时。
