@@ -4,11 +4,13 @@
 
 ## 视图
 
-保留原生Explorer外壳、树、地址栏和历史，C++ IShellView在CreateViewWindow中创建同进程Win32子HWND。仅右侧内容区自定义；不跨进程SetParent、不加载WinUI/.NET/网页、网络或媒体解码器到Explorer。采用Windows GDI绘制已校验未压缩PBGRA，透明背景使用标准AlphaBlend；新增依赖限系统gdi32/msimg32/oleacc，不引入第二UI框架。纯布局计算与同一控件先在独立测试harness验证，该harness不是交付客户端。
+保留原生Explorer外壳、树、地址栏和历史，C++ IShellView在CreateViewWindow中创建同进程Win32子HWND。仅右侧内容区自定义；不跨进程SetParent、不加载WinUI/.NET/网页、网络或媒体解码器到Explorer。采用Windows GDI绘制已校验未压缩PBGRA，透明背景使用标准AlphaBlend；新增依赖限系统gdi32/msimg32/oleacc/uiautomationcore，不引入第二UI框架。纯布局计算与同一控件先在独立测试harness验证，该harness不是交付客户端。
 
 按照视觉稿实现保宽高比、行边缘对齐的拼图图库，可调密度并切换列表布局；文件夹有独立清晰的导航呈现，分页继续明确标为导航。仅处理当前有界页，绘制和辅助技术查询不访问IPC；视口外图片及时释放，只对当前可见普通文件尝试缩略图。图片端点决定真实格式，不从扩展名推断身份或支持能力。无尺寸时用占位比例，收到真实派生图尺寸后重排并保留滚动锚点。
 
-复用Folder/PIDL/快照v1、当前页排序与既有导航用例。自定义IShellView/IFolderView负责选择、键盘、上下文菜单、刷新和焦点，不能假定DefView自动提供这些行为。保持根目录原有DefView入口可用；图库视图与列表模式在右侧提供明确选择，不用全局可变单例串联不同窗口。自绘控件提供IAccessible/MSAA列表/项目语义，由系统UIA桥接读取，或实现等价的原生UIA；不把无语义的画布当可访问界面。UIA/MSAA查询必须只读内存、失效后不能返回旧名称/图片；用实际外部客户端验收。
+复用Folder/PIDL/快照v1、当前页排序与既有导航用例。自定义IShellView/IFolderView负责选择、键盘、上下文菜单、刷新和焦点，不能假定DefView自动提供这些行为。保持根目录原有DefView入口可用；图库视图与列表模式在右侧提供明确选择，不用全局可变单例串联不同窗口。自绘控件保留IAccessible/MSAA兼容，并直接提供原生UIA列表/项目、选择与可导航项激活语义，复用同一当前页模型和已有操作；不建立隐藏镜像控件。UIA/MSAA查询必须只读内存、失效后不能返回旧名称/图片；用实际外部客户端验收。
+
+2026-09-13辅助技术回收裁决：普通MSAA关闭可回收；创建系统UIA桥接element后，关闭窗口和退出外部客户端仍逐窗保留provider，三轮/30秒证据证明并非单个最后对象缓存。系统选择状态正负对照正确，不能把检查工具摘要缺失误判为选择失败。一次手工系统wrapper验证虽具备ServerSide/UseComThreading和FragmentRoot形状，实际外部FindAll仍从30项变为0，不能交付。故停止桥接修补，采用自有原生UIA root/item provider，精确调用UiaDisconnectProvider清理自有退休对象，不调用全局DisconnectAll扰动Explorer。使用UseComThreading保持创建STA；先标记退休、拒绝重入暴露，在非同步SendMessage上下文完成清理，所有存活接口和清理工作保留合法DLL生命周期。对象代次区分同一窗口内的新旧页面，旧对象的当前查询必须失败。实现和实机通过前仍不默认安装。
 
 失效复用同一生产root的公开SHChangeNotify，原生自定义视图使用SHChangeNotifyRegister/NewDelivery及Lock/Unlock。收到通知先清图像、选择、详情和可访问数据，再有界刷新或回根；晚到结果按view generation和epoch丢弃。销毁不等待网络/解码/工作线程，不得释放仍被异步I/O或辅助技术持有的DLL；四活动视图和显式资源上限保持约束。常驻界面不加入无限Ready轮询；加载重试有截止时间，F5明确开始新一轮。
 
