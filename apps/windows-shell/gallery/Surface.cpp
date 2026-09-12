@@ -15,7 +15,15 @@ namespace {
 struct OwnerReference {
     IUnknown* value;
     explicit OwnerReference(IUnknown* owner) noexcept : value(owner) { if (value) value->AddRef(); }
+    OwnerReference(const OwnerReference&) = delete;
+    OwnerReference& operator=(const OwnerReference&) = delete;
     ~OwnerReference() { if (value) value->Release(); }
+};
+template<typename T> struct OwnedState {
+    // Model/type-info cleanup must precede the final owner/DLL lease release.
+    OwnerReference owner;
+    std::shared_ptr<T> state;
+    explicit OwnedState(std::shared_ptr<T> value) noexcept : owner(value->callbacks.lifetimeOwner), state(std::move(value)) {}
 };
 void Fill(HDC dc, const RECT& rectangle, COLORREF color) noexcept {
     HBRUSH brush = CreateSolidBrush(color); if (brush) { FillRect(dc, &rectangle, brush); DeleteObject(brush); }
@@ -284,7 +292,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
     }
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR id, DWORD_PTR reference) noexcept {
         auto* stored = reinterpret_cast<std::shared_ptr<State>*>(reference);
-        const auto state = *stored; OwnerReference owner(state->callbacks.lifetimeOwner);
+        OwnerReference owner((*stored)->callbacks.lifetimeOwner); const auto state = *stored;
         const bool isCanvas = hwnd == state->canvas;
         const bool isRoot = hwnd == state->window;
         try {
@@ -442,13 +450,15 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
 }
 
 void Surface::Destroy() noexcept {
-    const auto state = state_; if (!state || state->retiring) return;
+    if (!state_ || state_->retiring) return;
+    const OwnedState call(state_); const auto& state = call.state;
     const HWND window = state->window; state->Retire(); if (window && IsWindow(window)) DestroyWindow(window);
 }
 HWND Surface::Window() const noexcept { const auto state = state_; return state && !state->retiring ? state->window : nullptr; }
 
 HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) noexcept {
-    const auto state = state_; if (!state || !state->Alive() || page.entries.size() > snapshot::MaxItems) return E_INVALIDARG;
+    if (!state_ || !state_->Alive() || page.entries.size() > snapshot::MaxItems) return E_INVALIDARG;
+    const OwnedState call(state_); const auto& state = call.state;
     if (generation < state->model->generation) return S_FALSE;
     try {
         snapshot::Page next = page;
@@ -462,14 +472,17 @@ HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) n
     } catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, generation); if (state->Alive()) state->Notify(state->callbacks.viewportChanged); return E_OUTOFMEMORY; }
 }
 void Surface::Clear(snapshot::Status status, std::uint64_t generation) noexcept {
-    const auto state = state_; if (!state || !state->Alive()) return;
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
     if (generation < state->model->generation) return;
     state->Empty(status, generation); NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
     InvalidateRect(state->canvas, nullptr, FALSE); state->Notify(state->callbacks.viewportChanged);
     if (state->Alive()) state->Notify(state->callbacks.selectionChanged);
 }
 HRESULT Surface::SetThumbnail(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image) noexcept {
-    const auto state = state_; if (!state || !state->Alive() || generation != state->model->generation ||
+    if (!state_ || !state_->Alive()) return S_FALSE;
+    const OwnedState call(state_); const auto& state = call.state;
+    if (generation != state->model->generation ||
         index >= state->model->page.entries.size() || state->model->page.entries[index].kind != snapshot::Kind::File || !Contains(state->visible, index)) return S_FALSE;
     if (image && !PixelsValid(*image)) return E_INVALIDARG;
     size_t retained = 0;
@@ -495,7 +508,8 @@ Selection Surface::SelectedItems() const noexcept {
 }
 int Surface::FocusedItem() const noexcept { const auto state = state_; return state && state->Alive() ? state->model->focus : -1; }
 HRESULT Surface::SelectItem(UINT index, UINT flags) noexcept {
-    const auto state = state_; if (!state) return E_INVALIDARG;
+    if (!state_ || !state_->Alive()) return E_INVALIDARG;
+    const OwnedState call(state_); const auto& state = call.state;
     try { return state->Select(index, flags); } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
 }
 HRESULT Surface::ItemRect(UINT index, RECT* rectangle) const noexcept {
@@ -503,9 +517,13 @@ HRESULT Surface::ItemRect(UINT index, RECT* rectangle) const noexcept {
     const auto state = state_; if (!state || !state->Alive() || index >= state->model->page.entries.size()) return E_INVALIDARG;
     *rectangle = state->model->bounds[index]; POINT origin{}; MapWindowPoints(state->canvas, state->window, &origin, 1); OffsetRect(rectangle, origin.x, origin.y); return S_OK;
 }
-void Surface::Focus() noexcept { const auto state = state_; if (state && state->Alive()) SetFocus(state->canvas); }
+void Surface::Focus() noexcept {
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); SetFocus(call.state->canvas);
+}
 bool Surface::TranslateAccelerator(const MSG& message) noexcept {
-    const auto state = state_; if (!state || !state->Alive() || message.message != WM_KEYDOWN) return false;
+    if (!state_ || !state_->Alive() || message.message != WM_KEYDOWN) return false;
+    const OwnedState call(state_); const auto& state = call.state;
     if (message.wParam == VK_TAB) {
         if ((GetKeyState(VK_CONTROL) & 0x8000) || (GetKeyState(VK_MENU) & 0x8000)) return false;
         std::array<HWND, 7> order{state->canvas, state->buttons[0], state->buttons[1], state->buttons[2], state->buttons[3], state->buttons[4], state->buttons[5]};
@@ -519,18 +537,21 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
     try { return state->Key(message.wParam); } catch (const std::bad_alloc&) { return false; }
 }
 void Surface::SetVisible(bool visible) noexcept {
-    const auto state = state_; if (!state || !state->Alive()) return;
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
     state->shown = visible; ShowWindow(state->window, visible ? SW_SHOWNA : SW_HIDE);
     if (state->Alive()) { RECT client{}; GetClientRect(state->canvas, &client); state->UpdateVisible(client.bottom); }
 }
 void Surface::SetMode(Mode mode) noexcept {
-    const auto state = state_; if (!state || !state->Alive()) return;
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
     try { state->mode = mode; state->UpdateModeButtons(); state->model->title = mode == Mode::Gallery ? L"资产库图库" : L"资产库列表"; state->Reflow(true); }
     catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, state->model->generation + 1); state->Notify(state->callbacks.viewportChanged); }
 }
 Mode Surface::CurrentMode() const noexcept { const auto state = state_; return state ? state->mode : Mode::Gallery; }
 void Surface::SetDensity(UINT value) noexcept {
-    const auto state = state_; if (!state || !state->Alive()) return;
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
     try { state->density = std::clamp(value, MinimumDensityDip, MaximumDensityDip); state->Reflow(true); }
     catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, state->model->generation + 1); state->Notify(state->callbacks.viewportChanged); }
 }

@@ -46,7 +46,7 @@ int main() {
             Require(std::abs(ratio - 2.0) < 0.04, "preserved aspect ratio rounding");
         }
         Require(gallery::Visible(row, ratios, row.height + 1, 100).count == 0, "outside viewport");
-        std::cout << "gallery_layout: 72 viewport/dpi/mode matrices plus bounds, ratios and visibility passed\n";
+        std::cout << "gallery_layout: 36 viewport/dpi/mode matrices plus bounds, ratios and visibility passed\n";
         return 0;
     } catch (const char* error) { std::cerr << error << '\n'; return 1; }
 }

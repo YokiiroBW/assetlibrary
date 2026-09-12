@@ -10,6 +10,7 @@ struct Harness {
     gallery_test::Owner owner;
     gallery::Surface* surface = nullptr;
     UINT activated = 0;
+    bool populating = false, pending = false, fixtureFailed = false;
     ~Harness() { if (surface) delete surface; }
 };
 snapshot::Page FixturePage() {
@@ -31,6 +32,19 @@ std::shared_ptr<const gallery::Pbgra> FixtureImage(UINT index) {
         image->pixels[at + 2] = static_cast<BYTE>(60 + index % 6 * 24); image->pixels[at + 3] = 255;
     }
     return image;
+}
+void Populate(Harness& harness) noexcept {
+    if (!harness.surface) return;
+    if (harness.populating) { harness.pending = true; return; }
+    harness.populating = true;
+    try {
+        for (UINT pass = 0; pass < 4; ++pass) {
+            harness.pending = false; const auto visible = harness.surface->VisibleFileItems();
+            for (UINT at = 0; at < visible.count; ++at) harness.surface->SetThumbnail(visible.indices[at], 1, FixtureImage(visible.indices[at]));
+            if (!harness.pending) break;
+        }
+    } catch (const std::bad_alloc&) { harness.fixtureFailed = true; }
+    harness.populating = false;
 }
 LRESULT CALLBACK FrameProc(HWND window, UINT message, WPARAM first, LPARAM second, UINT_PTR id, DWORD_PTR data) {
     auto* harness = reinterpret_cast<Harness*>(data);
@@ -72,11 +86,11 @@ int wmain(int argc, wchar_t** argv) {
         SetWindowSubclass(frame, FrameProc, 1, reinterpret_cast<DWORD_PTR>(&harness));
         gallery::Callbacks callbacks; callbacks.context = &harness; callbacks.lifetimeOwner = &harness.owner;
         callbacks.activateItem = [](void* context, UINT) noexcept { ++static_cast<Harness*>(context)->activated; };
+        callbacks.viewportChanged = [](void* context) noexcept { Populate(*static_cast<Harness*>(context)); };
         RECT client{}; GetClientRect(frame, &client);
         if (SUCCEEDED(gallery::Surface::Create(frame, client, callbacks, &harness.surface))) {
             harness.surface->SetPage(FixturePage(), 1);
-            auto visible = harness.surface->VisibleFileItems();
-            for (UINT at = 0; at < visible.count; ++at) harness.surface->SetThumbnail(visible.indices[at], 1, FixtureImage(visible.indices[at]));
+            Populate(harness);
             if (external) {
                 const HWND canvas = FindWindowExW(harness.surface->Window(), nullptr, L"STATIC", nullptr);
                 result = static_cast<int>(RunExternal(argv[2], canvas));
@@ -99,6 +113,7 @@ int wmain(int argc, wchar_t** argv) {
         if (IsWindow(frame)) DestroyWindow(frame);
     }
     if (harness.surface) { delete harness.surface; harness.surface = nullptr; }
+    if (harness.fixtureFailed) result = 6;
     if (external && result == 0) {
         const ULONGLONG deadline = GetTickCount64() + 2000;
         while (harness.owner.references > 1 && GetTickCount64() < deadline) {

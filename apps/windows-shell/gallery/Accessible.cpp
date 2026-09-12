@@ -54,7 +54,7 @@ public:
     SelectionEnumerator(std::shared_ptr<AccessibleModel> model, Selection selection, UINT position = 0) noexcept
         : model_(std::move(model)), owner_(model_->lifetimeOwner), generation_(model_->generation),
           selection_(selection), position_(position) { if (owner_) owner_->AddRef(); }
-    ~SelectionEnumerator() { if (owner_) owner_->Release(); }
+    ~SelectionEnumerator() { model_.reset(); if (owner_) owner_->Release(); }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
         if (!result) return E_POINTER; *result = nullptr;
         if (iid != IID_IUnknown && iid != IID_IEnumVARIANT) return E_NOINTERFACE;
@@ -103,7 +103,7 @@ public:
     explicit Accessible(std::shared_ptr<AccessibleModel> model) noexcept : model_(std::move(model)), owner_(model_->lifetimeOwner) {
         if (owner_) owner_->AddRef();
     }
-    ~Accessible() { if (owner_) owner_->Release(); }
+    ~Accessible() { model_.reset(); if (owner_) owner_->Release(); }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
         if (!result) return E_POINTER; *result = nullptr;
         if (iid != IID_IUnknown && iid != IID_IDispatch && iid != IID_IAccessible) return E_NOINTERFACE;

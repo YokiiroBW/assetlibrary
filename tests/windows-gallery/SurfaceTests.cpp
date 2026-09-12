@@ -92,6 +92,13 @@ int main() {
         key.wParam = VK_HOME; Require(surface->TranslateAccelerator(key) && surface->FocusedItem() == 0, "Home selects first displayed item");
         key.wParam = VK_RETURN; Require(surface->TranslateAccelerator(key) && scenario.activations == 1, "Enter activates existing navigation callback");
         key.wParam = VK_APPS; Require(surface->TranslateAccelerator(key) && scenario.menus == 1, "keyboard context menu");
+        surface->SetPage(page, 1); files = surface->VisibleFileItems();
+        Require(files.count > 0, "scroll test visible candidates");
+        surface->SetThumbnail(files.indices[0], 1, Image());
+        const UINT beforeScroll = scenario.viewportChanges;
+        key.wParam = VK_END; Require(surface->TranslateAccelerator(key) && surface->FocusedItem() == 29, "End focuses final page item");
+        Require(scenario.viewportChanges > beforeScroll && surface->RetainedImageBytes() == 0, "scroll cancels old viewport and releases its pixels");
+        key.wParam = VK_HOME; surface->TranslateAccelerator(key);
         child.lVal = 2; Require(SUCCEEDED(accessible->accSelect(SELFLAG_TAKESELECTION, child)), "MSAA selection replace");
         child.lVal = 5; Require(SUCCEEDED(accessible->accSelect(SELFLAG_EXTENDSELECTION, child)) && surface->SelectedItems().count >= 4, "MSAA range selection");
         surface->SetVisible(false); Require(surface->VisibleFileItems().count == 0 && surface->RetainedImageBytes() == 0, "hidden releases images");
