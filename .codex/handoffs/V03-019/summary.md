@@ -1,6 +1,6 @@
 # V03-019 交接摘要
 
-状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `7446e99`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
+状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `d215431`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
 
 ## 交付行为
 
@@ -29,3 +29,7 @@
 root 已逐步合入 API、基础控件、主题、窗口/裁剪和 101 可见项修复。当前新增顺序为 `391f3ba` → `62364c2` → `ab50a05` → `124df8e` → `4eede49` → `7446e99`。V03-021 必须设置 providerLifetimeOwner=folder_ 并将 `gallery/Uia.cpp` 与系统 uiautomationcore 加入生产目标。随后 root 跑整包与真实 Explorer/Core；此同源验证不能替代该证据。
 
 详见 tests.md 与 accessibility-investigation.md；result.json 列明边界和验证结果。
+
+## 实际GUI文案复核补充
+
+`d215431` 修正正常非文件项的无障碍描述：Ready 时复用 TypeText(kind)，只有非Ready状态才调用 StatusText。正常资源库/目录/下一页/链接项不再误报后台服务不可用；不改变共享StatusText、实际状态、接口或业务行为。四种类型的HelpText/ItemStatus正控以及AccessDenied负控已通过严格GalleryUiaTests构建与定向CTest。

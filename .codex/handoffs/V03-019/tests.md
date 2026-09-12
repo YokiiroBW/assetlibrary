@@ -38,3 +38,7 @@ Windows UIA客户端在退休后 GetCurrentSelection 实测返回 S_OK+空数组
 focus订阅不是以抢前台方式测试；其实际事件来源可能是当前Explorer，测试不要求隐藏harness一定收到全局焦点变化；本次受控运行也收到1次本进程focus。精确root/child HasKeyboardFocus已有直接断言。
 
 Rendering/Budget在全局listener开启时曾实测Destroy后owner4/providers2/pending2/dispatcher1，属于已排队退休；测试现在2秒上限pump后严格断全部归零，Budget也必须owner1/!wrongThread。不会把CoUninitialize后的回收代替退役成功。
+
+## d215431 GUI文案补充验证
+
+构建 `cmake --build .runtime/gallery-tests --config Release --target GalleryUiaTests --parallel 2` 严格通过；`ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure -R '^gallery_uia$'` 1/1通过（0.05秒）。直接查询Ready Library/Directory/NextPage/Reparse的UIA HelpText/ItemStatus必须等于既有TypeText(kind)；同四种类型AccessDenied必须仍报告StatusText(AccessDenied)。没有重新执行无关套件；前述10/10和仓库快门禁是上一个完整检查点证据，root继续实际包验证。
