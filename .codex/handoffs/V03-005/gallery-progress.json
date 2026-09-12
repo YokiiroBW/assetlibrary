@@ -21,14 +21,18 @@
     "native_shell_view": "04d81cf",
     "surface_clip_and_frame": "47e7c06",
     "thumbnail_handoff": "27bb79b",
-    "visible_admission_contract": "b856730/e67d727"
+    "visible_admission_contract": "b856730/e67d727",
+    "complete_visible_surface": "75074f8",
+    "batched_image_admission": "22e88f4",
+    "shell_handoff": "c8df1a4",
+    "native_uia_decision": "9d46429"
   },
   "agents": [
     {
       "task": "V03-019",
       "agent": "windows_package_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-019",
-      "scope": "Surface clip/frame accepted. Whole-visible<=101 header and honest budget fallback pending. MSAA-only retires correctly; UIA ElementFromHandle triggers retained provider, even releasing UIA before close. Actual selection MSAA/Legacy/UIA positive/negative passed. One explicit system-wrapper feasibility trial approved; no default install until retirement passes."
+      "scope": "Surface throughf9acd9f integrated; final outstanding lifecycle now adopting owned nativeUIA root/items, reusing same AccessibleModel. One systemwrapper factory trial had0x22/FragmentRoot/List but real externalFindAll0 of30 (stage100); abandoned, not installed. Header provider-lifetime/API design and sourceUia*.h/cpp pending; root owns production CMake/ADR/import changes."
     },
     {
       "task": "V03-020",
@@ -40,7 +44,7 @@
       "task": "V03-021",
       "agent": "windows_shell_delivery",
       "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-021",
-      "scope": "Original View/client integrated04d81cf+0112fb4 and handoff1ad8687. Implementing16-slot batched admission of whole visible<=101, complete-driven refill and cross-generation shared16MiB pixel lease; bounded cancellation, no timer/retry loops."
+      "scope": "V03-021 full-visible101/16unfinished/64modulework/2IO/plain pixel lease integrated22e88f4+handoffc8df1a4. All affected tests passed. Possible follow-up to set separate providerLifetimeOwner=folder_ after Surface header approved; no current worker writes."
     }
   ],
   "real_core": {
@@ -62,13 +66,13 @@
     "new versioned package and final handoff"
   ],
   "nas": "unchanged; lacks required seccomp for original image worker; no server/security changes authorized or performed",
-  "desktop": "No owned GUI now. Corrected frame23164 exited via close button. Native maximize/restore and narrow Size menu work; toolbar wraps at464 logical px. Scroll no longer overpaints toolbar. Wide30-item page exposed starvation past16; root approved full visible<=101 with16 unfinished admission and shared16MiB pixel lease. Saved harness-scroll-clipped.png/harness-narrow-toolbar-wrap.png/harness-wide-visible-starvation.png in .runtime/gallery-validation. OriginalExplorer6212 unchanged.",
+  "desktop": "No owned GUI. Latest harness25084 exited via close button. Complete 29-image wide page visually passed in .runtime/gallery-validation/harness-wide-all-images.png; previous starvation screenshot preserved. Narrow toolbar wrapping and scroll clipping passed. Test synthetic pixels only; installed realExplorer gallery still pending. OriginalExplorer6212 untouched.",
   "verification": {
     "repository": "passed after shared test fixture correction",
     "native_build": "passed strict Release/W4/WX/analyze after04d81cf",
     "windows_tests": "prior101/101; helper-only change24/24 in owner",
     "real_images": "Core LPAC/AOT2/2 + native image pipe1/1 passed; fixture148 assets unchanged and cleaned",
     "visual": "partial: mouse mode/density and keyboard multiselect passed; scroll canvas clipping failed, provider retirement unresolved",
-    "native_tests": "12/12 root merged-source CTests passed69.14s; afterclip Surface/Layout/Rendering3/3 passed0.13s"
+    "native_tests": "Root original12/12 passed69.14s; after full-visible/lease fix targetedRequests/View/imports3/3 passed1.47s and Surface/Layout/Budget/Rendering4/4 passed0.22s; repository-batch.log passed."
   }
 }

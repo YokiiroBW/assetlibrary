@@ -12,6 +12,8 @@
 
 2026-09-13辅助技术回收裁决：普通MSAA关闭可回收；创建系统UIA桥接element后，关闭窗口和退出外部客户端仍逐窗保留provider，三轮/30秒证据证明并非单个最后对象缓存。系统选择状态正负对照正确，不能把检查工具摘要缺失误判为选择失败。一次手工系统wrapper验证虽具备ServerSide/UseComThreading和FragmentRoot形状，实际外部FindAll仍从30项变为0，不能交付。故停止桥接修补，采用自有原生UIA root/item provider，精确调用UiaDisconnectProvider清理自有退休对象，不调用全局DisconnectAll扰动Explorer。使用UseComThreading保持创建STA；先标记退休、拒绝重入暴露，在非同步SendMessage上下文完成清理，所有存活接口和清理工作保留合法DLL生命周期。对象代次区分同一窗口内的新旧页面，旧对象的当前查询必须失败。实现和实机通过前仍不默认安装。
 
+该方案依据微软的[原生Provider结构与导航](https://learn.microsoft.com/en-us/windows/win32/winauto/uiauto-serversideprovider)、[COM线程选项](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationcore/ne-uiautomationcore-provideroptions)、[运行时身份](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationcore/nf-uiautomationcore-irawelementproviderfragment-getruntimeid)和[精确Provider断开约束](https://learn.microsoft.com/en-us/windows/win32/api/uiautomationcoreapi/nf-uiautomationcoreapi-uiadisconnectprovider)。
+
 失效复用同一生产root的公开SHChangeNotify，原生自定义视图使用SHChangeNotifyRegister/NewDelivery及Lock/Unlock。收到通知先清图像、选择、详情和可访问数据，再有界刷新或回根；晚到结果按view generation和epoch丢弃。销毁不等待网络/解码/工作线程，不得释放仍被异步I/O或辅助技术持有的DLL；四活动视图和显式资源上限保持约束。常驻界面不加入无限Ready轮询；加载重试有截止时间，F5明确开始新一轮。
 
 ## 缩略图
