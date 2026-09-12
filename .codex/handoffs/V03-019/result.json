@@ -7,7 +7,7 @@
   "owner": "windows-gallery-surface-owner",
   "branch": "codex/v03-019-native-gallery-surface",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-019",
-  "commit": "d215431",
+  "commit": "f2ad8e3",
   "changed_files": [
     ".codex/handoffs/V03-019/accessibility-investigation.md",
     ".codex/handoffs/V03-019/legacy-control-sources.json",
@@ -45,12 +45,28 @@
     "skipped": 0,
     "report": "tests.md",
     "scope": "same-source Windows CTest; repository validation recorded separately",
-    "latest_targeted": {
-      "name": "gallery_uia",
-      "passed": 1,
-      "failed": 0,
-      "scope": "Ready navigation type descriptions and non-ready status control"
-    }
+    "latest_targeted": [
+      {
+        "commit": "d215431",
+        "names": [
+          "gallery_uia"
+        ],
+        "passed": 1,
+        "failed": 0,
+        "scope": "Ready navigation type descriptions and non-ready status control"
+      },
+      {
+        "commit": "f2ad8e3",
+        "names": [
+          "gallery_layout",
+          "gallery_surface"
+        ],
+        "passed": 2,
+        "failed": 0,
+        "scope": "Horizontal same-row navigation, order wrapping, and actual Shift+Right selection"
+      }
+    ],
+    "last_full_commit": "7446e99"
   },
   "risks": [
     "Actual Explorer/Core/package integration belongs to root and is not certified by the synthetic harness.",
@@ -68,7 +84,8 @@
       "Existing snapshot/PIDL type and status semantics; navigation/selection/refresh owner callbacks.",
       "Root-provided generated Web semantic COLORREF theme; no separately maintained palette.",
       "One bounded AccessibleModel for painting, MSAA and native UIA.",
-      "Ready navigation UIA descriptions reuse snapshot::TypeText; non-ready descriptions retain snapshot::StatusText unchanged."
+      "Ready navigation UIA descriptions reuse snapshot::TypeText; non-ready descriptions retain snapshot::StatusText unchanged.",
+      "Horizontal navigation uses current bounds/order and existing Next/Previous fallback; Up/Down spatial semantics are unchanged."
     ],
     "duplicated_logic": [],
     "cross_module_access": [

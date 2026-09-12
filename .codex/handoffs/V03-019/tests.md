@@ -42,3 +42,7 @@ Rendering/Budget在全局listener开启时曾实测Destroy后owner4/providers2/p
 ## d215431 GUI文案补充验证
 
 构建 `cmake --build .runtime/gallery-tests --config Release --target GalleryUiaTests --parallel 2` 严格通过；`ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure -R '^gallery_uia$'` 1/1通过（0.05秒）。直接查询Ready Library/Directory/NextPage/Reparse的UIA HelpText/ItemStatus必须等于既有TypeText(kind)；同四种类型AccessDenied必须仍报告StatusText(AccessDenied)。没有重新执行无关套件；前述10/10和仓库快门禁是上一个完整检查点证据，root继续实际包验证。
+
+## f2ad8e3 GUI键盘补充验证
+
+严格构建 `cmake --build .runtime/gallery-tests --config Release --target GalleryLayoutTests GallerySurfaceTests --parallel 2` 通过；定向 `ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure -R '^gallery_(layout|surface)$'` 2/2通过（0.08秒）。几何夹具刻意让整行目录中心比同排下一图片更近，修复前会选错；验证Left/Right同排优先、末列/首列沿order跨行、页末无目标、负偏移稳定及Up原几何不变。真实控件两列布局下Shift+Right焦点2且仅选1/2；普通Right从2到3，Left从3回2。仅做相关定向验证，完整10项/快门禁沿用此前检查点；root负责实际Explorer合并后的总验收。

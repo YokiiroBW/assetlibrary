@@ -1,6 +1,6 @@
 # V03-019 交接摘要
 
-状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `d215431`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
+状态：ready_for_review。分支 `codex/v03-019-native-gallery-surface`，代码终点 `f2ad8e3`。实现和同源测试已交付；真实 Core/Explorer、安装包和默认启用由协调线程统一验收，本文不宣布完整 V0.3 完成。
 
 ## 交付行为
 
@@ -33,3 +33,7 @@ root 已逐步合入 API、基础控件、主题、窗口/裁剪和 101 可见�
 ## 实际GUI文案复核补充
 
 `d215431` 修正正常非文件项的无障碍描述：Ready 时复用 TypeText(kind)，只有非Ready状态才调用 StatusText。正常资源库/目录/下一页/链接项不再误报后台服务不可用；不改变共享StatusText、实际状态、接口或业务行为。四种类型的HelpText/ItemStatus正控以及AccessDenied负控已通过严格GalleryUiaTests构建与定向CTest。
+
+## 实际GUI左右导航复核补充
+
+`f2ad8e3` 限定Left/Right先找纵向bounds重叠的同一视觉行邻项；同排无邻项才沿既有order Next/Previous衔接。不改变Up/Down。宽目录行中心即使更近，也不会抢走图片的水平导航。纯几何负控覆盖两列图片、跨行首末与负滚动偏移；真实隐藏控件Shift+Right只选第一/第二张图、不选上方目录，左右跨行沿显示顺序。GalleryLayoutTests/GallerySurfaceTests严格构建和2/2定向CTest通过。
