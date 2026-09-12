@@ -2,6 +2,25 @@
 
 2026-09-13 Windows x64；MSVC19.44.35228.0/工具14.44.35207，WindowsSDK10.0.26100.0；生产/MT、Proof/MD不变。所有构建保持/W4 /WX /permissive- /analyze /utf-8。
 
+## 最终状态栏与原生UIA接线 2515309
+
+消费Surface最终原生UIA系列和root批准的Uia.cpp/uiautomationcore构建提交后，实际命令（工具绝对路径见下文）为：
+
+```powershell
+& $cmake --build .runtime/explorer-gallery --config Release --parallel 2 --target AssetLibraryExplorer ExplorerGalleryViewTests
+& $ctest --test-dir .runtime/explorer-gallery -C Release --output-on-failure -R 'explorer_gallery_view|explorer_product_imports'
+```
+
+严格Release构建通过；2/2通过：View0.61s、imports0.02s，共0.63s。日志.runtime/explorer-gallery/uia-status-build.log、uia-status-tests.log。最终DLL SHA256 E054E952ABD6B6EFEB767055143923919363977F92F97909885548773EDDEF58。原9项与20s真实IPC不重复执行。
+
+最终verify_repository再次通过handoff/架构/依赖检查，日志uia-status-verify.log；Alpha继续blocked。
+
+状态栏fake Browser验证：开始Loading替换旧状态，100普通项+NextPage显示当前页100项/已选0项，普通多选显示2项，选中分页按钮不当资产；QueryActiveShellView中选择变化、Refresh和active替换均不回写旧数据；Expired显示失效状态；当前View退役清文字，非active View退役不清新View文字；host返回E_NOTIMPL不破坏UIActivate/浏览。实际Windows11状态栏显示仍由root验收。
+
+外部UIA使用独立MTA线程，通过公开ElementFromHandle/FindAll读取真实View的root与两个fake条目；线程只持UIA客户端接口，不调用View/Folder。主UI STA泵送消息。两个分支分别显式Destroy后Release、直接最后Release；客户端仍持root/child时View返回0、HWND销毁、ActiveViews0，provider只可暂持Folder。客户端继续读取旧root/child CurrentName失败且无数据，CurrentSelection为空/无旧条目；释放客户端后有限STA pump严格要求Folder/browser引用回1、providers/pendingRetirements/dispatcherWindows均0。
+
+另使用实际生产DLL创建隐藏顶层父窗下的空View（不显示、不启动IPC），外部MTA client保留native UIA root；最后View.Release为0，退役消息尚未处理时DllCanUnloadNow为S_FALSE，客户端离场并完成STA退役后恢复S_OK。这个检查补足仅看HWND消失不能证明DLL保活正确的缺口。旧即时Folder1检查改为有界STA退役泵送后仍断言1，未放宽最终回收条件。
+
 ## 最新同屏加载修复 d6ea45f
 
 新增Requests/View批次与共享像素lease后，实际执行：

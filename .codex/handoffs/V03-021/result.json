@@ -7,7 +7,7 @@
   "owner": "windows-gallery-shell-owner",
   "branch": "codex/v03-021-explorer-gallery-view",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-021",
-  "commit": "d6ea45fc4776544b17c07d86b2ba3a33052fcc7c",
+  "commit": "2515309b5c0d265da997995a1b8f788c4b8dd9a0",
   "changed_files": [
     ".codex/handoffs/V03-021/client-status.md",
     ".codex/handoffs/V03-021/result.json",
@@ -42,16 +42,16 @@
     "scope": "Original nine CTests plus thumbnail/Requests/real View tests. Offscreen fake Sources and own Temp notification PIDL are not actual Explorer/Core acceptance.",
     "strict_build": "Final Release /W4 /WX /permissive- /analyze /utf-8 passed; no weakened diagnostics",
     "repository_verification": "Passed: 482 architecture inputs, 21 migration tests, 14 architecture tests; Alpha remains blocked",
-    "dll_sha256": "EC5E179FCB210C58BA54360B3CF73C026EA333FD93B3D96D1200D2BEF77A6576",
-    "final_followup": "After initial 12/12 checkpoint, full-visible-page fix d6ea45f passed strict build and affected Requests/View/imports 3/3 in1.46s; earlier unchanged pipe/legacy tests were not rerun."
+    "dll_sha256": "E054E952ABD6B6EFEB767055143923919363977F92F97909885548773EDDEF58",
+    "final_followup": "Final2515309 native UIA/status integration passed strict Release build and View/imports2/2 in0.63s. Earlier12/12 and full-visible-page3/3 remain separate unchanged evidence; no legacy/20s IPC repetition."
   },
   "risks": [
     "Leased resident pixels across Surface/queue/Take share16MiB per RequestState. Two image I/O callbacks may independently hold bounded wire pixel frames and not-yet-admitted PBGRA copies (each<=1MiB plus fixed wire metadata); this is not a total process memory cap.",
     "Root must validate real registered Explorer plus real Core thumbnails before default installation.",
-    "Surface external MSAA provider retention under v6/PerMonitorV2 remains separately tracked by V03-019/root; not recorded as reclaimed here.",
     "Each new non-root view defaults to Gallery; mode/density do not persist across navigation, by coordinator decision.",
     "Notification Temp-directory test verifies public mechanism, not production root binding or final actual UIA behavior.",
-    "No G4 soak, raw-file open/download, asset write, or complete V0.3 release claim."
+    "No G4 soak, raw-file open/download, asset write, or complete V0.3 release claim.",
+    "Windows11 actual status-bar rendering is coordinator-owned acceptance; unsupported public status interface never changes browsing or private host controls."
   ],
   "blocked_by": [],
   "recommended_merge_order": 3,
@@ -65,7 +65,8 @@
       "Snapshot wire v1/150ms/64KiB parser and cleanup; shared actual TokenUser/session/held server identity moved to LocalPipePeer without semantic relaxation.",
       "Original four-active-view atomic shared between root DefView callback and custom View.",
       "Independent coordinator thumbnail wire vectors and existing COM test recorders.",
-      "Complete Surface visible set101 and separate request limit16 from owner f9acd9f; existing completion message and ticket validation refill bounded pipeline without new threads/timers."
+      "Complete Surface visible set101 and separate request limit16 from owner f9acd9f; existing completion message and ticket validation refill bounded pipeline without new threads/timers.",
+      "Provider lifetime uses original Folder independently from View; Surface native UIA and STA retirement are reused. Browser status uses public IShellBrowser and Snapshot status text only."
     ],
     "duplicated_logic": [
       "Native OVERLAPPED transfer/reap mechanics follow the original proven pattern in the separately bounded20s/1MiB thumbnail transport; peer authentication is shared once and no domain rule is copied."
@@ -73,24 +74,26 @@
     "cross_module_access": [],
     "new_language_or_framework": [],
     "new_major_dependencies": [
-      "Only ADR-0021-approved Windows system gdi32/msimg32/oleacc imports; no third-party/runtime dependency."
+      "Only coordinator ADR-approved Windows system gdi32/msimg32/oleacc/uiautomationcore imports; no third-party/runtime dependency."
     ],
     "contract_changes": [
       "No shared wire or contract files authored by this owner. Consume root thumbnail-v1 and Surface owner Shown API; internal C++ test notificationRoot override is not exposed through COM/configuration/environment.",
-      "Consume coordinator-approved101 candidates/16 unfinished tickets and shared resident16MiB interpretation; no shared contract file authored here. Per-state atomic byte leases span Surface/queue/Take and generations, holding plain pixels/budget only."
+      "Consume coordinator-approved101 candidates/16 unfinished tickets and shared resident16MiB interpretation; no shared contract file authored here. Per-state atomic byte leases span Surface/queue/Take and generations, holding plain pixels/budget only.",
+      "Consumed Surface providerLifetimeOwner and root-approved native UIA build/import changes; this owner added only Folder assignment and public browser status calls, no shared contract authored."
     ],
     "architecture_tests": [
       "Full12 CTests passed69.14s, including original9 preservation and new malformed-frame/cancel/generation/quota/COM-reentry coverage.",
       "Final incoming AddRef reentry negative control and strict gallery_view rebuild passed0.23s.",
       "verify_repository passed with482 native/repository inputs and Alpha blocked.",
       "Final diff review checked owner-only modifications, no backend COM references, DLL pins, no GUI IPC waits, unchanged original frame limits, and bounded queues.",
-      "Wide29-item real View fake-source regression,4 views64 work/two image workers, terminal failures, canceled unfinished slots waking new generation, cached-plus-completed16MiB and late old-generation lease release passed."
+      "Wide29-item real View fake-source regression,4 views64 work/two image workers, terminal failures, canceled unfinished slots waking new generation, cached-plus-completed16MiB and late old-generation lease release passed.",
+      "External MTA UIA root/child retained across real View Destroy/last Release: View0/slot0 before client release, final Folder/browser1 and providers/retirements/dispatcher0. Actual hidden production DLL UIA root also proves DllCanUnloadNow S_FALSE then S_OK after retirement. Active status100+page/selection/Loading/Expired and COM reentry tests passed."
     ],
     "technical_debt": [
       "Actual Explorer/Core image and external accessibility retirement acceptance remains coordinator-owned.",
       "Per-navigation mode preference is intentionally not persisted.",
-      "MSAA/v6/PMv2 retained-reference issue remains outside this adapter checkpoint; no forced Release or false unload assertion.",
-      "Visibility uses committed Surface intent and ancestor native visibility; real Explorer host behavior remains in final integration verification."
+      "Visibility uses committed Surface intent and ancestor native visibility; real Explorer host behavior remains in final integration verification.",
+      "Old legacy-bridge retention implementation was replaced by Surface native UIA; adapter-level external client and real DLL retirement checks pass, while full actual Explorer acceptance stays with coordinator."
     ]
   }
 }
