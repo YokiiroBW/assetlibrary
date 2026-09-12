@@ -50,16 +50,17 @@
     }
   ],
   "real_core": {
-    "session_id": null,
-    "evidence": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f",
-    "ready_file": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f/ready.json",
-    "origin": "https://localhost:56529",
-    "host_pid": 30400,
-    "expires_at_utc": "2026-09-13T02:31:46.5187613+08:00",
+    "session_id": 30648,
+    "evidence": ".runtime/gallery-server-20260913/core/20260912T192618Z-02d21811",
+    "ready_file": ".runtime/gallery-server-20260913/core/20260912T192618Z-02d21811/ready.json",
+    "origin": "https://localhost:64171",
+    "host_pid": 36424,
+    "expires_at_utc": "2026-09-12T21:26:28.6215079+00:00",
     "worker": ".runtime/gallery-server-20260913/worker/AssetLibrary.ImagePreview.Worker.exe",
     "corpus": "tests/integration/native-clients/fixtures/image-preview-v1",
-    "validation": "LiveImageEndpointTests 2/2 passed with EXPECT_AVAILABLE=1; genuine Windows LPAC/AOT server-generated PNG; .runtime/gallery-server-20260913/live-images.trx",
-    "cleanup": "Completed 2026-09-13: NATIVE_CLIENT_CLEANUP verified. Fixture stopped; renew before actual Explorer images."
+    "validation": "Prior fixture actualLPAC/Core2/2 and nativepipe1/1 remain evidence; this new fixture ready for final realExplorer run.",
+    "cleanup": "ACTIVE new fixture for package/Explorer acceptance. Root must write its ready.stop_file and wait session30648 for NATIVE_CLIENT_CLEANUP verified; never log connection credentials.",
+    "previous_evidence": ".runtime/gallery-server-20260913/core/20260912T163137Z-2819a65f (cleaned:148 original hashes/mtimes unchanged and6 roles/resources removed)"
   },
   "remaining": [
     "finish module reviews/merges",
@@ -78,5 +79,5 @@
     "native_tests": "Root original12/12 passed69.14s; after full-visible/lease fix targetedRequests/View/imports3/3 passed1.47s and Surface/Layout/Budget/Rendering4/4 passed0.22s; repository-batch.log passed.",
     "setup": "preview.3 identity: locked restore/format/zero-warning build +23 Setup tests;6 package tests;16 release-lock tests;17 RID package license audit all passed in .runtime/gallery-validation."
   },
-  "critical_decision": "Do not blindly finish nativeUIA rewrite before old-MSAA corrected-WM_DESTROY control completes. Prior map-clear failed result lacked actual-call evidence. Prefer smallest tested fix while preserving prototype/evidence."
+  "critical_decision": "CONFIRMED: corrected old-MSAA control explicitly executed CoDisconnect+correct ownHWND mapclear eachcycle;3 cycles still providers3/owners2 after30s, onlyCoUninit clears. Continue owned nativeUIA. New native correctedcanvasIdentity+explicitmapclear+per-providerdisconnect passes normal/action/3cycles; fixed512-slotSTA retirement capacity negative tests now running."
 }
