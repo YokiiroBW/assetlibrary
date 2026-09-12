@@ -14,10 +14,12 @@ on:
       - 'tests/windows-client/**'
       - 'tests/windows-setup/**'
       - 'tests/windows-shell/**'
+      - 'tests/windows-gallery/**'
       - 'contracts/windows-shell/**'
       - 'packages/sdk/assetlink/**'
       - 'packages/ui/**'
       - 'scripts/validate_android_dependencies.py'
+      - 'scripts/export_native_theme.py'
       - 'eng/android-dependency-policy.json'
       - '.github/workflows/platform-quality.yml'
 
@@ -151,6 +153,14 @@ jobs:
         run: cmake --build .runtime/explorer-proof --config Release --parallel 2
       - name: Native Shell regression tests
         run: ctest --test-dir .runtime/explorer-proof -C Release --output-on-failure
+      - name: Verify generated native theme
+        run: python -I -B scripts/export_native_theme.py --check
+      - name: Configure native gallery control tests
+        run: cmake -S tests/windows-gallery -B .runtime/gallery-surface -G "Visual Studio 17 2022" -A x64
+      - name: Build native gallery control tests
+        run: cmake --build .runtime/gallery-surface --config Release --parallel 2
+      - name: Native gallery layout rendering and accessibility
+        run: ctest --test-dir .runtime/gallery-surface -C Release --output-on-failure
       - name: Explorer release permission
         run: python tests/architecture/check_release_gates.py --target explorer-v0.5
       - name: Configure production Explorer component
@@ -176,6 +186,7 @@ jobs:
           path: |
             .runtime/windows-vulnerabilities.json
             .runtime/explorer-proof/CMakeCache.txt
+            .runtime/gallery-surface/Testing/Temporary/LastTest.log
             .runtime/AssetLibrary-win-x64.zip
             .runtime/AssetLibrary-win-x64.zip.sha256
             .runtime/AssetLibrary-win-x64/build-evidence.json
