@@ -18,7 +18,8 @@ internal sealed class ThumbnailSession(ClientTransport transport, SnapshotStore 
             if (disposed) { return Task.FromResult(Failure(request, ThumbnailStatus.Unavailable)); }
             work.RemoveAll(task => task.IsCompleted);
             if (work.Count == 4) { return Task.FromResult(Failure(request, ThumbnailStatus.Busy)); }
-            var task = LoadAsync(request, token);
+            // Even cached HTTP content or a synchronous decoder must never execute under the caller's session lock.
+            var task = Task.Run(() => LoadAsync(request, token), CancellationToken.None);
             work.Add(task);
             return task;
         }
