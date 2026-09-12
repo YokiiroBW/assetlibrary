@@ -48,6 +48,26 @@ int wmain() {
             Require(SUCCEEDED(root->GetPropertyValue(UIA_HelpTextPropertyId,&text)) && text.vt == VT_BSTR && wcscmp(text.bstrVal,snapshot::StatusText(status)) == 0,"root status is distinguishable from empty folder"); VariantClear(&text);
         }
         model->page.status = snapshot::Status::Ready;
+        for (const auto kind : {snapshot::Kind::Library,snapshot::Kind::Directory,snapshot::Kind::NextPage,snapshot::Kind::Reparse}) {
+            auto navigationModel = Model(providerOwner,window); navigationModel->page.entries[0].kind = kind;
+            navigationModel->page.entries[0].status = snapshot::Status::Ready;
+            IRawElementProviderSimple* navigationRoot = nullptr; Require(SUCCEEDED(gallery::CreateUiaRoot(navigationModel,&navigationRoot)),"navigation description root");
+            IRawElementProviderFragment* navigationTree = nullptr; navigationRoot->QueryInterface(IID_PPV_ARGS(&navigationTree));
+            IRawElementProviderFragment* navigationChild = nullptr; navigationTree->Navigate(NavigateDirection_FirstChild,&navigationChild); navigationTree->Release();
+            IRawElementProviderSimple* navigationItem = nullptr; navigationChild->QueryInterface(IID_PPV_ARGS(&navigationItem)); navigationChild->Release();
+            bool readyDescription = true, deniedDescription = true;
+            for (const auto property : {UIA_HelpTextPropertyId,UIA_ItemStatusPropertyId}) {
+                VARIANT text{}; const HRESULT described = navigationItem->GetPropertyValue(property,&text);
+                readyDescription = readyDescription && SUCCEEDED(described) && text.vt == VT_BSTR && text.bstrVal && wcscmp(text.bstrVal,snapshot::TypeText(kind)) == 0;
+                VariantClear(&text);
+            }
+            navigationModel->page.entries[0].status = snapshot::Status::AccessDenied;
+            VARIANT denied{}; const HRESULT described = navigationItem->GetPropertyValue(UIA_HelpTextPropertyId,&denied);
+            deniedDescription = SUCCEEDED(described) && denied.vt == VT_BSTR && denied.bstrVal && wcscmp(denied.bstrVal,snapshot::StatusText(snapshot::Status::AccessDenied)) == 0;
+            VariantClear(&denied); navigationItem->Release(); navigationRoot->Release();
+            Require(readyDescription,"ready Library/Directory/NextPage/Reparse describe type instead of unavailable service");
+            Require(deniedDescription,"non-ready navigation still reports actual status");
+        }
         IRawElementProviderFragment* fileFragment = nullptr; child->Navigate(NavigateDirection_NextSibling,&fileFragment);
         IRawElementProviderSimple* file = nullptr; fileFragment->QueryInterface(IID_PPV_ARGS(&file)); fileFragment->Release();
         VARIANT waiting{}; Require(SUCCEEDED(file->GetPropertyValue(UIA_ItemStatusPropertyId,&waiting)) && waiting.vt == VT_BSTR && wcscmp(waiting.bstrVal,L"等待预览") == 0,"pending file has honest status"); VariantClear(&waiting); file->Release();

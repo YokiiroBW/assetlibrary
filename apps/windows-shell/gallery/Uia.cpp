@@ -105,6 +105,7 @@ public:
                 const auto at = static_cast<size_t>(index_);
                 status = model_->page.entries[at].kind == snapshot::Kind::File ?
                     model_->thumbnailReady[at] ? L"缩略图已就绪" : model_->thumbnailUnavailable[at] ? L"预览不可用" : L"等待预览" :
+                    model_->page.entries[at].status == snapshot::Status::Ready ? snapshot::TypeText(model_->page.entries[at].kind) :
                     snapshot::StatusText(model_->page.entries[at].status);
             }
             value->vt = VT_BSTR; value->bstrVal = SysAllocString(status); if (!value->bstrVal) return E_OUTOFMEMORY;
