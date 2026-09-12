@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -152,12 +153,70 @@ class WindowsReleaseLockTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate package ID"):
             LOCKS.validate(self.root)
 
+    def write_license(self, package: str, version: str, metadata: str) -> Path:
+        directory = self.root / "restored-packages" / package.lower() / version
+        directory.mkdir(parents=True, exist_ok=True)
+        nuspec = directory / f"{package.lower()}.nuspec"
+        nuspec.write_text(f"<package><metadata>{metadata}</metadata></package>", encoding="utf-8")
+        return nuspec
+
+    def write_policy(self, relative: str = "eng/dotnet-dependency-policy.json", **extra) -> Path:
+        path = self.root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.write(path, {"version": 1, "allowed_license_expressions": ["MIT"],
+                          "license_file_exceptions": [], **extra})
+        return path
+
+    def test_release_only_package_license_is_audited_and_rejected(self) -> None:
+        extra = {"type": "Transitive", "resolved": "2.3.4", "contentHash": HASH}
+        self.mutate(self.release_path, lambda lock: lock["dependencies"][f"{self.framework}/win-x64"].update({"Release.Only": extra}))
+        self.write_policy()
+        self.write_license("Fixture.Package", "1.2.3", '<license type="expression">MIT</license>')
+        self.write_license("Release.Only", "2.3.4", '<license type="expression">GPL-3.0-only</license>')
+        self.assertEqual(LOCKS.validate(self.root), 2, "lock-only mode does not claim a license audit")
+        with self.assertRaisesRegex(ValueError, "unapproved license expression: release.only 2.3.4"):
+            LOCKS.validate(self.root, Path("restored-packages"))
+        self.write_license("Release.Only", "2.3.4", '<license type="expression">MIT</license>')
+        self.assertEqual(LOCKS.validate(self.root, Path("restored-packages")), 2)
+
+    def test_cli_uses_selected_root_policy_with_exact_legacy_exception(self) -> None:
+        nuspec = self.write_license("Fixture.Package", "1.2.3", '<licenseUrl>https://example.invalid/reviewed-license</licenseUrl>')
+        self.write_policy(legacy_license_url_exceptions=[{
+            "id": "Fixture.Package", "version": "1.2.3", "url": "https://example.invalid/reviewed-license",
+            "nuspec_sha256": hashlib.sha256(nuspec.read_bytes()).hexdigest(),
+        }])
+        command = [sys.executable, "-I", "-B", str(SCRIPT), "--root", str(self.root),
+                   "--packages-dir", "restored-packages"]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("licenses=passed", result.stdout)
+        self.write_policy()
+        result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no machine-readable license", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_custom_policy_and_missing_metadata_are_not_silently_skipped(self) -> None:
+        policy = self.write_policy("review/custom-policy.json")
+        with self.assertRaisesRegex(ValueError, "package directory is missing"):
+            LOCKS.validate(self.root, Path("restored-packages"), policy.relative_to(self.root))
+        (self.root / "restored-packages").mkdir()
+        with self.assertRaisesRegex(ValueError, "restored package metadata is missing"):
+            LOCKS.validate(self.root, Path("restored-packages"), policy.relative_to(self.root))
+        self.write_license("Fixture.Package", "1.2.3", '<license type="expression">MIT</license>')
+        command = [sys.executable, "-I", "-B", str(SCRIPT), "--root", str(self.root),
+                   "--packages-dir", "restored-packages", "--policy", "review/custom-policy.json"]
+        result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("licenses=passed", result.stdout)
+
     def test_cli_is_isolated_read_only_and_fails_closed(self) -> None:
         before = {path: path.read_bytes() for path in self.root.rglob("*.json")}
         command = [sys.executable, "-I", "-B", str(SCRIPT), "--root", str(self.root)]
         result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("WINDOWS_RELEASE_LOCKS_OK projects=6 rid=win-x64", result.stdout)
+        self.assertIn("licenses=not_requested", result.stdout)
         self.assertEqual(before, {path: path.read_bytes() for path in self.root.rglob("*.json")})
         self.release_path.unlink()
         result = subprocess.run(command, capture_output=True, text=True, timeout=10, check=False)

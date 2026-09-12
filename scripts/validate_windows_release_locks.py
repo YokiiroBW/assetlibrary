@@ -6,6 +6,7 @@ import argparse
 import importlib.util
 import json
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_DIRECTORY = Path("infra/windows-client/locks")
@@ -88,7 +89,11 @@ def merge_packages(destination: dict[str, tuple[str, str]], groups: dict, label:
             destination[key] = package
 
 
-def validate(root: Path) -> int:
+def validate(
+    root: Path,
+    packages_dir: Path | None = None,
+    policy_path: Path = Path("eng/dotnet-dependency-policy.json"),
+) -> int:
     lock_directory = root / LOCK_DIRECTORY
     if not lock_directory.is_dir():
         raise ValueError(f"missing release lock directory: {lock_directory}")
@@ -123,21 +128,37 @@ def validate(root: Path) -> int:
                 if key in default_packages and default_packages[key] != package:
                     raise ValueError(f"normal/release package version/hash mismatch: {project}/{key}")
         # RID-only build packages may be new, but must have valid hashes and be
-        # consistent across every release lock. License/vulnerability policy is separate.
+        # consistent across every release lock. Optional license auditing below
+        # consumes the complete release union, including these extra packages.
         merge_packages(release_packages, released, "release locks")
+    if packages_dir is not None:
+        policy = DEPENDENCIES.load_json(root / policy_path)
+        if policy.get("version") != 1:
+            raise ValueError("dependency policy must use version 1")
+        cache = (root / packages_dir).resolve()
+        if not cache.is_dir():
+            raise ValueError(f"restored NuGet package directory is missing: {cache}")
+        license_packages = {key: (key, version) for key, (version, _) in release_packages.items()}
+        errors = DEPENDENCIES.validate_licenses(license_packages, cache, policy)
+        if errors:
+            raise ValueError("release package license audit failed: " + "; ".join(errors))
     return len(release_packages)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT, help="Repository root containing default and release locks")
+    parser.add_argument("--packages-dir", type=Path, help="Audit licenses in this restored NuGet cache (relative to --root unless absolute)")
+    parser.add_argument("--policy", type=Path, default=Path("eng/dotnet-dependency-policy.json"),
+                        help="License policy relative to --root unless absolute; used only with --packages-dir")
     args = parser.parse_args()
     try:
-        packages = validate(args.root.resolve())
-    except (OSError, UnicodeError, ValueError) as error:
+        packages = validate(args.root.resolve(), args.packages_dir, args.policy)
+    except (OSError, UnicodeError, ValueError, ET.ParseError) as error:
         print(f"WINDOWS_RELEASE_LOCKS_INVALID: {error}")
         return 1
-    print(f"WINDOWS_RELEASE_LOCKS_OK projects={len(PROJECTS)} rid={RID} packages={packages}")
+    licenses = "passed" if args.packages_dir is not None else "not_requested"
+    print(f"WINDOWS_RELEASE_LOCKS_OK projects={len(PROJECTS)} rid={RID} packages={packages} licenses={licenses}")
     return 0
 
 
