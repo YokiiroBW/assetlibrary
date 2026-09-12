@@ -6,6 +6,13 @@
 
 namespace {
 void Require(bool value, const char* message) { if (!value) throw message; }
+void Drain(gallery_test::Owner& owner) {
+    const ULONGLONG deadline = GetTickCount64() + 2000;
+    while (owner.references > 1 && GetTickCount64() < deadline) {
+        MsgWaitForMultipleObjects(0, nullptr, FALSE, 10, QS_ALLINPUT);
+        MSG message{}; while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) { TranslateMessage(&message); DispatchMessageW(&message); }
+    }
+}
 struct Scenario {
     gallery::Surface* surface = nullptr;
     IAccessible* accessible = nullptr;
@@ -113,6 +120,7 @@ int main() {
         Require(surface->Window() == nullptr && surface->RetainedImageBytes() == 0, "callback destruction");
         Require(SUCCEEDED(accessible->get_accChildCount(&count)) && count == 0, "retired provider empty");
         accessible->Release(); accessible = nullptr; delete surface; surface = nullptr;
+        Drain(owner);
         Require(owner.references == 1, "accessibility and HWND owner references released");
         Require(!owner.wrongThread, "MSAA owner remains on its creating STA");
         scenario = {};
@@ -125,9 +133,17 @@ int main() {
         Require(surface->Window() == nullptr && surface->RetainedImageBytes() == 0, "external DestroyWindow retires the surface");
         delete surface; surface = nullptr;
         Require(owner.references > 1 && SUCCEEDED(accessible->get_accChildCount(&count)) && count == 0, "retained provider keeps owner alive without old names");
-        accessible->Release(); accessible = nullptr; Require(owner.references == 1, "external destruction owner references reclaimed");
+        accessible->Release(); accessible = nullptr; Drain(owner); Require(owner.references == 1, "external destruction owner references reclaimed");
         scenario = {};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "third surface creation"); scenario.surface = surface;
+        surface->Clear(snapshot::Status::Loading, 0);
+        UINT visibilityChanges = scenario.viewportChanges;
+        surface->SetVisible(false); Require(scenario.viewportChanges == visibilityChanges + 1, "Loading empty candidates still notify hide exactly once");
+        surface->SetVisible(true); Require(scenario.viewportChanges == visibilityChanges + 2, "Loading empty candidates still notify show exactly once");
+        snapshot::Page empty; empty.status = snapshot::Status::Ready; surface->SetPage(empty, 0);
+        visibilityChanges = scenario.viewportChanges;
+        ShowWindow(surface->Window(), SW_HIDE); Require(scenario.viewportChanges == visibilityChanges + 1, "native empty-page hide notification");
+        ShowWindow(surface->Window(), SW_SHOWNA); Require(scenario.viewportChanges == visibilityChanges + 2, "native empty-page show notification");
         surface->SetPage(page, 1); scenario.deleteOnViewport = true;
         surface->SetVisible(false); surface = scenario.surface;
         Require(surface == nullptr && owner.references == 1, "callback may delete the C++ Surface while its public method is running");

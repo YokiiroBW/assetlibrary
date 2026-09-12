@@ -157,6 +157,12 @@ struct Surface::State : std::enable_shared_from_this<State> {
         model->visible = shown;
         if (changed) Notify(callbacks.viewportChanged);
     }
+    void ChangeVisibility(bool value) noexcept {
+        const bool changed = shown != value; const auto previous = visible; shown = value;
+        RECT client{}; if (canvas) GetClientRect(canvas, &client);
+        UpdateVisible(client.bottom);
+        if (Alive() && changed && Same(previous, visible)) Notify(callbacks.viewportChanged);
+    }
     void ScrollTo(int top) {
         if (!Alive()) return;
         scroll = top; Reflow(false);
@@ -302,10 +308,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
             }
             if (isRoot && !state->retiring && state->callbacks.completion && message == state->callbacks.completionMessage)
                 return state->callbacks.completion(state->callbacks.context, wParam, lParam);
-            if (message == WM_SHOWWINDOW && isRoot) {
-                state->shown = wParam != 0; RECT client{}; if (state->canvas) GetClientRect(state->canvas, &client);
-                state->UpdateVisible(client.bottom);
-            }
+            if (message == WM_SHOWWINDOW && isRoot) state->ChangeVisibility(wParam != 0);
             if (!state->Alive()) return DefSubclassProc(hwnd, message, wParam, lParam);
             if (message == WM_SIZE && isRoot) { state->Resize(); return 0; }
             if (isRoot && (message == WM_DPICHANGED_AFTERPARENT || message == WM_DPICHANGED)) {
@@ -539,8 +542,8 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
 void Surface::SetVisible(bool visible) noexcept {
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
-    state->shown = visible; ShowWindow(state->window, visible ? SW_SHOWNA : SW_HIDE);
-    if (state->Alive()) { RECT client{}; GetClientRect(state->canvas, &client); state->UpdateVisible(client.bottom); }
+    ShowWindow(state->window, visible ? SW_SHOWNA : SW_HIDE);
+    if (state->Alive()) state->ChangeVisibility(visible);
 }
 void Surface::SetMode(Mode mode) noexcept {
     if (!state_ || !state_->Alive()) return;
