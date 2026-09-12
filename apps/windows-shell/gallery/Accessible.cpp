@@ -29,6 +29,20 @@ int SpatialNeighbor(const AccessibleModel& model, int index, LONG direction) noe
     const RECT origin = model.bounds[static_cast<size_t>(index)];
     const auto x = (origin.left + origin.right) / 2, y = (origin.top + origin.bottom) / 2;
     long long best = std::numeric_limits<long long>::max(); int answer = -1;
+    if (direction == NAVDIR_LEFT || direction == NAVDIR_RIGHT) {
+        // Full-width navigation rows must not win a horizontal move merely
+        // because their centre is closer than the next photo in this row.
+        for (int candidate = 0; candidate < count; ++candidate) {
+            if (candidate == index) continue;
+            const RECT item = model.bounds[static_cast<size_t>(candidate)];
+            if (std::max(origin.top,item.top) >= std::min(origin.bottom,item.bottom)) continue;
+            const auto dx = static_cast<long long>((item.left + item.right) / 2 - x);
+            if ((direction == NAVDIR_LEFT && dx >= 0) || (direction == NAVDIR_RIGHT && dx <= 0)) continue;
+            const auto distance = dx < 0 ? -dx : dx;
+            if (distance < best) { best = distance; answer = candidate; }
+        }
+        return answer >= 0 ? answer : SpatialNeighbor(model,index,direction == NAVDIR_RIGHT ? NAVDIR_NEXT : NAVDIR_PREVIOUS);
+    }
     for (int candidate = 0; candidate < count; ++candidate) {
         if (candidate == index) continue;
         const RECT item = model.bounds[static_cast<size_t>(candidate)];

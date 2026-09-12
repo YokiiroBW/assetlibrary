@@ -1,4 +1,5 @@
 #include "gallery/Layout.h"
+#include "gallery/Accessible.h"
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -49,6 +50,17 @@ int main() {
         std::vector<gallery::LayoutItem> all(snapshot::MaxItems, {snapshot::Kind::File, 1});
         const auto complete = gallery::Arrange(all, 1800, 96, 96, gallery::Mode::Gallery);
         Require(gallery::Visible(complete, all, 0, complete.height + 1).count == snapshot::MaxItems, "all 101 visible files are candidates");
+        gallery::AccessibleModel navigation; navigation.page.entries.resize(5);
+        navigation.bounds[0] = {0,0,600,44}; navigation.bounds[1] = {0,60,200,150}; navigation.bounds[2] = {300,60,500,150};
+        navigation.bounds[3] = {0,160,200,250}; navigation.bounds[4] = {300,160,500,250};
+        for (UINT at=0; at<5; ++at) navigation.order[at] = at;
+        Require(gallery::SpatialNeighbor(navigation,1,NAVDIR_RIGHT) == 2,"right prefers same row over closer wide folder above");
+        Require(gallery::SpatialNeighbor(navigation,2,NAVDIR_LEFT) == 1,"left prefers same row over closer wide folder above");
+        Require(gallery::SpatialNeighbor(navigation,2,NAVDIR_RIGHT) == 3 && gallery::SpatialNeighbor(navigation,3,NAVDIR_LEFT) == 2,"horizontal row boundary follows displayed order");
+        Require(gallery::SpatialNeighbor(navigation,0,NAVDIR_RIGHT) == 1 && gallery::SpatialNeighbor(navigation,4,NAVDIR_RIGHT) == -1,"navigation row and final page boundary");
+        Require(gallery::SpatialNeighbor(navigation,1,NAVDIR_UP) == 0,"vertical geometry remains unchanged");
+        for (UINT at=0; at<5; ++at) OffsetRect(&navigation.bounds[at],0,-100);
+        Require(gallery::SpatialNeighbor(navigation,1,NAVDIR_RIGHT) == 2,"same-row preference survives negative viewport offset");
         std::cout << "gallery_layout: 36 viewport/dpi/mode matrices plus bounds, ratios and visibility passed\n";
         return 0;
     } catch (const char* error) { std::cerr << error << '\n'; return 1; }
