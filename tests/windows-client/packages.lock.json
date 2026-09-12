@@ -119,7 +119,8 @@
       "assetlibrary.windows.assethost": {
         "type": "Project",
         "dependencies": {
-          "AssetLibrary.Windows.Core": "[1.0.0, )"
+          "AssetLibrary.Windows.Core": "[1.0.0, )",
+          "AssetLibrary.Windows.Session": "[1.0.0, )"
         }
       },
       "assetlibrary.windows.core": {
@@ -127,6 +128,9 @@
         "dependencies": {
           "AssetLibrary.AssetLink": "[1.0.0, )"
         }
+      },
+      "assetlibrary.windows.session": {
+        "type": "Project"
       }
     }
   }

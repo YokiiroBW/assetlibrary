@@ -1,11 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <OutputType Condition="'$(AssetLibraryProductionHost)' == 'true'">WinExe</OutputType>
+    <AssemblyName Condition="'$(AssetLibraryProductionHost)' == 'true'">AssetLibrary.Host</AssemblyName>
     <RootNamespace>AssetLibrary.Windows.AssetHost</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Core/AssetLibrary.Windows.Core.csproj" />
+    <ProjectReference Include="../Session/AssetLibrary.Windows.Session.csproj" />
     <InternalsVisibleTo Include="AssetLibrary.Windows.Tests" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@ namespace AssetLibrary.Windows.AssetHost;
 [SupportedOSPlatform("windows")]
 public sealed class SnapshotPipeServer : IAsyncDisposable
 {
-    private readonly SnapshotStore store;
+    private readonly Func<SnapshotRequest, SnapshotResponse> query;
     private readonly Action<string, SnapshotStatus, long>? log;
     private readonly CancellationTokenSource stopping = new();
     private readonly List<NamedPipeServerStream> pipes = [];
@@ -17,9 +17,12 @@ public sealed class SnapshotPipeServer : IAsyncDisposable
     public SnapshotPipeServer(SnapshotStore store, Action<string, SnapshotStatus, long>? log = null) : this(store, NativePipe.EndpointName, log) { }
 
     internal SnapshotPipeServer(SnapshotStore store, string pipeName, Action<string, SnapshotStatus, long>? log = null)
+        : this((store ?? throw new ArgumentNullException(nameof(store))).Query, pipeName, log) { }
+
+    internal SnapshotPipeServer(Func<SnapshotRequest, SnapshotResponse> query, string pipeName, Action<string, SnapshotStatus, long>? log = null)
     {
-        ArgumentNullException.ThrowIfNull(store);
-        this.store = store;
+        ArgumentNullException.ThrowIfNull(query);
+        this.query = query;
         this.log = log;
         PipeName = pipeName;
         try
@@ -93,7 +96,7 @@ public sealed class SnapshotPipeServer : IAsyncDisposable
         SnapshotProtocol.ValidateRequestHeader(bytes.AsSpan(0, SnapshotProtocol.HeaderSize));
         await pipe.ReadExactlyAsync(bytes.AsMemory(SnapshotProtocol.HeaderSize), deadline.Token).ConfigureAwait(false);
         var request = SnapshotProtocol.DecodeRequest(bytes);
-        var response = SnapshotProtocol.EncodeResponse(request.RequestId, store.Query(request));
+        var response = SnapshotProtocol.EncodeResponse(request.RequestId, query(request));
         await pipe.WriteAsync(response, deadline.Token).ConfigureAwait(false);
         // DisconnectNamedPipe discards unread output. Retain this bounded instance until the reader closes;
         // this is drain ownership, not an EOF requirement for decoding the already complete frame.
@@ -106,12 +109,6 @@ public sealed class SnapshotPipeServer : IAsyncDisposable
     {
         if (disposed) { return; }
         disposed = true;
-        await stopping.CancelAsync().ConfigureAwait(false);
-        try { await Task.WhenAll(listeners).WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false); }
-        finally
-        {
-            foreach (var pipe in pipes) { pipe.Dispose(); }
-            stopping.Dispose();
-        }
+        await PipeListenerShutdown.CompleteAsync(stopping, listeners, pipes).ConfigureAwait(false);
     }
 }

@@ -167,6 +167,7 @@ public sealed class SnapshotStore : IAsyncDisposable
     }
 
     internal (int Pages, int Tokens, int Running) Counts { get { lock (gate) { return (pages.Count, locations.Count, running); } } }
+    internal bool IsRevoked { get { lock (gate) { return revoked; } } }
     private sealed class PageState
     {
         internal bool Pending { get; set; }
