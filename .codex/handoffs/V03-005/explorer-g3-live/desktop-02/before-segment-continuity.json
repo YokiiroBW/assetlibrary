@@ -1,0 +1,28 @@
+{
+  "Utc": "2026-09-12T13:39:05.9663804+00:00",
+  "TargetPid": 16068,
+  "TargetCreation": "134336932049894842",
+  "BrokerPid": 13368,
+  "BrokerCreation": "134336929898310449",
+  "LastSource": "../desktop-01/sample-02-ready-g3-parsed.json",
+  "LastEnumN": 17,
+  "LastQueryN": 17,
+  "LastCancelN": 2,
+  "LastReapN": 2,
+  "LastObjects": 6,
+  "LastCallbacks": 1,
+  "LastSlots": 1,
+  "Module": [
+    {
+      "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\binaries\\AssetLibraryExplorerProof.dll",
+      "BaseAddress": "7FFD22470000",
+      "Sha256": "4AE3477602D7DDF15659A9C86C17C443630A986A933C6803CE17FF00C15184A5"
+    }
+  ],
+  "RemainingSamples": [
+    3,
+    4,
+    5
+  ],
+  "PriorSamplesNotRepeated": true
+}

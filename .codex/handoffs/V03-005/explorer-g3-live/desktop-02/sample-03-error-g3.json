@@ -1,0 +1,59 @@
+{
+  "StartedUtc": "2026-09-12T13:41:31.4878978+00:00",
+  "CompletedUtc": "2026-09-12T13:41:31.9545783+00:00",
+  "Mode": "proof",
+  "Label": "sample-03-error-g3",
+  "ExecutorPid": 29712,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13368,
+    "ExecutorCreationFileTime": "134336940911708918",
+    "ParentCreationFileTime": "134336929898310449",
+    "ErrorType": null
+  },
+  "PropertyFmtid": "{2F242D38-C686-4E35-87C3-36C9BAF44EFE}",
+  "PropertyPid": 2,
+  "ItemArgument": "nullptr",
+  "Native": {
+    "Pid": 25352,
+    "TargetPid": 16068,
+    "ExitCode": 0,
+    "TimedOut": false,
+    "Stdout": "{\"stage\":\"comInit\",\"hr\":\"00000000\",\"tick\":96763125,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"identity.before\",\"hr\":\"00000000\",\"tick\":96763125,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"shellWindows\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"windowCount\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"shellWindowCount\":2,\"targetMatches\":1,\"unreadableEntries\":0,\"countStable\":true}\r\n{\"stage\":\"identity.beforeView\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"serviceProvider\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"topLevelBrowser\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"activeShellView\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"viewWindow\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"viewWindowBelongsToTarget\":true}\r\n{\"stage\":\"folderView\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"getFolder\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"classId\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"classId\":\"{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}\",\"isSampleClass\":true}\r\n{\"stage\":\"currentFolder\",\"hr\":\"00000000\",\"tick\":96763140,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"currentPidlBytes\":22,\"actualFolderClassVerified\":true,\"namesRead\":false}\r\n{\"stage\":\"actualFolderDetailsInterface\",\"hr\":\"00000000\",\"tick\":96763156,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"stage\":\"fixedDiagnosticGetDetailsEx\",\"hr\":\"00000000\",\"tick\":96763156,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"diagnosticVariantType\":8,\"diagnosticUtf16Length\":765,\"propertyCallCount\":1}\r\n{\"kind\":\"diagnostic_property\",\"variantType\":8,\"utf16Length\":765,\"payload\":\"{\\\"v\\\":1,\\\"pid\\\":16068,\\\"qpc\\\":967631772843,\\\"hz\\\":10000000,\\\"folder\\\":2803,\\\"objects\\\":6,\\\"locks\\\":0,\\\"callbacks\\\":1,\\\"slots\\\":1,\\\"op_live\\\":0,\\\"enum_n\\\":20,\\\"enum_start\\\":967619124102,\\\"enum_end\\\":967620652794,\\\"enum_last\\\":1528692,\\\"enum_max\\\":1610130,\\\"enum_tid\\\":12524,\\\"enum_live\\\":0,\\\"query_n\\\":20,\\\"query_start\\\":967619124104,\\\"query_end\\\":967620652643,\\\"query_last\\\":1528539,\\\"query_max\\\":1610083,\\\"query_tid\\\":12524,\\\"query_live\\\":0,\\\"refresh_n\\\":13,\\\"refresh_start\\\":966840633800,\\\"refresh_end\\\":966840866776,\\\"refresh_last\\\":232976,\\\"refresh_max\\\":260319,\\\"refresh_tid\\\":29920,\\\"refresh_live\\\":0,\\\"cancel_n\\\":3,\\\"defer_n\\\":0,\\\"reap_n\\\":3,\\\"cancel_live\\\":0,\\\"cancel_last\\\":897,\\\"cancel_max\\\":897,\\\"pins\\\":0,\\\"pin_sync\\\":20,\\\"pin_pool\\\":0,\\\"view\\\":11912302489371672580,\\\"obs_start\\\":966835582444,\\\"ready_qpc\\\":966846030062,\\\"ready_tid\\\":29920}\"}\r\n{\"stage\":\"diagnosticPayloadPreserved\",\"hr\":\"00000000\",\"tick\":96763156,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"kind\":\"diagnostic_stability\",\"folderPidlStable\":true,\"activeViewStable\":true,\"snapshotStable\":true}\r\n{\"stage\":\"identity.after\",\"hr\":\"00000000\",\"tick\":96763156,\"observerPid\":25352,\"proofLoadedInObserver\":false}\r\n{\"payloadSemanticValidation\":\"required_in_wrapper\",\"expectedTargetPid\":16068,\"observerPid\":25352,\"navigationInvoked\":false,\"folderEnumerationInvoked\":false,\"refreshInvoked\":false}\r\n",
+    "Stderr": ""
+  },
+  "Diagnostic": {
+    "Version": 1,
+    "ExecutionPid": 16068,
+    "ExpectedTargetPid": 16068,
+    "PidMatchesTarget": true,
+    "Inconclusive": false,
+    "Scope": "target-object-execution",
+    "RawJson": "{\"v\":1,\"pid\":16068,\"qpc\":967631772843,\"hz\":10000000,\"folder\":2803,\"objects\":6,\"locks\":0,\"callbacks\":1,\"slots\":1,\"op_live\":0,\"enum_n\":20,\"enum_start\":967619124102,\"enum_end\":967620652794,\"enum_last\":1528692,\"enum_max\":1610130,\"enum_tid\":12524,\"enum_live\":0,\"query_n\":20,\"query_start\":967619124104,\"query_end\":967620652643,\"query_last\":1528539,\"query_max\":1610083,\"query_tid\":12524,\"query_live\":0,\"refresh_n\":13,\"refresh_start\":966840633800,\"refresh_end\":966840866776,\"refresh_last\":232976,\"refresh_max\":260319,\"refresh_tid\":29920,\"refresh_live\":0,\"cancel_n\":3,\"defer_n\":0,\"reap_n\":3,\"cancel_live\":0,\"cancel_last\":897,\"cancel_max\":897,\"pins\":0,\"pin_sync\":20,\"pin_pool\":0,\"view\":11912302489371672580,\"obs_start\":966835582444,\"ready_qpc\":966846030062,\"ready_tid\":29920}",
+    "MissingSignalInferred": false
+  },
+  "Stability": {
+    "kind": "diagnostic_stability",
+    "folderPidlStable": true,
+    "activeViewStable": true,
+    "snapshotStable": true
+  },
+  "Passed": true,
+  "Inconclusive": false,
+  "Failure": null,
+  "CountersAreNonTransactional": true,
+  "FolderEnumerationInvoked": false,
+  "NavigationInvoked": false,
+  "RefreshInvoked": false,
+  "ExtraQueryServiceInvoked": false,
+  "RegistryWrites": 0,
+  "MissingSignalInferred": false
+}

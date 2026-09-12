@@ -1,0 +1,62 @@
+param([Parameter(Mandatory)][string]$RunDirectory,[ValidateSet('proof')][string]$Mode='proof',[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+function Read-DiagnosticEnvelope {
+    param([Parameter(Mandatory)][string]$Text,[Parameter(Mandatory)][uint32]$TargetPid)
+    if($Text.Length -eq 0 -or $Text.Length -gt 2048){throw 'Diagnostic BSTR length invalid'}
+    $options=[System.Text.Json.JsonDocumentOptions]::new();$options.MaxDepth=16
+    $document=[System.Text.Json.JsonDocument]::Parse($Text,$options)
+    try{
+        $element=$document.RootElement
+        if($element.ValueKind -ne [System.Text.Json.JsonValueKind]::Object){throw 'Diagnostic JSON object required'}
+        $versions=@($element.EnumerateObject()|Where-Object {$_.Name -ceq 'v'})
+        $pids=@($element.EnumerateObject()|Where-Object {$_.Name -ceq 'pid'})
+        $version=0;$executionPid=0L
+        if($versions.Count -ne 1 -or $pids.Count -ne 1 -or $versions[0].Value.ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+           -not $versions[0].Value.TryGetInt32([ref]$version) -or $version -ne 1 -or
+           $pids[0].Value.ValueKind -ne [System.Text.Json.JsonValueKind]::Number -or
+           -not $pids[0].Value.TryGetInt64([ref]$executionPid) -or $executionPid -le 0 -or $executionPid -gt [uint32]::MaxValue){throw 'Unique numeric v1/pid envelope required'}
+        [ordered]@{Version=$version;ExecutionPid=$executionPid;ExpectedTargetPid=$TargetPid;PidMatchesTarget=($executionPid -eq $TargetPid);Inconclusive=($executionPid -ne $TargetPid);Scope=if($executionPid -eq $TargetPid){'target-object-execution'}else{'non-target-object-execution'};RawJson=$Text;MissingSignalInferred=$false}
+    }finally{$document.Dispose()}
+}
+$root='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005'
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path
+$result=Join-Path $run ($Label+'.json')
+if(Test-Path -LiteralPath $result){throw 'Preserve existing diagnostic label'}
+$marker=[IO.File]::Open((Join-Path $run ($Label+'.requested')),[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None);$marker.Dispose()
+$started=[DateTimeOffset]::UtcNow;$context=$null;$native=$null;$diagnostic=$null;$stability=$null;$failure=$null;$passed=$false
+try{
+    if((Get-FileHash -LiteralPath (Join-Path $root 'tests/windows-shell/execution-context.ps1')).Hash -cne '8E31BA6604D44E9F2E533CD95A999FBA0E5253FF2F88DD8352349D0FFF69B70B' -or
+       (Get-FileHash -LiteralPath (Join-Path $root 'tests/windows-shell/NativeExecutionContext.cs')).Hash -cne '19CA3138E6813C4455D595FB63DE2B8C6690F00B0A16112E33A8E919C5047A42'){throw 'Frozen native context source changed'}
+    . (Join-Path $root 'tests/windows-shell/execution-context.ps1')
+    $context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+    $identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw|ConvertFrom-Json
+    foreach($field in @('NativeHwnd','CreationFileTime','OwnershipStartFiletime')){if([string]$identity.$field -notmatch '^[1-9][0-9]*$'){throw 'Fresh exact identity required'}}
+    if([long]$identity.CreationFileTime -lt [long]$identity.OwnershipStartFiletime){throw 'Target predates this ownership epoch'}
+    $exe=Join-Path $PSScriptRoot 'preparation/build/Release/ProofG3View.exe'
+    if((Get-FileHash -LiteralPath $exe).Hash -cne '772307AF01BEAD9718166FD589554041DBB4192DDEF87447A9AE5FE2E0D04630'){throw 'Frozen diagnostic reader changed'}
+    $start=[Diagnostics.ProcessStartInfo]::new($exe);$start.UseShellExecute=$false;$start.CreateNoWindow=$true;$start.RedirectStandardOutput=$true;$start.RedirectStandardError=$true
+    $start.StandardOutputEncoding=[Text.UTF8Encoding]::new($false,$true);$start.StandardErrorEncoding=[Text.UTF8Encoding]::new($false,$true)
+    foreach($value in @([string]$identity.NativeHwnd,[string]$identity.Pid,[string]$identity.CreationFileTime)){$start.ArgumentList.Add($value)}
+    $child=[Diagnostics.Process]::new();$child.StartInfo=$start
+    try{
+        if(-not $child.Start()){throw 'Diagnostic reader launch failed'}
+        $output=$child.StandardOutput.ReadToEndAsync();$errors=$child.StandardError.ReadToEndAsync();$timeout=-not $child.WaitForExit(10000)
+        if($timeout){$child.Kill();if(-not $child.WaitForExit(3000)){throw 'Owned read-only reader exit unconfirmed'}}
+        $native=[ordered]@{Pid=$child.Id;TargetPid=$identity.Pid;ExitCode=$child.ExitCode;TimedOut=$timeout;Stdout=$output.GetAwaiter().GetResult();Stderr=$errors.GetAwaiter().GetResult()}
+    }finally{$child.Dispose()}
+    if($native.ExitCode -notin @(0,7) -or $native.TimedOut -or $native.Stderr){throw 'Native property read or identity check failed'}
+    $records=@($native.Stdout -split '\r?\n'|Where-Object {$_}|ForEach-Object {$_|ConvertFrom-Json})
+    $property=@($records|Where-Object {$_.kind -ceq 'diagnostic_property'})
+    if($property.Count -ne 1 -or $property[0].variantType -ne 8 -or $property[0].utf16Length -ne ([string]$property[0].payload).Length){throw 'One exact VT_BSTR property result required'}
+    $diagnostic=Read-DiagnosticEnvelope -Text ([string]$property[0].payload) -TargetPid ([uint32]$identity.Pid)
+    $stabilityRecords=@($records|Where-Object {$_.kind -ceq 'diagnostic_stability'})
+    if($stabilityRecords.Count -ne 1){throw 'One final view/PIDL stability record required'}
+    $stability=$stabilityRecords[0]
+    $passed=$diagnostic.PidMatchesTarget -and $stability.snapshotStable -and $native.ExitCode -eq 0
+    if(-not $diagnostic.PidMatchesTarget){$failure='non-target-object-execution; inconclusive for target signal/callback state'}
+    elseif(-not $passed){$failure='view-or-folder-changed; diagnostic observation is inconclusive'}
+}catch{$failure=$_.Exception.Message}
+finally{
+    [ordered]@{StartedUtc=$started.ToString('o');CompletedUtc=[DateTimeOffset]::UtcNow.ToString('o');Mode=$Mode;Label=$Label;ExecutorPid=$PID;Context=$context;PropertyFmtid='{2F242D38-C686-4E35-87C3-36C9BAF44EFE}';PropertyPid=2;ItemArgument='nullptr';Native=$native;Diagnostic=$diagnostic;Stability=$stability;Passed=$passed;Inconclusive=(-not $passed);Failure=$failure;CountersAreNonTransactional=$true;FolderEnumerationInvoked=$false;NavigationInvoked=$false;RefreshInvoked=$false;ExtraQueryServiceInvoked=$false;RegistryWrites=0;MissingSignalInferred=$false}|ConvertTo-Json -Depth 9|Set-Content -LiteralPath $result -Encoding utf8
+}
+if(-not $passed){exit 1}

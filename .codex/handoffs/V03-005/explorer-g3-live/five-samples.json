@@ -1,0 +1,117 @@
+[
+  {
+    "sample": 1,
+    "file": ".runtime\\explorer-g3\\desktop-01\\sample-01-ready-g3.json",
+    "ready_ms": 2650.2502,
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "cancel_n": 1,
+    "reap_n": 1,
+    "defer_n": 0,
+    "live": {
+      "op_live": 0,
+      "pins": 0,
+      "cancel_live": 0,
+      "enum_live": 0,
+      "query_live": 0,
+      "refresh_live": 0
+    },
+    "enum_ms": 156.1011,
+    "query_ms": 156.0939,
+    "refresh_ms": 25.4688,
+    "cancel_ms": 0.0601
+  },
+  {
+    "sample": 2,
+    "file": ".runtime\\explorer-g3\\desktop-01\\sample-02-ready-g3.json",
+    "ready_ms": 2632.772,
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "cancel_n": 2,
+    "reap_n": 2,
+    "defer_n": 0,
+    "live": {
+      "op_live": 0,
+      "pins": 0,
+      "cancel_live": 0,
+      "enum_live": 0,
+      "query_live": 0,
+      "refresh_live": 0
+    },
+    "enum_ms": 161.013,
+    "query_ms": 161.0083,
+    "refresh_ms": 26.0319,
+    "cancel_ms": 0.0601
+  },
+  {
+    "sample": 3,
+    "file": ".runtime\\explorer-g3\\desktop-02\\sample-03-ready-g3.json",
+    "ready_ms": 2617.2135,
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "cancel_n": 3,
+    "reap_n": 3,
+    "defer_n": 0,
+    "live": {
+      "op_live": 0,
+      "pins": 0,
+      "cancel_live": 0,
+      "enum_live": 0,
+      "query_live": 0,
+      "refresh_live": 0
+    },
+    "enum_ms": 161.013,
+    "query_ms": 161.0083,
+    "refresh_ms": 26.0319,
+    "cancel_ms": 0.0897
+  },
+  {
+    "sample": 4,
+    "file": ".runtime\\explorer-g3\\desktop-02\\sample-04-ready-g3.json",
+    "ready_ms": 3134.9231,
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "cancel_n": 4,
+    "reap_n": 4,
+    "defer_n": 0,
+    "live": {
+      "op_live": 0,
+      "pins": 0,
+      "cancel_live": 0,
+      "enum_live": 0,
+      "query_live": 0,
+      "refresh_live": 0
+    },
+    "enum_ms": 161.013,
+    "query_ms": 161.0083,
+    "refresh_ms": 26.1308,
+    "cancel_ms": 0.0897
+  },
+  {
+    "sample": 5,
+    "file": ".runtime\\explorer-g3\\desktop-02\\sample-05-ready-g3.json",
+    "ready_ms": 1030.2071,
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "cancel_n": 5,
+    "reap_n": 5,
+    "defer_n": 0,
+    "live": {
+      "op_live": 0,
+      "pins": 0,
+      "cancel_live": 0,
+      "enum_live": 0,
+      "query_live": 0,
+      "refresh_live": 0
+    },
+    "enum_ms": 161.013,
+    "query_ms": 161.0083,
+    "refresh_ms": 26.1308,
+    "cancel_ms": 0.0942
+  }
+]

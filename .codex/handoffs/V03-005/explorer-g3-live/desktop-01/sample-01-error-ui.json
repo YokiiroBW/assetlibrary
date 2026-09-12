@@ -1,0 +1,8 @@
+{
+  "ObservedUtc": "2026-09-12T13:31:43.225Z",
+  "FaultActionUtc": "2026-09-12T13:30:42.089Z",
+  "Text": [
+    "\t\t\t\t\t\t243 列表项目 (selectable) 后台连接服务不可用；启动并登录后按 F5 重试 ID: 0"
+  ],
+  "F5Used": false
+}

@@ -1,0 +1,2 @@
+# Preserve original measurements and native receipts across checkouts.
+** -text whitespace=cr-at-eol

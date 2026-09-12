@@ -1,0 +1,26 @@
+{
+  "Utc": "2026-09-12T13:46:26.1693609+00:00",
+  "TargetPid": 16068,
+  "TargetCreation": "134336932049894842",
+  "ObserverPid": 23596,
+  "ExitCode": 0,
+  "TimedOut": false,
+  "DurationMs": 1,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13368,
+    "ExecutorCreationFileTime": "134336943850708739",
+    "ParentCreationFileTime": "134336929898310449",
+    "ErrorType": null
+  },
+  "WM_NULL_only": true,
+  "NoNavigationOrRefresh": true
+}

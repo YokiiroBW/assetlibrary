@@ -1,0 +1,155 @@
+#include <windows.h>
+#include <shlobj.h>
+#include <exdisp.h>
+#include <servprov.h>
+#include <propkeydef.h>
+#include <oleauto.h>
+#include <wrl/client.h>
+#include <cstdio>
+#include <cwchar>
+#include <cerrno>
+#include <cstring>
+#include <memory>
+
+using Microsoft::WRL::ComPtr;
+constexpr CLSID kProof = {0x4ff8301d,0x2e73,0x4d49,{0x9f,0xe5,0x86,0x8d,0x5f,0x1e,0xa3,0x02}};
+constexpr PROPERTYKEY kDiagnostic = {{0x2f242d38,0xc686,0x4e35,{0x87,0xc3,0x36,0xc9,0xba,0xf4,0x4e,0xfe}},2};
+struct FreePidl { using pointer = PIDLIST_ABSOLUTE; void operator()(pointer p) const { CoTaskMemFree(p); } };
+using Pidl = std::unique_ptr<ITEMIDLIST, FreePidl>;
+struct ClearVariant { VARIANT value{}; ~ClearVariant() { VariantClear(&value); } };
+HRESULT WritePayload(BSTR value, UINT length) {
+  char utf8[8192]{};
+  const int bytes = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, value,
+      static_cast<int>(length), utf8, static_cast<int>(sizeof(utf8)), nullptr, nullptr);
+  if (bytes <= 0) return HRESULT_FROM_WIN32(GetLastError());
+  std::printf("{\"kind\":\"diagnostic_property\",\"variantType\":8,\"utf16Length\":%u,\"payload\":\"", length);
+  for (int index=0; index<bytes; ++index) {
+    const auto ch=static_cast<unsigned char>(utf8[index]);
+    if(ch=='"' || ch=='\\') { std::putchar('\\'); std::putchar(ch); }
+    else if(ch<0x20) std::printf("\\u%04x",static_cast<unsigned int>(ch));
+    else std::putchar(ch);
+  }
+  std::printf("\"}\n");
+  return S_OK;
+}
+void Stage(const char* name, HRESULT hr) {
+  std::printf("{\"stage\":\"%s\",\"hr\":\"%08lx\",\"tick\":%llu,\"observerPid\":%lu,\"proofLoadedInObserver\":%s}\n",
+      name, static_cast<unsigned long>(hr), GetTickCount64(), GetCurrentProcessId(),
+      GetModuleHandleW(L"AssetLibraryExplorerProof.dll") ? "true" : "false");
+}
+bool Number(const wchar_t* s, unsigned long long* out) {
+  if (!s || !*s) return false;
+  for (auto p = s; *p; ++p) if (*p < L'0' || *p > L'9') return false;
+  errno = 0; wchar_t* end = nullptr; *out = std::wcstoull(s, &end, 10);
+  return errno != ERANGE && end && !*end && *out != 0;
+}
+HRESULT Identity(HWND window, DWORD expectedPid, unsigned long long expectedCreation) {
+  DWORD actualPid = 0;
+  if (!IsWindow(window) || !IsWindowVisible(window) || !GetWindowThreadProcessId(window, &actualPid) || actualPid != expectedPid)
+    return HRESULT_FROM_WIN32(ERROR_INVALID_WINDOW_HANDLE);
+  wchar_t className[64]{};
+  DWORD targetSession = 0, observerSession = 0;
+  if (!GetClassNameW(window, className, ARRAYSIZE(className)) || wcscmp(className, L"CabinetWClass") != 0 ||
+      !ProcessIdToSessionId(expectedPid, &targetSession) || !ProcessIdToSessionId(GetCurrentProcessId(), &observerSession) ||
+      targetSession != observerSession || window == GetShellWindow()) return HRESULT_FROM_WIN32(ERROR_INVALID_OWNER);
+  HANDLE process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, expectedPid);
+  if (!process) return HRESULT_FROM_WIN32(GetLastError());
+  FILETIME created{}, exited{}, kernel{}, user{};
+  wchar_t image[MAX_PATH]{}; DWORD chars = ARRAYSIZE(image);
+  const bool timesOk = GetProcessTimes(process, &created, &exited, &kernel, &user) != FALSE;
+  const bool imageOk = QueryFullProcessImageNameW(process, 0, image, &chars) != FALSE;
+  CloseHandle(process);
+  const unsigned long long creation = (static_cast<unsigned long long>(created.dwHighDateTime) << 32) | created.dwLowDateTime;
+  wchar_t expectedImage[MAX_PATH]{};
+  const UINT length = GetWindowsDirectoryW(expectedImage, ARRAYSIZE(expectedImage));
+  if (!length || length >= ARRAYSIZE(expectedImage) || wcscat_s(expectedImage, L"\\explorer.exe") != 0) return E_FAIL;
+  return timesOk && imageOk && creation == expectedCreation && _wcsicmp(image, expectedImage) == 0
+      ? S_OK : HRESULT_FROM_WIN32(ERROR_INVALID_OWNER);
+}
+
+int Inspect(HWND window, DWORD processId, unsigned long long creation) {
+  HRESULT hr = Identity(window, processId, creation); Stage("identity.before", hr);
+  if (FAILED(hr)) return 1;
+  ComPtr<IShellWindows> windows;
+  hr = CoCreateInstance(CLSID_ShellWindows, nullptr, CLSCTX_LOCAL_SERVER, IID_PPV_ARGS(&windows)); Stage("shellWindows", hr);
+  if (FAILED(hr)) return 1;
+  long count = 0; hr = windows->get_Count(&count); Stage("windowCount", hr);
+  if (FAILED(hr) || count < 0 || count > 64) return 2;
+  unsigned int matches = 0, unreadable = 0;
+  ComPtr<IWebBrowserApp> target;
+  for (long index = 0; index < count; ++index) {
+    VARIANT position{}; position.vt = VT_I4; position.lVal = index;
+    ComPtr<IDispatch> dispatch;
+    hr = windows->Item(position, &dispatch);
+    if (hr == S_FALSE) continue;
+    if (FAILED(hr) || !dispatch) { ++unreadable; continue; }
+    ComPtr<IWebBrowserApp> browser;
+    hr = dispatch.As(&browser);
+    if (FAILED(hr)) { ++unreadable; continue; }
+    SHANDLE_PTR handle = 0; hr = browser->get_HWND(&handle);
+    if (FAILED(hr)) { ++unreadable; continue; }
+    if (reinterpret_cast<HWND>(handle) == window) { ++matches; target = browser; }
+  }
+  long afterCount = 0; hr = windows->get_Count(&afterCount);
+  std::printf("{\"shellWindowCount\":%ld,\"targetMatches\":%u,\"unreadableEntries\":%u,\"countStable\":%s}\n",
+      count, matches, unreadable, SUCCEEDED(hr) && count == afterCount ? "true" : "false");
+  if (matches != 1 || unreadable || FAILED(hr) || count != afterCount) return 2;
+  hr = Identity(window, processId, creation); Stage("identity.beforeView", hr); if (FAILED(hr)) return 1;
+  ComPtr<IServiceProvider> services; hr = target.As(&services); Stage("serviceProvider", hr); if (FAILED(hr)) return 3;
+  ComPtr<IShellBrowser> shell; hr = services->QueryService(SID_STopLevelBrowser, IID_PPV_ARGS(&shell)); Stage("topLevelBrowser", hr); if (FAILED(hr)) return 3;
+  ComPtr<IShellView> view; hr = shell->QueryActiveShellView(&view); Stage("activeShellView", hr); if (FAILED(hr) || !view) return 3;
+  HWND viewWindow = nullptr; hr = view->GetWindow(&viewWindow); Stage("viewWindow", hr);
+  DWORD viewPid = 0; if (viewWindow) GetWindowThreadProcessId(viewWindow, &viewPid);
+  const bool belongs = viewWindow && IsChild(window, viewWindow) && viewPid == processId;
+  std::printf("{\"viewWindowBelongsToTarget\":%s}\n", belongs ? "true" : "false");
+  if (FAILED(hr) || !belongs) return 2;
+  ComPtr<IFolderView> folderView; hr = view.As(&folderView); Stage("folderView", hr); if (FAILED(hr)) return 3;
+  ComPtr<IPersistFolder2> folder; hr = folderView->GetFolder(IID_PPV_ARGS(&folder)); Stage("getFolder", hr); if (FAILED(hr) || !folder) return 3;
+  CLSID clsid{}; hr = folder->GetClassID(&clsid); Stage("classId", hr); if (FAILED(hr)) return 3;
+  wchar_t clsidText[40]{}; if (!StringFromGUID2(clsid, clsidText, ARRAYSIZE(clsidText))) return 3;
+  std::printf("{\"classId\":\"%ls\",\"isSampleClass\":%s}\n", clsidText, clsid == kProof ? "true" : "false");
+  if(clsid != kProof) return 2;
+  PIDLIST_ABSOLUTE raw=nullptr;
+  hr=folder->GetCurFolder(&raw); Pidl current(raw); Stage("currentFolder",hr);
+  if(FAILED(hr)||!current) return 3;
+  const UINT bytes=ILGetSize(current.get());
+  if(bytes<22||bytes>16384) return 3;
+  std::printf("{\"currentPidlBytes\":%u,\"actualFolderClassVerified\":true,\"namesRead\":false}\n",bytes);
+  // QI the exact object returned by IFolderView::GetFolder; no second folder lookup.
+  ComPtr<IShellFolder2> details;
+  hr=folder.As(&details); Stage("actualFolderDetailsInterface",hr);
+  if(FAILED(hr)||!details) return 3;
+  ClearVariant property;
+  hr=details->GetDetailsEx(nullptr,&kDiagnostic,&property.value); Stage("fixedDiagnosticGetDetailsEx",hr);
+  if(FAILED(hr)) return 5;
+  const bool isBstr=property.value.vt==VT_BSTR && property.value.bstrVal!=nullptr;
+  const UINT length=isBstr?SysStringLen(property.value.bstrVal):0;
+  std::printf("{\"diagnosticVariantType\":%u,\"diagnosticUtf16Length\":%u,\"propertyCallCount\":1}\n",
+      static_cast<unsigned int>(property.value.vt),length);
+  if(!isBstr||length==0||length>2048) return 5;
+  hr=WritePayload(property.value.bstrVal,length); Stage("diagnosticPayloadPreserved",hr);
+  if(FAILED(hr)) return 6;
+  PIDLIST_ABSOLUTE afterRaw=nullptr;
+  const HRESULT folderHr=folder->GetCurFolder(&afterRaw); Pidl after(afterRaw);
+  const UINT afterBytes=SUCCEEDED(folderHr)&&after?ILGetSize(after.get()):0;
+  const bool folderStable=afterBytes==bytes&&std::memcmp(current.get(),after.get(),bytes)==0;
+  ComPtr<IShellView> afterView; const HRESULT viewHr=shell->QueryActiveShellView(&afterView);
+  HWND afterWindow=nullptr;
+  const bool viewStable=SUCCEEDED(viewHr)&&afterView&&SUCCEEDED(afterView->GetWindow(&afterWindow))&&afterWindow==viewWindow;
+  const bool stable=folderStable&&viewStable;
+  std::printf("{\"kind\":\"diagnostic_stability\",\"folderPidlStable\":%s,\"activeViewStable\":%s,\"snapshotStable\":%s}\n",
+      folderStable?"true":"false",viewStable?"true":"false",stable?"true":"false");
+  hr=Identity(window,processId,creation); Stage("identity.after",hr);
+  std::printf("{\"payloadSemanticValidation\":\"required_in_wrapper\",\"expectedTargetPid\":%lu,\"observerPid\":%lu,\"navigationInvoked\":false,\"folderEnumerationInvoked\":false,\"refreshInvoked\":false}\n",
+      static_cast<unsigned long>(processId),GetCurrentProcessId());
+  return FAILED(hr)?1:stable?0:7;
+}
+int wmain(int argc,wchar_t** argv) {
+  setvbuf(stdout,nullptr,_IONBF,0);
+  static_assert(sizeof(void*)==8);
+  unsigned long long window=0,process=0,creation=0;
+  if(argc!=4||!Number(argv[1],&window)||!Number(argv[2],&process)||process>MAXDWORD||!Number(argv[3],&creation))return 4;
+  HRESULT hr=CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);Stage("comInit",hr);if(FAILED(hr))return 4;
+  const int result=Inspect(reinterpret_cast<HWND>(window),static_cast<DWORD>(process),creation);
+  CoUninitialize();return result;
+}

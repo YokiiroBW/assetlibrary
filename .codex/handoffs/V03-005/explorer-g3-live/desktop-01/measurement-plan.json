@@ -1,0 +1,24 @@
+{
+  "PreparedUtc": "2026-09-12T13:25:20.9595913+00:00",
+  "Cases": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "FaultMode": "silent",
+  "SameTargetProcessRequired": true,
+  "Sample03ResponseDurationMs": 30000,
+  "OtherResourcePointsDurationMs": 1,
+  "G4WaivedByUser": true,
+  "G4Performed": false,
+  "RootOriginalPid": 6212,
+  "RootOriginalCreation": "134335976399732731",
+  "EnumQueryRefreshLimitMs": 250,
+  "QueryWaitBudgetMs": 150,
+  "CancelLimitMs": 2000,
+  "ReopenReadyLimitMs": 10000,
+  "CounterJudgementOwnedByRoot": true,
+  "NoProductChanges": true
+}

@@ -1,0 +1,94 @@
+{
+  "Utc": "2026-09-12T13:55:30.5184776+00:00",
+  "Processes": [
+    {
+      "Segment": "desktop-01",
+      "File": "fault-01-exit.json",
+      "Pid": 24136,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-01",
+      "File": "fault-02-exit.json",
+      "Pid": 21620,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-01",
+      "File": "host-01-exit.json",
+      "Pid": 14196,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-01",
+      "File": "host-02-exit.json",
+      "Pid": 23140,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-01",
+      "File": "host-baseline-exit.json",
+      "Pid": 29208,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "fault-03-exit.json",
+      "Pid": 9572,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "fault-04-exit.json",
+      "Pid": 15732,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "fault-05-exit.json",
+      "Pid": 24168,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "host-03-exit.json",
+      "Pid": 5364,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "host-04-exit.json",
+      "Pid": 30408,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "host-05-exit.json",
+      "Pid": 8860,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    },
+    {
+      "Segment": "desktop-02",
+      "File": "host-segment-baseline-exit.json",
+      "Pid": 13036,
+      "ExitCode": 0,
+      "CurrentPidAbsent": true
+    }
+  ],
+  "BothGuardsExited": true,
+  "BothSegmentsNineMissing": true,
+  "AllResponseWrappersCompletedBeforeWindowClose": true,
+  "CoreMayBeStoppedByRoot": true,
+  "NoAdditionalSamples": true
+}

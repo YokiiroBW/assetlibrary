@@ -1,0 +1,8 @@
+{
+  "v1_source_reconstructed_and_matched_preexisting_hash": "d1206fb7e56c6c1afc7342d143777eb132a88ce2914aa548d856202beb9d52a2",
+  "v1_point_samples": 0,
+  "v1_point_conclusion": "inconclusive_not_passed",
+  "v1_interval_with_nonzero_samples": "assess_using_actual_count_and_time_coverage",
+  "v2_fix": "start_interval_after_readiness_output_require_at_least_one_sample_and_reject_empty_result",
+  "v2_sha256": "90F0FC4EC3E270E34376786432B5B2C0A95C6BD47DB4409B6595296D4F0EF091"
+}

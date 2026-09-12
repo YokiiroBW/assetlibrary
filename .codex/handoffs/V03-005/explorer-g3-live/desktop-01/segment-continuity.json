@@ -1,0 +1,24 @@
+{
+  "Utc": "2026-09-12T13:37:42.3768688+00:00",
+  "CleanupUtc": "2026-09-12T21:36:43.0277596+08:00",
+  "SameExecutor": true,
+  "NineMissing": true,
+  "TargetPid": 16068,
+  "TargetCreation": "134336932049894842",
+  "TargetStillRunning": true,
+  "Module": [
+    {
+      "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\binaries\\AssetLibraryExplorerProof.dll",
+      "BaseAddress": "7FFD22470000",
+      "Sha256": "4AE3477602D7DDF15659A9C86C17C443630A986A933C6803CE17FF00C15184A5"
+    }
+  ],
+  "StopMarkerCreationUtc": "2026-09-12T13:37:41.2437188Z",
+  "WindowsIntentionallyRetained": true,
+  "RemainingPlannedSamples": [
+    3,
+    4,
+    5
+  ],
+  "FullComUnloadClaim": false
+}

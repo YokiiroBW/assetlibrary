@@ -36,6 +36,8 @@ M0-002-G1 两项原退出标准均已满足，现关闭该项。批准的每用�
 
 ## 官方依据
 
+2026-09-12 后续状态：G3已完成[真实进程量测验收](../../.codex/handoffs/V03-005/explorer-g3-live/README.md)。用户明确不做G4，其20轮/8小时条款由[用户决定](../decisions/2026-09-12_G4用户豁免与G3验收范围.md)豁免，未实测；不得把G4记为通过或重新安排。G1/G2/G3实测完成加G4行政豁免使Explorer门禁目标允许继续，但不自动完成正式登录、安装、预览等产品功能。
+
 - [IShellFolder::CreateViewObject](https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-ishellfolder-createviewobject)：Shell 的视图创建接口。
 - [Shell folder object](https://learn.microsoft.com/en-us/windows/win32/shell/nse-implement)：PIDL、导航和默认视图适配。
 - [WinUI XAML Islands](https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/host-controls-existing-desktop-apps)：WinUI 的承载、输入和生命周期责任。

@@ -1,5 +1,13 @@
 # V03-005 当前验证记录
 
+## 2026-09-12 G3实测通过、G4用户豁免
+
+最终集成仓库架构/契约检查通过；explorer-v0.5返回0/RELEASE_GATE_ALLOWED。G3为verified，G4为waived_by_user/not_performed/exit_criteria_met=false；原退出条款未删改。239份原件/副本摘要及214条操作员索引已核验，Git采用局部-text保留原始字节。
+
+V03-014实现87a882a/集成4ba8d31：严格Release和6/6受影响CTest通过。真实同PID16068的5个silent取消/重开根样本满足测前250ms/2秒/10秒口径；最大Enum161.013ms、Query161.0083ms、UIRefresh26.1308ms、取消完整回收0.0942ms、Ready3.1349231秒。基线与各恢复objects6/callback1/slots1稳定，所有调用/操作/cancel/pin静止0；5cancel=5reap，defer0未制造异步延迟。真正最后Release的受控组件验证保持通过；没有OS立即卸载或全场景无限证明。
+
+旧1ms辅助响应点实际0sample，明确inconclusive；修正观察器并保留原件/hash。两30s区间各276次/0失败但未覆盖故障调用/恢复期间，只作前后响应佐证。五样本内部QPC为主证据。第一段600s自然cleanup，第二段提前stopcleanup，均9missing；自有窗口/Host/fault/observer/Core已清理，原Explorer未重启，138样例hash/mtime不变、6角色回收。[完整证据](explorer-g3-live/evidence.json)。G4由用户明确豁免未运行，不把skip或研究失败记成通过。
+
 ## 2026-09-12 G2 实机故障恢复完成
 
 原始归档加最终验证日志共177个摘要在Git索引逐项匹配；局部.gitattributes关闭换行转换，保留原始CRLF/LF字节，解决首次git add规范化造成的索引摘要差异。

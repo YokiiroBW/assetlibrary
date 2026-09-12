@@ -1,0 +1,38 @@
+[
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\dispatch.ps1",
+    "Hash": "1446E19D03CD37713174DA18681E196038D4369C56F4DF0624C611164A0AEE59"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\run-g3-view.ps1",
+    "Hash": "4BD9D913D3BD47CDB140871EEBFC13E16AFE7824EAA438AD2596C36A289916E6"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\run-response.ps1",
+    "Hash": "689C327C966F5C7C70F986293068521B30F5645FC81D36F8313A19231EBB2958"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\start-fault.ps1",
+    "Hash": "B5E7720B1C4010DA97969B4C77A38BA2B497594AE12A21833FE3C7C4AAC88173"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\start-host.ps1",
+    "Hash": "C371525603BAD040498C76010955900D3858EDEA7FDF4F9C9D35489483132AC5"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\stop-fault.ps1",
+    "Hash": "0DE49D579543453B378E166831876C2F1B2083F15C5EB2FD1A829CC0C387A118"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\stop-host.ps1",
+    "Hash": "7BAA2964F2C8C7282A1DD163F752B0BC048913CDAA851F767A4C8EE695D0FB43"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\preparation\\ProofG3View.cpp",
+    "Hash": "3386DF3E25FF87BBE97F715116F6D34F1B7CD9A22830613D10519114397625CF"
+  },
+  {
+    "Path": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-g3\\preparation\\WindowResponse.cpp",
+    "Hash": "D1206FB7E56C6C1AFC7342D143777EB132A88CE2914AA548D856202BEB9D52A2"
+  }
+]

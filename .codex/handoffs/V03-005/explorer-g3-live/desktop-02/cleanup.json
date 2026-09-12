@@ -1,0 +1,49 @@
+{
+  "Utc": "2026-09-12T13:49:24.2672490+00:00",
+  "ExecutorPid": 22520,
+  "SameExecutorCleanup": true,
+  "RegisteredByThisRun": true,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 13368,
+    "ExecutorCreationFileTime": "134336939911292021",
+    "ParentCreationFileTime": "134336929898310449",
+    "ErrorType": null
+  },
+  "After": {
+    "ClassPresent": false,
+    "NamespacePresent": false,
+    "Owner": null,
+    "RegistryView": "current-process",
+    "NativeLaunchRouteVerified": true,
+    "SystemExplorerRegistrationVerified": false,
+    "SystemExplorerCleanupVerified": false,
+    "ExecutionContext": {
+      "QuerySucceeded": true,
+      "Is64Bit": true,
+      "PackageIdentityAbsent": true,
+      "ParentIsSystemExplorer": true,
+      "SameUser": true,
+      "SameSession": true,
+      "ParentPredatesExecutor": true,
+      "OrdinaryUser": true,
+      "PackageIdentityStatus": 15700,
+      "ParentPid": 13368,
+      "ExecutorCreationFileTime": "134336939911292021",
+      "ParentCreationFileTime": "134336929898310449",
+      "ErrorType": null
+    }
+  },
+  "Failure": null,
+  "CleanupError": null,
+  "CurrentViewClean": true,
+  "ExternalIndependentReadbackRequired": true
+}

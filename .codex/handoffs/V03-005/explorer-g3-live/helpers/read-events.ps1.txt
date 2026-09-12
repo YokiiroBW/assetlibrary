@@ -1,0 +1,16 @@
+$ErrorActionPreference='Stop'
+$start=[DateTimeOffset]::Parse('2026-09-12T13:26:42.6226118+00:00')
+$end=[DateTimeOffset]::UtcNow
+$events=@()
+try{$events=@(Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000,1001,1002;StartTime=$start.UtcDateTime;EndTime=$end.UtcDateTime} -MaxEvents 5000 -ErrorAction Stop)}
+catch{if($_.FullyQualifiedErrorId -notmatch '^NoMatchingEventsFound'){throw}}
+if($events.Count -ge 5000){throw 'Event query limit reached; not complete'}
+$eventMatches=@()
+foreach($event in $events){
+ $xml=[xml]$event.ToXml()
+ $apps=@($xml.SelectNodes('/*[local-name()="Event"]/*[local-name()="EventData"]/*[local-name()="Data"]') | Where-Object {[string]$_.InnerText -match '(^|[\\/])(explorer\.exe|ExplorerFaultHost\.exe|AssetLibrary\.Windows\.AssetHost\.exe)$'})
+ if($apps.Count){
+  $eventMatches += [ordered]@{TimeUtc=$event.TimeCreated.ToUniversalTime().ToString('o');Provider=$event.ProviderName;Id=$event.Id;RecordId=$event.RecordId;Applications=@($apps|ForEach-Object {[IO.Path]::GetFileName([string]$_.InnerText)})}
+ }
+}
+[ordered]@{StartUtc=$start.ToString('o');EndUtc=$end.ToString('o');Log='Application';Ids=@(1000,1001,1002);ReadSucceeded=$true;Scanned=$events.Count;LimitReached=$false;Matches=$eventMatches;NoMatchingEvents=($eventMatches.Count -eq 0);Scope='EventData executable names only; no message bodies or private paths recorded; process identity and visible navigation are independent evidence'}|ConvertTo-Json -Depth 6

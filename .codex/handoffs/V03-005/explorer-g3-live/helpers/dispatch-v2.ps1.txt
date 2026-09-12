@@ -1,0 +1,37 @@
+param(
+ [Parameter(Mandatory)][ValidateSet('guard','fields','view','host','fault','g3','response')][string]$Action,
+ [Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label,
+ [string]$Mode,[string]$DllPath,[string]$DllSha256,
+ [ValidatePattern('^desktop-[0-9]+$')][string]$RunName='desktop-01',
+ [ValidateRange(1,30000)][int]$DurationMs=1
+)
+$ErrorActionPreference='Stop'
+$root='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005';$run=Join-Path $PSScriptRoot $RunName
+$broker=Get-Content -LiteralPath (Join-Path $run 'broker.json') -Raw|ConvertFrom-Json
+$process=Get-Process -Id $broker.Pid
+if($process.Path -ine (Join-Path $env:WINDIR 'explorer.exe') -or $process.StartTime.ToUniversalTime().ToFileTimeUtc().ToString() -cne [string]$broker.CreationFileTime -or $process.SessionId -ne (Get-Process -Id $PID).SessionId){throw 'Broker identity changed'}
+$shell=New-Object -ComObject Shell.Application;$windows=$shell.Windows();$found=@()
+for($index=0;$index -lt $windows.Count;$index++){$window=$windows.Item($index);if([long]$window.HWND -eq [long]$broker.NativeHwnd){$found+=,$window}}
+if($found.Count -ne 1){throw 'Broker unavailable or ambiguous'}
+$old=Join-Path $root '.runtime/explorer-host-integration/preparation'
+$script=switch($Action){
+ 'guard'{Join-Path $old 'guard.ps1'}'fields'{Join-Path $old 'read-fields.ps1'}'view'{Join-Path $old 'run-view.ps1'}
+ 'host'{Join-Path $PSScriptRoot 'start-host.ps1'}'fault'{Join-Path $PSScriptRoot 'start-fault.ps1'}
+ 'g3'{Join-Path $PSScriptRoot 'run-g3-view.ps1'}'response'{Join-Path $PSScriptRoot 'run-response-v2.ps1'}
+}
+$argsList=@('-NoProfile','-NonInteractive','-File',$script,'-RunDirectory',$run)
+if($Action -in @('guard','fields','host','fault')){
+ if(-not $DllPath -or $DllSha256 -notmatch '^[0-9A-Fa-f]{64}$'){throw 'Frozen binary required'}
+ $argsList+=@('-DllPath',$DllPath,'-DllSha256',$DllSha256)
+}
+if($Action -ne 'guard'){$argsList+=@('-Label',$Label)}
+if($Action -eq 'fault'){if($Mode -notin @('silent','partial-frame','invalid-version','crash')){throw 'Invalid fault mode'};$argsList+=@('-Mode',$Mode)}
+if($Action -eq 'fields'){if($Mode -notin @('expected-registered','expected-missing')){throw 'Invalid field mode'};$argsList+=@('-Mode',$Mode)}
+if($Action -eq 'view'){if($Mode -notin @('sdk','desktop','proof')){throw 'Invalid view mode'};$argsList+=@('-Mode',$Mode)}
+if($Action -eq 'response'){$argsList+=@('-DurationMs',[string]$DurationMs)}
+foreach($value in $argsList){if($value -match '["\r\n]'){throw 'Unsafe argument'}}
+$arguments=($argsList|ForEach-Object {'"'+$_+'"'}) -join ' '
+$receipt=Join-Path $run ($Label+'-launch.json');if(Test-Path -LiteralPath $receipt){throw 'Do not replay existing label'}
+$start=[DateTimeOffset]::UtcNow
+$found[0].Document.Application.ShellExecute('C:/Users/Administrator/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/powershell/pwsh.exe',$arguments,$root,'open',0)
+[ordered]@{Utc=$start.ToString('o');Action=$Action;BrokerPid=$broker.Pid;BrokerHwnd=$broker.NativeHwnd;BrokerCreation=$broker.CreationFileTime;ScriptSha256=(Get-FileHash -LiteralPath $script).Hash}|ConvertTo-Json|Set-Content -LiteralPath $receipt -Encoding utf8

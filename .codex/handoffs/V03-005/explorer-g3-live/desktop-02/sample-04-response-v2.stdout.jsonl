@@ -1,0 +1,3 @@
+{"kind":"ready","target_pid":16068,"observer_pid":23596,"qpc":970570621243,"hz":10000000,"duration_ms":1,"message":0,"timeout_ms":250}
+{"kind":"resources","target_pid":16068,"elapsed_ms":0,"private_bytes":147828736,"working_set":210755584,"handles":2216}
+{"kind":"finished","target_pid":16068,"samples":1,"failures":0,"max_ticks":583,"hz":10000000,"begin_qpc":970571710480,"end_qpc":970572672991,"identity_ok":true,"resources_ok":true,"refresh_or_navigation_sent":false}

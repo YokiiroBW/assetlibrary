@@ -1,0 +1,22 @@
+param([Parameter(Mandatory)][string]$RunDirectory,[Parameter(Mandatory)][ValidatePattern('^[a-z0-9-]+$')][string]$Label,[ValidateRange(1,30000)][int]$DurationMs=1)
+$ErrorActionPreference='Stop'
+$root='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005'
+. (Join-Path $root 'tests/windows-shell/execution-context.ps1')
+$context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path;$identity=Get-Content -LiteralPath (Join-Path $run 'identity.json') -Raw|ConvertFrom-Json
+$exe=Join-Path $PSScriptRoot 'preparation/build/Release/WindowResponse.exe'
+if((Get-FileHash -LiteralPath $exe).Hash -cne '82F1ADB5361DEE260F3D25AC438DF07EEFAB1AA00602072209EDFF5E86D2DCA4'){throw 'Fixed read-only observer changed'}
+$record=Join-Path $run ($Label+'.json');$stdout=Join-Path $run ($Label+'.stdout.jsonl');$stderr=Join-Path $run ($Label+'.stderr.log')
+foreach($path in @($record,$stdout,$stderr)){if(Test-Path -LiteralPath $path){throw 'Fresh observer label required'}}
+$values=@([string]$identity.NativeHwnd,[string]$identity.Pid,[string]$identity.CreationFileTime,[string]$identity.OwnershipStartFiletime,[string]$DurationMs)
+foreach($value in $values){if($value -notmatch '^[1-9][0-9]*$'){throw 'Positive numeric identity required'}}
+$process=Start-Process -FilePath $exe -ArgumentList $values -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+$timeout=$false
+$exitCode=$null
+try{
+ $timeout=-not $process.WaitForExit(38000)
+ if($timeout){$process.Kill();$null=$process.WaitForExit(3000)}
+ $exitCode=$process.ExitCode
+ [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');TargetPid=$identity.Pid;TargetCreation=$identity.CreationFileTime;ObserverPid=$process.Id;ExitCode=$exitCode;TimedOut=$timeout;DurationMs=$DurationMs;Context=$context;WM_NULL_only=$true;NoNavigationOrRefresh=$true}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath $record -Encoding utf8
+}finally{$process.Dispose()}
+if($timeout -or $exitCode -ne 0){exit 1}

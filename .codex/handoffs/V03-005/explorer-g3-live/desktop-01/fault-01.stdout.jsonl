@@ -1,0 +1,4 @@
+{"mode":"silent","pid":24136,"client_pid":0,"requests":0,"elapsed_ms":0,"response_bytes":0,"event":"listening"}
+{"mode":"silent","pid":24136,"client_pid":16068,"requests":1,"elapsed_ms":21656,"response_bytes":0,"event":"request_received"}
+{"mode":"silent","pid":24136,"client_pid":0,"requests":1,"elapsed_ms":21812,"response_bytes":0,"event":"listening"}
+{"mode":"silent","pid":24136,"client_pid":0,"requests":1,"elapsed_ms":23078,"response_bytes":0,"event":"stopped"}

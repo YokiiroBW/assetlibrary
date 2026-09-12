@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer。自有 test-only 原生入口已接通，完整 Windows 安装包尚未交付；按 ADR-0018 继续进程外 Host 和真实 Core 接入。
-   当前接续V03-005：Windows最高优先级。G1原生入口与G2真实故障恢复已按原标准关闭：07crash/silent、08invalid40B/partial20B，重新进入根恢复真实Core；详见 `.codex/handoffs/V03-005/explorer-g2-live/README.md`。两个guard自然到期注销、独立9missing、自有窗口/Host/Core清理及138原件完整性通过，原Explorer未重启。用户已明确豁免G4（未实测，不再阻断），仅继续G3真实计时/取消/COM增长；正式登录安装/预览/主动失效也未完成。V03-013仅取得受限公开事件研究结论，等价合成视图正控失败，不改DLL行为/协议；后续不能再重复空Desktop PIDL对照。当前按V03-014量测通道执行G3，实际运行状态以current-windows-work.json为准；不得重新安排G4。
+   当前接续V03-005：Windows最高优先级。G1/G2/G3均按各自证据通过，G4依用户明确要求豁免、未执行；详见 `.codex/handoffs/V03-005/explorer-g3-live/README.md` 与 `docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md`。G3同进程五样本QPC、取消完整回收和稳定自有计数通过；Core138原件/6角色与自有窗口/服务清理，原Explorer未重启。不得把G4记成实测或再安排20轮/8小时。正式登录安装/预览/主动失效、V03-013刷新体验研究仍属于后续产品工作，完整客户端未宣布完成。当前无活跃GUI或测试服务。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

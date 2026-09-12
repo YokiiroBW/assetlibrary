@@ -1,0 +1,40 @@
+param(
+ [Parameter(Mandatory)][string]$RunDirectory,
+ [Parameter(Mandatory)][string]$DllPath,
+ [Parameter(Mandatory)][ValidatePattern('^[0-9A-Fa-f]{64}$')][string]$DllSha256,
+ [Parameter(Mandatory)][ValidatePattern('^fault-[a-z0-9-]+$')][string]$Label,
+ [Parameter(Mandatory)][ValidateSet('crash','silent','partial-frame','invalid-version')][string]$Mode
+)
+$ErrorActionPreference='Stop'
+$root='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005'
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path
+$exe=(Resolve-Path -LiteralPath $DllPath).Path
+if($exe -ine (Resolve-Path -LiteralPath (Join-Path $root '.runtime/explorer-g3/binaries/ExplorerFaultHost.exe')).Path -or
+ (Get-FileHash -LiteralPath $exe).Hash -cne $DllSha256.ToUpperInvariant() -or
+ $DllSha256.ToUpperInvariant() -cne 'F163BB5ACD630C145CC50F732B762592555AAF25F48E25410F455D180CC1882E'){throw 'Frozen fault binary required'}
+$record=Join-Path $run ($Label+'.json');$exitRecord=Join-Path $run ($Label+'-exit.json')
+$stop=Join-Path $run ($Label+'.stop');$stdout=Join-Path $run ($Label+'.stdout.jsonl');$stderr=Join-Path $run ($Label+'.stderr.log')
+foreach($path in @($record,$exitRecord,$stop,$stdout,$stderr)){if(Test-Path -LiteralPath $path){throw 'Fresh fault label required'}}
+. (Join-Path $root 'tests/windows-shell/execution-context.ps1')
+$context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+$process=$null;$failure=$null;$stopSent=$false;$forced=$false
+try{
+ $process=Start-Process -FilePath $exe -ArgumentList @('--execute','--mode',$Mode,'--lifetime-ms','119000','--max-connections','32') -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+ $clock=[Diagnostics.Stopwatch]::StartNew()
+ [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$process.Id;CreationFileTime=$process.StartTime.ToUniversalTime().ToFileTimeUtc().ToString();ExecutorPid=$PID;Context=$context;Mode=$Mode;ExeSha256=$DllSha256.ToUpperInvariant()}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath $record -Encoding utf8
+ while(-not $process.WaitForExit(100)){
+  if(-not $stopSent -and (Test-Path -LiteralPath $stop)){
+   $event=[Threading.EventWaitHandle]::OpenExisting('Local\AssetLibrary.ExplorerFault.Stop.'+$process.Id)
+   try{$null=$event.Set();$stopSent=$true}finally{$event.Dispose()}
+  }
+  if($clock.ElapsedMilliseconds -gt 123000){throw 'Fault process exceeded own watchdog'}
+ }
+}catch{$failure=$_.Exception.Message}
+finally{
+ if($process){
+  if(-not $process.HasExited){$process.Kill();$forced=$true;$null=$process.WaitForExit(3000)}
+  [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$process.Id;Exited=$process.HasExited;ExitCode=$(if($process.HasExited){$process.ExitCode}else{$null});StopSent=$stopSent;ForcedCleanup=$forced;Failure=$failure}|ConvertTo-Json|Set-Content -LiteralPath $exitRecord -Encoding utf8
+  $process.Dispose()
+ }
+}
+if($failure -or $forced){exit 1}

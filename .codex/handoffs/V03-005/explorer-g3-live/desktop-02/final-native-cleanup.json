@@ -1,0 +1,15 @@
+{
+  "Utc": "2026-09-12T13:52:34.4150564+00:00",
+  "OwnedWindowsRemaining": 0,
+  "OriginalExplorerSameCreation": true,
+  "OriginalExplorerAlive": true,
+  "TargetSameCreationResident": true,
+  "BrokerSameCreationResident": true,
+  "TargetDebuggerPresent": false,
+  "GuardsGone": true,
+  "NoExplorerKilledOrRestarted": true,
+  "AllResponseObserversCompletedBeforeWindowClose": true,
+  "G4Performed": false,
+  "CoreStopOwnedByRoot": true,
+  "FullComUnloadClaim": false
+}

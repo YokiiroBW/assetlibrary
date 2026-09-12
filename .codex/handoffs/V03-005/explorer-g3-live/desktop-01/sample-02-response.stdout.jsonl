@@ -1,0 +1,2 @@
+{"kind":"ready","target_pid":16068,"observer_pid":30700,"qpc":963791726398,"hz":10000000,"duration_ms":1,"message":0,"timeout_ms":250}
+{"kind":"finished","target_pid":16068,"samples":0,"failures":0,"max_ticks":0,"hz":10000000,"begin_qpc":963791726398,"end_qpc":963792804443,"identity_ok":true,"resources_ok":true,"refresh_or_navigation_sent":false}

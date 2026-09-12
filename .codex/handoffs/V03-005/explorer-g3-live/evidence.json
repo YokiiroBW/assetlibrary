@@ -1,0 +1,1477 @@
+{
+  "recorded_at_utc": "2026-09-12T13:59:55.190334+00:00",
+  "status": "G3_verified_original_criteria_and_predeclared_measurement_profile",
+  "G4": "waived_by_user_not_performed",
+  "runtime_code_commit": "4ba8d31",
+  "worker_commit": "87a882a",
+  "shell_sha256": "4AE3477602D7DDF15659A9C86C17C443630A986A933C6803CE17FF00C15184A5",
+  "target_pid": 16068,
+  "target_creation_filetime": "134336932049894842",
+  "samples": 5,
+  "same_process_and_counter_continuity": true,
+  "maxima_ms": {
+    "enum": 161.013,
+    "query": 161.0083,
+    "UI_refresh": 26.1308,
+    "cancel_resource_cleanup": 0.0942,
+    "rendered_recovery": 3134.9231
+  },
+  "stable_after_each_recovery": {
+    "objects": 6,
+    "callbacks": 1,
+    "slots": 1,
+    "all_live_operations_and_pins": 0
+  },
+  "cancel_count": 5,
+  "reaped_count": 5,
+  "deferred_count": 0,
+  "deferred_path_live_timing_not_measured": true,
+  "OS_DLL_unload_not_claimed": true,
+  "controlled_final_release_component_passed": true,
+  "WM_NULL_scope": "supporting before/after responsiveness only; old1ms zero samples inconclusive; neither30s interval covers fault/recovery as a whole",
+  "cleanup_verified": true,
+  "original_Explorer_forced_restart": false,
+  "fixture_files_unchanged": 138,
+  "fixture_roles_removed": 6,
+  "full_client_release": false,
+  "artifact_count": 239,
+  "artifacts": [
+    {
+      "file": "desktop-01/baseline-actual-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-actual-launch.json",
+      "sha256": "a7083daae032f63455620dc9ab165978ba22538ddc4d26718c5b419c60a64f27",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-actual.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-actual.json",
+      "sha256": "effe55d20f92144b2a4b9f46c104f870255aa3299108cb92f8bb0e2c81746163",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-cache-expired-wait.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-cache-expired-wait.json",
+      "sha256": "f8f30982832b21e0c0e51644193e2a836bd6cf8e7839e959b1157904a14ba39f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-g3-launch.json",
+      "sha256": "7c7491c3753c3eca3d33c14637b1ed730970f44aa0d75264a6235d3717d29fbc",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-g3-parsed.json",
+      "sha256": "ac74167e119409aa4b939ea227cd92ea3d81561386737fb456f1faa1d8fe15b8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-g3.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-g3.json",
+      "sha256": "4709030615d80d5651b230b45d70e9b96fe6bb5550ad7fbc3607589384b7b71c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-ready-wait.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-ready-wait.json",
+      "sha256": "4db66f16d16de637f3fe3b86e5bd10b57b903e8bf6f98d53836121454f0270eb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-response-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-response-launch.json",
+      "sha256": "f5c8ee5dff5d70d56c4c261aca6395f93ddb7e602ee8bd0e16c2bedb1c0951b9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-response.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-response.json",
+      "sha256": "d5ead6f38c45c9f66bcd1ef274bef435e309177bd33a9a66a587a9c7a185d652",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-response.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-response.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-response.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-response.stdout.jsonl",
+      "sha256": "fff1aa2701bc8e5411aec056863d867a7db44a6325a99d4d48faddea4039a5d6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/baseline-ui.json",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-ui.json",
+      "sha256": "7baa1122a820d13e4021b3e57b10144a514c694a2d91afbd6e64524008c7ce55",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/broker-epoch.json",
+      "source": ".runtime/explorer-g3/desktop-01/broker-epoch.json",
+      "sha256": "20a1032b16eec674431fed97a55d1e5743b0e9651528136c1e73ff997aeff4ed",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/broker.json",
+      "source": ".runtime/explorer-g3/desktop-01/broker.json",
+      "sha256": "ed000eea6f05683f689c5993f190b837e3f4fd2b1acb77947a8e9e786eb12d75",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/cleanup-fields-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/cleanup-fields-launch.json",
+      "sha256": "f995014e7271db99b1325a2908a669c280c6ce87749dc803b1c7454f3af3474e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/cleanup-fields.json",
+      "source": ".runtime/explorer-g3/desktop-01/cleanup-fields.json",
+      "sha256": "4259fda8774a4cb2a86026727889c8b73aa742bf40010b8998fdef6c76471609",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/cleanup.json",
+      "source": ".runtime/explorer-g3/desktop-01/cleanup.json",
+      "sha256": "0deaf9b4116d47908a95be95488fc3764906f76ab8a53fc0fc554b74a5fc32e8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01-exit.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01-exit.json",
+      "sha256": "0a31bed00f616d19612adcb0e168fbc59202863c8788e56dbe5a8dcda8389e7b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01-launch.json",
+      "sha256": "97684a5daad2a98d65d03d25d2df5e0e1897b7822fa8c3dc2680a9c0e63c821d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01.json",
+      "sha256": "ab422ce4e40e1085b117d332faaeaba2ea25524324f612de04d44d242a5bebbd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01.stdout.jsonl",
+      "sha256": "5e2645199ba52f60bccc39c63a0e3c6251e5b58989ade4af529a5b5a232de2f2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02-exit.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02-exit.json",
+      "sha256": "f35d1b2cfe599f1e9510cdebba3538156093666ad9335c96712761b7cec817cf",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02-launch.json",
+      "sha256": "a66aa38f260ecd9350f402f0e671a15cc471aa2d638d5f92c1eec23f6d3d5c01",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02.json",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02.json",
+      "sha256": "02e68abf7e53c22e30c8ef2df3da7c0c5382572b5854997170c360ababd15e14",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02.stdout.jsonl",
+      "sha256": "71b138da2e2d7bd9039c6821931bdb711df140d61de82041ccc5443eeeedec2a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/guard-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/guard-launch.json",
+      "sha256": "90e73dab8e448bcbbd64536288b4e386f152200e63968fb89b3d88e12afd1f49",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/guard-machine-preflight.json",
+      "source": ".runtime/explorer-g3/desktop-01/guard-machine-preflight.json",
+      "sha256": "b4fb929b994e58daaf4a383d7649bc4c8e93da44846f0472dad02ac17c188a0a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01-exit.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-01-exit.json",
+      "sha256": "45b473605ddd11fc803d855c2ca853c04e5ae8af3463f6e7c700e903b290cbc8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-01-launch.json",
+      "sha256": "ab0249133f0c662b39e95b34768f4b041efeb0a4edd5de183b00bb5f1e9f1fef",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-01.json",
+      "sha256": "f51acdf42146e8d36461aa6e5b27a7f7632afc34b78cd4031e0acf71d8bfd47f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/host-01.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/host-01.stdout.jsonl",
+      "sha256": "abf3e2efce29a9645c159b971d478091f6b546b22ddc5c17fb1baadb3896d99b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02-exit.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-02-exit.json",
+      "sha256": "795785d01c392dfa40220c6dd8214fa26ac36da8aa9a3713412fc77e123f29a8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-02-launch.json",
+      "sha256": "047eaaccc8c39405047d142c790295e58d3977d6133fc8b9b64955ceb1b773fb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-02.json",
+      "sha256": "a18fbfc6a2dbd6cb5e2269ff468d8067c3acc26152477b39e9d06411059a79c1",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/host-02.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/host-02.stdout.jsonl",
+      "sha256": "596340e95b56a0b1930a9d5114118a4d95905851ad66acae9aeb71ee91f93deb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline-exit.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline-exit.json",
+      "sha256": "769a8c22fcae9cea9cee8cfc0a07248d393a29d1cd38e6ecb8d167319aee5b6e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline-launch.json",
+      "sha256": "f09e2357a8e17b2ec1b7d5d8da43aee49ba85131ea12f01b68662e31f31a2cb0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline.json",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline.json",
+      "sha256": "658bf2ddcfee5c69e52d85a20151987b9a7673ebac048d2145fe49a6292b3b76",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline.stdout.jsonl",
+      "sha256": "6cd437616bcd41d4f5a6312a4888a1a688415e107e8aefb27c8465fc1659fdbf",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/identity.json",
+      "source": ".runtime/explorer-g3/desktop-01/identity.json",
+      "sha256": "ed75d8e4ff26b7fa444edc170701d36770f191e00a86866940e8c7e990649ed0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/measurement-plan.json",
+      "source": ".runtime/explorer-g3/desktop-01/measurement-plan.json",
+      "sha256": "ca31ffccd5bb01dd9734ecdf3f675322c86788133e1b117fdd7f055ecb3cf328",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/register.json",
+      "source": ".runtime/explorer-g3/desktop-01/register.json",
+      "sha256": "e9290466dedd0bda871a1ad64ebc07e85223ab8c298f1844710709b9cc775004",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/registered-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/registered-launch.json",
+      "sha256": "df37ab1ebf45f7b6a67f47341917156d210ba4369dd2a90c7d91c82cdabb5ffb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/registered.json",
+      "source": ".runtime/explorer-g3/desktop-01/registered.json",
+      "sha256": "c29e1d7517dd4c3ace24b75b5ba5fffe30279001e5e61bec1d7526abc48956f7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/root-metrics.json",
+      "source": ".runtime/explorer-g3/desktop-01/root-metrics.json",
+      "sha256": "c75d9641a6a6b167791aedcce3f45f7c012601e5ae6ea5f6e706cb57950a23e8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-error-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-error-g3-launch.json",
+      "sha256": "9abcab843afd34ef41a7a21418ad93ea7328ea69d4999ec67a4f4831f563f6dd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-error-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-error-g3-parsed.json",
+      "sha256": "07ad7408733aaf40cadfeaa2bb018baa15a0b8800977042ed9c650c6aac00436",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-error-g3.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-error-g3.json",
+      "sha256": "42db3b5d1fd76f855c7d2ec1de1a0b6c0652180ab43aba4de85bb8b3ae9050dd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-error-ui.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-error-ui.json",
+      "sha256": "ed1c044cb11292338023dd3bcd1cb9c3666198566843e7e731b011ef7b62ed01",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-ready-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-ready-g3-launch.json",
+      "sha256": "0fc1ddab9fbc645355bd7dacc2e6290992c13a6e4e325c361daf21c75df6b5a6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-ready-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-ready-g3-parsed.json",
+      "sha256": "2dbde9cda4e0eb9258b19e045daa8ca86c5aef7debea80914fb7843d272fe519",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-ready-g3.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-ready-g3.json",
+      "sha256": "a4a7b0d03c0bd5714ae1e9a1d52ea077015ae325e8f76ed0eb9f5cbfcb73bb64",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-response-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-response-launch.json",
+      "sha256": "eead08d0a6dfc45588b38df7a261c24a69287cf63ce8e59b9163b53d81b05d6e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-response.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-response.json",
+      "sha256": "8dcba178b757033684b019ee9979d3fd7ff28d78c959036584f22dabf7cca3ca",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-response.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-response.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-response.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-response.stdout.jsonl",
+      "sha256": "dcb7fd01bcab5c8dad235677789275dedf46198491605d3c38cfdb280d0b02c7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-error-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-error-g3-launch.json",
+      "sha256": "4042970da64629f836fdbcbceca146652d6d2feac86111c826bab87390b5111a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-error-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-error-g3-parsed.json",
+      "sha256": "91e0682cfdeaa80e4b303c52fd30d33dfc866f59aa4ed231d55b5b65c7836de4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-error-g3.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-error-g3.json",
+      "sha256": "13a7611c7270d1c0e89d11015768b01b9b0b0be6d5cc44e695478e0fe97fc42a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-error-ui.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-error-ui.json",
+      "sha256": "7b8a5973cbf3f1e2a2a39fe7f5ad7cb2c1d9ca26ada0ee516307a44104cc6264",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-ready-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-ready-g3-launch.json",
+      "sha256": "f5acb3a713fe2d69d93d3e8eda752a2c9e33807bb498def169a845f4da6927c2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-ready-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-ready-g3-parsed.json",
+      "sha256": "097cb1f04319d2c25d960d364aa6d3878fd3cde3b0d55036a9d3c6cc0302b685",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-ready-g3.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-ready-g3.json",
+      "sha256": "f7931b5b58c37d9255f88e126e5a91e095c23b0ae1ecdcd663e8c8ea08976acd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-response-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-response-launch.json",
+      "sha256": "6ff887deb525434cb1f7db18dacdc1c1bf8c91869c73a86d609a573e406ab835",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-response.json",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-response.json",
+      "sha256": "ab0687e725a89e13579b51d8436f646d83180df374bd218a514063e4f682a7f8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-response.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-response.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-response.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-response.stdout.jsonl",
+      "sha256": "bd685f6a0819d062b17fd8b69fcf52d0044efef66b24ff3439daf34d8c5fad6c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/screenshots/baseline-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-01/screenshots/baseline-ready.jpg",
+      "sha256": "472661dc68c323c8d1a4dd32162e2c105a0448b277103834e542656f02b760a1",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/screenshots/sample-01-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-01/screenshots/sample-01-ready.jpg",
+      "sha256": "b646d23511b03eb85a9ac287621364428ef7c8252e77db8ec18490d8860a0030",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/screenshots/sample-02-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-01/screenshots/sample-02-ready.jpg",
+      "sha256": "b646d23511b03eb85a9ac287621364428ef7c8252e77db8ec18490d8860a0030",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/segment-continuity.json",
+      "source": ".runtime/explorer-g3/desktop-01/segment-continuity.json",
+      "sha256": "ffaa13d2fb794962acafdbd28b6a78f1246a78bb0c2f1ba406fa30e89d648c4e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/target-epoch.json",
+      "source": ".runtime/explorer-g3/desktop-01/target-epoch.json",
+      "sha256": "9c0b075bf85b16952fe669c9ec53366a0ce10638b87fc1ee579ede92c07a6655",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/target-sdk-launch.json",
+      "source": ".runtime/explorer-g3/desktop-01/target-sdk-launch.json",
+      "sha256": "9d647e2a1508b03815764bdc1417e4e18d4bbf1f7c6d808cbf773417401d1137",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/target-sdk.json",
+      "source": ".runtime/explorer-g3/desktop-01/target-sdk.json",
+      "sha256": "d69fda213339eb7be11de4e4217d17fd1b6b3c07e851d4bb2ad92b142629d96d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/before-segment-continuity.json",
+      "source": ".runtime/explorer-g3/desktop-02/before-segment-continuity.json",
+      "sha256": "2ca2317270fb609ca6a650cf1fd612fd2576ae0da2c0a94a76d5e2727e4a9100",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/broker.json",
+      "source": ".runtime/explorer-g3/desktop-02/broker.json",
+      "sha256": "ed000eea6f05683f689c5993f190b837e3f4fd2b1acb77947a8e9e786eb12d75",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup-fields-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup-fields-launch.json",
+      "sha256": "04766f8a56b0fb14b73122aeda5c16d96c150b2c8b8077b974b47894031aca90",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup-fields.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup-fields.json",
+      "sha256": "1fc52f1cd7233c34ec04ebfa70fda9a65db4d264e8fa4b16fbef9ce5307c25d2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup-sdk-actual-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup-sdk-actual-launch.json",
+      "sha256": "32c46732e81e330517de191ab2a25a536beda47bad314a5333b171d49c468063",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup-sdk-actual.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup-sdk-actual.json",
+      "sha256": "bd70c2af8cf33afb3ba7ee922eca05a09eb0916747370b3ce289a90aa1eb0ad0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup-ui.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup-ui.json",
+      "sha256": "5528d7e83aeebf909bd090267cdb78cf2bc11c6edf8ecf38277da1e10c36d251",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/cleanup.json",
+      "source": ".runtime/explorer-g3/desktop-02/cleanup.json",
+      "sha256": "240c29aea9d7c8f9aed489dc2fb86ba59b6f5c79c081427874df884644c9d7e6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/continuity-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/continuity-g3-launch.json",
+      "sha256": "af0f33464e0fd60c41a58d958819856122ce4a8c1ed1f29f1c87b503dfd39c73",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/continuity-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/continuity-g3-parsed.json",
+      "sha256": "ea1d3c2944b730e24a27b7df021ddf95b0f9600bf1b816f2c2cb88f6a0fdfc87",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/continuity-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/continuity-g3.json",
+      "sha256": "a4165e8a11fd699cae486aebbe47dbda244c98f0c6281867aa7a69d385e20c4f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03-exit.json",
+      "sha256": "c8b0c5f57e97171106866a3b34610e911ef4aed82f799b87ad2ba4aa2fa68544",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03-launch.json",
+      "sha256": "6d4ca19781458c6ecf586a94bc26bf4b98f05962bbc62d196c709650ac6e00e5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03.json",
+      "sha256": "3203ee2c0fb965aecb386fb2d27f73538d2b9d9ca3cd10c179e8cf34122c99a4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03.stdout.jsonl",
+      "sha256": "07273a43e6c85b132d888ee3ece39701edac2b5ca927e9c735c64039efff499f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04-exit.json",
+      "sha256": "49ccaf87f5bcbc80f5d91c4fb87b59f86594c8d0ffa2c46d8b2c2a711ce35541",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04-launch.json",
+      "sha256": "0ed03c6c7c19b20ec1a935ccbed6323b6b40dc88370f17e133c147ea206e3efd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04.json",
+      "sha256": "c21170c8821d91b53b45a7995038d06d06aa71abcb3ebc5310eeb0c76c174b9b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04.stdout.jsonl",
+      "sha256": "620c0ed08d363afea0dce9e4eca143b98d87e001a8e4df99f94b6ab565b3913c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05-exit.json",
+      "sha256": "231eae65673d27528e5110bff8d545460acc0408900fb879f14e021fa0bc7ca1",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05-launch.json",
+      "sha256": "e3db33a632b065359fb974c0d0a406006dba9e5c0a8c03e00369876f676cd4d2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05.json",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05.json",
+      "sha256": "efdf66879be4c45df20d22541e019c2db380f20db5ba673da6fe9149b1e0ab78",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05.stdout.jsonl",
+      "sha256": "dea841b9832585edb92c619b706b1ea7d1fe0f1e913355c69caa9eaaf3a6f2ef",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/final-cua-cleanup.json",
+      "source": ".runtime/explorer-g3/desktop-02/final-cua-cleanup.json",
+      "sha256": "bd115cba4c05e06cda718e35ed3913ae2958115aa47e865ac96e54bc2ee1fc54",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/final-native-cleanup.json",
+      "source": ".runtime/explorer-g3/desktop-02/final-native-cleanup.json",
+      "sha256": "16d32bc39ca64f32462fc143f95e9a96cdbf15b241f8a7539f7f7937e32d3c43",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/final-root-actual-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/final-root-actual-launch.json",
+      "sha256": "dcc39b6511ca53f8b53f4ce142105654820a0c8b121bf3d523cd1b6d3f6a29e3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/final-root-actual.json",
+      "source": ".runtime/explorer-g3/desktop-02/final-root-actual.json",
+      "sha256": "d0af2e937ddddf815cd258d39c066c0abc8566d46e3c5437847c7e3537f1c92d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/final-service-cleanup.json",
+      "source": ".runtime/explorer-g3/desktop-02/final-service-cleanup.json",
+      "sha256": "7ffa7c2311ab7b5fba198e99ef8f19d9847eedf2733063dc6b01564dc04548b7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/g3-measurement-summary.json",
+      "source": ".runtime/explorer-g3/desktop-02/g3-measurement-summary.json",
+      "sha256": "fd428602b1c99c550822cbab82317cbe6ba0fe1d47b6d733ba39f925241a137b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/guard-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/guard-launch.json",
+      "sha256": "476cc899c280e3f69eed92fe27b6f5bb6c3bb3a0c8ae5220875a9509e19bc3d6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/guard-machine-preflight.json",
+      "source": ".runtime/explorer-g3/desktop-02/guard-machine-preflight.json",
+      "sha256": "b4fb929b994e58daaf4a383d7649bc4c8e93da44846f0472dad02ac17c188a0a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-03-exit.json",
+      "sha256": "5ccbcc8d02377705178252425f1fd4274e771be16d69981079ad2224698e9211",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-03-launch.json",
+      "sha256": "d1420c2243a8ea0451b97fc3cf32d4c8fca8bf0571a2d1e653b2a0ae4981052c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-03.json",
+      "sha256": "fd825bb62634ed9573b0e12578c312cdc95eed4edd475a6014dc86ab8f019a7d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/host-03.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/host-03.stdout.jsonl",
+      "sha256": "3033088017c43e85d2f7d68305d97e2bf471de5929e8c2a80479b808d3ea35aa",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-04-exit.json",
+      "sha256": "5ad24a5956bd2a587c8c5af7677bc1f08b43d5875bb3728162a3d7358bfd990b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-04-launch.json",
+      "sha256": "5232f9d0db8ace0c172758eab69902eda200b625b4b3c812df2f24e03dc87297",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-04.json",
+      "sha256": "484f0e77e7a47ab9f68f8da1b3e691da6c97e201e067760a6bb3579dc497290c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/host-04.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/host-04.stdout.jsonl",
+      "sha256": "7718ea75fd970db8497afd2011c586fade5e59a604ae76806b80a5e2f64ebc67",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-05-exit.json",
+      "sha256": "c89a7e28f834240edfd4afd6e02884b172c104dd31d65072960600e1c2359235",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-05-launch.json",
+      "sha256": "6afb486c26bad833bd3edf29fc14a5767252f16cfb2208e3a6193540cc0b2131",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-05.json",
+      "sha256": "1326376543b24c8fd43640f0a853601eb8b290e3e67df22a9bef268867e1e7a6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/host-05.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/host-05.stdout.jsonl",
+      "sha256": "62592a7ca85a681885299f61f2d1548b2663d0335c37e8a1481964972c7ff7ce",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline-exit.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline-exit.json",
+      "sha256": "6c74c8e1c3a690879ac118954b8d9ebfe432152d8ed6bf210fbaa5938ede2577",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline-launch.json",
+      "sha256": "29942eef994182578c312b54cd4b55e77a946b1d399b1bd515f0b601c35398f9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline.json",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline.json",
+      "sha256": "91ebc27de4a72205a8e5b81b443047b78d4ca97c6008410822596068d406ffd1",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline.stdout.jsonl",
+      "sha256": "62592a7ca85a681885299f61f2d1548b2663d0335c37e8a1481964972c7ff7ce",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/identity.json",
+      "source": ".runtime/explorer-g3/desktop-02/identity.json",
+      "sha256": "ed75d8e4ff26b7fa444edc170701d36770f191e00a86866940e8c7e990649ed0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/register.json",
+      "source": ".runtime/explorer-g3/desktop-02/register.json",
+      "sha256": "ddd5a631c3522f440de09bf8166bfa2638974e1683932df9e87d0d52dcc0ad46",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/registered-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/registered-launch.json",
+      "sha256": "dd80f23c516fa0f5745e276fb06076670674bef14666a98201eb00f855a68592",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/registered.json",
+      "source": ".runtime/explorer-g3/desktop-02/registered.json",
+      "sha256": "98cfd6790e9c121685038cf0496aaaaec71df87fa079e6937cf9b206eebe8c8e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/response-v2-smoke-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/response-v2-smoke-launch.json",
+      "sha256": "3d961a1d24d70c5de8db832ce6110bdc94956119970a0ccdc85d6d5a3788c77b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/response-v2-smoke.json",
+      "source": ".runtime/explorer-g3/desktop-02/response-v2-smoke.json",
+      "sha256": "b34c7f6fca8e6cfa51605f590b0f3f6435c82ce3fc13da57c6801ff7327eb5d6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/response-v2-smoke.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/response-v2-smoke.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/response-v2-smoke.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/response-v2-smoke.stdout.jsonl",
+      "sha256": "5d2f65ca6b09d7f3fe02468dadf6600d0aeaee025336bb7ae79ee2a40c476ed6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/root-metrics.json",
+      "source": ".runtime/explorer-g3/desktop-02/root-metrics.json",
+      "sha256": "66c9935793322e2697453f74a0406578c4d2415480565c6bb28f6ae277b85f66",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-error-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-error-g3-launch.json",
+      "sha256": "66a50d643c308b417c11247b8ad82af0faebf000cd162ad3d19be68b50fd1bb9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-error-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-error-g3-parsed.json",
+      "sha256": "69a2c0ce350eee25ce68757637dbb5e562318829d134f2d84a59edcff16b17a9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-error-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-error-g3.json",
+      "sha256": "f050c58b3953baf9d59e7e4f31e32d1d0205ed0a5d33df951a5f31af800e92a7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-error-ui.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-error-ui.json",
+      "sha256": "ecab58487849413d5c918249ca967470d0f22db896818037a6b1496367c39c0f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-ready-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-ready-g3-launch.json",
+      "sha256": "697c449d2ecfa482bfeaff1f012ad95a66175a6831431648557ad2e23c0f47d2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-ready-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-ready-g3-parsed.json",
+      "sha256": "565eb721d582df29838975df253e99aaa0b06672fcd24aab16beb8c570949abe",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-ready-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-ready-g3.json",
+      "sha256": "bbc385305a51ec43a3d0780258507c20b42776ce534e454bedbce973a400a3b9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-response-interval-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-response-interval-launch.json",
+      "sha256": "82ae32dfa31d0aec5e577b594247c0ec22dfb6cc3cc723acd4b829122dfab0b8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-response-interval.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-response-interval.json",
+      "sha256": "654a9ab91e2f84e33d41bd2265ac47db4691c23f0ffc2b8e06d22187465f23da",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-response-interval.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-response-interval.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-response-interval.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-response-interval.stdout.jsonl",
+      "sha256": "3aa532ce3949d2fcf78f6cec25e9bf4c4b05adb946ba643314e2e6688bcec519",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-response-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-response-launch.json",
+      "sha256": "ec2cadc457dba2a2b6610c50c62f36c593d34b6372556917eb4a1f9837f1c589",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-error-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-error-g3-launch.json",
+      "sha256": "b951b8c3509cfe2ff0ce0f028e4971356093ab33fe840928ae4e4ca9e348c1f2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-error-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-error-g3-parsed.json",
+      "sha256": "474dbc5d4740a312fec6fb23fd3c84fd57bc641fa96c899b6844c4caadf62a2a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-error-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-error-g3.json",
+      "sha256": "436f96686789f5011416f5bbf63d820a278dc983bf39f38ac49410be5e0bd6b4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-error-ui.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-error-ui.json",
+      "sha256": "c0514f108d9ffbbbb46adfb2c749b35305645945e9c2161c5e7358b053a51702",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-ready-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-ready-g3-launch.json",
+      "sha256": "462b02f318479220db3b1133dd2e3479fe52e8d106a7cc412d55298578eed545",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-ready-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-ready-g3-parsed.json",
+      "sha256": "8937e94e92f67594fbf46beb162b377859ac6d4edd25f7fa782e3dfb153a9e42",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-ready-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-ready-g3.json",
+      "sha256": "215bb2d979e22c4a19090471a79fc55a6cbcd7023c02ff2fab18c09810f9160e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-response-v2-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-response-v2-launch.json",
+      "sha256": "464e2cd7caa0fda12a9c61d692de167261f21df537178720e151bc5691a9a7fe",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-response-v2.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-response-v2.json",
+      "sha256": "693aba7179ed8d71676f2399cf40fffd9632ad4b2a906637e704bae37ce300a3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-response-v2.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-response-v2.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-response-v2.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-response-v2.stdout.jsonl",
+      "sha256": "85cfae11b1a392c6abc04650060959883d59d5fe01cc902c2b97eafd70b53f80",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-error-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-error-g3-launch.json",
+      "sha256": "eeff8d49e77c0c142a69041dee3710f914a87ce330fa5567dc9821afc74f3810",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-error-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-error-g3-parsed.json",
+      "sha256": "1b6cb0960f70d70557ca558ebcc3d0cda4334deb11e717da49f24a8ef6513ff5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-error-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-error-g3.json",
+      "sha256": "8116181801f0c312a84e39f456ed749b1abcb67c2655e538b30b05c394dc51b0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-error-ui.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-error-ui.json",
+      "sha256": "eb9f92a861643b12c4d833cac3001b5c115be09284c25c04adbebcc230ac3e2f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-ready-g3-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-ready-g3-launch.json",
+      "sha256": "ae6ccdc76daa9070db92d60281bc9f34cfbfd9e784fd345b9a767dbd99acdf05",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-ready-g3-parsed.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-ready-g3-parsed.json",
+      "sha256": "74223689175101c5a2958b07fa8d67f29dd49256a858956fa47e1a548661a788",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-ready-g3.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-ready-g3.json",
+      "sha256": "e6b45bfa0a00d9f26a9960982a992c042a9cc7a64920594c3c58824b68cdd47b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-interval-v2-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-interval-v2-launch.json",
+      "sha256": "6a7852ded43d2b0d780e0367475807169f171b2a621596f7273b55954db565d9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-interval-v2.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-interval-v2.json",
+      "sha256": "7dd02fe950d6794bf27de70a8f50064828e8cfe4231510b3715bc8262d344c08",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-interval-v2.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-interval-v2.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-interval-v2.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-interval-v2.stdout.jsonl",
+      "sha256": "51d478dfc93d1cd3607400ab35c7ab093c52615df9fa4ae29f6c693f28309941",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-v2-launch.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-v2-launch.json",
+      "sha256": "e72a17d1026d21c00f61dc574ce3363bac1922acef56b445ac820311a29ec221",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-v2.json",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-v2.json",
+      "sha256": "c6b9440d9586220b24c898fdc132dec1353c456e3eada738eea18b7f9a4e72ff",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-v2.stderr.log",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-v2.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-response-v2.stdout.jsonl",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-response-v2.stdout.jsonl",
+      "sha256": "13cf395d05f7a86150ca9a26c582397a8f46b792ecba347f911a882bbbdeba7f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/screenshots/sample-03-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-02/screenshots/sample-03-ready.jpg",
+      "sha256": "93804ce0dcbdc4510fede8ad964874f8db134b99fb5c0ad666d7a7ecc10d3237",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/screenshots/sample-04-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-02/screenshots/sample-04-ready.jpg",
+      "sha256": "a378cc4a64adb20ed208097c28a6f192571a26808acd9d9316fef8809381183d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/screenshots/sample-05-ready.jpg",
+      "source": ".runtime/explorer-g3/desktop-02/screenshots/sample-05-ready.jpg",
+      "sha256": "4659063fc598dabf806e27a19f444f9873d948e95e46bb1b2d9f4991bffaaeaa",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/stop-fault.ps1.txt",
+      "source": ".runtime/explorer-g3/desktop-02/stop-fault.ps1",
+      "sha256": "76613d6144a40fd1673dfe8e583d5eaf6366586e476c788613e11ca789dbb533",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/stop-host.ps1.txt",
+      "source": ".runtime/explorer-g3/desktop-02/stop-host.ps1",
+      "sha256": "d36513ab95221eca468f8f5ebc047954b7a2f23f792209c3c32b0a539548406e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/dispatch.ps1.txt",
+      "source": ".runtime/explorer-g3/dispatch.ps1",
+      "sha256": "1446e19d03cd37713174da18681e196038d4369c56f4df0624c611164a0aee59",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/dispatch-v2.ps1.txt",
+      "source": ".runtime/explorer-g3/dispatch-v2.ps1",
+      "sha256": "54c749705aa7be486957217323458283e1c371ac27989c933de52fe2b490d942",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/run-g3-view.ps1.txt",
+      "source": ".runtime/explorer-g3/run-g3-view.ps1",
+      "sha256": "4bd9d913d3bd47cdb140871eebfc13e16afe7824eaa438ad2596c36a289916e6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/run-response.ps1.txt",
+      "source": ".runtime/explorer-g3/run-response.ps1",
+      "sha256": "689c327c966f5c7c70f986293068521b30f5645fc81d36f8313a19231ebb2958",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/run-response-v2.ps1.txt",
+      "source": ".runtime/explorer-g3/run-response-v2.ps1",
+      "sha256": "8147c58dc3716e1b6910fc196e6b46f09b731d04079416351c047985130b0676",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/start-host.ps1.txt",
+      "source": ".runtime/explorer-g3/start-host.ps1",
+      "sha256": "c371525603bad040498c76010955900d3858edea7fdf4f9c9d35489483132ac5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/start-fault.ps1.txt",
+      "source": ".runtime/explorer-g3/start-fault.ps1",
+      "sha256": "b5e7720b1c4010da97969b4c77a38ba2b497594ae12a21833fe3c7c4aac88173",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/stop-host.ps1.txt",
+      "source": ".runtime/explorer-g3/stop-host.ps1",
+      "sha256": "7baa2964f2c8c7282a1dd163f752b0bc048913cdaa851f767a4c8ee695d0fb43",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/stop-fault.ps1.txt",
+      "source": ".runtime/explorer-g3/stop-fault.ps1",
+      "sha256": "0de49d579543453b378e166831876c2f1b2083f15c5eb2fd1a829cc0c387a118",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/read-events.ps1.txt",
+      "source": ".runtime/explorer-g3/read-events.ps1",
+      "sha256": "bb90e0f54a5ee7b9d07e763bc1ed43b8d09343bb6d50d1c11a68d3417c6473af",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/WindowResponse.cpp.txt",
+      "source": ".runtime/explorer-g3/preparation/WindowResponse.cpp",
+      "sha256": "5693562f4c051005e50651aa2eac2a0a8c71c2750f48aa63fbd8553c18842b58",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/WindowResponse-v1.cpp.txt",
+      "source": ".runtime/explorer-g3/preparation/WindowResponse-v1.cpp.txt",
+      "sha256": "d1206fb7e56c6c1afc7342d143777eb132a88ce2914aa548d856202beb9d52a2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/ProofG3View.cpp.txt",
+      "source": ".runtime/explorer-g3/preparation/ProofG3View.cpp",
+      "sha256": "3386df3e25ff87bbe97f715116f6d34f1b7cd9a22830613d10519114397625cf",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/CMakeLists.txt",
+      "source": ".runtime/explorer-g3/preparation/CMakeLists.txt",
+      "sha256": "eaf08f7628b26e09a3bbe86dfdf81321fc56e9ccf7b47a1c958c3c18b7ebb9f8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "preparation-manifest.json",
+      "source": ".runtime/explorer-g3/preparation-manifest.json",
+      "sha256": "868c00cfbd95013d7ae1305a334d1dc4814fcc88c7edab7fca4749c263cdb244",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "observer-negative.json",
+      "source": ".runtime/explorer-g3/observer-negative.json",
+      "sha256": "6709f943927c23f111bf4b41658282332238835783428303115c9b0693bd3383",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "observer-point-fix-evidence.json",
+      "source": ".runtime/explorer-g3/observer-point-fix-evidence.json",
+      "sha256": "29b48f8b57ca2a1eddbc1751291a82398393b494b7ccff0d821803d3d649656a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "observer-build-final.log",
+      "source": ".runtime/explorer-g3/observer-build-final.log",
+      "sha256": "802b550beeecdbd8e18ae02f247a4be465a21f4d4bd6ede8da8db094c8d1efca",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "observer-point-fix.log",
+      "source": ".runtime/explorer-g3/observer-point-fix.log",
+      "sha256": "4f7dd0401fb3312414ad27b9fec88d71d35800ca169de27469aea15db5f99dcf",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "application-events.json",
+      "source": ".runtime/explorer-g3/application-events.json",
+      "sha256": "28ac8ca8a388417e9675f8b06e814014c9344ba56eb729c3c02a0d79526cb89d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "core-cleanup.json",
+      "source": ".runtime/explorer-g3/core/20260912T131035Z-5ab31abe/acceptance.json",
+      "sha256": "005357f2c8475a9da7d87397961acd6b16c53236641d5468c3f01ea1f49aae58",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "five-samples.json",
+      "source": ".runtime/explorer-g3/root-five-samples.json",
+      "sha256": "aa04dd7a50577340be5e835df660d6e07d689f3f19e595b4c221c1995022c992",
+      "kind": "derived_from_original_QPC_records"
+    },
+    {
+      "file": "desktop-01/baseline-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-01/baseline-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-01.stop",
+      "source": ".runtime/explorer-g3/desktop-01/fault-01.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/fault-02.stop",
+      "source": ".runtime/explorer-g3/desktop-01/fault-02.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/guard.requested",
+      "source": ".runtime/explorer-g3/desktop-01/guard.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-01.stop",
+      "source": ".runtime/explorer-g3/desktop-01/host-01.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-02.stop",
+      "source": ".runtime/explorer-g3/desktop-01/host-02.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/host-baseline.stop",
+      "source": ".runtime/explorer-g3/desktop-01/host-baseline.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-error-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-error-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-01-ready-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-01/sample-01-ready-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-error-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-error-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/sample-02-ready-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-01/sample-02-ready-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-01/stop",
+      "source": ".runtime/explorer-g3/desktop-01/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/continuity-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/continuity-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-03.stop",
+      "source": ".runtime/explorer-g3/desktop-02/fault-03.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-04.stop",
+      "source": ".runtime/explorer-g3/desktop-02/fault-04.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/fault-05.stop",
+      "source": ".runtime/explorer-g3/desktop-02/fault-05.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/g3-measurement-summary.md",
+      "source": ".runtime/explorer-g3/desktop-02/g3-measurement-summary.md",
+      "sha256": "c9a66b9cb7eb53a4c3ac4a87473092535196c09a12c126e13b05c62a09163a8e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/guard.requested",
+      "source": ".runtime/explorer-g3/desktop-02/guard.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-03.stop",
+      "source": ".runtime/explorer-g3/desktop-02/host-03.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-04.stop",
+      "source": ".runtime/explorer-g3/desktop-02/host-04.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-05.stop",
+      "source": ".runtime/explorer-g3/desktop-02/host-05.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/host-segment-baseline.stop",
+      "source": ".runtime/explorer-g3/desktop-02/host-segment-baseline.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-error-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-error-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-03-ready-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-03-ready-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-error-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-error-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-04-ready-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-04-ready-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-error-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-error-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/sample-05-ready-g3.requested",
+      "source": ".runtime/explorer-g3/desktop-02/sample-05-ready-g3.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "desktop-02/stop",
+      "source": ".runtime/explorer-g3/desktop-02/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "operator-evidence-index.json",
+      "source": ".runtime/explorer-g3/desktop-02/evidence-index.json",
+      "sha256": "3b521d847e5d177bbd677ee09e937e828a4ebfd79e202f4b975895d4cb58cb62",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "repository-final.log",
+      "source": ".runtime/explorer-g3/repository-final.log",
+      "sha256": "3730d7e3cba37b323892ebc9acb25a553ed47863fef6c9a70dd4d4a6fb167e89",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "release-gate-final.log",
+      "source": ".runtime/explorer-g3/release-gate-final.log",
+      "sha256": "d97b91c81232b56314176092648bc5c6b85c7efe440090063d938110c29195a5",
+      "kind": "unmodified_copy"
+    }
+  ],
+  "operator_index_entries_verified": 214,
+  "repository_verification": "passed",
+  "explorer_gate_result": "RELEASE_GATE_ALLOWED_exit0_with_G4_user_waiver"
+}

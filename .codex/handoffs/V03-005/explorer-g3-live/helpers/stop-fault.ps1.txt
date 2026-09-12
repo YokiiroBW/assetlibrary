@@ -1,0 +1,12 @@
+param([Parameter(Mandatory)][ValidatePattern('^fault-[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$run='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-g3/desktop-01'
+$record=Get-Content -LiteralPath (Join-Path $run ($Label+'.json')) -Raw|ConvertFrom-Json
+$process=Get-Process -Id $record.Pid
+$handle=$process.SafeHandle
+try{
+ if($process.StartTime.ToUniversalTime().ToFileTimeUtc().ToString() -cne [string]$record.CreationFileTime -or
+ $process.Path -ine 'C:\YOKI\Codex\AssetLibrary-worktrees\V03-005\.runtime\explorer-g3\binaries\ExplorerFaultHost.exe' -or $process.SessionId -ne 2){throw 'Owned fault identity mismatch'}
+ [IO.File]::WriteAllText((Join-Path $run ($Label+'.stop')),'')
+ if(-not $process.WaitForExit(5000) -or $process.ExitCode -ne 0){throw 'Normal fault stop unconfirmed'}
+}finally{$process.Dispose()}

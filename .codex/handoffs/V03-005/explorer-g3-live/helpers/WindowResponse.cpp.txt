@@ -1,0 +1,97 @@
+#include <windows.h>
+#include <wtsapi32.h>
+#include <psapi.h>
+#include <vector>
+#include <string>
+#include <thread>
+#include <cstdio>
+#include <cwchar>
+#include <cerrno>
+
+struct Handle {
+    HANDLE value=nullptr;
+    explicit Handle(HANDLE h=nullptr):value(h){}
+    ~Handle(){if(value&&value!=INVALID_HANDLE_VALUE)CloseHandle(value);}
+    Handle(const Handle&)=delete;Handle& operator=(const Handle&)=delete;
+};
+bool Number(const wchar_t* text,ULONGLONG& result){
+    if(!text||!*text)return false;for(auto p=text;*p;++p)if(*p<L'0'||*p>L'9')return false;
+    errno=0;wchar_t* end=nullptr;result=wcstoull(text,&end,10);return !errno&&end&&!*end&&result;
+}
+bool User(HANDLE process,std::vector<BYTE>& bytes){
+    HANDLE raw=nullptr;if(!OpenProcessToken(process,TOKEN_QUERY,&raw))return false;Handle token(raw);
+    DWORD size=0;GetTokenInformation(token.value,TokenUser,nullptr,0,&size);
+    if(GetLastError()!=ERROR_INSUFFICIENT_BUFFER||size<sizeof(TOKEN_USER)||size>4096)return false;
+    bytes.resize(size);return GetTokenInformation(token.value,TokenUser,bytes.data(),size,&size)!=FALSE;
+}
+bool ActiveSession(DWORD session){
+    LPWSTR data=nullptr;DWORD size=0;
+    if(!WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE,session,WTSConnectState,&data,&size))return false;
+    const bool ok=size>=sizeof(WTS_CONNECTSTATE_CLASS)&&*reinterpret_cast<WTS_CONNECTSTATE_CLASS*>(data)==WTSActive;
+    WTSFreeMemory(data);return ok;
+}
+bool Identity(HWND window,DWORD pid,ULONGLONG birth,HANDLE process){
+    DWORD owner=0,session=0,selfSession=0;wchar_t cls[64]{},path[MAX_PATH]{},expected[MAX_PATH]{};DWORD chars=MAX_PATH;
+    FILETIME created{},exited{},kernel{},user{};
+    if(!IsWindow(window)||!IsWindowVisible(window)||window==GetShellWindow()||
+       !GetWindowThreadProcessId(window,&owner)||owner!=pid||pid==GetCurrentProcessId()||
+       !GetClassNameW(window,cls,64)||wcscmp(cls,L"CabinetWClass")||
+       !ProcessIdToSessionId(pid,&session)||!ProcessIdToSessionId(GetCurrentProcessId(),&selfSession)||session!=selfSession||
+       !ActiveSession(session)||WaitForSingleObject(process,0)!=WAIT_TIMEOUT||
+       !GetProcessTimes(process,&created,&exited,&kernel,&user)||
+       ((static_cast<ULONGLONG>(created.dwHighDateTime)<<32)|created.dwLowDateTime)!=birth||
+       !QueryFullProcessImageNameW(process,0,path,&chars))return false;
+    const auto length=GetWindowsDirectoryW(expected,MAX_PATH);
+    if(!length||length>=MAX_PATH||wcscat_s(expected,L"\\explorer.exe")||_wcsicmp(path,expected))return false;
+    std::vector<BYTE> own,other;
+    return User(GetCurrentProcess(),own)&&User(process,other)&&
+        EqualSid(reinterpret_cast<TOKEN_USER*>(own.data())->User.Sid,reinterpret_cast<TOKEN_USER*>(other.data())->User.Sid);
+}
+bool Resources(HANDLE process,DWORD pid,ULONGLONG elapsed){
+    PROCESS_MEMORY_COUNTERS_EX memory{};memory.cb=sizeof(memory);DWORD handles=0;
+    if(!GetProcessMemoryInfo(process,reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memory),sizeof(memory))||
+       !GetProcessHandleCount(process,&handles))return false;
+    printf("{\"kind\":\"resources\",\"target_pid\":%lu,\"elapsed_ms\":%llu,\"private_bytes\":%llu,\"working_set\":%llu,\"handles\":%lu}\n",
+        pid,elapsed,static_cast<ULONGLONG>(memory.PrivateUsage),static_cast<ULONGLONG>(memory.WorkingSetSize),handles);return true;
+}
+int Run(int argc,wchar_t** argv){
+    setvbuf(stdout,nullptr,_IONBF,0);
+    ULONGLONG hwnd=0,pid64=0,birth=0,epoch=0,duration=0;
+    if(argc!=6||!Number(argv[1],hwnd)||!Number(argv[2],pid64)||pid64>MAXDWORD||!Number(argv[3],birth)||
+       !Number(argv[4],epoch)||birth<epoch||!Number(argv[5],duration)||duration>30000)return 2;
+    const auto pid=static_cast<DWORD>(pid64);const auto window=reinterpret_cast<HWND>(hwnd);
+    Handle process(OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ|SYNCHRONIZE,FALSE,pid));
+    if(!process.value||!Identity(window,pid,birth,process.value))return 3;
+    Handle done(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!done.value)return 3;
+    std::thread watchdog([&]{if(WaitForSingleObject(done.value,35000)!=WAIT_OBJECT_0)TerminateProcess(GetCurrentProcess(),70);});
+    struct Join {HANDLE done;std::thread& thread;~Join(){SetEvent(done);thread.join();}} join{done.value,watchdog};
+    LARGE_INTEGER frequency{},begin{},end{};if(!QueryPerformanceFrequency(&frequency)||!QueryPerformanceCounter(&begin))return 3;
+    ULONGLONG nextResource=0,maxTicks=0;DWORD samples=0,failures=0;bool resourcesOk=true;
+    printf("{\"kind\":\"ready\",\"target_pid\":%lu,\"observer_pid\":%lu,\"qpc\":%llu,\"hz\":%llu,\"duration_ms\":%llu,\"message\":0,\"timeout_ms\":250}\n",
+        pid,GetCurrentProcessId(),static_cast<ULONGLONG>(begin.QuadPart),static_cast<ULONGLONG>(frequency.QuadPart),duration);
+    // Output consumers may block. The sampling interval starts after readiness output,
+    // and a point measurement must actually sample once, not pass an empty loop.
+    if(!QueryPerformanceCounter(&begin))return 4;
+    const auto start=GetTickCount64();
+    while((samples==0||GetTickCount64()-start<duration)&&samples<300){
+        DWORD owner=0;if(!IsWindow(window)||!GetWindowThreadProcessId(window,&owner)||owner!=pid||WaitForSingleObject(process.value,0)!=WAIT_TIMEOUT)return 4;
+        LARGE_INTEGER before{},after{};if(!QueryPerformanceCounter(&before))return 4;
+        DWORD_PTR ignored=0;SetLastError(ERROR_SUCCESS);
+        const bool response=SendMessageTimeoutW(window,WM_NULL,0,0,SMTO_BLOCK|SMTO_ABORTIFHUNG|SMTO_ERRORONEXIT,250,&ignored)!=0;
+        const DWORD error=response?ERROR_SUCCESS:GetLastError();if(!QueryPerformanceCounter(&after))return 4;
+        const auto ticks=static_cast<ULONGLONG>(after.QuadPart-before.QuadPart);if(ticks>maxTicks)maxTicks=ticks;++samples;
+        if(!response){++failures;printf("{\"kind\":\"response_failure\",\"ordinal\":%lu,\"error\":%lu,\"ticks\":%llu}\n",samples,error,ticks);}
+        const auto elapsed=GetTickCount64()-start;
+        if(elapsed>=nextResource){resourcesOk=Resources(process.value,pid,elapsed)&&resourcesOk;nextResource=elapsed+1000;}
+        const auto now=GetTickCount64()-start;if(now>=duration)break;
+        Sleep(static_cast<DWORD>((duration-now)<100?(duration-now):100));
+    }
+    if(!QueryPerformanceCounter(&end))return 4;
+    const bool identity=Identity(window,pid,birth,process.value);
+    printf("{\"kind\":\"finished\",\"target_pid\":%lu,\"samples\":%lu,\"failures\":%lu,\"max_ticks\":%llu,\"hz\":%llu,\"begin_qpc\":%llu,\"end_qpc\":%llu,\"identity_ok\":%s,\"resources_ok\":%s,\"refresh_or_navigation_sent\":false}\n",
+        pid,samples,failures,maxTicks,static_cast<ULONGLONG>(frequency.QuadPart),static_cast<ULONGLONG>(begin.QuadPart),static_cast<ULONGLONG>(end.QuadPart),identity?"true":"false",resourcesOk?"true":"false");
+    return identity&&resourcesOk&&samples>0&&!failures?0:1;
+}
+int wmain(int argc,wchar_t** argv){
+    try{return Run(argc,argv);}catch(...){fputs("read_only_observer_failed\n",stderr);return 5;}
+}

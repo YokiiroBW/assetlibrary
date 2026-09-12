@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-12T13:26:06.073048+00:00",
-  "status": "G3_real_measurements_in_progress_G4_explicit_user_waiver",
+  "updatedAtUtc": "2026-09-12T14:01:10.570809+00:00",
+  "status": "G1_G2_G3_verified_G4_user_waived_all_test_resources_cleaned",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -433,18 +433,17 @@
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
   },
-  "gui_owner": "windows_live_short assigned sole G3 desktop ownership; root reads records and owns Core cleanup",
+  "gui_owner": "none; all owned test windows/Host/fault/observer/Core cleaned; original Explorer not restarted",
   "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json",
   "gate_review": {
     "document": "explorer-gate-review/README.md",
     "closed": [
       "M0-002-G1",
-      "M0-002-G2"
-    ],
-    "open": [
+      "M0-002-G2",
       "M0-002-G3"
     ],
-    "next_task": "G3 only; do not run or schedule G4",
+    "open": [],
+    "next_task": "Requested G3 complete; G4 waived. Full client login/installer/preview remain separate product work.",
     "lifetime_criterion": "G3; historical G2_full_COM_unload label is incorrect, raw observations retained",
     "waived_not_tested": [
       "M0-002-G4"
@@ -492,8 +491,13 @@
     "private_key": "samefmtid_pid2",
     "profile": "docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md",
     "planned_samples": 5,
-    "actual_result": "pending",
+    "actual_result": "verified",
     "core_ready": ".runtime/explorer-g3/core/20260912T131035Z-5ab31abe/ready.json",
-    "note": "Do not expose private connection content; stop fixture via returned stop_file at end"
+    "note": "Do not expose private connection content; stop fixture via returned stop_file at end",
+    "evidence": "explorer-g3-live/evidence.json",
+    "report": "explorer-g3-live/README.md",
+    "samples": 5,
+    "cleanup": "verified_138files_unchanged_6roles_removed",
+    "limits": "defer0_not_live_measured; operationpin_return_not_OS_unload; WM_NULL_before_after_only; zero_samples_not_passed"
   }
 }

@@ -50,13 +50,15 @@
       "source_task": "M0-002",
       "source_blocker_index": 2,
       "classification": "blocking_release_or_later_milestone",
-      "status": "open",
-      "decision": "The 250 ms Explorer-side deadline is retained, but cancellation drain and reconnect require measured bounds in the real view.",
+      "status": "closed",
+      "resolution": "verified",
+      "decision": "V03-014 measurements in one real Explorer process satisfy the predeclared G3 profile: five fault/reopen samples, EnumObjects/Query/UI Refresh below250ms, completed cancellation cleanup below2s, rendered root recovery below10s, stable owned object/callback counts and zero live operations/pins. Controlled final Release remains verified. This does not claim immediate OS DLL unload or G4 soak coverage.",
       "blocked_targets": ["explorer-v0.5"],
       "owner": "windows-shell-owner",
       "follow_up_task": "V05-EXPLORER-FAULTS",
       "target_milestone": "V0.5",
       "enforced_by": ["python tests/architecture/check_release_gates.py --target explorer-v0.5"],
+      "closure_evidence": ["docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md", ".codex/handoffs/V03-005/explorer-g3-live/evidence.json", ".codex/handoffs/V03-014/tests.md"],
       "exit_criteria": ["Measured Explorer UI return, cancellation drain and normal-host reconnect meet documented bounds.", "No detached worker or DLL lifetime leak remains after repeated recovery."]
     },
     {
