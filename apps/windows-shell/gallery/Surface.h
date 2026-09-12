@@ -65,6 +65,7 @@ public:
     static HRESULT Create(HWND parent, const RECT& bounds, const Callbacks& callbacks, Surface** result) noexcept;
     void Destroy() noexcept; // Idempotent. No joining/waiting; clears pixels, names and accessible state first.
     HWND Window() const noexcept;
+    bool Shown() const noexcept; // Latest WM_SHOWWINDOW/SetVisible intent; native style may update after the callback.
 
     HRESULT SetPage(const snapshot::Page& page, std::uint64_t generation) noexcept;
     void Clear(snapshot::Status status, std::uint64_t generation) noexcept;

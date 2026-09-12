@@ -458,6 +458,7 @@ void Surface::Destroy() noexcept {
     const HWND window = state->window; state->Retire(); if (window && IsWindow(window)) DestroyWindow(window);
 }
 HWND Surface::Window() const noexcept { const auto state = state_; return state && !state->retiring ? state->window : nullptr; }
+bool Surface::Shown() const noexcept { const auto state = state_; return state && state->Alive() && state->shown; }
 
 HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) noexcept {
     if (!state_ || !state_->Alive() || page.entries.size() > snapshot::MaxItems) return E_INVALIDARG;

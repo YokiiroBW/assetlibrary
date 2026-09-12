@@ -17,7 +17,7 @@ struct Scenario {
     gallery::Surface* surface = nullptr;
     IAccessible* accessible = nullptr;
     UINT viewportChanges = 0, activations = 0, refreshes = 0, menus = 0;
-    bool destroyOnViewport = false, deleteOnViewport = false, verifyEmpty = false, observedEmpty = false;
+    bool destroyOnViewport = false, deleteOnViewport = false, verifyEmpty = false, observedEmpty = false, observedShown = false;
     WPARAM forwardedFirst = 0; LPARAM forwardedSecond = 0;
 };
 snapshot::Page Page() {
@@ -50,6 +50,7 @@ int main() {
         gallery::Callbacks callbacks; callbacks.context = &scenario; callbacks.lifetimeOwner = &owner;
         callbacks.viewportChanged = [](void* context) noexcept {
             auto& state = *static_cast<Scenario*>(context); ++state.viewportChanges;
+            if (state.surface) state.observedShown = state.surface->Shown();
             if (state.verifyEmpty && state.surface && state.accessible) {
                 LONG count = -1;
                 state.observedEmpty = state.surface->RetainedImageBytes() == 0 && state.surface->SelectedItems().count == 0 &&
@@ -138,8 +139,8 @@ int main() {
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "third surface creation"); scenario.surface = surface;
         surface->Clear(snapshot::Status::Loading, 0);
         UINT visibilityChanges = scenario.viewportChanges;
-        surface->SetVisible(false); Require(scenario.viewportChanges == visibilityChanges + 1, "Loading empty candidates still notify hide exactly once");
-        surface->SetVisible(true); Require(scenario.viewportChanges == visibilityChanges + 2, "Loading empty candidates still notify show exactly once");
+        surface->SetVisible(false); Require(scenario.viewportChanges == visibilityChanges + 1 && !scenario.observedShown, "Loading hide publishes latest visibility before native style");
+        surface->SetVisible(true); Require(scenario.viewportChanges == visibilityChanges + 2 && scenario.observedShown, "Loading show publishes latest visibility before native style");
         snapshot::Page empty; empty.status = snapshot::Status::Ready; surface->SetPage(empty, 0);
         visibilityChanges = scenario.viewportChanges;
         ShowWindow(surface->Window(), SW_HIDE); Require(scenario.viewportChanges == visibilityChanges + 1, "native empty-page hide notification");
