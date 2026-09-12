@@ -2,6 +2,25 @@
 
 2026-09-13 Windows x64；MSVC19.44.35228.0/工具14.44.35207，WindowsSDK10.0.26100.0；生产/MT、Proof/MD不变。所有构建保持/W4 /WX /permissive- /analyze /utf-8。
 
+## 最新同屏加载修复 d6ea45f
+
+新增Requests/View批次与共享像素lease后，实际执行：
+
+```powershell
+& $cmake --build .runtime/explorer-gallery --config Release --parallel 2 --target AssetLibraryExplorer ExplorerGalleryRequestTests ExplorerGalleryViewTests
+& $ctest --test-dir .runtime/explorer-gallery -C Release --output-on-failure -R 'explorer_gallery_(requests|view)|explorer_product_imports'
+```
+
+严格构建通过；3/3通过（imports0.04s、Requests1.10s、View0.32s，合计1.46s）。日志batch-build.log、batch-tests.log位于.runtime/explorer-gallery。最终DLL SHA256 EC5E179FCB210C58BA54360B3CF73C026EA333FD93B3D96D1200D2BEF77A6576。本轮没有重跑未改变的旧9项、真实pipe测试或G4。
+
+有区分力覆盖：101是当前页可见候选数组上限，102 candidate明确E_INVALIDARG（重复index亦拒绝），16仅为每视图未完成ticket上限。29同屏先只接纳16未完成ticket，完成后补齐29；成功/失败均只请求一次，4视图116张均完成且全局work≤64、image执行线程≤2；原离屏取消/同index重入回归保留。快速Cancel/新generation时，两回调故意延迟退出，取消队列仍占16slot；旧任务退出发当前代次无payload提示，无旧image结果，新29项随后全部完成。
+
+16×1MiB图片的完成指针模拟被Surface/外部缓存继续持有，后续13项全部无像素Busy，验证完成队列不能再加16MiB。Cancel后旧图片不释放时新代次仍拒绝；释放旧8MiB只允许新8张/9候选；全部旧lease释放后再允许完整16MiB，没有计数重置或下溢。窗口完成批次也由同一alias lease计费。两个后台I/O允许各自暂持受1MiB限制的wire像素帧和尚未接纳的PBGRA副本，属于独立有界临时缓冲，不混记为已接纳驻留图片。
+
+真实View假Sources新增2400×1800屏外非激活自有父窗，29张图片均为4:3保持原占位比例，确保可见集合不改变；必须靠Completed尾部补队列才能完成全部29张。没有真实Explorer/网络/注册操作。Surface f9acd9f与037457a仅作为owner已通过的共享依赖消费，本任务未编辑这些源文件。
+
+最新verify_repository再次通过（handoff、482架构输入、21 migration、14 architecture与既有依赖/主题检查），日志batch-verify.log；Alpha仍blocked。
+
 ## 实际命令
 
 ```powershell
