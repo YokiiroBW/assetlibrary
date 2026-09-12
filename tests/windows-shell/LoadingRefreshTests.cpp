@@ -1,6 +1,9 @@
 #include "LoadingRefresh.h"
 #include "SnapshotPidl.h"
 #include "RefreshTestBrowser.h"
+#include "EnumDoneTestFolder.h"
+#include <commctrl.h>
+#include <array>
 #include <thread>
 
 namespace {
@@ -301,16 +304,153 @@ void RealDefView(proof::Library& library,bool proofOwner){
     else Check(library.canUnload()==S_OK,"system-owner mechanism does not retain proof DLL objects");
 }
 
+struct EnumDoneTrace {
+    static constexpr UINT ReadMessage=WM_APP+113;
+    static constexpr UINT_PTR Timer=113;
+    struct Event {std::atomic<ULONGLONG> tick{0};std::atomic<DWORD> thread{0};std::atomic_ulong phase{0};};
+    std::array<Event,16> events;
+    std::atomic_ulong done{0},windowCreated{0},phase{0},postFailures{0};
+    std::atomic<HWND> target{nullptr};
+    std::atomic_bool queued{false};
+    const ULONGLONG started=GetTickCount64();
+    IShellView* view=nullptr; // Owner-thread only, held by the fixture until detach.
+    unsigned reads=0;
+    bool timer=false,lastValid=false;
+    snapshot::Status lastStatus=snapshot::Status::Unavailable;
+    void Notify() noexcept {
+        const auto index=done.fetch_add(1);
+        if(index<events.size()){events[index].thread=GetCurrentThreadId();events[index].phase=phase.load();events[index].tick=GetTickCount64();}
+        const auto window=target.load();
+        if(window&&!queued.exchange(true)&&!PostMessageW(window,ReadMessage,0,0)){++postFailures;queued=false;}
+    }
+    void Read(bool notification=true) noexcept {
+        if(notification)++reads;proof::Com<IFolderView> folder;int count=-1;snapshot::Entry entry;
+        auto hr=view?view->QueryInterface(IID_PPV_ARGS(&folder.value)):E_ABORT;
+        if(SUCCEEDED(hr))hr=folder.value->ItemCount(SVGIO_ALLVIEW,&count);
+        bool valid=false;
+        if(SUCCEEDED(hr)&&count==1){
+            proof::Item item;hr=folder.value->Item(0,&item.value);
+            if(SUCCEEDED(hr))try{valid=snapshot::ReadPidl(item.value,entry);}catch(const std::bad_alloc&){hr=E_OUTOFMEMORY;}
+        }
+        lastValid=valid;lastStatus=valid?entry.status:snapshot::Status::Unavailable;
+        printf("enum_done_read triggered=%d; phase=%lu; elapsed_ms=%llu; thread=%lu; done=%lu; hr=%08lx; count=%d; valid=%d; status=%lu\n",
+            notification,phase.load(),GetTickCount64()-started,GetCurrentThreadId(),done.load(),static_cast<ULONG>(hr),count,valid,valid?static_cast<ULONG>(entry.status):MAXDWORD);
+    }
+    static LRESULT CALLBACK WindowProc(HWND window,UINT message,WPARAM wParam,LPARAM lParam,UINT_PTR,DWORD_PTR data) noexcept {
+        auto self=reinterpret_cast<EnumDoneTrace*>(data);
+        if(message==ReadMessage){
+            // Coalesced, single delayed metadata read; notifications never reset this timer.
+            if(!self->timer&&GetTickCount64()-self->started<5000){
+                self->timer=SetTimer(window,Timer,500,nullptr)!=0;
+                if(!self->timer){++self->postFailures;self->queued=false;}
+            }
+            return 0;
+        }
+        if(message==WM_TIMER&&wParam==Timer){
+            KillTimer(window,Timer);self->timer=false;self->queued=false;
+            if(GetTickCount64()-self->started<5000)self->Read();return 0;
+        }
+        return DefSubclassProc(window,message,wParam,lParam);
+    }
+};
+// This wraps only the callback to record real system delivery. IShellView is untouched.
+class EnumDoneCallback final : public IShellFolderViewCB,public IObjectWithSite {
+    std::atomic_ulong refs_{1};
+    proof::Com<IShellFolderViewCB> inner_;
+    std::shared_ptr<EnumDoneTrace> trace_;
+public:
+    EnumDoneCallback(IShellFolderViewCB* inner,std::shared_ptr<EnumDoneTrace> trace):trace_(std::move(trace)){inner_.value=inner;if(inner)inner->AddRef();}
+    HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** result) override {
+        if(!result)return E_POINTER;*result=nullptr;
+        if(iid==IID_IUnknown||iid==IID_IShellFolderViewCB)*result=static_cast<IShellFolderViewCB*>(this);
+        else if(iid==IID_IObjectWithSite)*result=static_cast<IObjectWithSite*>(this);else return E_NOINTERFACE;
+        AddRef();return S_OK;
+    }
+    ULONG STDMETHODCALLTYPE AddRef() override {return ++refs_;}
+    ULONG STDMETHODCALLTYPE Release() override {auto left=--refs_;if(!left)delete this;return left;}
+    HRESULT STDMETHODCALLTYPE SetSite(IUnknown* site) override {
+        proof::Com<IObjectWithSite> inner;if(!inner_.value)return E_NOTIMPL;
+        auto hr=inner_.value->QueryInterface(IID_PPV_ARGS(&inner.value));return SUCCEEDED(hr)?inner.value->SetSite(site):hr;
+    }
+    HRESULT STDMETHODCALLTYPE GetSite(REFIID iid,void** result) override {
+        if(!result)return E_POINTER;*result=nullptr;proof::Com<IObjectWithSite> inner;if(!inner_.value)return E_FAIL;
+        auto hr=inner_.value->QueryInterface(IID_PPV_ARGS(&inner.value));return SUCCEEDED(hr)?inner.value->GetSite(iid,result):hr;
+    }
+    HRESULT STDMETHODCALLTYPE MessageSFVCB(UINT message,WPARAM wParam,LPARAM lParam) override {
+        if(message==SFVM_BACKGROUNDENUMDONE)trace_->Notify();
+        if(message==SFVM_WINDOWCREATED)++trace_->windowCreated;
+        return inner_.value?inner_.value->MessageSFVCB(message,wParam,lParam):E_NOTIMPL;
+    }
+};
+struct EnumDoneDeadline {
+    HANDLE done=CreateEventW(nullptr,TRUE,FALSE,nullptr);
+    std::thread watcher;
+    EnumDoneDeadline(){
+        Check(done!=nullptr,"diagnostic deadline event");
+        try {watcher=std::thread([this]{if(WaitForSingleObject(done,15000)!=WAIT_OBJECT_0)TerminateProcess(GetCurrentProcess(),70);});}
+        catch(...){CloseHandle(done);throw;}
+    }
+    ~EnumDoneDeadline(){SetEvent(done);watcher.join();CloseHandle(done);}
+};
+void EnumDoneMechanism(){
+    EnumDoneDeadline deadline;
+    puts("enum_done_research_only=true; empty_pidl_may_rebind_desktop=true; not_extension_acceptance=true");
+    for(unsigned mode=0;mode<3;++mode){
+        const char* label=mode==0?"initial":mode==1?"external":"automatic";
+        auto trace=std::make_shared<EnumDoneTrace>(),negative=std::make_shared<EnumDoneTrace>();
+        proof::Com<EnumDoneCallback> unattached;unattached.value=new EnumDoneCallback(nullptr,negative);
+        HiddenWindow parent(false);
+        proof::Com<enum_done_test::Folder> folder;folder.value=new enum_done_test::Folder();
+        if(mode==2){folder.value->status=snapshot::Status::Loading;folder.value->completeLoadingOnSecondEnumeration=true;}
+        auto signal=std::make_shared<loading::Signal>();proof::Com<IShellFolderViewCB> inner;
+        Check(SUCCEEDED(loading::CreateCallback(static_cast<IShellFolder2*>(folder.value),signal,&inner.value)),"mechanism existing callback");
+        proof::Com<EnumDoneCallback> callback;callback.value=new EnumDoneCallback(inner.value,trace);
+        proof::Com<IShellView> view;SFV_CREATE create{sizeof(create),folder.value,nullptr,callback.value};
+        Check(SUCCEEDED(SHCreateShellFolderView(&create,&view.value)),"synthetic system DefView");
+        proof::Com<RefreshBrowser> browser;browser.value=new RefreshBrowser();browser.value->window=parent.value;browser.value->active=view.value;
+        trace->view=view.value;trace->target=parent.value;
+        Check(SetWindowSubclass(parent.value,EnumDoneTrace::WindowProc,113,reinterpret_cast<DWORD_PTR>(trace.get()))!=FALSE,"mechanism read dispatcher");
+        struct DetachRead {HWND window;EnumDoneTrace* trace;~DetachRead(){trace->target=nullptr;trace->view=nullptr;KillTimer(window,EnumDoneTrace::Timer);RemoveWindowSubclass(window,EnumDoneTrace::WindowProc,113);}} detach{parent.value,trace.get()};
+        FOLDERSETTINGS settings{FVM_DETAILS,FWF_NOCLIENTEDGE};RECT bounds{0,0,600,400};HWND child=nullptr;
+        Check(SUCCEEDED(view.value->CreateViewWindow(nullptr,&settings,browser.value,&bounds,&child))&&child,"synthetic hidden view creation");
+        struct DestroyView {IShellView* view;~DestroyView(){view->DestroyViewWindow();}} destroy{view.value};
+        Pump(1500);
+        if(mode==1){
+            trace->phase=1;folder.value->status=snapshot::Status::Loading;
+            Check(SUCCEEDED(view.value->Refresh()),"external system Refresh");Pump(1500);
+        }
+        trace->Read(false);
+        printf("enum_done_fixture mode=%s; window_callbacks=%lu; source_enumerations=%lu; negative_done=%lu; automatic_refreshes=%lu\n",
+            label,trace->windowCreated.load(),folder.value->enumerations.load(),negative->done.load(),signal->diagnostic.refreshes.load());
+        Check(trace->lastValid&&trace->lastStatus==(mode==1?snapshot::Status::Loading:snapshot::Status::Ready),"system view actually renders synthetic page");
+        Check(trace->windowCreated==1&&folder.value->enumerations>0,"system callback and synthetic enumeration positive controls");
+        Check(!negative->done&&!negative->windowCreated&&!negative->reads,"unattached recorder cannot manufacture system events");
+        Check(trace->done<=trace->events.size()&&!trace->postFailures,"bounded notification recording and dispatch");
+        Check(mode==2?signal->diagnostic.refreshes>0:signal->diagnostic.refreshes==0,"internal Refresh uses unchanged Loading callback only");
+        printf("enum_done_mode=%s; owner_thread=%lu; enumerations=%lu; enum_thread=%lu; automatic_refreshes=%lu; done=%lu; deferred_reads=%u; negative_done=%lu\n",
+            label,GetCurrentThreadId(),folder.value->enumerations.load(),folder.value->enumThread.load(),signal->diagnostic.refreshes.load(),trace->done.load(),trace->reads,negative->done.load());
+        for(ULONG index=0;index<trace->done;++index){
+            const auto& event=trace->events[index];Check(event.tick!=0,"completed notification record");
+            printf("enum_done_event mode=%s; ordinal=%lu; phase=%lu; elapsed_ms=%llu; thread=%lu\n",label,index+1,event.phase.load(),event.tick.load()-trace->started,event.thread.load());
+        }
+        Check(GetTickCount64()-trace->started<5000,"fixed mechanism phase deadline");
+    }
+    Check(!loading::ActiveViews(),"mechanism windows return automatic observation quota");
+    puts("enum_done_mechanism=recorded; explorer=0; registry=0; pipe=0; manual_done_calls=0; behavior_changed=false");
+}
+
 }
 int wmain(int argc,wchar_t** argv){
+    const bool enumDone=argc==2&&wcscmp(argv[1],L"--enum-done-mechanism")==0;
     const bool proofOwner=argc==3&&wcscmp(argv[2],L"--proof-owner-lifetime")==0;
     const bool wiring=proofOwner||(argc==3&&wcscmp(argv[2],L"--wiring-only")==0);
     if(argc!=2&&!wiring)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
     std::unique_ptr<proof::Library> moduleLifetime;
     int result=0;try{
-        if(wiring){moduleLifetime=std::make_unique<proof::Library>(argv[1]);RealDefView(*moduleLifetime,proofOwner);}
+        if(enumDone)EnumDoneMechanism();
+        else if(wiring){moduleLifetime=std::make_unique<proof::Library>(argv[1]);RealDefView(*moduleLifetime,proofOwner);}
         else{Budgets();Completion();Teardown();ReentryAndMismatch();IndependentAndCapacity();Generations();RenderedBoundaries();EmptyAndDeadline();CalloutChanges();DefViewWiring(argv[1]);ControlledDllOwner(argv[1]);}
-        puts(wiring?"loading_refresh_mechanism=passed; native_lifetime=pending; registry=0; explorer=0; pipe=0"
+        puts(enumDone?"enum_done_controls=passed; notification_delivery=see_recorded_result; native_explorer_acceptance=false":wiring?"loading_refresh_mechanism=passed; native_lifetime=pending; registry=0; explorer=0; pipe=0"
             :"loading_refresh_unit=passed; hidden_owned_windows_only; registry=0; explorer=0; pipe=0");
     }
     catch(const std::exception& error){fprintf(stderr,"LoadingRefreshTests: %s\n",error.what());result=1;}

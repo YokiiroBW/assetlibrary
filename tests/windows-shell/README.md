@@ -112,6 +112,12 @@ ctest --test-dir .runtime/explorer-snapshot -C Release --output-on-failure -R '^
 
 ## 实际命令
 
+V03-013 可选研究诊断：`ExplorerLoadingRefreshTests --enum-done-mechanism` 使用本测试进程的隐藏DefView和合成内存Folder，无注册/pipe。自有监护线程固定15秒终止本进程（exit70），每阶段固定观察时间。当前空Desktop PIDL会被系统重新绑定到Desktop，首轮实际33项而非合成1项，故“实际合成呈现”正控返回exit1；只记录计数，不读Desktop项目名称或内容。虽然收到一次公开BACKGROUNDENUMDONE，仍不能作为本扩展的刷新接线验收。已知失败的研究诊断不登记到默认CTest，不把失败改为预期通过；后续外部/自动Refresh阶段在正控失败后不执行。详情见[研究结论](../../.codex/handoffs/V03-013/summary.md)。
+
+```powershell
+& .runtime/explicit-refresh-loading/Release/ExplorerLoadingRefreshTests.exe --enum-done-mechanism
+```
+
 临时只读诊断键 `{2F242D38-C686-4E35-87C3-36C9BAF44EFE}, pid=1` 通过空item的GetDetailsEx返回≤2048字符VT_BSTR。它不注册属性、不触发枚举/IPC/刷新；读取者必须先核JSON执行pid等于实际Explorer目标。字段、UInt64解释及因果边界见[诊断协议](../../.codex/handoffs/V03-006/probe-diagnostics.md)。诊断只为定位冷Loading，不代表已修复。
 
 ```powershell

@@ -1,0 +1,39 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-013",
+  "title": "explicit-refresh-loading",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "windows-shell-refresh-owner",
+  "branch": "codex/v03-013-explicit-refresh-loading",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-013",
+  "commit": "",
+  "changed_files": [".codex/tasks/V03-013.md", ".codex/handoffs/V03-013/summary.md", ".codex/handoffs/V03-013/result.json", ".codex/handoffs/V03-013/tests.md", "tests/windows-shell/LoadingRefreshTests.cpp", "tests/windows-shell/EnumDoneTestFolder.h", "tests/windows-shell/README.md"],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 2,
+    "failed": 1,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "Shell CTest executions: two existing regressions passed, one new research fixture-equivalence assertion failed and was not adopted into default CTest.",
+    "repository_verification": "passed; includes 21 migration manifest and 14 architecture tests; Alpha release remains blocked",
+    "strict_build": "passed for final source; optional diagnostic watchdog/reporting changes were not re-executed after coordinator ended scenario expansion"
+  },
+  "risks": ["The empty Desktop PIDL rebound the synthetic folder to system Desktop (33 observed items rather than one); the equivalence assertion failed.", "A real BACKGROUNDENUMDONE notification in that fixture is not evidence for this extension's Refresh path.", "Same-view Refresh Loading experience remains unchanged and unresolved.", "Optional research diagnostic is not registered in default CTest; its failure is retained, not treated as an expected pass."],
+  "blocked_by": ["A future coordinator-owned real namespace notification-count investigation is required before any FSM or contract change."],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-013/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "tests/windows-shell optional mechanism diagnostic and task handoff only",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["Existing hidden DefView/RefreshBrowser fixture", "Existing LoadingRefresh Callback, Budget and lifetime guards without behavior changes", "Snapshot private PIDL encoding and validation"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": ["python -I -B scripts/verify_repository.py: passed; handoff, architecture, contract/SDK and source/dependency checks; Alpha remains blocked"],
+    "technical_debt": ["Actual namespace event delivery remains unverified; no runtime enhancement approved.", "G2/G3/G4, final COM unload and full Windows release remain independent coordinator work."]
+  }
+}
