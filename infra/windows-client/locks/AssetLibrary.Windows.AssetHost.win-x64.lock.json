@@ -8,7 +8,7 @@
       "assetlibrary.windows.core": {
         "type": "Project",
         "dependencies": {
-          "AssetLibrary.AssetLink": "[0.3.0-preview.2, )"
+          "AssetLibrary.AssetLink": "[0.3.0-preview.3, )"
         }
       },
       "assetlibrary.windows.session": {
