@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-017",
+  "title": "windows-setup-package",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-package-owner",
+  "branch": "codex/v03-017-windows-setup-package",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-017",
+  "commit": "62f0814",
+  "changed_files": [
+    ".codex/handoffs/V03-017/cli-results.json",
+    ".codex/handoffs/V03-017/result.json",
+    ".codex/handoffs/V03-017/summary.md",
+    ".codex/handoffs/V03-017/tests.md",
+    ".codex/tasks/V03-017.md",
+    "apps/windows-client/Setup/AssetLibrary.Windows.Setup.csproj",
+    "apps/windows-client/Setup/Installer.cs",
+    "apps/windows-client/Setup/PackageManifest.cs",
+    "apps/windows-client/Setup/PackageStager.cs",
+    "apps/windows-client/Setup/Product.cs",
+    "apps/windows-client/Setup/Program.cs",
+    "apps/windows-client/Setup/README.md",
+    "apps/windows-client/Setup/RegistrationPlan.cs",
+    "apps/windows-client/Setup/RegistrationStore.cs",
+    "apps/windows-client/Setup/RegistrationTransaction.cs",
+    "apps/windows-client/Setup/SafePath.cs",
+    "apps/windows-client/Setup/SetupOptions.cs",
+    "apps/windows-client/Setup/ShellNotification.cs",
+    "apps/windows-client/Setup/VersionCleanup.cs",
+    "apps/windows-client/Setup/WindowsInteraction.cs",
+    "apps/windows-client/Setup/app.manifest",
+    "apps/windows-client/Setup/packages.lock.json",
+    "infra/windows-client/INSTALL.zh-CN.md",
+    "infra/windows-client/README.md",
+    "infra/windows-client/THIRD-PARTY-NOTICES.md",
+    "infra/windows-client/build_package.py",
+    "infra/windows-client/locks/AssetLibrary.Windows.Setup.win-x64.lock.json",
+    "tests/windows-setup/AssemblyInfo.cs",
+    "tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj",
+    "tests/windows-setup/AssetLibrary.Windows.Setup.slnx",
+    "tests/windows-setup/InstallerTests.cs",
+    "tests/windows-setup/PackageValidationTests.cs",
+    "tests/windows-setup/README.md",
+    "tests/windows-setup/RecoveryTests.cs",
+    "tests/windows-setup/SetupTestBase.cs",
+    "tests/windows-setup/packages.lock.json",
+    "tests/windows-setup/test_cli.py",
+    "tests/windows-setup/test_package.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 35,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Unsigned preview; final production payload and native Explorer/HKCU UI acceptance remain root-owned integration work.",
+    "Loaded DLL/current Setup cleanup is explicit deferred retry (3010), without Explorer termination.",
+    "Old versions remain until uninstall; local user connection configuration is preserved."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 4,
+  "handoff_summary": ".codex/handoffs/V03-017/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Setup OS deployment adapter (windows-package-owner)",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Frozen production CLSID/owner/Desktop NameSpace and user-session-v1 Host shutdown contract",
+      "Existing STA/COM/PIDL bounded notification approach",
+      "Repository .NET 10 SDK, central test packages, exact RID release lock convention"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Host public --shutdown-user-session and --user-session CLI; Settings no-argument CLI; Shell public COM registration only"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "No worker-owned shared edits; root approved manifest owner and production host build property are consumed."
+    ],
+    "architecture_tests": [
+      "verify_repository.py passed",
+      "dotnet format/build/analyzers passed",
+      "23 installer fault/boundary tests + 4 packaging tests + 8 real EXE sandbox CLI steps",
+      "Central dependency/license/vulnerability validation passed (2 projects,15 locked packages)"
+    ],
+    "technical_debt": [
+      "Publisher signing requires a release certificate; no self-signed trust bypass added.",
+      "Deferred loaded-file removal uses explicit user retry; no logon/reboot cleanup service.",
+      "Final production UI/Explorer/HKCU evidence remains root-owned; G4 waived and untested."
+    ]
+  }
+}

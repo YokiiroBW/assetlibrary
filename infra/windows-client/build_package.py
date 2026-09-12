@@ -166,6 +166,8 @@ def build(args) -> tuple[dict[str, Path], Path]:
                       f"-p:AssetLibraryReleaseLockRoot={lock_root}"]
         if name == "Setup":
             properties += ["-p:PublishSingleFile=true", "-p:IncludeNativeLibrariesForSelfExtract=true"]
+        if name == "Host":
+            properties += ["-p:AssetLibraryProductionHost=true"]
         run([args.dotnet, "restore", project, "--locked-mode", "--runtime", "win-x64", *properties])
         destination = build_root / "publish" / name
         if destination.exists():

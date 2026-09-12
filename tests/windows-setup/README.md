@@ -4,7 +4,7 @@
 
 ```powershell
 dotnet restore tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --locked-mode
-dotnet format tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --verify-no-changes --no-restore
+dotnet format tests/windows-setup/AssetLibrary.Windows.Setup.slnx --verify-no-changes --no-restore
 dotnet build tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release --no-restore
 dotnet test tests/windows-setup/AssetLibrary.Windows.Setup.Tests.csproj --configuration Release --no-build --no-restore --logger "trx;LogFileName=setup-tests.trx" --results-directory .runtime/setup-test-results
 python -I -B -m unittest discover -s tests/windows-setup -p test_package.py -v
