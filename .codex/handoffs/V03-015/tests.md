@@ -20,3 +20,7 @@
 修正后重验的问题：新建DirectoryInfo缓存需Refresh后检查reparse属性；InvalidDataException不是IOException，control listener须明确捕获；两个pipe共用真实取消/回收生命周期以消除重复；Settings RuntimeFrameworkVersion必须定点metadata；restore需单数RuntimeIdentifier以使用发行锁。没有降低分析规则、跳过失败测试或放宽TLS/许可策略。
 
 实机未执行：设置窗口实际主题/键盘/缩放、生产GUI进程及真实Explorer通知/安装/卸载；root统一检查。不以组件测试代替>600秒长期或G4运行证据。
+
+## 实机阻断的针对性修复验证
+
+`bbe480e`：Settings locked restore/publish通过；makepri dump验证App.xbf/MainWindow.xbf；六个normal/release锁SHA不变；缺PRI发布检查按预期拒绝。新增通知STA测试1/1通过，相关Host/test构建零警告，源码检查通过。该测试不调用SHParse/真实生产pipe；未在修复后重跑原76项与GUI，root整包验收继续。详见startup-fixes.md。

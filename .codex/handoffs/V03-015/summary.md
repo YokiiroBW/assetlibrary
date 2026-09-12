@@ -24,3 +24,7 @@ WinAppSDK是Microsoft EULA而非MIT；14个file-license及SDK BuildTools legacy 
 最终normal locked restore、format verify、Release build零警告、76项非NativeLive测试通过。架构/重复代码/敏感日志/依赖检查通过。文件与账号安全测试仅用系统临时目录和synthetic HTTP fixture。无资产内容读取/写入，没有注册表/GUI/真实NAS操作；真实Core及Explorer渲染、自动刷新/清空和安装由root统一验收。G4是用户豁免未测，不能当成运行证据。
 
 50万资产场景仍使用现有100条分页/64快照/8192令牌/2网络worker上限。设置状态为O(1)，配置与control正文大小固定，不引入全量扫描、缓存或数据库。无新迁移、公开Core契约、权限模型或第二框架。
+
+## 实机发现后的稳定修复
+
+root实机发现旧Settings缺应用PRI而退出0xC000027B，以及通知helper默认MTA请求STA返回0x80010106。修复提交 `bbe480efe9b5c388860c52d1ee1c8c829b556f60` 已启用资源工具/发布缺PRI硬失败，并以显式STA隔离通知且记录stage/hr。详细证据见 [startup-fixes.md](startup-fixes.md)。修复后GUI和通知由root统一验收，不沿用初版组件构建结果声称实机成功。

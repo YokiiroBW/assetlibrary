@@ -7,7 +7,7 @@
   "owner": "windows-session-owner",
   "branch": "codex/v03-015-windows-connection-session",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-015",
-  "commit": "40091921e4249e922f4168959ab2bed8d56d2b25",
+  "commit": "bbe480efe9b5c388860c52d1ee1c8c829b556f60",
   "changed_files": [
     "apps/windows-client/AssetHost/AssetLibrary.Windows.AssetHost.csproj",
     "apps/windows-client/AssetHost/ConnectedSession.cs",
@@ -54,7 +54,8 @@
     "tests/windows-client/SessionResumeTests.cs",
     "tests/windows-client/SessionStorageTests.cs",
     "tests/windows-client/SessionTestSupport.cs",
-    "tests/windows-client/packages.lock.json"
+    "tests/windows-client/packages.lock.json",
+    "tests/windows-client/SessionNotificationTests.cs"
   ],
   "changed_contracts": [],
   "tests": {
@@ -101,7 +102,8 @@
       "verify_repository.py passed",
       "validate_dotnet_dependencies.py: 6 projects/31 locked packages passed",
       "Windows solution locked restore/format/build and 76 non-NativeLive tests passed",
-      "Settings/Host release locked restore/publish passed with 5 committed RID locks"
+      "Settings/Host release locked restore/publish passed with 5 committed RID locks",
+      "Post-integration repair: 1 STA probe test passed; PRI App/MainWindow dump and missing-PRI negative publication check passed; six lock hashes unchanged. Original 76-test run predates this narrow repair."
     ],
     "technical_debt": [
       "Real install/UI/Explorer and Core integration acceptance owned by root, not claimed by component tests",
