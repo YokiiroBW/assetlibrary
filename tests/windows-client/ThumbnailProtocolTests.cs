@@ -6,10 +6,19 @@ namespace AssetLibrary.Windows.Tests;
 [TestClass]
 public sealed class ThumbnailProtocolTests
 {
+    private static string Repository
+    {
+        get
+        {
+            for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+            { if (File.Exists(Path.Combine(directory.FullName, "global.json"))) { return directory.FullName; } }
+            throw new InvalidOperationException("Repository fixture unavailable.");
+        }
+    }
     [TestMethod]
     public void IndependentFrozenVectorsCoverResponseAndRequestBounds()
     {
-        using var data = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(ThumbnailTestSupport.Repository, "contracts/windows-shell/thumbnail-vectors-v1.json")));
+        using var data = JsonDocument.Parse(File.ReadAllBytes(Path.Combine(Repository, "contracts/windows-shell/thumbnail-vectors-v1.json")));
         var root = data.RootElement;
         var request = new ThumbnailRequest(root.GetProperty("request_id").GetUInt32(), root.GetProperty("epoch").GetGuid(), root.GetProperty("node").GetGuid());
         foreach (var vector in root.GetProperty("vectors").EnumerateArray())

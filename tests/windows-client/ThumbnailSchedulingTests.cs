@@ -9,8 +9,7 @@ public sealed class ThumbnailSchedulingTests
     [TestMethod]
     public async Task SynchronousImageWorkCannotHoldTheCallingSessionCriticalSection()
     {
-        using var transport = ThumbnailTestSupport.Transport((request, _) => request.RequestUri!.AbsolutePath.EndsWith("/image", StringComparison.Ordinal)
-            ? Task.FromResult(ThumbnailTestSupport.ImageResponse()) : ThumbnailTestSupport.PageAsync(request));
+        using var transport = ThumbnailTestSupport.SuccessfulTransport();
         await using var store = new SnapshotStore(new ReadOnlyClient(transport), DateTimeOffset.UtcNow.AddHours(1));
         var request = await ThumbnailTestSupport.FileAsync(store);
         var decoderEntered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

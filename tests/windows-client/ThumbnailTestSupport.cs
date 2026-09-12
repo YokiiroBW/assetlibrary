@@ -14,15 +14,6 @@ internal static class ThumbnailTestSupport
     internal static byte[] Png => Convert.FromBase64String(PngBase64);
     internal static byte[] ExpectedPixels => [0, 0, 255, 255, 0, 128, 0, 128, 64, 0, 0, 64, 0, 0, 0, 0];
     internal static string Executable => Path.ChangeExtension(typeof(SnapshotStore).Assembly.Location, ".exe");
-    internal static string Repository
-    {
-        get
-        {
-            for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-            { if (File.Exists(Path.Combine(directory.FullName, "global.json"))) { return directory.FullName; } }
-            throw new InvalidOperationException("Repository fixture unavailable.");
-        }
-    }
     internal static HttpResponseMessage ImageResponse()
     {
         var message = new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(Png) };
@@ -49,4 +40,7 @@ internal static class ThumbnailTestSupport
     }
     internal static ClientTransport Transport(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> response) =>
         new(ProtocolFixture.Profile, new ProtocolFixture(response), TimeSpan.FromSeconds(3));
+    internal static ClientTransport SuccessfulTransport() => Transport((request, _) =>
+        request.RequestUri!.AbsolutePath.EndsWith("/image", StringComparison.Ordinal)
+            ? Task.FromResult(ImageResponse()) : PageAsync(request));
 }
