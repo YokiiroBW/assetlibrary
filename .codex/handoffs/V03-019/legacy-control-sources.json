@@ -1,0 +1,6 @@
+{
+  ".runtime\\gallery-legacy-control-source\\apps\\windows-shell\\gallery\\Surface.cpp": "1b1f052439de7410571bc56b8b98d81723cbf7bbd5c9ec619be3367f10d1550c",
+  ".runtime\\gallery-legacy-control-source\\apps\\windows-shell\\gallery\\Uia.cpp": "c99223ea6fec89312471d9b596027aa8eda50afaba15d81355dc3cc93e116238",
+  ".runtime\\gallery-legacy-control-source\\tests\\windows-gallery\\Harness.cpp": "9edc6aca9fa04854be8e6371e3372add506381b3bdedcf432eefd195b003ba1e",
+  ".runtime\\gallery-legacy-control-source\\tests\\windows-gallery\\AccessibilityProbe.cpp": "54c709087afa07b8f1f22be5fa973ef92584577871c3221ae98ef5b265d522e7"
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-019",
+  "title": "native-gallery-surface",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-gallery-surface-owner",
+  "branch": "codex/v03-019-native-gallery-surface",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-019",
+  "commit": "7446e99",
+  "changed_files": [
+    ".codex/handoffs/V03-019/accessibility-investigation.md",
+    ".codex/handoffs/V03-019/legacy-control-sources.json",
+    ".codex/handoffs/V03-019/result.json",
+    ".codex/handoffs/V03-019/summary.md",
+    ".codex/handoffs/V03-019/tests.md",
+    ".codex/tasks/V03-019.md",
+    "apps/windows-shell/gallery/Accessible.cpp",
+    "apps/windows-shell/gallery/Accessible.h",
+    "apps/windows-shell/gallery/Layout.cpp",
+    "apps/windows-shell/gallery/Layout.h",
+    "apps/windows-shell/gallery/Surface.cpp",
+    "apps/windows-shell/gallery/Surface.h",
+    "apps/windows-shell/gallery/Uia.cpp",
+    "apps/windows-shell/gallery/Uia.h",
+    "apps/windows-shell/generated/WorkspaceTheme.generated.h",
+    "scripts/export_native_theme.py",
+    "tests/windows-gallery/AccessibilityProbe.cpp",
+    "tests/windows-gallery/BudgetTests.cpp",
+    "tests/windows-gallery/CMakeLists.txt",
+    "tests/windows-gallery/Capture.h",
+    "tests/windows-gallery/Harness.cpp",
+    "tests/windows-gallery/Harness.manifest",
+    "tests/windows-gallery/LayoutTests.cpp",
+    "tests/windows-gallery/README.md",
+    "tests/windows-gallery/RenderingTests.cpp",
+    "tests/windows-gallery/SurfaceTests.cpp",
+    "tests/windows-gallery/TestOwner.h",
+    "tests/windows-gallery/UiaTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "same-source Windows CTest; repository validation recorded separately"
+  },
+  "risks": [
+    "Actual Explorer/Core/package integration belongs to root and is not certified by the synthetic harness.",
+    "Scheduler OS scheduling failure retains bounded DLL pins with diagnostics; never force unload.",
+    "G4 endurance is explicitly waived and not executed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-019/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Explorer native gallery presentation adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing snapshot/PIDL type and status semantics; navigation/selection/refresh owner callbacks.",
+      "Root-provided generated Web semantic COLORREF theme; no separately maintained palette.",
+      "One bounded AccessibleModel for painting, MSAA and native UIA."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Public snapshot projection and Surface callbacks only; no core tables, permissions, network or media decode."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [
+      "Only Windows system GDI/msimg32/oleacc/uiautomationcore, root approved ADR-0021."
+    ],
+    "contract_changes": [
+      "Root-approved Surface callbacks providerLifetimeOwner and complete visible-files API; no shared wire/DB contract edited by this owner."
+    ],
+    "architecture_tests": [
+      "scripts/verify_repository.py passed: 464 architecture inputs, 21 migration and 14 architecture tests; contract/theme/dependency/source policies passed.",
+      "MSVC /W4 /WX /analyze; final same-source native gallery CTest 10/10 including controlled listener and same-STA three-cycle reclamation."
+    ],
+    "technical_debt": [
+      "Actual Explorer, Core image fixture and release acceptance owned by coordinating task; G4 not claimed."
+    ]
+  }
+}
