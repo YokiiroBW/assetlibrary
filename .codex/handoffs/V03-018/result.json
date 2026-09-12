@@ -1,0 +1,64 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-018",
+  "title": "windows-browse-polish",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-browse-owner",
+  "branch": "codex/v03-018-windows-browse-polish",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-018",
+  "commit": "96a7814982e63654f3a564b4418ea33173ec5f72",
+  "changed_files": [
+    ".codex/tasks/V03-018.md",
+    ".codex/handoffs/V03-018/summary.md",
+    ".codex/handoffs/V03-018/tests.md",
+    ".codex/handoffs/V03-018/result.json",
+    "apps/windows-shell/ExplorerFolder.cpp",
+    "tests/windows-shell/ProductTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "One narrow ProductTests CTest covers both actual production and Proof DLL variants; historical DLL negative control fails as expected.",
+    "strict_build": "Release /W4 /WX /permissive- /analyze /utf-8 passed for production, Proof and ProductTests targets",
+    "repository_verification": "Passed: 437 architecture inputs, 21 migration tests, 14 architecture tests; Alpha remains blocked",
+    "dll_sha256": "8EABC09C943400541CE16ECF96141FAEC1E9E7F3376336C8DA0AD23001602C30"
+  },
+  "risks": [
+    "Actual Explorer tab/window title rendering and request flags require coordinator verification; component names are not GUI acceptance.",
+    "CompareIDs has no ascending/descending input; grouping is guaranteed for its default ascending current-page comparison, not an externally reversed Shell order.",
+    "No server-wide sort, gallery/waterfall view, content preview, installation update or full milestone completion is claimed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-018/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "apps/windows-shell native display-name and current-page comparison adapter; windows-browse-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ProductIdentity, existing strict private PIDL codec and frozen snapshot name/type records.",
+      "Existing name/type column comparison, opaque epoch/node/kind tie-break and bounded multi-segment traversal.",
+      "Existing registration-free ProductTests COM fixture, production/Proof identity and fresh-instance parsing checks."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "python -I -B scripts/verify_repository.py passed after implementation.",
+      "Release production/Proof/ProductTests targets passed strict warnings and static analysis.",
+      "explorer_product passed for both actual DLL variants; new test rejects historical pre-polish DLL.",
+      "Final diff reviewed for display-only changes, pure parsing/canonical compatibility and bounded page-local processing."
+    ],
+    "technical_debt": [
+      "Root must verify actual Explorer title rendering and current-page default sorting with a newly built package.",
+      "Descending sort invariance cannot be promised through CompareIDs alone; no view callback expansion was made.",
+      "Gallery/waterfall design is separately coordinator-owned; no gallery implementation in this task."
+    ]
+  }
+}
