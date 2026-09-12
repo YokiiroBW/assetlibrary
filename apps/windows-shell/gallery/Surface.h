@@ -79,7 +79,7 @@ public:
     HRESULT SelectItem(UINT index, UINT shellSelectionFlags) noexcept; // Documented SVSI_* flags.
     HRESULT ItemRect(UINT index, RECT* clientBounds) const noexcept; // Surface-window client coordinates.
     void Focus() noexcept;
-    bool TranslateAccelerator(const MSG& message) noexcept; // true only for consumed input; leaves Tab to host.
+    bool TranslateAccelerator(const MSG& message) noexcept; // Internal Tab only; boundary/Ctrl/Alt+Tab remain with host.
 
     void SetVisible(bool visible) noexcept; // Hidden means zero image candidates and immediate image release.
     void SetMode(Mode mode) noexcept;
