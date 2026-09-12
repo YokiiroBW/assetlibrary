@@ -250,7 +250,7 @@ void CleanupScheduler() noexcept {
     if (diagnostics.providers || scheduler.processing || scheduler.count || !scheduler.window) return;
     const HWND window = scheduler.window;
     if (!RemoveWindowSubclass(window,RetireProc,RetireCookie)) { diagnostics.lastResult = E_FAIL; return; }
-    const auto owner = scheduler.owner; scheduler.window = nullptr; KillTimer(window,1); DestroyWindow(window); scheduler = {};
+    const auto owner = scheduler.owner; scheduler.window = nullptr; KillTimer(window,1); DestroyWindow(window); scheduler = {}; diagnostics.dispatcherWindows = 0;
     if (owner) owner->Release();
 }
 HRESULT PrepareScheduler(IUnknown* owner) noexcept {
@@ -259,7 +259,7 @@ HRESULT PrepareScheduler(IUnknown* owner) noexcept {
     const HWND window = CreateWindowExW(0,L"STATIC",L"AssetLibrary.UiaRetirement",0,0,0,0,0,HWND_MESSAGE,nullptr,GetModuleHandleW(nullptr),nullptr);
     if (!window) return HRESULT_FROM_WIN32(GetLastError());
     if (!SetWindowSubclass(window,RetireProc,RetireCookie,0)) { DestroyWindow(window); return E_FAIL; }
-    scheduler.window = window; scheduler.owner = owner; owner->AddRef(); return S_OK;
+    scheduler.window = window; diagnostics.dispatcherWindows = 1; scheduler.owner = owner; owner->AddRef(); return S_OK;
 }
 HRESULT Schedule() noexcept {
     if (scheduler.scheduled || scheduler.processing || scheduler.count == 0) return S_OK;

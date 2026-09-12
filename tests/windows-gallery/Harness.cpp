@@ -163,10 +163,10 @@ int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic
             MsgWaitForMultipleObjects(0, nullptr, FALSE, 20, QS_ALLINPUT);
             MSG message{}; while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) { TranslateMessage(&message); DispatchMessageW(&message); }
         }
-        if (harness.owner.wrongThread || harness.owner.references != 1) {
+        if (harness.owner.wrongThread || harness.owner.references != 1 || gallery::InspectUia().dispatcherWindows != 0) {
             std::cerr << "external provider owner release did not complete on creating STA: references=" << harness.owner.references.load()
                 << " wrongThread=" << harness.owner.wrongThread.load() << " providers=" << gallery::InspectAccessibility().providers
-                << " nativeProviders=" << gallery::InspectUia().providers << " pending=" << gallery::InspectUia().pendingRetirements << " disconnected=" << gallery::InspectUia().disconnected << " nativeResult=0x" << std::hex << static_cast<ULONG>(gallery::InspectUia().lastResult) << std::dec << '\n'; result = 5;
+                << " nativeProviders=" << gallery::InspectUia().providers << " dispatcherWindows=" << gallery::InspectUia().dispatcherWindows << " pending=" << gallery::InspectUia().pendingRetirements << " disconnected=" << gallery::InspectUia().disconnected << " nativeResult=0x" << std::hex << static_cast<ULONG>(gallery::InspectUia().lastResult) << std::dec << '\n'; result = 5;
         }
     }
     return result;
@@ -179,7 +179,7 @@ void Pump(DWORD wait) {
 void PrintRetained(const std::array<Harness,3>& cases, const char* phase) {
     std::cout << phase << " owners=[" << cases[0].owner.references.load() << "," << cases[1].owner.references.load()
         << "," << cases[2].owner.references.load() << "] providers=" << gallery::InspectAccessibility().providers
-        << " nativeProviders=" << gallery::InspectUia().providers << " pending=" << gallery::InspectUia().pendingRetirements << " disconnected=" << gallery::InspectUia().disconnected
+        << " nativeProviders=" << gallery::InspectUia().providers << " dispatcherWindows=" << gallery::InspectUia().dispatcherWindows << " pending=" << gallery::InspectUia().pendingRetirements << " disconnected=" << gallery::InspectUia().disconnected
         << " cleared=[" << cases[0].retiredClear << "," << cases[1].retiredClear << "," << cases[2].retiredClear << "]\n" << std::flush;
 }
 int wmain(int argc, wchar_t** argv) {
@@ -196,8 +196,11 @@ int wmain(int argc, wchar_t** argv) {
         const ULONGLONG deadline = GetTickCount64() + 30000;
         while (GetTickCount64() < deadline && (cases[0].owner.references > 1 || cases[1].owner.references > 1 || cases[2].owner.references > 1)) Pump(50);
         PrintRetained(cases, "after_30s_max");
+        if (cases[0].owner.references != 1 || cases[1].owner.references != 1 || cases[2].owner.references != 1 ||
+            gallery::InspectUia().providers || gallery::InspectUia().pendingRetirements || gallery::InspectUia().dispatcherWindows ||
+            gallery::InspectAccessibility().providers || gallery::InspectAccessibility().enumerators) result = 5;
         UnregisterClassW(FrameClass, GetModuleHandleW(nullptr)); CoUninitialize(); PrintRetained(cases, "after_CoUninitialize");
-        return result; // Diagnostic output, not an unload certification.
+        return result; // Bounded synthetic regression, not the G4 duration gate.
     }
     Harness harness; const int result = RunCase(argc, argv, harness, false); UnregisterClassW(FrameClass, GetModuleHandleW(nullptr)); CoUninitialize(); return result;
 }

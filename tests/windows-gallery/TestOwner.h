@@ -8,11 +8,12 @@ public:
     const DWORD thread = GetCurrentThreadId();
     std::atomic_ulong references{1};
     std::atomic_bool wrongThread{false};
+    void (*releaseObserved)(ULONG) noexcept = nullptr;
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void** result) override {
         if (!result) return E_POINTER; *result = nullptr; if (iid != IID_IUnknown) return E_NOINTERFACE;
         *result = static_cast<IUnknown*>(this); AddRef(); return S_OK;
     }
     ULONG STDMETHODCALLTYPE AddRef() override { if (GetCurrentThreadId() != thread) wrongThread = true; return ++references; }
-    ULONG STDMETHODCALLTYPE Release() override { if (GetCurrentThreadId() != thread) wrongThread = true; return --references; }
+    ULONG STDMETHODCALLTYPE Release() override { if (GetCurrentThreadId() != thread) wrongThread = true; const auto count = --references; if (releaseObserved) releaseObserved(count); return count; }
 };
 } // namespace gallery_test

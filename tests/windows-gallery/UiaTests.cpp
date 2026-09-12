@@ -5,6 +5,7 @@
 #include <limits>
 
 namespace {
+bool unpinnedDispatcher = false;
 void Require(bool condition, const char* message) { if (!condition) throw message; }
 void Pump() {
     MSG message{}; while (PeekMessageW(&message,nullptr,0,0,PM_REMOVE)) { TranslateMessage(&message); DispatchMessageW(&message); }
@@ -23,6 +24,7 @@ std::shared_ptr<gallery::AccessibleModel> Model(gallery_test::Owner& owner, HWND
 int wmain() {
     if (FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED))) return 2;
     gallery_test::Owner providerOwner, viewOwner;
+    providerOwner.releaseObserved = [](ULONG count) noexcept { if (count == 1 && gallery::InspectUia().dispatcherWindows) unpinnedDispatcher = true; };
     HWND window = CreateWindowExW(0,L"STATIC",L"test",WS_OVERLAPPEDWINDOW,0,0,900,700,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);
     std::vector<IRawElementProviderSimple*> retained;
     std::vector<std::shared_ptr<gallery::AccessibleModel>> models;
@@ -45,7 +47,7 @@ int wmain() {
         ISelectionProvider* selection = nullptr; root->QueryInterface(IID_PPV_ARGS(&selection)); SAFEARRAY* stale = nullptr;
         Require(selection && selection->GetSelection(&stale) == UIA_E_ELEMENTNOTAVAILABLE && !stale,"provider directly refuses retired selection"); selection->Release();
         Pump(); for (auto* value : retained) value->Release(); retained.clear(); models.clear(); model.reset();
-        Require(gallery::InspectUia().providers == 0 && providerOwner.references == 1,"retired direct provider cleanup");
+        Require(gallery::InspectUia().providers == 0 && gallery::InspectUia().dispatcherWindows == 0 && !unpinnedDispatcher && providerOwner.references == 1,"retired direct provider cleanup");
 
         // Fill every reserved retirement slot without pumping. Five full pages
         // exceed the rejected four-batch design; the final partial page hits 512.
@@ -74,7 +76,7 @@ int wmain() {
         Require(gallery::InspectUia().pendingRetirements == 512,"all 512 objects queued without allocation");
         Pump(); Require(gallery::InspectUia().pendingRetirements == 0,"last destroyed page also drained");
         for (auto* value : retained) value->Release(); retained.clear(); models.clear(); model.reset();
-        Require(gallery::InspectUia().providers == 0 && providerOwner.references == 1 && !providerOwner.wrongThread,"all independent DLL leases returned on STA");
+        Require(gallery::InspectUia().providers == 0 && gallery::InspectUia().dispatcherWindows == 0 && !unpinnedDispatcher && providerOwner.references == 1 && !providerOwner.wrongThread,"all independent DLL leases returned on STA");
         std::cout << "gallery_uia: immutable interfaces, stale queries, 512 admission/retirement and no legacy fallback passed\n"; result = 0;
     } catch (const char* message) { std::cerr << message << '\n'; }
     if (surface) delete surface;

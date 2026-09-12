@@ -14,6 +14,7 @@ HRESULT RetireUia(const std::shared_ptr<AccessibleModel>& model) noexcept;
 
 struct UiaDiagnostics {
     UINT providers = 0;
+    UINT dispatcherWindows = 0;
     UINT pendingRetirements = 0;
     UINT disconnected = 0;
     HRESULT lastResult = S_OK;

@@ -52,3 +52,6 @@ set_tests_properties(gallery_uia PROPERTIES TIMEOUT 15)
 
 add_test(NAME gallery_accessibility_page COMMAND GalleryHarness --external-page $<TARGET_FILE:GalleryAccessibilityProbe>)
 set_tests_properties(gallery_accessibility_page PROPERTIES TIMEOUT 25)
+
+add_test(NAME gallery_accessibility_cycles COMMAND GalleryHarness --retention-cycles $<TARGET_FILE:GalleryAccessibilityProbe>)
+set_tests_properties(gallery_accessibility_cycles PROPERTIES TIMEOUT 60)
