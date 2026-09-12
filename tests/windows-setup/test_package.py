@@ -1,7 +1,9 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -11,6 +13,20 @@ SPEC.loader.exec_module(PACKAGE)
 
 
 class PackageTests(unittest.TestCase):
+    def test_build_passes_product_version_and_scopes_runtime_pin(self):
+        with tempfile.TemporaryDirectory(prefix="AssetLibrary-package-test-") as temporary:
+            args = SimpleNamespace(build_root=Path(temporary), dotnet="dotnet", cmake="cmake")
+            with patch.object(PACKAGE, "run") as execute:
+                PACKAGE.build(args)
+            commands = [call.args[0] for call in execute.call_args_list if call.args[0][0] == "dotnet"]
+            self.assertEqual(len(commands), 6)
+            for command in commands:
+                self.assertIn(f"-p:Version={PACKAGE.VERSION}", command)
+                if command[2] == PACKAGE.PROJECTS["Settings"]:
+                    self.assertFalse(any(value.startswith("-p:RuntimeFrameworkVersion=") for value in command))
+                else:
+                    self.assertIn("-p:RuntimeFrameworkVersion=10.0.11", command)
+
     def test_identical_dependency_is_merged_once(self):
         with tempfile.TemporaryDirectory(prefix="AssetLibrary-package-test-") as temporary:
             root = Path(temporary)

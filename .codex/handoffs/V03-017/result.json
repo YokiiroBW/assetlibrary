@@ -50,7 +50,7 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 35,
+    "passed": 36,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md"
@@ -84,7 +84,7 @@
     "architecture_tests": [
       "verify_repository.py passed",
       "dotnet format/build/analyzers passed",
-      "23 installer fault/boundary tests + 4 packaging tests + 8 real EXE sandbox CLI steps",
+      "23 installer fault/boundary tests + 5 packaging tests + 8 real EXE sandbox CLI steps",
       "Central dependency/license/vulnerability validation passed (2 projects,15 locked packages)"
     ],
     "technical_debt": [
@@ -92,5 +92,11 @@
       "Deferred loaded-file removal uses explicit user retry; no logon/reboot cleanup service.",
       "Final production UI/Explorer/HKCU evidence remains root-owned; G4 waived and untested."
     ]
+  },
+  "integration_review": {
+    "build_version": "All .NET restore/publish commands pass Version from the same frozen package VERSION constant.",
+    "runtime_pin": "Setup/Host only use global RuntimeFrameworkVersion; Settings uses its project-level Microsoft.NETCore.App metadata.",
+    "verification": "5 packaging tests passed once; one new command-boundary regression. No unchanged C# or CLI suite repeated.",
+    "uninstall": "Read-only review confirmed quoted absolute uninstall command reaches UninstallAsync without source-payload dependency or app restart. Current Setup file lock remains explicit pending cleanup; live SystemSettings launch is root-owned acceptance."
   }
 }

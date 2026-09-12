@@ -23,3 +23,5 @@
 首次符号链接测试因当前普通用户无 symlink 特权失败，随后改为无需提权的真实NTFS junction，未改系统策略，最终全数通过。独立csproj格式命令不会格式化ProjectReference源，最终改以本任务solution检查并纠正三个新文件CRLF；功能测试未因换行修正重复执行。未关闭任何分析器或把缺证据记为通过。
 
 尚未执行：三个最终生产组件统一打包、系统TaskDialog、真实HKCU、原生Explorer用户闭环、生产DLL加载态卸载、登录重启启动恢复。均由主任务单一实机入口执行。没有执行G4，依用户豁免明确未测；未运行不相关的全仓库.NET/Android/前端套件。
+
+整包参数补充验证：最终diff检查后运行 `python -I -B -m unittest discover -s tests/windows-setup -p test_package.py -v` 一次，5/5通过。新增test_build_passes_product_version_and_scopes_runtime_pin在命令边界捕获三组件六个真实构建调用计划，要求每个调用传manifest同源Version，且Settings不传全局RuntimeFrameworkVersion；未执行被mock的dotnet/CMake。此为脚本回归，最终组件版本与Settings依赖实际还原由root统一build核验。C#安装逻辑未变，未重复此前通过的安装/CLI套件。

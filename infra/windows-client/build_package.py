@@ -162,8 +162,12 @@ def build(args) -> tuple[dict[str, Path], Path]:
     components = {}
     lock_root = (ROOT / "infra/windows-client/locks").resolve()
     for name, project in PROJECTS.items():
-        properties = ["-p:RuntimeIdentifier=win-x64", "-p:SelfContained=true", "-p:RuntimeFrameworkVersion=10.0.11",
+        properties = ["-p:RuntimeIdentifier=win-x64", "-p:SelfContained=true", f"-p:Version={VERSION}",
                       f"-p:AssetLibraryReleaseLockRoot={lock_root}"]
+        # Settings pins Microsoft.NETCore.App in its project: a global runtime
+        # version would also override its Windows SDK framework reference.
+        if name != "Settings":
+            properties += ["-p:RuntimeFrameworkVersion=10.0.11"]
         if name == "Setup":
             properties += ["-p:PublishSingleFile=true", "-p:IncludeNativeLibrariesForSelfExtract=true"]
         if name == "Host":

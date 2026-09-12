@@ -17,3 +17,7 @@
 卸载保留用户连接配置。DLL 或执行中的 Setup 被占用时返回3010，记录待清理版本，不宣称全部组件已删除；再次双击解压包 Setup 会继续待清理卸载。升级保留旧版本，回滚注册不覆盖配置。外来归属、未知文件和改变的哈希均保留并拒绝或报告待清理。当前清理采用显式重试，尚未引入注销/重启清理任务。
 
 建议合并：root共享契约/ADR/依赖策略 → V03-015 Session/Settings/Host → V03-016 Shell → 本任务62f0814与交接补丁 → root生成其余RID锁并统一重建/安装。Shell使用批准 /MT，脚本校验导入表无动态VC CRT；root提供适用VS/SDK/WinAppSDK notices。生产HKCU、TaskDialog、原生Explorer登录/浏览/换身份/卸载验收归root单一操作。本任务不把合成fixture、源码测试或G4豁免记为系统UI/完整V0.3完成。
+
+整包评审补充：所有 .NET 组件的 restore/publish 共同传入 Version=0.3.0-preview.1；RuntimeFrameworkVersion=10.0.11 只传 Setup/Host，Settings 依其项目的 Microsoft.NETCore.App 定点 metadata 固定运行时，避免污染 Windows SDK framework reference。新增边界回归验证三个项目六个调用，打包测试共5项通过。上文旧单文件安装器与SHA保留为首次安装逻辑证据，最终EXE必须使用本次版本参数重新发布。
+
+已静态复查 Windows 设置的卸载调用：带引号绝对路径 Setup.exe uninstall → Program.Parse/前置检查/非quiet确认 → UninstallAsync → 完整核验旧Host → --shutdown-user-session → 注销与清理。卸载不依赖外部payload，也不启动Settings/Host新会话；Host退出失败先保留注册，正在运行Setup自身造成3010延期符合已披露流程。未发现命令解析或分支接线新阻断，没有执行GUI或真实注册；Windows设置实际启动上下文仍由root实机验收。未改root维护的notices。
