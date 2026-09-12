@@ -15,4 +15,4 @@ G2 注销子项已通过。历史 `final-cycle/evidence.json` 的 `G2_full_COM_u
 
 最终周期明确 `HostStoppedNormally=true`、`HardKillUsed=false`，不能扩读为崩溃测试。稀疏 GUI 截图的观察上界也不是 ready 延迟测量。正式安装、登录设置、预览与主动权限失效等产品项单独跟踪，不据此重新打开已经满足的 G1。
 
-下一项为 V03-012 test-only 故障工具与 V03-005 实机验收；工具只读合成帧、不访问资产、不杀 Explorer、不加入生产 Host。G4 沿用 [原 soak 协议](../../../../docs/spikes/M0-002/explorer-soak-protocol.md)，Host-only 测试不能替代真实视图。
+V03-012 test-only 故障工具已完成并集成为 88e6c21，严格构建与组件回归通过；下一项是 V03-005 实机验收。工具只读合成帧、不访问资产、不杀 Explorer、不加入生产 Host。当前远程会话为 WTSDisconnected，真实故障周期尚未执行，见[恢复计划](g2-acceptance-plan.md)。G4 沿用 [原 soak 协议](../../../../docs/spikes/M0-002/explorer-soak-protocol.md)，Host-only 测试不能替代真实视图。

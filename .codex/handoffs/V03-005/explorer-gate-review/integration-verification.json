@@ -1,0 +1,52 @@
+{
+  "checked_at_utc": "2026-09-12T01:25:59.399317+00:00",
+  "original_exit_criteria_unchanged": true,
+  "G1": "closed",
+  "G2_G3_G4": "open",
+  "explorer_release_gate_exit": 3,
+  "repository_verification_exit": 0,
+  "integrated_code_matches_reviewed_owner_commit": true,
+  "task_registry_reconciled": true,
+  "archive_files": [
+    {
+      "file": "final-fault-harness.log",
+      "sha256": "aa80c196d2c74522bbe37ce38232f7f815840c365c8ce0bc8984b0c6bc13382f"
+    },
+    {
+      "file": "g2-acceptance-plan.md",
+      "sha256": "6a6d74968af00339ba83d922c888c20161d9c0f3c620639cbccd2795f8b31ea4"
+    },
+    {
+      "file": "g2-core-cleanup.json",
+      "sha256": "005357f2c8475a9da7d87397961acd6b16c53236641d5468c3f01ea1f49aae58"
+    },
+    {
+      "file": "g2-preparation-outcome.json",
+      "sha256": "d929e52eef5d02171e1a52cc88b1659657210e7d8b1b3534f74e3614e5c26bf5"
+    },
+    {
+      "file": "g2-session-readonly.json",
+      "sha256": "280ac0c311f3266235b6c738ca208dbb5b5b98f217f7eaf0c5322a4b22fa418d"
+    },
+    {
+      "file": "gates-after-g1.log",
+      "sha256": "36c0d2747d630d8ab9f9105998aa0d4cafbb1e591e612d5f9bb7459ea1614f93"
+    },
+    {
+      "file": "gates-integration-final.log",
+      "sha256": "36c0d2747d630d8ab9f9105998aa0d4cafbb1e591e612d5f9bb7459ea1614f93"
+    },
+    {
+      "file": "README.md",
+      "sha256": "bc700bc6643b228386e880e0a237c1713abdb991c504c6ba4946ac1c0fd03754"
+    },
+    {
+      "file": "repository-gate-review.log",
+      "sha256": "1a6d4ccbd6c60e453f8edbc9111f681730c5b3a80b42cb7bdfa3c146b2a88674"
+    },
+    {
+      "file": "repository-integration-final.log",
+      "sha256": "2fb39d18ea65f454c263ce012e1d0b9f1cccc287c9a1ab8f0a403f570f6bf056"
+    }
+  ]
+}

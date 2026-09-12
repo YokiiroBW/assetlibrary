@@ -1,0 +1,18 @@
+{
+  "Status": "desktop_capture_and_input_unavailable_before_registration",
+  "BrokerPid": 18976,
+  "BrokerHwnd": 133536,
+  "BrokerCreationFiletime": "134336491306309774",
+  "BrokerStillSameProcess": true,
+  "BrokerWindowCloseAttempt": "Alt_L+F4 failed GetCursorPos access denied 0x80070005",
+  "CaptureAttempts": 2,
+  "CaptureError": "IGraphicsCaptureItemInterop.CreateForMonitor 0x80070057",
+  "TextOnlyRead": "17 SDK entries accessible; not actual proof acceptance",
+  "RegistrationStarted": false,
+  "PipeHostStarted": false,
+  "CoreCleanup": "verified_138files_unchanged_6roles_removed",
+  "OriginalExplorerSameCreation": true,
+  "OriginalExplorerRestarted": false,
+  "OwnedWindowClosure": "unconfirmed; do not force terminate Explorer",
+  "RecordedUtc": "2026-09-12T01:16:10.5903893+00:00"
+}

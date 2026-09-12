@@ -1,5 +1,13 @@
 # V03-005 当前验证记录
 
+## 2026-09-12 G2 故障工具集成
+
+最终集成仓库检查通过；explorer-v0.5 返回3且只列G2/G3/G4。四项原exit_criteria与26d7446逐项相同，四个工具源码blob与审查过的d3b2ba3一致，任务登记与现有交接对应。见[集成核验](explorer-gate-review/integration-verification.json)。
+
+V03-012代码d3b2ba3已集成为88e6c21。严格Release构建、两个不同的受影响CTest通过；独立审查要求截断响应必须证明实际发送，修正后故障用例1/1通过并断言20B/40B写入成功。最终silent156ms、partial157ms；这些是独立CLI/client组件时间，不是实际Explorer G3数据。原snapshot已通过且未变，不重复累计。代码不修改Shell/生产Host/协议，只有独立测试进程和CMake/README；复用现有Query/pipe命名/请求校验。见[V03-012交接](../V03-012/tests.md)及[最终故障日志](explorer-gate-review/final-fault-harness.log)。
+
+实机准备因截图两次0x80070057、收尾输入0x80070005而停止；只读WTS查询确认为Session2 WTSDisconnected。未注册/启动管道Host；合成Core清理验证138原件hash/mtime未变、6角色与服务退出。新SDK窗口HWND133536/PID18976关闭未确认，原Explorer6212身份未变且未重启。该阻断不计实机通过，见[准备与恢复计划](explorer-gate-review/g2-acceptance-plan.md)。
+
 ## 2026-09-12 原门禁证据裁决
 
 独立审核后关闭 G1，原四项 exit_criteria 未变；两个归档索引共 79 个证据文件 SHA256 逐项匹配。G2 的 COM 卸载历史标签纠正为 G3，保留原始失败。最终 diff 检查和 verify_repository.py 通过（21 迁移、14 架构回归及现有契约/源码检查）；explorer-v0.5 精确返回 3，仅列 G2/G3/G4，按预期继续阻断正式发行。此轮未重复原功能测试、未增加测试通过数。详见 explorer-gate-review/README.md。

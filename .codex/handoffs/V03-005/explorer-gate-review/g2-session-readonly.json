@@ -1,0 +1,9 @@
+{
+  "SessionId": 2,
+  "WtsConnectStateCode": 4,
+  "Active": false,
+  "ReadOnly": true,
+  "RecordedUtc": "2026-09-12T09:17:32.508392+08:00",
+  "StateName": "WTSDisconnected",
+  "EnumSource": "Windows SDK 10.0.26100.0 um/WtsApi32.h:129-134; WTSActive=0, WTSDisconnected=4"
+}

@@ -729,7 +729,10 @@
         "V03-006",
         "V03-007",
         "V03-008",
-        "V03-009"
+        "V03-009",
+        "V03-010",
+        "V03-011",
+        "V03-012"
       ],
       "owner": "architecture-coordinator",
       "branch": "codex/v03-005-parallel-browse-preview-integration",
@@ -818,7 +821,7 @@
       "id": "V03-012",
       "title": "explorer-fault-harness",
       "module": "explorer-fault-harness",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-010",
         "V03-011"
@@ -828,7 +831,43 @@
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-012",
       "task_file": ".codex/tasks/V03-012.md",
       "handoff": ".codex/handoffs/V03-012/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "88e6c21",
+      "execution_status": "bounded_fault_tool_accepted; actual_Explorer_G2_pending_active_desktop"
+    },
+    {
+      "id": "V03-010",
+      "title": "Explorer 进程外 AssetHost 只读快照",
+      "module": "explorer-assethost",
+      "status": "completed",
+      "depends_on": [
+        "V03-006"
+      ],
+      "owner": "assethost-agent",
+      "branch": "codex/v03-010-explorer-assethost",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-009",
+      "task_file": ".codex/tasks/V03-010.md",
+      "handoff": ".codex/handoffs/V03-010/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "12618ca",
+      "execution_status": "code_integrated_and_scoped_real_Core_Explorer_functional_evidence_accepted; product_release_independent"
+    },
+    {
+      "id": "V03-011",
+      "title": "实际视图 Loading 有界刷新",
+      "module": "rendered-view-loading",
+      "status": "completed",
+      "depends_on": [
+        "V03-006"
+      ],
+      "owner": "windows-shell-rendered-loading",
+      "branch": "codex/v03-011-rendered-view-loading",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-011",
+      "task_file": ".codex/tasks/V03-011.md",
+      "handoff": ".codex/handoffs/V03-011/summary.md",
+      "thread_deep_link": "",
+      "integrated_commit": "4e3f6bb",
+      "execution_status": "code_integrated_and_scoped_real_Core_Explorer_functional_evidence_accepted; product_release_independent"
     }
   ]
 }

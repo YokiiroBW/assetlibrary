@@ -1,0 +1,40 @@
+Start testing: Sep 12 09:17 中国标准时间
+----------------------------------------------------------
+2/6 Testing: explorer_fault_harness
+2/6 Test: explorer_fault_harness
+Command: "C:/YOKI/Codex/AssetLibrary-worktrees/V03-012/.runtime/explorer-fault-harness/Release/ExplorerFaultHarnessTests.exe" "C:/YOKI/Codex/AssetLibrary-worktrees/V03-012/.runtime/explorer-fault-harness/Release/ExplorerFaultHost.exe"
+Directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-012/.runtime/explorer-fault-harness
+"explorer_fault_harness" start time: Sep 12 09:17 中国标准时间
+Output:
+----------------------------------------------------------
+client_status=0 elapsed_ms=16
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=156
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=5 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=2 elapsed_ms=157
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+client_status=0 elapsed_ms=0
+client_status=2 elapsed_ms=0
+fault_harness=passed; actual_CLI=passed; states_deadlines_stop_exclusion_reconnect=passed; actual_Explorer=not_tested
+<end of output>
+Test time =   1.02 sec
+----------------------------------------------------------
+Test Passed.
+"explorer_fault_harness" end time: Sep 12 09:17 中国标准时间
+"explorer_fault_harness" time elapsed: 00:00:01
+----------------------------------------------------------
+
+End testing: Sep 12 09:17 中国标准时间

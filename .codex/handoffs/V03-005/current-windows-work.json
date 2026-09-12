@@ -1,6 +1,6 @@
 {
-  "updatedAtUtc": "2026-09-12T01:10:11.134131+00:00",
-  "status": "G1_closed_original_exit_criteria_G2_real_fault_recovery_next",
+  "updatedAtUtc": "2026-09-12T01:24:16.992827+00:00",
+  "status": "G1_closed_G2_fault_tool_integrated_actual_desktop_disconnected",
   "user_priority": "Windows first; user approved execution of the researched plan",
   "owner_thread": "01a0808b-de91-7d51-a440-be3b7c0d10a0",
   "owner_worktree": "C:/Users/Administrator/.codex/worktrees/6f7b/AssetLibrary",
@@ -433,7 +433,7 @@
       "independent_content_review": "passed; final module snapshot remains PID-only without fresh creation check"
     }
   },
-  "gui_owner": "root; no live registration/Host/test window yet in this gate run",
+  "gui_owner": "root paused: Session2 WTSDisconnected; no current registration or pipe Host; owned SDK window133536/PID18976 closure unconfirmed",
   "final_connection_evidence": ".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json",
   "gate_review": {
     "document": "explorer-gate-review/README.md",
@@ -445,7 +445,18 @@
       "M0-002-G3",
       "M0-002-G4"
     ],
-    "next_task": "V03-012",
+    "next_task": "V03-005 actual G2 fault recovery after desktop reconnect; V03-012 tool completed",
     "lifetime_criterion": "G3; historical G2_full_COM_unload label is incorrect, raw observations retained"
+  },
+  "g2_fault_tool": {
+    "worker_code_commit": "d3b2ba3",
+    "integrated_code_commit": "88e6c21",
+    "handoff": "../V03-012/summary.md",
+    "tests": "2 distinct affected CTests passed; final fault_harness rerun after actual20/40-byte assertion passed; snapshot unchanged not repeated",
+    "real_Explorer_fault_acceptance": "not_run",
+    "desktop_preparation": "explorer-gate-review/g2-preparation-outcome.json",
+    "session_evidence": "explorer-gate-review/g2-session-readonly.json",
+    "core_cleanup": "explorer-gate-review/g2-core-cleanup.json",
+    "resume": "Reconnect and verify active desktop; close old owned SDK window after fresh identity/UI check; fresh run, guard and fixture. Previous private profile is deleted; start-host-native.ps1 ready pointer must be updated to fresh fixture before use."
   }
 }
