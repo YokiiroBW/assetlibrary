@@ -1,0 +1,5 @@
+{"operation":"core_page","status":"Ready","elapsed_ms":11}
+{"operation":"host","status":"ready","elapsed_ms":0}
+{"operation":"core_page","status":"Ready","elapsed_ms":2048}
+{"operation":"logout","status":"server_revoked","elapsed_ms":0}
+{"operation":"session","status":"local_clear","elapsed_ms":0}

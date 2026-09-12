@@ -1,0 +1,23 @@
+{
+  "Utc": "2026-09-12T10:23:57.5328198+00:00",
+  "Pid": 25380,
+  "CreationFileTime": "134336822375313773",
+  "ExecutorPid": 25036,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 6564,
+    "ExecutorCreationFileTime": "134336822369069081",
+    "ParentCreationFileTime": "134336817627102063",
+    "ErrorType": null
+  },
+  "DllSha256": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+  "StopFile": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\desktop-08\\host-invalid-recovery.stop"
+}

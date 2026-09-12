@@ -1,0 +1,23 @@
+{
+  "Utc": "2026-09-12T10:19:24.2525547+00:00",
+  "Pid": 12520,
+  "CreationFileTime": "134336819642511397",
+  "ExecutorPid": 17504,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 6564,
+    "ExecutorCreationFileTime": "134336819635899159",
+    "ParentCreationFileTime": "134336817627102063",
+    "ErrorType": null
+  },
+  "DllSha256": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+  "StopFile": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-005\\.runtime\\explorer-host-integration\\desktop-08\\host-baseline.stop"
+}

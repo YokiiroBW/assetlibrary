@@ -1,0 +1,5 @@
+{"mode":"partial-frame","pid":18324,"client_pid":0,"requests":0,"elapsed_ms":0,"response_bytes":0,"event":"listening"}
+{"mode":"partial-frame","pid":18324,"client_pid":16108,"requests":1,"elapsed_ms":63078,"response_bytes":0,"event":"request_received"}
+{"mode":"partial-frame","pid":18324,"client_pid":16108,"requests":1,"elapsed_ms":63188,"response_bytes":20,"event":"response_written"}
+{"mode":"partial-frame","pid":18324,"client_pid":0,"requests":1,"elapsed_ms":63297,"response_bytes":0,"event":"listening"}
+{"mode":"partial-frame","pid":18324,"client_pid":0,"requests":1,"elapsed_ms":64594,"response_bytes":0,"event":"stopped"}

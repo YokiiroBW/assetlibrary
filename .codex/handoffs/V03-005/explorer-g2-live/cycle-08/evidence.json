@@ -1,0 +1,542 @@
+{
+  "recorded_at_utc": "2026-09-12T10:43:05.304682+00:00",
+  "status": "actual_invalid_and_partial_error_reopen_recovery_verified_cleaned",
+  "target_pid": 16108,
+  "target_hwnd": 6358406,
+  "target_creation_filetime": "134336819662724357",
+  "source_head": "4059e40",
+  "observations": {
+    "baseline-root": {
+      "completed": "2026-09-12T10:21:09.1677487+00:00",
+      "passed": true,
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "before_guard_deadline": true
+    },
+    "invalid-error": {
+      "completed": "2026-09-12T10:22:51.8534002+00:00",
+      "passed": true,
+      "names": [
+        "响应无效；按 F5 重试"
+      ],
+      "before_guard_deadline": true
+    },
+    "invalid-recovered": {
+      "completed": "2026-09-12T10:25:56.2417392+00:00",
+      "passed": true,
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "before_guard_deadline": true
+    },
+    "partial-error": {
+      "completed": "2026-09-12T10:27:03.5286819+00:00",
+      "passed": true,
+      "names": [
+        "后台连接服务不可用；启动并登录后按 F5 重试"
+      ],
+      "before_guard_deadline": true
+    },
+    "partial-recovered": {
+      "completed": "2026-09-12T10:28:36.6267223+00:00",
+      "passed": true,
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "before_guard_deadline": true
+    }
+  },
+  "cleanup": "600s deadline-triggered owner cleanup, independent9missing, ordinary SDK17/sidebar absent and all owned windows closed",
+  "cleanup_plan_limit": "48.479821s remained after final native recovery; planned60s reserve not met. Operator48.37s retained in raw record but corrected here using exact timestamps; original600s deadline caused cleanup.",
+  "lifetime_limit": "Explorer processes may remain resident; no fullCOM unload or G3/G4 pass claim",
+  "artifact_count": 81,
+  "artifacts": [
+    {
+      "file": "acceptance-summary.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/acceptance-summary.json",
+      "sha256": "837c135aaec4dd09a104cda6dc8436e830dfe2dd3cb615bc7b1e032d92d1f13a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "application-event-correlation.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/application-event-correlation.json",
+      "sha256": "3a3d39a69c9fa56d5715504757a8431f9d19df415fff97edf660c99da55cfb7a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "baseline-root-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/baseline-root-launch.json",
+      "sha256": "904e3073d0251383149205afcff1e81b0d0f7836006f6772329c899f129b98ae",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "baseline-root.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/baseline-root.json",
+      "sha256": "8b90638972cf9dde069ab42a6290502abfdf515f70f7957a40511ebd4cbdb5d0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "broker-epoch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/broker-epoch.json",
+      "sha256": "b332bd99e14988b9427cf5c62052a4c1f35dbfcb4d0b09d2333494399eb4384d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "broker.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/broker.json",
+      "sha256": "09f90c1de7f40adaa10ef0350bb745eb64327523179813bfe0402fedfbf51721",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-fields-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-fields-launch.json",
+      "sha256": "15eb6ec74d2972599f29b9e8411545b6269f357258e6402f3536872d455afaac",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-fields.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-fields.json",
+      "sha256": "3f3c9c475c867fb1e1c9b2b026bb5817f1f0635ce457646e91aef328a4e8398c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-request.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-request.json",
+      "sha256": "b87b5d1d0710694a30e0e92ff8a73aabaa294a8154533d8dc22eb90727ca3d53",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-sdk-actual-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-sdk-actual-launch.json",
+      "sha256": "01b2fefb209d4968d45b901d1d84ed703f5bcaa84f457616afb08de3a4615d8b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-sdk-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-sdk-actual.json",
+      "sha256": "5d5d921fd4da8392ccc09af49b5544b7dfa5330de86f4a9fb2ec4dadcff98e81",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-sdk-ui.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup-sdk-ui.json",
+      "sha256": "95fa40f4710aecd3765e8a32ff6d407d1b084abd9071434788c21e6981925511",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/cleanup.json",
+      "sha256": "86accec9430cc1e3de1745a13a1f892f6b713eb00f07ef0a7925addc69b6d9d7",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "close-admission.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/close-admission.json",
+      "sha256": "83cda8723338092b39f95e9d3c318478edf0db2ae9fed1c14de0774227860f95",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "evidence-index.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/evidence-index.json",
+      "sha256": "c4a7410e5d74a42aff823903b342309c6ba2752c94b925eea0452c2c19625cf3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "execution-inputs.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/execution-inputs.json",
+      "sha256": "94ece7fea98890ca4de16cb47fbf8c15879ff1860d4240862bb21ddec12f0e5c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-invalid-exit.json",
+      "sha256": "e4aa5d934bb80f47edaee806b60776a14cfe7e49879bb36e3c7f63a46a474738",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-invalid-launch.json",
+      "sha256": "3f4ae69e3cc4472cc3620534bb0583983bd965556514117eab4da1b10a3db8a9",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-invalid.json",
+      "sha256": "826d630964b4fefe6d059d26e2dfca900db2dd61bff54ef211854f7bb8b4bba6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-invalid.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-invalid.stdout.jsonl",
+      "sha256": "e0ca7d091c8119531348d2f2fa8fd066b9c399bb1dd0afc37aba1148bd5bc68b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-log-read-adjustment.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-log-read-adjustment.json",
+      "sha256": "fa6056cce10f2978ab3acefc304dfcc33053ff03fa6a6ed2eff0c5540058efef",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial-exit.json",
+      "sha256": "fb731a82c34aaddb24a93aa797ae69f683c23a3ce6d652079f24bd5dd21f6ed3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial-launch.json",
+      "sha256": "6419407b691966e003a295361d30756f9083ba75ebb147b666e9d9e8bcbf2b66",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial.json",
+      "sha256": "1f5b339f17bde954f7b47e70ce51e449c1bda7d7dbbfa3538ea518df38cb2fbd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial.stdout.jsonl",
+      "sha256": "8245fc06c4247852cfc04d82c14c4f4277ade3402d2e84c05a69371f9bd71b0f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "final-cua-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/final-cua-cleanup.json",
+      "sha256": "db4b0b9571deafcc6f4b17538254d3e50f66744c18777a3c2087fc1a8f2ecb06",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "final-native-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/final-native-cleanup.json",
+      "sha256": "5a45e1926540746adcfd700560ce58cade69a298844e672483f711cd8d1f2715",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "final-timing.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/final-timing.json",
+      "sha256": "0cbd96621371272379d98619dbd56e0edc993fc056b7f79d6a7f102d2df1b0f3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "guard-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/guard-launch.json",
+      "sha256": "12fdd18eea42e109ef1b168dfbd683f21e1e0c59b40d367bb8280dd09240f100",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "guard-machine-preflight.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/guard-machine-preflight.json",
+      "sha256": "b4fb929b994e58daaf4a383d7649bc4c8e93da44846f0472dad02ac17c188a0a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline-exit.json",
+      "sha256": "9c4459ca77ea05f3fceeae2e84b78c57e22d825016d68b24757d3938828d6703",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline-launch.json",
+      "sha256": "3444e8868ac183671e3abba1b05ef4a497db6ff698309e1d3ccc4684ac3926da",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline.json",
+      "sha256": "112f635d508248c6c12e2f6de078f792c098107ca31adcd8733fd3117b4a642a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline.stdout.jsonl",
+      "sha256": "d734245c99fd4b775f0d30527314b13500b3c957ebcaad4c82e1609dd01e32ff",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery-exit.json",
+      "sha256": "db2dace6f711d137bea81972f90694de5042da443cd57a1c0c0c03063b82f5f6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery-launch.json",
+      "sha256": "7514fa2524441cb3f7a245eaf2aa88a30ff95f581f6dbaf31445871df8c880b5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery.json",
+      "sha256": "f12989cd38a8cd0e3145fabeb26b5ff023dfbd3bc54d7e5bb2bda6f03235e71d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery.stdout.jsonl",
+      "sha256": "f972c927f4f2f4d558ca5bad54353cb0e20885cf5e401866cee8453be2e335da",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery-exit.json",
+      "sha256": "6b2ecaeae1c170078a521c7304a150ca96ac18ca1021b440a05d04fd072a529b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery-launch.json",
+      "sha256": "cf28c987babcc4e385628f575eefb69ae125ddb37765e6323edc45a60be71489",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery.json",
+      "sha256": "2ff392862c223d29cfd1dc9f73f8fd253471b8df2f12787b42e6784786749cf1",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery.stdout.jsonl",
+      "sha256": "90dd21672d4ca6ad680c865244d83411ede94654338de773b9ed8ad486c035e8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "identity.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/identity.json",
+      "sha256": "a38cc854e87c2a146a36e44fdbe767c61ba6480a8a3ccbc725eabb812fd48d69",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "index-validation.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/index-validation.json",
+      "sha256": "bef354299271c8a6e6d3fe5ab4d00ef896b416506d5e3e1cf55976f46c79fec4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-error-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-error-launch.json",
+      "sha256": "d31e5d9f9286f174410cfecaa35865fb09fa58d366819f9877f1dbfc5e8774e0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-error-ui.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-error-ui.json",
+      "sha256": "0328a0081d177654cb040b2b8afbe987cec0ad84a4a21d72233c198db0ec1e45",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-error.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-error.json",
+      "sha256": "88c907bc4f80dc79e3431df85e8c8a6c0e532efd9245de57975fb60090a45b7a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-recovered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-recovered-launch.json",
+      "sha256": "163c6256ea6347a403285c0969cf4af8b02e370e6c1e377b09f9de1ee7fc5e0c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-recovered-ui.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-recovered-ui.json",
+      "sha256": "ef8543e33253b9ef7ada6046701e24f94309f0424538364e74dac5f5f85e0f14",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-recovered.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/invalid-recovered.json",
+      "sha256": "b8384c65a24c1a0b76aef75db28ced70b06278cf2c3f5a8fbc63852876e2f22d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-error-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-error-launch.json",
+      "sha256": "3a4f4ebae51f4c08f50bdebdc9e99f6487d26f5a4b189d84d038a0c6497561cd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-error-ui.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-error-ui.json",
+      "sha256": "8b4eae1f5d060f58e60ce9e1e04273771677ac957c26c609928f991200e3352b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-error.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-error.json",
+      "sha256": "ec9728f842aa6cc08687658b73db330d8d789c30927db058e9db17451b999a10",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-recovered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-recovered-launch.json",
+      "sha256": "1a09e5d4bd019654092435829413d06f8a1d5c812c90282a26e2932699fd59fc",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-recovered-ui.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-recovered-ui.json",
+      "sha256": "bcef8a6632f69995e14578960e810a8a53cf3a04c3b088efce513a332d79d6cd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "partial-recovered.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/partial-recovered.json",
+      "sha256": "5cd5dc8ba3119bbd2409a9491e57b7865485310c5527f9a4e535e1c1a0b2799d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "prior-close-admission.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/prior-close-admission.json",
+      "sha256": "64b69cce7c85e58618b86505947d4b6820f488a56e38adbedc03c3141ec66362",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "prior-final-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/prior-final-cleanup.json",
+      "sha256": "4904867e26b2f04e7a0160043a9894aaf18a88405fc30a146bbf3c09d1d3888c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "register.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/register.json",
+      "sha256": "1afc45a6deaefb9d11dc13644fa5fc66d6b41a761edfc20f08805b1cedb51fb4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "registered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/registered-launch.json",
+      "sha256": "64b749ce986dff1d54f410317e5ff3f57321bb53045a5fc9b6e3f4635e9b7b3f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "registered.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/registered.json",
+      "sha256": "e7e062f34dc10617cd221da95fd67300b82d534ed8486f26c1c7e6c4b93baf7c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "stop-fault-desktop08.ps1.txt",
+      "source": ".runtime/explorer-host-integration/desktop-08/stop-fault-desktop08.ps1",
+      "sha256": "d3e7ed910285aef8b69f4db6dfe299384bbbd21f6513f6ebb39a5558cf415936",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "stop-host-desktop08.ps1.txt",
+      "source": ".runtime/explorer-host-integration/desktop-08/stop-host-desktop08.ps1",
+      "sha256": "8edaaf8966d87db6cc4cb1e838fdc20607f3347d4f330cfb6c2c64b9fb67af4e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "target-epoch.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/target-epoch.json",
+      "sha256": "3882d26e61cba2d52e949b3c3a4b8a0ba0a90a888f9d9883c505f618efdeec9f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/01-invalid-error.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-08/screenshots/01-invalid-error.jpg",
+      "sha256": "504e7d11801ea086bcd4838c131ec0c19abe6203db4ed3b94e9562f1e9fe90f3",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/02-invalid-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-08/screenshots/02-invalid-recovered.jpg",
+      "sha256": "4825fe26ab168259a60652a1d033b9817ca35d64d4d22fe003c3d2065449aba8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/03-partial-error.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-08/screenshots/03-partial-error.jpg",
+      "sha256": "0e99484e31ef2a3bccfed4effb8cc1beefb808e9dbe5ef1fd043cbacfe958529",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/04-partial-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-08/screenshots/04-partial-recovered.jpg",
+      "sha256": "4825fe26ab168259a60652a1d033b9817ca35d64d4d22fe003c3d2065449aba8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "acceptance-summary.md",
+      "source": ".runtime/explorer-host-integration/desktop-08/acceptance-summary.md",
+      "sha256": "388e5d5052ed14bdda254d202278226022fe60d58cdd132072872d4a3a471ae2",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-partial.stop",
+      "source": ".runtime/explorer-host-integration/desktop-08/fault-partial.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "guard.requested",
+      "source": ".runtime/explorer-host-integration/desktop-08/guard.requested",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.stop",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-baseline.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.stop",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-invalid-recovery.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-partial-recovery.stop",
+      "source": ".runtime/explorer-host-integration/desktop-08/host-partial-recovery.stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "stop",
+      "source": ".runtime/explorer-host-integration/desktop-08/stop",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "operator-evidence-index.json",
+      "source": ".runtime/explorer-host-integration/desktop-08/evidence-index.json",
+      "sha256": "c4a7410e5d74a42aff823903b342309c6ba2752c94b925eea0452c2c19625cf3",
+      "kind": "unmodified_copy"
+    }
+  ]
+}

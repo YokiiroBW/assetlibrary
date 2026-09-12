@@ -1,0 +1,7 @@
+{
+  "Utc": "2026-09-12T10:21:51.8777322+00:00",
+  "OriginalReadMethod": "ReadAllText FileShare.Read rejected concurrent writer",
+  "CorrectedMethod": "Open Read with FileShare.ReadWrite",
+  "ListeningObserved": true,
+  "NoGuiRefreshBeforeListening": true
+}

@@ -1,0 +1,23 @@
+{
+  "Utc": "2026-09-12T10:15:00.2362699+00:00",
+  "PreviousGuardClean": true,
+  "IndependentNineMissing": true,
+  "SessionActive": true,
+  "DefaultDesktop": true,
+  "Owned": [
+    {
+      "Pid": 22692,
+      "Hwnd": 6882610,
+      "Creation": "134336808131101228",
+      "Fresh": true
+    },
+    {
+      "Pid": 24076,
+      "Hwnd": 330142,
+      "Creation": "134336806274943105",
+      "Fresh": true
+    }
+  ],
+  "OriginalDesktopPid": 6212,
+  "Guard7304Absent": true
+}

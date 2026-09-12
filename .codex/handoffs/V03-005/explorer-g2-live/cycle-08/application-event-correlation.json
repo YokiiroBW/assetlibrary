@@ -1,0 +1,17 @@
+{
+  "RecordedUtc": "2026-09-12T10:37:50.3217205+00:00",
+  "StartUtc": "2026-09-12T10:19:25.1065431Z",
+  "EndUtc": "2026-09-12T10:37:50.1578232Z",
+  "Log": "Application",
+  "Ids": [
+    1000,
+    1001
+  ],
+  "QuerySucceeded": true,
+  "QueryErrorType": null,
+  "AtMaxEventBound": false,
+  "MatchedEvents": [],
+  "Correlation": "Exact named process-id XML fields only",
+  "Limitation": "WER records lacking a process-id field cannot be correlated by this read; no broad no-WER claim",
+  "UnrelatedMessagesSaved": false
+}

@@ -1,6 +1,6 @@
 # V03-005 — 并行浏览与预览协调
 
-状态 **partial / Windows 受控功能通过，原生入口 G1 已关闭**。V03-006 Shell、V03-010 AssetHost与V03-011实际视图加载观察已集成；真实Explorer冷库根、分页、两级目录、Host不可用/重启与旧位置拒绝/根恢复通过，入口/自有窗口/Host/Core清理与合成原件完整性已核验。详见[本次接入验收](explorer-host-integration/README.md)和[原门禁裁决](explorer-gate-review/README.md)。V03-012 故障工具已完成并集成，下一步 root 实机验收补 G2 crash/timeout/invalid frames；G3 计时/生命周期、G4 循环/八小时独立保留。Web/Android既有证据保留，NAS图片发行仍受原目标内核阻断；正式登录安装、预览及完整客户端未完成。
+状态 **partial / Windows G1、G2 已通过，G3、G4 与完整客户端仍未完成**。原生Explorer真实浏览与故障恢复均已验收：异常退出、无响应、错误版本和截断响应显示正确错误，重开根恢复真实Core内容；入口、测试窗口、Host/Core已清理，138份合成原件未变。详见[本轮G2验收](explorer-g2-live/README.md)。V03-013公开通知研究未取得等价视图，保留失败且不改客户端行为。正式登录安装、预览、主动失效以及生命周期/稳定性仍是后续工作。
 
 ## 已集成与已验收
 
@@ -20,7 +20,7 @@
 
 ## 当前接续与分工
 
-1. Windows最高优先级。自有入口、包外注册清理与真实Core只读接入已完成受控功能验收，G1已关闭。V03-012故障工具已合入88e6c21；下一步为G2真实故障恢复，不能重复回到旧入口排查或把工具正控当实机通过。当前Session 2已确认WTSDisconnected，截图与输入不可用；本轮未注册/启动管道Host，Core已清理，但新SDK测试窗口关闭未确认。恢复条件和已准备场景见[验收计划](explorer-gate-review/g2-acceptance-plan.md)。
+1. Windows最高优先级。G1原生入口与G2真实故障恢复已关闭；后续先补G3真实计时、取消和保留COM对象增长，再做G4规定循环/八小时。V03-013仅完成公开事件机制研究（实际33项而非合成1项），体验尚未改善；下一次须用已验证真实namespace的最小通知观察，不能再以空Desktop PIDL独立视图代替。当前没有活跃GUI/测试Host/Core或注册残留，原Explorer未重启。
 2. NAS包a12b0d1已实际构建、逐文件验hash后暂存/载入NAS，未替换线上服务。相同实际包在Linux6.14的20项corpus/资源检查及父退出验证通过，但NAS5.10.55+缺少可用seccomp，Ready前安全失败、未发图；原件/容器清理通过。简单AppArmor替换不能保留现有隔离保证。nas-platform-decision.md建议仅在现有dev-230部署认证TLS图片计算入口，正在等待用户/ADR确认；回答前不扩展该服务或更改NAS策略。
 3. 收齐Windows新入口与平台证据、实际NAS包/目标测试后再统一交付；继续更新result/tests/注册表。当前已通过的客户端源码套件不重复运行，仅对后续修复和缺证据补测。完整Alpha/V0.3、生产资产写入及既有Provider/平台门禁保持独立。
 

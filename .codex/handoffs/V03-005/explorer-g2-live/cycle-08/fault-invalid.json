@@ -1,0 +1,23 @@
+{
+  "Utc": "2026-09-12T10:21:12.1081357+00:00",
+  "Pid": 5660,
+  "CreationFileTime": "134336820721057200",
+  "ExecutorPid": 25552,
+  "Context": {
+    "QuerySucceeded": true,
+    "Is64Bit": true,
+    "PackageIdentityAbsent": true,
+    "ParentIsSystemExplorer": true,
+    "SameUser": true,
+    "SameSession": true,
+    "ParentPredatesExecutor": true,
+    "OrdinaryUser": true,
+    "PackageIdentityStatus": 15700,
+    "ParentPid": 6564,
+    "ExecutorCreationFileTime": "134336820714889340",
+    "ParentCreationFileTime": "134336817627102063",
+    "ErrorType": null
+  },
+  "Mode": "invalid-version",
+  "ExeSha256": "F163BB5ACD630C145CC50F732B762592555AAF25F48E25410F455D180CC1882E"
+}

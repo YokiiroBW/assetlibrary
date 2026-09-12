@@ -1,0 +1,19 @@
+param([Parameter(Mandatory)][string]$RunDirectory,[Parameter(Mandatory)][string]$DllPath,[Parameter(Mandatory)][ValidatePattern('^[0-9A-Fa-f]{64}$')][string]$DllSha256,[Parameter(Mandatory)][ValidatePattern('^host-[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$root='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005'
+. (Join-Path $root 'tests/windows-shell/execution-context.ps1')
+$context=Get-ProofExecutionContext;Assert-ProofNativeLaunch -Context $context
+$run=(Resolve-Path -LiteralPath $RunDirectory).Path
+$dll=(Resolve-Path -LiteralPath $DllPath).Path
+if((Get-FileHash -LiteralPath $dll).Hash -cne $DllSha256.ToUpperInvariant()){throw 'Frozen Host binary changed'}
+if([IO.Path]::GetFileName($dll) -cne 'AssetLibrary.Windows.AssetHost.dll'){throw 'Only this Host is allowed'}
+$taskConnectionProfile=(Get-Content -LiteralPath (Join-Path $root '.runtime/explorer-g2-faults/live-01/core/20260912T095645Z-56e8f0f2/ready.json') -Raw|ConvertFrom-Json).connection_file
+$stop=Join-Path $run ($Label+'.stop')
+$record=Join-Path $run ($Label+'.json')
+$stdout=Join-Path $run ($Label+'.stdout.jsonl')
+$stderr=Join-Path $run ($Label+'.stderr.log')
+foreach($path in @($stop,$record,$stdout,$stderr)){if(Test-Path -LiteralPath $path){throw 'Fresh Host label required'}}
+foreach($value in @($dll,$taskConnectionProfile,$stop)){if($value -match '["\r\n]'){throw 'Invalid argument characters'}}
+$arguments=@(('"'+$dll+'"'),'--profile',('"'+$taskConnectionProfile+'"'),'--lifetime-seconds','1800','--stop-file',('"'+$stop+'"'))
+$process=Start-Process -FilePath 'C:/YOKI/Codex/worktrees/V01-004/.runtime/sandbox-storage/V01-004/dotnet/dotnet.exe' -ArgumentList $arguments -WindowStyle Hidden -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+[ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$process.Id;CreationFileTime=$process.StartTime.ToUniversalTime().ToFileTimeUtc().ToString();ExecutorPid=$PID;Context=$context;DllSha256=$DllSha256.ToUpperInvariant();StopFile=$stop}|ConvertTo-Json -Depth 7|Set-Content -LiteralPath $record -Encoding utf8

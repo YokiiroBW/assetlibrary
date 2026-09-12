@@ -1,5 +1,7 @@
 # G2 剩余实机验收
 
+后续状态：本计划已执行，G2已依据两轮真实故障恢复关闭，见[验收结果](../explorer-g2-live/README.md)。以下保留当时的准备记录与断开会话阻断，不表示当前仍未执行。
+
 状态：V03-012 工具已完成构建、自动测试和审查；真实场景尚未执行，不作为 G2 通过证据。恢复后由 root 独占桌面验收。2026-09-12 准备窗口的截图两次报 `IGraphicsCaptureItemInterop.CreateForMonitor 0x80070057`，因此未注册入口或启动任何管道 Host；不能通过无截图模拟点击补填实机结果。
 
 后续只读 WTS 查询确认 Session 2 为 `WTSDisconnected`（4），枚举值以本机 Windows SDK 头文件核对；见 [会话记录](g2-session-readonly.json)。仅为收尾读取了 SDK 窗口的 17 项可访问性内容，尝试一次 Alt+F4 又收到 `GetCursorPos 0x80070005`，窗口关闭未确认且未强杀 Explorer。该新建测试窗口 HWND 133536/PID 18976；重连后须重新检查身份和界面再清理。所有实机用管道 Host/注册均未启动，已启动的合成 Core 则完整停止并验证 138 文件不变、6 账号与服务清理。见[准备结果](g2-preparation-outcome.json)及 [Core 清理](g2-core-cleanup.json)。

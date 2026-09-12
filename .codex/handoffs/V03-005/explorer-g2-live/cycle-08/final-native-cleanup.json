@@ -1,0 +1,30 @@
+{
+  "Utc": "2026-09-12T10:35:24.5546031+00:00",
+  "Owned": [
+    {
+      "Pid": 16108,
+      "Creation": "134336819662724357",
+      "Hwnd": 6358406,
+      "WindowPresent": false,
+      "OriginalProcessResident": true,
+      "DebuggerPresent": false
+    },
+    {
+      "Pid": 6564,
+      "Creation": "134336817627102063",
+      "Hwnd": 460224,
+      "WindowPresent": false,
+      "OriginalProcessResident": true,
+      "DebuggerPresent": false
+    }
+  ],
+  "OwnedWindowsRemaining": 0,
+  "Prior07OwnedVisibleCabinets": 0,
+  "OriginalExplorer6212SameCreation": true,
+  "OriginalExplorerAlive": true,
+  "GuardExited": true,
+  "HostAndFaultPidsAbsent": true,
+  "NoExplorerKilledOrRestarted": true,
+  "CoreStopOwnedByRoot": true,
+  "FullComUnloadClaim": false
+}

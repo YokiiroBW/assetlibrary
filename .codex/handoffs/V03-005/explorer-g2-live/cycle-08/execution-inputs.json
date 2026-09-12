@@ -1,0 +1,18 @@
+{
+  "Utc": "2026-09-12T10:19:23.4328643+00:00",
+  "RootHead": "4059e40",
+  "Cases": [
+    "invalid-version",
+    "partial-frame"
+  ],
+  "CrashAndSilentNotRepeated": true,
+  "ToolbarRefreshOnly": true,
+  "CoreReadyRelativePath": ".runtime/explorer-g2-faults/live-01/core/20260912T095645Z-56e8f0f2/ready.json",
+  "ShellDll": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-g2-faults/live-01/binaries/AssetLibraryExplorerProof.dll",
+  "ShellHash": "FA0F657A66F922DE1ED7A0C6A8E3E9635C2D6D0DDE59B355177DF60C34742C85",
+  "FaultExe": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-g2-faults/live-01/binaries/ExplorerFaultHost.exe",
+  "FaultHash": "F163BB5ACD630C145CC50F732B762592555AAF25F48E25410F455D180CC1882E",
+  "HostDll": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/apps/windows-client/AssetHost/bin/Release/net10.0/AssetLibrary.Windows.AssetHost.dll",
+  "HostHash": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+  "CleanupReserveSeconds": 60
+}

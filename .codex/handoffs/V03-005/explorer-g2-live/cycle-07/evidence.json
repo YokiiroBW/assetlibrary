@@ -1,0 +1,699 @@
+{
+  "recorded_at_utc": "2026-09-12T10:16:54.977523+00:00",
+  "status": "crash_and_silent_actual_recovery_verified_invalid_UI_recovered_native_followup_expired",
+  "target_pid": 22692,
+  "target_hwnd": 6882610,
+  "target_creation_filetime": "134336808131101228",
+  "broker_pid": 24076,
+  "broker_hwnd": 330142,
+  "shell_sha256": "FA0F657A66F922DE1ED7A0C6A8E3E9635C2D6D0DDE59B355177DF60C34742C85",
+  "host_sha256": "D26CA4310D7469D7837F2C5D28E14CD12A110C85ADAAD79349A55950310C5A8E",
+  "fault_sha256": "F163BB5ACD630C145CC50F732B762592555AAF25F48E25410F455D180CC1882E",
+  "initial_F5_attempt_triggered_request": false,
+  "trigger_that_worked": "actual_Explorer_toolbar_refresh_button",
+  "crash_model": "fault_process_self_termination_after_valid_request; not arbitrary_production_Host_bug",
+  "recovery": "new_real_Host_then_back_to_SDK_and_forward_reopen_root",
+  "single_refresh_loading_limitation": "crash-recovered stayed Loading; this is not successful automatic recovery. New bounded initial-view observation only started on reopen. Existing frozen contract already documents this limitation.",
+  "invalid_recovery_native_limit": "probe started after600s guard cleanup; class4FF and22B currentPIDL observed but expectedPathParse failed and no after-identity/count proof; new bounded cycle required",
+  "registration_cleanup": "original600second_deadline_at10:11:04Z; laterstop_marker_not_cause; independent9missing_passed",
+  "core_and_windows_cleanup": "not_in_this_receipt; rootCore remainsactive and nextGUIoperator ownsoldwindow cleanup",
+  "observations": {
+    "baseline-root": {
+      "started": "2026-09-12T10:02:14.1907931+00:00",
+      "completed": "2026-09-12T10:02:14.5763630+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "identity_after": true
+    },
+    "crash-error": {
+      "started": "2026-09-12T10:03:25.7570691+00:00",
+      "completed": "2026-09-12T10:03:26.1405503+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "identity_after": true
+    },
+    "crash-error-actual": {
+      "started": "2026-09-12T10:04:50.5709400+00:00",
+      "completed": "2026-09-12T10:04:51.0494014+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "后台连接服务不可用；启动并登录后按 F5 重试"
+      ],
+      "identity_after": true
+    },
+    "crash-recovered": {
+      "started": "2026-09-12T10:05:35.4837598+00:00",
+      "completed": "2026-09-12T10:05:35.8692623+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "正在加载；按 F5 重试"
+      ],
+      "identity_after": true
+    },
+    "crash-reopened-root": {
+      "started": "2026-09-12T10:06:25.5116138+00:00",
+      "completed": "2026-09-12T10:06:25.9189770+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "正在加载；按 F5 重试"
+      ],
+      "identity_after": true
+    },
+    "crash-ready-final": {
+      "started": "2026-09-12T10:06:41.2600385+00:00",
+      "completed": "2026-09-12T10:06:41.6331967+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "identity_after": true
+    },
+    "silent-error": {
+      "started": "2026-09-12T10:07:33.1793851+00:00",
+      "completed": "2026-09-12T10:07:33.5761808+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "后台连接服务不可用；启动并登录后按 F5 重试"
+      ],
+      "identity_after": true
+    },
+    "silent-recovered": {
+      "started": "2026-09-12T10:08:54.5522417+00:00",
+      "completed": "2026-09-12T10:08:54.9686908+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "原生客户端隔离样例"
+      ],
+      "identity_after": true
+    },
+    "invalid-error": {
+      "started": "2026-09-12T10:09:22.1521242+00:00",
+      "completed": "2026-09-12T10:09:22.5504412+00:00",
+      "probe_passed": true,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [
+        1
+      ],
+      "names": [
+        "响应无效；按 F5 重试"
+      ],
+      "identity_after": true
+    },
+    "invalid-recovered": {
+      "started": "2026-09-12T10:11:55.4200958+00:00",
+      "completed": "2026-09-12T10:11:55.8004516+00:00",
+      "probe_passed": false,
+      "class_ids": [
+        "{4FF8301D-2E73-4D49-9FE5-868D5F1EA302}"
+      ],
+      "counts": [],
+      "names": [],
+      "identity_after": false
+    }
+  },
+  "artifact_count": 88,
+  "artifacts": [
+    {
+      "file": "baseline-root-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/baseline-root-launch.json",
+      "sha256": "7bcf87d5d3468747b3ab7a3ff3bbff6d37e94c910b2f4df6fd697c866afcaa3d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "baseline-root.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/baseline-root.json",
+      "sha256": "dcb78e61553a614a5d73e0984990a7168b50d84b9aaf7bf3ed0c997777f7c052",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "before-missing-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/before-missing-launch.json",
+      "sha256": "00998313f4beda965b05f027e5a540b8db204250c3610266d2c0c329e8062785",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "before-missing.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/before-missing.json",
+      "sha256": "144f022393eb44cffc8031474419aaaf14ebf4580350cec1862cc9e76e84a44e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "broker-start.txt",
+      "source": ".runtime/explorer-host-integration/desktop-07/broker-start.txt",
+      "sha256": "c233d2c3646acd4d56c934b73bf0b6f9446a283987ac910122925d9c163750ab",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "broker.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/broker.json",
+      "sha256": "a39b4892ed8294f34ff8e91e3918c29442c70ffe57fdb3cd9815a100a2ff2feb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-fields-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/cleanup-fields-launch.json",
+      "sha256": "d87c431263f4dc525b5df0aec88576d7ed18b35b966a9a2e370d2e006d96a3bb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup-fields.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/cleanup-fields.json",
+      "sha256": "b883890ca57c62899632c9a1a97849b29761e6a9e8224aa067989c5162189d66",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/cleanup.json",
+      "sha256": "a2f0b3d176b72d3a20b3e6b0d803a6f3d5adc3fb1beda954147bdb8cf8b66e1c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-error-actual-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-error-actual-launch.json",
+      "sha256": "1d2e889ace69de10efdd3da81a6732cdc04e828afe6ada777ccdf725e202a10f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-error-actual.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-error-actual.json",
+      "sha256": "b106fb9af2dcacb362f0061b79831b32c3299faf6d963b4f6ee5d18df966b857",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-error-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-error-launch.json",
+      "sha256": "f2aea1c91dca4a6b2561c7f7cb20a0d08f9839dc185a1f067c43ed3729316820",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-error.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-error.json",
+      "sha256": "1b405676c48702a5ced15ebabd0a6a100cec829a7be73e2691674e336d1470a6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-ready-final-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-ready-final-launch.json",
+      "sha256": "3137e75326360e6c4c5fd271ee402363cdb32964bb943c7b77167c7d8badde09",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-ready-final.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-ready-final.json",
+      "sha256": "b11d144bd89570a7b0677d82e0a9377505c33927635a0c7c8b059ff50af1ac82",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-recovered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-recovered-launch.json",
+      "sha256": "0c4fa1c68000417b8f9bc0de4a8a9170b6ef360ac1f061fea99b35f206f70cd0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-recovered.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-recovered.json",
+      "sha256": "e4259fd1c5f58c2aa7cca3d19f751f6bed1064e278eb29b42f5e47269c5367f0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-reopened-root-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-reopened-root-launch.json",
+      "sha256": "a8f0f409a79f4c4c333108d8f30ad9d25fdbbc0245c69c796f8825a723a4880e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "crash-reopened-root.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/crash-reopened-root.json",
+      "sha256": "821b4ae7b2717ae7943848fc257701a5b7e1259a5adea1679dbce16042356d63",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-crash-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-crash-exit.json",
+      "sha256": "9a6cc4c8995639272334f3f67b7fabfd7aae931774e4126af1d5230cd7ade07e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-crash-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-crash-launch.json",
+      "sha256": "86fd51b8d7648b178dd737160a09eac4b6891ccd73b490588a4eecabcb3b47b6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-crash.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-crash.json",
+      "sha256": "6a43d6ce523a06e8a5b937595359f1e2879020f98c853e4971292553bc9e79b0",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-crash.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-crash.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-crash.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-crash.stdout.jsonl",
+      "sha256": "14e62fa734f983d1724f393e8373951c721d15e1c17470b21b51c7e7436a6edb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-invalid-exit.json",
+      "sha256": "73d3d82fdaaf39cc10ece6fad4b8e54f08091bba8b4364e9d843b54ef1a5eb6d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-invalid-launch.json",
+      "sha256": "9a31a8f4370f473383f10e808eb5a9523ffaa4916967465641e091a6fbe2fd9e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-invalid.json",
+      "sha256": "0b476b5cd6ef4d454da65e871a541cbaeeb1ca2405328a7ea5d725bb3fd1a689",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-invalid.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-invalid.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-invalid.stdout.jsonl",
+      "sha256": "16070f1b82698c43d1901b5a3fe73f84b173c81a1486a5c1409779ce63a6a2b8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-silent-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-silent-exit.json",
+      "sha256": "285a5e152851a138fd704c00b59ab49ef2cadd121b33c552800876f9be929e83",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-silent-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-silent-launch.json",
+      "sha256": "ad30cb33429c13b110881b0118e50cff4695657c87e08305c65ad35b2068e7b5",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-silent.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-silent.json",
+      "sha256": "2824b3169f6b01a16fc74c4c61c653e8b45a85164789f66df636af523167a289",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-silent.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-silent.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "fault-silent.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/fault-silent.stdout.jsonl",
+      "sha256": "72b358b31be5733d1f22fe535dac1c51f418f057fae1ba4275f8268f15796760",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "guard-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/guard-launch.json",
+      "sha256": "202fd18d9521ab6f6e269f44ee09872e7b788cf954ca222f6c3bccd20f59be36",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "guard-machine-preflight.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/guard-machine-preflight.json",
+      "sha256": "b4fb929b994e58daaf4a383d7649bc4c8e93da44846f0472dad02ac17c188a0a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-baseline-exit.json",
+      "sha256": "8cd2f5af3819d2aa616b518365331da9271075fb4588f1a5a4b5d21d17d0607d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-baseline-launch.json",
+      "sha256": "0fc181969ee83b30ed0f28e968d1ce3f9685f6de16816a789038aafe31342765",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-baseline.json",
+      "sha256": "3b9c0a82b51de31bb8d20b16dceb210642a7deb58f7b4fcefdbf7cf488c3b3ae",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-baseline.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-baseline.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-baseline.stdout.jsonl",
+      "sha256": "4d78f6e932523f504a6b07de21c342e81a64b02b7e08c345acc87444186b3e88",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-crash-recovery-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-crash-recovery-exit.json",
+      "sha256": "62c6d82acfd3f66717fcf4a95971e867fdf018ea0757f912281b9813474fd5ca",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-crash-recovery-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-crash-recovery-launch.json",
+      "sha256": "a1649176aa328f6c71588ab2703982e0b6805247001988994d8fb2b6dd4b7a87",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-crash-recovery.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-crash-recovery.json",
+      "sha256": "050b6145e2320f2327afd03fe1d596308ca9184462c698fb2bd327407bf477fd",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-crash-recovery.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-crash-recovery.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-crash-recovery.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-crash-recovery.stdout.jsonl",
+      "sha256": "d263dda648ad9dba7e332322d043bce89d239e869982e3561b49fb402e0ddb7f",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-invalid-recovery-exit.json",
+      "sha256": "ee808b99390e6ee0d63ab37f35364258d714cf6a4d186aa77331a7f7097e03bc",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-invalid-recovery-launch.json",
+      "sha256": "b9fa97af05f4276860350362765a41c81608ae79e905a865b9714b75734ba86e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-invalid-recovery.json",
+      "sha256": "f2a88bf81e4b5f0b8567feefd47e6fdc5faf4b70bd0dcbceccf8033329860f02",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-invalid-recovery.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-invalid-recovery.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-invalid-recovery.stdout.jsonl",
+      "sha256": "fea94c05c86a66e2e0044bd2da79e5562e12d4258dea7eda02fca9a9c84d2912",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-silent-recovery-exit.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-silent-recovery-exit.json",
+      "sha256": "7c2e54e0c75b7387df6c6795bcfba1afe77a7458ac4bce1fa6721f094bfd4282",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-silent-recovery-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-silent-recovery-launch.json",
+      "sha256": "dd385c1302b4c9c08736ce4d7fe6251563500127b85ab437afed522c1bfa1c62",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-silent-recovery.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-silent-recovery.json",
+      "sha256": "05aaeb93ff7281a617439467046777a13798120d6e7c1936ccf2670ee3ae5526",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-silent-recovery.stderr.log",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-silent-recovery.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "host-silent-recovery.stdout.jsonl",
+      "source": ".runtime/explorer-host-integration/desktop-07/host-silent-recovery.stdout.jsonl",
+      "sha256": "338b24e9454b708fcb39770633fbbaff0ed506ae16975e291f51f7054731dce6",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "identity.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/identity.json",
+      "sha256": "3b6b0c2d756472b30cc2f97d61abde2d3cce4a03355790f13f465934692e52fb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-error-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/invalid-error-launch.json",
+      "sha256": "9cea79eea8c71245999f13f9b1dd5fdcc91b37f3509bef841287987d9c2a9711",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-error.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/invalid-error.json",
+      "sha256": "e07a1ca44b8836b80113525d4784b90e7b70f74aa0a251b9fefdd260537010ec",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-recovered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/invalid-recovered-launch.json",
+      "sha256": "70312dee534a26e75ba9b29c3b512ae24c38e9af7a87e489b7018665907d9dc8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "invalid-recovered.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/invalid-recovered.json",
+      "sha256": "a45f681b05fe6c37e8a617d7540cf3561c19731e2b7f02ac2504c401d8386ee8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "register.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/register.json",
+      "sha256": "dcbbf0eae3493f310b3fcb87345640662ea3b3ce8ed349425f0e4e7a8cc9098b",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "registered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/registered-launch.json",
+      "sha256": "4aa18195b347111d40cf77cb0a4992a79d4530659f7b0c210222553270f51a81",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "registered.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/registered.json",
+      "sha256": "738d2ea4269a45963694ff4e25c6b8936aab8842d284a8a6b8ee7b3788ad4a69",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "silent-error-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/silent-error-launch.json",
+      "sha256": "3da837a7f86c300d02d8fe6174bcef648c077b5f42eb6a5d8c0dc005a46dfbdc",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "silent-error.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/silent-error.json",
+      "sha256": "b1536303cae11308e6f25e6b1268dcb084bb5ca15a6a6eef369bf8fdb811e35a",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "silent-recovered-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/silent-recovered-launch.json",
+      "sha256": "f4830915dfeee7dd1fadc8c5da2ee00f6553df6682f634f8ba886b5b9849be20",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "silent-recovered.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/silent-recovered.json",
+      "sha256": "042f23ceaae693a01b1f85374832d3b42661a942d84325537ea12d33218ed9ac",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "target-sdk-launch.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/target-sdk-launch.json",
+      "sha256": "4a378e127e17a31263bcc41e0c8c77e3bec60da039dd82dc3f403b37e8e5b1e8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "target-sdk.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/target-sdk.json",
+      "sha256": "8a2b032c46705a4c677bd0003e963d6823805442919d64f36b80e1d732a3d73d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "target-start.txt",
+      "source": ".runtime/explorer-host-integration/desktop-07/target-start.txt",
+      "sha256": "2ef6b4e9249894e4fe31dc01f849e0c9093986bc24927305ca544655cb743f2c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "worker-close-admission.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/worker-close-admission.json",
+      "sha256": "64b69cce7c85e58618b86505947d4b6820f488a56e38adbedc03c3141ec66362",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "worker-final-cleanup.json",
+      "source": ".runtime/explorer-host-integration/desktop-07/worker-final-cleanup.json",
+      "sha256": "4904867e26b2f04e7a0160043a9894aaf18a88405fc30a146bbf3c09d1d3888c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/01-baseline-loading.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/01-baseline-loading.jpg",
+      "sha256": "8983d8b2df355d2b5b636b761b3f3ee2d9c716e15ccee5da6bc1fd4d7b465259",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/02-baseline-root.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/02-baseline-root.jpg",
+      "sha256": "df331dab819b947c2249b3a9b0f61d132162fc1f6fa9e1b5a92b8bceb97353eb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/03-crash-error.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/03-crash-error.jpg",
+      "sha256": "df331dab819b947c2249b3a9b0f61d132162fc1f6fa9e1b5a92b8bceb97353eb",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/04-crash-error-actual.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/04-crash-error-actual.jpg",
+      "sha256": "8469f1c721a03275e1e96eebd93854168d2a40e975c8e64519e31adc81d6f7ed",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/05-crash-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/05-crash-recovered.jpg",
+      "sha256": "9c5ea6286dc9233d9c383238ed8cd08ecddebb21cb16de26605b47d6fe1d4f18",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/06-crash-reopened-ready.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/06-crash-reopened-ready.jpg",
+      "sha256": "63a35a4d15a4862ec3ff73f34342e3d489c04ba8c1cedeece86f7629264c5479",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/07-silent-error.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/07-silent-error.jpg",
+      "sha256": "8469f1c721a03275e1e96eebd93854168d2a40e975c8e64519e31adc81d6f7ed",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/08-silent-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/08-silent-recovered.jpg",
+      "sha256": "273964b9f0833217d6cabda1b233060fe50a21f95ea3e30847585db36e6bb97e",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/09-invalid-error.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/09-invalid-error.jpg",
+      "sha256": "e4de20eed90deb69c16a4f9015eb92ae71d2eee0bfc14b4b6ff89578848e08c4",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "screenshots/10-invalid-recovered.jpg",
+      "source": ".runtime/explorer-host-integration/desktop-07/screenshots/10-invalid-recovered.jpg",
+      "sha256": "63a35a4d15a4862ec3ff73f34342e3d489c04ba8c1cedeece86f7629264c5479",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/dispatch-g2.ps1.txt",
+      "source": ".runtime/explorer-host-integration/dispatch-g2.ps1",
+      "sha256": "ace1b1a3e61e051799b89f55950b5dcac35eb259c287093e29a18127d027bfc8",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/start-host-g2.ps1.txt",
+      "source": ".runtime/explorer-host-integration/start-host-g2.ps1",
+      "sha256": "975807ed32f58ebd6082e4cae4593734251b5d167ec69c5a4d31ff4a86672e2d",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/start-fault-g2.ps1.txt",
+      "source": ".runtime/explorer-host-integration/start-fault-g2.ps1",
+      "sha256": "16be1d55080ae1ee2a7d872cda15021dc3d034889a3e9de96851a2e26b3f2963",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/stop-host.ps1.txt",
+      "source": ".runtime/explorer-g2-faults/live-01/stop-host.ps1",
+      "sha256": "d81873927985c0fe1351cc2e7cd9df989cb7642872e2f25d524199eb5651461c",
+      "kind": "unmodified_copy"
+    },
+    {
+      "file": "helpers/stop-fault.ps1.txt",
+      "source": ".runtime/explorer-g2-faults/live-01/stop-fault.ps1",
+      "sha256": "8c62a314187bbf4fc86d3f763f62eea438efc9626139a4a974434c3d349da620",
+      "kind": "unmodified_copy"
+    }
+  ]
+}

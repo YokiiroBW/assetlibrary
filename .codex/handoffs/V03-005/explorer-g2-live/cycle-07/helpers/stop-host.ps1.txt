@@ -1,0 +1,14 @@
+param([Parameter(Mandatory)][ValidatePattern('^host-[a-z0-9-]+$')][string]$Label)
+$ErrorActionPreference='Stop'
+$run='C:/YOKI/Codex/AssetLibrary-worktrees/V03-005/.runtime/explorer-host-integration/desktop-07'
+$record=Get-Content -LiteralPath (Join-Path $run ($Label+'.json')) -Raw|ConvertFrom-Json
+$process=Get-Process -Id $record.Pid
+$handle=$process.SafeHandle
+try{
+ if($process.StartTime.ToUniversalTime().ToFileTimeUtc().ToString() -cne [string]$record.CreationFileTime -or
+ $process.Path -ine 'C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\dotnet.exe' -or $process.SessionId -ne 2){throw 'Owned Host identity mismatch'}
+ [IO.File]::WriteAllText((Join-Path $run ($Label+'.stop')),'')
+ $exited=$process.WaitForExit(5000)
+ [ordered]@{Utc=[DateTimeOffset]::UtcNow.ToString('o');Pid=$record.Pid;CreationFileTime=$record.CreationFileTime;Exited=$exited;ExitCode=$(if($exited){$process.ExitCode}else{$null});NormalStopRequested=$true;Forced=$false}|ConvertTo-Json|Set-Content -LiteralPath (Join-Path $run ($Label+'-exit.json')) -Encoding utf8
+ if(-not $exited -or $process.ExitCode -ne 0){throw 'Normal Host stop unconfirmed'}
+}finally{$process.Dispose()}

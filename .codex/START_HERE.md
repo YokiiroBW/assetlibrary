@@ -26,7 +26,7 @@
 4. 使用 `scripts/codex-new-task.py` 创建独立 worktree；任务包与 handoff 骨架写入对应任务 worktree，协调仓库只维护任务登记。
 5. 阅读 `docs/releases/WEB_WORKSPACE.md`、`.codex/handoffs/V01-024/summary.md` 和 `docs/releases/V0.1_ALPHA_READINESS.md`：当前NAS Web浏览/库管理交互已交付，V01-021仅代表原部署与最小只读链路；Windows试用保留，完整Alpha与资产写入门禁仍独立。历史对齐结论见 `docs/audits/2026-09-05-alignment.md`。
    原生首版最新状态见 `docs/releases/NATIVE_CLIENT_TRIAL.md` 与 `.codex/handoffs/V03-001/summary.md`：Android 只读 APK 已交付；用户明确 Windows 必须嵌入原生 Explorer。自有 test-only 原生入口已接通，完整 Windows 安装包尚未交付；按 ADR-0018 继续进程外 Host 和真实 Core 接入。
-   当前接续V03-005：Windows最高优先级。原生Explorer与进程外AssetHost的受控只读接入已通过真实Core/Explorer功能验收：冷库根、100条分页、两级目录、Host不可用、重启旧位置拒绝及根恢复；最终采用V03-011实际视图状态观察修复，详情见 `.codex/handoffs/V03-005/explorer-host-integration/README.md`。按原退出标准，G1 已关闭；V03-012 test-only 故障工具已合入88e6c21，严格构建和受影响测试通过。下一步 root 补 G2 实机 crash/timeout/invalid-frame 恢复，当前Session2为WTSDisconnected，待桌面重连；本轮Core已清理、未注册入口/启动管道Host，自有SDK窗口关闭未确认。映射/恢复计划见 `.codex/handoffs/V03-005/explorer-gate-review/`：COM保留属于G3，G2..G4与完整发布仍阻断。另有正式登录设置/启动安装、文件打开预览、主动失效等产品缺口。
+   当前接续V03-005：Windows最高优先级。G1原生入口与G2真实故障恢复已按原标准关闭：07crash/silent、08invalid40B/partial20B，重新进入根恢复真实Core；详见 `.codex/handoffs/V03-005/explorer-g2-live/README.md`。两个guard自然到期注销、独立9missing、自有窗口/Host/Core清理及138原件完整性通过，原Explorer未重启。G3真实计时/取消/COM增长和G4循环/八小时仍开放；正式登录安装/预览/主动失效也未完成。V03-013仅取得受限公开事件研究结论，等价合成视图正控失败，不改DLL行为/协议；后续不能再重复空Desktop PIDL对照。当前无活跃GUI或测试服务。
 6. 复用 M0-009 冻结的依赖方向、技术栈和 CI 命令，持续保留未关闭的 M0 residual gates。
 7. 从已登记未完成项继续 V0.1；Windows/Android/Explorer 分别遵循对应版本和平台门禁。
 

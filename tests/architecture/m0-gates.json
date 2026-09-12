@@ -35,13 +35,14 @@
       "source_task": "M0-002",
       "source_blocker_index": 1,
       "classification": "blocking_release_or_later_milestone",
-      "status": "open",
-      "decision": "The custom real Explorer view, Host missing/normal restart recovery and owner-guarded registration cleanup are proven. Real Explorer recovery from Host crash, timeout and invalid frames remains required.",
+      "status": "closed",
+      "decision": "V03-005 real Explorer evidence proves the approved view, missing Host, abrupt fault-host termination, silent timeout and invalid/partial frame recovery through reopening the root with a normal Core-backed Host. Owner-guarded native registration cleanup is independently verified. G3 timing/lifetime and G4 stability remain open.",
       "blocked_targets": ["explorer-v0.5"],
       "owner": "windows-shell-owner",
       "follow_up_task": "V05-EXPLORER-VIEW",
       "target_milestone": "V0.5",
       "enforced_by": ["python tests/architecture/check_release_gates.py --target explorer-v0.5"],
+      "closure_evidence": [".codex/handoffs/V03-005/explorer-host-integration/final-cycle/evidence.json", ".codex/handoffs/V03-005/explorer-g2-live/evidence.json", ".codex/handoffs/V03-005/explorer-g2-live/cycle-07/evidence.json", ".codex/handoffs/V03-005/explorer-g2-live/cycle-08/evidence.json"],
       "exit_criteria": ["Custom Explorer view opens through the approved entry.", "Host missing, crash, timeout and invalid frames recover without Explorer failure.", "Owner-guarded uninstall leaves no registration residue."]
     },
     {

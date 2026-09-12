@@ -1,0 +1,5 @@
+{"mode":"invalid-version","pid":17792,"client_pid":0,"requests":0,"elapsed_ms":16,"response_bytes":0,"event":"listening"}
+{"mode":"invalid-version","pid":17792,"client_pid":22692,"requests":1,"elapsed_ms":10359,"response_bytes":0,"event":"request_received"}
+{"mode":"invalid-version","pid":17792,"client_pid":22692,"requests":1,"elapsed_ms":10469,"response_bytes":40,"event":"response_written"}
+{"mode":"invalid-version","pid":17792,"client_pid":0,"requests":1,"elapsed_ms":10578,"response_bytes":0,"event":"listening"}
+{"mode":"invalid-version","pid":17792,"client_pid":0,"requests":1,"elapsed_ms":26734,"response_bytes":0,"event":"stopped"}
