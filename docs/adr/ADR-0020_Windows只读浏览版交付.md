@@ -31,3 +31,6 @@ Settings采用既有预算的C#/.NET10、WinUI3与Microsoft.WindowsAppSDK **2.4.
 V03-015连接会话、V03-016Shell生产化、V03-017安装打包独立worktree；root冻结共享契约、依赖政策与合并。测试覆盖无配置、错误口令/证书、正常连接、退出/换身份/失效、目录分页、坏包/路径逃逸/冲突/回滚/占用、安装和卸载原生读回；真实文件只用隔离合成夹具。正式包只能由最终合入源码构建并核强hash后交付。
 
 官方依据：[Windows App SDK自包含部署](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/self-contained-deploy/deploy-self-contained-apps)、[Microsoft.WindowsAppSDK NuGet](https://www.nuget.org/packages/Microsoft.WindowsAppSDK)、[Credential protection](https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata)。
+# 交付候选修订（2026-09-12）
+
+首个内部整包 `0.3.0-preview.1` 已在实机暴露 WinUI 应用 PRI 缺失和通知助手 COM apartment 错误，不能对外交付。修复后交付号递增为 `0.3.0-preview.2`，其余产品身份、路径规则与协议保持原冻结值。旧候选已注销，关闭测试窗口后仍有 Explorer 对旧 DLL 的占用，按安装器规则记录待清理；不覆盖同版本文件、不结束用户原有 Explorer。新版使用独立版本目录完成验收。
