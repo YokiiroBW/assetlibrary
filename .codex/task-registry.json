@@ -1098,6 +1098,19 @@
       "thread_deep_link": "",
       "execution_status": "Integrated in preview.7; actual Core/Explorer current-page large image and persistent display defaults accepted; owned test resources cleaned. G4 waived/not run.",
       "integrated_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
+    },
+    {
+      "id": "V03-026",
+      "title": "nas-local-image-integration",
+      "module": "nas-local-image-integration",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "nas-image-coordinator",
+      "branch": "codex/v03-026-nas-local-image-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-026",
+      "task_file": ".codex/tasks/V03-026.md",
+      "handoff": ".codex/handoffs/V03-026/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
