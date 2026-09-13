@@ -13,6 +13,7 @@ internal static class LinuxContainerIsolation
         && LinuxImageIsolation.Limit(9, 512UL * 1024 * 1024) && LinuxImageIsolation.Limit(0, 3)
         && LinuxImageIsolation.Limit(1, 0) && LinuxImageIsolation.Limit(4, 0)
         && LinuxImageIsolation.Limit(6, 1) && LinuxImageIsolation.Limit(8, 0)
+        && LinuxContainerStatus.AllThreads("/proc/self/task", 1655, 0) && LinuxContainerMemory.IsBounded()
         && DescriptorsArePrivate() && RingCreationError() == 12;
 
     internal static int RingCreationError()

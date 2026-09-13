@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>AssetLibrary.ImageSupervisor</AssemblyName>
+    <RootNamespace>AssetLibrary.ImageSupervisor</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <IsAotCompatible Condition="'$(PublishAot)' == 'true'">true</IsAotCompatible>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../ImagePreview/ImageWorkerProtocol.cs" Link="Protocol/ImageWorkerProtocol.cs" />
+    <Compile Include="../ImagePreview/LinuxContainerIdentity.cs" Link="Isolation/LinuxContainerIdentity.cs" />
+    <Compile Include="../ImagePreview/LinuxContainerStatus.cs" Link="Isolation/LinuxContainerStatus.cs" />
+    <Compile Include="../ImagePreview/LinuxContainerMemory.cs" Link="Isolation/LinuxContainerMemory.cs" />
+    <Compile Include="../../core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs" Link="Protocol/PngDerivativeValidator.cs" />
+    <RuntimeHostConfigurationOption Include="System.GC.HeapHardLimit" Value="33554432" />
+  </ItemGroup>
+</Project>

@@ -8,20 +8,12 @@ internal static class LinuxContainerIdentity
 {
     internal const uint DecoderId = 1655;
     internal const uint CoreId = 1654;
-    private const uint SupervisorCapabilities = (1u << 5) | (1u << 6) | (1u << 7);
-    internal static bool SupervisorBootstrap() => Native.GetPid() == 1 && Native.GetUid() == 0 && Native.GetEuid() == 0
-        && Native.Prctl(39, 0, 0, 0, 0) == 1 && Capabilities(SupervisorCapabilities | 1);
-    internal static bool DropOwnershipCapability()
-    {
-        var header = new CapabilityHeader { Version = 0x20080522 };
-        var reduced = new CapabilityData { EffectiveLow = SupervisorCapabilities, PermittedLow = SupervisorCapabilities };
-        return Native.SetCapabilities(ref header, ref reduced) == 0 && Supervisor();
-    }
+    private const uint SupervisorCapabilities = 1u | (1u << 5) | (1u << 6) | (1u << 7);
     internal static bool Supervisor() => Native.GetPid() == 1 && Native.GetUid() == 0 && Native.GetEuid() == 0
         && Native.Prctl(39, 0, 0, 0, 0) == 1 && Capabilities(SupervisorCapabilities);
     internal static bool DropDecoderIdentity()
     {
-        if (Native.GetParentPid() != 1 || Native.GetUid() != 0 || Native.GetEuid() != 0
+        if (Native.Prctl(27, 0, 0, 0, 0) != 0 || Native.GetParentPid() != 1 || Native.GetUid() != 0 || Native.GetEuid() != 0
             || Native.Prctl(39, 0, 0, 0, 0) != 1 || !Capabilities(SupervisorCapabilities)) return false;
         if (Native.SetGroups(0, IntPtr.Zero) != 0 || Native.SetResGid(DecoderId, DecoderId, DecoderId) != 0
             || Native.SetResUid(DecoderId, DecoderId, DecoderId) != 0) return false;
