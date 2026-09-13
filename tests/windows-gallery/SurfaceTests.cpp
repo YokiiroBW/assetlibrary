@@ -3,6 +3,7 @@
 #include "TestOwner.h"
 #include <shlobj.h>
 #include <oleacc.h>
+#include <commctrl.h>
 #include <iostream>
 
 namespace {
@@ -37,6 +38,95 @@ std::shared_ptr<const gallery::Pbgra> Image() {
     for (size_t at = 0; at < image->pixels.size(); at += 4) { image->pixels[at] = 64; image->pixels[at + 1] = 96; image->pixels[at + 2] = 128; image->pixels[at + 3] = 128; }
     return image;
 }
+struct PageScenario {
+    gallery::Surface* surface=nullptr;
+    UINT calls=0,viewports=0; int delta=0;
+    bool clearOnStep=false,deleteOnStep=false,deleteOnFocus=false,rewriteOnEnable=false,deleteOnEnable=false;
+    ~PageScenario() { delete surface; }
+    void Delete() noexcept { auto* retired=surface;surface=nullptr;delete retired; }
+};
+LRESULT CALLBACK NavigationEnable(HWND window,UINT message,WPARAM first,LPARAM second,UINT_PTR,DWORD_PTR reference) {
+    auto& fixture=*reinterpret_cast<PageScenario*>(reference);
+    if(message==WM_ENABLE && fixture.rewriteOnEnable) { fixture.rewriteOnEnable=false;fixture.surface->SetPageNavigation(false,true); }
+    if(message==WM_ENABLE && fixture.deleteOnEnable) { fixture.deleteOnEnable=false;fixture.Delete(); }
+    return DefSubclassProc(window,message,first,second);
+}
+void PageNavigation(HWND parent,gallery_test::Owner& owner) {
+    PageScenario fixture;gallery::Callbacks callbacks;callbacks.context=&fixture;callbacks.lifetimeOwner=callbacks.providerLifetimeOwner=&owner;
+    callbacks.viewportChanged=[](void* context) noexcept { ++static_cast<PageScenario*>(context)->viewports; };
+    callbacks.pageStep=[](void* context,int delta) noexcept {
+        auto& value=*static_cast<PageScenario*>(context);++value.calls;value.delta=delta;
+        if(value.clearOnStep)value.surface->Clear(snapshot::Status::Loading,4);
+        if(value.deleteOnStep)value.Delete();
+    };
+    callbacks.focusActivated=[](void* context) noexcept { auto& value=*static_cast<PageScenario*>(context);if(value.deleteOnFocus)value.Delete(); };
+    RECT bounds{0,0,1000,700};Require(SUCCEEDED(gallery::Surface::Create(parent,bounds,callbacks,&fixture.surface)),"page controls surface");
+    auto* surface=fixture.surface;const HWND root=surface->Window(),canvas=FindWindowExW(root,nullptr,L"STATIC",nullptr);
+    const HWND previous=GetDlgItem(root,gallery::PagePreviousControlId),next=GetDlgItem(root,gallery::PageNextControlId);
+    if(!root||!canvas||!previous||!next)throw "native page controls";
+    Require(!IsWindowEnabled(previous) && !IsWindowEnabled(next),"page buttons start disabled");
+    for(HWND button : {previous,next}) {
+        wchar_t caption[20]{};GetWindowTextW(button,caption,20);
+        Require(std::wstring(caption)==(button==previous?L"上一页":L"下一页"),"native page labels");
+        IAccessible* accessible=nullptr;Require(SUCCEEDED(AccessibleObjectFromWindow(button,static_cast<DWORD>(OBJID_CLIENT),IID_IAccessible,reinterpret_cast<void**>(&accessible))),"native page accessibility");
+        VARIANT self{};self.vt=VT_I4;BSTR name=nullptr;VARIANT flags{};
+        const auto named=accessible->get_accName(self,&name),stated=accessible->get_accState(self,&flags);
+        const bool valid=SUCCEEDED(named)&&name&&std::wstring(name)==caption&&SUCCEEDED(stated)&&flags.vt==VT_I4&&(flags.lVal&STATE_SYSTEM_UNAVAILABLE);
+        if(name)SysFreeString(name);VariantClear(&flags);accessible->Release();Require(valid,"native page name and disabled state are exposed");
+    }
+    const auto page=Page();surface->SetPage(page,1);const auto viewports=fixture.viewports;
+    SendMessageW(previous,BM_CLICK,0,0);SendMessageW(root,WM_COMMAND,MAKEWPARAM(gallery::PageNextControlId,BN_CLICKED),reinterpret_cast<LPARAM>(next));
+    Require(fixture.calls==0,"disabled native and direct commands cannot turn page");
+    surface->SetPageNavigation(true,true);Require(IsWindowEnabled(previous)&&IsWindowEnabled(next)&&fixture.viewports==viewports,"View flags only enable presentation");
+    SendMessageW(previous,BM_CLICK,0,0);Require(fixture.calls==1&&fixture.delta==-1,"previous publishes minus one once");
+    SendMessageW(next,BM_CLICK,0,0);Require(fixture.calls==2&&fixture.delta==1,"next publishes plus one once");
+    BYTE saved[256]{},keys[256]{};Require(GetKeyboardState(saved)!=FALSE,"page keyboard state");CopyMemory(keys,saved,sizeof(keys));keys[VK_SHIFT]=keys[VK_CONTROL]=keys[VK_MENU]=0;SetKeyboardState(keys);
+    MSG tab{};tab.hwnd=canvas;tab.message=WM_KEYDOWN;tab.wParam=VK_TAB;bool order=true;
+    for(int id : {100,101,102,103,104,105,gallery::PagePreviousControlId,gallery::PageNextControlId}) {
+        order=surface->TranslateAccelerator(tab)&&GetFocus()==GetDlgItem(root,id)&&order;tab.hwnd=GetFocus();
+    }
+    const bool boundary=!surface->TranslateAccelerator(tab);keys[VK_SHIFT]=0x80;SetKeyboardState(keys);
+    tab.hwnd=canvas;const bool reverseBoundary=!surface->TranslateAccelerator(tab);keys[VK_SHIFT]=0;keys[VK_CONTROL]=0x80;SetKeyboardState(keys);
+    const bool controlTab=!surface->TranslateAccelerator(tab);SetKeyboardState(saved);
+    Require(order&&boundary&&reverseBoundary&&controlTab,"canvas plus eight enabled buttons preserve forward/backward/modified Tab boundaries");
+    surface->SetPageNavigation(false,true);tab.hwnd=GetDlgItem(root,105);Require(surface->TranslateAccelerator(tab)&&GetFocus()==next,"Tab skips disabled previous page");
+    surface->SetPageNavigation(false,false);Require(GetFocus()==canvas,"disabling focused page button returns focus to canvas");
+    surface->SetPageNavigation(true,true);surface->SetPage(page,1);Require(!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"SetPage retires navigation even at same generation");
+    surface->SetPageNavigation(true,true);surface->Clear(snapshot::Status::Loading,1);Require(!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"Loading clear retires navigation");
+    surface->SetPage(page,2);surface->SetPageNavigation(true,true);surface->Clear(snapshot::Status::AccessDenied,2);Require(!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"permission clear retires navigation");
+    surface->SetPage(page,3);surface->SetPageNavigation(true,true);surface->SetVisible(false);surface->SetPageNavigation(true,true);
+    SendMessageW(root,WM_COMMAND,MAKEWPARAM(gallery::PageNextControlId,BN_CLICKED),0);Require(fixture.calls==2&&!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"hidden state rejects flags and commands");
+    surface->SetVisible(true);Require(!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"show cannot revive old navigation");surface->SetPageNavigation(true,true);
+    Require(SUCCEEDED(surface->BeginPreview(1,1,false,true)),"preview hides browse navigation");
+    Require(!(GetWindowLongPtrW(previous,GWL_STYLE)&WS_VISIBLE)&&!(GetWindowLongPtrW(next,GWL_STYLE)&WS_VISIBLE),"page buttons hidden in preview");
+    SendMessageW(root,WM_COMMAND,MAKEWPARAM(gallery::PageNextControlId,BN_CLICKED),0);Require(fixture.calls==2,"preview cannot call browse page step");
+    surface->EndPreview();Require(IsWindowEnabled(previous)&&IsWindowEnabled(next)&&(GetWindowLongPtrW(next,GWL_STYLE)&WS_VISIBLE),"ending preview restores still-current View navigation");
+    surface->SetStatusText(L"当前页30项");
+    for(int width : {1000,320,180}) {
+        MoveWindow(root,0,0,MulDiv(width,static_cast<int>(GetDpiForWindow(parent)),96),700,FALSE);
+        RECT prior{},buttonBounds{},summaryBounds{},canvasBounds{};GetWindowRect(GetDlgItem(root,105),&prior);GetWindowRect(next,&buttonBounds);
+        GetWindowRect(GetDlgItem(root,gallery::StatusTextControlId),&summaryBounds);GetWindowRect(canvas,&canvasBounds);
+        Require(buttonBounds.bottom<=canvasBounds.top && summaryBounds.bottom<=canvasBounds.top &&
+            (width==1000 ? summaryBounds.left>=buttonBounds.right : summaryBounds.top>=buttonBounds.bottom),"page controls and summary wrap fully above canvas");
+        Require(buttonBounds.top>=prior.top,"page controls follow existing browse toolbar");
+    }
+    MoveWindow(root,0,0,1000,700,FALSE);surface->SetPageNavigation(false,false);
+    Require(SetWindowSubclass(previous,NavigationEnable,87,reinterpret_cast<DWORD_PTR>(&fixture))!=FALSE,"enable reentry fixture");fixture.rewriteOnEnable=true;
+    surface->SetPageNavigation(true,false);Require(!IsWindowEnabled(previous)&&IsWindowEnabled(next),"reentrant flag publication wins over stale outer EnableWindow sequence");
+    RemoveWindowSubclass(previous,NavigationEnable,87);fixture.clearOnStep=true;SendMessageW(next,BM_CLICK,0,0);fixture.clearOnStep=false;
+    Require(fixture.calls==3&&!IsWindowEnabled(previous)&&!IsWindowEnabled(next),"page callback may synchronously clear current controls");
+    surface->SetPage(page,4);surface->SetPageNavigation(false,true);fixture.deleteOnStep=true;SendMessageW(next,BM_CLICK,0,0);
+    Require(!fixture.surface&&!IsWindow(root),"page callback may delete Surface");Drain(owner);Require(owner.references==1,"page callback owner reclaimed");
+    fixture.deleteOnStep=false;
+    for(bool enable : {true,false}) {
+        Require(SUCCEEDED(gallery::Surface::Create(parent,bounds,callbacks,&fixture.surface)),"navigation reentry surface");surface=fixture.surface;
+        surface->SetPage(page,1);const HWND window=surface->Window(),button=GetDlgItem(window,gallery::PagePreviousControlId);
+        if(enable) {
+            Require(SetWindowSubclass(button,NavigationEnable,87,reinterpret_cast<DWORD_PTR>(&fixture))!=FALSE,"delete during enable fixture");fixture.deleteOnEnable=true;surface->SetPageNavigation(true,true);
+        } else { surface->SetPageNavigation(true,true);SetFocus(button);fixture.deleteOnFocus=true;surface->SetPageNavigation(false,false);fixture.deleteOnFocus=false; }
+        Require(!fixture.surface&&!IsWindow(window),"EnableWindow/SetFocus callback can delete Surface during SetPageNavigation");Drain(owner);Require(owner.references==1,"navigation mutation owner reclaimed");
+    }
+}
 }
 
 int main() {
@@ -48,6 +138,7 @@ int main() {
         parent = CreateWindowExW(0, L"STATIC", L"AssetLibrary test-only hidden harness", WS_OVERLAPPEDWINDOW, 0, 0, 1000, 700,
             nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!parent) throw "parent creation";
+        PageNavigation(parent,owner);
         gallery::Callbacks callbacks; callbacks.context = &scenario; callbacks.lifetimeOwner = &owner; callbacks.providerLifetimeOwner = &owner;
         callbacks.viewportChanged = [](void* context) noexcept {
             auto& state = *static_cast<Scenario*>(context); ++state.viewportChanges;
@@ -71,6 +162,7 @@ int main() {
         RECT bounds{0, 0, 1000, 700};
         Require(SUCCEEDED(gallery::Surface::Create(parent, bounds, callbacks, &surface)), "surface creation"); scenario.surface = surface;
         const auto page = Page(); Require(SUCCEEDED(surface->SetPage(page, 1)), "page commit");
+        MoveWindow(surface->Window(),0,0,MulDiv(1000,static_cast<int>(GetDpiForWindow(parent)),96),700,FALSE);
         const HWND summary = GetDlgItem(surface->Window(),gallery::StatusTextControlId);
         const HWND summaryCanvas = FindWindowExW(surface->Window(),nullptr,L"STATIC",nullptr);
         if (!summary || !summaryCanvas || summary == summaryCanvas) throw "native summary is a distinct toolbar STATIC";
@@ -86,10 +178,10 @@ int main() {
         const bool summaryReadable = SUCCEEDED(namedSummary) && summaryName && callerSummary == summaryName;
         if (summaryName) SysFreeString(summaryName); summaryAccessible->Release(); Require(summaryReadable,"native accessible summary carries exact current text");
         RECT summaryRect{}, canvasRect{}, lastButtonRect{};
-        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),105),&lastButtonRect);
+        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),gallery::PageNextControlId),&lastButtonRect);
         Require(summaryRect.left >= lastButtonRect.right && summaryRect.bottom <= canvasRect.top,"wide summary sits beside buttons without covering canvas");
         MoveWindow(surface->Window(),0,0,MulDiv(320,static_cast<int>(GetDpiForWindow(parent)),96),700,FALSE);
-        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),105),&lastButtonRect);
+        GetWindowRect(summary,&summaryRect); GetWindowRect(summaryCanvas,&canvasRect); GetWindowRect(GetDlgItem(surface->Window(),gallery::PageNextControlId),&lastButtonRect);
         Require(summaryRect.top >= lastButtonRect.bottom && summaryRect.bottom <= canvasRect.top,"narrow summary wraps below buttons without covering canvas");
         surface->SetStatusText(std::wstring(300,L'图')); Require(GetWindowTextLengthW(summary) == 256,"summary length is capped at 256 UTF16 units");
         std::wstring paired(255,L'A'); paired.push_back(static_cast<wchar_t>(0xD83D)); paired.push_back(static_cast<wchar_t>(0xDCC1));
