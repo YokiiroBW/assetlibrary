@@ -1,0 +1,103 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-027",
+  "title": "nas-image-supervisor",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "nas-image-worker-owner",
+  "branch": "codex/v03-027-nas-image-supervisor",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-027",
+  "commit": "8cd23ea39c1d170fe579dcd28f1e81b82bd39855",
+  "changed_files": [
+    ".codex/handoffs/V03-027/result.json",
+    ".codex/handoffs/V03-027/summary.md",
+    ".codex/handoffs/V03-027/tests.md",
+    ".codex/tasks/V03-027.md",
+    "services/worker-supervisor/ImagePreview/ImageWorkerIsolation.cs",
+    "services/worker-supervisor/ImagePreview/LinuxContainerIdentity.cs",
+    "services/worker-supervisor/ImagePreview/LinuxContainerIsolation.cs",
+    "services/worker-supervisor/ImagePreview/LinuxContainerMemory.cs",
+    "services/worker-supervisor/ImagePreview/LinuxContainerProbe.cs",
+    "services/worker-supervisor/ImagePreview/LinuxContainerStatus.cs",
+    "services/worker-supervisor/ImagePreview/LinuxImageIsolation.cs",
+    "services/worker-supervisor/ImagePreview/Program.cs",
+    "services/worker-supervisor/ImagePreview/README.md",
+    "services/worker-supervisor/ImagePreview/StaticImageDecoder.cs",
+    "services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj",
+    "services/worker-supervisor/ImageSupervisor/ImageChild.cs",
+    "services/worker-supervisor/ImageSupervisor/ImageCircuitLedger.cs",
+    "services/worker-supervisor/ImageSupervisor/ImageCircuitState.cs",
+    "services/worker-supervisor/ImageSupervisor/ImageExchange.cs",
+    "services/worker-supervisor/ImageSupervisor/ImageSocketServer.cs",
+    "services/worker-supervisor/ImageSupervisor/LinuxImagePeer.cs",
+    "services/worker-supervisor/ImageSupervisor/LinuxSupervisorFiles.cs",
+    "services/worker-supervisor/ImageSupervisor/LocalImageFrames.cs",
+    "services/worker-supervisor/ImageSupervisor/Program.cs",
+    "services/worker-supervisor/ImageSupervisor/README.md",
+    "services/worker-supervisor/ImageSupervisor/SupervisorProbe.cs",
+    "services/worker-supervisor/ImageSupervisor/SupervisorStartup.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerMetadataTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerProtocolTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerStateTests.cs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 34,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "previous_affected_scope": {
+      "passed": 54,
+      "failed": 0,
+      "skipped": 3
+    },
+    "first_native_scope": {
+      "owner": "root",
+      "source": "7255b45 integration",
+      "image_cases_passed": 20,
+      "isolation_resource_probes": 4,
+      "final_source_fault_matrix": "22ac562: six fault cases passed; parent memory/ptrace rejection passed; maximum input failed"
+    },
+    "windows_immutable_functional": {
+      "pointer_sharing_verified": true,
+      "baseline_equivalence_cases": 18,
+      "scope": "Windows Skia functional only; not Linux confinement or maximum-memory proof"
+    }
+  },
+  "risks": [
+    "Valid40MP returnsLimit6; tiny-image31/32MiB returnsUnavailable7. SetImmutable and bounded stage/exit diagnostics await one root-owned AOT/NAS retest; no budget increased.",
+    "Root owns final solution/test csproj/ordinary and AOT locks, package and same-NAS deployment validation.",
+    "Three pre-existing adjacent tests lacked native fixtures/platform capability locally and were not counted as passed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-027/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "ImagePreview container profile and BCL-only ImageSupervisor",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ImageWorkerProtocol fixed24B, original32MiB/40MP and512/1600 closed profiles",
+      "StaticImageDecoder / ImageInputPolicy and existing pinned SkiaSharp",
+      "Original Linux seccomp and Windows LPAC paths remain explicit",
+      "Existing BCL PngDerivativeValidator linked by compilation",
+      "Core retains all authorization, stable source, cache and source verification"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Compile-linked existing BCL protocol and PNG validation, no Core or Skia assembly reference from Supervisor",
+      "Root owns new Core IImageDecoder socket adapter; no Core application/business changes in this task"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "validate_dotnet_source.py:552 files passed",
+      "verify_repository.py passed",
+      "Both owned projects strict Release build and format passed",
+      "ImageContainer tests34 passed with root-authorized temporary source links, shared csproj restored",
+      "Root22ac562 six NAS fault cases and parent memory/ptrace denial passed; records read-only verified."
+    ],
+    "technical_debt": []
+  }
+}
