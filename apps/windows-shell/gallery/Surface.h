@@ -17,6 +17,7 @@ constexpr size_t MaxPreviewPixelBytes = 10240000;
 constexpr int PreviewBackControlId = 107, PreviewPreviousControlId = 108, PreviewNextControlId = 109;
 constexpr int PreviewZoomOutControlId = 110, PreviewZoomInControlId = 111;
 constexpr int PreviewFitControlId = 112, PreviewActualControlId = 113;
+constexpr int PagePreviousControlId = 114, PageNextControlId = 115;
 constexpr size_t MaxImageBytes = 16u * 1024u * 1024u;
 constexpr UINT MinimumDensityDip = 96, MaximumDensityDip = 256, DefaultDensityDip = 176;
 
@@ -50,6 +51,7 @@ struct Callbacks {
     void (*activateItem)(void*, UINT index) noexcept = nullptr;
     void (*previewStep)(void*, int delta) noexcept = nullptr; // -1 or +1; owner selects an authorized file.
     void (*previewClose)(void*) noexcept = nullptr;
+    void (*pageStep)(void*, int delta) noexcept = nullptr; // -1 or +1; owner queries an opaque page token.
     void (*preferencesChanged)(void*) noexcept = nullptr; // Only an actual mode/density change.
     void (*contextMenu)(void*, int index, POINT screenPoint) noexcept = nullptr; // -1 means background.
     void (*viewportChanged)(void*) noexcept = nullptr;
@@ -105,6 +107,9 @@ public:
 
     // Presentation only: caller owns counts. Empty clears; max 256 UTF-16 units.
     void SetStatusText(const std::wstring& text) noexcept;
+    // Browse-only native controls. Clear/SetPage/hidden retire these flags;
+    // owner restores them after publishing the current authorized page/status.
+    void SetPageNavigation(bool previousEnabled, bool nextEnabled) noexcept;
     void SetVisible(bool visible) noexcept; // Hidden means zero image candidates and immediate image release.
     void SetMode(Mode mode) noexcept;
     Mode CurrentMode() const noexcept;
