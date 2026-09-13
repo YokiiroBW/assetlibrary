@@ -1,0 +1,123 @@
+Window: "图片样例 - 文件资源管理器", App: explorer.exe.
+	0 窗口 图片样例 - 文件资源管理器 Secondary Actions: Raise
+		1 窗格
+		2 窗格 图片样例
+			3 窗格
+				90 工具栏 命令模块 ID: FolderBandModuleInner
+					91 按钮 帮助(&H) Description: 获取帮助。 ID: HelpButton
+					92 复选框 预览窗格 Description: 显示预览窗格。 ID: PreviewButton
+				4 状态栏 状态栏 ID: StatusBarModuleInner
+					93 组 属性字段 ID: System.StatusBarViewItemCount
+						94 文本 1 个项目 Description: 项目总数 ID: PropertyValue
+					95 组 属性字段 ID: System.StatusBarSelectedItemCount
+						96 文本 选中 1 个项目 Description: 所选项目数量和大小 ID: PropertyValue
+					7 组 查看模式 ID: ViewButtonsGroup
+						8 单选按钮 (selectable) 详细信息 Description: 在窗口中显示每一项的相关信息。(Ctrl+Alt+6) ID: ViewMode_Details
+						9 单选按钮 (selectable) 大图标 Description: 使用大缩略图显示项。(Ctrl+Alt+2) ID: ViewMode_LargeIcons
+				10 窗格 控制项宿主 ID: ProperTreeHost
+					11 树 导航窗格 ID: 100
+						12 树项目 (selectable) 桌面
+							13 树项目 (selectable) 主文件夹
+							14 树项目 (selectable) 图库
+							15 树项目 (selectable) 快速访问开始 - 桌面 (已固定)
+							16 树项目 (selectable) 下载 (已固定)
+							17 树项目 (selectable) 文档 (已固定)
+							18 树项目 (selectable) 图片 (已固定)
+							19 树项目 (selectable) 音乐 (已固定)
+							20 树项目 (selectable) 快速访问结束 - 视频 (已固定)
+							21 树项目 (selectable) 此电脑
+							22 树项目 (selectable) 网络
+								83 树项目 (selectable) tsclient
+								84 树项目 (selectable) YokiiroNAS
+								85 树项目 (selectable) YOKIIROWORK
+							23 树项目 (selectable) 资产库
+				166 文本 Shell 文件夹视图 ID: listview
+					167 列表 资产库图库 Description: 只读浏览
+						225 列表项目 (selectable) 101.png Description: 等待预览 ID: {8D42DEC8-F329-4D15-A8EB-FFEC7385EB71}
+						226 列表项目 (selectable) 102.png Description: 等待预览 ID: {20B5140C-2580-42ED-8A82-A2B21A5A00DE}
+						227 列表项目 (selectable) 103.jpg Description: 等待预览 ID: {BAC83484-F800-4853-9DC6-D295A625B50A}
+						228 列表项目 (selectable) 104.png Description: 等待预览 ID: {2FE40B26-B9C3-47E1-8161-8587B16AD210}
+						229 列表项目 (selectable) 105.png Description: 等待预览 ID: {2D78CEDB-8B1D-495A-BD0B-909B7CB4CF67}
+						230 列表项目 (selectable) 106.jpg Description: 等待预览 ID: {051CE064-D77F-4C00-AC06-90D4F78E1710}
+						231 列表项目 (selectable) 107.png Description: 等待预览 ID: {F4063024-23CC-4EA8-BB50-AA0BA0F4E7F0}
+						232 列表项目 (selectable) 108.png Description: 等待预览 ID: {3BFFD4A8-2F38-4789-AB1F-4A2A5FEA3D00}
+						233 列表项目 (selectable) 109.jpg Description: 等待预览 ID: {95D909FC-F45A-480B-89D9-7F8CFAA3016E}
+						234 列表项目 (selectable) 110.png Description: 等待预览 ID: {42CF6275-8DD2-4086-98FC-7C711341C417}
+						235 列表项目 (selectable) 111.png Description: 等待预览 ID: {26F3474B-9863-4214-9546-AF04BDE70CD8}
+						236 列表项目 (selectable) 112.jpg Description: 等待预览 ID: {C017D9DB-F016-488F-ADF2-37F4DE684B79}
+						237 列表项目 (selectable) 113.png Description: 等待预览 ID: {33CF3DD7-8CE9-48FA-85F7-8CFDF52764A4}
+						238 列表项目 (selectable) 114.png Description: 等待预览 ID: {B46B3591-E5C2-40A3-9367-5D18808466AC}
+						239 列表项目 (selectable) 115.jpg Description: 等待预览 ID: {C283FF43-5EA1-46FE-8235-2E083378A3DB}
+						240 列表项目 (selectable) 116.png Description: 等待预览 ID: {510A4C58-F9A9-49A4-A600-0FA6DFB6D79A}
+						241 列表项目 (selectable) 117.png Description: 等待预览 ID: {3FB99CBF-B846-474F-9588-94D1B3588852}
+						242 列表项目 (selectable) 118.jpg Description: 等待预览 ID: {C6BFC445-31B2-4EC6-94D2-AE464EB6D9D1}
+						243 列表项目 (selectable) 119.png Description: 等待预览 ID: {3AA881E2-D760-4AC3-BED9-2D5FA40570AD}
+						244 列表项目 (selectable) 120.png Description: 等待预览 ID: {82049D9A-CAA1-44EB-BE57-BC670CC6B80A}
+					168 单选按钮 (selectable) 图库 ID: 100
+					169 单选按钮 (selectable) 列表 ID: 101
+					170 按钮 缩小 ID: 102
+					171 按钮 放大 ID: 103
+					172 按钮 刷新 ID: 104
+					173 按钮 连接设置 ID: 105
+					174 按钮 上一页 ID: 114
+					175 按钮 (disabled) 下一页 ID: 115
+					176 文本 当前页 20 项，已选 0 项 · 第 2 页 ID: 106
+		29 窗格
+			30 窗格
+				31 选项卡 ID: TabView
+					32 列表 ID: TabListView
+						33 选项卡项目 (selectable) 图片样例
+							177 图像
+							35 文本 图片样例
+							36 按钮 关闭标签页 ID: CloseButton
+					37 按钮 添加新标签页 ID: AddButton
+				38 应用栏 ID: NavigationCommands
+					39 应用栏按钮 后退 Description: 返回到 原生客户端隔离样例 ID: backButton
+					40 应用栏按钮 (disabled) 前进 Description: 前进 ID: forwardButton
+					41 应用栏按钮 上移到“桌面”(Alt + 向上键) Description: 上移到“桌面”(Alt + 向上键) ID: upButton
+					42 应用栏按钮 刷新“资产库”(F5) Description: 刷新“资产库”(F5) ID: refreshButton
+				43 组 ID: PART_AutoSuggestBox
+					44 编辑 地址栏 ID: TextBox
+				45 拆分按钮 资产库 ID: FirstCrumbStackPanel
+					46 图像
+				47 组 ID: PART_BreadcrumbBar
+					178 拆分按钮 资产库
+						179 文本 资产库
+					180 拆分按钮 原生客户端隔离样例
+						181 文本 原生客户端隔离样例
+					182 拆分按钮 图片样例
+						183 文本 图片样例
+				50 组 ID: FileExplorerSearchBox
+					51 编辑 在 图片样例 中搜索 ID: TextBox
+						52 文本 在 图片样例 中搜索
+				53 应用栏 ID: FileExplorerCommandBar
+					54 应用栏按钮 (disabled) 新建
+						55 图像
+					56 应用栏按钮 (disabled) 剪切​​ Description: 将所选项目移动到剪贴板。
+						57 图像
+					58 应用栏按钮 (disabled) 复制​​ Description: 将所选项目复制到剪贴板。
+						59 图像
+					60 应用栏按钮 (disabled) 粘贴​​ Description: 将剪贴板中的内容粘贴到当前位置。
+						61 图像
+					62 应用栏按钮 (disabled) 重命名​​ Description: 重命名所选项目。
+						63 图像
+					64 应用栏按钮 (disabled) 共享
+						65 图像
+					66 应用栏按钮 (disabled) 删除​​ Description: 将所选项目移动到回收站或将其永久删除。
+						67 图像
+					68 应用栏按钮 排序 ID: SortAndGroupButton
+						69 图像
+					70 应用栏按钮 查看
+						71 图像
+					72 按钮 更多选项 ID: MoreButton
+				73 应用栏 ID: FileExplorerSecondaryCommandBar
+					74 应用栏按钮 详细信息 Description: 显示或隐藏详细信息窗格。 ID: DetailsPaneToggleButton
+						75 图像
+		76 标题栏
+			77 菜单栏 系统 ID: MenuBar
+				82 菜单项目 系统
+			79 按钮 最小化
+			80 按钮 还原
+			81 按钮 关闭
+
+The focused UI element is 44 编辑 地址栏 ID: TextBox.

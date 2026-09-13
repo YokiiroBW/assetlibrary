@@ -1,0 +1,10 @@
+  AssetLibrary.AssetLink -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\packages\sdk\assetlink\dotnet\bin\Release\net10.0\AssetLibrary.AssetLink.dll
+  AssetLibrary.CoreServer -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\services\core-server\bin\Release\net10.0\AssetLibrary.CoreServer.dll
+  AssetLibrary.CoreServer.Host -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\services\core-server\Host\bin\Release\net10.0\AssetLibrary.CoreServer.Host.dll
+  AssetLibrary.WebGateway.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\bin\Release\net10.0\AssetLibrary.WebGateway.Tests.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:01.80

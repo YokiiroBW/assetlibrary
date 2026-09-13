@@ -1,0 +1,19 @@
+test_actual_copy_accepts_64_mib_and_rejects_one_more_byte (test_serve.NativeClientRunnerTests.test_actual_copy_accepts_64_mib_and_rejects_one_more_byte) ... ok
+test_changed_fixture_is_not_silently_used (test_serve.NativeClientRunnerTests.test_changed_fixture_is_not_silently_used) ... ok
+test_image_count_accepts_128_and_rejects_129 (test_serve.NativeClientRunnerTests.test_image_count_accepts_128_and_rejects_129) ... ok
+test_image_manifest_cannot_copy_outside_paths_or_unknown_corpora (test_serve.NativeClientRunnerTests.test_image_manifest_cannot_copy_outside_paths_or_unknown_corpora) ... ok
+test_images_are_explicit_bounded_verified_copies (test_serve.NativeClientRunnerTests.test_images_are_explicit_bounded_verified_copies) ... ok
+test_lifetime_cannot_be_unbounded (test_serve.NativeClientRunnerTests.test_lifetime_cannot_be_unbounded) ... ok
+test_page_generator_refuses_output_outside_test_storage (test_serve.NativeClientRunnerTests.test_page_generator_refuses_output_outside_test_storage) ... ok
+test_page_generator_reuses_real_synthetic_bytes_and_stages_120 (test_serve.NativeClientRunnerTests.test_page_generator_reuses_real_synthetic_bytes_and_stages_120) ... ok
+test_process_check_recognizes_the_current_process (test_serve.NativeClientRunnerTests.test_process_check_recognizes_the_current_process) ... ok
+test_rendezvous_cannot_escape_the_owned_temporary_directory (test_serve.NativeClientRunnerTests.test_rendezvous_cannot_escape_the_owned_temporary_directory) ... ok
+test_rendezvous_keeps_the_actual_localhost_certificate_identity (test_serve.NativeClientRunnerTests.test_rendezvous_keeps_the_actual_localhost_certificate_identity) ... ok
+test_single_image_still_rejects_more_than_32_mib (test_serve.NativeClientRunnerTests.test_single_image_still_rejects_more_than_32_mib) ... ok
+test_without_execute_never_reads_tools_or_starts_resources (test_serve.NativeClientRunnerTests.test_without_execute_never_reads_tools_or_starts_resources) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.747s
+
+OK
+{"status": "not_executed", "reason": "pass --execute to create owned test resources"}

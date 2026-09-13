@@ -1,8 +1,8 @@
 # Windows 原生资源管理器只读浏览
 
-Windows 日常入口是原生 Explorer 左侧“资产库”，图库和列表显示在同一窗口右侧。连接设置是 WinUI 辅助窗口；普通用户会话 Host 常驻并处理登录、分页及图片请求。已交付版本、安装包和实机边界以 [Windows 发布说明](../../docs/releases/WINDOWS_EXPLORER_PREVIEW.md) 为准；当前已验收版本为 `0.3.0-preview.8`。
+Windows 日常入口是原生 Explorer 左侧“资产库”，图库和列表显示在同一窗口右侧。连接设置是 WinUI 辅助窗口；普通用户会话 Host 常驻并处理登录、分页及图片请求。已交付版本、安装包和实机边界以 [Windows 发布说明](../../docs/releases/WINDOWS_EXPLORER_PREVIEW.md) 为准；当前已验收版本为 `0.3.0-preview.9`。
 
-图库保留图片比例，按可见区域加载缩略图，支持图库/列表切换、密度、键盘导航、多选和明确分页。每页最多100个普通项，另有分页入口。目录与文件身份来自 Core 的只读授权投影，文件名只供展示；退出、权限失效或换代会清空旧页面及图片。没有预览 Provider 时显示预览不可用，不读取原件绕过限制。
+图库保留图片比例，按可见区域加载缩略图，支持图库/列表切换、密度、键盘导航、多选和明确分页。每页最多100个普通项；上一页/下一页留在当前视图，大图可跨页，分页不会新增地址栏层级。目录与文件身份来自 Core 的只读授权投影，文件名只供展示；退出、权限失效或换代会清空旧页面及图片。没有预览 Provider 时显示预览不可用，不读取原件绕过限制。
 
 `Core` 复用生成 AssetLink SDK 与现有只读接口；`AssetHost` 把当前授权页和受限像素投影传给原生 Shell。网络、媒体解码和会话秘密均留在 Explorer 进程外，没有本地权限/路径/文件操作业务副本。连接只接受一个 HTTPS origin，默认系统 TLS 信任；用户显式 SHA256 叶证书指纹仍校验主机名与有效期，禁止自动重定向。记住登录默认关闭，启用时使用当前用户 DPAPI 与用户专属安全文件；Cookie/CSRF 不写普通配置、命令行或日志。
 
@@ -29,6 +29,6 @@ python scripts/validate_dotnet_dependencies.py --solution apps/windows-client/As
 
 ## Explorer 验收边界
 
-preview.6 的真实 Explorer 图库证据见发布说明与[集成交付](../../.codex/handoffs/V03-005/windows-gallery-delivery/README.md)。G1/G2/G3沿用已记录实测证据；G4按用户要求豁免且未测试。NAS图片引擎限制仍在，本机隔离Core图片成功不能代替NAS能力；完整V0.3、签名与Android真机门禁没有因此关闭。
+preview.6 的真实 Explorer 图库证据见发布说明与[集成交付](../../.codex/handoffs/V03-005/windows-gallery-delivery/README.md)。G1/G2/G3沿用已记录实测证据；G4按用户要求豁免且未测试。NAS图片引擎已同机交付，详见NAS发布说明；完整V0.3、签名与Android真机门禁没有因此关闭。
 
 原 [Proof说明](AssetHost/README.md) 和 [C++测试说明](../../tests/windows-shell/README.md) 仍用于兼容性与独立机制验证。生产会话与Proof端点分离，不能用机制测试替代实际安装、Explorer生命周期及卸载证据。上传、下载、同步和文件写入不在此只读模块范围内。

@@ -1,0 +1,11 @@
+{
+  "utc": "2026-09-13T15:48:34.5076191+00:00",
+  "action": "host-stop",
+  "broker": {
+    "Pid": 30824,
+    "NativeHwnd": 10553516,
+    "CreationFileTime": "134337860769727319",
+    "SessionId": 2
+  },
+  "script_sha256": "D12113A7272471C34FA730CAA93DDBF0B3658B2DD786D89B367407E63F7A83E7"
+}

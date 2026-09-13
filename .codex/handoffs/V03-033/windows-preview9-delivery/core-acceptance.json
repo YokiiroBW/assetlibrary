@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "stop_reason": "explicit_stop",
+  "sample_file_count": 258,
+  "sample_hashes_and_mtimes": "unchanged",
+  "resource_cleanup": "verified",
+  "postgres_roles_removed": 6,
+  "runtime_removed": true,
+  "https_listener_closed": true,
+  "host_and_postgres_processes_exited": true,
+  "native_client_acceptance": "not asserted by this server fixture"
+}

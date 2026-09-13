@@ -1,0 +1,8 @@
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\bin\Release\net10.0\AssetLibrary.WebGateway.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+VSTest 版本 18.0.2 (x64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+结果文件: C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\.runtime\validation\image-fixture.trx
+
+已通过! - 失败:     0，通过:     9，已跳过:     0，总计:     9，持续时间: 326 ms - AssetLibrary.WebGateway.Tests.dll (net10.0)

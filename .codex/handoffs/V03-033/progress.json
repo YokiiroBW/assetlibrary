@@ -1,25 +1,13 @@
 {
-  "status": "implementation",
-  "base_commit": "0e13f61",
-  "contract_commit": "8833999",
-  "integrated_controls_commit": "a297a18",
-  "target_version": "0.3.0-preview.9",
-  "installed_version": "0.3.0-preview.8",
-  "active_fixture": true,
-  "owned_broker_file": ".runtime/preview-live/native/broker.json",
-  "original_explorer": {
-    "pid": 6212,
-    "hwnd": 133910,
-    "creation": "134335976399732731"
-  },
-  "baseline_repository": "passed",
-  "setup_tests": 23,
-  "package_tests": 6,
-  "release_lock_validation": "passed",
-  "g4": "waived_not_run",
-  "fixture_ready": ".runtime/preview-live/core/20260913T152037Z-0785278f/ready.json",
-  "fixture_runner_session": 52089,
-  "fixture_source_commit": "afdc0dfed5d5ddc36745eea420eb11e684667bf6",
-  "fixture_worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-036",
-  "fixture_expected_sources": 258
+  "status": "delivered",
+  "source_commit": "1003157b4ec328c72f75768bad9640a5d8721087",
+  "version": "0.3.0-preview.9",
+  "installed": true,
+  "installed_files_verified": 540,
+  "active_fixture": false,
+  "owned_windows": 0,
+  "original_explorer_unchanged": true,
+  "preferences_unchanged": true,
+  "nas_changed": false,
+  "g4": "waived_not_run"
 }

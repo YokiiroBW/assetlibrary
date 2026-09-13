@@ -1,0 +1,72 @@
+{
+  "status": "passed_for_scoped_preview9_delivery",
+  "package": {
+    "version": "0.3.0-preview.9",
+    "source_commit": "1003157b4ec328c72f75768bad9640a5d8721087",
+    "bytes": 155529819,
+    "sha256": "574f9c2d307886225f0602c117aa1156253a2850716b21ef9844c054eaaf3d8d",
+    "unsigned": true
+  },
+  "installed": {
+    "version": "0.3.0-preview.9",
+    "files_verified": 540,
+    "bytes_verified": 310459193,
+    "all_sha256_match": true
+  },
+  "explorer": {
+    "pid": 35396,
+    "hwnd": 2493836,
+    "creation": "134337876346903709",
+    "module": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.9\\AssetLibrary.Explorer.dll",
+    "sha256": "34D6E978F53A697CFAF0339C38D0791F1B637E02E979067342B27E24AF5476B6"
+  },
+  "original_explorer_unchanged": true,
+  "preferences_unchanged": "Gallery/200",
+  "tests": {
+    "shell_ctest": 13,
+    "gallery_affected_ctest": 12,
+    "setup": 23,
+    "release_locks": 16,
+    "package": 6,
+    "final_setup_cli": 8,
+    "fixture_python": 13,
+    "fixture_csharp": 9
+  },
+  "behavior": [
+    "Same Explorer window/breadcrumb: library100 to39 and images100 to20, previous requery and new forward token",
+    "101.png preview to preceding100.jpg,125percent zoom then following101.png returns Fit100",
+    "Keyboard Right to102.png; Escape returns second browse page with102 selected",
+    "Wide2311 and narrow923 captured; narrow second page and alpha Fit71",
+    "Disconnect notification clears preview/history and returns root; immediate pre-notification frame retained"
+  ],
+  "cleanup": {
+    "status": "passed",
+    "stop_reason": "explicit_stop",
+    "sample_file_count": 258,
+    "sample_hashes_and_mtimes": "unchanged",
+    "resource_cleanup": "verified",
+    "postgres_roles_removed": 6,
+    "runtime_removed": true,
+    "https_listener_closed": true,
+    "host_and_postgres_processes_exited": true,
+    "native_client_acceptance": "not asserted by this server fixture"
+  },
+  "windows_cleanup": {
+    "owned_windows_remaining": 0,
+    "original_window_present": true,
+    "utc": "2026-09-13T15:50:00.606Z"
+  },
+  "connection_cleanup": {
+    "owned_profile_removed": true,
+    "remembered_absent": true,
+    "host_processes": 0
+  },
+  "limits": [
+    "Single current page100 plus navigation; no unbounded/infinite append scroll",
+    "Local64 page locations do not guarantee64 Host pages; all views share existing64 pages/8192 token budget",
+    "Wide33-image viewport reaches unchanged16MiB pixel budget; excess placeholders are explicit, viewport batching/virtualization remains future work",
+    "Native direct and routed Escape cancellation and same-generation reentry tested with real hidden HWND fixtures, not claimed as separately observed delayed-network desktop cases",
+    "No NAS change, asset writes, new dependency, fullV0.3, Android device or new G4; G4 waived",
+    "Unsigned; occupied preview.1 retained; no new physical multi-monitor DPI/touch evidence"
+  ]
+}

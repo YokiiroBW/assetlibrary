@@ -1,0 +1,41 @@
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  1>Checking Build System
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Surface.cpp
+  AccessibilityProbe.cpp
+  Layout.cpp
+  PreviewViewport.cpp
+  Accessible.cpp
+  Uia.cpp
+  GalleryAccessibilityProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryAccessibilityProbe.exe
+  Snapshot.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+  GallerySurface.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GallerySurface.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt
+  PreviewViewportTests.cpp
+  BudgetTests.cpp
+  SurfaceTests.cpp
+  GalleryPreviewViewportTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryPreviewViewportTests.exe
+  LayoutTests.cpp
+  GalleryBudgetTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryBudgetTests.exe
+  UiaTests.cpp
+  GallerySurfaceTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GallerySurfaceTests.exe
+  RenderingTests.cpp
+  GalleryLayoutTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryLayoutTests.exe
+  PreviewTests.cpp
+  GalleryUiaTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryUiaTests.exe
+  Harness.cpp
+  GalleryRenderingTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryRenderingTests.exe
+  GalleryPreviewTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryPreviewTests.exe
+  GalleryHarness.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\gallery-tests\Release\GalleryHarness.exe
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/tests/windows-gallery/CMakeLists.txt

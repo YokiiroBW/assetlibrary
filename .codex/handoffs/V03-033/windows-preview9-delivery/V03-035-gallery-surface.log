@@ -1,0 +1,14 @@
+Internal ctest changing into directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-035/.runtime/gallery-tests
+Test project C:/YOKI/Codex/AssetLibrary-worktrees/V03-035/.runtime/gallery-tests
+    Start 2: gallery_surface
+1/1 Test #2: gallery_surface ..................***Failed    0.06 sec
+disabling focused page button returns focus to canvas
+
+
+0% tests passed, 1 tests failed out of 1
+
+Total Test time (real) =   0.07 sec
+
+The following tests FAILED:
+	  2 - gallery_surface (Failed)
+Errors while running CTest

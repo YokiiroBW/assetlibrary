@@ -1,0 +1,14 @@
+  AssetLibrary.AssetLink -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\packages\sdk\assetlink\dotnet\bin\Release\net10.0\AssetLibrary.AssetLink.dll
+  AssetLibrary.CoreServer -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\services\core-server\bin\Release\net10.0\AssetLibrary.CoreServer.dll
+  AssetLibrary.CoreServer.Host -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\services\core-server\Host\bin\Release\net10.0\AssetLibrary.CoreServer.Host.dll
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\NativeClientSampleAssets.cs(93,9): error MSTEST0037: 使用“Assert.IsGreaterThan”而不是“Assert.IsTrue” (https://learn.microsoft.com/dotnet/core/testing/mstest-analyzers/mstest0037) [C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\AssetLibrary.WebGateway.Tests.csproj]
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\NativeClientImageFixtureTests.cs(98,26): error MSTEST0037: 使用“Assert.IsLessThanOrEqualTo”而不是“Assert.IsTrue” (https://learn.microsoft.com/dotnet/core/testing/mstest-analyzers/mstest0037) [C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\AssetLibrary.WebGateway.Tests.csproj]
+
+生成失败。
+
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\NativeClientSampleAssets.cs(93,9): error MSTEST0037: 使用“Assert.IsGreaterThan”而不是“Assert.IsTrue” (https://learn.microsoft.com/dotnet/core/testing/mstest-analyzers/mstest0037) [C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\AssetLibrary.WebGateway.Tests.csproj]
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\NativeClientImageFixtureTests.cs(98,26): error MSTEST0037: 使用“Assert.IsLessThanOrEqualTo”而不是“Assert.IsTrue” (https://learn.microsoft.com/dotnet/core/testing/mstest-analyzers/mstest0037) [C:\YOKI\Codex\AssetLibrary-worktrees\V03-036\tests\dotnet\AssetLibrary.WebGateway.Tests\AssetLibrary.WebGateway.Tests.csproj]
+    0 个警告
+    2 个错误
+
+已用时间 00:00:05.45

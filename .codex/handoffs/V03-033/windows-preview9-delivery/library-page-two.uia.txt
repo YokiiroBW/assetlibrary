@@ -1,0 +1,145 @@
+Window: "原生客户端隔离样例 - 文件资源管理器", App: explorer.exe.
+	0 窗口 原生客户端隔离样例 - 文件资源管理器 Secondary Actions: Raise
+		1 窗格
+		2 窗格 原生客户端隔离样例
+			3 窗格
+				90 工具栏 命令模块 ID: FolderBandModuleInner
+					91 按钮 帮助(&H) Description: 获取帮助。 ID: HelpButton
+					92 复选框 预览窗格 Description: 显示预览窗格。 ID: PreviewButton
+				4 状态栏 状态栏 ID: StatusBarModuleInner
+					93 组 属性字段 ID: System.StatusBarViewItemCount
+						94 文本 1 个项目 Description: 项目总数 ID: PropertyValue
+					95 组 属性字段 ID: System.StatusBarSelectedItemCount
+						96 文本 选中 1 个项目 Description: 所选项目数量和大小 ID: PropertyValue
+					7 组 查看模式 ID: ViewButtonsGroup
+						8 单选按钮 (selectable) 详细信息 Description: 在窗口中显示每一项的相关信息。(Ctrl+Alt+6) ID: ViewMode_Details
+						9 单选按钮 (selectable) 大图标 Description: 使用大缩略图显示项。(Ctrl+Alt+2) ID: ViewMode_LargeIcons
+				10 窗格 控制项宿主 ID: ProperTreeHost
+					11 树 导航窗格 ID: 100
+						12 树项目 (selectable) 桌面
+							13 树项目 (selectable) 主文件夹
+							14 树项目 (selectable) 图库
+							15 树项目 (selectable) 快速访问开始 - 桌面 (已固定)
+							16 树项目 (selectable) 下载 (已固定)
+							17 树项目 (selectable) 文档 (已固定)
+							18 树项目 (selectable) 图片 (已固定)
+							19 树项目 (selectable) 音乐 (已固定)
+							20 树项目 (selectable) 快速访问结束 - 视频 (已固定)
+							21 树项目 (selectable) 此电脑
+							22 树项目 (selectable) 网络
+								83 树项目 (selectable) tsclient
+								84 树项目 (selectable) YokiiroNAS
+								85 树项目 (selectable) YOKIIROWORK
+							23 树项目 (selectable) 资产库
+				97 文本 Shell 文件夹视图 ID: listview
+					98 列表 资产库图库 Description: 只读浏览
+						122 滚动条 垂直滚动条 ID: NonClientVerticalScrollBar
+							123 按钮 上一行 ID: UpButton
+							124 缩略图 位置 ID: ScrollbarThumb
+							125 按钮 向下翻页 ID: DownPageButton
+							126 按钮 下一行 ID: DownButton
+						127 列表项目 (selectable) 图片样例 Description: 文件夹 ID: {983D816C-F6A9-40B2-BAB5-351C0E26AB18}
+						128 列表项目 (selectable) 相册 Description: 文件夹 ID: {FFDDE4DF-ED3C-443F-A6C4-973F47C228D7}
+						129 列表项目 (selectable) sample-100.txt Description: 预览不可用 ID: {5FBC21F3-FE94-468F-8FF1-9D9165F6EEB3}
+						130 列表项目 (selectable) sample-101.txt Description: 预览不可用 ID: {05C50FB5-2899-44E3-9E3B-C4E71BBF26FD}
+						131 列表项目 (selectable) sample-102.txt Description: 预览不可用 ID: {D5901E41-B1A9-48AD-A2E9-5074F84A756F}
+						132 列表项目 (selectable) sample-103.txt Description: 预览不可用 ID: {57D9D326-9ED6-4BE9-B165-4FD67CA446D9}
+						133 列表项目 (selectable) sample-104.txt Description: 预览不可用 ID: {EEA28310-9A8B-4C97-AED5-FA8DCE2A257B}
+						134 列表项目 (selectable) sample-105.txt Description: 预览不可用 ID: {78E3AD85-252B-44E3-9C09-D46E5EF18544}
+						135 列表项目 (selectable) sample-106.txt Description: 预览不可用 ID: {0D1824C4-A3BC-42A5-AA2E-EE5FCCFB3457}
+						136 列表项目 (selectable) sample-107.txt Description: 预览不可用 ID: {246B1578-6E77-44F2-A521-CE4B399AE1CB}
+						137 列表项目 (selectable) sample-108.txt Description: 预览不可用 ID: {0C89EC0A-088E-4839-AF90-08CBA54F4053}
+						138 列表项目 (selectable) sample-109.txt Description: 等待预览 ID: {311F1C66-793F-4FB8-8D88-DB040AB74D81}
+						139 列表项目 (selectable) sample-110.txt Description: 等待预览 ID: {DAFF0608-610C-436E-9886-92E43E39B262}
+						140 列表项目 (selectable) sample-111.txt Description: 等待预览 ID: {2346872B-F68F-42FF-B3B9-FA95E0EA8866}
+						141 列表项目 (selectable) sample-112.txt Description: 等待预览 ID: {6E12AC78-1481-4E35-B5B4-077255BA0535}
+						142 列表项目 (selectable) sample-113.txt Description: 等待预览 ID: {D2693EC2-697A-4249-BFB8-F341BB2655A1}
+						143 列表项目 (selectable) sample-114.txt Description: 等待预览 ID: {BF2986C7-C0F6-4095-A181-DD4B0740CC05}
+						144 列表项目 (selectable) sample-115.txt Description: 等待预览 ID: {029A41B7-7E74-4F9A-9502-957EAF3A5F35}
+						145 列表项目 (selectable) sample-116.txt Description: 等待预览 ID: {24CE0B99-4E2D-4032-B27C-D8B7C930EEEF}
+						146 列表项目 (selectable) sample-117.txt Description: 等待预览 ID: {D9773E5C-6C52-4BF1-AD04-969A6CBCB3DB}
+						147 列表项目 (selectable) sample-118.txt Description: 等待预览 ID: {9EE3BABF-25B5-4D41-BCE6-A01184F7A392}
+						148 列表项目 (selectable) sample-119.txt Description: 等待预览 ID: {08178B67-AB8C-4DEC-9DA5-A54EC456F65E}
+						149 列表项目 (selectable) sample-120.txt Description: 等待预览 ID: {3D05D597-61A0-4A7C-B95A-97FE35790E5F}
+						150 列表项目 (selectable) sample-121.txt Description: 等待预览 ID: {BA89245A-D9B3-4705-8CA5-E4F0A054E8A3}
+						151 列表项目 (selectable) sample-122.txt Description: 等待预览 ID: {2330C482-7E9A-46DB-A76B-63202121C337}
+						152 列表项目 (selectable) sample-123.txt Description: 等待预览 ID: {CAD42DF5-F870-4D1A-B31D-4D03405D4DE1}
+						153 列表项目 (selectable) sample-124.txt Description: 等待预览 ID: {94593104-B4A2-42A3-A125-73B2AC3BC4A1}
+						154 列表项目 (selectable) sample-125.txt Description: 等待预览 ID: {E5FFCB76-1DC5-470C-A2E6-5945FE6FB715}
+						155 列表项目 (selectable) sample-126.txt Description: 等待预览 ID: {FEB77930-8703-457A-B5DD-A2A7316C5632}
+						156 列表项目 (selectable) sample-127.txt Description: 等待预览 ID: {99154A05-4B63-420C-973C-59ACC29A3792}
+						157 列表项目 (selectable) sample-128.txt Description: 等待预览 ID: {5D28B978-E558-4953-B20C-EECBC72AF1CF}
+						158 列表项目 (selectable) sample-129.txt Description: 等待预览 ID: {C12D0CD4-4367-4574-B887-AE21F9F6AF63}
+						159 列表项目 (selectable) sample-130.txt Description: 等待预览 ID: {AA41ADF4-BEAE-466F-AA0E-B9418C13A635}
+						160 列表项目 (selectable) sample-131.txt Description: 等待预览 ID: {3721388B-7989-499D-9307-15B002819C56}
+						161 列表项目 (selectable) sample-132.txt Description: 等待预览 ID: {C0CEB193-7328-4CFF-9A95-0A22543C59C1}
+						162 列表项目 (selectable) sample-133.txt Description: 等待预览 ID: {78C6F2BA-27E5-40A4-9693-586D0C850352}
+						163 列表项目 (selectable) sample-134.txt Description: 等待预览 ID: {36F26154-5951-4FC8-AFEC-4819D067F4E4}
+						164 列表项目 (selectable) sample-135.txt Description: 等待预览 ID: {14189DE2-25C7-459F-A005-CEB9BF939C2E}
+						165 列表项目 (selectable) 说明_中文.md Description: 等待预览 ID: {A4314056-7B9E-4874-8888-FB271BABF812}
+					99 单选按钮 (selectable) 图库 ID: 100
+					100 单选按钮 (selectable) 列表 ID: 101
+					101 按钮 缩小 ID: 102
+					102 按钮 放大 ID: 103
+					103 按钮 刷新 ID: 104
+					104 按钮 连接设置 ID: 105
+					105 按钮 上一页 ID: 114
+					106 按钮 (disabled) 下一页 ID: 115
+					107 文本 当前页 39 项，已选 0 项 · 第 2 页 ID: 106
+		29 窗格
+			30 窗格
+				31 选项卡 ID: TabView
+					32 列表 ID: TabListView
+						33 选项卡项目 (selectable) 原生客户端隔离样例
+							108 图像
+							35 文本 原生客户端隔离样例
+							36 按钮 关闭标签页 ID: CloseButton
+					37 按钮 添加新标签页 ID: AddButton
+				38 应用栏 ID: NavigationCommands
+					39 应用栏按钮 后退 Description: 返回到 资产库 ID: backButton
+					40 应用栏按钮 (disabled) 前进 Description: 前进 ID: forwardButton
+					41 应用栏按钮 上移到“桌面”(Alt + 向上键) Description: 上移到“桌面”(Alt + 向上键) ID: upButton
+					42 应用栏按钮 刷新“资产库”(F5) Description: 刷新“资产库”(F5) ID: refreshButton
+				43 组 ID: PART_AutoSuggestBox
+					44 编辑 地址栏 ID: TextBox
+				45 拆分按钮 资产库 ID: FirstCrumbStackPanel
+					46 图像
+				47 组 ID: PART_BreadcrumbBar
+					109 拆分按钮 资产库
+						110 文本 资产库
+					111 拆分按钮 原生客户端隔离样例
+						112 文本 原生客户端隔离样例
+				50 组 ID: FileExplorerSearchBox
+					51 编辑 在 原生客户端隔离样例 中搜索 ID: TextBox
+						52 文本 在 原生客户端隔离样例 中搜索
+				53 应用栏 ID: FileExplorerCommandBar
+					54 应用栏按钮 (disabled) 新建
+						55 图像
+					56 应用栏按钮 (disabled) 剪切​​ Description: 将所选项目移动到剪贴板。
+						57 图像
+					58 应用栏按钮 (disabled) 复制​​ Description: 将所选项目复制到剪贴板。
+						59 图像
+					60 应用栏按钮 (disabled) 粘贴​​ Description: 将剪贴板中的内容粘贴到当前位置。
+						61 图像
+					62 应用栏按钮 (disabled) 重命名​​ Description: 重命名所选项目。
+						63 图像
+					64 应用栏按钮 (disabled) 共享
+						65 图像
+					66 应用栏按钮 (disabled) 删除​​ Description: 将所选项目移动到回收站或将其永久删除。
+						67 图像
+					68 应用栏按钮 排序 ID: SortAndGroupButton
+						69 图像
+					70 应用栏按钮 查看
+						71 图像
+					72 按钮 更多选项 ID: MoreButton
+				73 应用栏 ID: FileExplorerSecondaryCommandBar
+					74 应用栏按钮 详细信息 Description: 显示或隐藏详细信息窗格。 ID: DetailsPaneToggleButton
+						75 图像
+		76 标题栏
+			77 菜单栏 系统 ID: MenuBar
+				82 菜单项目 系统
+			79 按钮 最小化
+			80 按钮 最大化
+			81 按钮 关闭
+
+The focused UI element is 44 编辑 地址栏 ID: TextBox.

@@ -1,0 +1,11 @@
+{
+  "utc": "2026-09-13T15:40:34.6754431+00:00",
+  "broker": {
+    "Pid": 30824,
+    "NativeHwnd": 10553516,
+    "CreationFileTime": "134337860769727319",
+    "SessionId": 2
+  },
+  "target": "AssetLibrary production root",
+  "separate": true
+}

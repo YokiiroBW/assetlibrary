@@ -1,0 +1,34 @@
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  AssetLibrarySnapshot.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibrarySnapshot.lib
+  AssetLibraryLoadingRefresh.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibraryLoadingRefresh.lib
+  ExplorerSnapshot.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerSnapshot.lib
+  AssetLibraryDiagnostics.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibraryDiagnostics.lib
+  AssetLibraryThumbnail.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibraryThumbnail.lib
+  ExplorerLoadingRefresh.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerLoadingRefresh.lib
+  ExplorerDiagnostics.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerDiagnostics.lib
+  ExplorerFaultHarnessTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerFaultHarnessTests.exe
+  ExplorerDiagnosticsTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerDiagnosticsTests.exe
+  AssetLibraryExplorerProof.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\AssetLibraryExplorerProof.dll
+  AssetLibraryGalleryRequests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibraryGalleryRequests.lib
+  ExplorerFaultHost.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerFaultHost.exe
+  ExplorerGalleryRequestTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerGalleryRequestTests.exe
+  Surface.cpp
+  ExplorerGalleryThumbnailTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerGalleryThumbnailTests.exe
+  ExplorerLoaderProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerLoaderProbe.exe
+  ExplorerLoadingRefreshTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerLoadingRefreshTests.exe
+  ExplorerNavigationMenuTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerNavigationMenuTests.exe
+  ExplorerProductTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerProductTests.exe
+  ExplorerSessionNotificationTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerSessionNotificationTests.exe
+  ExplorerProofProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerProofProbe.exe
+  ExplorerSnapshotProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerSnapshotProbe.exe
+  ExplorerSnapshotTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerSnapshotTests.exe
+  View.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+  AssetLibraryGallery.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibraryGallery.lib
+  ExplorerGalleryPreferencesTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerGalleryPreferencesTests.exe
+  GalleryViewTests.cpp
+    正在创建库 C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/.runtime/shell-tests/product-shell/Release/AssetLibrary.Explorer.lib 和对象 C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/.runtime/shell-tests/product-shell/Release/AssetLibrary.Explorer.exp
+  AssetLibraryExplorer.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\product-shell\Release\AssetLibrary.Explorer.dll
+  ExplorerGalleryViewTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-033\.runtime\shell-tests\Release\ExplorerGalleryViewTests.exe

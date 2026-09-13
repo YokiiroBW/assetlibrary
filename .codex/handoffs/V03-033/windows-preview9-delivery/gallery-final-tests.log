@@ -1,0 +1,30 @@
+Internal ctest changing into directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/.runtime/gallery-tests
+Test project C:/YOKI/Codex/AssetLibrary-worktrees/V03-033/.runtime/gallery-tests
+      Start  1: gallery_layout
+ 1/12 Test  #1: gallery_layout ........................   Passed    0.01 sec
+      Start  2: gallery_surface
+ 2/12 Test  #2: gallery_surface .......................   Passed    0.17 sec
+      Start  3: gallery_accessibility_external
+ 3/12 Test  #3: gallery_accessibility_external ........   Passed    0.11 sec
+      Start  4: gallery_accessibility_retired_proxy
+ 4/12 Test  #4: gallery_accessibility_retired_proxy ...   Passed    0.13 sec
+      Start  5: gallery_rendering
+ 5/12 Test  #5: gallery_rendering .....................   Passed    0.23 sec
+      Start  6: gallery_budget
+ 6/12 Test  #6: gallery_budget ........................   Passed    0.05 sec
+      Start  7: gallery_uia
+ 7/12 Test  #7: gallery_uia ...........................   Passed    0.08 sec
+      Start  8: gallery_accessibility_page
+ 8/12 Test  #8: gallery_accessibility_page ............   Passed    0.12 sec
+      Start  9: gallery_accessibility_cycles
+ 9/12 Test  #9: gallery_accessibility_cycles ..........   Passed    0.32 sec
+      Start 10: gallery_accessibility_listener
+10/12 Test #10: gallery_accessibility_listener ........   Passed    0.18 sec
+      Start 11: gallery_preview
+11/12 Test #11: gallery_preview .......................   Passed    0.30 sec
+      Start 12: gallery_preview_external
+12/12 Test #12: gallery_preview_external ..............   Passed    0.16 sec
+
+100% tests passed, 0 tests failed out of 12
+
+Total Test time (real) =   1.87 sec
