@@ -31,6 +31,19 @@
     ".codex/handoffs/V03-028/result.json",
     ".codex/handoffs/V03-028/summary.md",
     ".codex/handoffs/V03-028/tests.md",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/README.md",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/commands.txt",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/compiler.json",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/dotnet-info.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/evidence.json",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/source-integrity.json",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/test-build.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/test-restore.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/test-run.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/toolchain.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/windows-lpac-c775b7d.trx",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/worker-publish.log",
+    ".codex/handoffs/V03-028/windows-lpac-c775b7d/worker-restore.log",
     ".codex/tasks/V03-028.md",
     "services/core-server/Host/Trial/Preview/TrialImagePreviewConfiguration.cs",
     "services/core-server/Modules/PreviewProvider/Infrastructure/ImagePreviewRuntime.cs",
@@ -49,7 +62,15 @@
     "report": "tests.md",
     "tested_source_revision": "a87b44c7e950b53e44f0e41f6702d1d892653eeb",
     "scope": "Development Linux complete131 discovered cases:93 unique passed after one formerly skipped source-broker follow-up;38 Windows/platform/live-fixture cases remain unexecuted. Windows initial45/1 is historical separate evidence.",
-    "linux_report": "linux-tests-a87b44c/README.md"
+    "linux_report": "linux-tests-a87b44c/README.md",
+    "windows_lpac_regression": {
+      "tested_source_revision": "c775b7d2b221479510f958f7e302a676b024e778",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "report": "windows-lpac-c775b7d/README.md",
+      "scope": "One existing real NativeAOT LPAC+Job thumbnail test only; separate source/platform evidence, not added to historical Linux counters."
+    }
   },
   "risks": [
     "Development Linux UID0 SO_PEERCRED passed; actual NAS UID1654/container isolation/reap and real Core image deployment remain coordinator-owned.",
@@ -80,7 +101,8 @@
       "Strict Core/Host Release builds0 warnings; targeted format verification passed.",
       "45 affected tests passed and1 Linux platform test explicitly skipped on Windows.",
       "Diff review checked fixed path/UID0, environment mutual exclusion, no half-close/EOF wait, bounded wire sizes, cancellation and deferred semaphore disposal.",
-      "Frozen integrationa87b44c tested on dev-230 in isolated2GiB/2CPU containers:93 unique passes/0 failures/38 platform or live-fixture skips; actual Linux SO_PEERCRED and real source-broker passed. No code changes. Both containers removed and absence verified."
+      "Frozen integrationa87b44c tested on dev-230 in isolated2GiB/2CPU containers:93 unique passes/0 failures/38 platform or live-fixture skips; actual Linux SO_PEERCRED and real source-broker passed. No code changes. Both containers removed and absence verified.",
+      "Coordinator-requested immutable c775b7d Windows NativeAOT locked publish and one existing LPAC+Job PNG test passed; source archive3564 files unchanged, no product code or configuration edits, sandbox and owned processes cleared. Evidence-only supplement."
     ],
     "technical_debt": [
       "Linux/container peer identity, broker capacity/reap and final deployment checks required from root."

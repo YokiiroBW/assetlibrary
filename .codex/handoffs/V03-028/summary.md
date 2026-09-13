@@ -4,6 +4,8 @@
 
 2026-09-13追加开发Linux验证：固定协调源码a87b44c在dev-230独立副本、指定镜像与2GiB/2CPU容器中完整运行预览测试；合并一次补充source-broker后131个唯一用例93通过/0失败/38平台或缺实机夹具未执行。真实Linux SO_PEERCRED UID0正控通过，Core/Host严格构建通过；两个容器已按归属验证后删除。没有修改源码或操作NAS，原始TRX及边界见[Linux证据](linux-tests-a87b44c/README.md)。a87已包含root的生命周期与测试链接整合，不把该源码和本组件初始a173混同。
 
+2026-09-13追加Windows旧路径定向验证：固定协调源码c775b7d独立归档、原win-x64 RID锁、SDK10.0.111与本机MSVC实际NativeAOT发布通过，仅运行既有LPAC真实缩略图测试1/1通过、0skip。原临时profile/日志清理、sandbox读回为空和自有进程0均确认；3564个归档文件未变化。未改安装、注册、用户配置或操作Explorer/NAS，详见[Windows证据](windows-lpac-c775b7d/README.md)。该单项不与此前不同提交的Linux结果合并计数。
+
 ## 完成与API
 
 ImagePreviewRuntime.Create在末尾增加可选string? socketPath=null，已有调用源兼容。TrialImagePreviewConfiguration只读取ASSETLIBRARY_IMAGE_PREVIEW_SOCKET并传入该参数。仅精确/run/assetlibrary-image/decoder.sock且Linux可选择新UnixSocketImageDecoder；旧WORKER非空时与socket互斥。未知路径、URI、空格或平台不符返回既有Unavailable query，基础浏览保持可用；不更改旧本地进程路径。

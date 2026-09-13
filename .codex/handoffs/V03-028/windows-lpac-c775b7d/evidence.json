@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "c775b7d2b221479510f958f7e302a676b024e778",
+  "sourceArchiveSha256": "8da747d1c6f6ad871db7e2f87e1b8b178af125f318ab2d9f49113cd9179cc4b7",
+  "workerRidLockSha256": "bd2342dac988629533228d720d61c2eb3de95515d34cd185cb1ba18d6c67a76a",
+  "workerRidLockUnchanged": true,
+  "startedUtc": "2026-09-13T11:02:52.1144990Z",
+  "finishedUtc": "2026-09-13T11:02:53.1727825Z",
+  "testExit": 0,
+  "testSandboxBeforeCount": 0,
+  "testSandboxAfterRecursiveCount": 0,
+  "remainingOwnedWorkerProcessCount": 0,
+  "remainingOwnedWorkerProcesses": [],
+  "testEnvironmentRemoved": true,
+  "artifacts": [
+    {
+      "name": "AssetLibrary.ImagePreview.Worker.exe",
+      "bytes": 1479168,
+      "sha256": "28d2ffb41ecc13c89578ae4da065b7667f189223d5a30d338a8f56a38113f7f2"
+    },
+    {
+      "name": "libSkiaSharp.dll",
+      "bytes": 12274488,
+      "sha256": "09fb4b1afee9810f127672baff0e050ed076b6d889b90adec7271914c3894125"
+    },
+    {
+      "name": "LICENSE.SkiaSharp.txt",
+      "bytes": 1129,
+      "sha256": "89101e35a8c66fd4d6dffc1763259161d35cb564c169714ec227a768c89f2938"
+    },
+    {
+      "name": "THIRD-PARTY-NOTICES.SkiaSharp.txt",
+      "bytes": 139775,
+      "sha256": "21504c46c4c58aa64c1055bd2dcbc5f9a136b4b8c412ed3cc6740e22c5b127f5"
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 # V03-028 测试记录
 
+## 后续Windows旧隔离路径单项（c775b7d）
+
+不可变c775b7d2b221479510f958f7e302a676b024e778在自有.runtime副本实际win-x64 NativeAOT发布；SDK10.0.111/MSVC14.44，原RID锁locked restore且哈希不变，严格测试项目build0warning/0error。仅NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail执行1项通过/0失败/0skip；现有LPAC+Job下Ready、512×300真实PNG与exit0。临时sandbox前后0、剩余自有Worker0，3564个归档文件未改。见[原始TRX、命令、哈希及清理](windows-lpac-c775b7d/README.md)。不重复运行Windows门禁/G4，不将此正常图回归扩张为最大图片或NAS验收。
+
 ## 后续开发Linux完整测试（a87b44c）
 
 dev-230独立/tmp副本和给定镜像，实际SDK10.0.111、Linux6.14、内存2GiB/CPU2，未使用root构建缓存。完整131项92通过/39未执行；补Host locked restore/build后仅补充source-broker1项通过，唯一用例汇总93通过/0失败/38未执行。Linux真实SO_PEERCRED通过；剩余34 Windows项、1非Linux负控及3 PG/HTTPS live夹具项，不声称全部131都执行。两测试容器Exit0/无OOM且精确删除并核不存在。详见[命令、原始TRX与清理](linux-tests-a87b44c/README.md)。此后没有修改任何代码，且不是NAS验收。

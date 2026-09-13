@@ -1,0 +1,44 @@
+$ErrorActionPreference = 'Stop'
+$stage = $PSScriptRoot
+$source = Join-Path $stage 'source'
+$env:DOTNET_ROOT = 'C:/YOKI/Codex/worktrees/V01-004/.runtime/sandbox-storage/V01-004/dotnet'
+$env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+$env:NUGET_PACKAGES = 'C:/YOKI/Codex/AssetLibrary-worktrees/V03-015/.runtime/nuget'
+$env:DOTNET_CLI_HOME = Join-Path $stage 'dotnet-home'
+$env:DOTNET_NOLOGO = '1'
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+& 'C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/Common7/Tools/Launch-VsDevShell.ps1' -Arch amd64 -HostArch amd64 -SkipAutomaticLocation | Out-File (Join-Path $stage 'toolchain.log')
+Set-Location $source
+& "$env:DOTNET_ROOT/dotnet.exe" --info | Out-File (Join-Path $stage 'dotnet-info.log')
+Get-Command cl.exe,link.exe | Select-Object Name,Source,@{Name='Version';Expression={$_.FileVersionInfo.FileVersion}} | ConvertTo-Json | Set-Content (Join-Path $stage 'compiler.json')
+$worker = 'services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj'
+$testProject = 'tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj'
+$lockRoot = Join-Path $source 'services/worker-supervisor/ImagePreview/locks'
+$lockBefore = Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $lockRoot 'AssetLibrary.ImagePreview.Worker.win-x64.lock.json')
+$publish = Join-Path $stage 'publish'
+& "$env:DOTNET_ROOT/dotnet.exe" restore $worker -p:RuntimeIdentifier=win-x64 -p:PublishAot=true -p:SelfContained=true "-p:AssetLibraryReleaseLockRoot=$lockRoot" --locked-mode 2>&1 | Tee-Object (Join-Path $stage 'worker-restore.log')
+if ($LASTEXITCODE -ne 0) { throw "Worker locked restore failed: $LASTEXITCODE" }
+& "$env:DOTNET_ROOT/dotnet.exe" publish $worker -c Release -p:RuntimeIdentifier=win-x64 --self-contained true -p:PublishAot=true "-p:AssetLibraryReleaseLockRoot=$lockRoot" -p:DebugType=None -p:DebugSymbols=false --no-restore -o $publish 2>&1 | Tee-Object (Join-Path $stage 'worker-publish.log')
+if ($LASTEXITCODE -ne 0) { throw "Worker NativeAOT publish failed: $LASTEXITCODE" }
+$lockAfter = Get-FileHash -Algorithm SHA256 -LiteralPath $lockBefore.Path
+if ($lockBefore.Hash -ne $lockAfter.Hash) { throw 'Worker RID lock changed' }
+& "$env:DOTNET_ROOT/dotnet.exe" restore $testProject --locked-mode 2>&1 | Tee-Object (Join-Path $stage 'test-restore.log')
+if ($LASTEXITCODE -ne 0) { throw "Test locked restore failed: $LASTEXITCODE" }
+& "$env:DOTNET_ROOT/dotnet.exe" build $testProject -c Release --no-restore 2>&1 | Tee-Object (Join-Path $stage 'test-build.log')
+if ($LASTEXITCODE -ne 0) { throw "Test strict build failed: $LASTEXITCODE" }
+$testRoot = Join-Path $source '.runtime/sandbox-storage/V01-004/tests'
+New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
+$before = @(Get-ChildItem -LiteralPath $testRoot -Force)
+if ($before.Count -ne 0) { throw 'Test sandbox is not initially empty' }
+$env:ASSETLIBRARY_IMAGE_WORKER_TEST_EXECUTABLE = Join-Path $publish 'AssetLibrary.ImagePreview.Worker.exe'
+$started = [DateTime]::UtcNow
+& "$env:DOTNET_ROOT/dotnet.exe" test $testProject -c Release --no-build --no-restore --filter 'FullyQualifiedName=AssetLibrary.Preview.Tests.WindowsImageProcessTests.NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail' --logger 'trx;LogFileName=windows-lpac-c775b7d.trx' --results-directory (Join-Path $stage 'results') 2>&1 | Tee-Object (Join-Path $stage 'test-run.log')
+$testExit = $LASTEXITCODE
+$finished = [DateTime]::UtcNow
+Remove-Item Env:ASSETLIBRARY_IMAGE_WORKER_TEST_EXECUTABLE
+$after = @(Get-ChildItem -LiteralPath $testRoot -Force -Recurse)
+$ownedProcesses = @(Get-CimInstance Win32_Process -Filter "Name = 'AssetLibrary.ImagePreview.Worker.exe'" | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($stage,[StringComparison]::OrdinalIgnoreCase) } | Select-Object ProcessId,ExecutablePath)
+$files = @(Get-ChildItem -LiteralPath $publish -File | Sort-Object Name | ForEach-Object { [ordered]@{name=$_.Name;bytes=$_.Length;sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()} })
+[ordered]@{sourceCommit='c775b7d2b221479510f958f7e302a676b024e778';sourceArchiveSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $stage 'source.zip')).Hash.ToLowerInvariant();workerRidLockSha256=$lockAfter.Hash.ToLowerInvariant();workerRidLockUnchanged=$true;startedUtc=$started.ToString('o');finishedUtc=$finished.ToString('o');testExit=$testExit;testSandboxBeforeCount=$before.Count;testSandboxAfterRecursiveCount=$after.Count;remainingOwnedWorkerProcessCount=$ownedProcesses.Count;remainingOwnedWorkerProcesses=$ownedProcesses;testEnvironmentRemoved=(!(Test-Path Env:ASSETLIBRARY_IMAGE_WORKER_TEST_EXECUTABLE));artifacts=$files} | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $stage 'evidence.json')
+if ($testExit -ne 0) { throw "LPAC test failed: $testExit" }
+if ($after.Count -ne 0 -or $ownedProcesses.Count -ne 0) { throw 'Owned test resources remain' }

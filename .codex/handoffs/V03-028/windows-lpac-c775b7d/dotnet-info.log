@@ -1,0 +1,48 @@
+.NET SDK:
+ Version:           10.0.111
+ Commit:            e2f47b0110
+ Workload version:  10.0.100-manifests.330ea142
+ MSBuild version:   18.0.11+e2f47b011
+
+运行时环境:
+ OS Name:     Windows
+ OS Version:  10.0.26100
+ OS Platform: Windows
+ RID:         win-x64
+ Base Path:   C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\sdk\10.0.111\
+
+已安装 .NET 工作负载:
+没有要显示的已安装工作负载。
+已配置为在安装新清单时使用 workload sets。
+未安装任何 workload sets。运行 “dotnet workload restore” 以安装工作负载集。
+
+Host:
+  Version:      10.0.11
+  Architecture: x64
+  Commit:       e2f47b0110
+
+.NET SDKs installed:
+  10.0.111 [C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\sdk]
+
+.NET runtimes installed:
+  Microsoft.AspNetCore.App 10.0.11 [C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 10.0.11 [C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.WindowsDesktop.App 10.0.11 [C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\dotnet\shared\Microsoft.WindowsDesktop.App]
+
+Other architectures found:
+  None
+
+Environment variables:
+  DOTNET_CLI_HOME                          [C:\YOKI\Codex\AssetLibrary-worktrees\V03-028\.runtime\windows-lpac-c775b7d\dotnet-home]
+  DOTNET_CLI_TELEMETRY_OPTOUT              [1]
+  DOTNET_NOLOGO                            [1]
+  DOTNET_ROOT                              [C:/YOKI/Codex/worktrees/V01-004/.runtime/sandbox-storage/V01-004/dotnet]
+
+global.json file:
+  C:\YOKI\Codex\AssetLibrary-worktrees\V03-028\.runtime\windows-lpac-c775b7d\source\global.json
+
+Learn more:
+  https://aka.ms/dotnet/info
+
+Download .NET:
+  https://aka.ms/dotnet/download
