@@ -12,7 +12,8 @@ internal static class TrialImagePreviewConfiguration
     {
         services.AddSingleton<IImagePreviewQuery>(provider => ImagePreviewRuntime.Create(roots, workers,
             Environment.GetEnvironmentVariable("ASSETLIBRARY_IMAGE_PREVIEW_WORKER"),
-            Path.Combine(configuration.StatePath, "image-preview-profiles"), provider.GetRequiredService<ILoggerFactory>()));
+            Path.Combine(configuration.StatePath, "image-preview-profiles"), provider.GetRequiredService<ILoggerFactory>(),
+            socketPath: Environment.GetEnvironmentVariable("ASSETLIBRARY_IMAGE_PREVIEW_SOCKET")));
         services.AddSingleton<AuthorizedImagePreviewService>();
     }
 }

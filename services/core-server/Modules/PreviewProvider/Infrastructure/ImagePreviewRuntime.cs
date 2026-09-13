@@ -8,8 +8,16 @@ namespace AssetLibrary.Modules.PreviewProvider.Infrastructure;
 public static class ImagePreviewRuntime
 {
     public static IImagePreviewQuery Create(ILibraryScanTargetQuery roots, ReadOnlyWorkerProcessOptions sourceWorkers,
-        string? workerExecutable, string profileDirectory, ILoggerFactory logs)
+        string? workerExecutable, string profileDirectory, ILoggerFactory logs, string? socketPath = null)
     {
+        if (!string.IsNullOrEmpty(socketPath))
+        {
+            if (!string.IsNullOrEmpty(workerExecutable) || !OperatingSystem.IsLinux()
+                || !string.Equals(socketPath, UnixSocketImageDecoder.SocketPath, StringComparison.Ordinal))
+                return new UnavailableImagePreviewQuery();
+            return new ImagePreviewService(roots, new ProcessImageSourceReader(sourceWorkers),
+                new UnixSocketImageDecoder(), logs.CreateLogger<ImagePreviewService>());
+        }
         if (string.IsNullOrWhiteSpace(workerExecutable)) return new UnavailableImagePreviewQuery();
         if (!Path.IsPathFullyQualified(workerExecutable) || !File.Exists(workerExecutable)
             || (File.GetAttributes(workerExecutable) & FileAttributes.ReparsePoint) != 0)
