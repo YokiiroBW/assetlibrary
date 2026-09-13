@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-028",
+  "title": "nas-local-image-adapter",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "nas-image-core-owner",
+  "branch": "codex/v03-028-nas-local-image-adapter",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-028",
+  "commit": "a173210614b283e087200fd85109f3624efbeb5a",
+  "changed_files": [
+    ".codex/handoffs/V03-028/result.json",
+    ".codex/handoffs/V03-028/summary.md",
+    ".codex/handoffs/V03-028/tests.md",
+    ".codex/tasks/V03-028.md",
+    "services/core-server/Host/Trial/Preview/TrialImagePreviewConfiguration.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/ImagePreviewRuntime.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImageDecoder.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImagePeer.cs",
+    "services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImageTransport.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/SocketImageConfigurationTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/SocketImageDecoderTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/SocketImageTestServer.cs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 45,
+    "failed": 0,
+    "skipped": 1,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Actual Linux SO_PEERCRED and NAS UID/container isolation/reap evidence remain coordinator-owned; Windows socket tests explicitly inject peer policy.",
+    "Coordinator must add approved decoder IDisposable release in ImagePreviewService and three implementation Compile links to the test project.",
+    "No production NAS activation, GUI, original assets, G4 or complete V0.3 claim."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V03-028/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "PreviewProvider Infrastructure Unix socket adapter and Host backend selection; nas-image-core-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing IImageDecoder/IImageSourceLease ports, exact source streaming/hash verification, application authorization/cache/source revalidation.",
+      "Existing ImageWorkerProtocol24B and ImageWorkerTransport PNG/CRC/size validation with fixed512/1600 profiles.",
+      "Core original two application permits and15s budget; socket serial wait fits the existing8s decoder budget."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Consumes frozen ADR0023/local-image-container-v1 only; no external AssetLink, shared contract, worker, csproj or lock authored.",
+      "ImagePreviewRuntime.Create gains trailing optional socketPath; existing source calls remain valid."
+    ],
+    "architecture_tests": [
+      "Strict Core/Host Release builds0 warnings; targeted format verification passed.",
+      "45 affected tests passed and1 Linux platform test explicitly skipped on Windows.",
+      "Diff review checked fixed path/UID0, environment mutual exclusion, no half-close/EOF wait, bounded wire sizes, cancellation and deferred semaphore disposal."
+    ],
+    "technical_debt": [
+      "Linux/container peer identity, broker capacity/reap and final deployment checks required from root."
+    ]
+  }
+}
