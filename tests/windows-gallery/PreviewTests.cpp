@@ -66,6 +66,8 @@ int main() {
         surface->SetMode(gallery::Mode::List); surface->SetMode(gallery::Mode::List); surface->SetDensity(96); surface->SetDensity(1);
         Require(scenario.preferences==2,"only actual bounded mode/density changes notify");
         surface->SetMode(gallery::Mode::Gallery); surface->SetDensity(176); scenario.preferences=0;
+        surface->SelectItem(0,SVSI_SELECT|SVSI_DESELECTOTHERS|SVSI_FOCUSED); MSG directorySpace{};directorySpace.hwnd=canvas;directorySpace.message=WM_KEYDOWN;directorySpace.wParam=VK_SPACE;
+        surface->TranslateAccelerator(directorySpace);Require(scenario.activated==0,"Space on directory never changes navigation history");
         surface->SelectItem(1,SVSI_SELECT|SVSI_DESELECTOTHERS|SVSI_FOCUSED|SVSI_SELECTIONMARK); surface->SelectItem(2,SVSI_SELECT);
         MSG key{}; key.hwnd=canvas; key.message=WM_KEYDOWN; key.wParam=VK_SPACE;
         Require(surface->TranslateAccelerator(key) && scenario.activated==2,"Space activates a regular file");
@@ -89,6 +91,13 @@ int main() {
         Require(SUCCEEDED(surface->SetPreview(1,1,image,L"大图已就绪")),"1600px preview accepted");image.reset();
         const RECT red=RedBounds(canvas);Require(red.right>red.left && std::abs((red.right-red.left)-2*(red.bottom-red.top))<=2,"fit preserves wide-image aspect ratio");
         const DWORD gdi=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);for(int at=0;at<8;++at)RedBounds(canvas);Require(GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS)==gdi,"preview painting releases temporary GDI buffers");
+        CopyMemory(modified,saved,sizeof(saved));modified[VK_CONTROL]=0x80;SetKeyboardState(modified);
+        key.wParam=VK_ESCAPE;const bool ctrlEscape=surface->TranslateAccelerator(key);key.wParam=VK_RIGHT;const bool ctrlRight=surface->TranslateAccelerator(key);
+        modified[VK_CONTROL]=0;modified[VK_MENU]=0x80;SetKeyboardState(modified);key.wParam=VK_LEFT;const bool altLeft=surface->TranslateAccelerator(key);SetKeyboardState(saved);
+        Require(!ctrlEscape && !ctrlRight && !altLeft && scenario.closed==0 && scenario.step==0,"preview preserves modified Explorer navigation shortcuts");
+        key.wParam=VK_TAB;Require(surface->TranslateAccelerator(key) && GetFocus()==GetDlgItem(surface->Window(),gallery::PreviewBackControlId),"preview Tab reaches Back");
+        key.hwnd=GetFocus();Require(surface->TranslateAccelerator(key) && GetFocus()==GetDlgItem(surface->Window(),gallery::PreviewNextControlId),"preview Tab skips disabled Previous");
+        key.hwnd=GetFocus();Require(!surface->TranslateAccelerator(key),"preview boundary Tab remains with host");key.hwnd=canvas;
         key.wParam=VK_LEFT;surface->TranslateAccelerator(key);Require(scenario.step==0,"disabled previous boundary");
         key.wParam=VK_RIGHT;surface->TranslateAccelerator(key);Require(scenario.step==1,"keyboard next callback");scenario.step=0;
         SendMessageW(GetDlgItem(surface->Window(),gallery::PreviewNextControlId),BM_CLICK,0,0);Require(scenario.step==1,"native next button");
