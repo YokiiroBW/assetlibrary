@@ -1,5 +1,5 @@
 {
-  "status": "implementation_in_progress",
+  "status": "final_package_preparation",
   "user_constraint": "All runtime processing on the same NAS and deployment package; no external compute host.",
   "base": "937a7e3",
   "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026",
@@ -45,9 +45,9 @@
     "unless-stopped for normal NAS reboot; permanent startup errors stay unhealthy without spawning"
   ],
   "remaining": [
-    "Resolve valid 40MP and near-32MiB input boundary with no increase to 512MiB process/container budget; current rebuild a87b44c adds immutable pixels and bounded exit diagnostics",
-    "Verify latest normal/boundary inputs, parent-death cleanup and Linux SO_PEERCRED",
-    "Build four-image NAS package from clean committed source; isolated Core end-to-end; backup and controlled same-NAS upgrade",
-    "Final source checks, cleanup, handoffs and main integration; no G4"
+    "Build final four-image NAS package from a clean committed snapshot including GC Region128 and PNG non-IDAT4MiB limit",
+    "Verify final-image metadata boundaries, normal/security regressions, then same-NAS authenticated Core image API",
+    "Cold backup and controlled existing deployment upgrade; verify existing two libraries/195792 scan records, client image requests",
+    "Clean owned resources, preserve rollback, finish evidence and main integration; no G4"
   ]
 }

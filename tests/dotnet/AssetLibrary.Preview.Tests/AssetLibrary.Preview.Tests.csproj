@@ -50,6 +50,7 @@
     <Compile Include="../../../services/worker-supervisor/ImageSupervisor/LocalImageFrames.cs" Link="Boundary/LocalImageFrames.cs" />
     <Compile Include="../../../services/worker-supervisor/ImagePreview/LinuxContainerStatus.cs" Link="Boundary/LinuxContainerStatus.cs" />
     <Compile Include="../../../services/worker-supervisor/ImagePreview/LinuxContainerMemory.cs" Link="Boundary/LinuxContainerMemory.cs" />
+    <Compile Include="../../../services/worker-supervisor/ImagePreview/ImageInputPolicy.cs" Link="Boundary/ImageInputPolicy.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Fixtures/skia-rgba8-sbit.png" CopyToOutputDirectory="PreserveNewest" />

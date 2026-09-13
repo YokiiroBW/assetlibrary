@@ -68,6 +68,8 @@ operator在一次性容器中隐藏读取口令，再以UID1654调用同一个Ho
 
 图片预览有两个互斥的受控后端。常规seccomp平台仍保留既有包内worker；本NAS的同机容器路径按ADR-0023使用同一Compose的 `image` 服务，PID1为BCL-only NativeAOT监督器，每请求一个UID/GID1655、cap0的短命decoder。Core仅把已授权图片字节发送到固定本地socket；监督器/decoder没有资产、PG、Core私密状态、用户会话或Docker socket挂载，也不发布网络端口。
 
+首版生成静态JPEG、8位PNG和WebP的512缩略图与1600预览，保留方向与透明度；动画和16位PNG暂不支持。源上限32MiB/4000万像素，每个PNG非IDAT附加块最多4MiB；超限显示图片限制错误，不导致整个图片服务反复重启。它不会调用其他应用的FFmpeg，也无需在NAS宿主另装图片运行时。
+
 目标平台的UID/namespace/MEMLOCK/NPROC/AS/CPU/memcg/取消/回收和真实Core出图证据通过后，在 `deployment.env` 添加唯一一行，保留其他身份与设置：
 
 ```text

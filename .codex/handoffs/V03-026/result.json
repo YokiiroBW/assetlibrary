@@ -7,7 +7,7 @@
   "owner": "nas-image-coordinator",
   "branch": "codex/v03-026-nas-local-image-integration",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-026",
-  "commit": "2ac4bdc7646ca79fcae08aba31db3bd209a24b37",
+  "commit": "a37701316e63e28681e054facc3f908708974b34",
   "changed_files": [
     ".codex/START_HERE.md",
     ".codex/handoffs/V03-005/nas-platform-decision.md",
@@ -40,6 +40,10 @@
     ".codex/handoffs/V03-028/result.json",
     ".codex/handoffs/V03-028/summary.md",
     ".codex/handoffs/V03-028/tests.md",
+    ".codex/handoffs/V03-029/build-host.md",
+    ".codex/handoffs/V03-029/result.json",
+    ".codex/handoffs/V03-029/summary.md",
+    ".codex/handoffs/V03-029/tests.md",
     ".codex/project-state.json",
     ".codex/task-registry.json",
     ".codex/tasks/V03-026.md",
@@ -65,6 +69,7 @@
     "services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImageTransport.cs",
     "services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj",
     "services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj",
+    "services/worker-supervisor/ImagePreview/ImageInputPolicy.cs",
     "services/worker-supervisor/ImagePreview/ImageWorkerIsolation.cs",
     "services/worker-supervisor/ImagePreview/LinuxContainerIdentity.cs",
     "services/worker-supervisor/ImagePreview/LinuxContainerIsolation.cs",
@@ -95,6 +100,7 @@
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerMetadataTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerProtocolTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerStateTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageInputPolicyTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImagePreviewServiceTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/SocketImageConfigurationTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/SocketImageDecoderTests.cs",
@@ -105,14 +111,13 @@
     "contracts/providers/local-image-container-v1.md"
   ],
   "tests": {
-    "passed": 428,
+    "passed": 432,
     "failed": 0,
     "skipped": 52,
     "report": "tests.md"
   },
   "risks": [
-    "Valid 40MP and near32MiB controls are not yet passing; production image backend not enabled.",
-    "Final package and same-NAS Core integration and deployment remain."
+    "Final-image PNG metadata boundary and actual Core/NAS upgrade verification remain; production backend not yet enabled."
   ],
   "blocked_by": [],
   "recommended_merge_order": 0,
@@ -144,7 +149,7 @@
       "dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore:428 passed,52 platform/fixture skips"
     ],
     "technical_debt": [
-      "Valid maximum-image inputs remain under investigation; no final package or production image activation claimed"
+      "Platform validation and backed-up final deployment remain; no known code blocker."
     ]
   }
 }
