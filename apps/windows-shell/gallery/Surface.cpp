@@ -178,9 +178,11 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const auto revision = pageNavigationRevision; const auto page = pageRevision;
         const bool enabled[] = {shown && !previewActive && pagePreviousEnabled,shown && !previewActive && pageNextEnabled};
         for (size_t at=0;at<2;++at) {
+            const bool focused = GetFocus() == buttons[6+at];
             if (buttons[6+at]) EnableWindow(buttons[6+at],enabled[at]);
             if (!Alive() || revision != pageNavigationRevision || page != pageRevision) return false;
-            if (!enabled[at] && shown && !previewActive && GetFocus() == buttons[6+at]) {
+            // Disabling a focused native button may clear focus before returning.
+            if (!enabled[at] && shown && !previewActive && focused && (!GetFocus() || GetFocus() == buttons[6+at])) {
                 SetFocus(canvas);
                 if (!Alive() || revision != pageNavigationRevision || page != pageRevision) return false;
             }
