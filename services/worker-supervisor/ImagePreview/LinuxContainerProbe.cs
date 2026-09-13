@@ -38,9 +38,14 @@ internal sealed class LinuxContainerProbe(string mode)
         var stateDenied = false;
         try { using var file = File.OpenRead("/run/assetlibrary-image/supervisor-state.bin"); }
         catch (UnauthorizedAccessException) { stateDenied = true; }
+        var memoryDenied = false;
+        // Opening only: never read or print any byte from the owned supervisor's address space.
+        try { using var memory = File.OpenRead("/proc/1/mem"); }
+        catch (UnauthorizedAccessException) { memoryDenied = true; }
+        var traceError = LinuxContainerIsolation.ParentPtraceError();
         var identity = LinuxContainerIdentity.Decoder();
-        return new ContainerProbeReport("isolation", initialRingError == 0 && ring == 12 && fork == 11 && parent == 1 && stateDenied && identity,
-            initialRingError, ring, fork, parent, stateDenied, identity);
+        return new ContainerProbeReport("isolation", initialRingError == 0 && ring == 12 && fork == 11 && parent == 1 && stateDenied && identity && memoryDenied && traceError == 1,
+            initialRingError, ring, fork, parent, stateDenied, identity, memoryDenied, traceError);
     }
     private static bool MemoryDenied()
     {
@@ -57,7 +62,7 @@ internal sealed class LinuxContainerProbe(string mode)
     }
 }
 internal sealed record ContainerProbeReport(string Probe, bool Passed, int InitialRingError = -1, int RingError = -1,
-    int ForkError = -1, int ParentSignalError = -1, bool StateDenied = false, bool DecoderIdentity = false);
+    int ForkError = -1, int ParentSignalError = -1, bool StateDenied = false, bool DecoderIdentity = false, bool ParentMemoryDenied = false, int ParentPtraceError = -1);
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower, GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(ContainerProbeReport))]
 internal sealed partial class ContainerProbeJson : JsonSerializerContext;

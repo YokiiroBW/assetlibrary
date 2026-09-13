@@ -23,6 +23,22 @@ public sealed class ImageContainerStateTests
     }
 
     [TestMethod]
+    [DataRow(false, false, true)]
+    [DataRow(true, false, false)]
+    [DataRow(false, true, false)]
+    public void ADeadlineRetainsTheBudgetWhileObservedCancellationCanRecover(bool clientClosed, bool operatorStopping, bool expectedOpen)
+    {
+        var state = new ImageCircuitState();
+        for (var attempt = 0; attempt < 3; ++attempt)
+        {
+            state.ReserveAttempt();
+            if (!ImageCircuitState.InfrastructureCancellation(clientClosed, operatorStopping)) state.CompleteHealthy();
+            state = ImageCircuitState.Read(state.Encode());
+        }
+        Assert.AreEqual(expectedOpen, state.Open);
+    }
+
+    [TestMethod]
     [DataRow("")]
     [DataRow("49534331000000")]
     [DataRow("495343310000000000")]

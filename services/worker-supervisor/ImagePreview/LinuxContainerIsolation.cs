@@ -52,6 +52,12 @@ internal static class LinuxContainerIsolation
         var result = Native.Call(62, 1, 0, 0);
         return result == -1 ? Marshal.GetLastPInvokeError() : 0;
     }
+    internal static int ParentPtraceError()
+    {
+        // PTRACE_SEIZE with no options does not stop PID1. An unexpected attachment ends when this probe exits.
+        var result = Native.Call(101, 0x4206, 1, 0, 0);
+        return result == -1 ? Marshal.GetLastPInvokeError() : 0;
+    }
     private static class Native
     {
         [DllImport("libc", EntryPoint = "syscall", SetLastError = true)]

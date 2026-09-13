@@ -20,6 +20,7 @@ internal sealed class ImageCircuitState
         if (Open) throw new InvalidOperationException("Image circuit is open.");
         ++Failures;
     }
+    internal static bool InfrastructureCancellation(bool observedClientClosure, bool operatorStopping) => !observedClientClosure && !operatorStopping;
     internal void CompleteHealthy() => Failures = 0;
     internal byte[] Encode()
     {

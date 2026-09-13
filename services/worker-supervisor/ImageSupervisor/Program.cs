@@ -20,7 +20,7 @@ try
     using var circuit = new ImageCircuitLedger();
     using var listener = SupervisorStartup.Bind();
     if (args.Length == 1) return await SupervisorProbe.RunAsync(args[0], circuit).ConfigureAwait(false);
-    await new ImageSocketServer(listener, circuit).RunAsync(stopping).ConfigureAwait(false);
+    await new ImageSocketServer(listener, circuit, operatorStop.Token).RunAsync(stopping).ConfigureAwait(false);
     return 0;
 }
 catch (ImageNamespaceFailure failure)

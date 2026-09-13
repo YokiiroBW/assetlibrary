@@ -6,7 +6,7 @@ using AssetLibrary.ImagePreview.Protocol;
 namespace AssetLibrary.ImageSupervisor;
 
 [SupportedOSPlatform("linux")]
-internal sealed class ImageSocketServer(Socket listener, ImageCircuitLedger circuit)
+internal sealed class ImageSocketServer(Socket listener, ImageCircuitLedger circuit, CancellationToken operatorStopping)
 {
     private int active;
     private ImageNamespaceFailure? fatal;
@@ -39,7 +39,7 @@ internal sealed class ImageSocketServer(Socket listener, ImageCircuitLedger circ
         using var client = new NetworkStream(socket, ownsSocket: true);
         var released = 0;
         void Release() { if (Interlocked.Exchange(ref released, 1) == 0) Interlocked.Exchange(ref active, 0); }
-        try { await new ImageExchange(circuit, Release, socket).RunAsync(client, stopping.Token).ConfigureAwait(false); }
+        try { await new ImageExchange(circuit, Release, socket, operatorStopping).RunAsync(client, stopping.Token).ConfigureAwait(false); }
         catch (ImageStateFailure)
         {
             stateFailed = true;
