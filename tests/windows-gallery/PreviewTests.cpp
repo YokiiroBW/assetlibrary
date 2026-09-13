@@ -198,8 +198,13 @@ int main() {
         scenario.deleteOnViewport=false;
         for(bool captureReentry : {true,false}) {
             Require(SUCCEEDED(gallery::Surface::Create(parent,bounds,callbacks,&surface)),"reentry surface");scenario.surface=surface;
-            surface->SetPage(page,1);surface->BeginPreview(1,1,false,true);surface->SetPreview(1,1,Red(1600,800),L"重入验证");
+            surface->SetPage(page,1);surface->BeginPreview(1,1,true,true);surface->SetPreview(1,1,Red(1600,800),L"重入验证");
             const HWND target=FindWindowExW(surface->Window(),nullptr,L"STATIC",nullptr);Key(surface,target,'1');
+            HWND tabAt=target;
+            for(int id=gallery::PreviewBackControlId;id<=gallery::PreviewActualControlId;++id) {
+                Require(Key(surface,tabAt,VK_TAB) && GetFocus()==GetDlgItem(surface->Window(),id),"all-enabled Tab order fits canvas plus seven controls");tabAt=GetFocus();
+            }
+            Require(!Key(surface,tabAt,VK_TAB),"eighth focus entry yields to host at boundary");
             if(captureReentry) {
                 Require(SetWindowSubclass(parent,DeleteOnCapture,77,reinterpret_cast<DWORD_PTR>(&scenario))!=FALSE,"capture callback fixture");SetCapture(parent);
             } else { SetFocus(parent);scenario.deleteOnFocus=true; }

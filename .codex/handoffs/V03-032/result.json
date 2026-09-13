@@ -1,0 +1,68 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-032",
+  "title": "explorer-preview-interactions",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "preview-interaction-owner",
+  "branch": "codex/v03-032-explorer-preview-interactions",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-032",
+  "commit": "410b5f0e74b1a28cfc1587c3ef316e8b3fdbf2f2",
+  "changed_files": [
+    ".codex/handoffs/V03-032/result.json",
+    ".codex/handoffs/V03-032/summary.md",
+    ".codex/handoffs/V03-032/tests.md",
+    ".codex/task-registry.json",
+    ".codex/tasks/V03-032.md",
+    "apps/windows-shell/CMakeLists.txt",
+    "apps/windows-shell/gallery/PreviewViewport.cpp",
+    "apps/windows-shell/gallery/Surface.cpp",
+    "apps/windows-shell/gallery/Surface.h",
+    "tests/windows-gallery/CMakeLists.txt",
+    "tests/windows-gallery/PreviewTests.cpp",
+    "tests/windows-gallery/PreviewViewportTests.cpp",
+    "tests/windows-gallery/RenderingTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "12 unique native Surface/preview/rendering/accessibility tests. Geometry owner test is separate; no real Explorer/Host/NAS/G4 execution."
+  },
+  "risks": [
+    "Real Core/Host/Explorer zoom and cross-DPI/input-device verification remain coordinator-owned.",
+    "Existing bounded derived preview only;100% does not request or increase original-file resolution."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 2,
+  "handoff_summary": ".codex/handoffs/V03-032/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows gallery Surface preview interaction and rendering; V03-032 owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Frozen PreviewViewport.h and V03-031 geometry implementation; existing Surface/Win32/Model/owner lifetime.",
+      "Existing authorized PBGRA, source-size DIB/AlphaBlend, 16MiB persistent budget and thumbnail path.",
+      "Existing preview close/step callbacks, UIA/MSAA retirement and browse selection/focus/scroll restoration."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Explicit coordinator-approved replay of geometry31d81c7 and shared CMake1ba6314; no authored changes outside task-owned Surface/tests."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Only native button control constants110..113 added as approved; no IPC/HTTP/COM/preference contract or geometry interface changed."
+    ],
+    "architecture_tests": [
+      "Strict MSVC /W4 /WX /analyze /utf-8 /MT compilation passed after fixing const RECT and test return-value diagnostics.",
+      "12 unique native component tests passed; anchored pixels, capture/focus reentry, full8-entry Tab, bounded clipping and GDI/USER reclamation.",
+      "verify_repository passed:539 architecture inputs,21 migration model tests,14 architecture tests and existing dependency/theme policies;Alpha remains blocked."
+    ],
+    "technical_debt": [
+      "Real Explorer delivery and cross-monitor DPI validation are root-owned."
+    ]
+  }
+}
