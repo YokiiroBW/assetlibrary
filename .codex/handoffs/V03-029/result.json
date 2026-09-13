@@ -7,7 +7,7 @@
   "owner": "nas-image-package-owner",
   "branch": "codex/v03-029-nas-image-package",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-029",
-  "commit": "9874114",
+  "commit": "281e0d3",
   "changed_files": [
     ".codex/handoffs/V03-029/build-host.md",
     ".codex/handoffs/V03-029/result.json",

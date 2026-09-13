@@ -32,3 +32,9 @@ Python使用Codex primary runtime；POSIX shell为bundled Git usr/bin/sh.exe。�
 未执行本任务实际Docker四镜像build、decoder、NAS连接/容器更改、真实Core/PG/原件或发布。LinuxAOT和实际NAS平台/旧宿主PID回收由root执行，不复制成此任务的本机通过。
 
 只读dev-230检查是root追加授权：Python3.12.3、Docker26.1.4需sudo、四基础镜像amd64缓存、AOT工具镜像recipe含SDK10.0.111/clang；未运行任何pull/build/创建容器。详见build-host.md。
+
+## 目标 Compose 兼容补丁 281e0d3
+
+Root 在实际 NAS 确认 `compose create --no-deps` 不受支持。修复只去掉 create 的该选项；严格假 Docker 加入拒绝分支，确保原命令会失败。`python -I -B -m unittest discover -s tests/repository -p 'test_nas*.py' -k persisted_socket -v` 定向 1/1 通过（6.653 秒）。未重复未变输入的 95 项套件；实际重打包与 NAS 重验由 root 负责。
+
+准备型 `.runtime/v03-029-deployment-tools/validate_prepared.py` 4/4 本地 mock 通过：外层/嵌入语法及 SSH、helper Running/ExitCode 负控、远端 proof 和本地 proof 写入失败恢复路径。未执行嵌入 remote 脚本或导入 SSH transport，不能将这些记为真实冷备/安装通过。

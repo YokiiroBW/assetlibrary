@@ -27,3 +27,7 @@ nasctl重验小型公共控制文件hash，再验证实际imageID/源码与部�
 新增16个NAS包装/配置/CLI负控已通过；旧release包验证10过、2个POSIX权限用例因Windows跳过；sh -n通过。非-I实际CI discovery通过load_tests在真正-I子解释器运行此suite，没有改根CI或伪造隔离flag。仓库快门禁通过，隔离模式完整repository95/95通过；原非隔离总入口的既有release工具导入错误由root统一调整CI命令，详见tests.md。
 
 根任务负责最终LinuxAOT/四镜像构建、同NAS权限/资源/取消/熔断/真实Core出图、冷备、部署和回滚验收。本任务未改变任何线上容器，未读原件，G4豁免未执行，完整V0.3仍独立。
+
+Root 后续真实 NAS Compose 发现 create 子命令不接受 --no-deps，281e0d3 将 image 创建改为 `compose --profile image create image`；image 没有 depends_on，不会带起其他服务。up 仍保留其受支持的 --no-deps。严格假 Docker 现拒绝 create/--no-deps 组合，持久 SOCKET 定向回归 1/1 通过。Root 将正式重打同源包，不手改已 hash 的交付包；卷标签的兼容警告未改变现有归属模型。
+
+Root 另授权准备冷备/安装脚本，产物仅在本工作树 `.runtime/v03-029-deployment-tools/`，不提交产品；已按 review 补实际容器退出码、128MiB/CPU shares、固定 OpenSSH transport 与 proof 失败恢复保护。4 个纯本地 mock 检查通过；脚本未连接 NAS，实际执行、回滚及 API/UI 验收仍由 root 决定。
