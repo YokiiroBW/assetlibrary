@@ -18,7 +18,7 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "0.3.0-preview.8"
+VERSION = "0.3.0-preview.9"
 OWNER = "AssetLibrary.Windows.Explorer"
 PROJECTS = {
     "Setup": "apps/windows-client/Setup/AssetLibrary.Windows.Setup.csproj",

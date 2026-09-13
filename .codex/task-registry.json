@@ -1250,6 +1250,19 @@
       "task_file": ".codex/tasks/V03-035.md",
       "handoff": ".codex/handoffs/V03-035/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V03-036",
+      "title": "explorer-page-fixture",
+      "module": "explorer-page-fixture",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "windows-page-fixture-owner",
+      "branch": "codex/v03-036-explorer-page-fixture",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-036",
+      "task_file": ".codex/tasks/V03-036.md",
+      "handoff": ".codex/handoffs/V03-036/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }

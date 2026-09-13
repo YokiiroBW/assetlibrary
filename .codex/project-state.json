@@ -84,13 +84,17 @@
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
   "active_work": {
     "milestone": "V0.3 browse/preview wave",
-    "coordinator_task": "V03-022",
+    "coordinator_task": "V03-033",
     "coordinator_thread": "01a0801a-4c6c-7d92-b0be-ce0150f8b115",
-    "tasks": [],
-    "stage": "preview7_delivered",
+    "tasks": [
+      "V03-034",
+      "V03-035",
+      "V03-036"
+    ],
+    "stage": "page_navigation_implementation",
     "windows_entry": "native Explorer; G1/G2/G3 measured, G4 waived/not performed",
     "command_approvals": "User authorized owned desktop tests and delivery. Original Explorer was not restarted; no HKLM/UAC/security-policy changes.",
-    "contract_commit": "c10eddf",
-    "integration_checkpoint": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
+    "contract_commit": "8833999",
+    "integration_checkpoint": "0e13f61"
   }
 }
