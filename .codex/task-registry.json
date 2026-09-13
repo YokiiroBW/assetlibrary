@@ -1166,6 +1166,19 @@
       "thread_deep_link": "",
       "execution_status": "Integrated and deployed on the original NAS under ADR-0023; final Core/API/browser and retained-library checks passed; owned test resources cleaned. Full V0.3/G4 not claimed.",
       "integrated_commit": "7f092904dbadcf1276bb9daf5b565946ecccbdad"
+    },
+    {
+      "id": "V03-030",
+      "title": "explorer-zoom-integration",
+      "module": "explorer-zoom-integration",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "windows-zoom-coordinator",
+      "branch": "codex/v03-030-explorer-zoom-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-030",
+      "task_file": ".codex/tasks/V03-030.md",
+      "handoff": ".codex/handoffs/V03-030/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
