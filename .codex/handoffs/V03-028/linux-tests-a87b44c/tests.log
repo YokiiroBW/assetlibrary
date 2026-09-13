@@ -1,0 +1,47 @@
+Test run for /src/tests/dotnet/AssetLibrary.Preview.Tests/bin/Release/net10.0/AssetLibrary.Preview.Tests.dll (.NETCoreApp,Version=v10.0)
+VSTest version 18.0.2 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+  Skipped RealHostSourceChildStreamsVerifiedBytesAndReleasesTheOriginalHandle [9 ms]
+  Skipped RealPostgresRoundTripPreservesUnchangedImageAdmission [3 ms]
+  Skipped RealHttpsImageTrustAndInvisibleEntryRulesPreserveTheJsonContract [3 ms]
+  Skipped RealCoreReturnsTheDeclaredEngineStateWithoutOriginalFallback [1 ms]
+  Skipped UnsupportedPlatformCannotActivateProductionSocketBackend [< 1 ms]
+  Skipped OutOfProcessTransferBrokerCannotCreateAJob [1 ms]
+  Skipped InProcessComCannotReadHostOnlyMarker [1 ms]
+  Skipped WorkerCannotReadHostFileOrWriteItsRxDirectory [3 ms]
+  Skipped InheritableEventOutsideStdioWhitelistIsNotShared [< 1 ms]
+  Skipped OwnedDirectoryWithInheritedModifyCanBecomeStrictlyPrivate [2 ms]
+  Skipped ChangedPositiveTimestampDoesNotHideLiveOwnedWorker [1 ms]
+  Skipped CancellationBeforeStartupCreatesNoState [< 1 ms]
+  Skipped SuccessfulProfileDisposalRemovesBothOwnedDirectories [< 1 ms]
+  Skipped CleanupFailureRetainsOwnershipForRecovery [< 1 ms]
+  Skipped StartupCancellationKeepsItsErrorWhenCleanupAlsoFails [< 1 ms]
+  Skipped RecoveryToleratesAlreadyDeletedOwnedProfileBeforeJournalUpdate [< 1 ms]
+  Skipped RecoveryDoesNotAdoptLegacyOrMalformedRecords [< 1 ms]
+  Skipped LpacWinsockInitializationBlocksThisTestedPath [< 1 ms]
+  Skipped LpacWinHttpInitializationBlocksThisTestedPath [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123","-1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123","+1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123","01") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123"," 1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123","1 ") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","123","0") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","0","1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","+123","1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("3","0123","1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("-1","123","1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("+3","123","1") [< 1 ms]
+  Skipped RejectsNegativeSignedAndNoncanonicalIdentity ("03","123","1") [< 1 ms]
+  Skipped AcceptsValidCreatedAndStartedIdentity ("1","0","0") [< 1 ms]
+  Skipped AcceptsValidCreatedAndStartedIdentity ("3","123","1") [< 1 ms]
+  Skipped ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen [1 ms]
+  Skipped NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail [2 ms]
+  Skipped KernelCpuQuotaTerminatesWithMeasuredPeriodicOvershoot [< 1 ms]
+  Skipped CommittedMemoryIsBoundedByJobRatherThanGc [< 1 ms]
+  Skipped JobRejectsAnotherProcess [< 1 ms]
+  Skipped CancellationTerminatesSleepingWorkerAndReaps [< 1 ms]
+Results File: /src/.runtime/linux-results/linux-preview-tests.trx
+
+Passed!  - Failed:     0, Passed:    92, Skipped:    39, Total:   131, Duration: 8 s - AssetLibrary.Preview.Tests.dll (net10.0)

@@ -1,0 +1,228 @@
+{
+  "runs": [
+    {
+      "trx": "linux-preview-tests.trx",
+      "total": 131,
+      "outcomes": {
+        "Passed": 92,
+        "NotExecuted": 39
+      }
+    },
+    {
+      "trx": "linux-source-broker.trx",
+      "total": 1,
+      "outcomes": {
+        "Passed": 1
+      }
+    }
+  ],
+  "unique": 131,
+  "outcomes": {
+    "Passed": 93,
+    "NotExecuted": 38
+  },
+  "skip_categories": {
+    "windows_only": 34,
+    "live_fixture_missing": 3,
+    "non_linux_negative": 1
+  },
+  "linux_peer": [
+    {
+      "name": "AssetLibrary.Preview.Tests.SocketImageConfigurationTests::RealLinuxPeerUsesEffectiveUserAndRejectsUnconnectedSocket",
+      "outcome": "Passed",
+      "reason": ""
+    }
+  ],
+  "remaining_skips": [
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageIdentityTests::ChangedPositiveTimestampDoesNotHideLiveOwnedWorker",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. Actual Windows worker identity is required."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageParentExitTests::ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. Windows parent-exit Job boundary is required."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"0\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageResourceTests::CommittedMemoryIsBoundedByJobRatherThanGc",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageResourceTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows Job limits are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsComBoundaryTests::OutOfProcessTransferBrokerCannotCreateAJob",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. Actual Windows COM isolation is required."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::AcceptsValidCreatedAndStartedIdentity (\"3\",\"123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageResourceTests::JobRejectsAnotherProcess",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageResourceTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows Job limits are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"-1\",\"123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.ImageTimestampIntegrationTests::RealPostgresRoundTripPreservesUnchangedImageAdmission",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. The existing owned PostgreSQL runner must supply the trial test connection."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageNetworkTests::LpacWinHttpInitializationBlocksThisTestedPath",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageNetworkTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows network boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"+123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::StartupCancellationKeepsItsErrorWhenCleanupAlsoFails",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::AcceptsValidCreatedAndStartedIdentity (\"1\",\"0\",\"0\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"01\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageDirectoryTests::OwnedDirectoryWithInheritedModifyCanBecomeStrictlyPrivate",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. Windows ACL platform is required."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::RecoveryDoesNotAdoptLegacyOrMalformedRecords",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"+1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"-1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::RecoveryToleratesAlreadyDeletedOwnedProfileBeforeJournalUpdate",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::CancellationBeforeStartupCreatesNoState",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::SuccessfulProfileDisposalRemovesBothOwnedDirectories",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.LiveImageEndpointTests::RealHttpsImageTrustAndInvisibleEntryRulesPreserveTheJsonContract",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. The existing real Core/PostgreSQL fixture must supply its private connection file."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"0\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageResourceTests::KernelCpuQuotaTerminatesWithMeasuredPeriodicOvershoot",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageResourceTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows Job limits are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageBoundaryTests::WorkerCannotReadHostFileOrWriteItsRxDirectory",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageBoundaryTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows LPAC boundaries are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsComBoundaryTests::InProcessComCannotReadHostOnlyMarker",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. Actual Windows COM isolation is required."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\"1 \")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"123\",\" 1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageLifecycleTests::CleanupFailureRetainsOwnershipForRecovery",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageLifecycleTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows profile lifecycle requires the actual platform.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"03\",\"123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"3\",\"0123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.SocketImageConfigurationTests::UnsupportedPlatformCannotActivateProductionSocketBackend",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. This negative control applies outside Linux."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageProcessTests::NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. This test requires the Windows LPAC launcher."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.LiveImageEndpointTests::RealCoreReturnsTheDeclaredEngineStateWithoutOriginalFallback",
+      "outcome": "NotExecuted",
+      "reason": "Assert.Inconclusive failed. The existing real Core/PostgreSQL fixture must supply its private connection file."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests::RejectsNegativeSignedAndNoncanonicalIdentity (\"+3\",\"123\",\"1\")",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageOwnerJournalTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows owner journal boundary is required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageResourceTests::CancellationTerminatesSleepingWorkerAndReaps",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageResourceTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows Job limits are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageBoundaryTests::InheritableEventOutsideStdioWhitelistIsNotShared",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageBoundaryTests.RequireWindows threw exception. Assert.Inconclusive failed. Windows LPAC boundaries are required.."
+    },
+    {
+      "name": "AssetLibrary.Preview.Tests.WindowsImageNetworkTests::LpacWinsockInitializationBlocksThisTestedPath",
+      "outcome": "NotExecuted",
+      "reason": "Initialization method AssetLibrary.Preview.Tests.WindowsImageNetworkTests.RequireWindows threw exception. Assert.Inconclusive failed. Actual Windows network boundary is required.."
+    }
+  ]
+}

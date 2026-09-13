@@ -1,5 +1,11 @@
 # V03-028 测试记录
 
+## 后续开发Linux完整测试（a87b44c）
+
+dev-230独立/tmp副本和给定镜像，实际SDK10.0.111、Linux6.14、内存2GiB/CPU2，未使用root构建缓存。完整131项92通过/39未执行；补Host locked restore/build后仅补充source-broker1项通过，唯一用例汇总93通过/0失败/38未执行。Linux真实SO_PEERCRED通过；剩余34 Windows项、1非Linux负控及3 PG/HTTPS live夹具项，不声称全部131都执行。两测试容器Exit0/无OOM且精确删除并核不存在。详见[命令、原始TRX与清理](linux-tests-a87b44c/README.md)。此后没有修改任何代码，且不是NAS验收。
+
+## 原Windows组件测试（a173210）
+
 Windows11 x64；SDK10.0.111位于C:/YOKI/Codex/worktrees/V01-004/.runtime/sandbox-storage/V01-004/dotnet；NuGet缓存C:/YOKI/Codex/AssetLibrary-worktrees/V03-015/.runtime/nuget。不修改项目/锁；.runtime/socket-test-links.targets只为AssetLibrary.Preview.Tests增加三份UnixSocketImage*实现源，与现有内部源码测试方式一致。
 
 ```powershell

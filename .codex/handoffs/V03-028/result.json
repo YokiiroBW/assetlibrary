@@ -9,6 +9,25 @@
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-028",
   "commit": "a173210614b283e087200fd85109f3624efbeb5a",
   "changed_files": [
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/README.md",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/build.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/commands.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/container-cleanup.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/container-state.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/evidence.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/host-build.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/host-restore.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/identity.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/kernel.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/linux-preview-tests.trx",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/linux-source-broker.trx",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/restore.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/sdk.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/source-broker-commands.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/source-broker.log",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/source-container-state.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/test-summary.json",
+    ".codex/handoffs/V03-028/linux-tests-a87b44c/tests.log",
     ".codex/handoffs/V03-028/result.json",
     ".codex/handoffs/V03-028/summary.md",
     ".codex/handoffs/V03-028/tests.md",
@@ -24,15 +43,18 @@
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 45,
+    "passed": 93,
     "failed": 0,
-    "skipped": 1,
-    "report": "tests.md"
+    "skipped": 38,
+    "report": "tests.md",
+    "tested_source_revision": "a87b44c7e950b53e44f0e41f6702d1d892653eeb",
+    "scope": "Development Linux complete131 discovered cases:93 unique passed after one formerly skipped source-broker follow-up;38 Windows/platform/live-fixture cases remain unexecuted. Windows initial45/1 is historical separate evidence.",
+    "linux_report": "linux-tests-a87b44c/README.md"
   },
   "risks": [
-    "Actual Linux SO_PEERCRED and NAS UID/container isolation/reap evidence remain coordinator-owned; Windows socket tests explicitly inject peer policy.",
-    "Coordinator must add approved decoder IDisposable release in ImagePreviewService and three implementation Compile links to the test project.",
-    "No production NAS activation, GUI, original assets, G4 or complete V0.3 claim."
+    "Development Linux UID0 SO_PEERCRED passed; actual NAS UID1654/container isolation/reap and real Core image deployment remain coordinator-owned.",
+    "38 Linux-run cases remain unexecuted:34 Windows-only,1 non-Linux negative control,3 Postgres/HTTPS live-fixture tests.",
+    "No NAS or original-asset operations, no G4 or complete V0.3 claim."
   ],
   "blocked_by": [],
   "recommended_merge_order": 2,
@@ -57,7 +79,8 @@
     "architecture_tests": [
       "Strict Core/Host Release builds0 warnings; targeted format verification passed.",
       "45 affected tests passed and1 Linux platform test explicitly skipped on Windows.",
-      "Diff review checked fixed path/UID0, environment mutual exclusion, no half-close/EOF wait, bounded wire sizes, cancellation and deferred semaphore disposal."
+      "Diff review checked fixed path/UID0, environment mutual exclusion, no half-close/EOF wait, bounded wire sizes, cancellation and deferred semaphore disposal.",
+      "Frozen integrationa87b44c tested on dev-230 in isolated2GiB/2CPU containers:93 unique passes/0 failures/38 platform or live-fixture skips; actual Linux SO_PEERCRED and real source-broker passed. No code changes. Both containers removed and absence verified."
     ],
     "technical_debt": [
       "Linux/container peer identity, broker capacity/reap and final deployment checks required from root."

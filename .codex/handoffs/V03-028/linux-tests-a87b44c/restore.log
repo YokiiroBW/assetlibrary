@@ -1,0 +1,16 @@
+
+Welcome to .NET 10.0!
+---------------------
+SDK Version: 10.0.111
+
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------
+  Determining projects to restore...
+  Restored /src/packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj (in 120 ms).
+  Restored /src/services/core-server/AssetLibrary.CoreServer.csproj (in 6.15 sec).
+  Restored /src/tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj (in 11.81 sec).

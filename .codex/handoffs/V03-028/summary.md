@@ -2,6 +2,8 @@
 
 状态ready_for_review。分支codex/v03-028-nas-local-image-adapter，工作区C:/YOKI/Codex/AssetLibrary-worktrees/V03-028。代码a173210614b283e087200fd85109f3624efbeb5a；root负责Linux/NAS及完整同源容器闭环。
 
+2026-09-13追加开发Linux验证：固定协调源码a87b44c在dev-230独立副本、指定镜像与2GiB/2CPU容器中完整运行预览测试；合并一次补充source-broker后131个唯一用例93通过/0失败/38平台或缺实机夹具未执行。真实Linux SO_PEERCRED UID0正控通过，Core/Host严格构建通过；两个容器已按归属验证后删除。没有修改源码或操作NAS，原始TRX及边界见[Linux证据](linux-tests-a87b44c/README.md)。a87已包含root的生命周期与测试链接整合，不把该源码和本组件初始a173混同。
+
 ## 完成与API
 
 ImagePreviewRuntime.Create在末尾增加可选string? socketPath=null，已有调用源兼容。TrialImagePreviewConfiguration只读取ASSETLIBRARY_IMAGE_PREVIEW_SOCKET并传入该参数。仅精确/run/assetlibrary-image/decoder.sock且Linux可选择新UnixSocketImageDecoder；旧WORKER非空时与socket互斥。未知路径、URI、空格或平台不符返回既有Unavailable query，基础浏览保持可用；不更改旧本地进程路径。
