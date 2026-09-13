@@ -13,6 +13,15 @@ namespace {
 using proof::Check;
 std::atomic_ulong queries{0};
 bool cleanupFailed=false;
+gallery::preferences::Values savedPreferences;
+ULONG preferenceWrites=0;
+bool rejectPreferenceWrite=false;
+std::function<void()> loadingPreferences;
+gallery::preferences::Values LoadPreferences()noexcept{auto action=std::move(loadingPreferences);if(action)action();return savedPreferences;}
+HRESULT SavePreferences(const gallery::preferences::Values& value)noexcept{++preferenceWrites;if(rejectPreferenceWrite)return E_ACCESSDENIED;savedPreferences=value;return S_OK;}
+HRESULT CreateTestView(IShellFolder2* folder,PCIDLIST_ABSOLUTE absolute,snapshot::Location location,IShellView** result,gallery::Sources sources={},PCIDLIST_ABSOLUTE root=nullptr){
+    return gallery::CreateView(folder,absolute,location,result,sources,root,{LoadPreferences,SavePreferences});
+}
 snapshot::Page Page(const snapshot::Location&,HANDLE) noexcept {++queries;return {};}
 thumbnail::Result Image(const snapshot::Location&,HANDLE) noexcept {++queries;return {};}
 struct HiddenWindow {
@@ -91,11 +100,15 @@ struct PageControl {
     DWORD ui=GetCurrentThreadId();
     std::atomic_ulong calls{0},canceled{0},uiCalls{0};
     std::atomic_ulong images{0};
+    std::atomic_ulong previews{0},lastPreviewNode{0};
+    std::atomic_ulong previewCanceled{0};
+    std::atomic_bool blockFirstPreview{false},ignorePreviewCancel{false},releasePreview{false};
+    std::atomic<thumbnail::Status> previewStatus{thumbnail::Status::Ready};
     std::atomic_bool blockAll{false},blockAfterFirst{false};
     std::atomic<snapshot::Status> status{snapshot::Status::Ready};
     UINT items=2;
     bool more=false;
-    ~PageControl(){const auto until=GetTickCount64()+2000;while(gallery::PendingWork()&&GetTickCount64()<until)Sleep(1);if(gallery::PendingWork())TerminateProcess(GetCurrentProcess(),70);}
+    ~PageControl(){releasePreview=true;const auto until=GetTickCount64()+2000;while(gallery::PendingWork()&&GetTickCount64()<until)Sleep(1);if(gallery::PendingWork())TerminateProcess(GetCurrentProcess(),70);}
 };
 PageControl* pageControl=nullptr;
 snapshot::Page VisiblePage(const snapshot::Location& location,HANDLE cancel)noexcept{
@@ -113,6 +126,18 @@ thumbnail::Result VisibleImage(const snapshot::Location& location,HANDLE)noexcep
     try{auto image=std::make_shared<gallery::Pbgra>();image->width=4;image->height=3;image->stride=16;image->pixels.resize(48);result.image=std::move(image);}
     catch(const std::bad_alloc&){result={};}return result;
 }
+thumbnail::Result VisiblePreview(const snapshot::Location& location,HANDLE cancel)noexcept{
+    const auto ordinal=++pageControl->previews;pageControl->lastPreviewNode=location.node.Data1;const auto status=pageControl->previewStatus.load();
+    if(pageControl->blockFirstPreview&&ordinal==1){
+        const auto until=GetTickCount64()+5000;bool observedCancel=false;
+        while(!pageControl->releasePreview&&GetTickCount64()<until){
+            if(WaitForSingleObject(cancel,0)==WAIT_OBJECT_0){if(!observedCancel){++pageControl->previewCanceled;observedCancel=true;}if(!pageControl->ignorePreviewCancel)break;}
+            Sleep(1);
+        }
+    }
+    auto result=VisibleImage(location,cancel);result.status=status;
+    if(result.status!=thumbnail::Status::Ready)result.image.reset();return result;
+}
 template<class F>void Await(F ready,const char* phase="quiesce"){
     const auto until=GetTickCount64()+2000;while(!ready()&&GetTickCount64()<until)Pump(5);
     if(!ready()){fprintf(stderr,"phase=%s pages=%lu canceled=%lu jobs=%lu\n",phase,pageControl->calls.load(),pageControl->canceled.load(),gallery::PendingWork());throw std::runtime_error("bounded visible-view condition");}
@@ -125,7 +150,7 @@ struct VisibleFixture {
     proof::Com<IShellView> view;
     proof::Com<IFolderView> items;
     VisibleFixture(){folder.value=new CompareFolder();browser.value=new CreationBrowser();browser.value->parent=parent.value;
-        Check(gallery::CreateView(folder.value,root.value,{{501},{502}},&view.value,{VisiblePage,VisibleImage})==S_OK,"offscreen gallery create");
+        Check(CreateTestView(folder.value,root.value,{{501},{502}},&view.value,{VisiblePage,VisibleImage,VisiblePreview})==S_OK,"offscreen gallery create");
         Check(view.value->QueryInterface(IID_PPV_ARGS(&items.value))==S_OK,"offscreen IFolderView");browser.value->active=view.value;}
     ~VisibleFixture(){if(view.value)view.value->DestroyViewWindow();browser.value->active=nullptr;}
     HWND Open(int width=600,int height=400){RECT bounds{0,0,width,height};FOLDERSETTINGS settings{FVM_ICON,0};HWND window=nullptr;
@@ -155,7 +180,7 @@ struct Fixture {
     proof::Item root{snapshot::MakePidl({{101},{201},snapshot::Kind::Library,L"private notification fixture"})};
     proof::Com<IShellView> view;
     explicit Fixture(PCIDLIST_ABSOLUTE notificationRoot=nullptr){folder.value=new enum_done_test::Folder();browser.value=new RefreshBrowser();browser.value->window=parent.value;
-        Check(gallery::CreateView(folder.value,root.value,{{101},{201}},&view.value,{Page,Image},notificationRoot)==S_OK,"gallery view create");browser.value->active=view.value;}
+        Check(CreateTestView(folder.value,root.value,{{101},{201}},&view.value,{Page,Image},notificationRoot)==S_OK,"gallery view create");browser.value->active=view.value;}
     ~Fixture(){if(view.value)view.value->DestroyViewWindow();browser.value->active=nullptr;}
     HWND Open(){RECT bounds{0,0,600,400};FOLDERSETTINGS settings{FVM_ICON,FWF_AUTOARRANGE};HWND window=nullptr;
         Check(view.value->CreateViewWindow(nullptr,&settings,browser.value,&bounds,&window)==S_OK&&window,"gallery child HWND created");return window;}
@@ -180,7 +205,7 @@ void InterfacesAndFinalRelease(){
     Check(folder.value==static_cast<IShellFolder2*>(fixture.folder.value),"original Folder is reused");folder.value->Release();folder.value=nullptr;
     MSG refresh{};refresh.hwnd=window;refresh.message=WM_KEYDOWN;refresh.wParam=VK_F5;
     Check(fixture.view.value->TranslateAccelerator(&refresh)==S_OK&&queries==0,"hidden F5 never waits for or starts IPC");
-    Check(fixture.view.value->SaveViewState()==E_NOTIMPL,"unsupported persistence reported");
+    Check(fixture.view.value->SaveViewState()==E_NOTIMPL,"per-directory Shell stream persistence is unsupported; explicit app defaults are separate");
     enumeration.value->Release();enumeration.value=nullptr;items.value->Release();items.value=nullptr;
     fixture.browser.value->active=nullptr;
     // Exercise the real View's last reference with a live Surface. No explicit Destroy first.
@@ -225,6 +250,8 @@ void CreationReentry(){
     Check(loading::ActiveViews()==before&&!IsWindow(window),"creation reentry has no quota leak");
     browser.value->adding=[&]{fixture.view.value->DestroyViewWindow();};window=nullptr;
     Check(fixture.view.value->CreateViewWindow(nullptr,&settings,browser.value,&bounds,&window)==E_ABORT&&!window&&loading::ActiveViews()==before,"even incoming AddRef reentry cannot reopen a canceled creation");
+    loadingPreferences=[&]{fixture.view.value->DestroyViewWindow();};window=nullptr;
+    Check(fixture.view.value->CreateViewWindow(nullptr,&settings,browser.value,&bounds,&window)==E_ABORT&&!window&&loading::ActiveViews()==before,"preference loading reentry cannot restore through a retired Surface");
 }
 void CompareReentry(){
     {
@@ -371,6 +398,70 @@ void ProductionRoute(const wchar_t* path){
     folderView.value->Release();folderView.value=nullptr;view.value->Release();view.value=nullptr;child.value->Release();child.value=nullptr;root.value->Release();root.value=nullptr;
     Check(library.canUnload()==S_OK,"unopened product gallery releases Folder ownership");
 }
+void PreferencesAndPreview(){
+    savedPreferences={gallery::Mode::List,200};preferenceWrites=0;
+    PageControl control;pageControl=&control;VisibleFixture fixture;const auto window=fixture.Open();
+    Await([&]{return fixture.Count()==2&&gallery::PendingWork()==0;});
+    UINT mode=0;Check(fixture.items.value->GetCurrentViewMode(&mode)==S_OK&&mode==FVM_DETAILS&&preferenceWrites==0,"create restores defaults without writing them back");
+    Check(fixture.items.value->SetCurrentViewMode(FVM_ICON)==S_OK&&preferenceWrites==1&&savedPreferences.mode==gallery::Mode::Gallery&&savedPreferences.densityDip==200,"explicit mode persists mode and density together");
+    {VisibleFixture another;another.Open();UINT other=0;Check(another.items.value->GetCurrentViewMode(&other)==S_OK&&other==FVM_ICON,"new directory adopts saved default");
+        Check(another.items.value->SetCurrentViewMode(FVM_DETAILS)==S_OK&&savedPreferences.mode==gallery::Mode::List,"latest explicit window wins");
+        Check(fixture.items.value->GetCurrentViewMode(&other)==S_OK&&other==FVM_ICON,"existing window is not forced to another mode");}
+    const auto writes=preferenceWrites;fixture.view.value->SaveViewState();Check(preferenceWrites==writes&&savedPreferences.mode==gallery::Mode::List,"old SaveViewState cannot overwrite latest default");
+    rejectPreferenceWrite=true;Check(fixture.items.value->SetCurrentViewMode(FVM_DETAILS)==S_OK,"failed save leaves current browsing usable");
+    Check(OwnSummary(window).find(L"浏览设置未保存")!=std::wstring::npos,"save failure is nonblocking and visible");rejectPreferenceWrite=false;
+    Check(fixture.items.value->SetCurrentViewMode(FVM_ICON)==S_OK,"successful explicit save recovers");
+    Check(OwnSummary(window).find(L"浏览设置未保存")==std::wstring::npos,"successful save clears failure hint");
+    Check(fixture.items.value->SelectItem(0,SVSI_SELECT|SVSI_FOCUSED|SVSI_DESELECTOTHERS)==S_OK,"preview starts from selected file");
+    Await([]{return gallery::PendingWork()==0;});
+    const auto canvas=FindWindowExW(window,nullptr,L"STATIC",nullptr);if(!canvas)throw std::runtime_error("preview canvas");
+    UiaClient oldGallery(canvas);oldGallery.Held();const auto beforePreview=preferenceWrites;
+    SendMessageW(canvas,WM_KEYDOWN,VK_SPACE,0);
+    Await([&]{return control.previews==1&&gallery::PendingWork()==0;},"open-large-preview");
+    const auto first=control.lastPreviewNode.load();oldGallery.Retired();
+    Check(IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"large preview stays within same Explorer child");
+    SendMessageW(GetDlgItem(window,gallery::PreviewNextControlId),BM_CLICK,0,0);
+    Await([&]{return control.previews==2&&gallery::PendingWork()==0;},"next-large-preview");
+    Check(first!=control.lastPreviewNode&&!IsWindowEnabled(GetDlgItem(window,gallery::PreviewNextControlId)),"next reaches second file and stops at current-page boundary");
+    control.previewStatus=thumbnail::Status::Unsupported;
+    SendMessageW(GetDlgItem(window,gallery::PreviewPreviousControlId),BM_CLICK,0,0);
+    Await([&]{return control.previews==3&&gallery::PendingWork()==0;},"unsupported-preview-fallback");
+    Check(first==control.lastPreviewNode&&IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"unsupported preview remains navigable");
+    SendMessageW(canvas,WM_KEYDOWN,VK_ESCAPE,0);Await([]{return gallery::PendingWork()==0;});
+    int selected=0,focused=-1;Check(fixture.items.value->ItemCount(SVGIO_SELECTION,&selected)==S_OK&&selected==1&&fixture.items.value->GetFocusedItem(&focused)==S_OK&&focused==0,"close restores original gallery selection and focus");
+    Check(!IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId))&&preferenceWrites==beforePreview,"preview lifecycle does not persist temporary state");
+    Check(fixture.items.value->GetCurrentViewMode(&mode)==S_OK&&mode==FVM_ICON,"close restores gallery mode");
+    control.previewStatus=thumbnail::Status::AccessDenied;SendMessageW(canvas,WM_KEYDOWN,VK_RETURN,0);
+    Await([&]{return fixture.Count()==0&&gallery::PendingWork()==0;},"preview-auth-revokes-page");
+    Check(!IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"permission failure clears preview and old page");
+    fixture.view.value->DestroyViewWindow();savedPreferences={};
+}
+void PreviewViewRaces(){
+    for(const bool late:{false,true}){
+        PageControl control;pageControl=&control;control.blockFirstPreview=true;control.ignorePreviewCancel=late;
+        control.previewStatus=late?thumbnail::Status::AccessDenied:thumbnail::Status::Ready;
+        VisibleFixture fixture;const auto window=fixture.Open();Await([&]{return fixture.Count()==2&&gallery::PendingWork()==0;});
+        const auto canvas=FindWindowExW(window,nullptr,L"STATIC",nullptr);
+        if(!canvas)throw std::runtime_error("race preview canvas");
+        Check(fixture.items.value->SelectItem(0,SVSI_SELECT|SVSI_FOCUSED|SVSI_DESELECTOTHERS)==S_OK,"race selected file");
+        SendMessageW(canvas,WM_KEYDOWN,VK_SPACE,0);Await([&]{return control.previews==1;},"preview-source-blocked");
+        const auto before=GetTickCount64();
+        if(late)SendMessageW(GetDlgItem(window,gallery::PreviewBackControlId),BM_CLICK,0,0);else ShowWindow(window,SW_HIDE);
+        Check(GetTickCount64()-before<200,"close/hide never waits for pending preview I/O");
+        Await([&]{return control.previewCanceled==1;},"preview-cancel-signaled");
+        if(!late){
+            Await([]{return gallery::PendingWork()==0;});Check(fixture.Count()==0,"hide clears authorized page during image load");
+            ShowWindow(window,SW_SHOWNA);Await([&]{return fixture.Count()==2&&gallery::PendingWork()==0;});
+            Check(!IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"show restores revalidated browse state without stale preview");
+        }else{
+            control.previewStatus=thumbnail::Status::Ready;SendMessageW(canvas,WM_KEYDOWN,VK_SPACE,0);
+            Await([&]{return control.previews==2&&gallery::PendingWork()==1;},"same-file-new-preview-finishes");Pump(10);
+            const auto summary=OwnSummary(window);control.releasePreview=true;Await([]{return gallery::PendingWork()==0;});Pump(10);
+            Check(fixture.Count()==2&&OwnSummary(window)==summary&&IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"late old denied response cannot clear or overwrite reopened same-index preview");
+        }
+        fixture.view.value->DestroyViewWindow();Eventually([]{return !gallery::PendingWork()&&UiaIdle()&&loading::ActiveViews()==0;},"preview race retires requests, providers and quota");
+    }
+}
 void ProductionUiaDllLifetime(const wchar_t* path){
     proof::Library library(path,product::ClassId);auto root=library.Root();
     proof::Item entry(snapshot::MakePidl({{301},{302},snapshot::Kind::Library,L"hidden DLL lifecycle fixture"}));auto child=proof::Bind(root.value,entry);
@@ -388,7 +479,7 @@ void ProductionUiaDllLifetime(const wchar_t* path){
 }
 int wmain(int argc,wchar_t** argv){
     if(argc!=2)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
-    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
+    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();PreferencesAndPreview();PreviewViewRaces();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
         puts("gallery_view=passed; last_Release=retired_before_zero; external_destroy=idempotent; shared_quota=4; public_notification=NewDelivery; root_navigation=same_browser; hidden_IPC=0; registry_writes=0; real_Explorer=0");
     }catch(const std::exception& error){fprintf(stderr,"GalleryViewTests: %s\n",error.what());result=1;}
     CoUninitialize();return result;

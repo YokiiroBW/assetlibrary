@@ -68,12 +68,16 @@ class View final:public IShellView,public IFolderView {
     PIDLIST_ABSOLUTE absolute_=nullptr,root_=nullptr;
     snapshot::Location location_;
     Requests requests_;
+    PreferenceStore preferences_;
     Surface* surface_=nullptr;
     snapshot::Page page_;
     std::uint64_t generation_=Generation();
     ULONG notification_=0;
     bool slot_=false,creating_=false,destroying_=false,visible_=false,refreshing_=false,retired_=false;
     bool statusUpdating_=false;
+    bool preferenceSaveFailed_=false;
+    int previewIndex_=-1;
+    std::uint64_t previewSerial_=0;
     std::uint64_t statusRevision_=0;
     UINT active_=SVUIA_DEACTIVATE;
     bool OnThread()const noexcept {return GetCurrentThreadId()==thread_;}
@@ -105,6 +109,7 @@ class View final:public IShellView,public IFolderView {
                             if(index<page_.entries.size()&&page_.entries[index].kind!=snapshot::Kind::NextPage&&page_.entries[index].kind!=snapshot::Kind::StatusRow)++selected;}
                         text=L"当前页 "+std::to_wstring(count)+L" 项，已选 "+std::to_wstring(selected)+L" 项";
                         if(more)text+=L"（还有下一页）";
+                        if(preferenceSaveFailed_)text+=L" · 浏览设置未保存";
                     }
                 }
                 if(surface_&&(clear||Live(window,generation)))surface_->SetStatusText(text);
@@ -128,6 +133,7 @@ class View final:public IShellView,public IFolderView {
         return -1;
     }
     std::uint64_t Clear(snapshot::Status status) noexcept {
+        previewIndex_=-1;previewSerial_=Generation();
         const auto generation=Generation();generation_=generation;requests_.Cancel(generation);page_={};page_.status=status;
         if(surface_)surface_->Clear(status,generation);if(generation_==generation)UpdateStatus();return generation;
     }
@@ -182,7 +188,22 @@ class View final:public IShellView,public IFolderView {
                 if(page_.status!=snapshot::Status::Ready||item.index>=page_.entries.size())continue;
                 const auto& entry=page_.entries[item.index];
                 if(item.thumbnail.image&&(item.thumbnail.location.epoch!=entry.epoch||item.thumbnail.location.node!=entry.node))continue;
-                surface_->SetThumbnail(item.index,generation_,std::move(item.thumbnail.image));
+                if(item.preview){
+                    if(previewIndex_!=static_cast<int>(item.index))continue;
+                    const auto serial=previewSerial_;
+                    const wchar_t* text=L"暂时无法显示图片，可返回后重试";
+                    switch(item.thumbnail.status){
+                    case thumbnail::Status::Ready:text=item.thumbnail.image?L"适应窗口":L"暂时无法显示图片";break;
+                    case thumbnail::Status::Unsupported:text=L"此文件暂不支持图片预览";break;
+                    case thumbnail::Status::Busy:text=L"图片服务繁忙，可返回后重试";break;
+                    case thumbnail::Status::InvalidResponse:text=L"图片数据校验失败";break;
+                    default:break;
+                    }
+                    UINT ordinal=0,total=0;
+                    for(UINT index=0;index<page_.entries.size();++index)if(page_.entries[index].kind==snapshot::Kind::File){++total;if(index<=item.index)++ordinal;}
+                    const auto status=L"本页文件 "+std::to_wstring(ordinal)+L"/"+std::to_wstring(total)+L" · "+text;
+                    surface_->SetPreview(item.index,serial,std::move(item.thumbnail.image),status);
+                }else if(previewIndex_<0)surface_->SetThumbnail(item.index,generation_,std::move(item.thumbnail.image));
             }
         }catch(const std::bad_alloc&){if(Live(processingWindow,processingGeneration))Clear(snapshot::Status::Unavailable);}
         catch(HRESULT error){if(error!=E_ABORT&&Live(processingWindow,processingGeneration))Clear(snapshot::Status::InvalidResponse);}
@@ -190,7 +211,7 @@ class View final:public IShellView,public IFolderView {
         return 0;
     }
     void Viewport() noexcept {
-        if(destroying_||!surface_)return;
+        if(creating_||destroying_||!surface_)return;
         const auto window=surface_->Window();if(!window){DestroyViewWindow();return;}
         const bool visible=IsVisibleIntent();
         if(!visible){
@@ -200,7 +221,8 @@ class View final:public IShellView,public IFolderView {
         }
         if(!visible_){visible_=true;if(!refreshing_&&!retired_){Refresh();return;}}
         if(retired_||page_.status!=snapshot::Status::Ready)return;
-        requests_.Visible(page_,surface_->VisibleFileItems(),generation_);
+        if(previewIndex_>=0)requests_.Preview(page_,static_cast<UINT>(previewIndex_),generation_);
+        else requests_.Visible(page_,surface_->VisibleFileItems(),generation_);
     }
     void Focused() noexcept {
         if(active_==SVUIA_ACTIVATE_FOCUS)return;active_=SVUIA_ACTIVATE_FOCUS;
@@ -213,6 +235,7 @@ class View final:public IShellView,public IFolderView {
         if(Live(window,generation))UpdateStatus();
     }
     void Activate(UINT index) noexcept {
+        if(page_.status==snapshot::Status::Ready&&index<page_.entries.size()&&page_.entries[index].kind==snapshot::Kind::File){OpenPreview(index);return;}
         if(index>=page_.entries.size()||!snapshot::Navigable(page_.entries[index].kind))return;
         try{
             const auto window=Window();const auto generation=generation_;
@@ -220,6 +243,35 @@ class View final:public IShellView,public IFolderView {
             if(FAILED(Menu(1,&raw,IID_PPV_ARGS(&menu.value)))||!Live(window,generation))return;
             CMINVOKECOMMANDINFO info{sizeof(info)};info.hwnd=window;info.lpVerb=MAKEINTRESOURCEA(0);info.nShow=SW_SHOWNORMAL;menu.value->InvokeCommand(&info);
         }catch(const std::bad_alloc&){return;}
+    }
+    int AdjacentFile(int index,int delta)const noexcept {
+        if(delta!=-1&&delta!=1)return -1;
+        for(int candidate=index+delta;candidate>=0&&candidate<static_cast<int>(page_.entries.size());candidate+=delta)
+            if(page_.entries[static_cast<size_t>(candidate)].kind==snapshot::Kind::File)return candidate;
+        return -1;
+    }
+    void OpenPreview(UINT index) noexcept {
+        Reference<View> invocation(this);
+        if(!surface_||!IsVisibleIntent()||retired_||page_.status!=snapshot::Status::Ready||index>=page_.entries.size()||page_.entries[index].kind!=snapshot::Kind::File)return;
+        const auto window=Window();const auto generation=generation_,serial=Generation();
+        previewIndex_=static_cast<int>(index);previewSerial_=serial;
+        requests_.Visible(page_,{},generation);
+        const auto hr=surface_->BeginPreview(index,serial,AdjacentFile(previewIndex_,-1)>=0,AdjacentFile(previewIndex_,1)>=0);
+        if(!Live(window,generation)||previewSerial_!=serial)return;
+        if(FAILED(hr)){ClosePreview();return;}
+        Viewport();
+    }
+    void ClosePreview() noexcept {
+        Reference<View> invocation(this);if(!surface_||previewIndex_<0)return;
+        const auto window=Window();const auto generation=generation_;
+        previewIndex_=-1;previewSerial_=Generation();requests_.Visible(page_,{},generation);
+        surface_->EndPreview();if(Live(window,generation)){Viewport();if(Live(window,generation))UpdateStatus();}
+    }
+    void StepPreview(int delta) noexcept {if(previewIndex_<0)return;const auto next=AdjacentFile(previewIndex_,delta);if(next>=0)OpenPreview(static_cast<UINT>(next));}
+    void PreferencesChanged() noexcept {
+        if(creating_||destroying_||!surface_)return;
+        const preferences::Values value{surface_->CurrentMode(),surface_->Density()};
+        preferenceSaveFailed_=!preferences_.save||FAILED(preferences_.save(value));UpdateStatus();
     }
     HRESULT Menu(UINT count,PCUITEMID_CHILD_ARRAY items,REFIID iid,void** result){
         auto hr=count?folder_->GetUIObjectOf(Window(),count,items,iid,nullptr,result):folder_->CreateViewObject(Window(),iid,result);
@@ -242,8 +294,8 @@ class View final:public IShellView,public IFolderView {
         DestroyMenu(popup);
     }
 public:
-    View(IShellFolder2* folder,PCIDLIST_ABSOLUTE absolute,snapshot::Location location,Sources sources,PCIDLIST_ABSOLUTE notificationRoot)
-        :folder_(folder),location_(location),requests_(sources){
+    View(IShellFolder2* folder,PCIDLIST_ABSOLUTE absolute,snapshot::Location location,Sources sources,PCIDLIST_ABSOLUTE notificationRoot,PreferenceStore preferences)
+        :folder_(folder),location_(location),requests_(sources),preferences_(preferences){
         absolute_=ILCloneFull(absolute);root_=notificationRoot?ILCloneFull(notificationRoot):ILCloneFirst(absolute);
         if(!absolute_||!root_){CoTaskMemFree(absolute_);CoTaskMemFree(root_);throw std::bad_alloc();}folder_->AddRef();
     }
@@ -305,9 +357,20 @@ public:
         callbacks.refresh=[](void* p)noexcept{static_cast<View*>(p)->Refresh();};
         callbacks.settings=[](void*)noexcept{settings::Launch();};
         callbacks.focusActivated=[](void* p)noexcept{static_cast<View*>(p)->Focused();};
+        callbacks.previewStep=[](void* p,int delta)noexcept{static_cast<View*>(p)->StepPreview(delta);};
+        callbacks.previewClose=[](void* p)noexcept{static_cast<View*>(p)->ClosePreview();};
+        callbacks.preferencesChanged=[](void* p)noexcept{static_cast<View*>(p)->PreferencesChanged();};
         callbacks.completionMessage=CompletionMessage;callbacks.completion=[](void* p,WPARAM w,LPARAM l)noexcept{return static_cast<View*>(p)->Completed(w,l);};
         Surface* created=nullptr;hr=Surface::Create(parent,*bounds,callbacks,&created);surface_=created;
         if(generation_!=creation)hr=E_ABORT;
+        if(SUCCEEDED(hr)){
+            const auto window=Window();const auto restored=preferences_.load?preferences_.load():preferences::Values{};
+            // Preference sources and Surface setters are call-outs. Each may
+            // synchronously retire this View; never continue through a stale HWND.
+            if(Live(window,creation))surface_->SetMode(restored.mode);
+            if(Live(window,creation))surface_->SetDensity(restored.densityDip);
+            if(!Live(window,creation))hr=E_ABORT;
+        }
         if(SUCCEEDED(hr)){
             requests_.Attach(Window(),CompletionMessage);SHChangeNotifyEntry entry{root_,TRUE};
             notification_=SHChangeNotifyRegister(Window(),SHCNRF_ShellLevel|SHCNRF_NewDelivery,SHCNE_UPDATEDIR,CompletionMessage,1,&entry);
@@ -321,7 +384,7 @@ public:
     }
     HRESULT STDMETHODCALLTYPE DestroyViewWindow() override {
         if(!OnThread())return RPC_E_WRONG_THREAD;if(destroying_)return S_OK;Reference<View> invocation(this);destroying_=true;
-        requests_.Close();generation_=Generation();page_={};visible_=false;retired_=true;
+        requests_.Close();generation_=Generation();previewIndex_=-1;previewSerial_=Generation();page_={};visible_=false;retired_=true;
         UpdateStatus(true);
         if(notification_){SHChangeNotifyDeregister(notification_);notification_=0;}
         auto surface=surface_;surface_=nullptr;if(surface){surface->Destroy();delete surface;}
@@ -389,10 +452,10 @@ public:
     HRESULT STDMETHODCALLTYPE SelectAndPositionItems(UINT,PCUITEMID_CHILD_ARRAY,POINT*,DWORD) override {return E_NOTIMPL;}
 };
 }
-HRESULT CreateView(IShellFolder2* folder,PCIDLIST_ABSOLUTE absolute,snapshot::Location location,IShellView** result,Sources sources,PCIDLIST_ABSOLUTE notificationRoot) noexcept {
+HRESULT CreateView(IShellFolder2* folder,PCIDLIST_ABSOLUTE absolute,snapshot::Location location,IShellView** result,Sources sources,PCIDLIST_ABSOLUTE notificationRoot,PreferenceStore preferences) noexcept {
     if(!result)return E_POINTER;*result=nullptr;UINT bytes=0,count=0;
     if(!folder||snapshot::Zero(location.epoch)||snapshot::Zero(location.node)||!snapshot::BoundedList(absolute,bytes,count)||!count)return E_INVALIDARG;
     if(notificationRoot&&(!snapshot::BoundedList(notificationRoot,bytes,count)||!count))return E_INVALIDARG;
-    try{auto view=new(std::nothrow) View(folder,absolute,location,sources,notificationRoot);if(!view)return E_OUTOFMEMORY;*result=view;return S_OK;}catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
+    try{auto view=new(std::nothrow) View(folder,absolute,location,sources,notificationRoot,preferences);if(!view)return E_OUTOFMEMORY;*result=view;return S_OK;}catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
 }
 }
