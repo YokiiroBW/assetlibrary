@@ -1,0 +1,17 @@
+{
+  "status": "verified_stopped",
+  "deployment_id": "826109ef-d44c-45be-884c-88f1fb85607a",
+  "backup_directory": "/volume2/homes/agent/assetlibrary/V03-026/backup-42b203e1-ad51-4498-8dd6-18f64a65748b",
+  "setup_image_id": "sha256:18256b03738f9d1d9e538268c3dece99ee64bf4c97d48749d8f82e23a61fdbc5",
+  "archive_sha256": {
+    "assetlibrary-nas-core-state.tar": "1e5c8b1df2210b1f0674a2cceb77e670a1e833d2775842383ede78cc1404ef67",
+    "assetlibrary-nas-postgres-data.tar": "882f007a909d1979e029b14de3792fe0b3ec3b5a42c82fce0b9ee06aac207009",
+    "assetlibrary-nas-postgres-tls.tar": "d251f8334b5a7865e6dae2327bf61065cc8a37e4281aecc94550054f050437cf",
+    "assetlibrary-nas-setup-state.tar": "7b51f897563c4e77d2912bbfc9a56553e97c24d233e759bb85b4139c940cddfd",
+    "deployment.tar": "019f0969a5b987da745ef203bcdbe530c8a889f86d35b3a7d3308688b74c9c9d"
+  },
+  "numeric_owner_mode_acl_xattr_links": true,
+  "original_assets_included": false,
+  "private_configuration_preserved": true,
+  "rollback_exercised": false
+}

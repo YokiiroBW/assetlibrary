@@ -1,0 +1,2 @@
+{"case": "pid1_death_old_host_decoder_removed", "host_decoder_pid": 14683, "start_tick": "137809832", "old_host_pid_absent": true, "elapsed": 1.4143630019389093, "failure_reservation": 1}
+owned_fault_resources_cleaned

@@ -1,0 +1,135 @@
+"""Owned same-NAS deployment verification, using the public CLI and authenticated API."""
+import importlib.util,json,sys,time,uuid,urllib.request,urllib.error,hashlib
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('prior_nas',r'C:/YOKI/Codex/AssetLibrary-worktrees/V01-021/.runtime/V01-021/nas_acceptance.py')
+prior=importlib.util.module_from_spec(spec);spec.loader.exec_module(prior)
+prior.SSH=['C:/Program Files/OpenSSH/ssh.exe','-o','BatchMode=yes','-o','ConnectTimeout=8','agent-210']
+validation_spec=importlib.util.spec_from_file_location('png_checks',Path('tests/integration/native-clients/verify_nas_worker.py'))
+checks=importlib.util.module_from_spec(validation_spec);validation_spec.loader.exec_module(checks)
+ORIGIN='https://192.168.31.210:5446'
+PROJECT='assetlibrary-v03026-acceptance'
+DEPLOY='/volume2/homes/agent/assetlibrary/V03-026/acceptance'
+CORPUS='/tmp/assetlibrary-v03-026/corpus'
+OUT=Path('.runtime/nas-package-acceptance');OUT.mkdir(exist_ok=True)
+
+class Api(prior.Api):
+ def request(self,path,payload=None,*,origin=ORIGIN,csrf=None):
+  return super().request(path,payload,origin=origin,csrf=csrf)
+
+def cli(*args,input=None,timeout=240):
+ p=prior.nas(['sh',DEPLOY+'/nasctl.sh',*args],input=input,timeout=timeout)
+ with (OUT/'cli.log').open('a',encoding='utf-8') as f:f.write('action='+args[0]+'\n'+p.stdout+'\n'+p.stderr+'\n')
+ print('CLI '+args[0]+' completed',flush=True)
+ return p.stdout
+
+def setup(package):
+ code=r'''
+from pathlib import Path
+import json,sys,shutil,socket
+p=json.loads(sys.stdin.read());src=Path(p['package']).resolve(strict=True);dst=Path(p['deployment'])
+assert Path('/volume2/homes/agent/assetlibrary/V03-026').resolve(strict=True) in src.parents and not src.is_symlink()
+assert dst==Path('/volume2/homes/agent/assetlibrary/V03-026/acceptance') and not dst.exists()
+with socket.socket() as test:test.bind(('192.168.31.210',5446))
+dst.mkdir(mode=0o700)
+for name in ('compose.yaml','nasctl.sh','settings.example.json','README.md','images.env','images.tar','build-manifest.json','SHA256SUMS'):
+ assert (src/name).is_file() and not (src/name).is_symlink();shutil.copyfile(src/name,dst/name)
+(dst/'nasctl.sh').chmod(0o700)
+(dst/'settings.json').write_text(json.dumps(p['settings']))
+print('Owned acceptance directory created')
+'''
+ settings={'deployment_name':PROJECT,'public_origin':ORIGIN,'bind_address':'192.168.31.210','storage_sources':[{'source_key':'fixture','display_name':'Synthetic preview acceptance','host_path':CORPUS}]}
+ prior.nas(['python3','-I','-B','-c',code],input=json.dumps({'package':package,'deployment':DEPLOY,'settings':settings}))
+ cli('configure')
+ prior.nas(['python3','-I','-B','-c','from pathlib import Path; p=Path("'+DEPLOY+'/deployment.env"); s=p.read_text(); assert "ASSETLIBRARY_IMAGE_PREVIEW_SOCKET=" not in s; p.write_text(s+"ASSETLIBRARY_IMAGE_PREVIEW_SOCKET=/run/assetlibrary-image/decoder.sock\\n")'])
+ cli('initialize')
+ secret=prior.credentials(False)
+ cli('operator','bootstrap','--account',secret['account_name'],'--display-name','Synthetic image acceptance','--password-stdin',input=secret['password']+'\n')
+ certificate=cli('certificate');assert certificate.startswith('-----BEGIN CERTIFICATE-----')
+ (OUT/'acceptance.crt').write_text(certificate,encoding='ascii')
+ cli('start');cli('status')
+
+def images(api,library,entries):
+ results=[]
+ for name in [*checks.SUCCESS,*checks.ERRORS]:
+  entry=entries[name]
+  for variant,profile in [('thumbnail',0),('preview',1)]:
+   path=f'/assetlink/v1/libraries/{library}/entries/{entry}/image?variant={variant}'
+   request=urllib.request.Request(ORIGIN+path,headers={'Origin':ORIGIN,'X-AssetLibrary-CSRF':api.csrf})
+   try:response=api.opener.open(request,timeout=17)
+   except urllib.error.HTTPError as e:response=e
+   with response:
+    data=response.read(12582913);status=response.status;assert len(data)<=12582912
+    row={'file':name,'variant':variant,'status':status,'bytes':len(data)}
+    if name in checks.SUCCESS:
+     assert status==200,(name,status,data[:100]);assert response.headers.get_content_type()=='image/png'
+     checks.validate_png(data,checks.SUCCESS[name][profile],2097152 if profile==0 else 12582912)
+     row['sha256']=hashlib.sha256(data).hexdigest();row['dimensions']=checks.SUCCESS[name][profile]
+    else:
+     expected={'active.svg':415,'not-an-image.png':415,'oversized-header.png':422,'truncated.jpg':422}[name]
+     assert status==expected,(name,status)
+    results.append(row)
+ return results
+
+def verify():
+ prior.ORIGIN=ORIGIN
+ api=Api(OUT/'acceptance.crt');assert api.request('/assetlink/v1/auth/session')[0]==401;api.login(False)
+ try:
+  status,reply=api.control('libraries.list',{'page_size':100});assert status==200
+  libraries=reply['body']['items']
+  if not libraries:
+   status,reply=api.control('libraries.register',{'source_key':'fixture','display_name':'Synthetic images','root_path':'/assets/fixture','category':'images'},mutation=True)
+   assert status==200,(status,reply);library=reply['body']['library_id']
+   status,reply=api.control('library_scans.start',{'library_id':library},mutation=True);assert status==200
+  else:
+   assert len(libraries)==1;library=libraries[0]['library_id']
+  deadline=time.monotonic()+120
+  while True:
+   status,reply=api.control('library_scans.get',{'library_id':library});assert status==200
+   scan=reply['body']['scan']
+   if scan and scan['state']=='succeeded':break
+   assert scan and scan['state'] in ('queued','leased') and time.monotonic()<deadline,(scan and scan['state'])
+   time.sleep(.5)
+  pending=[''];entries={}
+  while pending:
+   parent=pending.pop();status,reply=api.control('entries.browse',{'library_id':library,'parent_relative_path':parent,'page_size':100})
+   assert status==200 and reply['body']['next_cursor'] is None
+   for entry in reply['body']['items']:
+    if entry['kind']=='directory':pending.append(entry['relative_path'])
+    else:entries[entry['relative_path']]=entry['entry_id']
+  results=images(api,library,entries)
+  assert api.request(f'/assetlink/v1/libraries/{library}/entries/{uuid.uuid4()}/image?variant=thumbnail')[0]==404
+  assert api.request(f'/assetlink/v1/libraries/{library}/entries/{entries["landscape.png"]}/image?variant=wrong')[0]==400
+  (OUT/'fixture-entries.json').write_text(json.dumps({'library':library,'entries':entries},indent=2)+'\n',encoding='utf-8')
+  report={'status':'image_cases_passed','origin':ORIGIN,'library_id':library,'cases':results,'scan':{k:scan[k] for k in ('scan_id','state','observed_entries','committed_entries')}}
+  (OUT/'api-images.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+  print(json.dumps({'status':report['status'],'cases':len(results),'scan_count':scan['committed_entries']}),flush=True)
+ finally:assert api.request('/assetlink/v1/auth/logout',{})[0]==204
+ assert api.request('/assetlink/v1/auth/session')[0]==401
+
+def outage():
+ prior.ORIGIN=ORIGIN
+ fixture=json.loads((OUT/'fixture-entries.json').read_text());library=fixture['library'];entry=fixture['entries']['active.svg']
+ item=json.loads(prior.nas(['docker','inspect',PROJECT+'-image-1']).stdout)[0]
+ assert item['Config']['Labels']['com.docker.compose.project']==PROJECT and item['Config']['Labels']['com.docker.compose.service']=='image'
+ deployment=prior.nas(['sh','-c','sed -n "s/^ASSETLIBRARY_DEPLOYMENT_ID=//p" "$1"','_',DEPLOY+'/deployment.env']).stdout.strip()
+ assert item['Config']['Labels']['io.assetlibrary.deployment']==deployment
+ prior.nas(['docker','stop','--time','10',item['Id']])
+ api=Api(OUT/'acceptance.crt');api.login(False)
+ try:
+  status,reply=api.control('entries.browse',{'library_id':library,'parent_relative_path':'','page_size':100});assert status==200
+  status,reply=api.request(f'/assetlink/v1/libraries/{library}/entries/{entry}/image?variant=thumbnail')
+  assert status==503 and reply['code']=='preview_unavailable'
+ finally:
+  api.request('/assetlink/v1/auth/logout',{})
+  cli('start');cli('status')
+ api=Api(OUT/'acceptance.crt');api.login(False)
+ try:assert api.request(f'/assetlink/v1/libraries/{library}/entries/{entry}/image?variant=thumbnail')[0]==415
+ finally:api.request('/assetlink/v1/auth/logout',{})
+ (OUT/'outage.json').write_text(json.dumps({'image_stopped':True,'browse_status':200,'image_status':503,'recovered_image_status':415,'same_deployment_id':deployment})+'\n')
+ print('Owned image outage and recovery verified',flush=True)
+
+if __name__=='__main__':
+ if sys.argv[1]=='setup':setup(sys.argv[2])
+ elif sys.argv[1]=='verify':verify()
+ elif sys.argv[1]=='outage':outage()
+ else:raise SystemExit('setup <verified same-NAS package> | verify | outage')

@@ -1,0 +1,17 @@
+from pathlib import Path
+import hashlib,json,os,stat
+root=Path('/tmp/assetlibrary-v03-026/corpus');assert root.resolve()==root and root.is_dir()
+files=sorted(root.rglob('*'));assert len(files)<=32
+result={}
+for path in files:
+ assert not path.is_symlink()
+ if path.is_dir():continue
+ info=path.stat();assert stat.S_ISREG(info.st_mode) and info.st_size<=33554432
+ digest=hashlib.sha256()
+ with path.open('rb') as stream:
+  while True:
+   block=stream.read(65536)
+   if not block:break
+   digest.update(block)
+ result[path.relative_to(root).as_posix()]={'bytes':info.st_size,'mtime_ns':info.st_mtime_ns,'sha256':digest.hexdigest()}
+print(json.dumps(result,sort_keys=True))

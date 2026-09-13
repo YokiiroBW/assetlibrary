@@ -1,0 +1,104 @@
+import json,subprocess,uuid,time,selectors,struct,os,hashlib
+PARENT='/tmp/assetlibrary-v03-026';IMAGE='assetlibrary/v03-026-image:third';INIT='assetlibrary/nas-setup:a12b0d139765357b1e33437a4c7a34823dd556ad';SCOPE='V03-026';VOLUME='assetlibrary-v03-026-fault-'+uuid.uuid4().hex[:8];owned=[];clients=[];records=[]
+def docker(args,timeout=15,okay=(0,)):
+ p=subprocess.run(['docker']+args,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=timeout)
+ if p.returncode not in okay:raise RuntimeError(str(args[:2])+':'+str(p.returncode)+':'+p.stderr.decode(errors='replace')[:300])
+ return p
+
+def inspect(cid):
+ data=json.loads(docker(['inspect',cid]).stdout)[0];assert data['Config']['Labels'].get('io.assetlibrary.task')==SCOPE;return data
+
+def remove(cid):
+ inspect(cid);docker(['rm','--force',cid]);owned.remove(cid)
+
+def create():
+ a=['create','--name','assetlibrary-v03-026-fault-'+uuid.uuid4().hex[:8],'--label','io.assetlibrary.task='+SCOPE,'--network','none','--read-only','--cap-drop','ALL']
+ for cap in ['CHOWN','SETUID','SETGID','KILL']:a+=['--cap-add',cap]
+ a+=['--security-opt','no-new-privileges','--memory','512m','--cpu-shares','256','--user','0:0','--mount','type=volume,src='+VOLUME+',dst=/run/assetlibrary-image',IMAGE]
+ cid=docker(a).stdout.decode().strip();owned.append(cid);docker(['start',cid]);return cid
+
+client_code=r'''
+import socket,struct,sys,json,time
+mode=sys.argv[1];h=struct.Struct('<6I');data=open('/corpus/landscape.jpg','rb').read()
+def exact(s,n):
+ o=b''
+ while len(o)<n:
+  b=s.recv(n-len(o))
+  if not b:raise EOFError()
+  o+=b
+ return o
+with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as s:
+ s.settimeout(14);s.connect('/run/assetlibrary-image/decoder.sock')
+ if mode=='early':print('closed_early',flush=True);sys.exit(0)
+ ready=h.unpack(exact(s,24))
+ if mode=='blocked':print(json.dumps({'ready':ready}),flush=True);sys.exit(0)
+ assert ready==(0x31495041,1,0,0,0,0),ready
+ if mode=='after_ready':print('closed_after_ready',flush=True);sys.exit(0)
+ s.sendall(h.pack(0x31495041,2,1,len(data),0,0));s.sendall(data[:1]);print('partial_ready',flush=True)
+ if mode=='partial_cancel':sys.exit(0)
+ sys.stdin.readline()
+ try:
+  s.sendall(data[1:]);f=h.unpack(exact(s,24));print(json.dumps({'response':f,'body_bytes':len(exact(s,f[3]))}),flush=True)
+ except (EOFError,OSError) as e:print(type(e).__name__,flush=True)
+'''
+
+def start_client(mode):
+ a=['docker','run','--rm','--interactive','--label','io.assetlibrary.task='+SCOPE,'--network','none','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges','--memory','128m','--user','1654:1654','--mount','type=volume,src='+VOLUME+',dst=/run/assetlibrary-image,readonly','--mount','type=bind,src='+PARENT+'/corpus,dst=/corpus,readonly','--entrypoint','python3',INIT,'-I','-B','-u','-c',client_code,mode]
+ p=subprocess.Popen(a,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE);clients.append(p)
+ with selectors.DefaultSelector() as wait:
+  wait.register(p.stdout,selectors.EVENT_READ)
+  if not wait.select(5):raise RuntimeError('client ready timeout')
+ line=p.stdout.readline().decode().strip();return p,line
+
+def finish(p,release=False):
+ out,err=p.communicate(b'continue\n' if release else b'',timeout=15);clients.remove(p)
+ assert p.returncode==0,(p.returncode,err.decode(errors='replace')[:200]);return out.decode().strip()
+
+def state():
+ p=docker(['run','--rm','--label','io.assetlibrary.task='+SCOPE,'--network','none','--read-only','--cap-drop','ALL','--user','0:0','--mount','type=volume,src='+VOLUME+',dst=/ipc,readonly','--entrypoint','python3',INIT,'-I','-B','-c','import struct,json;print(json.dumps(struct.unpack("<Ii",open("/ipc/supervisor-state.bin","rb").read())))'])
+ return json.loads(p.stdout)[1]
+
+def child_pids(cid):
+ script='for p in /proc/[0-9]*; do if [ "$(awk \'/^Uid:/{print $2}\' "$p/status" 2>/dev/null)" = 1655 ]; then echo "${p##*/}"; fi; done'
+ return [int(p) for p in docker(['exec',cid,'/bin/sh','-c',script]).stdout.split()]
+
+def wait_empty(cid):
+ end=time.monotonic()+3
+ while child_pids(cid) and time.monotonic()<end:time.sleep(.03)
+ assert not child_pids(cid),'child remained'
+
+def signal_child(cid,signal):
+ pids=child_pids(cid);assert len(pids)==1,pids
+ pid=pids[0];assert pid>1
+ script='test "$(awk \'/^Uid:/{print $2}\' /proc/'+str(pid)+'/status)" = 1655 && kill -'+str(signal)+' '+str(pid)
+ docker(['exec',cid,'/bin/sh','-c',script]);return pid
+
+try:
+ docker(['volume','create','--label','io.assetlibrary.task='+SCOPE,VOLUME])
+ docker(['run','--rm','--network','none','--read-only','--cap-drop','ALL','--cap-add','CHOWN','--security-opt','no-new-privileges','--user','0:0','--mount','type=volume,src='+VOLUME+',dst=/ipc','--entrypoint','python3',INIT,'-I','-B','-c','import os;os.chown("/ipc",0,1654);os.chmod("/ipc",0o710)'])
+ cid=create();time.sleep(.15)
+
+ p,line=start_client('parent_death');assert line=='partial_ready',line
+ rows=docker(['top',cid,'-eo','pid,uid,comm']).stdout.decode().splitlines()[1:]
+ candidates=[int(row.split()[0]) for row in rows if row.split()[1]=='1655'];assert len(candidates)==1,candidates
+ worker=candidates[0];status=open('/proc/'+str(worker)+'/status').read();assert '\nUid:\t1655' in status
+ stat=open('/proc/'+str(worker)+'/stat').read();start_tick=stat.rsplit(')',1)[1].split()[19]
+ began=time.monotonic();docker(['kill','--signal','KILL',cid]);tail=finish(p,True)
+ limit=time.monotonic()+3
+ while os.path.exists('/proc/'+str(worker)) and time.monotonic()<limit:time.sleep(.03)
+ gone=not os.path.exists('/proc/'+str(worker));assert gone,'old host decoder PID remained'
+ assert not inspect(cid)['State']['Running'];assert state()==1
+ records.append({'case':'pid1_death_old_host_decoder_removed','host_decoder_pid':worker,'start_tick':start_tick,'old_host_pid_absent':gone,'elapsed':time.monotonic()-began,'failure_reservation':1})
+ print(json.dumps(records[-1]),flush=True);remove(cid)
+
+finally:
+ for p in clients:
+  if p.poll() is None:p.kill()
+  p.communicate(timeout=5)
+ for cid in list(owned):remove(cid)
+ for leftover in docker(['ps','-aq','--filter','label=io.assetlibrary.task='+SCOPE]).stdout.decode().split():
+  item=inspect(leftover)
+  if any(m.get('Name')==VOLUME for m in item['Mounts']):docker(['rm','--force',item['Id']])
+ data=json.loads(docker(['volume','inspect',VOLUME]).stdout)[0];assert data['Labels'].get('io.assetlibrary.task')==SCOPE;docker(['volume','rm',VOLUME])
+ open(PARENT+'/parent-host-pid-proof.json','w').write(json.dumps(records,indent=2)+'\n')
+ print('owned_fault_resources_cleaned',flush=True)

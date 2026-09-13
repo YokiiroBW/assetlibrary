@@ -1,0 +1,15 @@
+file:///C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/.runtime/nas-images-browser.mjs:29
+
+   throw new Error('thumbnail pixels are clipped outside their frame');
+
+         ^
+
+
+
+Error: thumbnail pixels are clipped outside their frame
+
+    at file:///C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/.runtime/nas-images-browser.mjs:29:10
+
+
+
+Node.js v24.20.0

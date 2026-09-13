@@ -1,53 +1,19 @@
 {
-  "status": "final_package_preparation",
-  "user_constraint": "All runtime processing on the same NAS and deployment package; no external compute host.",
-  "base": "937a7e3",
-  "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026",
+  "status": "delivered",
+  "source_revision": "7f092904dbadcf1276bb9daf5b565946ecccbdad",
   "branch": "codex/v03-026-nas-local-image-integration",
-  "adr": "ADR-0023",
-  "contract": "contracts/providers/local-image-container-v1.md",
-  "actors": {
-    "V03-027": "windows_session_delivery: ImageSupervisor + container worker profile",
-    "V03-028": "windows_shell_delivery: Core Unix socket adapter",
-    "V03-029": "windows_package_delivery: NAS package/compose/nasctl"
-  },
-  "ssh": {
-    "nas": "agent-210:port77 (SSH config, BatchMode, strict host key)",
-    "linux_build": "dev-230; sudo -n docker available; build only, not runtime dependency"
-  },
-  "build_image": "sha256:6637af43221d16bcad07c04ddb47421b42cbdbcba642f4d8c52a53fa61e03ad5",
-  "build_directory": "/tmp/assetlibrary-v03-026",
-  "probes": {
-    "host": ".runtime/nas-capabilities.json",
-    "host_memlock": ".runtime/nas-memlock-probe.json",
-    "container": ".runtime/nas-container-probe.json",
-    "facts": [
-      "Kernel5.10.55+, seccomp absent, unpriv user namespace EINVAL and no userns proc link",
-      "Valid ring setup succeeds before MEMLOCK0; returns ENOMEM12 after",
-      "Container UID1655 cap0 NNP1; NPROC1 denies fork(EAGAIN11) and thread",
-      "networknone external connect ENETUNREACH101; packet EPERM1; vsock EAFNOSUPPORT97",
-      "Memory cgroup512MiB and kmem accounting visible",
-      "Owned capability containers removed and label-filter empty"
-    ]
-  },
-  "production": {
-    "changed": false,
-    "core": "assetlibrary-nas-core-1",
-    "postgres": "assetlibrary-nas-postgres-1",
-    "current_revision": "61e6c0ef054f91bae6a6f39c692c175fdf151028"
-  },
-  "decisions": [
-    "Supervisor PID1 retains CHOWN/SETUID/SETGID/KILL (4 caps); all decoder threads UID/GID1655 cap0 NNP1. No per-thread capset claim.",
-    "SupervisorPID1 no init wrapper; decoder1655, clear supplementary groups/cap0/NNP, NPROC1+MEMLOCK0 after warmup",
-    "State in IPC root0600, parent root:1654 0710, Core ro mount, decoder cannot access",
-    "One worker active; Core adapter serial permit within original8/15s; no arbitrary paths/URLs",
-    "Reserve persistent attempt before spawn, reset only after safe cleanup; after3 no new workers",
-    "unless-stopped for normal NAS reboot; permanent startup errors stay unhealthy without spawning"
-  ],
-  "remaining": [
-    "Build final four-image NAS package from a clean committed snapshot including GC Region128 and PNG non-IDAT4MiB limit",
-    "Verify final-image metadata boundaries, normal/security regressions, then same-NAS authenticated Core image API",
-    "Cold backup and controlled existing deployment upgrade; verify existing two libraries/195792 scan records, client image requests",
-    "Clean owned resources, preserve rollback, finish evidence and main integration; no G4"
-  ]
+  "local_package": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-026\\.runtime\\ui-final-package\\assetlibrary-nas",
+  "nas_package": "/volume2/homes/agent/assetlibrary/V03-026/package-7f092904dbad/assetlibrary-nas",
+  "production_directory": "/volume2/homes/agent/assetlibrary/V01-021/live",
+  "production_changed": true,
+  "deployment_id": "826109ef-d44c-45be-884c-88f1fb85607a",
+  "backup_directory": "/volume2/homes/agent/assetlibrary/V03-026/backup-42b203e1-ad51-4498-8dd6-18f64a65748b",
+  "production_healthy": true,
+  "original_libraries": 2,
+  "original_scan_entries": 195792,
+  "active_fixtures": false,
+  "temporary_operator_relay_closed": true,
+  "nas_temp_containers_volumes_networks_corpus_cleaned": true,
+  "remaining": [],
+  "g4": "waived_not_executed"
 }

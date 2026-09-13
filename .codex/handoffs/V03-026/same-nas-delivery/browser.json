@@ -1,0 +1,76 @@
+{
+  "status": "passed",
+  "candidateStyleInjected": false,
+  "cases": [
+    {
+      "viewport": "desktop",
+      "thumbnail": [
+        512,
+        341
+      ],
+      "preview": [
+        1600,
+        1066
+      ],
+      "horizontalOverflow": false,
+      "escapeClosed": true,
+      "logoutCleared": true
+    },
+    {
+      "viewport": "mobile",
+      "thumbnail": [
+        512,
+        341
+      ],
+      "preview": [
+        1600,
+        1066
+      ],
+      "horizontalOverflow": false,
+      "escapeClosed": true,
+      "logoutCleared": true
+    }
+  ],
+  "imageResponses": [
+    {
+      "viewport": "desktop",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "desktop",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "desktop",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "desktop",
+      "status": 200,
+      "variant": "preview"
+    },
+    {
+      "viewport": "mobile",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "mobile",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "mobile",
+      "status": 200,
+      "variant": "thumbnail"
+    },
+    {
+      "viewport": "mobile",
+      "status": 200,
+      "variant": "preview"
+    }
+  ]
+}

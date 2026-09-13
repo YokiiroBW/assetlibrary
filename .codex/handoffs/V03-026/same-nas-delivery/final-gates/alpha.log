@@ -1,0 +1,21 @@
+ALPHA_INTEGRATION_AUDIT_OK decision=blocked
+- capability:read-only-permission-gateway-web
+- capability:transfer-operation-sandbox
+- capability:single-core-native-packaging
+- capability:production-authentication
+- capability:production-database-composition
+- capability:host-business-api
+- capability:tls-and-secret-management
+- capability:metadata-tags-ratings-colors
+- capability:exact-dedup
+- capability:software-backup-restore
+- capability:production-file-operations
+- capability:scale-and-fault-release-evidence
+- capability:windows-service-runtime-evidence
+- capability:linux-systemd-runtime-evidence
+- release_target:v0.1-release gates=M0-006-G1,M0-006-G2
+- release_target:windows-server-release gates=M0-004-G1
+- release_target:linux-server-release gates=M0-006-G3
+- release_target:large-file-release gates=M0-006-G1
+- release_target:production-file-writes gates=M0-006-G2
+- partial_input:V01-008

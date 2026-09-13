@@ -1,0 +1,13 @@
+$ pnpm run sdk:build && tsc --project tsconfig.json --noEmit --pretty false && vite build
+$ pnpm --dir ../../packages/sdk/assetlink/typescript run build
+$ tsc --project tsconfig.json
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 55 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.52 kB │ gzip:  0.34 kB
+dist/assets/index-C-mzZoD8.css   27.74 kB │ gzip:  6.28 kB
+dist/assets/index-lyxi2LMw.js   302.09 kB │ gzip: 93.65 kB │ map: 1,197.57 kB
+
+✓ built in 183ms

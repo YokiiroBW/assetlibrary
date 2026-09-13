@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="38d9a129-1924-4a9c-8afd-4a77fb8a47de" name="Administrator@YOKIIRONETBOOK 2026-09-13 18:32:26" runUser="YOKIIRONETBOOK\Administrator" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-13T18:32:26.6508916+08:00" queuing="2026-09-13T18:32:26.6508918+08:00" start="2026-09-13T18:32:25.9949521+08:00" finish="2026-09-13T18:32:26.6886225+08:00" />
+  <TestSettings name="default" id="ef0f7993-d9fe-4561-ac06-fbd02812e239">
+    <Deployment runDeploymentRoot="Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="1a8a9699-4783-40e3-897c-e75112f6ce50" testId="1b4a3f69-f38e-8c56-85df-afa55ac4c481" testName="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint (&quot;AssetLibrary.CoreServer&quot;,&quot;CoreServer&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0084474" startTime="2026-09-13T18:32:26.3961645+08:00" endTime="2026-09-13T18:32:26.4189168+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1a8a9699-4783-40e3-897c-e75112f6ce50" />
+    <UnitTestResult executionId="e218d2de-1ed0-4db2-bea2-30bad4f4431f" testId="1d047cd1-70d0-896c-a8ad-43f21c216281" testName="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint (&quot;AssetLibrary.WorkerSupervisor&quot;,&quot;WorkerSupervisor&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0074601" startTime="2026-09-13T18:32:26.3961671+08:00" endTime="2026-09-13T18:32:26.4189168+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e218d2de-1ed0-4db2-bea2-30bad4f4431f" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint (&quot;AssetLibrary.CoreServer&quot;,&quot;CoreServer&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.build.tests\bin\release\net10.0\assetlibrary.build.tests.dll" id="1b4a3f69-f38e-8c56-85df-afa55ac4c481">
+      <Execution id="1a8a9699-4783-40e3-897c-e75112f6ce50" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Build.Tests\bin\Release\net10.0\AssetLibrary.Build.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Build.Tests.FoundationAssemblyTests" name="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint" />
+    </UnitTest>
+    <UnitTest name="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint (&quot;AssetLibrary.WorkerSupervisor&quot;,&quot;WorkerSupervisor&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.build.tests\bin\release\net10.0\assetlibrary.build.tests.dll" id="1d047cd1-70d0-896c-a8ad-43f21c216281">
+      <Execution id="e218d2de-1ed0-4db2-bea2-30bad4f4431f" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Build.Tests\bin\Release\net10.0\AssetLibrary.Build.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Build.Tests.FoundationAssemblyTests" name="FoundationAssemblyIsBuildableButHasNoRuntimeEntryPoint" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1b4a3f69-f38e-8c56-85df-afa55ac4c481" executionId="1a8a9699-4783-40e3-897c-e75112f6ce50" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d047cd1-70d0-896c-a8ad-43f21c216281" executionId="e218d2de-1ed0-4db2-bea2-30bad4f4431f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>已为 C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Build.Tests\bin\Release\net10.0\AssetLibrary.Build.Tests.dll 启用测试并行化(Workers: 16，Scope: MethodLevel)&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

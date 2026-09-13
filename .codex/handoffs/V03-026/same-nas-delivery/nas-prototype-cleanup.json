@@ -1,0 +1,12 @@
+{
+  "status": "verified",
+  "removed": [
+    "assetlibrary-v03-026-first-ipc",
+    "assetlibrary/v03-026-image:first",
+    "assetlibrary/v03-026-image:second",
+    "assetlibrary/v03-026-image:third",
+    "assetlibrary/v03-026-image:fourth"
+  ],
+  "owned_nas_temporary_directory_removed": true,
+  "production_and_final_package_and_backup_preserved": true
+}

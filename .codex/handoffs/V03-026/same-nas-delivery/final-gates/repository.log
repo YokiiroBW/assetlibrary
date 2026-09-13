@@ -1,0 +1,86 @@
+Handoff validation passed.
+Root: C:\YOKI\Codex\AssetLibrary-worktrees\V03-026
+Required artifacts: 37
+Architecture quality gate: M0-009
+Architecture quality gate passed.
+Policy: modular monolith + ports/adapters + isolated workers
+Enforcement task: M0-009
+Architecture inputs scanned: 533
+Active governed roots: services/core-server, services/worker-supervisor, apps/web, apps/windows-client, apps/windows-shell, apps/android, packages/sdk/assetlink/dotnet, packages/sdk/assetlink/typescript, packages/sdk/assetlink/kotlin, packages/test-support
+Inactive governed roots: 4
+ALPHA_INTEGRATION_AUDIT_OK decision=blocked
+- capability:read-only-permission-gateway-web
+- capability:transfer-operation-sandbox
+- capability:single-core-native-packaging
+- capability:production-authentication
+- capability:production-database-composition
+- capability:host-business-api
+- capability:tls-and-secret-management
+- capability:metadata-tags-ratings-colors
+- capability:exact-dedup
+- capability:software-backup-restore
+- capability:production-file-operations
+- capability:scale-and-fault-release-evidence
+- capability:windows-service-runtime-evidence
+- capability:linux-systemd-runtime-evidence
+- release_target:v0.1-release gates=M0-006-G1,M0-006-G2
+- release_target:windows-server-release gates=M0-004-G1
+- release_target:linux-server-release gates=M0-006-G3
+- release_target:large-file-release gates=M0-006-G1
+- release_target:production-file-writes gates=M0-006-G2
+- partial_input:V01-008
+.NET source policy passed (559 C# files scanned).
+MIGRATION_MANIFEST_OK migrations=21 modules=11 postgresql=16.15
+test_backup_contract_requires_exact_manifest_and_role_hashes (test_migration_manifest.MigrationManifestTests.test_backup_contract_requires_exact_manifest_and_role_hashes) ... ok
+test_backup_failure_leaves_no_published_artifact (test_migration_manifest.MigrationManifestTests.test_backup_failure_leaves_no_published_artifact) ... ok
+test_backup_metadata_rejects_path_traversal_and_hash_drift (test_migration_manifest.MigrationManifestTests.test_backup_metadata_rejects_path_traversal_and_hash_drift) ... ok
+test_checksum_drift_is_rejected (test_migration_manifest.MigrationManifestTests.test_checksum_drift_is_rejected) ... ok
+test_client_major_mismatch_is_rejected_before_database_access (test_migration_manifest.MigrationManifestTests.test_client_major_mismatch_is_rejected_before_database_access) ... ok
+test_filesystem_root_cannot_be_a_backup_directory (test_migration_manifest.MigrationManifestTests.test_filesystem_root_cannot_be_a_backup_directory) ... ok
+test_forbidden_sql_is_rejected_even_with_matching_hash (test_migration_manifest.MigrationManifestTests.test_forbidden_sql_is_rejected_even_with_matching_hash) ... ok
+test_identity_switching_sql_is_rejected_even_with_matching_hash (test_migration_manifest.MigrationManifestTests.test_identity_switching_sql_is_rejected_even_with_matching_hash) ... ok
+test_malformed_checksum_types_are_reported_without_a_traceback (test_migration_manifest.MigrationManifestTests.test_malformed_checksum_types_are_reported_without_a_traceback) ... ok
+test_migration_owner_mismatch_is_rejected (test_migration_manifest.MigrationManifestTests.test_migration_owner_mismatch_is_rejected) ... ok
+test_module_reordering_is_rejected (test_migration_manifest.MigrationManifestTests.test_module_reordering_is_rejected) ... ok
+test_non_matching_database_confirmation_fails_before_tool_lookup (test_migration_manifest.MigrationManifestTests.test_non_matching_database_confirmation_fails_before_tool_lookup) ... ok
+test_production_migrations_do_not_promote_spike_business_tables (test_migration_manifest.MigrationManifestTests.test_production_migrations_do_not_promote_spike_business_tables) ... ok
+test_psql_only_commands_do_not_require_backup_tools (test_migration_manifest.MigrationManifestTests.test_psql_only_commands_do_not_require_backup_tools) ... ok
+test_repository_manifest_is_valid_and_frozen (test_migration_manifest.MigrationManifestTests.test_repository_manifest_is_valid_and_frozen) ... ok
+test_role_membership_contract_keeps_login_boundaries_non_inheriting (test_migration_manifest.MigrationManifestTests.test_role_membership_contract_keeps_login_boundaries_non_inheriting) ... ok
+test_role_provisioning_cannot_enable_login_or_store_password (test_migration_manifest.MigrationManifestTests.test_role_provisioning_cannot_enable_login_or_store_password) ... ok
+test_role_provisioning_rejects_dangerous_administrative_sql (test_migration_manifest.MigrationManifestTests.test_role_provisioning_rejects_dangerous_administrative_sql) ... ok
+test_role_provisioning_requires_explicit_cluster_change_flag (test_migration_manifest.MigrationManifestTests.test_role_provisioning_requires_explicit_cluster_change_flag) ... ok
+test_unlisted_sql_is_rejected (test_migration_manifest.MigrationManifestTests.test_unlisted_sql_is_rejected) ... ok
+test_validate_cli_is_connection_free (test_migration_manifest.MigrationManifestTests.test_validate_cli_is_connection_free) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 1.333s
+
+OK
+AssetLink SDK generation is current (7 generated files).
+AssetLink SDK source policy passed (3 generated source files).
+AssetLink SDK dependency, integrity, and license policy passed.
+Web dependency, lock, and license policy passed.
+Web read-only source boundary passed.
+Native semantic theme is current.
+Android dependency integrity passed (475 verified components).
+test_adapter_database_and_business_logic_tokens_fail (test_architecture_rules.ArchitectureRuleTests.test_adapter_database_and_business_logic_tokens_fail) ... ok
+test_ci_tiers_require_real_workflows_commands_and_skip_policies (test_architecture_rules.ArchitectureRuleTests.test_ci_tiers_require_real_workflows_commands_and_skip_policies) ... ok
+test_contract_consumer_digest_passes_and_stale_digest_fails (test_architecture_rules.ArchitectureRuleTests.test_contract_consumer_digest_passes_and_stale_digest_fails) ... ok
+test_contract_digest_is_stable_across_lf_and_crlf_checkouts (test_architecture_rules.ArchitectureRuleTests.test_contract_digest_is_stable_across_lf_and_crlf_checkouts) ... ok
+test_cross_module_internal_access_and_cycle_fail (test_architecture_rules.ArchitectureRuleTests.test_cross_module_internal_access_and_cycle_fail) ... ok
+test_domain_reverse_dependency_and_platform_access_fail (test_architecture_rules.ArchitectureRuleTests.test_domain_reverse_dependency_and_platform_access_fail) ... ok
+test_language_budget_requires_allowed_language_manifest_and_lock (test_architecture_rules.ArchitectureRuleTests.test_language_budget_requires_allowed_language_manifest_and_lock) ... ok
+test_m0_gate_ledger_requires_complete_coverage_and_fail_closed_deferrals (test_architecture_rules.ArchitectureRuleTests.test_m0_gate_ledger_requires_complete_coverage_and_fail_closed_deferrals) ... ok
+test_release_gate_allows_scoped_start_and_blocks_unresolved_target (test_architecture_rules.ArchitectureRuleTests.test_release_gate_allows_scoped_start_and_blocks_unresolved_target) ... ok
+test_shell_heavy_dependency_fails (test_architecture_rules.ArchitectureRuleTests.test_shell_heavy_dependency_fails) ... ok
+test_source_outside_registered_language_root_fails (test_architecture_rules.ArchitectureRuleTests.test_source_outside_registered_language_root_fails) ... ok
+test_unbounded_shared_directory_fails (test_architecture_rules.ArchitectureRuleTests.test_unbounded_shared_directory_fails) ... ok
+test_v0_1_start_cannot_be_authorized_with_an_open_start_blocker (test_architecture_rules.ArchitectureRuleTests.test_v0_1_start_cannot_be_authorized_with_an_open_start_blocker) ... ok
+test_valid_layered_module_and_language_manifest_pass (test_architecture_rules.ArchitectureRuleTests.test_valid_layered_module_and_language_manifest_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.107s
+
+OK
+Repository verification passed (M0-009 fast architecture gate).

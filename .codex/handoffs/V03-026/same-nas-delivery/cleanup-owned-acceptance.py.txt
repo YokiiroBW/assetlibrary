@@ -1,0 +1,31 @@
+import runpy,types,json
+from pathlib import Path
+t=types.SimpleNamespace(**runpy.run_path('.runtime/nas-package-acceptance.py'))
+proof=json.loads((t.OUT/'final-package.json').read_text());owner=proof['deployment_id']
+assert owner=='76d578b8-fe9f-460f-bc51-3f8b9df7ad70'
+items=json.loads(t.prior.nas(['docker','inspect',t.PROJECT+'-core-1',t.PROJECT+'-postgres-1',t.PROJECT+'-image-1']).stdout)
+assert all(x['Config']['Labels']['io.assetlibrary.deployment']==owner and x['Config']['Labels']['com.docker.compose.project']==t.PROJECT for x in items)
+t.cli('down')
+assert not t.prior.nas(['docker','ps','-aq','--filter','label=com.docker.compose.project='+t.PROJECT]).stdout.strip()
+removed=[]
+for suffix in ['core-state','postgres-data','postgres-tls','setup-state','image-ipc']:
+ name=t.PROJECT+'-'+suffix;volume=json.loads(t.prior.nas(['docker','volume','inspect',name]).stdout)[0]
+ assert volume['Name']==name and volume['Labels']['io.assetlibrary.deployment']==owner and volume['Driver']=='local' and not volume.get('Options')
+ assert not t.prior.nas(['docker','ps','-aq','--filter','volume='+name]).stdout.strip()
+ t.prior.nas(['docker','volume','rm',name]);removed.append(name)
+ assert t.prior.nas(['docker','volume','inspect',name],check=False).returncode!=0
+for suffix in ['database','egress']:
+ assert t.prior.nas(['docker','network','inspect',t.PROJECT+'_'+suffix],check=False).returncode!=0
+code=r'''
+from pathlib import Path
+import json,sys,shutil
+root=Path('/volume2/homes/agent/assetlibrary/V03-026/acceptance')
+assert root.resolve(strict=True)==root and not any(p.is_symlink() for p in (root,*root.parents))
+env=(root/'deployment.env').read_text().splitlines()
+assert 'ASSETLIBRARY_DEPLOYMENT_ID='+sys.argv[1] in env
+assert 'ASSETLIBRARY_DEPLOYMENT_NAME=assetlibrary-v03026-acceptance' in env
+shutil.rmtree(root);assert not root.exists()
+'''
+t.prior.nas(['python3','-I','-B','-c',code,owner])
+result={'status':'verified','containers_removed':len(items),'volumes_removed':removed,'networks_absent':True,'test_deployment_directory_removed':True,'production_untouched_by_cleanup':True}
+Path('.runtime/acceptance-cleanup.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))

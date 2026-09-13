@@ -1,0 +1,786 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="12b54830-4f5a-42df-ad6a-dce8a90ef65f" name="Administrator@YOKIIRONETBOOK 2026-09-13 18:32:26" runUser="YOKIIRONETBOOK\Administrator" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-13T18:32:26.5176878+08:00" queuing="2026-09-13T18:32:26.5176879+08:00" start="2026-09-13T18:32:25.9971018+08:00" finish="2026-09-13T18:32:27.4706706+08:00" />
+  <TestSettings name="default" id="bfa63f11-7824-4bce-acac-694c5ef0c96e">
+    <Deployment runDeploymentRoot="Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="88e231bc-5fc0-4e6d-8d10-fd6896a51437" testId="106af19a-7605-82d0-8807-81d9779b590f" testName="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (TaskHealth,&quot;assetlibrary_task_health_runtime&quot;,&quot;DELETE FROM library_storage.library_root WHERE false&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0001153" startTime="2026-09-13T18:32:27.4138841+08:00" endTime="2026-09-13T18:32:27.4140316+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="88e231bc-5fc0-4e6d-8d10-fd6896a51437">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests.SharedConnectionMechanicsPreserveEveryModuleRoleBoundary(ModuleDatabaseRole role, String expectedRole, String forbiddenSql) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialDatabaseBoundaryIntegrationTests.cs:line 16&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a51bbd3a-79c0-4298-81a1-efb605225f83" testId="1997ad6e-ff22-853c-884f-a53152e70731" testName="DiscoveryHonorsCancellationBeforeEnumerating" computerName="YOKIIRONETBOOK" duration="00:00:00.0036763" startTime="2026-09-13T18:32:26.5403394+08:00" endTime="2026-09-13T18:32:26.5440741+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a51bbd3a-79c0-4298-81a1-efb605225f83" />
+    <UnitTestResult executionId="46697c4d-89ec-4e4b-8972-1c5ba6d4be47" testId="1b228d62-5385-8cb7-853d-2f1722c2592a" testName="CanonicalRootRejectsNonCanonicalInput (&quot;///&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000072" startTime="2026-09-13T18:32:26.5178921+08:00" endTime="2026-09-13T18:32:26.5179129+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="46697c4d-89ec-4e4b-8972-1c5ba6d4be47" />
+    <UnitTestResult executionId="a2e09679-2140-4a24-9eb2-c6b0c0c09c4c" testId="133476fe-b44a-8456-bbd8-33aaf7002083" testName="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting (2)" computerName="YOKIIRONETBOOK" duration="00:00:00.3300214" startTime="2026-09-13T18:32:26.5269761+08:00" endTime="2026-09-13T18:32:26.8570529+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a2e09679-2140-4a24-9eb2-c6b0c0c09c4c" />
+    <UnitTestResult executionId="0be88334-e780-4880-8c8b-a18ad0a4ac67" testId="109c8802-2d5e-8fc7-acbd-606a5a95c406" testName="ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys" computerName="YOKIIRONETBOOK" duration="00:00:00.0008477" startTime="2026-09-13T18:32:27.4149120+08:00" endTime="2026-09-13T18:32:27.4157933+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0be88334-e780-4880-8c8b-a18ad0a4ac67">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialDispatchIntegrationTests.ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialDispatchIntegrationTests.cs:line 28&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4df8b943-5c3c-4dee-9ddf-fa86b3a3ad26" testId="10e6c34d-5eb1-8b52-a76c-777bb59fa2a4" testName="RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity" computerName="YOKIIRONETBOOK" duration="00:00:00.0012177" startTime="2026-09-13T18:32:27.4229103+08:00" endTime="2026-09-13T18:32:27.4241677+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4df8b943-5c3c-4dee-9ddf-fa86b3a3ad26">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialRegistrationIntegrationTests.RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialRegistrationIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9f408e0a-b899-4e97-897d-6cd5d61b1914" testId="13786bb3-9c0c-8aff-88c1-0136d6acb1cc" testName="TimeoutAbortsTheSnapshotWithAnExplicitTerminalState" computerName="YOKIIRONETBOOK" duration="00:00:00.0539551" startTime="2026-09-13T18:32:26.4862608+08:00" endTime="2026-09-13T18:32:26.5402800+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9f408e0a-b899-4e97-897d-6cd5d61b1914" />
+    <UnitTestResult executionId="942433d0-660e-45be-91d6-4e5a6855a8c8" testId="14796337-8f76-8bd8-a7e1-1232da69384b" testName="ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion" computerName="YOKIIRONETBOOK" duration="00:00:00.0022415" startTime="2026-09-13T18:32:27.4187441+08:00" endTime="2026-09-13T18:32:27.4210319+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="942433d0-660e-45be-91d6-4e5a6855a8c8">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialPermissionIntegrationTests.VerifyWindowsAsync() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialPermissionIntegrationTests.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialPermissionIntegrationTests.ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialPermissionIntegrationTests.cs:line 21&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="cd0c9f5f-1fab-48ee-8545-ad185c63aacf" testId="144f9adb-a4d7-80db-ad6b-c041c3ab5c4f" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;nonzero&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0140413" startTime="2026-09-13T18:32:26.4912601+08:00" endTime="2026-09-13T18:32:26.5053528+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cd0c9f5f-1fab-48ee-8545-ad185c63aacf">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fab44880-2a94-4dd0-bd80-4c761808f7f5" testId="110845f2-191a-8eda-9222-dcea34f0dab6" testName="OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately" computerName="YOKIIRONETBOOK" duration="00:00:00.0032678" startTime="2026-09-13T18:32:27.4054983+08:00" endTime="2026-09-13T18:32:27.4089259+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fab44880-2a94-4dd0-bd80-4c761808f7f5">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialAvailabilityIntegrationTests.OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialAvailabilityIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="bc20d853-9e23-4efc-825f-404eb09da504" testId="10729e30-72b5-8bd5-8e71-4a1a3b8dbec3" testName="CanonicalRootRejectsNonCanonicalInput (&quot;relative/path&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0003435" startTime="2026-09-13T18:32:26.5174053+08:00" endTime="2026-09-13T18:32:26.5178300+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bc20d853-9e23-4efc-825f-404eb09da504" />
+    <UnitTestResult executionId="72e824b5-56a3-4e0e-b937-3b0ccdab5ec5" testId="1f090e93-7be6-8dde-afcb-504b0c222f88" testName="CanonicalRootRejectsNonCanonicalInput (&quot;//&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000212" startTime="2026-09-13T18:32:26.5178851+08:00" endTime="2026-09-13T18:32:26.5179370+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="72e824b5-56a3-4e0e-b937-3b0ccdab5ec5" />
+    <UnitTestResult executionId="ec9cc434-0101-409b-b043-a9ba48ed5f37" testId="12fdfb04-2141-82db-a36b-f0a5c60fe38c" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;/absolute/file.jpg&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0117058" startTime="2026-09-13T18:32:26.4355553+08:00" endTime="2026-09-13T18:32:26.4682918+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec9cc434-0101-409b-b043-a9ba48ed5f37" />
+    <UnitTestResult executionId="dc88e847-70a4-48de-98f3-5c26d1a6c50e" testId="12da6775-744a-8a5b-bc92-bf6df81d3a05" testName="CanonicalRootRejectsNonCanonicalInput (&quot;/srv//assets&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000121" startTime="2026-09-13T18:32:26.5178435+08:00" endTime="2026-09-13T18:32:26.5178857+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dc88e847-70a4-48de-98f3-5c26d1a6c50e" />
+    <UnitTestResult executionId="1ff9f0e2-087b-4f89-89ed-d025e1426c60" testId="1fbddef7-851c-8687-a7da-c545363eac18" testName="ObservationRequiresKindAppropriateLength" computerName="YOKIIRONETBOOK" duration="00:00:00.0144395" startTime="2026-09-13T18:32:26.4357193+08:00" endTime="2026-09-13T18:32:26.4692085+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ff9f0e2-087b-4f89-89ed-d025e1426c60" />
+    <UnitTestResult executionId="21b41e92-2210-495f-ac9f-c960b806f40b" testId="1124314d-5a5a-838a-b0d6-b8d374ec27d3" testName="DiscoveryStreamsVisibleEntriesAndLeavesEverySandboxByteUnchanged" computerName="YOKIIRONETBOOK" duration="00:00:00.0197851" startTime="2026-09-13T18:32:26.5332037+08:00" endTime="2026-09-13T18:32:26.5531003+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="21b41e92-2210-495f-ac9f-c960b806f40b" />
+    <UnitTestResult executionId="d28092a5-3155-475a-89b6-35ea767c600b" testId="113b87ac-a045-8973-acc9-50234648b75c" testName="LargeDiscoveryIsGeneratedLazilyAndNeverExceedsTheBatchBound" computerName="YOKIIRONETBOOK" duration="00:00:00.0686933" startTime="2026-09-13T18:32:26.4777411+08:00" endTime="2026-09-13T18:32:26.5464860+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d28092a5-3155-475a-89b6-35ea767c600b" />
+    <UnitTestResult executionId="89038991-57ce-4367-abf9-2773d8110a69" testId="18220771-aad3-84a0-8f6a-7c4ab3ed1ecb" testName="RelativePathNormalizesSeparatorsAndKeepsDisplayNameSeparateFromIdentity" computerName="YOKIIRONETBOOK" duration="00:00:00.0139541" startTime="2026-09-13T18:32:26.4357326+08:00" endTime="2026-09-13T18:32:26.4690641+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="89038991-57ce-4367-abf9-2773d8110a69" />
+    <UnitTestResult executionId="3d5c2c01-04a3-4690-a388-d11b088a4872" testId="152c80fd-19d5-83c8-b064-799d3cdebe09" testName="JournalFailureAfterCommitNeverAttemptsToAbortCommittedObservations" computerName="YOKIIRONETBOOK" duration="00:00:00.0303449" startTime="2026-09-13T18:32:26.4882438+08:00" endTime="2026-09-13T18:32:26.5186331+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d5c2c01-04a3-4690-a388-d11b088a4872" />
+    <UnitTestResult executionId="27a4d55e-8568-43ba-a6af-f0908560ecb4" testId="1d67f6e3-4255-83bf-90a0-c93c34ce52b8" testName="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)" computerName="YOKIIRONETBOOK" duration="00:00:00.0013062" startTime="2026-09-13T18:32:26.5414907+08:00" endTime="2026-09-13T18:32:26.5428491+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="27a4d55e-8568-43ba-a6af-f0908560ecb4">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Literal backslash filenames require a POSIX filesystem.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests.PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity(Boolean directory) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyFileDiscoveryTests.cs:line 66&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="14a8de93-59f4-47e9-af04-6b8a3c191c31" testId="1c16011c-baa6-8f28-a03e-f0d5acd83cbc" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;folder/../file.jpg&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0126793" startTime="2026-09-13T18:32:26.4356021+08:00" endTime="2026-09-13T18:32:26.4683553+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14a8de93-59f4-47e9-af04-6b8a3c191c31" />
+    <UnitTestResult executionId="dbec284f-220d-41b4-b2a4-4a211574ac7f" testId="1ba64828-62ee-8a8f-9c40-f7cf007d91bd" testName="RootProbeRejectsLinksInTheRootOrItsAncestors (True)" computerName="YOKIIRONETBOOK" duration="00:00:00.3441689" startTime="2026-09-13T18:32:26.5222858+08:00" endTime="2026-09-13T18:32:26.8665404+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dbec284f-220d-41b4-b2a4-4a211574ac7f" />
+    <UnitTestResult executionId="ebadc321-a51b-44cd-823c-596ca2ea2741" testId="1eebb53d-eee4-807e-abe4-2c9945e3528b" testName="InvalidBatchSizeFailsBeforeAnyPortIsCalled" computerName="YOKIIRONETBOOK" duration="00:00:00.0015509" startTime="2026-09-13T18:32:26.4883404+08:00" endTime="2026-09-13T18:32:26.4899299+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ebadc321-a51b-44cd-823c-596ca2ea2741" />
+    <UnitTestResult executionId="54982101-c5d8-4060-b2e1-095d42fa5378" testId="1fbd990e-be56-844f-a207-3d69d0d0fddd" testName="SinkInitializationFailureTerminatesTheJournalWithoutACommit" computerName="YOKIIRONETBOOK" duration="00:00:00.0072297" startTime="2026-09-13T18:32:26.4877521+08:00" endTime="2026-09-13T18:32:26.4950221+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="54982101-c5d8-4060-b2e1-095d42fa5378" />
+    <UnitTestResult executionId="8dbec78e-3f99-4971-91ea-e3a86257e2bd" testId="191cf083-31e2-8cde-94d4-eb675a703881" testName="DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex" computerName="YOKIIRONETBOOK" duration="00:00:00.0008721" startTime="2026-09-13T18:32:27.4251742+08:00" endTime="2026-09-13T18:32:27.4260962+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8dbec78e-3f99-4971-91ea-e3a86257e2bd">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialStorageFailureIntegrationTests.DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialStorageFailureIntegrationTests.cs:line 12&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d36bc915-bf84-4dff-8d61-b339b33ef642" testId="146f556c-9b3b-883d-bfcc-d56dc83261b6" testName="CanonicalRootRejectsNonCanonicalInput (&quot;C://&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000174" startTime="2026-09-13T18:32:26.5188839+08:00" endTime="2026-09-13T18:32:26.5189344+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d36bc915-bf84-4dff-8d61-b339b33ef642" />
+    <UnitTestResult executionId="9224fd70-3154-4b07-b34f-283b4300dfd8" testId="1898af7a-77c3-8153-9844-8c493c9b6636" testName="CanonicalRootRejectsNonCanonicalInput (&quot;//nas&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000212" startTime="2026-09-13T18:32:26.5178476+08:00" endTime="2026-09-13T18:32:26.5178916+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9224fd70-3154-4b07-b34f-283b4300dfd8" />
+    <UnitTestResult executionId="a9210fc3-ae77-486c-b399-04f3fe447c45" testId="126b2920-e06b-8f66-baab-ea3eacb41e47" testName="CanonicalRootRejectsNonCanonicalInput (&quot;/srv/../secret&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0002869" startTime="2026-09-13T18:32:26.5175188+08:00" endTime="2026-09-13T18:32:26.5178261+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a9210fc3-ae77-486c-b399-04f3fe447c45" />
+    <UnitTestResult executionId="afb412ac-0ff3-4255-ae4a-5efa7d662a9c" testId="1473db72-ed1d-85c7-af34-05d2358f6126" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;wrong_count&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0135949" startTime="2026-09-13T18:32:26.4912390+08:00" endTime="2026-09-13T18:32:26.5048769+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="afb412ac-0ff3-4255-ae4a-5efa7d662a9c">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5d12d269-68a1-42e7-8e5a-61477fd50364" testId="10d5937f-389b-834f-b640-e38929653cda" testName="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (ScanReconciliation,&quot;assetlibrary_scan_reconciliation_runtime&quot;,&quot;DELETE FROM asset_identity.filesystem_entry WHERE false&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0003880" startTime="2026-09-13T18:32:27.4134338+08:00" endTime="2026-09-13T18:32:27.4138627+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5d12d269-68a1-42e7-8e5a-61477fd50364">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests.SharedConnectionMechanicsPreserveEveryModuleRoleBoundary(ModuleDatabaseRole role, String expectedRole, String forbiddenSql) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialDatabaseBoundaryIntegrationTests.cs:line 16&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="f453c4a1-2fdc-4eb2-8aaa-ae362280a5cd" testId="13582317-c632-8f6c-86b0-767d26071ffc" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;incomplete&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0146955" startTime="2026-09-13T18:32:26.4899679+08:00" endTime="2026-09-13T18:32:26.5047537+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f453c4a1-2fdc-4eb2-8aaa-ae362280a5cd">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d271ebe1-9e19-4027-ad72-cbbd6e40fbba" testId="1b44651d-8399-85aa-91dc-c0a19d9aa8a5" testName="ReplacingAYieldedDirectoryWithALinkAbortsTheInitialScan" computerName="YOKIIRONETBOOK" duration="00:00:00.3760568" startTime="2026-09-13T18:32:26.4883470+08:00" endTime="2026-09-13T18:32:26.8645185+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d271ebe1-9e19-4027-ad72-cbbd6e40fbba" />
+    <UnitTestResult executionId="c3b43bb4-d294-4fe2-963c-7a3ef63dec11" testId="12a1bad2-04dc-856a-80b8-cdc516b1269f" testName="OverlapPolicyPreservesCaseDistinctionsForCaseSensitiveStorage" computerName="YOKIIRONETBOOK" duration="00:00:00.0005120" startTime="2026-09-13T18:32:26.5197536+08:00" endTime="2026-09-13T18:32:26.5202978+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3b43bb4-d294-4fe2-963c-7a3ef63dec11" />
+    <UnitTestResult executionId="81385b0f-7ca5-4799-bb87-b258131d7e10" testId="1dbe01cb-8dbb-8b63-8cbd-51cd89ec2594" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;folder//file.jpg&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0127034" startTime="2026-09-13T18:32:26.4355476+08:00" endTime="2026-09-13T18:32:26.4682258+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="81385b0f-7ca5-4799-bb87-b258131d7e10" />
+    <UnitTestResult executionId="f68a7117-5e29-4a08-a3a3-36796fb4ee13" testId="16324347-ce6b-8b52-ad40-1af436504837" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;C:/absolute/file.jpg&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000283" startTime="2026-09-13T18:32:26.4854665+08:00" endTime="2026-09-13T18:32:26.4862188+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f68a7117-5e29-4a08-a3a3-36796fb4ee13" />
+    <UnitTestResult executionId="8c564321-5cfc-40fa-a4c5-b4ef5ae97370" testId="1fdaec54-18b8-84ad-9f91-e4f47a54eb69" testName="NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged" computerName="YOKIIRONETBOOK" duration="00:00:00.0132627" startTime="2026-09-13T18:32:26.5048155+08:00" endTime="2026-09-13T18:32:26.5181660+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8c564321-5cfc-40fa-a4c5-b4ef5ae97370">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.WorkerOptions() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 69&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerTraversalTests.NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerTraversalTests.cs:line 32&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c92cbcf9-e1a5-4d7a-ac9a-a3d58876af95" testId="162c3e6f-fd2c-8e92-b916-59a3429ceb96" testName="EmptyOnlineLibraryCommitsAnExplicitZeroEntrySnapshot" computerName="YOKIIRONETBOOK" duration="00:00:00.0171740" startTime="2026-09-13T18:32:26.4771083+08:00" endTime="2026-09-13T18:32:26.4943269+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c92cbcf9-e1a5-4d7a-ac9a-a3d58876af95" />
+    <UnitTestResult executionId="527c61fc-46fe-4eff-b421-7b348f67b0ba" testId="16ac8a59-d449-8a55-a970-8491efaae456" testName="RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt" computerName="YOKIIRONETBOOK" duration="00:00:00.0013189" startTime="2026-09-13T18:32:27.4089562+08:00" endTime="2026-09-13T18:32:27.4103524+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="527c61fc-46fe-4eff-b421-7b348f67b0ba">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialCommittedRecoveryIntegrationTests.RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialCommittedRecoveryIntegrationTests.cs:line 12&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="de05d2fe-fa1d-4af9-a493-7a53021e2ec5" testId="13473103-d74c-848b-88f3-f8a4bf21c740" testName="DefaultPolicyExcludesSystemAndTemporaryItems" computerName="YOKIIRONETBOOK" duration="00:00:00.0002187" startTime="2026-09-13T18:32:26.4743152+08:00" endTime="2026-09-13T18:32:26.4746223+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="de05d2fe-fa1d-4af9-a493-7a53021e2ec5" />
+    <UnitTestResult executionId="7b87d34c-86a4-47ee-8411-564055f6cfb9" testId="10b69001-7698-806f-b15f-cb279bc586a0" testName="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;C:\Assets\Photos\&quot;,&quot;C:/Assets/Photos&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0031449" startTime="2026-09-13T18:32:26.5049155+08:00" endTime="2026-09-13T18:32:26.5081280+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7b87d34c-86a4-47ee-8411-564055f6cfb9" />
+    <UnitTestResult executionId="db106abf-8849-4849-ae01-3b906f12838c" testId="1f907770-50b6-8130-946c-1680c351af1e" testName="ValidationServiceDoesNotTreatTheCandidateLibraryAsItsOwnConflict" computerName="YOKIIRONETBOOK" duration="00:00:00.0066849" startTime="2026-09-13T18:32:26.5214049+08:00" endTime="2026-09-13T18:32:26.5281279+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="db106abf-8849-4849-ae01-3b906f12838c" />
+    <UnitTestResult executionId="0213dfe0-bf57-4292-9ed5-3083cc1277d1" testId="176a4224-5b6f-8a51-ab4c-9551feef6eba" testName="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;/srv/assets/&quot;,&quot;/srv/assets&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0028745" startTime="2026-09-13T18:32:26.5050408+08:00" endTime="2026-09-13T18:32:26.5081228+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0213dfe0-bf57-4292-9ed5-3083cc1277d1" />
+    <UnitTestResult executionId="d28a0b0d-bc4b-4d6b-972a-e3508e0203b0" testId="18bdb00f-bc50-8b07-9a5c-f43bfe1463ba" testName="RunningCancellationAbortsOnlyStagedObservations" computerName="YOKIIRONETBOOK" duration="00:00:00.0009211" startTime="2026-09-13T18:32:27.4241890+08:00" endTime="2026-09-13T18:32:27.4251526+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d28a0b0d-bc4b-4d6b-972a-e3508e0203b0">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialRunningCancellationIntegrationTests.RunningCancellationAbortsOnlyStagedObservations() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialRunningCancellationIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="1bd55afd-12d9-48db-bdee-bfb3a3cae09b" testId="18ddcafd-c8cd-845d-b69f-117f83514dce" testName="OverlapPolicyUsesStoragePathCaseRulesAndSeparatesStorageSources" computerName="YOKIIRONETBOOK" duration="00:00:00.0073237" startTime="2026-09-13T18:32:26.5195772+08:00" endTime="2026-09-13T18:32:26.5269466+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1bd55afd-12d9-48db-bdee-bfb3a3cae09b" />
+    <UnitTestResult executionId="14995953-578c-40ff-bd7e-045e66f336be" testId="12c6336d-9aad-8b39-9910-eb226813530b" testName="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;//nas/share/assets/&quot;,&quot;//nas/share/assets&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0000189" startTime="2026-09-13T18:32:26.5174031+08:00" endTime="2026-09-13T18:32:26.5175035+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14995953-578c-40ff-bd7e-045e66f336be" />
+    <UnitTestResult executionId="9e50c956-621d-45af-91f3-5734cb72b128" testId="1f6b8956-7633-8622-b58f-da1b5a349e13" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;stderr_limit&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0106266" startTime="2026-09-13T18:32:26.4943506+08:00" endTime="2026-09-13T18:32:26.5050210+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9e50c956-621d-45af-91f3-5734cb72b128">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="9dd27b58-c95d-4614-9571-bd6a54e30928" testId="172839f0-68e7-821d-b38e-eb8307195aae" testName="ProbeAndDiscoveryProtocolRequireACompleteBoundedRequest" computerName="YOKIIRONETBOOK" duration="00:00:00.0928930" startTime="2026-09-13T18:32:26.4958631+08:00" endTime="2026-09-13T18:32:26.5888458+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9dd27b58-c95d-4614-9571-bd6a54e30928" />
+    <UnitTestResult executionId="e3218880-f795-4984-8508-e399dc9cd10c" testId="10984b4c-4c3d-8303-8269-43c9f71e4b29" testName="AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex" computerName="YOKIIRONETBOOK" duration="00:00:00.0007926" startTime="2026-09-13T18:32:27.4261117+08:00" endTime="2026-09-13T18:32:27.4273590+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3218880-f795-4984-8508-e399dc9cd10c">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialTimeoutIntegrationTests.AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialTimeoutIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="bebccf95-95ff-45c5-babe-e2519e7b429b" testId="174458e1-ef3a-8e45-8b69-aa14e8a0020a" testName="SystemProbeReadsOnlyTaskSandboxAndReportsMissingPath" computerName="YOKIIRONETBOOK" duration="00:00:00.0265985" startTime="2026-09-13T18:32:26.5239410+08:00" endTime="2026-09-13T18:32:26.5506003+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bebccf95-95ff-45c5-babe-e2519e7b429b" />
+    <UnitTestResult executionId="a45d6b75-d854-4fd6-ad16-fcad4ad99c7a" testId="1bb8e994-3067-8e15-85f4-e7e50674a4cf" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;never_read&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0102419" startTime="2026-09-13T18:32:26.4950428+08:00" endTime="2026-09-13T18:32:26.5053325+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a45d6b75-d854-4fd6-ad16-fcad4ad99c7a">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="37f74546-2671-4fb2-bbc0-2ac309e75954" testId="12f9658c-872e-8cf6-b45c-f7a942880754" testName="OfflineStorageReturnsBeforeDiscoveryJournalOrIndexWrites" computerName="YOKIIRONETBOOK" duration="00:00:00.0123499" startTime="2026-09-13T18:32:26.4779517+08:00" endTime="2026-09-13T18:32:26.4903890+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="37f74546-2671-4fb2-bbc0-2ac309e75954" />
+    <UnitTestResult executionId="c2c27b1b-9318-4544-8e1d-189923032ea4" testId="1e54e91f-3814-82b1-a3fd-6f977f948a23" testName="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)" computerName="YOKIIRONETBOOK" duration="00:00:00.0003397" startTime="2026-09-13T18:32:26.5428684+08:00" endTime="2026-09-13T18:32:26.5432393+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c2c27b1b-9318-4544-8e1d-189923032ea4">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Literal backslash filenames require a POSIX filesystem.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests.PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity(Boolean directory) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/SystemReadOnlyFileDiscoveryTests.cs:line 66&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a4852952-4025-48cd-b4f6-ca6a8e2a13cf" testId="12113be7-ba6a-8371-bd4e-849d355d4141" testName="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry (False)" computerName="YOKIIRONETBOOK" duration="00:00:00.2853097" startTime="2026-09-13T18:32:26.5222961+08:00" endTime="2026-09-13T18:32:26.8077066+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a4852952-4025-48cd-b4f6-ca6a8e2a13cf" />
+    <UnitTestResult executionId="f0353f57-bb3c-4d8c-bd2a-2cd2c6d4c8c1" testId="1bfaf732-ed1c-888d-9ccf-31006b6569c5" testName="WideTreesDescendImmediatelyWithoutAccumulatingSiblingDirectories" computerName="YOKIIRONETBOOK" duration="00:00:00.9000569" startTime="2026-09-13T18:32:26.5047987+08:00" endTime="2026-09-13T18:32:27.4050365+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0353f57-bb3c-4d8c-bd2a-2cd2c6d4c8c1" />
+    <UnitTestResult executionId="c1d7d189-6d45-42eb-a297-5e131907c94e" testId="15f58e3b-e2ab-8917-a29b-31d3399bec9b" testName="CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit" computerName="YOKIIRONETBOOK" duration="00:00:00.0009448" startTime="2026-09-13T18:32:27.4177358+08:00" endTime="2026-09-13T18:32:27.4187288+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c1d7d189-6d45-42eb-a297-5e131907c94e">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialLeaseGuardIntegrationTests.CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialLeaseGuardIntegrationTests.cs:line 12&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="18a1269d-e88f-4f1d-a67a-2844f1b3f75a" testId="1d86b437-2db6-8fbb-9203-8f2dd78eae82" testName="ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows" computerName="YOKIIRONETBOOK" duration="00:00:00.0010230" startTime="2026-09-13T18:32:27.4158123+08:00" endTime="2026-09-13T18:32:27.4168816+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="18a1269d-e88f-4f1d-a67a-2844f1b3f75a">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialInterruptedRecoveryIntegrationTests.ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialInterruptedRecoveryIntegrationTests.cs:line 12&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b5af8f4b-c40a-41de-b741-7b2f11a932e8" testId="1853836f-9ca3-8917-b515-c60ea8c523bc" testName="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting (1)" computerName="YOKIIRONETBOOK" duration="00:00:00.3338078" startTime="2026-09-13T18:32:26.5225436+08:00" endTime="2026-09-13T18:32:26.8564269+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b5af8f4b-c40a-41de-b741-7b2f11a932e8" />
+    <UnitTestResult executionId="52d8c91a-9541-4f04-8da6-a2441cf8d161" testId="1cc92667-f700-8db7-a81e-95084a7a1bb7" testName="ReparseDirectoryIsRecordedButNeverRecursed" computerName="YOKIIRONETBOOK" duration="00:00:00.0119672" startTime="2026-09-13T18:32:26.4352875+08:00" endTime="2026-09-13T18:32:26.4682567+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="52d8c91a-9541-4f04-8da6-a2441cf8d161" />
+    <UnitTestResult executionId="fb00a65f-62c4-4c7d-bbcf-e2cd55812b29" testId="196674bb-3235-86c1-812f-280fc94ecbaf" testName="WorkerStreamsACompleteSnapshotWithoutChangingAnyAsset" computerName="YOKIIRONETBOOK" duration="00:00:00.0895034" startTime="2026-09-13T18:32:26.5014420+08:00" endTime="2026-09-13T18:32:26.5910219+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fb00a65f-62c4-4c7d-bbcf-e2cd55812b29" />
+    <UnitTestResult executionId="e60d2e41-668a-448b-bdf7-85a78961d389" testId="11527cb3-966c-8510-b688-ddf2f45a617f" testName="ValidationServiceReturnsOverlapWithoutRegisteringAnything" computerName="YOKIIRONETBOOK" duration="00:00:00.0127662" startTime="2026-09-13T18:32:26.5203303+08:00" endTime="2026-09-13T18:32:26.5331584+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e60d2e41-668a-448b-bdf7-85a78961d389" />
+    <UnitTestResult executionId="3a851233-bc2e-4f85-8c42-fa7ca769c927" testId="1a45b703-c6a2-809d-97c9-acc98629a76a" testName="CrashBetweenAcceptAndEnqueueRecoversOneDurableTask" computerName="YOKIIRONETBOOK" duration="00:00:00.0008007" startTime="2026-09-13T18:32:27.4140473+08:00" endTime="2026-09-13T18:32:27.4148975+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3a851233-bc2e-4f85-8c42-fa7ca769c927">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialDispatchIntegrationTests.CrashBetweenAcceptAndEnqueueRecoversOneDurableTask() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialDispatchIntegrationTests.cs:line 12&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="fea51e04-c692-4483-b1b0-7a5faeb2b584" testId="1944dd6a-c5a4-88ae-b93e-7f1dafe17a49" testName="UnexpectedSinkFailureAlsoAbortsAndPropagatesTheOriginalError" computerName="YOKIIRONETBOOK" duration="00:00:00.0203047" startTime="2026-09-13T18:32:26.4863546+08:00" endTime="2026-09-13T18:32:26.5092080+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fea51e04-c692-4483-b1b0-7a5faeb2b584" />
+    <UnitTestResult executionId="b367ca06-7dcb-4a6a-b14d-8dfb4ae832b0" testId="13658519-81d5-893f-a79a-09e92188e6c4" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;./file.jpg&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0148693" startTime="2026-09-13T18:32:26.4357297+08:00" endTime="2026-09-13T18:32:26.4686920+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b367ca06-7dcb-4a6a-b14d-8dfb4ae832b0" />
+    <UnitTestResult executionId="a7fa15fe-c94b-49b8-b643-f4b33776cb10" testId="112f2973-13fd-8abe-ae7d-afa5529d3512" testName="UnrelatedCancellationIsAnInternalFailureNotAClaimThatTheCallerCancelled" computerName="YOKIIRONETBOOK" duration="00:00:00.0086354" startTime="2026-09-13T18:32:26.4863497+08:00" endTime="2026-09-13T18:32:26.4950303+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a7fa15fe-c94b-49b8-b643-f4b33776cb10" />
+    <UnitTestResult executionId="1b0d7fdd-e4fc-4e02-85db-c6b19de7eb65" testId="19bf1426-2076-8e82-822b-7223a07c2efb" testName="OnlineScanStagesFixedBatchesAndCommitsOneCompleteSnapshot" computerName="YOKIIRONETBOOK" duration="00:00:00.0403929" startTime="2026-09-13T18:32:26.4769898+08:00" endTime="2026-09-13T18:32:26.5174684+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1b0d7fdd-e4fc-4e02-85db-c6b19de7eb65" />
+    <UnitTestResult executionId="c80b9e1f-4000-4e25-808f-599057657329" testId="12b07faf-4085-8401-abed-c90851c6abfa" testName="QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt" computerName="YOKIIRONETBOOK" duration="00:00:00.0009428" startTime="2026-09-13T18:32:27.4218947+08:00" endTime="2026-09-13T18:32:27.4228906+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c80b9e1f-4000-4e25-808f-599057657329">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialQueuedCancellationIntegrationTests.QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialQueuedCancellationIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="353047f1-dfa4-4549-b63f-986f6575b9f2" testId="11e5661c-470e-8eed-88c7-1463c3cab1b5" testName="AnUnchangedChildLinkIsObservedWithoutRecursingIntoItsTarget" computerName="YOKIIRONETBOOK" duration="00:00:00.3395251" startTime="2026-09-13T18:32:26.5281575+08:00" endTime="2026-09-13T18:32:26.8677336+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="353047f1-dfa4-4549-b63f-986f6575b9f2" />
+    <UnitTestResult executionId="4ee91a9c-a638-451f-af18-6891953e6f87" testId="19858242-ebe0-8eea-9957-9b6c4818dd4a" testName="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry (True)" computerName="YOKIIRONETBOOK" duration="00:00:00.1784231" startTime="2026-09-13T18:32:26.5223762+08:00" endTime="2026-09-13T18:32:26.7012949+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4ee91a9c-a638-451f-af18-6891953e6f87" />
+    <UnitTestResult executionId="9cd089b5-d433-4027-b368-05fa02806908" testId="1f6cbfd1-d055-8734-a8f9-25847c66f818" testName="ObservationRejectsDefaultValueObjectIdentities" computerName="YOKIIRONETBOOK" duration="00:00:00.0260387" startTime="2026-09-13T18:32:26.4357161+08:00" endTime="2026-09-13T18:32:26.4807125+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9cd089b5-d433-4027-b368-05fa02806908" />
+    <UnitTestResult executionId="cf4898bc-8079-4e49-8f91-8d112d67ca96" testId="17f284da-5cf7-81c7-86d6-4b810eb11459" testName="MismatchedScanTargetFailsBeforeDiscoveryJournalOrIndexWrites" computerName="YOKIIRONETBOOK" duration="00:00:00.0133627" startTime="2026-09-13T18:32:26.4766465+08:00" endTime="2026-09-13T18:32:26.4901224+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cf4898bc-8079-4e49-8f91-8d112d67ca96" />
+    <UnitTestResult executionId="acdf7aaa-bfbd-4821-ba1d-445780d413a9" testId="1943038e-155e-83c5-9e48-726fed4ab638" testName="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (LibraryStorage,&quot;assetlibrary_library_storage_runtime&quot;,&quot;DELETE FROM task_health.durable_task WHERE false&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0019979" startTime="2026-09-13T18:32:27.4113279+08:00" endTime="2026-09-13T18:32:27.4134140+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acdf7aaa-bfbd-4821-ba1d-445780d413a9">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests.SharedConnectionMechanicsPreserveEveryModuleRoleBoundary(ModuleDatabaseRole role, String expectedRole, String forbiddenSql) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialDatabaseBoundaryIntegrationTests.cs:line 16&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="5598dc69-9822-4a96-aee4-f0e63188c10e" testId="11afdfff-134f-8f4c-a234-499b3dc710ae" testName="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0111770" startTime="2026-09-13T18:32:26.4355610+08:00" endTime="2026-09-13T18:32:26.4681095+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5598dc69-9822-4a96-aee4-f0e63188c10e" />
+    <UnitTestResult executionId="e32ddf56-bae4-4fe9-91fb-01657b4346f4" testId="17c5d690-94d8-8419-95bb-bc733d3801b7" testName="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;oversized&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0134519" startTime="2026-09-13T18:32:26.4913001+08:00" endTime="2026-09-13T18:32:26.5047961+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e32ddf56-bae4-4fe9-91fb-01657b4346f4">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests.FailedOrUnresponsiveProcessesCannotCommitAndAreReaped(String fault) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/IsolatedReadOnlyWorkerFaultTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="53e8cfb4-8a8c-4a01-8b44-25ced0d7c78d" testId="13621b5f-71bb-88a8-a1f8-cc2b25c2b672" testName="DefaultLibraryIdFailsBeforeAnyPortIsCalled" computerName="YOKIIRONETBOOK" duration="00:00:00.0108104" startTime="2026-09-13T18:32:26.4790776+08:00" endTime="2026-09-13T18:32:26.4899897+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="53e8cfb4-8a8c-4a01-8b44-25ced0d7c78d" />
+    <UnitTestResult executionId="9198efae-e8f3-4211-91de-5b02bc844449" testId="1b7c3c18-0d23-82b2-919e-2c9de90eac34" testName="CompletedSnapshotSurvivesLostJournalAcknowledgement" computerName="YOKIIRONETBOOK" duration="00:00:00.0007719" startTime="2026-09-13T18:32:27.4169013+08:00" endTime="2026-09-13T18:32:27.4177175+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="NotExecuted" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9198efae-e8f3-4211-91de-5b02bc844449">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.Inconclusive 失败。Native read-only integration is provided by the required PostgreSQL/Host test runner.</Message>
+          <StackTrace>   at Microsoft.VisualStudio.TestTools.UnitTesting.Assert.Inconclusive(String message) in /_/src/TestFramework/TestFramework/Assertions/Assert.Inconclusive.cs:line 27&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture.RequiredEnvironment(String name) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 75&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialFixture..ctor(IReadOnlyFileDiscovery discovery, Func`2 decorateStore, InitialScanExecutionOptions options) in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialFixture.cs:line 35&#xD;
+   at AssetLibrary.ReadCore.Tests.ReadOnlyTrialJournalRecoveryIntegrationTests.CompletedSnapshotSurvivesLostJournalAcknowledgement() in /_/tests/dotnet/AssetLibrary.ReadCore.Tests/ReadOnlyTrialJournalRecoveryIntegrationTests.cs:line 13&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="814df913-b0f5-4cce-90fd-4170980756f6" testId="1e6977bb-8e72-863d-b204-1a8d1439297b" testName="RootProbeRejectsLinksInTheRootOrItsAncestors (False)" computerName="YOKIIRONETBOOK" duration="00:00:00.3467386" startTime="2026-09-13T18:32:26.5222741+08:00" endTime="2026-09-13T18:32:26.8691003+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="814df913-b0f5-4cce-90fd-4170980756f6" />
+    <UnitTestResult executionId="5f87cc6a-ba15-45b0-8126-52cd1fe02c0d" testId="169b6243-74b1-818f-8e53-916210e42350" testName="CallerCancellationAbortsThenPreservesCancellationSemantics" computerName="YOKIIRONETBOOK" duration="00:00:00.0542605" startTime="2026-09-13T18:32:26.4863306+08:00" endTime="2026-09-13T18:32:26.5406489+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5f87cc6a-ba15-45b0-8126-52cd1fe02c0d" />
+    <UnitTestResult executionId="4199ca49-2b5c-494b-b202-67c27637ab8c" testId="171ef0fd-3e55-8540-9d4c-b32c0403aceb" testName="IncompleteDiscoveryAbortsStagedRowsAndNeverCommitsThem" computerName="YOKIIRONETBOOK" duration="00:00:00.0183244" startTime="2026-09-13T18:32:26.4882726+08:00" endTime="2026-09-13T18:32:26.5092102+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4199ca49-2b5c-494b-b202-67c27637ab8c" />
+    <UnitTestResult executionId="3c77aba2-2772-4b75-bb72-6582942e806e" testId="10741fa8-3c79-858d-91a0-e9347d58e890" testName="OverlapPolicyRejectsSameParentAndChildRootsButNotPrefixLookalikes" computerName="YOKIIRONETBOOK" duration="00:00:00.0024021" startTime="2026-09-13T18:32:26.5189534+08:00" endTime="2026-09-13T18:32:26.5213876+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c77aba2-2772-4b75-bb72-6582942e806e" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;./file.jpg&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="13658519-81d5-893f-a79a-09e92188e6c4">
+      <Execution id="b367ca06-7dcb-4a6a-b14d-8dfb4ae832b0" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="DefaultPolicyExcludesSystemAndTemporaryItems" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="13473103-d74c-848b-88f3-f8a4bf21c740">
+      <Execution id="de05d2fe-fa1d-4af9-a493-7a53021e2ec5" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="DefaultPolicyExcludesSystemAndTemporaryItems" />
+    </UnitTest>
+    <UnitTest name="IncompleteDiscoveryAbortsStagedRowsAndNeverCommitsThem" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="171ef0fd-3e55-8540-9d4c-b32c0403aceb">
+      <Execution id="4199ca49-2b5c-494b-b202-67c27637ab8c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="IncompleteDiscoveryAbortsStagedRowsAndNeverCommitsThem" />
+    </UnitTest>
+    <UnitTest name="DefaultLibraryIdFailsBeforeAnyPortIsCalled" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="13621b5f-71bb-88a8-a1f8-cc2b25c2b672">
+      <Execution id="53e8cfb4-8a8c-4a01-8b44-25ced0d7c78d" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="DefaultLibraryIdFailsBeforeAnyPortIsCalled" />
+    </UnitTest>
+    <UnitTest name="AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10984b4c-4c3d-8303-8269-43c9f71e4b29">
+      <Execution id="e3218880-f795-4984-8508-e399dc9cd10c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialTimeoutIntegrationTests" name="AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex" />
+    </UnitTest>
+    <UnitTest name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (TaskHealth,&quot;assetlibrary_task_health_runtime&quot;,&quot;DELETE FROM library_storage.library_root WHERE false&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="106af19a-7605-82d0-8807-81d9779b590f">
+      <Execution id="88e231bc-5fc0-4e6d-8d10-fd6896a51437" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests" name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;relative/path&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10729e30-72b5-8bd5-8e71-4a1a3b8dbec3">
+      <Execution id="bc20d853-9e23-4efc-825f-404eb09da504" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;/absolute/file.jpg&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12fdfb04-2141-82db-a36b-f0a5c60fe38c">
+      <Execution id="ec9cc434-0101-409b-b043-a9ba48ed5f37" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="110845f2-191a-8eda-9222-dcea34f0dab6">
+      <Execution id="fab44880-2a94-4dd0-bd80-4c761808f7f5" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialAvailabilityIntegrationTests" name="OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately" />
+    </UnitTest>
+    <UnitTest name="ReplacingAYieldedDirectoryWithALinkAbortsTheInitialScan" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1b44651d-8399-85aa-91dc-c0a19d9aa8a5">
+      <Execution id="d271ebe1-9e19-4027-ad72-cbbd6e40fbba" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialScanBoundaryTests" name="ReplacingAYieldedDirectoryWithALinkAbortsTheInitialScan" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;never_read&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1bb8e994-3067-8e15-85f4-e7e50674a4cf">
+      <Execution id="a45d6b75-d854-4fd6-ad16-fcad4ad99c7a" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="SystemProbeReadsOnlyTaskSandboxAndReportsMissingPath" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="174458e1-ef3a-8e45-8b69-aa14e8a0020a">
+      <Execution id="bebccf95-95ff-45c5-babe-e2519e7b429b" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="SystemProbeReadsOnlyTaskSandboxAndReportsMissingPath" />
+    </UnitTest>
+    <UnitTest name="OverlapPolicyPreservesCaseDistinctionsForCaseSensitiveStorage" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12a1bad2-04dc-856a-80b8-cdc516b1269f">
+      <Execution id="c3b43bb4-d294-4fe2-963c-7a3ef63dec11" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="OverlapPolicyPreservesCaseDistinctionsForCaseSensitiveStorage" />
+    </UnitTest>
+    <UnitTest name="ValidationServiceReturnsOverlapWithoutRegisteringAnything" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="11527cb3-966c-8510-b688-ddf2f45a617f">
+      <Execution id="e60d2e41-668a-448b-bdf7-85a78961d389" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="ValidationServiceReturnsOverlapWithoutRegisteringAnything" />
+    </UnitTest>
+    <UnitTest name="DiscoveryHonorsCancellationBeforeEnumerating" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1997ad6e-ff22-853c-884f-a53152e70731">
+      <Execution id="a51bbd3a-79c0-4298-81a1-efb605225f83" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="DiscoveryHonorsCancellationBeforeEnumerating" />
+    </UnitTest>
+    <UnitTest name="ObservationRejectsDefaultValueObjectIdentities" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1f6cbfd1-d055-8734-a8f9-25847c66f818">
+      <Execution id="9cd089b5-d433-4027-b368-05fa02806908" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="ObservationRejectsDefaultValueObjectIdentities" />
+    </UnitTest>
+    <UnitTest name="ValidationServiceDoesNotTreatTheCandidateLibraryAsItsOwnConflict" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1f907770-50b6-8130-946c-1680c351af1e">
+      <Execution id="db106abf-8849-4849-ae01-3b906f12838c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="ValidationServiceDoesNotTreatTheCandidateLibraryAsItsOwnConflict" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;C:\Assets\Photos\&quot;,&quot;C:/Assets/Photos&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10b69001-7698-806f-b15f-cb279bc586a0">
+      <Execution id="7b87d34c-86a4-47ee-8411-564055f6cfb9" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootNormalizesSeparatorsAndEndingSlash" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;//&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1f090e93-7be6-8dde-afcb-504b0c222f88">
+      <Execution id="72e824b5-56a3-4e0e-b937-3b0ccdab5ec5" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="RelativePathNormalizesSeparatorsAndKeepsDisplayNameSeparateFromIdentity" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="18220771-aad3-84a0-8f6a-7c4ab3ed1ecb">
+      <Execution id="89038991-57ce-4367-abf9-2773d8110a69" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathNormalizesSeparatorsAndKeepsDisplayNameSeparateFromIdentity" />
+    </UnitTest>
+    <UnitTest name="RootProbeRejectsLinksInTheRootOrItsAncestors (True)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1ba64828-62ee-8a8f-9c40-f7cf007d91bd">
+      <Execution id="dbec284f-220d-41b4-b2a4-4a211574ac7f" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="RootProbeRejectsLinksInTheRootOrItsAncestors" />
+    </UnitTest>
+    <UnitTest name="CallerCancellationAbortsThenPreservesCancellationSemantics" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="169b6243-74b1-818f-8e53-916210e42350">
+      <Execution id="5f87cc6a-ba15-45b0-8126-52cd1fe02c0d" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="CallerCancellationAbortsThenPreservesCancellationSemantics" />
+    </UnitTest>
+    <UnitTest name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (LibraryStorage,&quot;assetlibrary_library_storage_runtime&quot;,&quot;DELETE FROM task_health.durable_task WHERE false&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1943038e-155e-83c5-9e48-726fed4ab638">
+      <Execution id="acdf7aaa-bfbd-4821-ba1d-445780d413a9" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests" name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary" />
+    </UnitTest>
+    <UnitTest name="UnexpectedSinkFailureAlsoAbortsAndPropagatesTheOriginalError" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1944dd6a-c5a4-88ae-b93e-7f1dafe17a49">
+      <Execution id="fea51e04-c692-4483-b1b0-7a5faeb2b584" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="UnexpectedSinkFailureAlsoAbortsAndPropagatesTheOriginalError" />
+    </UnitTest>
+    <UnitTest name="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry (True)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="19858242-ebe0-8eea-9957-9b6c4818dd4a">
+      <Execution id="4ee91a9c-a638-451f-af18-6891953e6f87" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry" />
+    </UnitTest>
+    <UnitTest name="ProbeAndDiscoveryProtocolRequireACompleteBoundedRequest" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="172839f0-68e7-821d-b38e-eb8307195aae">
+      <Execution id="9dd27b58-c95d-4614-9571-bd6a54e30928" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerProtocolTests" name="ProbeAndDiscoveryProtocolRequireACompleteBoundedRequest" />
+    </UnitTest>
+    <UnitTest name="LargeDiscoveryIsGeneratedLazilyAndNeverExceedsTheBatchBound" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="113b87ac-a045-8973-acc9-50234648b75c">
+      <Execution id="d28092a5-3155-475a-89b6-35ea767c600b" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="LargeDiscoveryIsGeneratedLazilyAndNeverExceedsTheBatchBound" />
+    </UnitTest>
+    <UnitTest name="TimeoutAbortsTheSnapshotWithAnExplicitTerminalState" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="13786bb3-9c0c-8aff-88c1-0136d6acb1cc">
+      <Execution id="9f408e0a-b899-4e97-897d-6cd5d61b1914" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="TimeoutAbortsTheSnapshotWithAnExplicitTerminalState" />
+    </UnitTest>
+    <UnitTest name="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting (1)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1853836f-9ca3-8917-b515-c60ea8c523bc">
+      <Execution id="b5af8f4b-c40a-41de-b741-7b2f11a932e8" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting" />
+    </UnitTest>
+    <UnitTest name="NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1fdaec54-18b8-84ad-9f91-e4f47a54eb69">
+      <Execution id="8c564321-5cfc-40fa-a4c5-b4ef5ae97370" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerTraversalTests" name="NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged" />
+    </UnitTest>
+    <UnitTest name="RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="16ac8a59-d449-8a55-a970-8491efaae456">
+      <Execution id="527c61fc-46fe-4eff-b421-7b348f67b0ba" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialCommittedRecoveryIntegrationTests" name="RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;/srv/assets/&quot;,&quot;/srv/assets&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="176a4224-5b6f-8a51-ab4c-9551feef6eba">
+      <Execution id="0213dfe0-bf57-4292-9ed5-3083cc1277d1" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootNormalizesSeparatorsAndEndingSlash" />
+    </UnitTest>
+    <UnitTest name="ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="109c8802-2d5e-8fc7-acbd-606a5a95c406">
+      <Execution id="0be88334-e780-4880-8c8b-a18ad0a4ac67" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialDispatchIntegrationTests" name="ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys" />
+    </UnitTest>
+    <UnitTest name="ObservationRequiresKindAppropriateLength" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1fbddef7-851c-8687-a7da-c545363eac18">
+      <Execution id="1ff9f0e2-087b-4f89-89ed-d025e1426c60" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="ObservationRequiresKindAppropriateLength" />
+    </UnitTest>
+    <UnitTest name="CompletedSnapshotSurvivesLostJournalAcknowledgement" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1b7c3c18-0d23-82b2-919e-2c9de90eac34">
+      <Execution id="9198efae-e8f3-4211-91de-5b02bc844449" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialJournalRecoveryIntegrationTests" name="CompletedSnapshotSurvivesLostJournalAcknowledgement" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;/srv/../secret&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="126b2920-e06b-8f66-baab-ea3eacb41e47">
+      <Execution id="a9210fc3-ae77-486c-b399-04f3fe447c45" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;/srv//assets&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12da6775-744a-8a5b-bc92-bf6df81d3a05">
+      <Execution id="dc88e847-70a4-48de-98f3-5c26d1a6c50e" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="SinkInitializationFailureTerminatesTheJournalWithoutACommit" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1fbd990e-be56-844f-a207-3d69d0d0fddd">
+      <Execution id="54982101-c5d8-4060-b2e1-095d42fa5378" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="SinkInitializationFailureTerminatesTheJournalWithoutACommit" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;stderr_limit&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1f6b8956-7633-8622-b58f-da1b5a349e13">
+      <Execution id="9e50c956-621d-45af-91f3-5734cb72b128" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;C:/absolute/file.jpg&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="16324347-ce6b-8b52-ad40-1af436504837">
+      <Execution id="f68a7117-5e29-4a08-a3a3-36796fb4ee13" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1d86b437-2db6-8fbb-9203-8f2dd78eae82">
+      <Execution id="18a1269d-e88f-4f1d-a67a-2844f1b3f75a" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialInterruptedRecoveryIntegrationTests" name="ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows" />
+    </UnitTest>
+    <UnitTest name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (ScanReconciliation,&quot;assetlibrary_scan_reconciliation_runtime&quot;,&quot;DELETE FROM asset_identity.filesystem_entry WHERE false&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10d5937f-389b-834f-b640-e38929653cda">
+      <Execution id="5d12d269-68a1-42e7-8e5a-61477fd50364" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialDatabaseBoundaryIntegrationTests" name="SharedConnectionMechanicsPreserveEveryModuleRoleBoundary" />
+    </UnitTest>
+    <UnitTest name="RootProbeRejectsLinksInTheRootOrItsAncestors (False)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1e6977bb-8e72-863d-b204-1a8d1439297b">
+      <Execution id="814df913-b0f5-4cce-90fd-4170980756f6" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="RootProbeRejectsLinksInTheRootOrItsAncestors" />
+    </UnitTest>
+    <UnitTest name="WorkerStreamsACompleteSnapshotWithoutChangingAnyAsset" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="196674bb-3235-86c1-812f-280fc94ecbaf">
+      <Execution id="fb00a65f-62c4-4c7d-bbcf-e2cd55812b29" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerProtocolTests" name="WorkerStreamsACompleteSnapshotWithoutChangingAnyAsset" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;C://&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="146f556c-9b3b-883d-bfcc-d56dc83261b6">
+      <Execution id="d36bc915-bf84-4dff-8d61-b339b33ef642" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="11afdfff-134f-8f4c-a234-499b3dc710ae">
+      <Execution id="5598dc69-9822-4a96-aee4-f0e63188c10e" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="OverlapPolicyRejectsSameParentAndChildRootsButNotPrefixLookalikes" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10741fa8-3c79-858d-91a0-e9347d58e890">
+      <Execution id="3c77aba2-2772-4b75-bb72-6582942e806e" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="OverlapPolicyRejectsSameParentAndChildRootsButNotPrefixLookalikes" />
+    </UnitTest>
+    <UnitTest name="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry (False)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12113be7-ba6a-8371-bd4e-849d355d4141">
+      <Execution id="a4852952-4025-48cd-b4f6-ca6a8e2a13cf" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="DiscoveryRejectsLinkedRootsBeforeObservingAnyExternalEntry" />
+    </UnitTest>
+    <UnitTest name="InvalidBatchSizeFailsBeforeAnyPortIsCalled" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1eebb53d-eee4-807e-abe4-2c9945e3528b">
+      <Execution id="ebadc321-a51b-44cd-823c-596ca2ea2741" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="InvalidBatchSizeFailsBeforeAnyPortIsCalled" />
+    </UnitTest>
+    <UnitTest name="DiscoveryStreamsVisibleEntriesAndLeavesEverySandboxByteUnchanged" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1124314d-5a5a-838a-b0d6-b8d374ec27d3">
+      <Execution id="21b41e92-2210-495f-ac9f-c960b806f40b" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="DiscoveryStreamsVisibleEntriesAndLeavesEverySandboxByteUnchanged" />
+    </UnitTest>
+    <UnitTest name="UnrelatedCancellationIsAnInternalFailureNotAClaimThatTheCallerCancelled" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="112f2973-13fd-8abe-ae7d-afa5529d3512">
+      <Execution id="a7fa15fe-c94b-49b8-b643-f4b33776cb10" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="UnrelatedCancellationIsAnInternalFailureNotAClaimThatTheCallerCancelled" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;incomplete&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="13582317-c632-8f6c-86b0-767d26071ffc">
+      <Execution id="f453c4a1-2fdc-4eb2-8aaa-ae362280a5cd" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="AnUnchangedChildLinkIsObservedWithoutRecursingIntoItsTarget" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="11e5661c-470e-8eed-88c7-1463c3cab1b5">
+      <Execution id="353047f1-dfa4-4549-b63f-986f6575b9f2" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="AnUnchangedChildLinkIsObservedWithoutRecursingIntoItsTarget" />
+    </UnitTest>
+    <UnitTest name="WideTreesDescendImmediatelyWithoutAccumulatingSiblingDirectories" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1bfaf732-ed1c-888d-9ccf-31006b6569c5">
+      <Execution id="f0353f57-bb3c-4d8c-bd2a-2cd2c6d4c8c1" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerTraversalTests" name="WideTreesDescendImmediatelyWithoutAccumulatingSiblingDirectories" />
+    </UnitTest>
+    <UnitTest name="EmptyOnlineLibraryCommitsAnExplicitZeroEntrySnapshot" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="162c3e6f-fd2c-8e92-b916-59a3429ceb96">
+      <Execution id="c92cbcf9-e1a5-4d7a-ac9a-a3d58876af95" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="EmptyOnlineLibraryCommitsAnExplicitZeroEntrySnapshot" />
+    </UnitTest>
+    <UnitTest name="RunningCancellationAbortsOnlyStagedObservations" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="18bdb00f-bc50-8b07-9a5c-f43bfe1463ba">
+      <Execution id="d28a0b0d-bc4b-4d6b-972a-e3508e0203b0" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialRunningCancellationIntegrationTests" name="RunningCancellationAbortsOnlyStagedObservations" />
+    </UnitTest>
+    <UnitTest name="JournalFailureAfterCommitNeverAttemptsToAbortCommittedObservations" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="152c80fd-19d5-83c8-b064-799d3cdebe09">
+      <Execution id="3d5c2c01-04a3-4690-a388-d11b088a4872" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="JournalFailureAfterCommitNeverAttemptsToAbortCommittedObservations" />
+    </UnitTest>
+    <UnitTest name="OnlineScanStagesFixedBatchesAndCommitsOneCompleteSnapshot" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="19bf1426-2076-8e82-822b-7223a07c2efb">
+      <Execution id="1b0d7fdd-e4fc-4e02-85db-c6b19de7eb65" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="OnlineScanStagesFixedBatchesAndCommitsOneCompleteSnapshot" />
+    </UnitTest>
+    <UnitTest name="QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12b07faf-4085-8401-abed-c90851c6abfa">
+      <Execution id="c80b9e1f-4000-4e25-808f-599057657329" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialQueuedCancellationIntegrationTests" name="QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt" />
+    </UnitTest>
+    <UnitTest name="MismatchedScanTargetFailsBeforeDiscoveryJournalOrIndexWrites" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="17f284da-5cf7-81c7-86d6-4b810eb11459">
+      <Execution id="cf4898bc-8079-4e49-8f91-8d112d67ca96" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="MismatchedScanTargetFailsBeforeDiscoveryJournalOrIndexWrites" />
+    </UnitTest>
+    <UnitTest name="RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="10e6c34d-5eb1-8b52-a76c-777bb59fa2a4">
+      <Execution id="4df8b943-5c3c-4dee-9ddf-fa86b3a3ad26" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialRegistrationIntegrationTests" name="RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;wrong_count&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1473db72-ed1d-85c7-af34-05d2358f6126">
+      <Execution id="afb412ac-0ff3-4255-ae4a-5efa7d662a9c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="191cf083-31e2-8cde-94d4-eb675a703881">
+      <Execution id="8dbec78e-3f99-4971-91ea-e3a86257e2bd" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialStorageFailureIntegrationTests" name="DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex" />
+    </UnitTest>
+    <UnitTest name="OfflineStorageReturnsBeforeDiscoveryJournalOrIndexWrites" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12f9658c-872e-8cf6-b45c-f7a942880754">
+      <Execution id="37f74546-2671-4fb2-bbc0-2ac309e75954" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.InitialReadOnlyScanServiceTests" name="OfflineStorageReturnsBeforeDiscoveryJournalOrIndexWrites" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;oversized&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="17c5d690-94d8-8419-95bb-bc733d3801b7">
+      <Execution id="e32ddf56-bae4-4fe9-91fb-01657b4346f4" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;//nas&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1898af7a-77c3-8153-9844-8c493c9b6636">
+      <Execution id="9224fd70-3154-4b07-b34f-283b4300dfd8" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootRejectsNonCanonicalInput (&quot;///&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1b228d62-5385-8cb7-853d-2f1722c2592a">
+      <Execution id="46697c4d-89ec-4e4b-8972-1c5ba6d4be47" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootRejectsNonCanonicalInput" />
+    </UnitTest>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;folder//file.jpg&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1dbe01cb-8dbb-8b63-8cbd-51cd89ec2594">
+      <Execution id="81385b0f-7ca5-4799-bb87-b258131d7e10" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="15f58e3b-e2ab-8917-a29b-31d3399bec9b">
+      <Execution id="c1d7d189-6d45-42eb-a297-5e131907c94e" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialLeaseGuardIntegrationTests" name="CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit" />
+    </UnitTest>
+    <UnitTest name="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting (2)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="133476fe-b44a-8456-bbd8-33aaf7002083">
+      <Execution id="a2e09679-2140-4a24-9eb2-c6b0c0c09c4c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyBoundaryTests" name="ReplacingTheEnumeratedRootIsDetectedBeforeReadingOrCompleting" />
+    </UnitTest>
+    <UnitTest name="CrashBetweenAcceptAndEnqueueRecoversOneDurableTask" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1a45b703-c6a2-809d-97c9-acc98629a76a">
+      <Execution id="3a851233-bc2e-4f85-8c42-fa7ca769c927" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialDispatchIntegrationTests" name="CrashBetweenAcceptAndEnqueueRecoversOneDurableTask" />
+    </UnitTest>
+    <UnitTest name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (&quot;nonzero&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="144f9adb-a4d7-80db-ad6b-c041c3ab5c4f">
+      <Execution id="cd0c9f5f-1fab-48ee-8545-ad185c63aacf" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.IsolatedReadOnlyWorkerFaultTests" name="FailedOrUnresponsiveProcessesCannotCommitAndAreReaped" />
+    </UnitTest>
+    <UnitTest name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1d67f6e3-4255-83bf-90a0-c93c34ce52b8">
+      <Execution id="27a4d55e-8568-43ba-a6af-f0908560ecb4" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity" />
+    </UnitTest>
+    <UnitTest name="OverlapPolicyUsesStoragePathCaseRulesAndSeparatesStorageSources" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="18ddcafd-c8cd-845d-b69f-117f83514dce">
+      <Execution id="1bd55afd-12d9-48db-bdee-bfb3a3cae09b" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="OverlapPolicyUsesStoragePathCaseRulesAndSeparatesStorageSources" />
+    </UnitTest>
+    <UnitTest name="ReparseDirectoryIsRecordedButNeverRecursed" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1cc92667-f700-8db7-a81e-95084a7a1bb7">
+      <Execution id="52d8c91a-9541-4f04-8da6-a2441cf8d161" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="ReparseDirectoryIsRecordedButNeverRecursed" />
+    </UnitTest>
+    <UnitTest name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments (&quot;folder/../file.jpg&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1c16011c-baa6-8f28-a03e-f0d5acd83cbc">
+      <Execution id="14a8de93-59f4-47e9-af04-6b8a3c191c31" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.AssetIdentityAndPolicyTests" name="RelativePathRejectsEmptyAbsoluteTraversalAndAmbiguousSegments" />
+    </UnitTest>
+    <UnitTest name="CanonicalRootNormalizesSeparatorsAndEndingSlash (&quot;//nas/share/assets/&quot;,&quot;//nas/share/assets&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="12c6336d-9aad-8b39-9910-eb226813530b">
+      <Execution id="14995953-578c-40ff-bd7e-045e66f336be" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.LibraryStorageTests" name="CanonicalRootNormalizesSeparatorsAndEndingSlash" />
+    </UnitTest>
+    <UnitTest name="ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="14796337-8f76-8bd8-a7e1-1232da69384b">
+      <Execution id="942433d0-660e-45be-91d6-4e5a6855a8c8" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.ReadOnlyTrialPermissionIntegrationTests" name="ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion" />
+    </UnitTest>
+    <UnitTest name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-026\tests\dotnet\assetlibrary.readcore.tests\bin\release\net10.0\assetlibrary.readcore.tests.dll" id="1e54e91f-3814-82b1-a3fd-6f977f948a23">
+      <Execution id="c2c27b1b-9318-4544-8e1d-189923032ea4" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.ReadCore.Tests.SystemReadOnlyFileDiscoveryTests" name="PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="106af19a-7605-82d0-8807-81d9779b590f" executionId="88e231bc-5fc0-4e6d-8d10-fd6896a51437" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1997ad6e-ff22-853c-884f-a53152e70731" executionId="a51bbd3a-79c0-4298-81a1-efb605225f83" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b228d62-5385-8cb7-853d-2f1722c2592a" executionId="46697c4d-89ec-4e4b-8972-1c5ba6d4be47" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="133476fe-b44a-8456-bbd8-33aaf7002083" executionId="a2e09679-2140-4a24-9eb2-c6b0c0c09c4c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="109c8802-2d5e-8fc7-acbd-606a5a95c406" executionId="0be88334-e780-4880-8c8b-a18ad0a4ac67" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10e6c34d-5eb1-8b52-a76c-777bb59fa2a4" executionId="4df8b943-5c3c-4dee-9ddf-fa86b3a3ad26" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13786bb3-9c0c-8aff-88c1-0136d6acb1cc" executionId="9f408e0a-b899-4e97-897d-6cd5d61b1914" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14796337-8f76-8bd8-a7e1-1232da69384b" executionId="942433d0-660e-45be-91d6-4e5a6855a8c8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="144f9adb-a4d7-80db-ad6b-c041c3ab5c4f" executionId="cd0c9f5f-1fab-48ee-8545-ad185c63aacf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="110845f2-191a-8eda-9222-dcea34f0dab6" executionId="fab44880-2a94-4dd0-bd80-4c761808f7f5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10729e30-72b5-8bd5-8e71-4a1a3b8dbec3" executionId="bc20d853-9e23-4efc-825f-404eb09da504" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f090e93-7be6-8dde-afcb-504b0c222f88" executionId="72e824b5-56a3-4e0e-b937-3b0ccdab5ec5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12fdfb04-2141-82db-a36b-f0a5c60fe38c" executionId="ec9cc434-0101-409b-b043-a9ba48ed5f37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12da6775-744a-8a5b-bc92-bf6df81d3a05" executionId="dc88e847-70a4-48de-98f3-5c26d1a6c50e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1fbddef7-851c-8687-a7da-c545363eac18" executionId="1ff9f0e2-087b-4f89-89ed-d025e1426c60" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1124314d-5a5a-838a-b0d6-b8d374ec27d3" executionId="21b41e92-2210-495f-ac9f-c960b806f40b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="113b87ac-a045-8973-acc9-50234648b75c" executionId="d28092a5-3155-475a-89b6-35ea767c600b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="18220771-aad3-84a0-8f6a-7c4ab3ed1ecb" executionId="89038991-57ce-4367-abf9-2773d8110a69" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="152c80fd-19d5-83c8-b064-799d3cdebe09" executionId="3d5c2c01-04a3-4690-a388-d11b088a4872" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d67f6e3-4255-83bf-90a0-c93c34ce52b8" executionId="27a4d55e-8568-43ba-a6af-f0908560ecb4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c16011c-baa6-8f28-a03e-f0d5acd83cbc" executionId="14a8de93-59f4-47e9-af04-6b8a3c191c31" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1ba64828-62ee-8a8f-9c40-f7cf007d91bd" executionId="dbec284f-220d-41b4-b2a4-4a211574ac7f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1eebb53d-eee4-807e-abe4-2c9945e3528b" executionId="ebadc321-a51b-44cd-823c-596ca2ea2741" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1fbd990e-be56-844f-a207-3d69d0d0fddd" executionId="54982101-c5d8-4060-b2e1-095d42fa5378" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="191cf083-31e2-8cde-94d4-eb675a703881" executionId="8dbec78e-3f99-4971-91ea-e3a86257e2bd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="146f556c-9b3b-883d-bfcc-d56dc83261b6" executionId="d36bc915-bf84-4dff-8d61-b339b33ef642" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1898af7a-77c3-8153-9844-8c493c9b6636" executionId="9224fd70-3154-4b07-b34f-283b4300dfd8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="126b2920-e06b-8f66-baab-ea3eacb41e47" executionId="a9210fc3-ae77-486c-b399-04f3fe447c45" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1473db72-ed1d-85c7-af34-05d2358f6126" executionId="afb412ac-0ff3-4255-ae4a-5efa7d662a9c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10d5937f-389b-834f-b640-e38929653cda" executionId="5d12d269-68a1-42e7-8e5a-61477fd50364" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13582317-c632-8f6c-86b0-767d26071ffc" executionId="f453c4a1-2fdc-4eb2-8aaa-ae362280a5cd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b44651d-8399-85aa-91dc-c0a19d9aa8a5" executionId="d271ebe1-9e19-4027-ad72-cbbd6e40fbba" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12a1bad2-04dc-856a-80b8-cdc516b1269f" executionId="c3b43bb4-d294-4fe2-963c-7a3ef63dec11" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1dbe01cb-8dbb-8b63-8cbd-51cd89ec2594" executionId="81385b0f-7ca5-4799-bb87-b258131d7e10" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="16324347-ce6b-8b52-ad40-1af436504837" executionId="f68a7117-5e29-4a08-a3a3-36796fb4ee13" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1fdaec54-18b8-84ad-9f91-e4f47a54eb69" executionId="8c564321-5cfc-40fa-a4c5-b4ef5ae97370" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="162c3e6f-fd2c-8e92-b916-59a3429ceb96" executionId="c92cbcf9-e1a5-4d7a-ac9a-a3d58876af95" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="16ac8a59-d449-8a55-a970-8491efaae456" executionId="527c61fc-46fe-4eff-b421-7b348f67b0ba" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13473103-d74c-848b-88f3-f8a4bf21c740" executionId="de05d2fe-fa1d-4af9-a493-7a53021e2ec5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10b69001-7698-806f-b15f-cb279bc586a0" executionId="7b87d34c-86a4-47ee-8411-564055f6cfb9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f907770-50b6-8130-946c-1680c351af1e" executionId="db106abf-8849-4849-ae01-3b906f12838c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="176a4224-5b6f-8a51-ab4c-9551feef6eba" executionId="0213dfe0-bf57-4292-9ed5-3083cc1277d1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="18bdb00f-bc50-8b07-9a5c-f43bfe1463ba" executionId="d28a0b0d-bc4b-4d6b-972a-e3508e0203b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="18ddcafd-c8cd-845d-b69f-117f83514dce" executionId="1bd55afd-12d9-48db-bdee-bfb3a3cae09b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12c6336d-9aad-8b39-9910-eb226813530b" executionId="14995953-578c-40ff-bd7e-045e66f336be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f6b8956-7633-8622-b58f-da1b5a349e13" executionId="9e50c956-621d-45af-91f3-5734cb72b128" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="172839f0-68e7-821d-b38e-eb8307195aae" executionId="9dd27b58-c95d-4614-9571-bd6a54e30928" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10984b4c-4c3d-8303-8269-43c9f71e4b29" executionId="e3218880-f795-4984-8508-e399dc9cd10c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="174458e1-ef3a-8e45-8b69-aa14e8a0020a" executionId="bebccf95-95ff-45c5-babe-e2519e7b429b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1bb8e994-3067-8e15-85f4-e7e50674a4cf" executionId="a45d6b75-d854-4fd6-ad16-fcad4ad99c7a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12f9658c-872e-8cf6-b45c-f7a942880754" executionId="37f74546-2671-4fb2-bbc0-2ac309e75954" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e54e91f-3814-82b1-a3fd-6f977f948a23" executionId="c2c27b1b-9318-4544-8e1d-189923032ea4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12113be7-ba6a-8371-bd4e-849d355d4141" executionId="a4852952-4025-48cd-b4f6-ca6a8e2a13cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1bfaf732-ed1c-888d-9ccf-31006b6569c5" executionId="f0353f57-bb3c-4d8c-bd2a-2cd2c6d4c8c1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15f58e3b-e2ab-8917-a29b-31d3399bec9b" executionId="c1d7d189-6d45-42eb-a297-5e131907c94e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d86b437-2db6-8fbb-9203-8f2dd78eae82" executionId="18a1269d-e88f-4f1d-a67a-2844f1b3f75a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1853836f-9ca3-8917-b515-c60ea8c523bc" executionId="b5af8f4b-c40a-41de-b741-7b2f11a932e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1cc92667-f700-8db7-a81e-95084a7a1bb7" executionId="52d8c91a-9541-4f04-8da6-a2441cf8d161" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="196674bb-3235-86c1-812f-280fc94ecbaf" executionId="fb00a65f-62c4-4c7d-bbcf-e2cd55812b29" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="11527cb3-966c-8510-b688-ddf2f45a617f" executionId="e60d2e41-668a-448b-bdf7-85a78961d389" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1a45b703-c6a2-809d-97c9-acc98629a76a" executionId="3a851233-bc2e-4f85-8c42-fa7ca769c927" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1944dd6a-c5a4-88ae-b93e-7f1dafe17a49" executionId="fea51e04-c692-4483-b1b0-7a5faeb2b584" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13658519-81d5-893f-a79a-09e92188e6c4" executionId="b367ca06-7dcb-4a6a-b14d-8dfb4ae832b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="112f2973-13fd-8abe-ae7d-afa5529d3512" executionId="a7fa15fe-c94b-49b8-b643-f4b33776cb10" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19bf1426-2076-8e82-822b-7223a07c2efb" executionId="1b0d7fdd-e4fc-4e02-85db-c6b19de7eb65" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="12b07faf-4085-8401-abed-c90851c6abfa" executionId="c80b9e1f-4000-4e25-808f-599057657329" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="11e5661c-470e-8eed-88c7-1463c3cab1b5" executionId="353047f1-dfa4-4549-b63f-986f6575b9f2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19858242-ebe0-8eea-9957-9b6c4818dd4a" executionId="4ee91a9c-a638-451f-af18-6891953e6f87" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1f6cbfd1-d055-8734-a8f9-25847c66f818" executionId="9cd089b5-d433-4027-b368-05fa02806908" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17f284da-5cf7-81c7-86d6-4b810eb11459" executionId="cf4898bc-8079-4e49-8f91-8d112d67ca96" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1943038e-155e-83c5-9e48-726fed4ab638" executionId="acdf7aaa-bfbd-4821-ba1d-445780d413a9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="11afdfff-134f-8f4c-a234-499b3dc710ae" executionId="5598dc69-9822-4a96-aee4-f0e63188c10e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17c5d690-94d8-8419-95bb-bc733d3801b7" executionId="e32ddf56-bae4-4fe9-91fb-01657b4346f4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13621b5f-71bb-88a8-a1f8-cc2b25c2b672" executionId="53e8cfb4-8a8c-4a01-8b44-25ced0d7c78d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b7c3c18-0d23-82b2-919e-2c9de90eac34" executionId="9198efae-e8f3-4211-91de-5b02bc844449" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e6977bb-8e72-863d-b204-1a8d1439297b" executionId="814df913-b0f5-4cce-90fd-4170980756f6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="169b6243-74b1-818f-8e53-916210e42350" executionId="5f87cc6a-ba15-45b0-8126-52cd1fe02c0d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="171ef0fd-3e55-8540-9d4c-b32c0403aceb" executionId="4199ca49-2b5c-494b-b202-67c27637ab8c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10741fa8-3c79-858d-91a0-e9347d58e890" executionId="3c77aba2-2772-4b75-bb72-6582942e806e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="79" executed="54" passed="54" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>已为 C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll 启用测试并行化(Workers: 16，Scope: MethodLevel)&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("incomplete")”。&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("oversized")”。&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("wrong_count")”。&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("stderr_limit")”。&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("never_read")”。&#xD;
+在测试运行中跳过测试“FailedOrUnresponsiveProcessesCannotCommitAndAreReaped ("nonzero")”。&#xD;
+在测试运行中跳过测试“NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged”。&#xD;
+在测试运行中跳过测试“PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)”。&#xD;
+在测试运行中跳过测试“PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)”。&#xD;
+在测试运行中跳过测试“OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately”。&#xD;
+在测试运行中跳过测试“RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt”。&#xD;
+在测试运行中跳过测试“SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (LibraryStorage,"assetlibrary_library_storage_runtime","DELETE FROM task_health.durable_task WHERE false")”。&#xD;
+在测试运行中跳过测试“SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (ScanReconciliation,"assetlibrary_scan_reconciliation_runtime","DELETE FROM asset_identity.filesystem_entry WHERE false")”。&#xD;
+在测试运行中跳过测试“SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (TaskHealth,"assetlibrary_task_health_runtime","DELETE FROM library_storage.library_root WHERE false")”。&#xD;
+在测试运行中跳过测试“CrashBetweenAcceptAndEnqueueRecoversOneDurableTask”。&#xD;
+在测试运行中跳过测试“ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys”。&#xD;
+在测试运行中跳过测试“ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows”。&#xD;
+在测试运行中跳过测试“CompletedSnapshotSurvivesLostJournalAcknowledgement”。&#xD;
+在测试运行中跳过测试“CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit”。&#xD;
+在测试运行中跳过测试“ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion”。&#xD;
+在测试运行中跳过测试“QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt”。&#xD;
+在测试运行中跳过测试“RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity”。&#xD;
+在测试运行中跳过测试“RunningCancellationAbortsOnlyStagedObservations”。&#xD;
+在测试运行中跳过测试“DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex”。&#xD;
+在测试运行中跳过测试“AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex”。&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

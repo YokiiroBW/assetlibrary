@@ -1,0 +1,51 @@
+{
+  "status": "passed",
+  "pixels_saved": false,
+  "names_or_paths_saved": false,
+  "cases": [
+    {
+      "sample": 1,
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        512,
+        342
+      ],
+      "bytes": 124733,
+      "sha256": "a72e5f72076b16775a9bad3c5f118c1213de08d7520e70a80d7d450fcdce9d86"
+    },
+    {
+      "sample": 1,
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        756,
+        505
+      ],
+      "bytes": 234574,
+      "sha256": "6d4ea5d7284e50fd552ec824393b3aeab0145e3a02199536be528477a9a60072"
+    },
+    {
+      "sample": 2,
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        362,
+        512
+      ],
+      "bytes": 247569,
+      "sha256": "9a903da5433a269ba6d601d0abf1dd8329654660c2a76b646c22894da51118a5"
+    },
+    {
+      "sample": 2,
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1131,
+        1600
+      ],
+      "bytes": 1436490,
+      "sha256": "431f003af9c147058a0f41dbfdf8bd89bebfa885988bca60eeea8fca37ab22e8"
+    }
+  ]
+}

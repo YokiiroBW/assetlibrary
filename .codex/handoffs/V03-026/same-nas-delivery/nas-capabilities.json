@@ -1,0 +1,1 @@
+{"io_uring": {"closed": true, "errno": 0, "param_bytes": 120, "result": 3, "valid_entries": 1}, "kernel": "5.10.55+", "user_namespace": {"exit": 0, "output": "{\"result\": -1, \"errno\": 22}", "stderr_bytes": 0}}

@@ -1,0 +1,40 @@
+{
+  "status": "verified",
+  "source_revision": "7f092904dbadcf1276bb9daf5b565946ecccbdad",
+  "deployment_id": "826109ef-d44c-45be-884c-88f1fb85607a",
+  "socket_persisted": true,
+  "original_asset_mounts_readonly": true,
+  "original_asset_read_group": 101,
+  "containers": [
+    {
+      "service": "core",
+      "image_id": "sha256:a7496d62a690a14797fa15e725dbdbdb2441fd7a7d3b92e7e8c2c6f3a4ff0a6a",
+      "healthy": true,
+      "uid": "1654:1654",
+      "read_only_root": true,
+      "restart": "unless-stopped",
+      "network_mode": "assetlibrary-nas_database",
+      "memory_bytes": 1073741824
+    },
+    {
+      "service": "postgres",
+      "image_id": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+      "healthy": true,
+      "uid": "999:999",
+      "read_only_root": true,
+      "restart": "unless-stopped",
+      "network_mode": "assetlibrary-nas_database",
+      "memory_bytes": 1073741824
+    },
+    {
+      "service": "image",
+      "image_id": "sha256:0816234e94d9bc9c8a1911d4bf58ead1e4292e24b27c7f2ee19a815f52023d28",
+      "healthy": true,
+      "uid": "0:0",
+      "read_only_root": true,
+      "restart": "unless-stopped",
+      "network_mode": "none",
+      "memory_bytes": 536870912
+    }
+  ]
+}

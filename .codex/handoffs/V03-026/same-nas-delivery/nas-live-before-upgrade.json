@@ -1,0 +1,39 @@
+{
+  "kind": "nas_local_image_pre_upgrade_readonly_baseline",
+  "libraries": [
+    {
+      "library_id": "6dd9b706-6686-4fde-82c8-1f8e6335a2f7",
+      "category": "general",
+      "scan": {
+        "scan_id": "de75c78e-8102-49d0-b970-4dfa3320a711",
+        "state": "succeeded",
+        "observed_entries": 195792,
+        "committed_entries": 195792
+      }
+    },
+    {
+      "library_id": "972f8818-23bc-46d5-9e42-36a0d0264769",
+      "category": "general",
+      "scan": null
+    }
+  ],
+  "deployment_id": "826109ef-d44c-45be-884c-88f1fb85607a",
+  "containers": [
+    {
+      "name": "assetlibrary-nas-core-1",
+      "image": "sha256:939696ed896661bb0804223af81b64165e785a4100b63bb8905cf1204dc1dbd5",
+      "running": true,
+      "health": "healthy",
+      "user": "1654:1654",
+      "read_only": true
+    },
+    {
+      "name": "assetlibrary-nas-postgres-1",
+      "image": "sha256:5f71c21b69a7977b82247582e2e731ed76bdebaadb7dd7945ed76bcc9ed06632",
+      "running": true,
+      "health": "healthy",
+      "user": "999:999",
+      "read_only": true
+    }
+  ]
+}

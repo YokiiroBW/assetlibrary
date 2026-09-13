@@ -1,0 +1,14 @@
+{
+  "status": "verified",
+  "containers_removed": 3,
+  "volumes_removed": [
+    "assetlibrary-v03026-acceptance-core-state",
+    "assetlibrary-v03026-acceptance-postgres-data",
+    "assetlibrary-v03026-acceptance-postgres-tls",
+    "assetlibrary-v03026-acceptance-setup-state",
+    "assetlibrary-v03026-acceptance-image-ipc"
+  ],
+  "networks_absent": true,
+  "test_deployment_directory_removed": true,
+  "production_untouched_by_cleanup": true
+}

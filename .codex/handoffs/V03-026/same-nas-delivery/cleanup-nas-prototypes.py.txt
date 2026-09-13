@@ -1,0 +1,26 @@
+import runpy,types,json
+from pathlib import Path
+t=types.SimpleNamespace(**runpy.run_path('.runtime/nas-package-acceptance.py'))
+scope='V03-026';removed=[]
+assert not t.prior.nas(['docker','ps','-aq','--filter','label=io.assetlibrary.task='+scope]).stdout.strip()
+volume='assetlibrary-v03-026-first-ipc';info=json.loads(t.prior.nas(['docker','volume','inspect',volume]).stdout)[0]
+assert info['Labels']['io.assetlibrary.task']==scope and info['Driver']=='local' and not info.get('Options')
+assert not t.prior.nas(['docker','ps','-aq','--filter','volume='+volume]).stdout.strip()
+t.prior.nas(['docker','volume','rm',volume]);removed.append(volume)
+for version in ['first','second','third','fourth']:
+ tag='assetlibrary/v03-026-image:'+version;info=json.loads(t.prior.nas(['docker','image','inspect',tag]).stdout)[0]
+ assert info['Config']['Labels']['io.assetlibrary.task']==scope and info['Config']['Labels']['io.assetlibrary.scope']=='temporary-local-image-validation'
+ assert not t.prior.nas(['docker','ps','-aq','--filter','ancestor='+info['Id']]).stdout.strip()
+ t.prior.nas(['docker','image','rm',tag]);removed.append(tag)
+code=r'''
+from pathlib import Path
+import shutil
+root=Path('/tmp/assetlibrary-v03-026')
+assert root.resolve(strict=True)==root and root.parent==Path('/tmp') and not root.is_symlink()
+assert (root/'corpus/manifest.json').is_file() and (root/'fourth-runtime/region-fixed-aot.tar').is_file()
+shutil.rmtree(root);assert not root.exists()
+'''
+t.prior.nas(['python3','-I','-B','-c',code])
+assert not t.prior.nas(['docker','ps','-aq','--filter','label=io.assetlibrary.task='+scope]).stdout.strip()
+report={'status':'verified','removed':removed,'owned_nas_temporary_directory_removed':True,'production_and_final_package_and_backup_preserved':True}
+Path('.runtime/nas-prototype-cleanup.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))

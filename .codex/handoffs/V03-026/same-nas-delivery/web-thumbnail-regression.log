@@ -1,0 +1,105 @@
+$ playwright test "--" "image-preview.spec.mjs" "--grep" "image preview preserves Quick Look"
+[WebServer] (node:4484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ pnpm run sdk:build && vite "--host" "127.0.0.1"
+
+
+[WebServer] (node:24960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+[WebServer] $ pnpm --dir ../../packages/sdk/assetlink/typescript run build
+
+[WebServer] (node:20072) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ tsc --project tsconfig.json
+
+
+[WebServer] (node:7088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 66 tests using 4 workers
+
+
+(node:7864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+(node:16440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:35460) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+(node:34712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:65:3 › image preview preserves Quick Look, history, focus and responsive layout at 390
+[2/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:65:3 › image preview preserves Quick Look, history, focus and responsive layout at 1440
+[3/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:17:1 › derived thumbnails use only the visible range, cancel on scroll, and reacquire on return
+[4/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:127:1 › foreground revalidation and identity changes revoke every image URL before reuse
+[5/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:159:1 › keyboard focus follows selection between already mounted virtual rows
+[6/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:171:1 › image admission bounds its queue and expires queued work within the original budget
+[7/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:201:1 › image leases enforce the total decoded pixel budget and dispose successful URLs
+[8/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:232:1 › busy Retry-After shares one total deadline and never starts a fresh retry budget
+[9/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:256:1 › reopened images reflect new server bytes and BFCache revalidation removes sensitive pixels
+[10/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:283:1 › directories and reparse entries never request images
+[11/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:301:1 › a rejected L0 detail clears thumbnails even when the image endpoint has not rejected yet
+[12/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:319:3 › image 401 acts before a stalled error body and clears existing images
+[13/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:319:3 › image 403 acts before a stalled error body and clears existing images
+[14/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:319:3 › image 404 acts before a stalled error body and clears existing images
+[15/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:360:3 › image source_changed retains L0 and has an explicit retry without auto looping
+[16/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:360:3 › image preview_unsupported retains L0 and has an explicit retry without auto looping
+[17/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:360:3 › image preview_invalid retains L0 and has an explicit retry without auto looping
+[18/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:360:3 › image preview_limit_exceeded retains L0 and has an explicit retry without auto looping
+[19/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:360:3 › image preview_unavailable retains L0 and has an explicit retry without auto looping
+[20/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:384:1 › malformed MIME, PNG dimensions and encoded lengths never reach image rendering
+[21/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:410:1 › busy image retries are capped at two and respect Retry-After
+[22/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:441:1 › closing a pending preview cancels the connection and suppresses late image publication
+[23/66] [chromium] › ..\..\tests\web\image-preview.spec.mjs:473:1 › an image stalled body uses the 20 second budget without extending JSON deadlines
+[24/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:21:1 › reconnecting after authentication loss discards the previous identity's selection
+[25/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:53:3 › a 403 response while paging removes cached entries and details
+[26/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:53:3 › a 404 response while paging removes cached entries and details
+[27/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:74:1 › a rejected catalog refresh clears the dependent browse and selected details
+[28/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:98:1 › a rejected search page removes earlier matches and the selected match
+[29/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:124:3 › a 401 rejection with a HTML body still hides cached data
+[30/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:124:3 › a 401 rejection with a malformed error body still hides cached data
+[31/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:124:3 › a 403 rejection with a malformed error body still hides cached data
+[32/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:124:3 › a 404 rejection with a malformed error body still hides cached data
+[33/66] [chromium] › ..\..\tests\web\read-only-authority.spec.mjs:162:1 › a transient paging error preserves the last readable page while showing the error
+[34/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:22:3 › a request with stalled headers times out, closes the connection, and can retry
+[35/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:22:3 › a request with stalled body times out, closes the connection, and can retry
+[36/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:67:1 › changing the query cancels its pending request without reporting a timeout
+[37/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:101:1 › reconnecting cancels a pending later page from the previous workspace
+[38/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:136:1 › a pre-cancelled caller is rejected before sending an AssetLink request
+[39/66] [chromium] › ..\..\tests\web\read-only-deadline.spec.mjs:165:1 › an authentication rejection keeps its status when its response body stalls
+[40/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:23:1 › desktop browse stays permission-filtered, paged, virtualized and restores navigation
+[41/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:74:1 › narrow workspace reflows and presents the empty directory state
+[42/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:100:1 › directory responses refresh library availability without reloading the catalog
+[43/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:123:1 › read errors and expired authentication have distinct fail-closed states
+[44/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:145:1 › search opens an unloaded library and locates a file beyond the first page
+[45/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:192:1 › mismatched and oversized response pages fail closed
+[46/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:211:1 › a stale search response cannot replace the newest query
+[47/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:234:1 › home, category management and conflicts use explicit server metadata
+[48/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:273:1 › multi-selection, keyboard, grid and mobile details share real entry information
+[49/66] [chromium] › ..\..\tests\web\read-only-workspace.spec.mjs:339:1 › scope, server-wide filters and bounded deep links survive refresh and history
+[50/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:18:1 › administrator registers a controlled source and explicitly scans before browsing real indexed names
+[51/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:65:1 › registration errors preserve the form and retry identity without enumerating server paths
+[52/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:94:1 › unconfirmed start and cancel submissions reuse their keys, while a failed attempt gets a new task
+[53/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:143:1 › reload recovers the active durable scan and hiding the page stops polling
+[54/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:166:1 › offline libraries preserve their last index and recover through an explicit refresh
+[55/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:189:1 › scan denial clears selected entries and malformed progress never becomes an empty success
+[56/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:208:1 › registration dialog keeps keyboard focus contained and restores it when closed
+[57/66] [chromium] › ..\..\tests\web\trial-library-scan.spec.mjs:225:1 › source list is bounded and does not accept arbitrary storage definitions
+[58/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:121:1 › login uses password-manager fields and memory CSRF, then logout hides the workspace
+[59/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:151:1 › failed logout is not confirmed and can be retried without exposing assets
+[60/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:167:1 › session outages stay distinct from expiration and recover without replacing the identity
+[61/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:190:1 › session changes across tabs discard previous libraries, search, details and cursors
+[62/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:214:1 › focus revalidation detects a new session generation for the same principal
+[63/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:231:1 › absolute session expiry hides data without waiting for another asset request
+[64/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:239:1 › rate-limited login stays a retryable form with no workspace
+[65/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:251:3 › a 403 session rejection on focus hides the previous workspace
+[66/66] [chromium] › ..\..\tests\web\trial-session.spec.mjs:251:3 › a 404 session rejection on focus hides the previous workspace
+  66 passed (30.7s)

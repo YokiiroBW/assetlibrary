@@ -1,21 +1,51 @@
-# V03-026 验证进展（尚未统一验收）
+# V03-026 测试与交付记录
 
-Windows 使用锁定 .NET10.0.111；Linux 仅在 dev-230 编译，运行时测试均在原 NAS agent-210、5.10.55+、Docker24.0.2，专用合成目录和标签容器，不操作原件或其他应用。
+最终运行包：7f092904dbadcf1276bb9daf5b565946ecccbdad；Core/image/Worker源码与已执行原生c775b7d回归相同，后续仅修NAS CLI和Web样式。实际artifact、原始日志、TRX、截图及归档摘要见[same-nas-delivery/README.md](same-nas-delivery/README.md)。不得累加重叠套件或把缺夹具/平台跳过算通过。
 
-- root 29c9c12：solution locked restore/build 通过；受影响 Preview 测试77通过、1项Linux SO_PEERCRED在Windows跳过。日志 .runtime/affected-tests.log 和 .runtime/tests/nas-adapter-affected.trx。最终源验证待后续修正稳定。
-- 首轮 NAS NativeAOT：10份合成文件×512/1600两种profile共20用例符合预期，三种格式、方向6、透明、中文改名重复文件及4类拒绝路径。.runtime/nas-first-cases.log。
-- 第二轮1809630：所有decoder线程身份、父内存读取拒绝、ptrace/信号拒绝、IPC状态不可读、有效io_uring由可创建变为ENOMEM12、NPROC线程/派生进程拒绝，实际memcg512MiB。.runtime/second-native-isolation.log。
-- 第二轮故障：Ready前断开、Ready后断开、部分输入断开均清理且不计基础设施失败；上传时kill child计1、SIGSTOP触发自身8秒超时计2、kill PID1保留计3且重启后拒绝创建下一decoder。.runtime/nas-fault-cases-second.log。需补旧宿主PID消失核验；不以新命名空间空进程替代旧进程证据。
-- 第三轮a87b44c：不可变像素共享优化已合，普通图片仍通过；40MP PNG仍Limit6，1×1且31/32MiB PNG仍Unavailable7，监督器固定诊断为result/exit137。.runtime/nas-third-boundaries.log、.runtime/nas-third-diagnostics.log 为观察记录，不能将其脚本末尾历史 native_cases_passed 字样当边界成功。
+| 验证 | 结果 |
+| --- | --- |
+| 锁定SDK10.0.111，solution locked restore、format、Release build | 通过，0编译警告 |
+| solution普通测试（a87b44c） | 428通过、52平台/夹具跳过 |
+| 最后worker/Preview build、变更源format、ImageInputPolicy与ImageContainer集合 | 38通过，其中4项为新用例；不再累计其余34项 |
+| NuGet实际在线查询与依赖验证 | 14项目、50锁定包通过，无新第三方包 |
+| Linux同一源Preview完整套件+源broker补充 | 131唯一用例，93过/38未执行；真实SO_PEERCRED与源broker通过 |
+| Windows精确c775b7d NativeAOT旧LPAC+Job | 1/1，真实512×300 PNG、exit0；测试目录/worker清空 |
+| Linux旧无参数seccomp图片路径 | JPEG/PNG/WebP×512/1600，6/6；全PNG CRC、exit0、容器清理 |
+| NAS新监督器最终c775b7d | 10项metadata/32MiB边界与隔离probe通过，typedLimit计数0；GC128的40MP两profile此前已通过 |
+| NAS故障注入 | Ready前/后/部分输入取消；上传时kill child、8秒超时、kill PID1与熔断重启；旧宿主PID1.414秒内消失 |
+| NAS最终7f09290正式CLI | initialize/start/status、固定socket持久、实际容器配置/health通过 |
+| NAS真实Core图片 | 20普通格式/拒绝 + 18最大值/元数据边界，共38项符合预期；PNG CRC/尺寸验证 |
+| NAS图片服务中断/恢复 | 目录200、图片503；恢复后正常预期415，未清空fuse |
+| Web源码/格式/生产build | 通过；SDK/Web frozen offline install，TS检查包含在build中 |
+| Web浏览器 | 实际完整66/66通过，含两viewport的缩略图边界断言 |
+| 最终NAS页面 | 1440桌面/390手机，无样式注入；缩略图/1600预览/Esc/退出清图通过，已看截图 |
+| 生产升级 | 四旧卷+配置5个冷备compare/hash通过；原2库/195792观察及提交数、原账号/部署ID不变 |
+| 正式库原图片 | 2张×2profile共4次200，未保存像素/名称/路径 |
+| 原件与资源清理 | 20合成文件hash/mtime/大小不变；3容器/5卷/2网络/测试目录/原型IPC与4镜像清理，正式三服务仍健康 |
 
-前三轮均未增加AS512MiB、memcg512MiB、CPU3秒或managed heap64MiB。第三轮失败仍在诊断，不替换生产镜像。先前所有root临时容器已清，专用IPC卷/合成输入保留供最终复验；不声称全部运行资源已清。
+真实命令沿用项目入口：
 
-追加验证：a87b44c完整solution的locked restore/format/Release build通过，428个用例通过、52项平台/夹具缺失跳过，无失败；原始TRX在.runtime/tests/solution-a87。Linux独立副本同一源131个唯一Preview用例93通过、38未执行，无失败；包括真实SO_PEERCRED UID0和补跑的真实source broker，证据已合入V03-028/linux-tests-a87b44c。
+```text
+dotnet restore AssetLibrary.slnx --locked-mode
+dotnet format AssetLibrary.slnx --verify-no-changes --no-restore
+dotnet build AssetLibrary.slnx --configuration Release --no-restore
+dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore
+dotnet package list --project AssetLibrary.slnx --include-transitive --vulnerable --no-restore --format json --output-version 1
+python -I -B scripts/validate_dotnet_dependencies.py --solution AssetLibrary.slnx --packages-dir <locked-cache> --vulnerability-report <report>
+python -I -B scripts/validate_dotnet_source.py
+python -I -B scripts/validate_web_source.py
+pnpm --dir apps/web run format:check
+pnpm --dir apps/web run build
+pnpm --dir apps/web run test:browser -- image-preview.spec.mjs --grep "image preview preserves Quick Look"
+python3 -I -B scripts/build_nas_deployment.py --docker <owned-sudo-wrapper> --output-root .runtime/sandbox-storage/V01-022/same-nas-final-7f09290
+```
 
-第三轮父退出补测在NAS记录旧宿主decoder PID14683/start_tick137809832后kill PID1，1.414秒内旧宿主PID消失，预扣故障1保留；只清本测试资源。.runtime/nas-parent-host-proof.log。升级前真实HTTPS登录/注销、两库及原scan195792观察/提交计数已记录，不含原路径或凭据；.runtime/nas-live-baseline.json。
+浏览器上述命令实际运行66项，非仅2项，已保留完整日志。Linux镜像从干净Git bundle克隆的精确提交构建；SDK/AOT锁和镜像中实际ELF/许可证/SourceRevision/SHA验证，无复用伪来源标签。images.tar为801215488字节，SHA256 3e2173c6849f3b76ffeef57275f16eaa1e5af89762d54523e30882b37662c2f8，Windows/NAS传输后复核通过。
 
-打包新增16项契约用例在集成目录通过（19.1秒），旧server packaging6项在-I下通过。根CI原非-I的repository discovery会触发既有release工具的隔离导入保护；改为python -I -B后与ci-tiers保持一致，未删保护。全-I仓库95项结果由V03-029交接提供。
+历史失败保留：缺seccomp是原路径拒绝；40MP初始AS预留过高、31MiB巨大PNG块实际CPU2.97秒后exit137，分别修为GC128与非IDAT4MiB准入；Compose create --no-deps不支持已修并实际CLI通过；缩略图naturalWidth/toBeVisible绿但元素341px高被78px容器裁空，新增框内断言后在旧样式确定失败、修后实际78px完整显示。没有提高硬限或删除失败计数来制造成功。
 
-V03-027第三轮资源采样：40MP输入0.47秒Limit且memcg不足20MiB、无OOM；31MiB输入实际CPU累计2.97秒、wall3.57秒、exit137、memcg峰98.7MB和oom_kill0。2ac4bdc候选将GC地址预留由默认5倍改为明确128MiB，Heap64MiB及内核上限不变；第四轮AOT和目标NAS对照进行中。
+合成管理员首次初始化遇到既有NAS风险服务直连故障；一次性限定CONNECT目标且不解密TLS的转发成功后自动关闭，随后登录/图片/重启验证没有转发。未使用生产凭据创建测试账号、未修改全局防火墙或其他应用。
 
-完整 package、同NAS Core真实授权API、备份升级/回滚、最终artifact哈希和清理尚未完成。各子任务的静态/纯测试记录分别见V03-027/028/029，不与目标NAS平台证据混算。
+最终仓库/架构/Alpha审计日志在同目录final-gates中补充；完整Alpha继续blocked、v0.1-start受控开发允许。未执行G4、Android真机、整机重启或实际回滚演练。
+
+最终仓库门禁通过：verify_repository（14架构回归）、95/95 repository tests、Alpha有效性审计成功且发布仍blocked，v0.1-start仍允许。见same-nas-delivery/final-gates。

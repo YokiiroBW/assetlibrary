@@ -1,0 +1,8 @@
+{"case": "early", "client": "closed_early", "result": "", "children": 0, "failures": 0}
+{"case": "after_ready", "client": "closed_after_ready", "result": "", "children": 0, "failures": 0}
+{"case": "partial_cancel", "client": "partial_ready", "result": "", "children": 0, "failures": 0}
+{"case": "child_crash_during_upload", "failures": 1, "result": "{\"response\": [826888257, 7, 0, 0, 0, 0], \"body_bytes\": 0}"}
+{"case": "own_deadline", "failures": 2, "elapsed": 8.287718161009252, "result": "ConnectionResetError"}
+{"case": "pid1_death_restart_fused", "prior_children": [136], "failures": 3, "ready": [826888257, 7, 0, 0, 0, 0], "new_children": 0}
+fault_cases_passed
+owned_fault_resources_cleaned

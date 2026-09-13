@@ -1,0 +1,62 @@
+[
+  {
+    "tag": "IMG",
+    "classes": "",
+    "width": 143.5,
+    "height": 78,
+    "display": "block",
+    "visibility": "visible",
+    "opacity": "1",
+    "overflow": "clip",
+    "grid": "none",
+    "minWidth": "auto",
+    "minHeight": "0px",
+    "maxWidth": "100%",
+    "maxHeight": "100%"
+  },
+  {
+    "tag": "SPAN",
+    "classes": "derived-image image-thumbnail",
+    "width": 143.5,
+    "height": 78,
+    "display": "grid",
+    "visibility": "visible",
+    "opacity": "1",
+    "overflow": "hidden",
+    "grid": "143.5px",
+    "minWidth": "0px",
+    "minHeight": "auto",
+    "maxWidth": "100%",
+    "maxHeight": "none"
+  },
+  {
+    "tag": "SPAN",
+    "classes": "entry-kind ",
+    "width": 143.5,
+    "height": 86,
+    "display": "flex",
+    "visibility": "visible",
+    "opacity": "1",
+    "overflow": "visible",
+    "grid": "none",
+    "minWidth": "auto",
+    "minHeight": "78px",
+    "maxWidth": "none",
+    "maxHeight": "none"
+  },
+  {
+    "tag": "DIV",
+    "classes": "entry-row ",
+    "width": 167.5,
+    "height": 161,
+    "display": "flex",
+    "visibility": "visible",
+    "opacity": "1",
+    "overflow": "visible",
+    "grid": "22px 24px minmax(0px, 1fr) 58px",
+    "minWidth": "0px",
+    "minHeight": "auto",
+    "maxWidth": "none",
+    "maxHeight": "none"
+  }
+]

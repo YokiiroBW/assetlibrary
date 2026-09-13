@@ -1,0 +1,230 @@
+[
+  {
+    "stage": "files_proof",
+    "exit_code": 0
+  },
+  {
+    "stage": "files_bundle",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 1
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "verify_cold_archives_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "verify_cold_archives",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "verify_cold_archives_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "verify_cold_archives_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "bundle_sha256sum",
+    "exit_code": 0
+  },
+  {
+    "stage": "files_install",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 1
+  },
+  {
+    "stage": "nasctl_load",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 1
+  },
+  {
+    "stage": "nasctl_initialize",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "nasctl_start",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "nasctl_status",
+    "exit_code": 0
+  }
+]

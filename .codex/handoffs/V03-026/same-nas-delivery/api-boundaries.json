@@ -1,0 +1,163 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "file": "maximum-40mp-small.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        512,
+        320
+      ],
+      "bytes": 1440,
+      "sha256": "1e50a254a9ba7119a0125c45522d8aa5b746203e37b0f93a18252dd85cf1efcc"
+    },
+    {
+      "file": "maximum-40mp-small.png",
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "bytes": 8606,
+      "sha256": "c7e27b5fcb4618a16a0556bbea858a7fea89743a2496495bc981c84d19945cfa"
+    },
+    {
+      "file": "maximum-32m-pixel-data.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        512,
+        73
+      ],
+      "bytes": 148506,
+      "sha256": "b52095e94ab5de6b5931269eafa5036889dc69982f52ab0ddf6680b28c565340"
+    },
+    {
+      "file": "maximum-32m-pixel-data.png",
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1600,
+        229
+      ],
+      "bytes": 1455659,
+      "sha256": "81a0742e0b1dac1c5affcece312cd1a3e0b4e7fa4a5e73e9fcf08af2a8b113ba"
+    },
+    {
+      "file": "below-4m-non-idat.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "below-4m-non-idat.png",
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "maximum-4m-non-idat.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "maximum-4m-non-idat.png",
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "maximum-32m-multiple-metadata.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "maximum-32m-multiple-metadata.png",
+      "variant": "preview",
+      "status": 200,
+      "dimensions": [
+        1,
+        1
+      ],
+      "bytes": 99,
+      "sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75"
+    },
+    {
+      "file": "oversized-4m-non-idat.png",
+      "variant": "thumbnail",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "oversized-4m-non-idat.png",
+      "variant": "preview",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "small-31m.png",
+      "variant": "thumbnail",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "small-31m.png",
+      "variant": "preview",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "small-32m.png",
+      "variant": "thumbnail",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "small-32m.png",
+      "variant": "preview",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "maximum-40mp-32m.png",
+      "variant": "thumbnail",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    },
+    {
+      "file": "maximum-40mp-32m.png",
+      "variant": "preview",
+      "status": 422,
+      "error_code": "preview_limit_exceeded"
+    }
+  ]
+}

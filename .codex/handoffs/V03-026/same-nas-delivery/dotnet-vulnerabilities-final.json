@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "parameters": "--vulnerable --include-transitive",
+  "sources": [
+    "https://api.nuget.org/v3/index.json"
+  ],
+  "projects": [
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/services/core-server/AssetLibrary.CoreServer.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/services/core-server/Host/AssetLibrary.CoreServer.Host.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.AssetLink.Tests/AssetLibrary.AssetLink.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.Build.Tests/AssetLibrary.Build.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.Packaging.Tests/AssetLibrary.Packaging.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.TaskHealth.Tests/AssetLibrary.TaskHealth.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.TransferOperation.Tests/AssetLibrary.TransferOperation.Tests.csproj"
+    },
+    {
+      "path": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026/tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj"
+    }
+  ]
+}

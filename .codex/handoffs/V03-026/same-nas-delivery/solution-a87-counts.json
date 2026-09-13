@@ -1,0 +1,66 @@
+[
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26.trx",
+    "Total": 13,
+    "Executed": 13,
+    "Passed": 13,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[1].trx",
+    "Total": 32,
+    "Executed": 32,
+    "Passed": 32,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[2].trx",
+    "Total": 2,
+    "Executed": 2,
+    "Passed": 2,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[3].trx",
+    "Total": 64,
+    "Executed": 64,
+    "Passed": 64,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[4].trx",
+    "Total": 79,
+    "Executed": 54,
+    "Passed": 54,
+    "Failed": 0,
+    "Skipped": 25
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[5].trx",
+    "Total": 63,
+    "Executed": 63,
+    "Passed": 63,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[6].trx",
+    "Total": 96,
+    "Executed": 93,
+    "Passed": 93,
+    "Failed": 0,
+    "Skipped": 3
+  },
+  {
+    "File": "Administrator_YOKIIRONETBOOK_2026-09-13_18_32_26[7].trx",
+    "Total": 131,
+    "Executed": 107,
+    "Passed": 107,
+    "Failed": 0,
+    "Skipped": 24
+  }
+]

@@ -1,0 +1,3 @@
+{"probe":"isolation","passed":true,"initial_ring_error":0,"ring_error":12,"fork_error":11,"parent_signal_error":1,"state_denied":true,"decoder_identity":true,"parent_memory_denied":true,"parent_ptrace_error":1}
+{"id": "2e4db0b2c870992d3c61b70726b11732bd745671bf6998a6ad133af319b15c9b", "image": "sha256:de9cb83214d4077d2c75fa200f7293ebc5331a0db4203da48f4e98fde0ed6093", "state": {"Dead": false, "Error": "", "ExitCode": 0, "FinishedAt": "2026-09-13T10:08:04.585927164Z", "OOMKilled": false, "Paused": false, "Pid": 0, "Restarting": false, "Running": false, "StartedAt": "2026-09-13T10:08:04.518796382Z", "Status": "exited"}}
+owned_container_removed

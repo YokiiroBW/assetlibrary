@@ -1,0 +1,193 @@
+{
+  "status": "image_cases_passed",
+  "origin": "https://192.168.31.210:5446",
+  "library_id": "5a692b9e-ad96-47b7-8c13-aec4af5cfd59",
+  "cases": [
+    {
+      "file": "landscape.jpg",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 2283,
+      "sha256": "911b2be99f3273cbb99933886af29e1dfbbd049d78f2516f11163e3723c11fc4",
+      "dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "file": "landscape.jpg",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 13553,
+      "sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb",
+      "dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "file": "landscape.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 1677,
+      "sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+      "dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "file": "landscape.png",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 9592,
+      "sha256": "e4e069cf8c1e75ed8e642369f89cce22a524967452be654ca4d1db33d8e66c82",
+      "dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "file": "landscape.webp",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 1677,
+      "sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+      "dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "file": "landscape.webp",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 9592,
+      "sha256": "e4e069cf8c1e75ed8e642369f89cce22a524967452be654ca4d1db33d8e66c82",
+      "dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "file": "rotate-six.jpg",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 2607,
+      "sha256": "9a6c5a97d20aef7d0fa2bd1397e8692d24d1e823df9b1c690392c0cc8d2ffb9b",
+      "dimensions": [
+        341,
+        512
+      ]
+    },
+    {
+      "file": "rotate-six.jpg",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 14878,
+      "sha256": "0c9a143d7145f91269ebe787c06c6175573b157a0511ad8d06c301fa91556eac",
+      "dimensions": [
+        1066,
+        1600
+      ]
+    },
+    {
+      "file": "transparent.png",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 9952,
+      "sha256": "6ffee20bc18401c288e3a0a674f8a7de0441013801c06aa64dd9938c919b37dc",
+      "dimensions": [
+        384,
+        512
+      ]
+    },
+    {
+      "file": "transparent.png",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 10270,
+      "sha256": "9b49bec9b32752244002629759752cc6c417bdcbb30b43406de272dc03fc4290",
+      "dimensions": [
+        900,
+        1200
+      ]
+    },
+    {
+      "file": "\u4e2d\u6587\u76ee\u5f55/\u91cd\u590d\u5185\u5bb9.dat",
+      "variant": "thumbnail",
+      "status": 200,
+      "bytes": 2283,
+      "sha256": "911b2be99f3273cbb99933886af29e1dfbbd049d78f2516f11163e3723c11fc4",
+      "dimensions": [
+        512,
+        341
+      ]
+    },
+    {
+      "file": "\u4e2d\u6587\u76ee\u5f55/\u91cd\u590d\u5185\u5bb9.dat",
+      "variant": "preview",
+      "status": 200,
+      "bytes": 13553,
+      "sha256": "780b2c10cc03e5aac60776caef34141aa64199bf02019512a7d9c56329323ebb",
+      "dimensions": [
+        1600,
+        1066
+      ]
+    },
+    {
+      "file": "active.svg",
+      "variant": "thumbnail",
+      "status": 415,
+      "bytes": 82
+    },
+    {
+      "file": "active.svg",
+      "variant": "preview",
+      "status": 415,
+      "bytes": 82
+    },
+    {
+      "file": "not-an-image.png",
+      "variant": "thumbnail",
+      "status": 415,
+      "bytes": 82
+    },
+    {
+      "file": "not-an-image.png",
+      "variant": "preview",
+      "status": 415,
+      "bytes": 82
+    },
+    {
+      "file": "oversized-header.png",
+      "variant": "thumbnail",
+      "status": 422,
+      "bytes": 73
+    },
+    {
+      "file": "oversized-header.png",
+      "variant": "preview",
+      "status": 422,
+      "bytes": 73
+    },
+    {
+      "file": "truncated.jpg",
+      "variant": "thumbnail",
+      "status": 422,
+      "bytes": 81
+    },
+    {
+      "file": "truncated.jpg",
+      "variant": "preview",
+      "status": 422,
+      "bytes": 81
+    }
+  ],
+  "scan": {
+    "scan_id": "574b5e64-a020-4278-85b9-afdb22ca4ceb",
+    "state": "succeeded",
+    "observed_entries": 21,
+    "committed_entries": 21
+  }
+}

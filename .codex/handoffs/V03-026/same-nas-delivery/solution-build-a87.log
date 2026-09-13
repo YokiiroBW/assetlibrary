@@ -1,0 +1,20 @@
+  AssetLibrary.AssetLink -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\packages\sdk\assetlink\dotnet\bin\Release\net10.0\AssetLibrary.AssetLink.dll
+  AssetLibrary.WorkerSupervisor -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\services\worker-supervisor\bin\Release\net10.0\AssetLibrary.WorkerSupervisor.dll
+  AssetLibrary.ImageSupervisor -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\services\worker-supervisor\ImageSupervisor\bin\Release\net10.0\AssetLibrary.ImageSupervisor.dll
+  AssetLibrary.ImagePreview.Worker -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\services\worker-supervisor\ImagePreview\bin\Release\net10.0\AssetLibrary.ImagePreview.Worker.dll
+  AssetLibrary.AssetLink.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.AssetLink.Tests\bin\Release\net10.0\AssetLibrary.AssetLink.Tests.dll
+  AssetLibrary.CoreServer -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\services\core-server\bin\Release\net10.0\AssetLibrary.CoreServer.dll
+  AssetLibrary.Build.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Build.Tests\bin\Release\net10.0\AssetLibrary.Build.Tests.dll
+  AssetLibrary.TaskHealth.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.TaskHealth.Tests\bin\Release\net10.0\AssetLibrary.TaskHealth.Tests.dll
+  AssetLibrary.TransferOperation.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.TransferOperation.Tests\bin\Release\net10.0\AssetLibrary.TransferOperation.Tests.dll
+  AssetLibrary.ReadCore.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.ReadCore.Tests\bin\Release\net10.0\AssetLibrary.ReadCore.Tests.dll
+  AssetLibrary.Preview.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Preview.Tests\bin\Release\net10.0\AssetLibrary.Preview.Tests.dll
+  AssetLibrary.CoreServer.Host -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\services\core-server\Host\bin\Release\net10.0\AssetLibrary.CoreServer.Host.dll
+  AssetLibrary.Packaging.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.Packaging.Tests\bin\Release\net10.0\AssetLibrary.Packaging.Tests.dll
+  AssetLibrary.WebGateway.Tests -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-026\tests\dotnet\AssetLibrary.WebGateway.Tests\bin\Release\net10.0\AssetLibrary.WebGateway.Tests.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:06.39

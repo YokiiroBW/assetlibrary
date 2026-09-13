@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "nas_local_image_integration_in_progress",
-  "next_action": "Continue V03-026/ADR-0023 same-NAS image processing. Core adapter, native supervisor and packaging integrated; actual ordinary images, Linux socket peer, containment/fault/parent cleanup verified. Resolve maximum-input CPU/address-space limits, then final same-source NAS package, Core end-to-end and backed-up upgrade. Existing preview.7 delivery remains; G4 waived, no desktop fixture.",
+  "status": "nas_local_image_delivered",
+  "next_action": "V03-026 completed: same-NAS Core/image/PostgreSQL, final package7f09290 deployed after verified backup; original2 libraries/195792 scan entries preserved. Continue only the next user-selected feature. Windows preview.7 remains installed; zoom/original/sync/signing and Android physical devices remain separate. No active fixture; G4 waived.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -77,7 +77,8 @@
     "V03-005 checkpoint3890793 integrates Android1838b96/815e2f6, Web238c61c/4e633e8/d944300/d11085e, and Windows diagnostics453e10b/ba9fcbb/046dbde. Frozen wire/ADR0019/pins38aedca and bounded real image fixture5edf25c are committed. Web65 distinct browser cases and Android77 distinct client/repository cases passed in owned worktrees; coordinator reviewed code and representative screenshots. Root fixture Python8 and .NET6/Release passed. Real Core image consumer acceptance, Windows LPAC/Linux sandbox validation, Explorer entry and production packaging/deployment remain uncompleted. Existing NAS and release gates unchanged.",
     "2026-09-12: Windows preview.2 ZIP delivered after real install, native sidebar/paging/Chinese folders/session invalidation and Settings startup. See docs/releases/WINDOWS_EXPLORER_PREVIEW.md and V03-005/windows-product-delivery. Failed preview.1 retained as negative evidence. Test Core138 sources unchanged and6 roles/resources cleaned; final installation retained, test configuration removed.",
     "2026-09-13: Explorer gallery preview.6 delivered after actual Core/Explorer image, pagination, selection, own summary, resize and logout acceptance. 148 sources unchanged and6 roles/runtime cleaned; test profiles removed, installation retained. See windows-gallery-delivery; G4 remains waived/not performed.",
-    "2026-09-13: V03-022 integrated V03-023/024/025 and delivered preview.7 after actual Core/Explorer large-image, preferences across fresh process, selection restore and logout acceptance. 542 installed files verified; 148 sources unchanged; all test resources cleaned. G4 remains waived/not performed."
+    "2026-09-13: V03-022 integrated V03-023/024/025 and delivered preview.7 after actual Core/Explorer large-image, preferences across fresh process, selection restore and logout acceptance. 542 installed files verified; 148 sources unchanged; all test resources cleaned. G4 remains waived/not performed.",
+    "V03-026..029 delivered same-NAS image processing by ADR-0023 without an external runtime host. Final7f09290 package was verified, cold-backed-up and deployed; 38 actual Core image cases, desktop/mobile rendering and outage recovery passed; original2 libraries/195792 scan entries and account retained, 4 real-library PNG requests passed without saving private pictures/names/paths. All owned NAS test containers/5volumes/2networks/corpus/prototypes cleaned. Existing administrator-risk egress issue only required a one-time synthetic bootstrap TLS transport which was closed; normal account/image requests work without it. G4 remains waived and full V0.3/Alpha are not closed."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
   "active_work": {

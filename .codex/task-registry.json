@@ -1103,65 +1103,69 @@
       "id": "V03-026",
       "title": "nas-local-image-integration",
       "module": "nas-local-image-integration",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-022"
       ],
       "owner": "nas-image-coordinator",
       "branch": "codex/v03-026-nas-local-image-integration",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-026",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-026",
       "task_file": ".codex/tasks/V03-026.md",
       "handoff": ".codex/handoffs/V03-026/summary.md",
       "thread_deep_link": "",
-      "execution_status": "Same-NAS ADR0023 implementation; platform capability probes passed, product acceptance pending."
+      "execution_status": "Integrated and deployed on the original NAS under ADR-0023; final Core/API/browser and retained-library checks passed; owned test resources cleaned. Full V0.3/G4 not claimed.",
+      "integrated_commit": "7f092904dbadcf1276bb9daf5b565946ecccbdad"
     },
     {
       "id": "V03-027",
       "title": "nas-image-supervisor",
       "module": "nas-image-supervisor",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-022"
       ],
       "owner": "nas-image-worker-owner",
       "branch": "codex/v03-027-nas-image-supervisor",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-027",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-027",
       "task_file": ".codex/tasks/V03-027.md",
       "handoff": ".codex/handoffs/V03-027/summary.md",
       "thread_deep_link": "",
-      "execution_status": "Same-NAS ADR0023 implementation; platform capability probes passed, product acceptance pending."
+      "execution_status": "Integrated and deployed on the original NAS under ADR-0023; final Core/API/browser and retained-library checks passed; owned test resources cleaned. Full V0.3/G4 not claimed.",
+      "integrated_commit": "7f092904dbadcf1276bb9daf5b565946ecccbdad"
     },
     {
       "id": "V03-028",
       "title": "nas-local-image-adapter",
       "module": "nas-local-image-adapter",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-022"
       ],
       "owner": "nas-image-core-owner",
       "branch": "codex/v03-028-nas-local-image-adapter",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-028",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-028",
       "task_file": ".codex/tasks/V03-028.md",
       "handoff": ".codex/handoffs/V03-028/summary.md",
       "thread_deep_link": "",
-      "execution_status": "Same-NAS ADR0023 implementation; platform capability probes passed, product acceptance pending."
+      "execution_status": "Integrated and deployed on the original NAS under ADR-0023; final Core/API/browser and retained-library checks passed; owned test resources cleaned. Full V0.3/G4 not claimed.",
+      "integrated_commit": "7f092904dbadcf1276bb9daf5b565946ecccbdad"
     },
     {
       "id": "V03-029",
       "title": "nas-image-package",
       "module": "nas-image-package",
-      "status": "in_progress",
+      "status": "completed",
       "depends_on": [
         "V03-022"
       ],
       "owner": "nas-image-package-owner",
       "branch": "codex/v03-029-nas-image-package",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-029",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-029",
       "task_file": ".codex/tasks/V03-029.md",
       "handoff": ".codex/handoffs/V03-029/summary.md",
       "thread_deep_link": "",
-      "execution_status": "Same-NAS ADR0023 implementation; platform capability probes passed, product acceptance pending."
+      "execution_status": "Integrated and deployed on the original NAS under ADR-0023; final Core/API/browser and retained-library checks passed; owned test resources cleaned. Full V0.3/G4 not claimed.",
+      "integrated_commit": "7f092904dbadcf1276bb9daf5b565946ecccbdad"
     }
   ]
 }

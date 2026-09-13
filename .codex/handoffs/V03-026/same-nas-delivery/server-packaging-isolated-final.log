@@ -1,0 +1,11 @@
+test_one_host_wrapper_references_the_inert_core (test_server_packaging_foundation.ServerPackagingFoundationTests.test_one_host_wrapper_references_the_inert_core) ... ok
+test_privileged_scripts_are_read_only_by_default_and_owner_guarded (test_server_packaging_foundation.ServerPackagingFoundationTests.test_privileged_scripts_are_read_only_by_default_and_owner_guarded) ... ok
+test_release_and_production_write_gates_remain_open (test_server_packaging_foundation.ServerPackagingFoundationTests.test_release_and_production_write_gates_remain_open) ... ok
+test_release_definition_policy_passes_without_claiming_platform_execution (test_server_packaging_foundation.ServerPackagingFoundationTests.test_release_definition_policy_passes_without_claiming_platform_execution) ... ok
+test_release_rid_locks_are_sandboxed_and_neutral_locks_stay_portable (test_server_packaging_foundation.ServerPackagingFoundationTests.test_release_rid_locks_are_sandboxed_and_neutral_locks_stay_portable) ... ok
+test_release_workflow_executes_real_native_and_docker_commands (test_server_packaging_foundation.ServerPackagingFoundationTests.test_release_workflow_executes_real_native_and_docker_commands) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.004s
+
+OK

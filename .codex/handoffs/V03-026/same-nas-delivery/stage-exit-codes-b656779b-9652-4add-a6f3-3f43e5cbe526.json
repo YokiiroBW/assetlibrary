@@ -1,0 +1,250 @@
+[
+  {
+    "stage": "files_bundle",
+    "exit_code": 0
+  },
+  {
+    "stage": "bundle_sha256sum",
+    "exit_code": 0
+  },
+  {
+    "stage": "list_project",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 1
+  },
+  {
+    "stage": "files_prepare",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "stop_core",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "stop_postgres",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-core-state_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-core-state",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-core-state_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-core-state_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-data_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-data",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-data_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-data_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-tls_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-tls",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-tls_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-postgres-tls_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_volume",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-setup-state_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-setup-state",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-setup-state_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_assetlibrary-nas-setup-state_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_backup_image",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_configuration_create",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_configuration",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_configuration_container_exit",
+    "exit_code": 0
+  },
+  {
+    "stage": "inspect_container",
+    "exit_code": 0
+  },
+  {
+    "stage": "archive_configuration_remove",
+    "exit_code": 0
+  },
+  {
+    "stage": "files_record",
+    "exit_code": 0
+  }
+]

@@ -1,0 +1,26 @@
+import runpy,types,json,urllib.request,urllib.error,hashlib
+t=types.SimpleNamespace(**runpy.run_path('.runtime/nas-package-acceptance.py'));t.prior.ORIGIN=t.ORIGIN
+data=json.loads((t.OUT/'fixture-entries.json').read_text());library=data['library'];entries=data['entries']
+success={'maximum-40mp-small.png':[(512,320),(1600,1000)],'maximum-32m-pixel-data.png':[(512,73),(1600,229)],'below-4m-non-idat.png':[(1,1),(1,1)],'maximum-4m-non-idat.png':[(1,1),(1,1)],'maximum-32m-multiple-metadata.png':[(1,1),(1,1)]}
+limited=['oversized-4m-non-idat.png','small-31m.png','small-32m.png','maximum-40mp-32m.png']
+api=t.Api(t.OUT/'acceptance.crt');api.login(False);rows=[]
+try:
+ for name in [*success,*limited]:
+  for profile,variant in enumerate(['thumbnail','preview']):
+   request=urllib.request.Request(f'{t.ORIGIN}/assetlink/v1/libraries/{library}/entries/{entries[name]}/image?variant={variant}',headers={'Origin':t.ORIGIN,'X-AssetLibrary-CSRF':api.csrf})
+   try:response=api.opener.open(request,timeout=17)
+   except urllib.error.HTTPError as error:response=error
+   with response:
+    png=response.read(12582913);assert len(png)<=12582912
+    row={'file':name,'variant':variant,'status':response.status}
+    if name in success:
+     assert response.status==200,(name,response.status)
+     t.checks.validate_png(png,success[name][profile],2097152 if profile==0 else 12582912)
+     row.update(dimensions=success[name][profile],bytes=len(png),sha256=hashlib.sha256(png).hexdigest())
+    else:
+     assert response.status==422 and json.loads(png)['code']=='preview_limit_exceeded',(name,response.status)
+     row['error_code']='preview_limit_exceeded'
+    rows.append(row)
+finally:assert api.request('/assetlink/v1/auth/logout',{})[0]==204
+(t.OUT/'api-boundaries.json').write_text(json.dumps({'status':'passed','cases':rows},indent=2)+'\n')
+print(json.dumps({'status':'passed','cases':len(rows),'successful':sum(x['status']==200 for x in rows),'typed_limits':sum(x['status']==422 for x in rows)}))

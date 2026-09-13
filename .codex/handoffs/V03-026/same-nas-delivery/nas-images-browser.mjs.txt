@@ -1,0 +1,51 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+const input=[];for await(const chunk of process.stdin)input.push(chunk);
+const cfg=JSON.parse(Buffer.concat(input).toString('utf8'));
+const {chromium,expect}=await import(pathToFileURL(cfg.playwright).href);
+const browser=await chromium.launch({headless:true,args:[`--ignore-certificate-errors-spki-list=${cfg.spki}`]});
+const evidence=[];const responses=[];
+try{
+ for(const [name,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){
+  const context=await browser.newContext({viewport,locale:'zh-CN',timezoneId:'Asia/Shanghai',colorScheme:name==='mobile'?'dark':'light',reducedMotion:'reduce',ignoreHTTPSErrors:false});
+  const page=await context.newPage();
+  page.on('response',r=>{if(new URL(r.url()).pathname.endsWith('/image'))responses.push({viewport:name,status:r.status(),variant:new URL(r.url()).searchParams.get('variant')});});
+  await page.goto(`${cfg.origin}/libraries/${cfg.library}?view=grid&name=landscape`,{waitUntil:'domcontentloaded'});
+  await page.getByLabel('账号',{exact:true}).fill(cfg.account);
+  await page.getByLabel('密码',{exact:true}).fill(cfg.password);
+  await page.getByRole('button',{name:'登录',exact:true}).click();
+  const row=page.getByRole('option',{name:/^landscape\.png，/});
+  await expect(row).toBeVisible({timeout:20000});
+  if(cfg.candidateStyle)await page.addStyleTag({content:await readFile(cfg.candidateStyle,'utf8')});
+  await expect(row.locator('img')).toHaveJSProperty('naturalWidth',512,{timeout:20000});
+  await expect(page.locator('.image-thumbnail[data-image-state="ready"] img')).toHaveCount(3,{timeout:20000});
+  const geometry=await row.locator('img').evaluate(el=>{const values=[];for(let p=el;p&&values.length<4;p=p.parentElement){const s=getComputedStyle(p),r=p.getBoundingClientRect();values.push({tag:p.tagName,classes:p.className,width:r.width,height:r.height,display:s.display,visibility:s.visibility,opacity:s.opacity,overflow:s.overflow,grid:s.gridTemplateColumns,minWidth:s.minWidth,minHeight:s.minHeight,maxWidth:s.maxWidth,maxHeight:s.maxHeight});}return values;});
+  await writeFile(`${cfg.output}/${name}-geometry.json`,JSON.stringify(geometry,null,2));
+  await expect(row.locator('img')).toBeVisible();
+  const frame=await row.locator('.image-thumbnail').boundingBox();const bounds=await row.locator('img').boundingBox();
+  if(bounds.y<frame.y||bounds.y+bounds.height>frame.y+frame.height+1){
+   await page.screenshot({path:`${cfg.output}/${name}-clipped-before.png`,fullPage:true});
+   await page.getByRole('button',{name:'退出登录',exact:true}).click();
+   throw new Error('thumbnail pixels are clipped outside their frame');
+  }
+  await page.screenshot({path:`${cfg.output}/${name}-gallery.png`,fullPage:true});
+  await row.dblclick();
+  const modal=page.getByRole('dialog',{name:'图片预览',exact:true});
+  await expect(modal).toBeVisible();
+  const picture=modal.getByRole('img',{name:'landscape.png',exact:true});
+  await expect(picture).toHaveJSProperty('naturalWidth',1600,{timeout:20000});
+  await expect(picture).toHaveJSProperty('naturalHeight',1066);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
+  if(overflow)throw new Error('horizontal viewport overflow');
+  await page.screenshot({path:`${cfg.output}/${name}-preview.png`,fullPage:true});
+  await page.keyboard.press('Escape');await expect(modal).toBeHidden();
+  await page.getByRole('button',{name:'退出登录',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'登录资源库'})).toBeVisible();
+  await expect(page.locator('.derived-image img')).toHaveCount(0);
+  evidence.push({viewport:name,thumbnail:[512,341],preview:[1600,1066],horizontalOverflow:false,escapeClosed:true,logoutCleared:true});
+  await context.close();
+ }
+ const report={status:'passed',candidateStyleInjected:Boolean(cfg.candidateStyle),cases:evidence,imageResponses:responses};
+ await writeFile(`${cfg.output}/browser.json`,JSON.stringify(report,null,2)+'\n');
+ console.log(JSON.stringify(report));
+}finally{await browser.close();}
