@@ -1224,6 +1224,32 @@
       "task_file": ".codex/tasks/V03-033.md",
       "handoff": ".codex/handoffs/V03-033/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V03-034",
+      "title": "explorer-page-state",
+      "module": "explorer-page-state",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "windows-page-state-owner",
+      "branch": "codex/v03-034-explorer-page-state",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-034",
+      "task_file": ".codex/tasks/V03-034.md",
+      "handoff": ".codex/handoffs/V03-034/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "V03-035",
+      "title": "explorer-page-controls",
+      "module": "explorer-page-controls",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "windows-page-controls-owner",
+      "branch": "codex/v03-035-explorer-page-controls",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-035",
+      "task_file": ".codex/tasks/V03-035.md",
+      "handoff": ".codex/handoffs/V03-035/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
