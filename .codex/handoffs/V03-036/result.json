@@ -1,0 +1,64 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-036",
+  "title": "explorer-page-fixture",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-page-fixture-owner",
+  "branch": "codex/v03-036-explorer-page-fixture",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-036",
+  "commit": "afdc0df",
+  "changed_files": [
+    ".codex/tasks/V03-036.md",
+    ".codex/handoffs/V03-036/summary.md",
+    ".codex/handoffs/V03-036/result.json",
+    ".codex/handoffs/V03-036/tests.md",
+    "tests/integration/native-clients/serve.py",
+    "tests/integration/native-clients/test_serve.py",
+    "tests/integration/native-clients/make_page_corpus.py",
+    "tests/integration/native-clients/README.md",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientSampleAssets.cs",
+    "tests/dotnet/AssetLibrary.WebGateway.Tests/NativeClientImageFixtureTests.cs"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 22,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "python": 13,
+    "csharp": 9,
+    "strict_build": "passed, zero warnings/errors",
+    "format": "passed",
+    "repository": "passed, 539 architecture inputs; Alpha remains blocked"
+  },
+  "risks": [
+    "No service/decoder/Explorer activation in this task; root must perform actual paging and fixture cleanup acceptance.",
+    "Partial invalid copies remain only inside the owned fixture runtime and are handled by existing lifecycle cleanup.",
+    "Use the complete previously verified image worker directory with libSkiaSharp.dll, not a lone bin/native EXE."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-036/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Native-client integration test fixture and bounded synthetic corpus tooling",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing manifest/path/SHA staging, source hash/mtime snapshots and NativeClientSampleAssets default 138 files.",
+      "Three checked-in synthetic JPEG/PNG/alpha images, copied exactly without a media dependency.",
+      "Existing WebGateway.Tests and its Core/Host/AssetLink project dependencies; production runtime unchanged."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": ["No new cross-module access; tests reuse their current project references and no product files were modified."],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "verify_repository passed including 539 source inputs, 14 architecture tests and existing contract/dependency checks.",
+      "13 Python and 9 C# tests cover 128/129 admission, actual 32MiB/64MiB boundaries, original source integrity and generated corpus staging.",
+      "Locked restore, strict related-project Release build and scoped format passed; dependency locks unchanged."
+    ],
+    "technical_debt": []
+  }
+}
