@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-025",
+  "title": "explorer-browse-preferences",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-preferences-owner",
+  "branch": "codex/v03-025-explorer-browse-preferences",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\AssetLibrary-worktrees\\V03-025",
+  "commit": "c5ef10437747c30c7467fda445073faee9519d39",
+  "changed_files": [
+    ".codex/handoffs/V03-025/result.json",
+    ".codex/handoffs/V03-025/summary.md",
+    ".codex/handoffs/V03-025/tests.md",
+    ".codex/tasks/V03-025.md",
+    "apps/windows-shell/gallery/BrowsePreferences.cpp",
+    "apps/windows-shell/gallery/BrowsePreferences.h",
+    "tests/windows-shell/GalleryPreferencesTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "View/Surface callbacks, failure summary, preview exclusion and product CMake integration are coordinator-owned.",
+    "Tests use borrowed own temporary keys and never call production Load/Save.",
+    "Fixed-size synchronous registry work has no retries/flush and does not promise power-loss durability."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-025/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Native gallery BrowsePreferences component and isolated registry/codec tests; windows-preferences-owner",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Surface Mode and Minimum/Maximum/DefaultDensityDip constants.",
+      "ADR0022 exact ABP1 fixed16-byte record and HKCU64 sibling-key boundary.",
+      "Existing native Win32 registry pattern and system advapi32."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Consumes coordinator-frozen ADR0022; no shared contract, Surface/View, Setup or CMake authored."
+    ],
+    "architecture_tests": [
+      "Strict native build and1/1 codec/actual isolated HKCU test passed.",
+      "Setup OwnedRoots and registry transaction static review confirms sibling key outside installer ownership; unchanged model evidence retained by root.",
+      "Diff restricted to component, test, task and handoff; no asset I/O/IPC/COM retention/global mutable state."
+    ],
+    "technical_debt": [
+      "Coordinator wires explicit changes and fake preference stores into View tests."
+    ]
+  }
+}
