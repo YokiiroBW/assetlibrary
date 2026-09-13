@@ -12,6 +12,9 @@ constexpr UINT MaxImageRequestsPerView = 16;
 constexpr UINT MaxVisibleFiles = static_cast<UINT>(snapshot::MaxItems);
 constexpr int StatusTextControlId = 106;
 constexpr size_t MaxStatusTextChars = 256;
+constexpr UINT MaxPreviewDimension = 1600;
+constexpr size_t MaxPreviewPixelBytes = 10240000;
+constexpr int PreviewBackControlId = 107, PreviewPreviousControlId = 108, PreviewNextControlId = 109;
 constexpr size_t MaxImageBytes = 16u * 1024u * 1024u;
 constexpr UINT MinimumDensityDip = 96, MaximumDensityDip = 256, DefaultDensityDip = 176;
 
@@ -43,6 +46,9 @@ struct Callbacks {
     // the View/Surface. Accessibility providers retain this, not lifetimeOwner.
     IUnknown* providerLifetimeOwner = nullptr;
     void (*activateItem)(void*, UINT index) noexcept = nullptr;
+    void (*previewStep)(void*, int delta) noexcept = nullptr; // -1 or +1; owner selects an authorized file.
+    void (*previewClose)(void*) noexcept = nullptr;
+    void (*preferencesChanged)(void*) noexcept = nullptr; // Only an actual mode/density change.
     void (*contextMenu)(void*, int index, POINT screenPoint) noexcept = nullptr; // -1 means background.
     void (*viewportChanged)(void*) noexcept = nullptr;
     void (*selectionChanged)(void*) noexcept = nullptr;
@@ -77,6 +83,14 @@ public:
     // S_FALSE means stale generation, hidden/offscreen, or non-file item.
     // nullptr is an honest unavailable placeholder, never a synthetic image.
     HRESULT SetThumbnail(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image) noexcept;
+    // generation is the owner's monotonic preview request serial, independent
+    // of SetPage generation. Calls may reenter/retire through owner callbacks.
+    // Begin releases all thumbnails/old preview, retaining browse state.
+    HRESULT BeginPreview(UINT index, std::uint64_t generation, bool previousEnabled, bool nextEnabled) noexcept;
+    // nullptr carries an honest no-image status. Stale/hidden/end returns S_FALSE.
+    HRESULT SetPreview(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image, const std::wstring& statusText) noexcept;
+    void EndPreview() noexcept; // Restores prior selection, focus and browse position.
+    bool Previewing() const noexcept;
     VisibleFiles VisibleFileItems() const noexcept;
     size_t RetainedImageBytes() const noexcept;
 
