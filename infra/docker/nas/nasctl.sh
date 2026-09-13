@@ -175,7 +175,7 @@ case "$action" in
         compose up --detach --wait --wait-timeout 120 core
         if [ -n "$image_socket" ]; then
             if [ "$(docker info --format '{{.MemoryLimit}}')" = true ] \
-                && compose --profile image create --no-deps image && verify_image \
+                && compose --profile image create image && verify_image \
                 && compose --profile image up --detach --no-deps --wait --wait-timeout 40 image \
                 && verify_image --running; then
                 printf '%s\n' 'Core is running; image container configuration and health verified. Target platform isolation evidence remains required.'

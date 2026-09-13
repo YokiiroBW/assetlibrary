@@ -336,11 +336,12 @@ case "$1" in
     done
     exit 0 ;;
   compose)
-    action=; quiet=0
+    action=; quiet=0; nodeps=0
     for argument do
-      case "$argument" in up|create|stop|down|ps) action=$argument ;; --quiet) quiet=1 ;; esac
+      case "$argument" in up|create|stop|down|ps) action=$argument ;; --quiet) quiet=1 ;; --no-deps) nodeps=1 ;; esac
       last=$argument
     done
+    if [ "$action" = create ] && [ "$nodeps" = 1 ]; then printf 'unknown flag: --no-deps\n' >&2; exit 9; fi
     if [ "$action" = ps ] && [ "$quiet" = 1 ]; then printf '%064d\n' 2; fi
     if [ "$action" = up ] && [ "$last" = image ] && [ "${FAKE_HEALTH_FAIL:-0}" = 1 ]; then exit 1; fi
     exit 0 ;;
