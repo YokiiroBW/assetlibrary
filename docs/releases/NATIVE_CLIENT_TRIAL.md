@@ -1,5 +1,7 @@
 # 原生客户端首版进度与 Android 试用
 
+2026-09-13后续：Windows preview.8 已交付原生Explorer的预览缩放/平移、适应/100%和键盘替代；真实Core/Explorer及清理通过，见[最新Windows交付](WINDOWS_EXPLORER_PREVIEW.md)。下方保留既有平台与历史证据，完整V0.3边界不变。
+
 2026-09-13更新：Windows原生Explorer图库与大图浏览preview.7已交付，支持保比例瀑布流、列表/密度记忆、可见范围缩略图、空格/双击1600大图和键盘切图、选择和自有计数摘要；真实Core/Explorer图片验收及清理已通过。同日后续已完成[NAS同机图片服务上线](NAS_IMAGE_PREVIEW.md)；Android真机与完整V0.3仍独立。最新包见[Windows图库交付说明](WINDOWS_EXPLORER_PREVIEW.md)。
 
 2026-09-12更新：Windows11 x64 **原生Explorer只读浏览preview.2安装包已交付**，含连接设置/后台Host与会话失效清理；包、安装和实际验收边界见[Windows交付说明](WINDOWS_EXPLORER_PREVIEW.md)。下文2026-09-08的Windows状态仅保留为历史，不代表最新状态；Android状态不变。

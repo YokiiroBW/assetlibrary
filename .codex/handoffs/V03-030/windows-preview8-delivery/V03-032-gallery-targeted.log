@@ -1,0 +1,23 @@
+Internal ctest changing into directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests
+Test project C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests
+    Start  5: gallery_rendering
+1/2 Test  #5: gallery_rendering ................   Passed    0.19 sec
+    Start 11: gallery_preview
+Could not find executable C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe
+Looked in the following places:
+C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe
+C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe.exe
+C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/Release/GalleryPreviewTests.exe
+C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/Release/GalleryPreviewTests.exe.exe
+Release/C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe
+Release/C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe.exe
+Unable to find executable: C:/YOKI/Codex/AssetLibrary-worktrees/V03-032/.runtime/gallery-tests/Release/GalleryPreviewTests.exe
+2/2 Test #11: gallery_preview ..................***Not Run   0.00 sec
+
+50% tests passed, 1 tests failed out of 2
+
+Total Test time (real) =   0.19 sec
+
+The following tests FAILED:
+	 11 - gallery_preview (Not Run)
+Errors while running CTest

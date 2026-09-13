@@ -1,0 +1,6 @@
+test_repository_verification_has_no_python_cache_residue (test_codex_new_task.NewTaskTests.test_repository_verification_has_no_python_cache_residue) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 5.498s
+
+OK

@@ -1171,40 +1171,46 @@
       "id": "V03-030",
       "title": "explorer-zoom-integration",
       "module": "explorer-zoom-integration",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [],
       "owner": "windows-zoom-coordinator",
       "branch": "codex/v03-030-explorer-zoom-integration",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-030",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-030",
       "task_file": ".codex/tasks/V03-030.md",
       "handoff": ".codex/handoffs/V03-030/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "67affa7ddbb43f633aa611aae0f5a1860c7e8582",
+      "execution_status": "Integrated in installed preview.8; actual Core/Explorer zoom, pan, reset, restoration and owned cleanup verified. G4 waived, no full V0.3 claim."
     },
     {
       "id": "V03-031",
       "title": "explorer-preview-geometry",
       "module": "explorer-preview-geometry",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [],
       "owner": "preview-geometry-owner",
       "branch": "codex/v03-031-explorer-preview-geometry",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-031",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-031",
       "task_file": ".codex/tasks/V03-031.md",
       "handoff": ".codex/handoffs/V03-031/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "67affa7ddbb43f633aa611aae0f5a1860c7e8582",
+      "execution_status": "Integrated in installed preview.8; actual Core/Explorer zoom, pan, reset, restoration and owned cleanup verified. G4 waived, no full V0.3 claim."
     },
     {
       "id": "V03-032",
       "title": "explorer-preview-interactions",
       "module": "explorer-preview-interactions",
-      "status": "ready",
+      "status": "completed",
       "depends_on": [],
       "owner": "preview-interaction-owner",
       "branch": "codex/v03-032-explorer-preview-interactions",
-      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-032",
+      "worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-032",
       "task_file": ".codex/tasks/V03-032.md",
       "handoff": ".codex/handoffs/V03-032/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "integrated_commit": "67affa7ddbb43f633aa611aae0f5a1860c7e8582",
+      "execution_status": "Integrated in installed preview.8; actual Core/Explorer zoom, pan, reset, restoration and owned cleanup verified. G4 waived, no full V0.3 claim."
     }
   ]
 }

@@ -1,0 +1,125 @@
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  1>Checking Build System
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  Snapshot.cpp
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Snapshot.cpp
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  LoaderProbe.cpp
+  SnapshotPidl.cpp
+  SnapshotPidl.cpp
+  SnapshotPipe.cpp
+  SnapshotPipe.cpp
+  LocalPipePeer.cpp
+  LocalPipePeer.cpp
+  ExplorerLoaderProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerLoaderProbe.exe
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  G3Measurements.cpp
+  Probe.cpp
+  G3Measurements.cpp
+  正在运行 C/C++ 代码分析...
+  正在运行 C/C++ 代码分析...
+  DirectNavigation.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+  ExplorerProofProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerProofProbe.exe
+  正在生成代码...
+  正在生成代码...
+  AssetLibrarySnapshot.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibrarySnapshot.lib
+  ExplorerSnapshot.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerSnapshot.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  LoadingRefresh.cpp
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  ProductTests.cpp
+  ThumbnailClient.cpp
+  SettingsCommand.cpp
+  正在运行 C/C++ 代码分析...
+  AssetLibraryThumbnail.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibraryThumbnail.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  AssetLibraryLoadingRefresh.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibraryLoadingRefresh.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  LoadingRefresh.cpp
+  SnapshotProbe.cpp
+  正在生成代码...
+  NavigationMenuTests.cpp
+  ExplorerSnapshotProbe.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerSnapshotProbe.exe
+  ExplorerProductTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerProductTests.exe
+  ExplorerFaultHost.cpp
+  ExplorerFaultHarnessTests.cpp
+  ExplorerFaultHarnessTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerFaultHarnessTests.exe
+  SnapshotTests.cpp
+  ExplorerFaultHost.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerFaultHost.exe
+  ExplorerLoadingRefresh.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerLoadingRefresh.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  ProbeDiagnostics.cpp
+  ExplorerNavigationMenuTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerNavigationMenuTests.exe
+  LoadingRefreshTests.cpp
+  AssetLibraryDiagnostics.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibraryDiagnostics.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  ProbeDiagnostics.cpp
+  ExplorerSnapshotTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerSnapshotTests.exe
+  LoadingRefreshTests.cpp
+  ExplorerSessionNotificationTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerSessionNotificationTests.exe
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  GalleryThumbnailTests.cpp
+  ViewRequests.cpp
+  ExplorerGalleryThumbnailTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerGalleryThumbnailTests.exe
+  ExplorerDiagnostics.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerDiagnostics.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  ProbeDiagnosticsTests.cpp
+  ExplorerFolder.cpp
+  AssetLibraryGalleryRequests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibraryGalleryRequests.lib
+  ExplorerLoadingRefreshTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerLoadingRefreshTests.exe
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  GalleryRequestTests.cpp
+  NavigationMenu.cpp
+  SnapshotIcon.cpp
+  SettingsMenu.cpp
+  SettingsCommand.cpp
+  ExplorerDiagnosticsTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerDiagnosticsTests.exe
+  View.cpp
+  正在运行 C/C++ 代码分析...
+  ExplorerGalleryRequestTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerGalleryRequestTests.exe
+  Surface.cpp
+  Layout.cpp
+  PreviewViewport.cpp
+  Accessible.cpp
+  Uia.cpp
+  BrowsePreferences.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+    正在创建库 C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests/Release/AssetLibraryExplorerProof.lib 和对象 C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests/Release/AssetLibraryExplorerProof.exp
+  AssetLibraryExplorerProof.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\AssetLibraryExplorerProof.dll
+  正在生成代码...
+  AssetLibraryGallery.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibraryGallery.lib
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/apps/windows-shell/CMakeLists.txt
+  GalleryPreferencesTests.cpp
+  ExplorerFolder.cpp
+  GalleryViewTests.cpp
+  NavigationMenu.cpp
+  SettingsCommand.cpp
+  SnapshotIcon.cpp
+  正在运行 C/C++ 代码分析...
+  SettingsMenu.cpp
+  ExplorerGalleryPreferencesTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerGalleryPreferencesTests.exe
+  SettingsCommand.cpp
+  正在运行 C/C++ 代码分析...
+  正在生成代码...
+  ExplorerGalleryViewTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\Release\ExplorerGalleryViewTests.exe
+  正在生成代码...
+    正在创建库 C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests/product-shell/Release/AssetLibrary.Explorer.lib 和对象 C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests/product-shell/Release/AssetLibrary.Explorer.exp
+  AssetLibraryExplorer.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\.runtime\shell-tests\product-shell\Release\AssetLibrary.Explorer.dll
+  Building Custom Rule C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/tests/windows-shell/CMakeLists.txt

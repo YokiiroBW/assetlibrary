@@ -1,0 +1,12 @@
+{
+  "utc": "2026-09-13T14:07:08.4932750+00:00",
+  "action": "install",
+  "broker": {
+    "Pid": 31504,
+    "NativeHwnd": 2164000,
+    "CreationFileTime": "134337818139908651",
+    "SessionId": 2,
+    "Path": "C:\\Windows\\explorer.exe"
+  },
+  "script_sha256": "0CCE120DDDAB9628E57AF1DDB2E834C904148624B2E4200CACFB99639B9EE967"
+}

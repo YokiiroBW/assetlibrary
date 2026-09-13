@@ -1,0 +1,30 @@
+Internal ctest changing into directory: C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests
+Test project C:/YOKI/Codex/AssetLibrary-worktrees/V03-030/.runtime/shell-tests
+      Start  1: explorer_snapshot
+ 1/12 Test  #1: explorer_snapshot ................   Passed    0.83 sec
+      Start  2: explorer_fault_harness
+ 2/12 Test  #2: explorer_fault_harness ...........   Passed    1.00 sec
+      Start  3: explorer_navigation_menu
+ 3/12 Test  #3: explorer_navigation_menu .........   Passed    0.01 sec
+      Start  4: explorer_loading_refresh
+ 4/12 Test  #4: explorer_loading_refresh .........   Passed   43.58 sec
+      Start  5: explorer_loading_view_wiring
+ 5/12 Test  #5: explorer_loading_view_wiring .....   Passed    1.24 sec
+      Start  6: explorer_diagnostics
+ 6/12 Test  #6: explorer_diagnostics .............   Passed    0.02 sec
+      Start  7: explorer_product
+ 7/12 Test  #7: explorer_product .................   Passed    0.02 sec
+      Start  8: explorer_session_notification
+ 8/12 Test  #8: explorer_session_notification ....   Passed    1.42 sec
+      Start  9: explorer_product_imports
+ 9/12 Test  #9: explorer_product_imports .........   Passed    0.03 sec
+      Start 10: explorer_gallery_thumbnail
+10/12 Test #10: explorer_gallery_thumbnail .......   Passed   20.16 sec
+      Start 11: explorer_gallery_requests
+11/12 Test #11: explorer_gallery_requests ........   Passed    1.50 sec
+      Start 12: explorer_gallery_preferences
+12/12 Test #12: explorer_gallery_preferences .....   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 12
+
+Total Test time (real) =  69.81 sec

@@ -1,6 +1,6 @@
 # ADR-0024 — Explorer 预览缩放与平移
 
-- 状态：Accepted for implementation，V03-030协调；2026-09-13用户要求继续完善浏览体验。
+- 状态：Accepted，V03-030协调；2026-09-13已用67affa7包完成真实Core/Explorer验收与交付。
 - 在ADR-0022已有预览内推进，Windows入口继续原生Explorer右侧，不打开独立资产客户端。
 
 ## 行为

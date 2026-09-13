@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="87b614d3-ab19-442b-b8a5-511270d37090" name="Administrator@YOKIIRONETBOOK 2026-09-13 21:57:58" runUser="YOKIIRONETBOOK\Administrator" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-13T21:57:58.7755577+08:00" queuing="2026-09-13T21:57:58.7755578+08:00" start="2026-09-13T21:57:58.4183308+08:00" finish="2026-09-13T21:57:58.9741640+08:00" />
+  <TestSettings name="default" id="9415c5b0-8b62-4055-9217-f7b08c0eec2d">
+    <Deployment runDeploymentRoot="Administrator_YOKIIRONETBOOK_2026-09-13_21_57_58" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="4457988a-1118-4612-9788-4cdb9491e70f" testId="1e428f51-585d-8d99-8390-1197342d0d0d" testName="CaseInsensitiveDuplicateManifestIsRejected" computerName="YOKIIRONETBOOK" duration="00:00:00.0446934" startTime="2026-09-13T21:57:58.7543344+08:00" endTime="2026-09-13T21:57:58.8007748+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4457988a-1118-4612-9788-4cdb9491e70f" />
+    <UnitTestResult executionId="fe9dfaea-f06a-4b6c-af70-e96796f9bb06" testId="1a9c0c9d-b458-8289-b75c-29e0e6f9e932" testName="ExtraFileIsRejectedBeforeCopy" computerName="YOKIIRONETBOOK" duration="00:00:00.0709985" startTime="2026-09-13T21:57:58.7267367+08:00" endTime="2026-09-13T21:57:58.8098266+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fe9dfaea-f06a-4b6c-af70-e96796f9bb06" />
+    <UnitTestResult executionId="c633702c-c9d8-4caf-9918-2089420d0a37" testId="1c816ed5-df6b-8e1d-9278-b0861cd73d36" testName="UnsafeManifestPathsAreRejected (&quot;../escape.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0073638" startTime="2026-09-13T21:57:58.7426565+08:00" endTime="2026-09-13T21:57:58.7527134+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c633702c-c9d8-4caf-9918-2089420d0a37" />
+    <UnitTestResult executionId="f0fc2065-dd8b-41c1-8657-baaa97794659" testId="13bd23a9-d76b-8c4d-b9da-0b4e8045bdc2" testName="ShutdownFailurePreservesInstalledRegistration" computerName="YOKIIRONETBOOK" duration="00:00:00.1127581" startTime="2026-09-13T21:57:58.7613789+08:00" endTime="2026-09-13T21:57:58.8741834+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0fc2065-dd8b-41c1-8657-baaa97794659" />
+    <UnitTestResult executionId="01c5dc35-2198-43bf-9b74-62b215ac4205" testId="1528953c-a6c2-89f2-8ced-92e49d4ef117" testName="StagingFailureLeavesOldVersionActiveAndRetrySucceeds" computerName="YOKIIRONETBOOK" duration="00:00:00.1485070" startTime="2026-09-13T21:57:58.7567271+08:00" endTime="2026-09-13T21:57:58.9053026+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01c5dc35-2198-43bf-9b74-62b215ac4205" />
+    <UnitTestResult executionId="dbcc6845-bd63-447a-a520-bbb6c69ebaf4" testId="1050cbc0-8721-8897-9db9-d3efc040ee27" testName="UnsafeManifestPathsAreRejected (&quot;C:/escape.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0116487" startTime="2026-09-13T21:57:58.7267414+08:00" endTime="2026-09-13T21:57:58.7527338+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dbcc6845-bd63-447a-a520-bbb6c69ebaf4" />
+    <UnitTestResult executionId="9dbdeccb-f98a-4f2d-99e9-f0832b8a8d8c" testId="1a0a65dc-219d-8fa2-96c7-5dc95d88ccec" testName="UnsafeManifestPathsAreRejected (&quot;CON.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0115903" startTime="2026-09-13T21:57:58.7267738+08:00" endTime="2026-09-13T21:57:58.7527154+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9dbdeccb-f98a-4f2d-99e9-f0832b8a8d8c" />
+    <UnitTestResult executionId="b17f5129-83f0-45c2-a9ec-ba66af652026" testId="19da8e4f-340f-8a77-8156-b5f6e91b7d99" testName="InstallReinstallUpgradeAndUninstallPreserveSourceAndUserConfiguration" computerName="YOKIIRONETBOOK" duration="00:00:00.1994559" startTime="2026-09-13T21:57:58.7267939+08:00" endTime="2026-09-13T21:57:58.9387786+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b17f5129-83f0-45c2-a9ec-ba66af652026" />
+    <UnitTestResult executionId="dda99101-31fb-4b86-baea-5bc8d4da11bd" testId="1582a29f-1707-8d00-8095-9fe5c610fab1" testName="UnsafeManifestPathsAreRejected (&quot;nested/file.dll.&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0115499" startTime="2026-09-13T21:57:58.7267534+08:00" endTime="2026-09-13T21:57:58.7527128+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="dda99101-31fb-4b86-baea-5bc8d4da11bd" />
+    <UnitTestResult executionId="79c7cccb-80dd-47b8-8a0a-6c1f9197d24b" testId="194541fb-2bfc-8038-9e52-6695e4785257" testName="UnsafeManifestPathsAreRejected (&quot;nested\escape.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0072411" startTime="2026-09-13T21:57:58.7426504+08:00" endTime="2026-09-13T21:57:58.7527297+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79c7cccb-80dd-47b8-8a0a-6c1f9197d24b" />
+    <UnitTestResult executionId="0e11267b-57f7-426d-b6d0-cc79f37496f3" testId="1805c24d-6ce6-8c26-bbbd-6d8c24fddd94" testName="SandboxCommandCannotTargetRealProgramDirectories" computerName="YOKIIRONETBOOK" duration="00:00:00.0041600" startTime="2026-09-13T21:57:58.7614235+08:00" endTime="2026-09-13T21:57:58.7656275+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e11267b-57f7-426d-b6d0-cc79f37496f3" />
+    <UnitTestResult executionId="892e3802-74f9-42ca-a409-a3c7a1df41b2" testId="1b94d7ea-984c-8031-ad11-00a8a15edbec" testName="ReparsePointInsidePayloadIsRejected" computerName="YOKIIRONETBOOK" duration="00:00:00.0731692" startTime="2026-09-13T21:57:58.7267592+08:00" endTime="2026-09-13T21:57:58.8124553+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="892e3802-74f9-42ca-a409-a3c7a1df41b2" />
+    <UnitTestResult executionId="0c2e5158-032f-4834-adbc-6cd6d5940ea1" testId="161aadea-16d2-87db-baa1-18cbf842936e" testName="AddedForeignFilePreventsVersionDeletion" computerName="YOKIIRONETBOOK" duration="00:00:00.1178639" startTime="2026-09-13T21:57:58.7614234+08:00" endTime="2026-09-13T21:57:58.8793204+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0c2e5158-032f-4834-adbc-6cd6d5940ea1" />
+    <UnitTestResult executionId="7d11604f-9a6a-4837-91fb-7a05b1c85371" testId="1d3952c8-e3da-8b34-bf66-11d4b590efa4" testName="ForeignDirectoryAndRegistryArePreserved" computerName="YOKIIRONETBOOK" duration="00:00:00.1079389" startTime="2026-09-13T21:57:58.7426629+08:00" endTime="2026-09-13T21:57:58.8510646+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7d11604f-9a6a-4837-91fb-7a05b1c85371" />
+    <UnitTestResult executionId="535a1549-8dda-4148-9cf2-f905ff93c5f5" testId="154a99f8-efc0-8433-94bc-9f506075b74f" testName="LockedDllUnregistersAndReportsPendingThenRetries" computerName="YOKIIRONETBOOK" duration="00:00:00.1416011" startTime="2026-09-13T21:57:58.7614011+08:00" endTime="2026-09-13T21:57:58.9030384+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="535a1549-8dda-4148-9cf2-f905ff93c5f5" />
+    <UnitTestResult executionId="27bc0c8a-0328-4686-b9b8-a361676e708d" testId="1b96a67a-be30-85bf-b9c4-b1900e66ab74" testName="CrashJournalRestoresOldRegistrationOnNextInstall" computerName="YOKIIRONETBOOK" duration="00:00:00.1380821" startTime="2026-09-13T21:57:58.7612990+08:00" endTime="2026-09-13T21:57:58.8994198+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="27bc0c8a-0328-4686-b9b8-a361676e708d" />
+    <UnitTestResult executionId="265c31d9-48a6-4122-b564-a78bd5285f03" testId="1b4f0efb-80dc-870a-b149-68c8c6baaf6b" testName="CorruptedPayloadLeavesNoInstallationOrRegistration" computerName="YOKIIRONETBOOK" duration="00:00:00.0689697" startTime="2026-09-13T21:57:58.7267842+08:00" endTime="2026-09-13T21:57:58.8078153+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="265c31d9-48a6-4122-b564-a78bd5285f03" />
+    <UnitTestResult executionId="b2464adf-7039-44df-825c-107421442f12" testId="1bb56679-0cae-8582-8b18-a6782bb531e5" testName="LowSpaceAndCanceledInstallDoNotSwitchRegistration" computerName="YOKIIRONETBOOK" duration="00:00:00.0807848" startTime="2026-09-13T21:57:58.7426763+08:00" endTime="2026-09-13T21:57:58.8239036+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b2464adf-7039-44df-825c-107421442f12" />
+    <UnitTestResult executionId="0b1319cc-5bac-4078-8068-9667ea2a5253" testId="101e3a78-e8ce-8499-9f9d-1c065842094e" testName="UnsafeManifestPathsAreRejected (&quot;nested /file.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0115740" startTime="2026-09-13T21:57:58.7267476+08:00" endTime="2026-09-13T21:57:58.7527343+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0b1319cc-5bac-4078-8068-9667ea2a5253" />
+    <UnitTestResult executionId="ae2faaa4-cd03-4766-ab02-34fb8ba9765c" testId="101cc126-6248-83f0-99ca-34dd0a894ea8" testName="RegistryFailureRestoresPreviousVersion" computerName="YOKIIRONETBOOK" duration="00:00:00.1490901" startTime="2026-09-13T21:57:58.7567384+08:00" endTime="2026-09-13T21:57:58.9058909+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ae2faaa4-cd03-4766-ab02-34fb8ba9765c" />
+    <UnitTestResult executionId="edb65478-1eb9-4067-a91a-aa9947743867" testId="19484731-7e22-8933-974b-10d2ec8f33da" testName="UnsafeManifestPathsAreRejected (&quot;nested/file.dll:stream&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0115414" startTime="2026-09-13T21:57:58.7267680+08:00" endTime="2026-09-13T21:57:58.7527239+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="edb65478-1eb9-4067-a91a-aa9947743867" />
+    <UnitTestResult executionId="35c4fccb-2942-4aae-80bf-bbe1a4d0667c" testId="13c7e019-1ac1-8c85-ab8a-7a59e4a0832d" testName="UnsafeManifestPathsAreRejected (&quot;nested/../../escape.dll&quot;)" computerName="YOKIIRONETBOOK" duration="00:00:00.0073051" startTime="2026-09-13T21:57:58.7426699+08:00" endTime="2026-09-13T21:57:58.7527197+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="35c4fccb-2942-4aae-80bf-bbe1a4d0667c" />
+    <UnitTestResult executionId="f0097ddb-af8c-4de1-b407-308c6085538a" testId="1610274f-2500-8a5e-944f-58df9a6e1a12" testName="SameVersionDifferentHashRefusesOverwrite" computerName="YOKIIRONETBOOK" duration="00:00:00.1359699" startTime="2026-09-13T21:57:58.7426443+08:00" endTime="2026-09-13T21:57:58.8790920+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f0097ddb-af8c-4de1-b407-308c6085538a" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="LowSpaceAndCanceledInstallDoNotSwitchRegistration" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1bb56679-0cae-8582-8b18-a6782bb531e5">
+      <Execution id="b2464adf-7039-44df-825c-107421442f12" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.InstallerTests" name="LowSpaceAndCanceledInstallDoNotSwitchRegistration" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;nested/file.dll.&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1582a29f-1707-8d00-8095-9fe5c610fab1">
+      <Execution id="dda99101-31fb-4b86-baea-5bc8d4da11bd" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="SameVersionDifferentHashRefusesOverwrite" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1610274f-2500-8a5e-944f-58df9a6e1a12">
+      <Execution id="f0097ddb-af8c-4de1-b407-308c6085538a" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.InstallerTests" name="SameVersionDifferentHashRefusesOverwrite" />
+    </UnitTest>
+    <UnitTest name="ReparsePointInsidePayloadIsRejected" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1b94d7ea-984c-8031-ad11-00a8a15edbec">
+      <Execution id="892e3802-74f9-42ca-a409-a3c7a1df41b2" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="ReparsePointInsidePayloadIsRejected" />
+    </UnitTest>
+    <UnitTest name="InstallReinstallUpgradeAndUninstallPreserveSourceAndUserConfiguration" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="19da8e4f-340f-8a77-8156-b5f6e91b7d99">
+      <Execution id="b17f5129-83f0-45c2-a9ec-ba66af652026" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.InstallerTests" name="InstallReinstallUpgradeAndUninstallPreserveSourceAndUserConfiguration" />
+    </UnitTest>
+    <UnitTest name="CrashJournalRestoresOldRegistrationOnNextInstall" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1b96a67a-be30-85bf-b9c4-b1900e66ab74">
+      <Execution id="27bc0c8a-0328-4686-b9b8-a361676e708d" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="CrashJournalRestoresOldRegistrationOnNextInstall" />
+    </UnitTest>
+    <UnitTest name="LockedDllUnregistersAndReportsPendingThenRetries" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="154a99f8-efc0-8433-94bc-9f506075b74f">
+      <Execution id="535a1549-8dda-4148-9cf2-f905ff93c5f5" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="LockedDllUnregistersAndReportsPendingThenRetries" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;nested\escape.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="194541fb-2bfc-8038-9e52-6695e4785257">
+      <Execution id="79c7cccb-80dd-47b8-8a0a-6c1f9197d24b" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="AddedForeignFilePreventsVersionDeletion" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="161aadea-16d2-87db-baa1-18cbf842936e">
+      <Execution id="0c2e5158-032f-4834-adbc-6cd6d5940ea1" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="AddedForeignFilePreventsVersionDeletion" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;nested/file.dll:stream&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="19484731-7e22-8933-974b-10d2ec8f33da">
+      <Execution id="edb65478-1eb9-4067-a91a-aa9947743867" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;C:/escape.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1050cbc0-8721-8897-9db9-d3efc040ee27">
+      <Execution id="dbcc6845-bd63-447a-a520-bbb6c69ebaf4" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="ShutdownFailurePreservesInstalledRegistration" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="13bd23a9-d76b-8c4d-b9da-0b4e8045bdc2">
+      <Execution id="f0fc2065-dd8b-41c1-8657-baaa97794659" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="ShutdownFailurePreservesInstalledRegistration" />
+    </UnitTest>
+    <UnitTest name="StagingFailureLeavesOldVersionActiveAndRetrySucceeds" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1528953c-a6c2-89f2-8ced-92e49d4ef117">
+      <Execution id="01c5dc35-2198-43bf-9b74-62b215ac4205" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="StagingFailureLeavesOldVersionActiveAndRetrySucceeds" />
+    </UnitTest>
+    <UnitTest name="RegistryFailureRestoresPreviousVersion" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="101cc126-6248-83f0-99ca-34dd0a894ea8">
+      <Execution id="ae2faaa4-cd03-4766-ab02-34fb8ba9765c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.RecoveryTests" name="RegistryFailureRestoresPreviousVersion" />
+    </UnitTest>
+    <UnitTest name="CorruptedPayloadLeavesNoInstallationOrRegistration" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1b4f0efb-80dc-870a-b149-68c8c6baaf6b">
+      <Execution id="265c31d9-48a6-4122-b564-a78bd5285f03" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="CorruptedPayloadLeavesNoInstallationOrRegistration" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;nested /file.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="101e3a78-e8ce-8499-9f9d-1c065842094e">
+      <Execution id="0b1319cc-5bac-4078-8068-9667ea2a5253" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="ExtraFileIsRejectedBeforeCopy" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1a9c0c9d-b458-8289-b75c-29e0e6f9e932">
+      <Execution id="fe9dfaea-f06a-4b6c-af70-e96796f9bb06" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="ExtraFileIsRejectedBeforeCopy" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;nested/../../escape.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="13c7e019-1ac1-8c85-ab8a-7a59e4a0832d">
+      <Execution id="35c4fccb-2942-4aae-80bf-bbe1a4d0667c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="SandboxCommandCannotTargetRealProgramDirectories" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1805c24d-6ce6-8c26-bbbd-6d8c24fddd94">
+      <Execution id="0e11267b-57f7-426d-b6d0-cc79f37496f3" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="SandboxCommandCannotTargetRealProgramDirectories" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;../escape.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1c816ed5-df6b-8e1d-9278-b0861cd73d36">
+      <Execution id="c633702c-c9d8-4caf-9918-2089420d0a37" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+    <UnitTest name="ForeignDirectoryAndRegistryArePreserved" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1d3952c8-e3da-8b34-bf66-11d4b590efa4">
+      <Execution id="7d11604f-9a6a-4837-91fb-7a05b1c85371" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.InstallerTests" name="ForeignDirectoryAndRegistryArePreserved" />
+    </UnitTest>
+    <UnitTest name="CaseInsensitiveDuplicateManifestIsRejected" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1e428f51-585d-8d99-8390-1197342d0d0d">
+      <Execution id="4457988a-1118-4612-9788-4cdb9491e70f" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="CaseInsensitiveDuplicateManifestIsRejected" />
+    </UnitTest>
+    <UnitTest name="UnsafeManifestPathsAreRejected (&quot;CON.dll&quot;)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-030\tests\windows-setup\bin\release\net10.0-windows\assetlibrary.windows.setup.tests.dll" id="1a0a65dc-219d-8fa2-96c7-5dc95d88ccec">
+      <Execution id="9dbdeccb-f98a-4f2d-99e9-f0832b8a8d8c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Setup.Tests.PackageValidationTests" name="UnsafeManifestPathsAreRejected" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1e428f51-585d-8d99-8390-1197342d0d0d" executionId="4457988a-1118-4612-9788-4cdb9491e70f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1a9c0c9d-b458-8289-b75c-29e0e6f9e932" executionId="fe9dfaea-f06a-4b6c-af70-e96796f9bb06" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c816ed5-df6b-8e1d-9278-b0861cd73d36" executionId="c633702c-c9d8-4caf-9918-2089420d0a37" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13bd23a9-d76b-8c4d-b9da-0b4e8045bdc2" executionId="f0fc2065-dd8b-41c1-8657-baaa97794659" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1528953c-a6c2-89f2-8ced-92e49d4ef117" executionId="01c5dc35-2198-43bf-9b74-62b215ac4205" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1050cbc0-8721-8897-9db9-d3efc040ee27" executionId="dbcc6845-bd63-447a-a520-bbb6c69ebaf4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1a0a65dc-219d-8fa2-96c7-5dc95d88ccec" executionId="9dbdeccb-f98a-4f2d-99e9-f0832b8a8d8c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19da8e4f-340f-8a77-8156-b5f6e91b7d99" executionId="b17f5129-83f0-45c2-a9ec-ba66af652026" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1582a29f-1707-8d00-8095-9fe5c610fab1" executionId="dda99101-31fb-4b86-baea-5bc8d4da11bd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="194541fb-2bfc-8038-9e52-6695e4785257" executionId="79c7cccb-80dd-47b8-8a0a-6c1f9197d24b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1805c24d-6ce6-8c26-bbbd-6d8c24fddd94" executionId="0e11267b-57f7-426d-b6d0-cc79f37496f3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b94d7ea-984c-8031-ad11-00a8a15edbec" executionId="892e3802-74f9-42ca-a409-a3c7a1df41b2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="161aadea-16d2-87db-baa1-18cbf842936e" executionId="0c2e5158-032f-4834-adbc-6cd6d5940ea1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1d3952c8-e3da-8b34-bf66-11d4b590efa4" executionId="7d11604f-9a6a-4837-91fb-7a05b1c85371" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="154a99f8-efc0-8433-94bc-9f506075b74f" executionId="535a1549-8dda-4148-9cf2-f905ff93c5f5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b96a67a-be30-85bf-b9c4-b1900e66ab74" executionId="27bc0c8a-0328-4686-b9b8-a361676e708d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1b4f0efb-80dc-870a-b149-68c8c6baaf6b" executionId="265c31d9-48a6-4122-b564-a78bd5285f03" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1bb56679-0cae-8582-8b18-a6782bb531e5" executionId="b2464adf-7039-44df-825c-107421442f12" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="101e3a78-e8ce-8499-9f9d-1c065842094e" executionId="0b1319cc-5bac-4078-8068-9667ea2a5253" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="101cc126-6248-83f0-99ca-34dd0a894ea8" executionId="ae2faaa4-cd03-4766-ab02-34fb8ba9765c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="19484731-7e22-8933-974b-10d2ec8f33da" executionId="edb65478-1eb9-4067-a91a-aa9947743867" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="13c7e019-1ac1-8c85-ab8a-7a59e4a0832d" executionId="35c4fccb-2942-4aae-80bf-bbe1a4d0667c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1610274f-2500-8a5e-944f-58df9a6e1a12" executionId="f0097ddb-af8c-4de1-b407-308c6085538a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="23" executed="23" passed="23" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>已为 C:\YOKI\Codex\AssetLibrary-worktrees\V03-030\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll 启用测试并行化(Workers: 16，Scope: MethodLevel)&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

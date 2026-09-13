@@ -1,0 +1,53 @@
+{
+  "status": "passed_for_scoped_preview8_delivery",
+  "package": {
+    "version": "0.3.0-preview.8",
+    "source_commit": "67affa7ddbb43f633aa611aae0f5a1860c7e8582",
+    "bytes": 155526095,
+    "sha256": "3fc8d3bd763662dc89f6d1ebbc000496c2bbbf402ad3e6af178a308bd9571767",
+    "unsigned": true
+  },
+  "installed_files_verified": 540,
+  "explorer": {
+    "pid": 5880,
+    "hwnd": 724396,
+    "creation": "134337829469066793",
+    "module": "C:\\Users\\Administrator\\AppData\\Local\\Programs\\AssetLibrary\\versions\\0.3.0-preview.8\\AssetLibrary.Explorer.dll",
+    "hash": "96DE351FB3A190ED8E52BA77361D307C2024B30A714C76C09990D6CCE4D0F79D"
+  },
+  "original_explorer_unchanged": true,
+  "preferences_unchanged": "Gallery/200",
+  "tests": {
+    "gallery_and_geometry_ctest": 13,
+    "shell_ctest": 13,
+    "setup": 23,
+    "release_locks": 16,
+    "package": 6,
+    "final_setup_cli": 8
+  },
+  "behavior": [
+    "Real Core JPEG/PNG/WebP, orientation and transparent previews in Explorer",
+    "Wheel100 to125 to195, drag and Shift+Left move pixels without changing picture",
+    "Double-click Fit; keyboard1 to100,0 toFit and numpad+ zoom",
+    "Narrow window retains100; Fit recalculates83 to69 percent",
+    "Next from explicit86 resets PNG toFit69, invalid image clears pixels/disables zoom",
+    "Escape restores original selection and scrolled gallery location",
+    "Disconnect clears zoomed transparent image and old data"
+  ],
+  "cleanup": {
+    "both_fixture_instances_verified": true,
+    "synthetic_files_each": 148,
+    "postgres_roles_each": 6,
+    "test_connection_removed": true,
+    "remembered_absent": true,
+    "host_processes": 0,
+    "owned_windows_remaining": 0
+  },
+  "limits": [
+    "100% means derived preview device pixels, not original-file retrieval",
+    "No new server/Host/wire changes or NAS deployment",
+    "G4 waived; no fresh G1/G2/G3 certification or complete V0.3",
+    "Unsigned, old occupied preview.1 retained",
+    "No new physical multi-monitor DPI transition or touch-device acceptance"
+  ]
+}

@@ -17,3 +17,4 @@ G4长期稳定性,用户豁免且未测试,docs/decisions/2026-09-12_G4用户豁
 模式密度跨目录与进程记忆,preview.7实机通过,.codex/handoffs/V03-022/windows-preview7-delivery/evidence.json,HKCU16B只存模式密度；新进程200减到176再加回200
 大图失败与返回及退出清理,preview.7实机通过,.codex/handoffs/V03-022/windows-preview7-delivery/README.md,坏图清旧像素；Esc保留原选择；logout清大图回根
 同NAS图片处理与Core接口,冷备上线并实测通过,.codex/handoffs/V03-026/same-nas-delivery/README.md,38项NAS图片请求及4项正式库图片；不重记Explorer整套门禁或G4
+Explorer预览缩放和平移,preview.8实机通过,.codex/handoffs/V03-030/windows-preview8-delivery/README.md,同原生窗口缩放拖动键盘与复位；540文件匹配；原件和窗口清理；不含新物理跨屏DPI或G4

@@ -1,0 +1,5 @@
+适用于 .NET Framework MSBuild 版本 17.14.51+25f168cee
+
+  GallerySurface.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-032\.runtime\gallery-tests\Release\GallerySurface.lib
+  PreviewTests.cpp
+  GalleryPreviewTests.vcxproj -> C:\YOKI\Codex\AssetLibrary-worktrees\V03-032\.runtime\gallery-tests\Release\GalleryPreviewTests.exe

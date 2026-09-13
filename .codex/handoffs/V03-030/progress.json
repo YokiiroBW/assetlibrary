@@ -1,0 +1,13 @@
+{
+  "status": "delivered",
+  "source_commit": "67affa7ddbb43f633aa611aae0f5a1860c7e8582",
+  "version": "0.3.0-preview.8",
+  "installed": true,
+  "installed_files_verified": 540,
+  "active_fixture": false,
+  "owned_windows": 0,
+  "original_explorer_unchanged": true,
+  "preferences_unchanged": true,
+  "nas_changed": false,
+  "g4": "waived_not_run"
+}
