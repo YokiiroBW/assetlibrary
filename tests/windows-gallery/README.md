@@ -1,6 +1,6 @@
 # 原生图库同源验证
 
-本目录构建 ADR-0021 的 Win32/GDI 控件独立测试程序。生产仅消费 `apps/windows-shell/gallery/Surface.cpp`、`Layout.cpp`、`Accessible.cpp`、`Uia.cpp` 与已有 snapshot 语义；harness 的渐变 PBGRA 是明确标注的合成测试数据，不是产品客户端或 NAS 预览后备。
+本目录构建 ADR-0021/0022 的 Win32/GDI 控件独立测试程序。生产仅消费 `apps/windows-shell/gallery/Surface.cpp`、`Layout.cpp`、`Accessible.cpp`、`Uia.cpp` 与已有 snapshot 语义；harness 的渐变 PBGRA 是明确标注的合成测试数据，不是产品客户端或 NAS 预览后备。
 
 使用 Visual Studio 2022 Build Tools、Windows SDK 10.0.26100.0、C++17；所有目标保持 `/W4 /WX /permissive- /analyze /utf-8` 与 `/MT`。UI 宿主测试 EXE 嵌入 Common Controls v6、PerMonitorV2 与 asInvoker 清单；生产 DLL 使用 Explorer 自身宿主环境。
 
@@ -21,6 +21,8 @@ ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure
 | gallery_accessibility_cycles | 同STA三轮关闭、provider/退休队列/调度窗归零 |
 | gallery_uia | 512上限/无分配退休队列、513拒绝且无旧桥fallback、接口/焦点/状态/边界 |
 | gallery_budget | 101可见、29小图、16MiB拒绝诚实不可用 |
+| gallery_preview | 单图fit、1600/容量/极端比例、浏览恢复、关闭/隐藏/迟到、键盘与偏好通知 |
+| gallery_preview_external | 独立UIA客户端List→Pane/Image→切图→List，旧provider拒读和资源回收 |
 | gallery_rendering | 内存DC调用同一WM_PRINTCLIENT绘制，512×1/1×512 contain、PBGRA透明合成、32次绘制后GDI/USER计数不增长 |
 
 自动用例创建的顶层窗口保持隐藏，不控制系统 Explorer、不注册 COM、不调用真实 Host 或网络。所有 CTest 必须通过，才能把该实现交给主任务继续真实 Explorer 验收；具体运行结果与尚未覆盖项见 V03-019 handoff。
@@ -42,10 +44,12 @@ ctest --test-dir .runtime/gallery-tests -C Release --output-on-failure
 
 输出路径必须不存在，避免覆盖旧证据。BMP 来自实际 GDI 绘制，不是设计稿；它只含画布，不代表 Explorer 命令栏、工具栏样式或跨显示器 DPI 已完成实机验收。
 
-控件只处理当前有界页。原生按钮提供图库/列表、缩小/放大、刷新和设置；方向/Home/End/Page、Ctrl/Shift多选、Space选择切换、Enter导航回调及键盘右键可用。内部Tab进入工具栏，边界Tab及Ctrl/Alt+Tab交给宿主。没有加入原图/1600px预览、小图弹层、标签或时间轴业务，F2/文件写操作保持不可用。
+控件只处理当前有界页。原生按钮提供图库/列表、缩小/放大、刷新和设置；方向/Home/End/Page、Ctrl/Shift多选、Space/Enter普通文件预览、Ctrl+Space选择切换、Enter目录导航回调及键盘右键可用。内部Tab进入工具栏，边界Tab及Ctrl/Alt+Tab交给宿主。1600px合成预览用于同源UI验证；没有原图打开、缩放/平移、标签或时间轴业务，F2/文件写操作保持不可用。
 
 持久图像只保存不可变PBGRA共享缓冲，计数按vector容量而非仅长度；每视图≤101候选/16MiB；16仅请求批次上限。无持久GDI位图副本，单次AlphaBlend临时DIB≤1MiB，绘完即释放。布局对极端比例限制tile几何，但实际图像始终按原尺寸contain，不随tile比例拉伸。颜色来自生成的共享Web语义主题；高对比度用系统颜色覆盖。
 
 原生UIA和MSAA共用当前页模型。调度窗和provider只保留独立Folder/DLL pin；窗口事件只临时保留View。旧provider退役拒绝current名称，UIA客户端旧Selection可返回空数组S_OK。详见handoff生命周期对照。
 
 工具栏当前摘要由 `Surface::SetStatusText` 原样显示View计算结果，原生STATIC子项ID106，可通过GetDlgItem读取。最多256个UTF-16单元，宽窗旁置、窄窗换行，Clear/Destroy清空；测试覆盖native可访问名和重排回调销毁。不依赖Windows11宿主底部DefView缓存计数。
+
+大图预览沿用现有canvas与原生按钮，--show可用普通文件Space/Enter/双击进入，并用Esc/返回、左右/上一下一验证。合成图不代表真实Core预览；生产图只由Host提供。预览释放所有缩略图、保留原page/selection/scroll，一个最大10,240,000B PBGRA受16MiB capacity限额；临时GDI DIB另最多10,240,000B。

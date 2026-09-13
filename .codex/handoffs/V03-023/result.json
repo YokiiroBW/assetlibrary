@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-023",
+  "title": "native-large-preview-surface",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "windows-preview-surface-owner",
+  "branch": "codex/v03-023-native-large-preview-surface",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\AssetLibrary-worktrees\\V03-023",
+  "commit": "cb0f154",
+  "changed_files": [
+    ".codex/handoffs/V03-023/result.json",
+    ".codex/handoffs/V03-023/summary.md",
+    ".codex/handoffs/V03-023/tests.md",
+    ".codex/tasks/V03-023.md",
+    "apps/windows-shell/gallery/Accessible.cpp",
+    "apps/windows-shell/gallery/Accessible.h",
+    "apps/windows-shell/gallery/Surface.cpp",
+    "apps/windows-shell/gallery/Surface.h",
+    "apps/windows-shell/gallery/Uia.cpp",
+    "tests/windows-gallery/AccessibilityProbe.cpp",
+    "tests/windows-gallery/CMakeLists.txt",
+    "tests/windows-gallery/Harness.cpp",
+    "tests/windows-gallery/PreviewTests.cpp",
+    "tests/windows-gallery/README.md"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "scope": "Strict native build and full gallery CTest 12/12; repository fast gate passed; actual Explorer/Core is root-owned."
+  },
+  "risks": [
+    "Actual Core/Host/Explorer and preferences persistence integration is owned by V03-022/root; synthetic harness is not product evidence.",
+    "Fit only; no original open, zoom/pan or prefetch. Ctrl+Enter is delegated rather than mapped to preview.",
+    "G4 endurance is explicitly waived, not executed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-023/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Explorer gallery presentation adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing Surface canvas/GDI AlphaBlend/native controls, font/theme, AccessibleModel/MSAA/native UIA and bounded retirement scheduler.",
+      "Current bounded snapshot page and caller-owned authorization/request serial/status/preference persistence.",
+      "Shared Pbgra image ownership and existing 16MiB view capacity guard; no thumbnail cache retained during preview."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Read-only snapshot projection and owner callbacks only; no View/Requests/IPC/registry/core modifications."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Root-approved Surface BeginPreview/SetPreview/EndPreview/Previewing and previewStep/previewClose/preferencesChanged callbacks; shared wire contracts untouched."
+    ],
+    "architecture_tests": [
+      "MSVC /W4 /WX /analyze build passed; gallery component/preview external tests.",
+      "scripts/verify_repository.py passed: 512 architecture inputs, 21 migration tests, 14 architecture rule tests, theme/contract/dependency/source checks; Alpha audit remains blocked."
+    ],
+    "technical_debt": [
+      "Actual Explorer visual, Core/Host decode/cancel and preference registry acceptance belong to coordinating root."
+    ]
+  }
+}
