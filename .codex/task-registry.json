@@ -1179,6 +1179,32 @@
       "task_file": ".codex/tasks/V03-030.md",
       "handoff": ".codex/handoffs/V03-030/summary.md",
       "thread_deep_link": ""
+    },
+    {
+      "id": "V03-031",
+      "title": "explorer-preview-geometry",
+      "module": "explorer-preview-geometry",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "preview-geometry-owner",
+      "branch": "codex/v03-031-explorer-preview-geometry",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-031",
+      "task_file": ".codex/tasks/V03-031.md",
+      "handoff": ".codex/handoffs/V03-031/summary.md",
+      "thread_deep_link": ""
+    },
+    {
+      "id": "V03-032",
+      "title": "explorer-preview-interactions",
+      "module": "explorer-preview-interactions",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "preview-interaction-owner",
+      "branch": "codex/v03-032-explorer-preview-interactions",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-032",
+      "task_file": ".codex/tasks/V03-032.md",
+      "handoff": ".codex/handoffs/V03-032/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
