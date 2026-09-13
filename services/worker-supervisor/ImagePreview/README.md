@@ -40,3 +40,7 @@ The existing decoder marks its source bitmap immutable only after `GetPixels` ha
 ## GC address reservation
 
 The worker candidate sets `System.GC.RegionRange` to134217728 (128MiB), while retaining the64MiB GC commit hard limit and all OS/container limits. .NET10 otherwise reserves five times a single heap hard limit, consuming320MiB of the512MiB address-space budget before native pixels. [Microsoft documents the region range and distinguishes reservation from commit](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector#region-range). The fixed value is embedded in the worker; the supervisor does not forward a new environment override. Actual NAS VM reduction and maximum-image behavior must be measured before accepting this candidate; it does not increase CPU time or promise that arbitrarily large metadata can decode within3CPU seconds.
+
+## Buffered PNG chunks
+
+Before invoking Skia, the input policy rejects any non-IDAT PNG chunk whose payload exceeds4MiB with the existing typed Limit status. This bounds libpng's progressive buffering/copy cost; IDAT remains streamed by the codec and is governed by the unchanged32MiB total input and40MP limits. The rule applies by chunk behavior, not by one private tag, and does not strip or bypass ICC/EXIF handling. An over-budget metadata image is rejected rather than claimed to have rendered successfully; normal typed Limit responses do not advance the infrastructure-failure circuit.

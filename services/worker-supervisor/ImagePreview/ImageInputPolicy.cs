@@ -5,6 +5,7 @@ namespace AssetLibrary.ImagePreview.Worker;
 
 internal static class ImageInputPolicy
 {
+    private const uint MaximumBufferedPngChunkBytes = 4 * 1024 * 1024;
     public static void Validate(ReadOnlySpan<byte> source)
     {
         if (source.Length > ImageWorkerProtocol.MaximumSourceBytes) throw new ImageDecodeException(ImageWorkerStatus.Limit);
@@ -38,7 +39,10 @@ internal static class ImageInputPolicy
             if (source.Length - offset < 12) throw new ImageDecodeException(ImageWorkerStatus.Invalid);
             var length = BinaryPrimitives.ReadUInt32BigEndian(source[offset..]);
             if (length > source.Length - offset - 12) throw new ImageDecodeException(ImageWorkerStatus.Invalid);
-            if (source.Slice(offset + 4, 4).SequenceEqual("acTL"u8)) throw new ImageDecodeException(ImageWorkerStatus.Unsupported);
+            var kind = source.Slice(offset + 4, 4);
+            // libpng streams IDAT, but buffers other chunks; cap that copy cost before entering the codec.
+            if (length > MaximumBufferedPngChunkBytes && !kind.SequenceEqual("IDAT"u8)) throw new ImageDecodeException(ImageWorkerStatus.Limit);
+            if (kind.SequenceEqual("acTL"u8)) throw new ImageDecodeException(ImageWorkerStatus.Unsupported);
             offset += checked((int)length + 12);
         }
     }
