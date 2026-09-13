@@ -16,7 +16,7 @@
 同一 Compose 新增一个图片监督容器，以本地 pathname Unix socket 连接 Core，不发布网络端口。Core继续拥有权限、稳定文件读取、缓存和源复验；仅发送已授权的有界图片字节。监督器和decoder不获得原路径、资产挂载、Core状态、用户会话、数据库或Docker socket。
 
 - 容器：独立PID/net/mount/IPC，network_mode:none，只读镜像，NNP，memory512MiB，cpu_shares256。不使用privileged/unconfined、不修改宿主内核或其他服务，不假设CFS/PID cgroup限额可用。
-- 可信监督器：不加载Skia，作为PID1运行。启动时额外CHOWN只用于将新socket归属Core UID1654；接受请求之前清除自身permitted/effective/inheritable的CHOWN，稳态仅SETUID/SETGID/KILL、ambient0。NNP持续启用。每次创建短命decoder，三根stdio管道，环境清空到明确运行时白名单。只有一个decoder在途，无服务端排队；额外请求立即不可用。
+- 可信监督器：不加载Skia，作为PID1运行。明确保留CHOWN/SETUID/SETGID/KILL四项能力、ambient0和NNP；CHOWN仅由固定代码管理唯一IPC卷的socket归属。Linux capset是线程级，不能以单次调用宣称CLR全进程已撤销CHOWN；不引入复杂重执行/FD传递来制造这种声明。解码子进程仍全线程降UID并清能力。每次创建短命decoder，三根stdio管道，环境清空到明确运行时白名单。只有一个decoder在途，无服务端排队；额外请求立即不可用。
 - Core的socket适配器：保留现有IImageDecoder签名与两项应用层许可，适配器内部一个可取消串行许可，使同一个Core的第二项请求在既有总预算内等待；不新增无界队列。
 - decoder：显式固定 `--container-decoder` 入口，受信启动阶段先清补充组并降为UID/GID1655、cap0；预热之后设置AS512MiB、CPU3秒、FSIZE0、CORE0、NPROC软/硬1、MEMLOCK软/硬0和NNP。在读攻击输入前验证全部约束及有效io_uring创建确实被拒；成功创建或不明确结果则不可用。不继承ring、listener、凭据或源fd，不传SCM_RIGHTS。
 - 该容器档位不声称禁止每个syscall；文件/网络/跨进程隔离来自独立namespace、无敏感挂载、不同UID/组、cap0与目录权限。旧普通worker仍必须通过seccomp，禁止通用“跳过隔离”开关。
