@@ -52,7 +52,9 @@ bool PixelsValid(const Pbgra& image, UINT maximum = 512) noexcept {
 
 struct Surface::State : std::enable_shared_from_this<State> {
     HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr, statusText = nullptr;
-    std::array<HWND, 6> buttons{};
+    std::array<HWND, 8> buttons{};
+    bool pagePreviousEnabled = false, pageNextEnabled = false;
+    std::uint64_t pageNavigationRevision = 0;
     std::array<HWND,7> previewButtons{};
     std::shared_ptr<AccessibleModel> previewModel = std::make_shared<AccessibleModel>();
     std::shared_ptr<const Pbgra> previewImage;
@@ -171,11 +173,31 @@ struct Surface::State : std::enable_shared_from_this<State> {
         previewModel->detail.fill(0); previewModel->focus = -1; previewModel->bounds.fill({});
         if (!previewModel->page.entries.empty()) { auto& entry = previewModel->page.entries[0]; entry.name.clear(); entry.epoch = {}; entry.node = {}; }
     }
+    void ResetPageNavigation() noexcept { pagePreviousEnabled = pageNextEnabled = false; ++pageNavigationRevision; }
+    bool PageControls() noexcept {
+        const auto revision = pageNavigationRevision; const auto page = pageRevision;
+        const bool enabled[] = {shown && !previewActive && pagePreviousEnabled,shown && !previewActive && pageNextEnabled};
+        for (size_t at=0;at<2;++at) {
+            if (buttons[6+at]) EnableWindow(buttons[6+at],enabled[at]);
+            if (!Alive() || revision != pageNavigationRevision || page != pageRevision) return false;
+            if (!enabled[at] && shown && !previewActive && GetFocus() == buttons[6+at]) {
+                SetFocus(canvas);
+                if (!Alive() || revision != pageNavigationRevision || page != pageRevision) return false;
+            }
+        }
+        return true;
+    }
+    void PageStep(int delta) noexcept {
+        if (!Alive() || !shown || previewActive || (delta < 0 ? !pagePreviousEnabled : !pageNextEnabled)) return;
+        const auto retained = shared_from_this(); const auto callback = callbacks.pageStep; const auto context = callbacks.context;
+        if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context,delta); }
+    }
     bool Toolbar() noexcept {
         const auto revision = pageRevision; const bool preview = previewActive;
         for (HWND button : buttons) { if (button) ShowWindow(button,preview ? SW_HIDE : SW_SHOWNA); if (!Alive() || revision != pageRevision) return false; }
         for (HWND button : previewButtons) { if (button) ShowWindow(button,preview ? SW_SHOWNA : SW_HIDE); if (!Alive() || revision != pageRevision) return false; }
         if (preview && !PreviewControls()) return false;
+        if (!PageControls()) return false;
         ShowScrollBar(canvas,SB_VERT,preview ? FALSE : TRUE);
         return Alive() && revision == pageRevision;
     }
@@ -186,7 +208,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
     }
     void PreviewClose() noexcept { if (Alive() && previewActive) Notify(callbacks.previewClose); }
     void Empty(snapshot::Status status, std::uint64_t generation) noexcept {
-        RetirePreview(); previewActive = false; browseStatus.fill(0);
+        RetirePreview(); previewActive = false; browseStatus.fill(0); ResetPageNavigation();
         RetireUia(model);
         model->presentation = ++presentationSerial; model->accessible = nullptr;
         ++pageRevision; activationQueued = false;
@@ -194,6 +216,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         model->page.entries.clear(); model->page.status = status; model->page.epoch = {};
         model->generation = generation; model->selected.fill(false); model->bounds.fill({}); model->focus = -1;
         layout.items.clear(); layout.height = 0; layoutItems.clear(); scroll = 0; hover = anchor = -1;
+        if (Alive() && !PageControls()) return;
         if (statusText) { SetWindowTextW(statusText,L""); ShowWindow(statusText,SW_HIDE); }
         if (canvas) { SCROLLINFO info{sizeof(info), SIF_RANGE | SIF_POS, 0, 0, 0, 0, 0}; SetScrollInfo(canvas, SB_VERT, &info, TRUE); }
         CancelDrag();
@@ -237,7 +260,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const int width = client.right;
         const int rowHeight = Scale(34), gap = Scale(6), desired = Scale(72);
         const auto revision = pageRevision; const auto transform = previewRevision;
-        const int buttonCount = previewActive ? 7 : 6;
+        const int buttonCount = previewActive ? 7 : 8;
         const int columns = std::max(1, std::min(buttonCount, (width - gap) / std::max(1, desired + gap)));
         const int rows = (buttonCount + columns - 1) / columns;
         int toolbarHeight = rows * rowHeight + gap * 2;
@@ -306,6 +329,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
     }
     void ChangeVisibility(bool value) noexcept {
         const bool changed = shown != value; const auto previous = visible; shown = value;
+        if (!shown) { ResetPageNavigation(); if (Alive() && !PageControls()) return; }
         if (!shown && previewActive) {
             RetirePreview(); previewActive = false; ++pageRevision; SetWindowTextW(statusText,browseStatus.data());
             const auto revision = pageRevision; CancelDrag(); if (!Alive() || pageRevision != revision || shown != value) return;
@@ -554,6 +578,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         return DefSubclassProc(hwnd, message, wParam, lParam);
     }
     void Command(WORD id) {
+        if (id == PagePreviousControlId || id == PageNextControlId) { PageStep(id == PagePreviousControlId ? -1 : 1); return; }
         if (previewActive) {
             if (id == PreviewBackControlId) PreviewClose();
             else if (id == PreviewPreviousControlId) PreviewStep(-1);
@@ -731,11 +756,13 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             auto retained = static_cast<State*>(context)->shared_from_this();
             try { retained->ScrollTo(top); return S_OK; } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
         };
-        const wchar_t* labels[] = {L"图库", L"列表", L"缩小", L"放大", L"刷新", L"连接设置"};
+        const wchar_t* labels[] = {L"图库", L"列表", L"缩小", L"放大", L"刷新", L"连接设置", L"上一页", L"下一页"};
         for (size_t index = 0; index < state->buttons.size(); ++index) {
             const DWORD buttonStyle = index < 2 ? BS_AUTORADIOBUTTON | BS_PUSHLIKE : BS_PUSHBUTTON;
-            state->buttons[index] = CreateWindowExW(0, L"BUTTON", labels[index], WS_CHILD | WS_VISIBLE | WS_TABSTOP | buttonStyle,
-                0, 0, 1, 1, state->window, reinterpret_cast<HMENU>(100 + index), GetModuleHandleW(nullptr), nullptr);
+            const size_t controlId = index < 6 ? 100 + index : static_cast<size_t>(PagePreviousControlId) + index - 6;
+            const DWORD disabled = index >= 6 ? WS_DISABLED : 0;
+            state->buttons[index] = CreateWindowExW(0, L"BUTTON", labels[index], WS_CHILD | WS_VISIBLE | WS_TABSTOP | buttonStyle | disabled,
+                0, 0, 1, 1, state->window, reinterpret_cast<HMENU>(controlId), GetModuleHandleW(nullptr), nullptr);
             if (!state->buttons[index]) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
             hr = state->Attach(state->buttons[index]); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
         }
@@ -915,9 +942,9 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
     const OwnedState call(state_); const auto& state = call.state;
     if (message.wParam == VK_TAB) {
         if ((GetKeyState(VK_CONTROL) & 0x8000) || (GetKeyState(VK_MENU) & 0x8000)) return false;
-        std::array<HWND,8> order{}; size_t count = 0; order[count++] = state->canvas;
+        std::array<HWND,9> order{}; size_t count = 0; order[count++] = state->canvas;
         if (state->previewActive) { for (HWND button : state->previewButtons) if (IsWindowEnabled(button)) order[count++] = button; }
-        else for (HWND button : state->buttons) order[count++] = button;
+        else for (HWND button : state->buttons) if (IsWindowEnabled(button)) order[count++] = button;
         const auto end = order.begin() + static_cast<ptrdiff_t>(count);
         const auto at = std::find(order.begin(),end,message.hwnd);
         if (at == end) return false;
@@ -945,6 +972,14 @@ void Surface::SetStatusText(const std::wstring& text) noexcept {
     if (!SetWindowTextW(state->statusText,bounded) || !state->Alive()) return;
     try { state->Resize(); }
     catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable,state->model->generation + 1); if (state->Alive()) state->Notify(state->callbacks.viewportChanged); }
+}
+void Surface::SetPageNavigation(bool previousEnabled, bool nextEnabled) noexcept {
+    if (!state_ || !state_->Alive()) return;
+    const OwnedState call(state_); const auto& state = call.state;
+    state->pagePreviousEnabled = state->shown && previousEnabled;
+    state->pageNextEnabled = state->shown && nextEnabled;
+    ++state->pageNavigationRevision;
+    state->PageControls();
 }
 void Surface::SetVisible(bool visible) noexcept {
     if (!state_ || !state_->Alive()) return;
