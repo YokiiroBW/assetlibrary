@@ -10,6 +10,19 @@ namespace AssetLibrary.Preview.Tests;
 public sealed class ImagePreviewServiceTests
 {
     [TestMethod]
+    public async Task QueryDisposesItsDecoderOnceAndOutstandingLeaseCanStillClose()
+    {
+        var scenario = new ImageServiceScenario();
+        var service = scenario.Service();
+        var lease = await service.PrepareAsync(scenario.Source, ImagePreviewVariant.Thumbnail, CancellationToken.None);
+        service.Dispose();
+        service.Dispose();
+        await lease.DisposeAsync();
+        Assert.AreEqual(1, scenario.DecoderDisposals);
+        Assert.AreEqual(1, scenario.Disposed);
+    }
+
+    [TestMethod]
     public async Task CapacityRemainsReservedUntilTheResponseLeaseIsDisposed()
     {
         var scenario = new ImageServiceScenario();
@@ -138,12 +151,14 @@ public sealed class ImagePreviewServiceTests
     }
 }
 
-internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSourceReader, IImageDecoder
+internal sealed class ImageServiceScenario : ILibraryScanTargetQuery, IImageSourceReader, IImageDecoder, IDisposable
 {
     public ImagePreviewSource Source { get; } = new(LibraryId.New(), new AssetObservation(StableEntryId.New(),
         new RelativeAssetPath("image.png"), AssetEntryKind.File, 100, DateTimeOffset.UtcNow));
     public int Opened { get; private set; }
     public int Decoded { get; private set; }
+    public int DecoderDisposals { get; private set; }
+    public void Dispose() => DecoderDisposals++;
     public int Disposed { get; set; }
     public bool Changed { get; set; }
     public bool Offline { get; init; }

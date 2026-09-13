@@ -43,6 +43,13 @@
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/IsolatedImageDecoder.cs" Link="Boundary/IsolatedImageDecoder.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/ImageWorkerTransport.cs" Link="Boundary/ImageWorkerTransport.cs" />
     <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/PngDerivativeValidator.cs" Link="Boundary/PngDerivativeValidator.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImageDecoder.cs" Link="Boundary/UnixSocketImageDecoder.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImageTransport.cs" Link="Boundary/UnixSocketImageTransport.cs" />
+    <Compile Include="../../../services/core-server/Modules/PreviewProvider/Infrastructure/UnixSocketImagePeer.cs" Link="Boundary/UnixSocketImagePeer.cs" />
+    <Compile Include="../../../services/worker-supervisor/ImageSupervisor/ImageCircuitState.cs" Link="Boundary/ImageCircuitState.cs" />
+    <Compile Include="../../../services/worker-supervisor/ImageSupervisor/LocalImageFrames.cs" Link="Boundary/LocalImageFrames.cs" />
+    <Compile Include="../../../services/worker-supervisor/ImagePreview/LinuxContainerStatus.cs" Link="Boundary/LinuxContainerStatus.cs" />
+    <Compile Include="../../../services/worker-supervisor/ImagePreview/LinuxContainerMemory.cs" Link="Boundary/LinuxContainerMemory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Fixtures/skia-rgba8-sbit.png" CopyToOutputDirectory="PreserveNewest" />

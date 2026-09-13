@@ -4,6 +4,7 @@
     <Project Path="services/core-server/Host/AssetLibrary.CoreServer.Host.csproj" />
     <Project Path="services/worker-supervisor/AssetLibrary.WorkerSupervisor.csproj" />
     <Project Path="services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj" />
+    <Project Path="services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj" />
   </Folder>
   <Folder Name="/packages/">
     <Project Path="packages/sdk/assetlink/dotnet/AssetLibrary.AssetLink.csproj" />

@@ -62,10 +62,14 @@ internal sealed class ImagePreviewService(ILibraryScanTargetQuery roots, IImageS
     {
         lock (lifecycle)
         {
+            if (disposed) return;
             disposed = true;
             capacity.Dispose();
             cache.Clear();
         }
+        // Runtime owns the decoder alongside this query. Close cancellable
+        // transports outside the lock, since cancellation can complete a lease.
+        if (decoder is IDisposable ownedDecoder) ownedDecoder.Dispose();
         GC.SuppressFinalize(this);
     }
 
