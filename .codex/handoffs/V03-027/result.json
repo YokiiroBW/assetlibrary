@@ -3,16 +3,19 @@
   "task_id": "V03-027",
   "title": "nas-image-supervisor",
   "milestone": "V0.3",
-  "status": "partial",
+  "status": "ready_for_review",
   "owner": "nas-image-worker-owner",
   "branch": "codex/v03-027-nas-image-supervisor",
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-027",
-  "commit": "8cd23ea39c1d170fe579dcd28f1e81b82bd39855",
+  "commit": "972795a9f8dbec3ae887612b5e4c29b9995bfb7b",
   "changed_files": [
+    ".codex/handoffs/V03-027/nas-validation.json",
     ".codex/handoffs/V03-027/result.json",
     ".codex/handoffs/V03-027/summary.md",
     ".codex/handoffs/V03-027/tests.md",
     ".codex/tasks/V03-027.md",
+    "services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj",
+    "services/worker-supervisor/ImagePreview/ImageInputPolicy.cs",
     "services/worker-supervisor/ImagePreview/ImageWorkerIsolation.cs",
     "services/worker-supervisor/ImagePreview/LinuxContainerIdentity.cs",
     "services/worker-supervisor/ImagePreview/LinuxContainerIsolation.cs",
@@ -38,11 +41,12 @@
     "services/worker-supervisor/ImageSupervisor/SupervisorStartup.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerMetadataTests.cs",
     "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerProtocolTests.cs",
-    "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerStateTests.cs"
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageContainerStateTests.cs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/ImageInputPolicyTests.cs"
   ],
   "changed_contracts": [],
   "tests": {
-    "passed": 34,
+    "passed": 38,
     "failed": 0,
     "skipped": 0,
     "report": "tests.md",
@@ -56,18 +60,27 @@
       "source": "7255b45 integration",
       "image_cases_passed": 20,
       "isolation_resource_probes": 4,
-      "final_source_fault_matrix": "22ac562: six fault cases passed; parent memory/ptrace rejection passed; maximum input failed"
+      "final_source_fault_matrix": "Root22ac562 six fault cases and parent access passed; final c775 image metadata/normal32MiB/isolation passed"
     },
     "windows_immutable_functional": {
       "pointer_sharing_verified": true,
       "baseline_equivalence_cases": 18,
       "scope": "Windows Skia functional only; not Linux confinement or maximum-memory proof"
+    },
+    "final_nas": {
+      "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+      "cases_passed": 10,
+      "isolation_passed": true,
+      "ledger_zero_after_each": true,
+      "children_zero_after_each": true,
+      "owned_resources_remaining": 0,
+      "evidence": "nas-validation.json"
     }
   },
   "risks": [
-    "Valid40MP returnsLimit6; tiny-image31/32MiB returnsUnavailable7. SetImmutable and bounded stage/exit diagnostics await one root-owned AOT/NAS retest; no budget increased.",
-    "Root owns final solution/test csproj/ordinary and AOT locks, package and same-NAS deployment validation.",
-    "Three pre-existing adjacent tests lacked native fixtures/platform capability locally and were not counted as passed."
+    "Core end-to-end, production deployment/rollback and final release gates remain owned by root.",
+    "GC region reserve is128MiB; hard Heap64MiB/AS512MiB/memcg512MiB/CPU3 are unchanged. Non-IDAT PNG payload above4MiB is intentionally typedLimit6, not successful rendering.",
+    "Three pre-existing adjacent tests lacked native fixtures/platform capability locally; they were not counted as passed."
   ],
   "blocked_by": [],
   "recommended_merge_order": 1,
@@ -92,11 +105,12 @@
     "new_major_dependencies": [],
     "contract_changes": [],
     "architecture_tests": [
-      "validate_dotnet_source.py:552 files passed",
+      "validate_dotnet_source.py:553 files passed",
       "verify_repository.py passed",
-      "Both owned projects strict Release build and format passed",
-      "ImageContainer tests34 passed with root-authorized temporary source links, shared csproj restored",
-      "Root22ac562 six NAS fault cases and parent memory/ptrace denial passed; records read-only verified."
+      "Owned projects strict Release build/format passed",
+      "38 pure contract/input/state tests passed; temporary shared test csproj restored",
+      "Root20-image and six-fault NAS matrix passed",
+      "V03-027 final same-code package:10 metadata/normal-input cases+isolation passed, all owned containers/volumes cleaned"
     ],
     "technical_debt": []
   }

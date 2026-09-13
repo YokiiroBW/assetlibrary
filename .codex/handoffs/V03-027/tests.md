@@ -1,25 +1,24 @@
-# V03-027 验证记录
+# V03-027 最终验证记录
 
-Windows本地工具为SDK10.0.111（V01-004固定工具路径），NuGet复用V03-015/.runtime/nuget。Linux/NAS操作由root单一所有者执行；本任务没有远程登录或控制NAS。
+本地：Windows、SDK10.0.111，NuGet复用V03-015/.runtime/nuget；Linux AOT由root builder生成。Root后续授权本任务使用自建V03-027 label临时NAS容器/卷及只读合成corpus，所有操作均独立于production和V03-026 acceptance。
 
-| 检查 | 结果与范围 |
+| 检查 | 结果 |
 |---|---|
-| ImagePreview locked restore | 通过，无锁修改 |
-| ImageSupervisor restore | 通过；本地临时NuGetLockFilePath在其.runtime，正式普通/AOT锁由root生成 |
-| 两项目Release build --no-restore | 最终0警告/0错误 |
-| 两项目format / 新测试format | 最终通过 |
-| ImageContainer定向测试 | 最终34通过、0失败、0跳过（22ac562） |
-| 相邻预览filter排除Windows/Live类 | 54通过、3跳过、0失败（a2b7d8a，含当时31个新增用例，不重复加总） |
-| validate_dotnet_source.py | 552文件通过，无重复块豁免 |
-| verify_repository.py | 通过：M0-009架构/契约/源代码/依赖等快速gate，Alpha发布仍blocked |
-| Root首次NAS AOT probes | isolation/threads/memory passed；CPU137且OOMfalse；对应7255b45集成镜像 |
-| Root首次真实socket图片 | 10文件×2规格=20项通过，peer_uid0；owned_containers_cleaned |
+| ImagePreview locked restore | 通过，无锁改动 |
+| ImageSupervisor restore | 通过；本地临时锁在.runtime，正式锁由root所有 |
+| 两项目Release build / format | 通过，0 warning/0 error |
+| ImageContainer+ImageInputPolicy定向 | 最终38通过、0失败/跳过 |
+| 前期相邻预览filter | 54通过、3跳过、0失败（包含当时31新增用例，不重复加总） |
+| 源策略 / repository gate | 553文件源策略通过；架构/契约快速gate通过 |
+| Immutable功能对照 | Windows pointer-sharing成立，18个PNG字节/尺寸before-after相同；不当作Linux隔离证明 |
+| Root NAS正常图与故障 | 20图、resource probes、父mem/ptrace及6故障case通过；详见root日志 |
+| NAS Region128对照 | pre VmSize424164→227360KiB；40MP两profile成功，真实32MiB像素两profile成功 |
+| 最终正式image | 10个边界/邻接case通过，isolation通过；所有case ledger0/child0/oom0/failcnt0 |
+| 最终资源查验 | V03-027 containers=[]、volumes=[] |
 
-3个跳过项为 `RealHostSourceChildStreamsVerifiedBytesAndReleasesTheOriginalHandle`、`RealPostgresRoundTripPreservesUnchangedImageAdmission`、`LeafSymbolicLinkIsRejected`，缺少原生source worker/真实PostgreSQL夹具/Windows链接能力。它们不算通过，也不替代root的真实平台链路。
+3个旧条件缺失跳过：RealHostSourceChildStreamsVerifiedBytesAndReleasesTheOriginalHandle、RealPostgresRoundTripPreservesUnchangedImageAdmission、LeafSymbolicLinkIsRejected。未把缺少原生source worker、PG夹具或Windows链接能力记作通过。
 
-本地34用例覆盖：跨重启3次未完成预算、损坏/截断/未知计数拒绝；自身deadline与已观测client/operator取消的预算区别；Uid/Gid真实/有效/保存/fs字段、effective/permitted/inheritable capabilities与NNP负控；实际controller路径解析；固定24B帧、32MiB超限拒绝、未知规格/像素字段、source精确转送不消费监控字节、失败禁止body、512/1600规格上限。
-
-真实命令（使用精确dotnet/python可执行）：
+## 本地入口
 
 ```powershell
 dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj --locked-mode --packages C:/YOKI/Codex/AssetLibrary-worktrees/V03-015/.runtime/nuget
@@ -28,28 +27,25 @@ dotnet build services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.W
 dotnet build services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj -c Release --no-restore
 dotnet format services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj --verify-no-changes --no-restore
 dotnet format services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj --verify-no-changes --no-restore
-dotnet test tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj -c Release --no-restore --filter FullyQualifiedName~ImageContainer --logger "trx;LogFileName=container-pure-final.trx" --results-directory .runtime/v03-027-validation
-dotnet test tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj -c Release --no-build --no-restore --filter "FullyQualifiedName!~Windows&FullyQualifiedName!~Live" --logger "trx;LogFileName=preview-offline.trx" --results-directory .runtime/v03-027-validation
+dotnet test tests/dotnet/AssetLibrary.Preview.Tests/AssetLibrary.Preview.Tests.csproj -c Release --no-restore --filter "FullyQualifiedName~ImageInputPolicyTests|FullyQualifiedName~ImageContainer" --logger "trx;LogFileName=container-input-final.trx" --results-directory .runtime/v03-027-validation
 python -I -B scripts/validate_dotnet_source.py
 python -I -B scripts/verify_repository.py
 ```
 
-Root授权本地临时将四个BCL源链接进预览测试项目：ImageCircuitState、LocalImageFrames、LinuxContainerStatus、LinuxContainerMemory。测试结束已用保存的原始字节恢复csproj；root真正集成入口另有相同链接，不提交跨owner项目改动。
+Root批准本地临时链接ImageCircuitState、LocalImageFrames、LinuxContainerStatus、LinuxContainerMemory、ImageInputPolicy五个BCL源到既有Preview.Tests；每次结束均用保存的原始字节恢复csproj。Root真实同源项目已接线；本任务没有提交共享csproj或锁。
 
-最终源码审查后将deadline分类与新增父访问探针集中在22ac562，随后重跑定向34用例与严格构建。正常首次迭代中的代码复杂度/平台注解、CancellationToken参数顺序及源码写入转义错误均修正，未禁用分析器。初版三cap方案被root发现线程级capset问题后废弃，当前四cap监督/全线程cap0子进程才是最终方案。
+38用例覆盖预记账跨重启3次熔断、坏状态拒绝、deadline与已观测client/operator取消区别、Uid/Gid含fsuid和cap/NNP负控、controller映射、固定帧/精确source转送、错误零body及闭合规格，并新增4MiB可通过预检查、+1两类非IDAT拒绝、大IDAT不误套metadata预算。CRC常量独立生成；预检查单测不等同于完整Skia出图。
 
-Root22ac562同码新增证据（本任务已只读核验）：
+## NAS证据
 
-- `.runtime/second-native-isolation.log`：parent_memory_denied=true、parent_ptrace_error=1，全部isolation条件通过。
-- `.runtime/nas-fault-cases-second.log`：3种正常取消均children0/failures0；child上传期崩溃计数1；自身deadline8.2877秒计数2；PID1死亡重启计数3、Ready7/new_children0；fault_cases_passed及owned_fault_resources_cleaned。
-- `.runtime/nas-maximum-cases.log`：40MP+32MiB返回Limit6，未通过期望成功。
-- `.runtime/nas-boundary-controls.log`：40MP小编码Limit6；1×1+32MiB Unavailable7；资源已清理。
-- `.runtime/nas-31m-control.log`：1×1+31MiB Unavailable7，未通过。
+本任务脚本与完整日志在 `.runtime/v03-027-validation`；摘要和日志强hash保存在nas-validation.json。正式Supervisor PID1、UID降权和全部硬限始终使用原实现；没有诊断PID1替身或提高CPU/Heap/AS/memcg。
 
-以上路径相对root V03-026 worktree，不是本任务执行NAS测试。最大边界仍有真实失败，不能合并成“全平台全通过”。
+- nas-baseline-ticks.log：third image247e...，40MP小编码Limit6/pre VM424164KiB；31MiB padding CPU峰2.97s、wall3.57s、result/exit137，memcg约98.7MB且无OOM。
+- nas-region128-comparison.log：fourth imagefc8a...，VM减少约192MiB。40MP p1为1600×1000，CPU观测0.27s；p0为512×320。31MiB padding仍CPU2.98s，证实CPU和AS是两件事。
+- nas-region128-pixel32m.log：7600×1092的exact32MiB像素PNG核SHA后p0/p1成功，CPU观测0.08/0.19s。
+- nas-final-metadata.log：正式image76b3...，4MiB-1/=成功1×1（CPU峰0.89/0.90s）；4MiB+1、31M、32M单块均Limit6且ledger0；8个≤4MiB块组成exact32MiB成功1×1，CPU峰1.06s/wall1.75s；32MiB像素p0/p1成功（CPU0.09/0.18s）；两次邻接普通图正常。10case均child0/ledger0/OOM0/failcnt0，最终isolation全部passed。
+- nas-cleanup-check.log：独立查询所有V03-027 label容器/卷均为空。
 
-## 0063769 / 8cd23ea
+Root已有日志位于V03-026/.runtime：first-native-probe.log、nas-first-cases.log、second-native-isolation.log、nas-fault-cases-second.log。早取消/Ready后/partial均计数0且无child；上传期杀child计数1；保持连接并停住child导致自身8.29s超时计数2；杀PID1重启后计数3、Ready7、无新child。父mem拒绝与ptrace EPERM均通过。
 
-最小SetImmutable两行优化及固定stage+退出码诊断均完成strict build/format/source-policy验证。Windows临时functional probe（`.runtime/immutable-validation/Probe.csproj`，未提交项目或锁）以原始22ac562 StaticImageDecoder为baseline：mutable image与bitmap像素指针不同，immutable image指针相同；18个before/after PNG逐字节和尺寸一致。输出为 `IMMUTABLE_SHARE_POINTER_OK; BASELINE_EQUIVALENCE_CASES=18; WINDOWS_FUNCTIONAL_ONLY`。
-
-没有重跑未变化的34纯单元用例或相邻预览套件。Root将0063769+8cd23ea一次AOT复验最大边界；当前GC64MiB、AS512MiB、memcg512MiB及现有Job限制均未变。源码现暂停，待实际诊断反馈；最大输入+1、最终Core同NAS闭环和部署仍由root验收。不以新cgroup为零冒充旧资源回收，不安排G4。
+RegionRange只减少虚拟地址预留，GC64MiB、AS/memcg512MiB、CPU3秒、NPROC1不变。超大单块PNG metadata现在按已批准资源规则拒绝，不把它写成成功出图。Core端到端和最终production部署由root继续，不用这些模块结果关闭整个V0.3/G4/其他客户端门禁。

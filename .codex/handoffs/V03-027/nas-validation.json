@@ -1,0 +1,496 @@
+{
+  "implementation_commit": "972795a9f8dbec3ae887612b5e4c29b9995bfb7b",
+  "scope": "V03-027-owned temporary NAS containers/volumes; corpus read-only; production and V03-026 acceptance untouched",
+  "logs": [
+    {
+      "path": ".runtime/v03-027-validation/nas-baseline-ticks.log",
+      "sha256": "92f2178125da5c8a10c04fc8a87bb67e950976573bb2d75ab0b4a9c26fd60fc3",
+      "observations": [
+        {
+          "case": "maximum-40mp-small.png",
+          "profile": 1,
+          "image": "sha256:247e18f40b2d891da9852655f3076dca3d2480e479d0e3139d4a55c5e8d32eaa",
+          "response": [
+            826888257,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            424164
+          ],
+          "sample_count": 0,
+          "observed_cpu_peak_seconds": null,
+          "observed_vm_peak_kib": null,
+          "elapsed_seconds": 0.469729526899755,
+          "memcg_peak_bytes": 19595264,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "small-31m.png",
+          "profile": 1,
+          "image": "sha256:247e18f40b2d891da9852655f3076dca3d2480e479d0e3139d4a55c5e8d32eaa",
+          "response": [
+            826888257,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            424164
+          ],
+          "sample_count": 55,
+          "observed_cpu_peak_seconds": 2.97,
+          "observed_vm_peak_kib": 469884,
+          "elapsed_seconds": 3.5687983261886984,
+          "memcg_peak_bytes": 98709504,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        }
+      ]
+    },
+    {
+      "path": ".runtime/v03-027-validation/nas-region128-comparison.log",
+      "sha256": "c672404d36090857833f33694197cd61e1c2f0d1693d73104531e26864912a44",
+      "observations": [
+        {
+          "case": "maximum-40mp-small.png",
+          "profile": 1,
+          "image": "sha256:fc8a8c5d98bff87382be96304d7fda1517ce4984f8dc497d0349d1595afe0756",
+          "response": [
+            826888257,
+            3,
+            1,
+            8606,
+            1600,
+            1000
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 6,
+          "observed_cpu_peak_seconds": 0.27,
+          "observed_vm_peak_kib": 390448,
+          "elapsed_seconds": 0.7969861999154091,
+          "memcg_peak_bytes": 186605568,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-40mp-small.png",
+          "profile": 0,
+          "image": "sha256:fc8a8c5d98bff87382be96304d7fda1517ce4984f8dc497d0349d1595afe0756",
+          "response": [
+            826888257,
+            3,
+            0,
+            1440,
+            512,
+            320
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 3,
+          "observed_cpu_peak_seconds": 0.14,
+          "observed_vm_peak_kib": 383776,
+          "elapsed_seconds": 0.6762750488705933,
+          "memcg_peak_bytes": 180690944,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "small-31m.png",
+          "profile": 1,
+          "image": "sha256:fc8a8c5d98bff87382be96304d7fda1517ce4984f8dc497d0349d1595afe0756",
+          "response": [
+            826888257,
+            7,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 58,
+          "observed_cpu_peak_seconds": 2.98,
+          "observed_vm_peak_kib": 273672,
+          "elapsed_seconds": 3.5431484659202397,
+          "memcg_peak_bytes": 99655680,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        }
+      ]
+    },
+    {
+      "path": ".runtime/v03-027-validation/nas-region128-pixel32m.log",
+      "sha256": "cad989fd5f0c3a618accfbacd2e40da8411c85602bb1c913e1c6db8eb31899df",
+      "observations": [
+        {
+          "case": "maximum-32m-pixel-data.png",
+          "profile": 0,
+          "image": "sha256:fc8a8c5d98bff87382be96304d7fda1517ce4984f8dc497d0349d1595afe0756",
+          "response": [
+            826888257,
+            3,
+            0,
+            148506,
+            512,
+            73
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 3,
+          "observed_cpu_peak_seconds": 0.08,
+          "observed_vm_peak_kib": 292552,
+          "elapsed_seconds": 0.6699675410054624,
+          "memcg_peak_bytes": 121233408,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-32m-pixel-data.png",
+          "profile": 1,
+          "image": "sha256:fc8a8c5d98bff87382be96304d7fda1517ce4984f8dc497d0349d1595afe0756",
+          "response": [
+            826888257,
+            3,
+            1,
+            1455659,
+            1600,
+            229
+          ],
+          "png_sha256": null,
+          "failures": null,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 5,
+          "observed_cpu_peak_seconds": 0.19,
+          "observed_vm_peak_kib": 295272,
+          "elapsed_seconds": 0.7716471450403333,
+          "memcg_peak_bytes": 125100032,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        }
+      ]
+    },
+    {
+      "path": ".runtime/v03-027-validation/nas-final-metadata.log",
+      "sha256": "c1c26fe466789be4ea09a94e14215f2feea55a88abbd5f6e2bd7589e6b7df43c",
+      "observations": [
+        {
+          "case": "below-4m-non-idat.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            99,
+            1,
+            1
+          ],
+          "png_sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 18,
+          "observed_cpu_peak_seconds": 0.89,
+          "observed_vm_peak_kib": 239640,
+          "elapsed_seconds": 1.4419450741261244,
+          "memcg_peak_bytes": 37330944,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-4m-non-idat.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            99,
+            1,
+            1
+          ],
+          "png_sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 18,
+          "observed_cpu_peak_seconds": 0.9,
+          "observed_vm_peak_kib": 239648,
+          "elapsed_seconds": 1.5484381169080734,
+          "memcg_peak_bytes": 37949440,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "oversized-4m-non-idat.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 0,
+          "observed_cpu_peak_seconds": null,
+          "observed_vm_peak_kib": null,
+          "elapsed_seconds": 0.6395340459421277,
+          "memcg_peak_bytes": 37949440,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "landscape.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            1677,
+            512,
+            341
+          ],
+          "png_sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 0,
+          "observed_cpu_peak_seconds": null,
+          "observed_vm_peak_kib": null,
+          "elapsed_seconds": 0.5764282830059528,
+          "memcg_peak_bytes": 37949440,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "small-31m.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 1,
+          "observed_cpu_peak_seconds": 0.01,
+          "observed_vm_peak_kib": 227360,
+          "elapsed_seconds": 0.6406824870500714,
+          "memcg_peak_bytes": 57630720,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "small-32m.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          "png_sha256": null,
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 2,
+          "observed_cpu_peak_seconds": 0.03,
+          "observed_vm_peak_kib": 227360,
+          "elapsed_seconds": 0.7404854029882699,
+          "memcg_peak_bytes": 59207680,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-32m-multiple-metadata.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            99,
+            1,
+            1
+          ],
+          "png_sha256": "1f1473309f785b4a4b0bc18ed8afc259eb9dc2bc9c8fe36edd0f6d99d8884a75",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 20,
+          "observed_cpu_peak_seconds": 1.06,
+          "observed_vm_peak_kib": 268328,
+          "elapsed_seconds": 1.7511930151376873,
+          "memcg_peak_bytes": 102006784,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-32m-pixel-data.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            148506,
+            512,
+            73
+          ],
+          "png_sha256": "b52095e94ab5de6b5931269eafa5036889dc69982f52ab0ddf6680b28c565340",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 3,
+          "observed_cpu_peak_seconds": 0.09,
+          "observed_vm_peak_kib": 292552,
+          "elapsed_seconds": 0.7594092690851539,
+          "memcg_peak_bytes": 128335872,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "maximum-32m-pixel-data.png",
+          "profile": 1,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            1,
+            1455659,
+            1600,
+            229
+          ],
+          "png_sha256": "81a0742e0b1dac1c5affcece312cd1a3e0b4e7fa4a5e73e9fcf08af2a8b113ba",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 5,
+          "observed_cpu_peak_seconds": 0.18,
+          "observed_vm_peak_kib": 295140,
+          "elapsed_seconds": 0.8743600591551512,
+          "memcg_peak_bytes": 132800512,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "case": "landscape.png",
+          "profile": 0,
+          "image": "sha256:76b3ecd8512a8d0e173166208e438e7c89124cdbadaca8a5d7b2fd6e47900c76",
+          "response": [
+            826888257,
+            3,
+            0,
+            1677,
+            512,
+            341
+          ],
+          "png_sha256": "f67fe31590b54d36a47870fbdddf748bbbdb4c4155196aab25568254f8443057",
+          "failures": 0,
+          "children_after": [],
+          "pre_vm_kib": [
+            227360
+          ],
+          "sample_count": 0,
+          "observed_cpu_peak_seconds": null,
+          "observed_vm_peak_kib": null,
+          "elapsed_seconds": 0.6581764768343419,
+          "memcg_peak_bytes": 132800512,
+          "memcg_failures": 0,
+          "oom_control": "oom_kill_disable 0\nunder_oom 0\noom_kill 0"
+        },
+        {
+          "final_isolation": {
+            "probe": "isolation",
+            "passed": true,
+            "initial_ring_error": 0,
+            "ring_error": 12,
+            "fork_error": 11,
+            "parent_signal_error": 1,
+            "state_denied": true,
+            "decoder_identity": true,
+            "parent_memory_denied": true,
+            "parent_ptrace_error": 1
+          }
+        }
+      ]
+    },
+    {
+      "path": ".runtime/v03-027-validation/nas-cleanup-check.log",
+      "sha256": "cee4be62fed5b125c4610d21ec926fc0b06b6c12505d96ee2f18e786e84db5fb",
+      "observations": [
+        {
+          "owned_containers_remaining": [],
+          "owned_volumes_remaining": []
+        }
+      ]
+    }
+  ]
+}
