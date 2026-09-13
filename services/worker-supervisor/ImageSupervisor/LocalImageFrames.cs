@@ -41,8 +41,10 @@ internal static class LocalImageFrames
         var buffer = new byte[16384];
         while (count > 0)
         {
-            var read = await from.ReadAsync(buffer.AsMemory(0, Math.Min(count, buffer.Length)), token).ConfigureAwait(false);
-            if (read == 0) throw new EndOfStreamException();
+            int read;
+            try { read = await from.ReadAsync(buffer.AsMemory(0, Math.Min(count, buffer.Length)), token).ConfigureAwait(false); }
+            catch (IOException) { throw new ImageClientRejected(); }
+            if (read == 0) throw new ImageClientRejected();
             await to.WriteAsync(buffer.AsMemory(0, read), token).ConfigureAwait(false);
             count -= read;
         }
@@ -50,3 +52,5 @@ internal static class LocalImageFrames
     internal static Task WriteEmptyAsync(Stream stream, ImageWorkerStatus status, CancellationToken token) =>
         stream.WriteAsync(ImageWorkerProtocol.Header((int)status, 0, 0), token).AsTask();
 }
+
+internal sealed class ImageClientRejected : IOException;

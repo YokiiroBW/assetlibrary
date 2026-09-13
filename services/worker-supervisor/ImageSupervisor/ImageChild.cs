@@ -32,7 +32,17 @@ internal sealed class ImageChild : IDisposable
         // A late native startup cannot be abandoned while serving new requests. PID1 exits on this failure.
         var launch = Task.Run(() => Start(start), CancellationToken.None);
         try { return await launch.WaitAsync(token).ConfigureAwait(false); }
-        catch (OperationCanceledException) { throw new ImageNamespaceFailure("image_startup_timeout"); }
+        catch (OperationCanceledException)
+        {
+            try
+            {
+                using var late = await launch.WaitAsync(TimeSpan.FromSeconds(2), CancellationToken.None).ConfigureAwait(false);
+                await late.StopAsync().ConfigureAwait(false);
+            }
+            catch (TimeoutException) { throw new ImageNamespaceFailure("image_startup_timeout"); }
+            catch (Exception failure) when (failure is IOException or System.ComponentModel.Win32Exception) { /* Native creation failed; there is no surviving child. */ }
+            throw new OperationCanceledException(token);
+        }
     }
     private static ImageChild Start(ProcessStartInfo start)
     {

@@ -22,8 +22,10 @@ internal sealed class ImageSocketServer(Socket listener, ImageCircuitLedger circ
                 if (!LinuxImagePeer.IsCore(client)) { client.Dispose(); continue; }
                 requests.RemoveAll(task => task.IsCompleted);
                 // At most one decoder and one prior bounded publication; busy clients never form a task queue.
-                if (requests.Count == 2 || circuit.Open || Interlocked.CompareExchange(ref active, 1, 0) != 0)
+                if (requests.Count == 2 || Interlocked.CompareExchange(ref active, 1, 0) != 0)
                 { await RejectAsync(client, stopping.Token).ConfigureAwait(false); continue; }
+                if (circuit.Open)
+                { Interlocked.Exchange(ref active, 0); await RejectAsync(client, stopping.Token).ConfigureAwait(false); continue; }
                 requests.Add(Task.Run(() => ServeAsync(client, stopping), CancellationToken.None));
             }
         }
@@ -37,7 +39,7 @@ internal sealed class ImageSocketServer(Socket listener, ImageCircuitLedger circ
         using var client = new NetworkStream(socket, ownsSocket: true);
         var released = 0;
         void Release() { if (Interlocked.Exchange(ref released, 1) == 0) Interlocked.Exchange(ref active, 0); }
-        try { await new ImageExchange(circuit, Release).RunAsync(client, stopping.Token).ConfigureAwait(false); }
+        try { await new ImageExchange(circuit, Release, socket).RunAsync(client, stopping.Token).ConfigureAwait(false); }
         catch (ImageStateFailure)
         {
             stateFailed = true;

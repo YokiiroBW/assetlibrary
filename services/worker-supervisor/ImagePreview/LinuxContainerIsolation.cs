@@ -56,7 +56,7 @@ internal static class LinuxContainerIsolation
     {
         [DllImport("libc", EntryPoint = "syscall", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern nint Call(nint number, nint a, nint b, nint c);
+        internal static extern nint Call(nint number, nint a, nint b, nint c, nint d = 0, nint e = 0, nint f = 0);
         [DllImport("libc", EntryPoint = "_exit")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern void Exit(int code);

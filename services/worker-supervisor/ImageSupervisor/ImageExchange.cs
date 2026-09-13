@@ -1,10 +1,11 @@
 using System.Runtime.Versioning;
+using System.Net.Sockets;
 using AssetLibrary.ImagePreview.Protocol;
 
 namespace AssetLibrary.ImageSupervisor;
 
 [SupportedOSPlatform("linux")]
-internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release)
+internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release, Socket socket)
 {
     internal async Task RunAsync(Stream client, CancellationToken stopping)
     {
@@ -13,17 +14,24 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release)
         ImageReply reply;
         try { circuit.Begin(); }
         catch (IOException) { throw new ImageStateFailure(); }
-        using var child = await ImageChild.StartAsync("--container-decoder", deadline.Token).ConfigureAwait(false);
         using var monitor = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
-        Task disconnected = Task.CompletedTask;
+        using var early = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         using var diagnostics = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
-        var diagnostic = DrainErrorsAsync(child.Errors, diagnostics.Token);
+        var disconnected = WatchEarlyDisconnectAsync(socket, deadline, early.Token);
+        Task diagnostic = Task.CompletedTask;
+        ImageChild? child = null;
         var infrastructureFailed = true;
         try
         {
+            deadline.Token.ThrowIfCancellationRequested();
+            child = await ImageChild.StartAsync("--container-decoder", deadline.Token).ConfigureAwait(false);
+            diagnostic = DrainErrorsAsync(child.Errors, diagnostics.Token);
             var ready = await LocalImageFrames.ReadAsync(child.Output, deadline.Token).ConfigureAwait(false);
             if (!LocalImageFrames.Empty(ready, ImageWorkerStatus.Ready)) throw new InvalidDataException("Image child is not ready.");
-            await LocalImageFrames.WriteEmptyAsync(client, ImageWorkerStatus.Ready, deadline.Token).ConfigureAwait(false);
+            await early.CancelAsync().ConfigureAwait(false); await disconnected.ConfigureAwait(false);
+            disconnected = Task.CompletedTask;
+            try { await LocalImageFrames.WriteEmptyAsync(client, ImageWorkerStatus.Ready, deadline.Token).ConfigureAwait(false); }
+            catch (IOException) { throw new ImageClientRejected(); }
             var request = await ForwardInputAsync(client, child, deadline.Token).ConfigureAwait(false);
             disconnected = WatchDisconnectAsync(client, deadline, monitor.Token);
             reply = await ReadResultAsync(child, request.Profile, deadline.Token).ConfigureAwait(false);
@@ -32,12 +40,12 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release)
         }
         catch (OperationCanceledException) { reply = ImageReply.Unavailable; infrastructureFailed = false; }
         catch (ImageClientRejected) { reply = ImageReply.Unavailable; infrastructureFailed = false; }
-        catch (Exception failure) when (failure is IOException or InvalidDataException) { reply = ImageReply.Unavailable; }
+        catch (Exception failure) when (failure is IOException or InvalidDataException or System.ComponentModel.Win32Exception) { reply = ImageReply.Unavailable; }
         finally
         {
-            await monitor.CancelAsync().ConfigureAwait(false);
+            await early.CancelAsync().ConfigureAwait(false); await monitor.CancelAsync().ConfigureAwait(false);
             await disconnected.ConfigureAwait(false);
-            await child.StopAsync().ConfigureAwait(false);
+            if (child is not null) { await child.StopAsync().ConfigureAwait(false); child.Dispose(); }
             await diagnostics.CancelAsync().ConfigureAwait(false);
             try { await diagnostic.ConfigureAwait(false); }
             catch (Exception failure) when (failure is IOException or InvalidDataException or OperationCanceledException) { /* Already bounded, terminated and reaped. */ }
@@ -56,16 +64,17 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release)
     }
     private static async Task<ImageWorkerHeader> ForwardInputAsync(Stream client, ImageChild child, CancellationToken token)
     {
+        ImageWorkerHeader request;
         try
         {
-            var request = await LocalImageFrames.ReadAsync(client, token).ConfigureAwait(false);
+            request = await LocalImageFrames.ReadAsync(client, token).ConfigureAwait(false);
             LocalImageFrames.RequireRequest(request);
-            await child.Input.WriteAsync(ImageWorkerProtocol.Header(request.Status, request.Profile, request.Length), token).ConfigureAwait(false);
-            await LocalImageFrames.CopyExactlyAsync(client, child.Input, request.Length, token).ConfigureAwait(false);
-            await child.Input.FlushAsync(token).ConfigureAwait(false); child.Input.Dispose();
-            return request;
         }
         catch (Exception failure) when (failure is IOException or InvalidDataException) { throw new ImageClientRejected(); }
+        await child.Input.WriteAsync(ImageWorkerProtocol.Header(request.Status, request.Profile, request.Length), token).ConfigureAwait(false);
+        await LocalImageFrames.CopyExactlyAsync(client, child.Input, request.Length, token).ConfigureAwait(false);
+        await child.Input.FlushAsync(token).ConfigureAwait(false); child.Input.Dispose();
+        return request;
     }
 
     private static async Task<ImageReply> ReadResultAsync(ImageChild child, int profile, CancellationToken token)
@@ -83,10 +92,20 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release)
         if (child.ExitCode != (frame.Status == (int)ImageWorkerStatus.Success ? 0 : 1)) throw new InvalidDataException("Child exit disagrees with response.");
         return new ImageReply(frame, png);
     }
+    private static async Task WatchEarlyDisconnectAsync(Socket client, CancellationTokenSource operation, CancellationToken token)
+    {
+        // The client must wait for Ready. Peek observes early EOF without consuming the later request header.
+        try { _ = await client.ReceiveAsync(new byte[1], SocketFlags.Peek, token).ConfigureAwait(false); }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { return; }
+        catch (SocketException) when (token.IsCancellationRequested) { return; }
+        catch (SocketException) { /* Early connection loss cancels startup and follows the same owned reap path. */ }
+        await operation.CancelAsync().ConfigureAwait(false);
+    }
     private static async Task WatchDisconnectAsync(Stream client, CancellationTokenSource operation, CancellationToken monitor)
     {
         try { _ = await client.ReadAsync(new byte[1], monitor).ConfigureAwait(false); }
         catch (OperationCanceledException) when (monitor.IsCancellationRequested) { return; }
+        catch (IOException) when (monitor.IsCancellationRequested) { return; }
         catch (IOException) { /* Socket failure is cancellation, never an additional request. */ }
         await operation.CancelAsync().ConfigureAwait(false);
     }
@@ -106,7 +125,5 @@ internal sealed record ImageReply(ImageWorkerHeader Frame, byte[] Bytes)
 {
     internal static ImageReply Unavailable => new(new ImageWorkerHeader(7, 0, 0, 0, 0), []);
 }
-
-internal sealed class ImageClientRejected : IOException;
 
 internal sealed class ImageStateFailure : IOException;

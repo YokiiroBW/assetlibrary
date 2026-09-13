@@ -2,19 +2,20 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using AssetLibrary.ImageSupervisor;
 
-if (!OperatingSystem.IsLinux() || RuntimeFeature.IsDynamicCodeSupported || RuntimeInformation.ProcessArchitecture != Architecture.X64) return 2;
+if (!OperatingSystem.IsLinux()) return 2;
 if (args is ["--health"])
 {
-    try { return SupervisorStartup.Healthy() ? 0 : 1; }
+    try { return !RuntimeFeature.IsDynamicCodeSupported && RuntimeInformation.ProcessArchitecture == Architecture.X64 && SupervisorStartup.Healthy() ? 0 : 1; }
     catch (Exception failure) when (failure is IOException or InvalidDataException or UnauthorizedAccessException) { return 1; }
 }
-if (args.Length != 0 && (args.Length != 1 || !SupervisorModes.IsProbe(args[0]))) return 2;
 using var stopping = new CancellationTokenSource();
 using var operatorStop = new CancellationTokenSource();
 using var interrupt = PosixSignalRegistration.Create(PosixSignal.SIGINT, context => { context.Cancel = true; operatorStop.Cancel(); stopping.Cancel(); });
 using var terminate = PosixSignalRegistration.Create(PosixSignal.SIGTERM, context => { context.Cancel = true; operatorStop.Cancel(); stopping.Cancel(); });
 try
 {
+    if (RuntimeFeature.IsDynamicCodeSupported || RuntimeInformation.ProcessArchitecture != Architecture.X64
+        || (args.Length != 0 && (args.Length != 1 || !SupervisorModes.IsProbe(args[0])))) throw new InvalidDataException("Invalid supervisor invocation.");
     if (!LinuxSupervisorFiles.DirectoryIsPrivate()) throw new IOException("Supervisor directory rejected.");
     using var circuit = new ImageCircuitLedger();
     using var listener = SupervisorStartup.Bind();
