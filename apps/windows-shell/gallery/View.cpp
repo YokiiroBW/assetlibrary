@@ -5,6 +5,7 @@
 #include <shlwapi.h>
 #include <shellapi.h>
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cstring>
 #include <new>
@@ -67,6 +68,12 @@ class View final:public IShellView,public IFolderView {
     IShellBrowser* browser_=nullptr;
     PIDLIST_ABSOLUTE absolute_=nullptr,root_=nullptr;
     snapshot::Location location_;
+    static constexpr UINT MaxPageLocations=64;
+    std::array<snapshot::Location,MaxPageLocations> pageLocations_{};
+    snapshot::Location pageTarget_{};
+    UINT pageCount_=0,pageIndex_=0,targetPage_=0;
+    bool targetPending_=false,pageWithoutFiles_=false,crossPagePreview_=false;
+    int pendingPreviewDirection_=0;
     Requests requests_;
     PreferenceStore preferences_;
     Surface* surface_=nullptr;
@@ -90,6 +97,39 @@ class View final:public IShellView,public IFolderView {
     }
     bool Live(HWND window,std::uint64_t generation)const noexcept {return window&&Window()==window&&IsWindow(window)&&generation_==generation&&!destroying_;}
     void ReleaseSlot() noexcept {if(slot_){slot_=false;loading::ReleaseViewSlot();}}
+    void ResetPages() noexcept {
+        pageLocations_.fill({});pageTarget_={};pageCount_=pageIndex_=targetPage_=0;
+        targetPending_=false;pageWithoutFiles_=false;crossPagePreview_=false;pendingPreviewDirection_=0;
+    }
+    enum class NextPageState {Absent,Available,Cycle,Capacity};
+    NextPageState NextPage(snapshot::Location& target)const noexcept {
+        target={};if(page_.status!=snapshot::Status::Ready||!pageCount_)return NextPageState::Absent;
+        bool found=false;
+        for(const auto& entry:page_.entries)if(entry.kind==snapshot::Kind::NextPage){
+            if(found||snapshot::Zero(entry.node)||entry.epoch!=page_.epoch)return NextPageState::Cycle;
+            found=true;target={entry.epoch,entry.node};
+        }
+        if(!found)return NextPageState::Absent;
+        for(UINT at=0;at<=pageIndex_;++at)if(pageLocations_[at].epoch==target.epoch&&pageLocations_[at].node==target.node)return NextPageState::Cycle;
+        return pageIndex_+1>=MaxPageLocations?NextPageState::Capacity:NextPageState::Available;
+    }
+    bool CanStepPage(int delta)const noexcept {
+        if(retired_||targetPending_||page_.status!=snapshot::Status::Ready||!pageCount_)return false;
+        if(delta==-1)return pageIndex_>0;
+        snapshot::Location target;return delta==1&&NextPage(target)==NextPageState::Available;
+    }
+    void PageButtons() noexcept {
+        if(surface_)surface_->SetPageNavigation(previewIndex_<0&&CanStepPage(-1),previewIndex_<0&&CanStepPage(1));
+    }
+    void StepPage(int delta,int previewDirection=0) noexcept {
+        Reference<View> invocation(this);
+        if(!surface_||!IsVisibleIntent()||(previewDirection==0&&previewIndex_>=0)||!CanStepPage(delta))return;
+        snapshot::Location target;
+        if(delta<0)target=pageLocations_[pageIndex_-1];else if(NextPage(target)!=NextPageState::Available)return;
+        pageTarget_=target;targetPage_=delta<0?pageIndex_-1:pageIndex_+1;targetPending_=true;
+        pendingPreviewDirection_=previewDirection;pageWithoutFiles_=false;
+        Refresh();
+    }
     void UpdateStatus(bool clear=false) noexcept {
         ++statusRevision_;if(statusUpdating_||!browser_)return;
         statusUpdating_=true;struct Updating {bool& value;~Updating(){value=false;}} updating{statusUpdating_};
@@ -109,6 +149,11 @@ class View final:public IShellView,public IFolderView {
                             if(index<page_.entries.size()&&page_.entries[index].kind!=snapshot::Kind::NextPage&&page_.entries[index].kind!=snapshot::Kind::StatusRow)++selected;}
                         text=L"当前页 "+std::to_wstring(count)+L" 项，已选 "+std::to_wstring(selected)+L" 项";
                         if(more)text+=L"（还有下一页）";
+                        if(pageIndex_)text+=L" · 第 "+std::to_wstring(pageIndex_+1)+L" 页";
+                        snapshot::Location next;const auto navigation=NextPage(next);
+                        if(navigation==NextPageState::Cycle)text+=L" · 分页位置重复，请重新打开目录";
+                        if(navigation==NextPageState::Capacity)text+=L" · 已达64页浏览上限，请重新打开目录";
+                        if(pageWithoutFiles_)text+=L" · 此页没有可预览的文件，请使用翻页按钮继续浏览";
                         if(preferenceSaveFailed_)text+=L" · 浏览设置未保存";
                     }
                 }
@@ -133,13 +178,13 @@ class View final:public IShellView,public IFolderView {
         return -1;
     }
     std::uint64_t Clear(snapshot::Status status) noexcept {
-        previewIndex_=-1;previewSerial_=Generation();
+        previewIndex_=-1;previewSerial_=Generation();crossPagePreview_=false;
         const auto generation=Generation();generation_=generation;requests_.Cancel(generation);page_={};page_.status=status;
         if(surface_)surface_->Clear(status,generation);if(generation_==generation)UpdateStatus();return generation;
     }
     void Root() noexcept {
         Reference<View> invocation(this);const auto window=Window();
-        retired_=true;const auto generation=Clear(snapshot::Status::Expired);
+        retired_=true;ResetPages();const auto generation=Clear(snapshot::Status::Expired);
         Reference<IShellBrowser> browser(browser_);
         if(browser.value&&Live(window,generation))browser.value->BrowseObject(root_,SBSP_ABSOLUTE|SBSP_SAMEBROWSER);
     }
@@ -147,7 +192,8 @@ class View final:public IShellView,public IFolderView {
         const auto window=Window();const auto generation=generation_;
         if(!Live(window,generation)||retired_)return;
         Reference<IShellFolder2> folder(folder_);
-        if(page.status==snapshot::Status::AccessDenied||page.status==snapshot::Status::Expired){Root();return;}
+        if(page.status==snapshot::Status::AccessDenied||page.status==snapshot::Status::Expired||
+            (!snapshot::Zero(page.epoch)&&page.epoch!=pageTarget_.epoch)){Root();return;}
         if(page.status==snapshot::Status::Ready){
             if(page.epoch!=location_.epoch){Root();return;}
             std::vector<Pidl> ids;std::vector<size_t> order;ids.reserve(page.entries.size());order.reserve(page.entries.size());
@@ -162,9 +208,31 @@ class View final:public IShellView,public IFolderView {
             std::vector<snapshot::Entry> sorted;sorted.reserve(order.size());for(auto index:order)sorted.push_back(std::move(page.entries[index]));page.entries=std::move(sorted);
         }
         if(!Live(window,generation)||retired_)return;
+        int previewDirection=0;
+        if(page.status==snapshot::Status::Ready){
+            if(!targetPending_||targetPage_>=MaxPageLocations){Clear(snapshot::Status::InvalidResponse);return;}
+            pageLocations_[targetPage_]=pageTarget_;pageIndex_=targetPage_;pageCount_=pageIndex_+1;
+            // Requerying a page issues new opaque children: never reuse an old forward chain.
+            for(UINT at=pageCount_;at<MaxPageLocations;++at)pageLocations_[at]={};
+            targetPending_=false;previewDirection=std::exchange(pendingPreviewDirection_,0);pageWithoutFiles_=false;
+        }
+        const auto automaticPreview=previewSerial_;
         page_=std::move(page);
-        if(surface_)surface_->SetPage(page_,generation);
-        if(Live(window,generation)){UpdateStatus();if(Live(window,generation))Viewport();}
+        if(surface_){const auto result=surface_->SetPage(page_,generation);
+            if(FAILED(result)&&Live(window,generation)){Clear(snapshot::Status::Unavailable);return;}}
+        if(!Live(window,generation)||retired_)return;
+        if(previewDirection&&previewSerial_==automaticPreview){
+            const auto index=AdjacentFile(previewDirection>0?-1:static_cast<int>(page_.entries.size()),previewDirection);
+            if(index>=0){
+                crossPagePreview_=true;
+                surface_->SelectItem(static_cast<UINT>(index),SVSI_SELECT|SVSI_FOCUSED|SVSI_DESELECTOTHERS|SVSI_ENSUREVISIBLE);
+                if(Live(window,generation)&&!retired_&&previewSerial_==automaticPreview)OpenPreview(static_cast<UINT>(index));
+                return;
+            }
+            pageWithoutFiles_=true;
+        }
+        UpdateStatus();if(!Live(window,generation)||retired_)return;
+        PageButtons();if(Live(window,generation)&&!retired_)Viewport();
     }
     LRESULT Completed(WPARAM value,LPARAM data) noexcept {
         Reference<View> invocation(this);
@@ -215,7 +283,7 @@ class View final:public IShellView,public IFolderView {
         const auto window=surface_->Window();if(!window){DestroyViewWindow();return;}
         const bool visible=IsVisibleIntent();
         if(!visible){
-            if(visible_){visible_=false;Clear(snapshot::Status::Unavailable);}
+            if(visible_){visible_=false;ResetPages();Clear(snapshot::Status::Unavailable);}
             else requests_.Visible(page_,{},generation_);
             return;
         }
@@ -236,6 +304,7 @@ class View final:public IShellView,public IFolderView {
     }
     void Activate(UINT index) noexcept {
         if(page_.status==snapshot::Status::Ready&&index<page_.entries.size()&&page_.entries[index].kind==snapshot::Kind::File){OpenPreview(index);return;}
+        if(index<page_.entries.size()&&page_.entries[index].kind==snapshot::Kind::NextPage){StepPage(1);return;}
         if(index>=page_.entries.size()||!snapshot::Navigable(page_.entries[index].kind))return;
         try{
             const auto window=Window();const auto generation=generation_;
@@ -256,18 +325,27 @@ class View final:public IShellView,public IFolderView {
         const auto window=Window();const auto generation=generation_,serial=Generation();
         previewIndex_=static_cast<int>(index);previewSerial_=serial;
         requests_.Visible(page_,{},generation);
-        const auto hr=surface_->BeginPreview(index,serial,AdjacentFile(previewIndex_,-1)>=0,AdjacentFile(previewIndex_,1)>=0);
+        const auto hr=surface_->BeginPreview(index,serial,AdjacentFile(previewIndex_,-1)>=0||CanStepPage(-1),AdjacentFile(previewIndex_,1)>=0||CanStepPage(1));
         if(!Live(window,generation)||previewSerial_!=serial)return;
         if(FAILED(hr)){ClosePreview();return;}
         Viewport();
     }
     void ClosePreview() noexcept {
-        Reference<View> invocation(this);if(!surface_||previewIndex_<0)return;
-        const auto window=Window();const auto generation=generation_;
-        previewIndex_=-1;previewSerial_=Generation();requests_.Visible(page_,{},generation);
-        surface_->EndPreview();if(Live(window,generation)){Viewport();if(Live(window,generation))UpdateStatus();}
+        Reference<View> invocation(this);
+        pendingPreviewDirection_=0;
+        if(!surface_||previewIndex_<0){previewSerial_=Generation();return;}
+        const auto window=Window();const auto generation=generation_;const auto focused=previewIndex_;const auto cross=crossPagePreview_;
+        previewIndex_=-1;previewSerial_=Generation();crossPagePreview_=false;requests_.Visible(page_,{},generation);
+        surface_->EndPreview();if(!Live(window,generation)||retired_)return;
+        if(cross)surface_->SelectItem(static_cast<UINT>(focused),SVSI_SELECT|SVSI_FOCUSED|SVSI_DESELECTOTHERS|SVSI_ENSUREVISIBLE);
+        if(!Live(window,generation)||retired_)return;PageButtons();
+        if(Live(window,generation)){Viewport();if(Live(window,generation))UpdateStatus();}
     }
-    void StepPreview(int delta) noexcept {if(previewIndex_<0)return;const auto next=AdjacentFile(previewIndex_,delta);if(next>=0)OpenPreview(static_cast<UINT>(next));}
+    void StepPreview(int delta) noexcept {
+        if(previewIndex_<0||(delta!=-1&&delta!=1))return;
+        const auto next=AdjacentFile(previewIndex_,delta);
+        if(next>=0)OpenPreview(static_cast<UINT>(next));else StepPage(delta,delta);
+    }
     void PreferencesChanged() noexcept {
         if(creating_||destroying_||!surface_)return;
         const preferences::Values value{surface_->CurrentMode(),surface_->Density()};
@@ -317,6 +395,9 @@ public:
     HRESULT STDMETHODCALLTYPE TranslateAccelerator(MSG* message) override {
         if(!OnThread())return RPC_E_WRONG_THREAD;if(!message)return E_POINTER;Reference<View> invocation(this);
         if(message->message==WM_KEYDOWN&&message->wParam==VK_F5){Refresh();return S_OK;}
+        if(message->message==WM_KEYDOWN&&message->wParam==VK_ESCAPE&&pendingPreviewDirection_&&
+            !(GetKeyState(VK_CONTROL)&0x8000)&&!(GetKeyState(VK_MENU)&0x8000)&&
+            (message->hwnd==Window()||IsChild(Window(),message->hwnd))){ClosePreview();return S_OK;}
         return surface_&&surface_->TranslateAccelerator(*message)?S_OK:S_FALSE;
     }
     HRESULT STDMETHODCALLTYPE EnableModeless(BOOL) override {return E_NOTIMPL;}
@@ -330,10 +411,12 @@ public:
     HRESULT STDMETHODCALLTYPE Refresh() override {
         if(!OnThread())return RPC_E_WRONG_THREAD;if(!surface_)return E_UNEXPECTED;Reference<View> invocation(this);
         if(refreshing_)return S_FALSE;refreshing_=true;retired_=false;
+        if(!targetPending_){pageTarget_=pageCount_?pageLocations_[pageIndex_]:location_;targetPage_=pageCount_?pageIndex_:0;targetPending_=true;pendingPreviewDirection_=0;}
+        pageWithoutFiles_=false;
         const auto window=Window();const auto generation=Clear(snapshot::Status::Loading);
         if(!Live(window,generation)||retired_){refreshing_=false;return E_ABORT;}
         HRESULT hr=S_OK;
-        if(IsVisibleIntent()){visible_=true;hr=requests_.Begin(location_,generation);}
+        if(IsVisibleIntent()){visible_=true;hr=requests_.Begin(pageTarget_,generation);}
         if(FAILED(hr)&&Live(window,generation))Clear(hr==HRESULT_FROM_WIN32(ERROR_BUSY)?snapshot::Status::Busy:snapshot::Status::Unavailable);
         refreshing_=false;return hr;
     }
@@ -359,6 +442,7 @@ public:
         callbacks.focusActivated=[](void* p)noexcept{static_cast<View*>(p)->Focused();};
         callbacks.previewStep=[](void* p,int delta)noexcept{static_cast<View*>(p)->StepPreview(delta);};
         callbacks.previewClose=[](void* p)noexcept{static_cast<View*>(p)->ClosePreview();};
+        callbacks.pageStep=[](void* p,int delta)noexcept{static_cast<View*>(p)->StepPage(delta);};
         callbacks.preferencesChanged=[](void* p)noexcept{static_cast<View*>(p)->PreferencesChanged();};
         callbacks.completionMessage=CompletionMessage;callbacks.completion=[](void* p,WPARAM w,LPARAM l)noexcept{return static_cast<View*>(p)->Completed(w,l);};
         Surface* created=nullptr;hr=Surface::Create(parent,*bounds,callbacks,&created);surface_=created;
@@ -384,7 +468,7 @@ public:
     }
     HRESULT STDMETHODCALLTYPE DestroyViewWindow() override {
         if(!OnThread())return RPC_E_WRONG_THREAD;if(destroying_)return S_OK;Reference<View> invocation(this);destroying_=true;
-        requests_.Close();generation_=Generation();previewIndex_=-1;previewSerial_=Generation();page_={};visible_=false;retired_=true;
+        ResetPages();requests_.Close();generation_=Generation();previewIndex_=-1;previewSerial_=Generation();page_={};visible_=false;retired_=true;
         UpdateStatus(true);
         if(notification_){SHChangeNotifyDeregister(notification_);notification_=0;}
         auto surface=surface_;surface_=nullptr;if(surface){surface->Destroy();delete surface;}

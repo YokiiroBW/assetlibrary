@@ -74,6 +74,7 @@ public:
     std::wstring status;
     HRESULT statusResult=S_OK;
     std::vector<std::wstring> statuses;
+    UINT browseCalls=0;
     std::function<void()> adding;
     std::function<void()> getWindow;
     std::function<void()> querying;
@@ -88,7 +89,7 @@ public:
     HRESULT STDMETHODCALLTYPE SetStatusTextSB(LPCWSTR text)override{if(FAILED(statusResult))return statusResult;try{status=text;statuses.push_back(status);}catch(const std::bad_alloc&){return E_OUTOFMEMORY;}return statusResult;}
     HRESULT STDMETHODCALLTYPE EnableModelessSB(BOOL)override{return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE TranslateAcceleratorSB(MSG*,WORD)override{return E_NOTIMPL;}
-    HRESULT STDMETHODCALLTYPE BrowseObject(PCUIDLIST_RELATIVE,UINT)override{return E_NOTIMPL;}
+    HRESULT STDMETHODCALLTYPE BrowseObject(PCUIDLIST_RELATIVE,UINT)override{++browseCalls;return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE GetViewStateStream(DWORD,IStream** result)override{if(result)*result=nullptr;return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE GetControlWindow(UINT,HWND* result)override{if(result)*result=nullptr;return E_NOTIMPL;}
     HRESULT STDMETHODCALLTYPE SendControlMsg(UINT,UINT,WPARAM,LPARAM,LRESULT*)override{return E_NOTIMPL;}
@@ -106,13 +107,18 @@ struct PageControl {
     std::atomic<thumbnail::Status> previewStatus{thumbnail::Status::Ready};
     std::atomic_bool blockAll{false},blockAfterFirst{false};
     std::atomic<snapshot::Status> status{snapshot::Status::Ready};
+    std::array<std::atomic_ulong,128> locations{};
+    std::function<snapshot::Page(const snapshot::Location&,HANDLE,ULONG)> page;
+    std::atomic_bool releasePage{false};
     UINT items=2;
     bool more=false;
-    ~PageControl(){releasePreview=true;const auto until=GetTickCount64()+2000;while(gallery::PendingWork()&&GetTickCount64()<until)Sleep(1);if(gallery::PendingWork())TerminateProcess(GetCurrentProcess(),70);}
+    ~PageControl(){releasePreview=true;releasePage=true;const auto until=GetTickCount64()+2000;while(gallery::PendingWork()&&GetTickCount64()<until)Sleep(1);if(gallery::PendingWork())TerminateProcess(GetCurrentProcess(),70);}
 };
 PageControl* pageControl=nullptr;
 snapshot::Page VisiblePage(const snapshot::Location& location,HANDLE cancel)noexcept{
     const auto ordinal=++pageControl->calls;if(GetCurrentThreadId()==pageControl->ui)++pageControl->uiCalls;
+    if(ordinal<=pageControl->locations.size())pageControl->locations[ordinal-1]=location.node.Data1;
+    if(pageControl->page){try{return pageControl->page(location,cancel,ordinal);}catch(const std::bad_alloc&){return {};}}
     if(pageControl->blockAll||(pageControl->blockAfterFirst&&ordinal>1))if(WaitForSingleObject(cancel,5000)==WAIT_OBJECT_0)++pageControl->canceled;
     snapshot::Page page;page.status=pageControl->status;page.epoch=location.epoch;if(page.status!=snapshot::Status::Ready)return page;
     try{page.entries={ {location.epoch,{401},snapshot::Kind::File,L"fixture-b"},{location.epoch,{402},snapshot::Kind::File,L"fixture-a"} };
@@ -472,6 +478,119 @@ void PreviewViewRaces(){
         fixture.view.value->DestroyViewWindow();Eventually([]{return !gallery::PendingWork()&&UiaIdle()&&loading::ActiveViews()==0;},"preview race retires requests, providers and quota");
     }
 }
+snapshot::Page CursorPage(const snapshot::Location& location,ULONG next,UINT files=2,snapshot::Kind kind=snapshot::Kind::File){
+    snapshot::Page page;page.status=snapshot::Status::Ready;page.epoch=location.epoch;
+    for(UINT at=0;at<files;++at)page.entries.push_back({location.epoch,{location.node.Data1*10+at},kind,L"file-"+std::to_wstring(at)});
+    if(next)page.entries.push_back({location.epoch,{next},snapshot::Kind::NextPage,L"下一页"});return page;
+}
+snapshot::Entry EntryAt(VisibleFixture& fixture,int index){
+    proof::Item item;snapshot::Entry entry;Check(fixture.items.value->Item(index,&item.value)==S_OK&&snapshot::ReadPidl(item.value,entry),"current-page private PIDL");return entry;
+}
+HWND Canvas(HWND window){const auto canvas=FindWindowExW(window,nullptr,L"STATIC",nullptr);Check(canvas!=nullptr,"owned page canvas");return canvas;}
+void Click(HWND window,int id){const auto button=GetDlgItem(window,id);if(!button)throw std::runtime_error("missing page button");Check(IsWindowVisible(button)&&IsWindowEnabled(button),"requested page or preview button is enabled");SendMessageW(button,BM_CLICK,0,0);}
+void ReadyCursor(VisibleFixture& fixture,ULONG cursor,int count=3){
+    Await([&]{return fixture.Count()==count&&EntryAt(fixture,0).node.Data1==cursor*10&&gallery::PendingWork()==0;},"cursor-page-ready");
+}
+void ActivateAt(VisibleFixture& fixture,HWND window,int index){
+    Check(fixture.items.value->SelectItem(index,SVSI_SELECT|SVSI_FOCUSED|SVSI_DESELECTOTHERS)==S_OK,"select primary page item");SendMessageW(Canvas(window),WM_KEYDOWN,VK_RETURN,0);
+}
+void PageRoundTripAndRetry(){
+    PageControl control;pageControl=&control;
+    control.page=[](const snapshot::Location& location,HANDLE,ULONG ordinal){
+        if(ordinal==2){snapshot::Page failed;failed.epoch=location.epoch;failed.status=snapshot::Status::Unavailable;return failed;}
+        return CursorPage(location,location.node.Data1==502?(ordinal==1?700ul:900ul):800ul);
+    };
+    VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);
+    Check(!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"first page has no invented previous cursor");
+    ActivateAt(fixture,window,2);
+    Await([&]{return control.calls==2&&fixture.Count()==0&&OwnSummary(window)==snapshot::StatusText(snapshot::Status::Unavailable)&&gallery::PendingWork()==0;},"page-error");
+    Check(!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId))&&!IsWindowEnabled(GetDlgItem(window,gallery::PageNextControlId)),"failed page has no stale controls or selection");
+    Check(fixture.view.value->Refresh()==S_OK,"F5 retries pending target");ReadyCursor(fixture,700);
+    Check(control.locations[1]==700&&control.locations[2]==700&&OwnSummary(window).find(L"第 2 页")!=std::wstring::npos,"failed query never commits an extra page position");
+    Click(window,gallery::PagePreviousControlId);ReadyCursor(fixture,502);
+    Click(window,gallery::PageNextControlId);ReadyCursor(fixture,900);
+    Check(control.calls==5&&control.locations[3]==502&&control.locations[4]==900,"previous is requeried and new next token replaces old forward history");
+    HWND current=nullptr;Check(fixture.view.value->GetWindow(&current)==S_OK&&current==window&&fixture.browser.value->browseCalls==0&&!control.uiCalls,"buttons and NextPage primary activation stay in same HWND without Shell navigation or UI source calls");
+    ShowWindow(window,SW_HIDE);Check(fixture.Count()==0,"hidden page cleared immediately");ShowWindow(window,SW_SHOWNA);ReadyCursor(fixture,502);
+    Check(control.locations[5]==502&&!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"show starts from physical anchor without old history");
+}
+void PageBounds(){
+    for(const bool cycle:{true,false}){
+        PageControl control;pageControl=&control;
+        control.page=[cycle](const snapshot::Location& location,HANDLE,ULONG){return CursorPage(location,cycle?(location.node.Data1==502?700ul:502ul):location.node.Data1+1);};
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);
+        const ULONG pages=cycle?2:64;
+        for(ULONG at=1;at<pages;++at){Click(window,gallery::PageNextControlId);ReadyCursor(fixture,cycle?700:502+at);}
+        const auto notice=cycle?L"分页位置重复":L"已达64页浏览上限";
+        Check(control.calls==pages&&!IsWindowEnabled(GetDlgItem(window,gallery::PageNextControlId))&&OwnSummary(window).find(notice)!=std::wstring::npos,"known cursor cycle and local capacity stop with an honest visible reason");
+        ActivateAt(fixture,window,2);Pump(10);
+        Check(control.calls==pages&&fixture.browser.value->browseCalls==0,"primary navigation cannot bypass cycle or capacity");
+        Click(window,gallery::PagePreviousControlId);ReadyCursor(fixture,cycle?502:564);
+        Check(control.calls==pages+1&&IsWindowEnabled(GetDlgItem(window,gallery::PageNextControlId)),"capacity still permits previous requery and new forward step");
+    }
+}
+void CrossPagePreview(){
+    PageControl control;pageControl=&control;
+    control.page=[](const snapshot::Location& location,HANDLE,ULONG){return CursorPage(location,location.node.Data1==502?700ul:800ul);};
+    VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);
+    ActivateAt(fixture,window,1);Await([&]{return control.previews==1&&gallery::PendingWork()==0;},"last-file-preview");
+    Click(window,gallery::PreviewNextControlId);
+    Await([&]{return control.calls==2&&control.previews==2&&control.lastPreviewNode==7000&&gallery::PendingWork()==0;},"cross-next-first-file");
+    Check(IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId))&&fixture.Count()==3&&EntryAt(fixture,0).node.Data1==7000,"cross next opens first ordinary file on newly queried page");
+    Click(window,gallery::PreviewNextControlId);Await([&]{return control.previews==3&&control.lastPreviewNode==7001&&gallery::PendingWork()==0;});
+    SendMessageW(Canvas(window),WM_KEYDOWN,VK_ESCAPE,0);Await([]{return gallery::PendingWork()==0;});
+    int selected=0,focused=-1;Check(fixture.items.value->ItemCount(SVGIO_SELECTION,&selected)==S_OK&&selected==1&&fixture.items.value->GetFocusedItem(&focused)==S_OK&&focused==1,"cross-page Esc focuses current preview file even after another same-page step");
+    ActivateAt(fixture,window,0);Await([&]{return control.previews==4&&gallery::PendingWork()==0;});Click(window,gallery::PreviewPreviousControlId);
+    Await([&]{return control.calls==3&&control.previews==5&&control.lastPreviewNode==5021&&gallery::PendingWork()==0;},"cross-previous-last-file");
+    const auto reads=control.calls.load(),images=control.images.load(),previews=control.previews.load();
+    Click(window,gallery::PreviewZoomInControlId);Click(window,gallery::PreviewActualControlId);Click(window,gallery::PreviewFitControlId);Pump(10);
+    Check(control.calls==reads&&control.images==images&&control.previews==previews&&fixture.browser.value->browseCalls==0,"cross-page zoom remains local with no page, thumbnail, preview or Shell navigation");
+}
+void CrossPageWithoutFiles(){
+    for(const bool directory:{false,true}){
+        PageControl control;pageControl=&control;
+        control.page=[directory](const snapshot::Location& location,HANDLE,ULONG){return location.node.Data1==502?CursorPage(location,700,1):
+            CursorPage(location,800,directory?1u:0u,snapshot::Kind::Directory);};
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502,2);ActivateAt(fixture,window,0);
+        Await([&]{return control.previews==1&&gallery::PendingWork()==0;});Click(window,gallery::PreviewNextControlId);
+        Await([&]{return control.calls==2&&OwnSummary(window).find(L"此页没有可预览的文件")!=std::wstring::npos&&gallery::PendingWork()==0;},"one-page-preview-stop");
+        Check(control.previews==1&&!IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId))&&fixture.Count()==(directory?2:1)&&IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId))&&IsWindowEnabled(GetDlgItem(window,gallery::PageNextControlId)),"directory-only and no-file pages stop after one query and restore usable browse controls");
+    }
+}
+void PageCancellationAndRevocation(){
+    for(const int action:{0,1,2}){
+        PageControl control;pageControl=&control;
+        control.page=[&control](const snapshot::Location& location,HANDLE cancel,ULONG ordinal){
+            if(ordinal==2){if(WaitForSingleObject(cancel,2000)==WAIT_OBJECT_0)++control.canceled;
+                const auto until=GetTickCount64()+2000;while(!control.releasePage&&GetTickCount64()<until)Sleep(1);
+                snapshot::Page old;old.epoch=location.epoch;old.status=snapshot::Status::AccessDenied;return old;}
+            return CursorPage(location,location.node.Data1==502?700ul:800ul);
+        };
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);Click(window,gallery::PageNextControlId);
+        Await([&]{return control.calls==2;});Check(fixture.Count()==0,"new target retires old page before background result");
+        // Repeated input while Loading must not enqueue another location.
+        SendMessageW(GetDlgItem(window,gallery::PageNextControlId),BM_CLICK,0,0);Pump(10);Check(control.calls==2,"loading disables duplicate page steps");
+        const auto before=GetTickCount64();
+        if(action==0)fixture.view.value->Refresh();else if(action==1)ShowWindow(window,SW_HIDE);else fixture.view.value->DestroyViewWindow();
+        Check(GetTickCount64()-before<200,"refresh hide destroy do not wait for canceled page I/O");Await([&]{return control.canceled==1;});
+        if(action==1)ShowWindow(window,SW_SHOWNA);
+        if(action!=2)Await([&]{return fixture.Count()==3&&EntryAt(fixture,0).node.Data1==(action==0?7000ul:5020ul);});
+        control.releasePage=true;Await([]{return gallery::PendingWork()==0;});Pump(10);
+        Check(fixture.browser.value->browseCalls==0,"late canceled AccessDenied cannot revoke the new generation");
+        if(action==2)Check(!IsWindow(window)&&fixture.Count()==0,"destroy cannot resurrect late page or history");
+        else Check(fixture.Count()==3&&(IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId))!=FALSE)==(action==0),"retry keeps target; hide clears history before first-page reload");
+    }
+    for(const auto status:{snapshot::Status::AccessDenied,snapshot::Status::Expired,snapshot::Status::Ready}){
+        PageControl control;pageControl=&control;
+        control.page=[status](const snapshot::Location& location,HANDLE,ULONG ordinal){auto page=CursorPage(location,location.node.Data1==502?700ul:800ul);
+            if(ordinal==3){page.status=status;if(status==snapshot::Status::Ready)page.epoch={999};else page.entries.clear();}return page;};
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);Click(window,gallery::PageNextControlId);ReadyCursor(fixture,700);
+        fixture.view.value->Refresh();Await([&]{return fixture.Count()==0&&fixture.browser.value->browseCalls==1&&gallery::PendingWork()==0;},"page-authority-revoked");
+        Check(!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"permission expiry and epoch change clear all page positions");
+        fixture.view.value->Refresh();ReadyCursor(fixture,502);
+        Check(control.locations[3]==502&&!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"explicit recovery after failed root navigation begins at physical anchor");
+    }
+}
 void ProductionUiaDllLifetime(const wchar_t* path){
     proof::Library library(path,product::ClassId);auto root=library.Root();
     proof::Item entry(snapshot::MakePidl({{301},{302},snapshot::Kind::Library,L"hidden DLL lifecycle fixture"}));auto child=proof::Bind(root.value,entry);
@@ -489,7 +608,7 @@ void ProductionUiaDllLifetime(const wchar_t* path){
 }
 int wmain(int argc,wchar_t** argv){
     if(argc!=2)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
-    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();PreferencesAndPreview();PreviewViewRaces();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
+    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();PreferencesAndPreview();PreviewViewRaces();PageRoundTripAndRetry();PageBounds();CrossPagePreview();CrossPageWithoutFiles();PageCancellationAndRevocation();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
         puts("gallery_view=passed; last_Release=retired_before_zero; external_destroy=idempotent; shared_quota=4; public_notification=NewDelivery; root_navigation=same_browser; hidden_IPC=0; registry_writes=0; real_Explorer=0");
     }catch(const std::exception& error){fprintf(stderr,"GalleryViewTests: %s\n",error.what());result=1;}
     CoUninitialize();return result;
