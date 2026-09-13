@@ -1,0 +1,19 @@
+{
+  "implementation_commit": "629e1a099b46e75886417cbb05b7c70e9ac9f804",
+  "test": "MaximumEdgeAndEncodedSizeDecodeInTheUnchangedColdJobBudget",
+  "outcome": "Passed",
+  "test_duration": "00:00:01.2077539",
+  "decode_including_parent_validation_ms": 573,
+  "encoded_png_bytes": 12582912,
+  "width": 1600,
+  "height": 1600,
+  "decoded_pixel_bytes": 10240000,
+  "child_reused": false,
+  "job_process_limit": 1,
+  "job_memory_limit_bytes": 134217728,
+  "decoder_deadline_ms": 3000,
+  "job_peak_memory_measured": false,
+  "note": "Successful fresh helper requires CurrentIsBounded; Windows Job enforces the unchanged cap. This records a bound, not measured peak memory. Test duration also includes synthetic PNG generation.",
+  "source_report": ".runtime/preview-validation/windows-module.trx",
+  "tested_host_sha256": "10ee6e3a5a7f3ae05c59279ac99436452aefe3823e45c85974ed25059c2f4f04"
+}
