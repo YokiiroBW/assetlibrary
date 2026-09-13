@@ -1,0 +1,20 @@
+{
+  "status": "implementation",
+  "base_commit": "0e13f61",
+  "contract_commit": "8833999",
+  "integrated_controls_commit": "e169953",
+  "target_version": "0.3.0-preview.9",
+  "installed_version": "0.3.0-preview.8",
+  "active_fixture": false,
+  "owned_broker_file": ".runtime/preview-live/native/broker.json",
+  "original_explorer": {
+    "pid": 6212,
+    "hwnd": 133910,
+    "creation": "134335976399732731"
+  },
+  "baseline_repository": "passed",
+  "setup_tests": 23,
+  "package_tests": 6,
+  "release_lock_validation": "passed",
+  "g4": "waived_not_run"
+}
