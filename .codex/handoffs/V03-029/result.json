@@ -1,0 +1,78 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-029",
+  "title": "nas-image-package",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "nas-image-package-owner",
+  "branch": "codex/v03-029-nas-image-package",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-029",
+  "commit": "9874114",
+  "changed_files": [
+    ".codex/handoffs/V03-029/build-host.md",
+    ".codex/handoffs/V03-029/result.json",
+    ".codex/handoffs/V03-029/summary.md",
+    ".codex/handoffs/V03-029/tests.md",
+    ".codex/tasks/V03-029.md",
+    "infra/docker/nas/Dockerfile",
+    "infra/docker/nas/README.md",
+    "infra/docker/nas/bootstrap.py",
+    "infra/docker/nas/compose.yaml",
+    "infra/docker/nas/nasctl.sh",
+    "scripts/build_nas_deployment.py",
+    "tests/repository/test_nas_image_container_package.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 2,
+    "report": "tests.md",
+    "scope": "16 new NAS tests plus 10 old release checks; 2 old POSIX permission checks require Linux. CI wrapper and fast gates recorded separately.",
+    "repository_isolated": {
+      "passed": 95,
+      "failed": 0,
+      "seconds": 24.674
+    },
+    "repository_nonisolated_initial": {
+      "passed": 74,
+      "errors": 1,
+      "reason": "Existing validate_server_release isolated import guard in unchanged server packaging tests; root owns shared CI command correction."
+    }
+  },
+  "risks": [
+    "Root-owned Supervisor/Core/RID lock commits must be merged before real four-image build; this packaging branch alone intentionally does not add those sources.",
+    "No target NAS/container execution or asset access in this task; platform isolation and actual old-process reclamation are separate root evidence.",
+    "POSIX executable/readability checks were skipped on this Windows host; Linux final builder must validate them.",
+    "G4 waived, not performed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 3,
+  "handoff_summary": ".codex/handoffs/V03-029/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "NAS Docker packaging and deployment adapter",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "build_server_release Git snapshot/path boundary/hash primitives, existing image-preview AOT layer and ELF/license/checksum validation.",
+      "Existing NAS bootstrap/settings/deployment identity and four-volume lifecycle; optional socket uses validated scalar configuration.",
+      "Supervisor health/fuse/decoder and Core authorization/protocol implementations remain owned by V03-027/028."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Only public csproj/lock/artifact paths are referenced for packaging; no writes to Core/worker/registry/contracts/migrations or live NAS."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "Root-approved fourth image, profile and local IPC volume; startup/steady trusted Supervisor capabilities use latest root four-cap decision; shared ADR/protocol files untouched."
+    ],
+    "architecture_tests": [
+      "NAS policy/payload/CLI suite 16 passed and old release10 passed/2 Windows POSIX skips.",
+      "scripts/verify_repository.py passed: 530 inputs, 21 migration/14 architecture tests; isolated repository discovery95/95 passed. Initial non-isolated existing release guard mismatch handed to root CI owner."
+    ],
+    "technical_debt": [
+      "Final Linux build, NAS kernel/cgroup/UID/cleanup/fuse/Core integration and deployment are owned by coordinating root."
+    ]
+  }
+}
