@@ -319,7 +319,7 @@ case "$1 $2" in
 esac
 case "$1" in
   ps) exit 0 ;;
-  create) printf '%064d\n' 1; exit 0 ;;
+  create) if [ "${FAKE_SHORT_ID:-0}" = 1 ]; then printf 'a\n'; else printf '%064d\n' 1; fi; exit 0 ;;
   rm) exit 0 ;;
   info) printf 'true\n'; exit 0 ;;
   inspect) printf '[]\n'; exit 0 ;;
@@ -419,6 +419,12 @@ exit 9
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Duplicate optional deployment field", result.stderr)
         self.assertFalse(any(" up " in call for call in self.calls()))
+
+    def test_invalid_preparation_id_never_causes_partial_id_removal(self):
+        result = self.run_cli(FAKE_SHORT_ID="1")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Invalid IPC preparation container identity", result.stderr)
+        self.assertFalse(any(call.startswith("rm ") or " up " in call for call in self.calls()))
 
     def test_unsafe_backend_choice_control_drift_and_foreign_volume_fail_before_start(self):
         for overrides in ({"ASSETLIBRARY_IMAGE_PREVIEW_SOCKET": "/tmp/other.sock"},

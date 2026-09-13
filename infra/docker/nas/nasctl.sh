@@ -110,6 +110,7 @@ prepare_image_volume() {
     preparation=$(docker create --name "$name-image-ipc-prepare-$$" --network none --read-only --cap-drop ALL \
         --label "io.assetlibrary.deployment=$deployment" --entrypoint /bin/false \
         --mount "type=volume,source=$volume,target=/run/assetlibrary-image" "$image_image")
+    [ "${#preparation}" -eq 64 ] || die 'Invalid IPC preparation container identity; inspect the failed operation.'
     case "$preparation" in ''|*[!0-9a-f]*) die 'Invalid IPC preparation container identity; inspect the failed operation.' ;; esac
     docker rm "$preparation" >/dev/null
 }
