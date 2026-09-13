@@ -1,0 +1,66 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-031",
+  "title": "explorer-preview-geometry",
+  "milestone": "V0.3",
+  "status": "ready_for_review",
+  "owner": "preview-geometry-owner",
+  "branch": "codex/v03-031-explorer-preview-geometry",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-031",
+  "commit": "31d81c7d4eb8837865ead1fe47088f2a03b0a3cf",
+  "changed_files": [
+    ".codex/handoffs/V03-031/result.json",
+    ".codex/handoffs/V03-031/summary.md",
+    ".codex/handoffs/V03-031/tests.md",
+    ".codex/task-registry.json",
+    ".codex/tasks/V03-031.md",
+    "apps/windows-shell/CMakeLists.txt",
+    "apps/windows-shell/gallery/PreviewViewport.cpp",
+    "tests/windows-gallery/CMakeLists.txt",
+    "tests/windows-gallery/PreviewViewportTests.cpp"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "directed_scenarios": 7,
+    "shape_view_matrices": 256,
+    "repeated_saturation_operations": 2000
+  },
+  "risks": [
+    "Pure geometry tests do not replace Surface HWND/input/capture/accessibility/rendering or final Explorer integration."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/V03-031/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows gallery PreviewViewport numeric geometry",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Frozen PreviewViewport.h and ADR0024 geometry rules",
+      "Existing MSVC/CMake gallery harness and root-owned production/test source wiring"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Surface consumes the approved geometry header; this implementation does not depend on Surface or its lifetime"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "verify_repository.py passed",
+      "Real MSVC x64 /W4 /WX /permissive- /analyze /utf-8 /MT build passed",
+      "CTest gallery_preview_viewport passed:7 directed scenarios/256 matrices/2000 saturation repeats"
+    ],
+    "technical_debt": []
+  },
+  "shared_prerequisite": {
+    "upstream_commit": "1ba6314",
+    "local_cherry_pick": "40a76b8",
+    "owner": "root",
+    "note": "Three CMake files included in base4d1a9c5 diff are supplied root integration."
+  }
+}
