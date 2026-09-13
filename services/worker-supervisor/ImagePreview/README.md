@@ -36,3 +36,7 @@ Windows requires LPAC, the exact ADR-0019-approved `lpacCom` capability and matc
 ## Decoder pixel lifetime
 
 The existing decoder marks its source bitmap immutable only after `GetPixels` has completed, and its target immutable only after the drawing canvas is disposed. Neither buffer is mutated afterward; their `using` lifetimes enclose the SKImage wrappers. This follows [Skia RasterFromBitmap sharing semantics](https://api.skia.org/namespaceSkImages.html) and avoids an unnecessary full-resolution mutable-bitmap copy without changing limits, formats, orientation, alpha or metadata policy. Windows pointer-sharing and byte-for-byte functional comparisons do not by themselves prove the NAS512MiB maximum-input boundary.
+
+## GC address reservation
+
+The worker candidate sets `System.GC.RegionRange` to134217728 (128MiB), while retaining the64MiB GC commit hard limit and all OS/container limits. .NET10 otherwise reserves five times a single heap hard limit, consuming320MiB of the512MiB address-space budget before native pixels. [Microsoft documents the region range and distinguishes reservation from commit](https://learn.microsoft.com/en-us/dotnet/core/runtime-config/garbage-collector#region-range). The fixed value is embedded in the worker; the supervisor does not forward a new environment override. Actual NAS VM reduction and maximum-image behavior must be measured before accepting this candidate; it does not increase CPU time or promise that arbitrarily large metadata can decode within3CPU seconds.
