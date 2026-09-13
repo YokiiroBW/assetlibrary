@@ -1,0 +1,15 @@
+{
+  "version": "0.1.0-candidate",
+  "owner": "assetlibrary",
+  "report_id": "synthetic-unavailable",
+  "revision": 1,
+  "request_id": "synthetic-request-1",
+  "library_id": "10000000-0000-4000-8000-000000000001",
+  "observed_at": "2026-09-14T00:00:00Z",
+  "source_revision": null,
+  "analysis_state": "unavailable",
+  "unavailable_reason": "not_implemented",
+  "execution_available": false,
+  "entries": [],
+  "candidates": []
+}

@@ -1,0 +1,71 @@
+{
+  "task": "TS-060",
+  "assetlibrary_base": "99e79f2f5a6d3b84ff2faaa9640752569796eb69",
+  "platform_docs_base": "a5ee59ff67a2de7a7e0d8328ea3c0f43e1d6a209",
+  "http": {
+    "status": "passed",
+    "checks": [
+      "anonymous_control_401",
+      "authorized_library_discovery",
+      "root_files_100_plus_37_unique_entries",
+      "page_cursor_and_traversal_rejected",
+      "stable_entry_detail_no_hash_claim",
+      "localized_scoped_search",
+      "real_initial_scan_committed",
+      "five_candidate_operation_names_unsupported",
+      "origin_and_csrf_rejected",
+      "real_reader_permissions_empty_404_403",
+      "both_sessions_revoked"
+    ],
+    "server": {
+      "status": "passed",
+      "stop_reason": "explicit_stop",
+      "sample_file_count": 138,
+      "sample_hashes_and_mtimes": "unchanged",
+      "resource_cleanup": "verified",
+      "postgres_roles_removed": 6,
+      "runtime_removed": true,
+      "https_listener_closed": true,
+      "host_and_postgres_processes_exited": true,
+      "native_client_acceptance": "not asserted by this server fixture"
+    },
+    "web_ui": "not_tested_static_shell_only",
+    "platform": "not_connected",
+    "production_publishing": "unavailable",
+    "hibp": "existing_test_handler"
+  },
+  "candidate_tests": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "offline schema and manually authored relationship examples"
+  },
+  "operation_tests": {
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "actual Application services with test-only sandbox and ports"
+  },
+  "repository_verification": "passed; alpha remains blocked",
+  "evidence_sha256": {
+    ".runtime/ts060-http-899dfc93e73a/http-checks.json": "7a08cf27b943012fe179a8d2324a5394339efa5e8ca894889b18a64218f83b3d",
+    ".runtime/ts060-plans/ts060-plans.trx": "d172fc90cf5479f665fb109d51bf78272ac916529b36ea55fe15100af8f2fd51",
+    "tests/integration/tianshu/probe_core.py": "781bd57c94fcec0b66200b59706a41d18581c246e0897ef80e2ea36a7280f4ae",
+    "tests/integration/tianshu/test_candidate.py": "0c676fa0d4a89d952f6ba6574495b0af4281dfa505e51566fac18201e6bbc80d"
+  },
+  "cleanup": {
+    "http_outer_temporary_directory_removed": true,
+    "failed_attempt_temporary_directory_removed": true,
+    "operation_sandbox_fixture_count_after_tests": 0
+  },
+  "not_verified": [
+    "platform integration",
+    "production publisher",
+    "deduplication/classification/preference analyzers",
+    "NAS",
+    "UI",
+    "image decoding",
+    "500k scale",
+    "crash durability"
+  ]
+}

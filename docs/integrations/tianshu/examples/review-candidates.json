@@ -1,0 +1,91 @@
+{
+  "version": "0.1.0-candidate",
+  "owner": "assetlibrary",
+  "report_id": "synthetic-review-1",
+  "revision": 1,
+  "request_id": "synthetic-request-1",
+  "library_id": "10000000-0000-4000-8000-000000000001",
+  "observed_at": "2026-09-14T00:00:00Z",
+  "source_revision": null,
+  "analysis_state": "candidates_only",
+  "unavailable_reason": null,
+  "execution_available": false,
+  "entries": [
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000001",
+      "sha256": "c923045a95120a84565d06a15749e4fcb867c95938acf8cb6bf473c7cb093ccb"
+    },
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000002",
+      "sha256": "c923045a95120a84565d06a15749e4fcb867c95938acf8cb6bf473c7cb093ccb"
+    },
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000003",
+      "sha256": "278e89b5cdea7e744d184e1644ae3bede414bb434b4f2f60a9d4ae36a5bbb2ea"
+    },
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000004",
+      "sha256": "19e10431d97c1abab70dd3a7e5ba53514bb5155ec5f718e070eb828b1d403708"
+    },
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000005",
+      "sha256": "d4031950c356192b96bca761db6dc4d597e38dbd9aa323e4d243c7016b3f90b0"
+    },
+    {
+      "entry_id": "00000000-0000-4000-8000-000000000006",
+      "sha256": "16223dd9d81d887527f4021baa26686af71a2e23371b18e548327896a88ad13d"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "synthetic-exact",
+      "kind": "exact_duplicate",
+      "entry_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002"
+      ],
+      "evidence": "full_sha256",
+      "label": null,
+      "preferred_entry_id": null,
+      "explanation": "Synthetic equal bytes; both intentional physical copies remain."
+    },
+    {
+      "candidate_id": "synthetic-related",
+      "kind": "same_source",
+      "entry_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "evidence": "manual",
+      "label": null,
+      "preferred_entry_id": null,
+      "explanation": "Manually proposed original/revision relation, not an analyzer result."
+    },
+    {
+      "candidate_id": "synthetic-category",
+      "kind": "classification",
+      "entry_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002",
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "evidence": "manual",
+      "label": "review-images",
+      "preferred_entry_id": null,
+      "explanation": "Synthetic review label only; no physical category or identity was changed."
+    },
+    {
+      "candidate_id": "synthetic-preference",
+      "kind": "preferred",
+      "entry_ids": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002",
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "evidence": "manual",
+      "label": null,
+      "preferred_entry_id": "00000000-0000-4000-8000-000000000001",
+      "explanation": "Prefer original display only; retain animation and sidecar as well as every member."
+    }
+  ]
+}
