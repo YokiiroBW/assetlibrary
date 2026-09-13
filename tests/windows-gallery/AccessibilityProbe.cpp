@@ -24,6 +24,50 @@ public:
         ++focusCalls; int senderProcess = 0; if (sender && SUCCEEDED(sender->get_CurrentProcessId(&senderProcess)) && static_cast<DWORD>(senderProcess) == process) ++focuses; lastProcess = senderProcess; return S_OK;
     }
 };
+int PreviewCase(HWND window) {
+    IUIAutomation* automation=nullptr; IAccessible *oldAccessible=nullptr,*restoredAccessible=nullptr;
+    IUIAutomationElement *gallery=nullptr,*file=nullptr,*preview=nullptr,*image=nullptr,*secondPreview=nullptr,*secondImage=nullptr,*restored=nullptr,*button=nullptr;
+    IUIAutomationCondition *listCondition=nullptr,*imageCondition=nullptr;
+    IUIAutomationElementArray *files=nullptr,*images=nullptr,*restoredFiles=nullptr;
+    IUIAutomationInvokePattern *open=nullptr,*buttonInvoke=nullptr;
+    const auto rejectedName=[](IUIAutomationElement* element) {
+        const auto deadline=GetTickCount64()+2000;
+        while(GetTickCount64()<deadline) { BSTR name=nullptr;const auto hr=element->get_CurrentName(&name);if(name)SysFreeString(name);if(FAILED(hr))return true;Sleep(10); }return false;
+    };
+    int result=1;
+    try {
+        Require(SUCCEEDED(CoCreateInstance(CLSID_CUIAutomation,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&automation))),"preview UIA client");
+        Require(SUCCEEDED(AccessibleObjectFromWindow(window,static_cast<DWORD>(OBJID_CLIENT),IID_IAccessible,reinterpret_cast<void**>(&oldAccessible))),"gallery MSAA before preview");
+        VARIANT selected{};selected.vt=VT_I4;selected.lVal=3;Require(SUCCEEDED(oldAccessible->accSelect(SELFLAG_TAKESELECTION|SELFLAG_TAKEFOCUS,selected)),"prepare preserved gallery selection");
+        Require(SUCCEEDED(automation->ElementFromHandle(window,&gallery)),"gallery root");
+        VARIANT type{};type.vt=VT_I4;type.lVal=UIA_ListItemControlTypeId;automation->CreatePropertyCondition(UIA_ControlTypePropertyId,type,&listCondition);
+        type.lVal=UIA_ImageControlTypeId;automation->CreatePropertyCondition(UIA_ControlTypePropertyId,type,&imageCondition);
+        Require(listCondition && imageCondition && SUCCEEDED(gallery->FindAll(TreeScope_Children,listCondition,&files)),"gallery children");
+        int count=0;files->get_Length(&count);Require(count==30,"gallery all30 before preview");files->GetElement(2,&file);
+        Require(file && SUCCEEDED(file->GetCurrentPatternAs(UIA_InvokePatternId,IID_PPV_ARGS(&open))),"ordinary file has preview Invoke");
+        Require(SUCCEEDED(open->Invoke()) && rejectedName(gallery),"enter preview retires old gallery provider");
+        Require(IsWindow(window)!=FALSE,"preview preserves same native canvas");BSTR name=nullptr;
+        Require(FAILED(oldAccessible->get_accName(selected,&name)) && !name,"hidden gallery MSAA names refused");
+        Require(SUCCEEDED(automation->ElementFromHandle(window,&preview)),"preview root");CONTROLTYPEID control=0;preview->get_CurrentControlType(&control);Require(control==UIA_PaneControlTypeId,"preview is a pane");
+        Require(SUCCEEDED(preview->FindAll(TreeScope_Children,listCondition,&images)),"hidden gallery query");images->get_Length(&count);images->Release();images=nullptr;Require(count==0,"no hidden ListItems exposed during preview");
+        Require(SUCCEEDED(preview->FindAll(TreeScope_Children,imageCondition,&images)),"preview image query");images->get_Length(&count);Require(count==1,"exactly one Image in preview");images->GetElement(0,&image);
+        Require(image!=nullptr,"current preview Image");name=nullptr;image->get_CurrentName(&name);const bool initial=name && wcscmp(name,L"合成图库测试条目（非产品图片）2")==0;if(name)SysFreeString(name);Require(initial,"full current preview name");
+        IUIAutomationSelectionItemPattern* hiddenSelection=nullptr;const auto selectionResult=image->GetCurrentPatternAs(UIA_SelectionItemPatternId,IID_PPV_ARGS(&hiddenSelection));if(hiddenSelection)hiddenSelection->Release();Require(FAILED(selectionResult) || !hiddenSelection,"image does not expose gallery selection pattern");
+        const HWND next=GetDlgItem(GetParent(window),109);if(!next)throw "native Next button";automation->ElementFromHandle(next,&button);Require(button && SUCCEEDED(button->GetCurrentPatternAs(UIA_InvokePatternId,IID_PPV_ARGS(&buttonInvoke))),"native Next Invoke");
+        Require(SUCCEEDED(buttonInvoke->Invoke()) && rejectedName(image),"next retires old image provider");buttonInvoke->Release();buttonInvoke=nullptr;button->Release();button=nullptr;
+        automation->ElementFromHandle(window,&secondPreview);Require(secondPreview && SUCCEEDED(secondPreview->FindAll(TreeScope_Children,imageCondition,&restoredFiles)),"next preview root");restoredFiles->GetElement(0,&secondImage);Require(secondImage!=nullptr,"next image");
+        name=nullptr;secondImage->get_CurrentName(&name);const bool nextName=name && wcscmp(name,L"合成图库测试条目（非产品图片）3")==0;if(name)SysFreeString(name);Require(nextName,"next file name");
+        const HWND back=GetDlgItem(GetParent(window),107);if(!back)throw "native Back button";automation->ElementFromHandle(back,&button);Require(button && SUCCEEDED(button->GetCurrentPatternAs(UIA_InvokePatternId,IID_PPV_ARGS(&buttonInvoke))),"native Back Invoke");
+        Require(SUCCEEDED(buttonInvoke->Invoke()) && rejectedName(secondImage),"back retires preview Image");
+        Require(SUCCEEDED(automation->ElementFromHandle(window,&restored)),"restored gallery root");restored->get_CurrentControlType(&control);Require(control==UIA_ListControlTypeId,"back restores gallery List");
+        Require(SUCCEEDED(AccessibleObjectFromWindow(window,static_cast<DWORD>(OBJID_CLIENT),IID_IAccessible,reinterpret_cast<void**>(&restoredAccessible))),"restored MSAA");
+        VARIANT selection{};const auto read=restoredAccessible->get_accSelection(&selection);const bool preserved=SUCCEEDED(read) && selection.vt==VT_I4 && selection.lVal==3;VariantClear(&selection);Require(preserved,"preview stepping preserves underlying selection");
+        std::cout<<"external_preview: List->Pane/Image->next->List, old providers refused and selection preserved\n";result=0;
+    } catch(const char* error) {std::cerr<<error<<'\n';}
+    IUnknown* retained[]={open,buttonInvoke,button,restoredFiles,images,files,image,secondImage,file,restored,secondPreview,preview,gallery,listCondition,imageCondition,restoredAccessible,oldAccessible,automation};
+    for(auto* value:retained)if(value)value->Release();return result;
+}
+
 }
 int wmain(int argc, wchar_t** argv) {
     if (argc != 2 && argc != 3) return 2;
@@ -35,6 +79,7 @@ int wmain(int argc, wchar_t** argv) {
     const bool releaseFirst = retire && wcscmp(argv[2], L"--released-retire") == 0;
     const HWND window = reinterpret_cast<HWND>(_wcstoui64(argv[1], nullptr, 10));
     if (!window || !IsWindow(window) || FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED))) return 2;
+    if(argc==3 && wcscmp(argv[2],L"--preview")==0) {const int result=PreviewCase(window);CoUninitialize();return result;}
     IAccessible* accessible = nullptr; IUIAutomation* automation = nullptr; IUIAutomationElement* element = nullptr;
     IUIAutomationCondition* condition = nullptr; IUIAutomationElementArray* children = nullptr;
     IUIAutomationSelectionPattern* rootSelection = nullptr; IUIAutomationElement* firstItem = nullptr;

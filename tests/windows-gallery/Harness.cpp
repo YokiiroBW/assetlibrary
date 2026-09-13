@@ -20,6 +20,7 @@ struct Harness {
     gallery_test::Owner owner;
     gallery::Surface* surface = nullptr;
     UINT activated = 0;
+    int previewIndex = -1; std::uint64_t previewSerial = 0;
     bool populating = false, pending = false, fixtureFailed = false, retireOnAction = false, replaceOnAction = false, retiredClear = false;
     ~Harness() { if (surface) delete surface; }
 };
@@ -42,6 +43,21 @@ std::shared_ptr<const gallery::Pbgra> FixtureImage(UINT index) {
         image->pixels[at + 2] = static_cast<BYTE>(60 + index % 6 * 24); image->pixels[at + 3] = 255;
     }
     return image;
+}
+void OpenPreview(Harness& harness, int index) noexcept {
+    if (!harness.surface || index < 1 || index >= 30) return;
+    harness.previewIndex = index; const auto serial = ++harness.previewSerial;
+    if (harness.surface->BeginPreview(static_cast<UINT>(index),serial,index > 1,index < 29) != S_OK) return;
+    try {
+        auto image = std::make_shared<gallery::Pbgra>(); image->width = 1600; image->height = (index % 2) ? 1000 : 1600; image->stride = image->width * 4;
+        image->pixels.resize(static_cast<size_t>(image->stride) * image->height);
+        for (UINT y=0; y<image->height; ++y) for (UINT x=0; x<image->width; ++x) {
+            const size_t at=static_cast<size_t>(y)*image->stride+x*4;
+            image->pixels[at]=static_cast<BYTE>(x*180/image->width); image->pixels[at+1]=static_cast<BYTE>(y*170/image->height);
+            image->pixels[at+2]=static_cast<BYTE>(60+index%6*24); image->pixels[at+3]=255;
+        }
+        harness.surface->SetPreview(static_cast<UINT>(index),serial,std::move(image),L"合成1600px测试图 · 适应窗口（非Core图片）");
+    } catch (const std::bad_alloc&) { harness.fixtureFailed = true; }
 }
 void Populate(Harness& harness) noexcept {
     if (!harness.surface) return;
@@ -107,9 +123,10 @@ DWORD RunExternal(const wchar_t* executable, HWND canvas, bool retire, const wch
 int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic) {
     const bool show = argc == 2 && wcscmp(argv[1], L"--show") == 0;
     const bool variant = argc == 3 && (wcscmp(argv[1], L"--msaa-retire") == 0 || wcscmp(argv[1], L"--element-retire") == 0 || wcscmp(argv[1], L"--released-retire") == 0 || wcscmp(argv[1], L"--listener") == 0);
+    const bool previewTest = argc == 3 && wcscmp(argv[1],L"--preview") == 0;
     const bool replace = argc == 3 && wcscmp(argv[1], L"--external-page") == 0;
     const bool retire = argc == 3 && (wcscmp(argv[1], L"--external-retire") == 0 || variant);
-    const bool external = argc == 3 && (wcscmp(argv[1], L"--external") == 0 || retire || replace);
+    const bool external = argc == 3 && (wcscmp(argv[1], L"--external") == 0 || retire || replace || previewTest);
     const bool render = argc == 4 && wcscmp(argv[1], L"--render") == 0;
     if (!show && !external && !render) { std::cerr << "test-only harness: --show, --external <probe.exe>, or --render <new.bmp> <width>\n"; return 2; }
     harness.retireOnAction = retire; harness.replaceOnAction = replace; int result = 1;
@@ -126,11 +143,14 @@ int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic
             state.surface->SelectItem(2,SVSI_SELECT|SVSI_DESELECTOTHERS);
             return gallery::InspectUia().providers == 0 ? 1 : 0;
         };
-        callbacks.activateItem = [](void* context, UINT) noexcept {
+        callbacks.activateItem = [](void* context, UINT index) noexcept {
             auto& state = *static_cast<Harness*>(context); ++state.activated;
             if (state.retireOnAction && state.surface) state.surface->Destroy();
             else if (state.replaceOnAction && state.surface) { auto page = FixturePage(); page.entries[0].name = L"新页合成目录"; state.surface->SetPage(page, 2); }
+            else if (index > 0) OpenPreview(state,static_cast<int>(index));
         };
+        callbacks.previewStep = [](void* context,int delta) noexcept { auto& state=*static_cast<Harness*>(context); OpenPreview(state,state.previewIndex + delta); };
+        callbacks.previewClose = [](void* context) noexcept { auto& state=*static_cast<Harness*>(context); state.previewIndex=-1; if (state.surface) state.surface->EndPreview(); };
         callbacks.viewportChanged = [](void* context) noexcept { Populate(*static_cast<Harness*>(context)); };
         RECT client{}; GetClientRect(frame, &client);
         if (SUCCEEDED(gallery::Surface::Create(frame, client, callbacks, &harness.surface))) {
@@ -138,7 +158,7 @@ int RunCase(int argc, wchar_t** argv, Harness& harness, bool retentionDiagnostic
             Populate(harness);
             if (external) {
                 const HWND canvas = FindWindowExW(harness.surface->Window(), nullptr, L"STATIC", nullptr);
-                result = static_cast<int>(RunExternal(argv[2], canvas, retire || replace, replace ? L"--page" : variant ? argv[1] : L"--retire"));
+                result = static_cast<int>(RunExternal(argv[2], canvas, retire || replace || previewTest, previewTest ? L"--preview" : replace ? L"--page" : variant ? argv[1] : L"--retire"));
                 if (result != 0) std::cerr << "external accessibility stage failed: " << result << '\n';
                 const ULONGLONG actionDeadline = GetTickCount64() + 2000;
                 while (result == 0 && harness.activated == 0 && GetTickCount64() < actionDeadline) {

@@ -63,3 +63,6 @@ set_tests_properties(gallery_accessibility_listener PROPERTIES TIMEOUT 25)
 
 add_test(NAME gallery_preview COMMAND GalleryPreviewTests)
 set_tests_properties(gallery_preview PROPERTIES TIMEOUT 20)
+
+add_test(NAME gallery_preview_external COMMAND GalleryHarness --preview $<TARGET_FILE:GalleryAccessibilityProbe>)
+set_tests_properties(gallery_preview_external PROPERTIES TIMEOUT 25)
