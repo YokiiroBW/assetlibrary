@@ -23,7 +23,7 @@
       "commands": [
         "python scripts/verify_repository.py",
         "python -I -B scripts/validate_v0_1_alpha.py",
-        "python -m unittest discover -s tests/repository -p test_*.py -v",
+        "python -I -B -m unittest discover -s tests/repository -p test_*.py -v",
         "python -B database/migrations/production/migration_tool.py validate",
         "python -B -m unittest discover -s tests/database -p test_migration_manifest.py -v",
         "python -B -m unittest discover -s tests/database -p test_web_gateway_migrations.py -v",

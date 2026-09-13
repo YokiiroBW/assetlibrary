@@ -55,6 +55,7 @@ jobs:
             services/core-server/packages.lock.json
             services/worker-supervisor/packages.lock.json
             services/worker-supervisor/ImagePreview/packages.lock.json
+            services/worker-supervisor/ImageSupervisor/packages.lock.json
             packages/sdk/assetlink/dotnet/packages.lock.json
             tests/dotnet/AssetLibrary.AssetLink.Tests/packages.lock.json
             tests/dotnet/AssetLibrary.Build.Tests/packages.lock.json
@@ -67,7 +68,7 @@ jobs:
       - name: V0.1 Alpha integration audit
         run: python -I -B scripts/validate_v0_1_alpha.py
       - name: Repository workflow tests
-        run: python -m unittest discover -s tests/repository -p test_*.py -v
+        run: python -I -B -m unittest discover -s tests/repository -p test_*.py -v
       - name: Database migration manifest validation
         run: python -B database/migrations/production/migration_tool.py validate
       - name: Database migration static tests

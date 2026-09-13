@@ -3,8 +3,8 @@
   "handoff_version": "2.1",
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
-  "status": "windows_native_gallery_delivered",
-  "next_action": "Explorer preview.7 delivered/installed: fit1600 image preview and cross-directory/process mode+density defaults. Continue the next user-selected feature; NAS image isolation, zoom/pan/original-file workflows, sync/signing and Android physical devices remain separate. No active fixture or G4 run.",
+  "status": "nas_local_image_integration_in_progress",
+  "next_action": "Continue V03-026/ADR-0023 same-NAS image processing. Core adapter, native supervisor and packaging integrated; actual ordinary images, Linux socket peer, containment/fault/parent cleanup verified. Resolve maximum-input CPU/address-space limits, then final same-source NAS package, Core end-to-end and backed-up upgrade. Existing preview.7 delivery remains; G4 waived, no desktop fixture.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
