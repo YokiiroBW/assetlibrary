@@ -178,9 +178,30 @@ void ResidentPixelLeases(){
     auto recovered=Collect(requests,page,16,93);Check(Pixels(recovered)==gallery::MaxImageBytes,"delayed old lease destruction restores exact capacity without underflow");
     requests.Close();Check(Pixels(recovered)==gallery::MaxImageBytes,"external plain leases safely outlive closed request controller");
 }
+void PreviewReplacement(){
+    Control state;control=&state;Window window;gallery::Requests requests({Page,Image,Image});requests.Attach(window.value,Message);
+    Check(requests.Begin(location,100)==S_OK,"preview page");Wait([]{return gallery::PendingWork()==0;});auto page=requests.Take()[0].snapshot;
+    state.mode=Mode::LateFirst;Check(requests.Preview(page,0,100)==S_OK,"first preview");Wait([&]{return state.images==1;});
+    Check(requests.Preview(page,1,100)==S_OK,"new preview cancels old in same page");Wait([&]{return state.images==2&&state.liveImages==1;});auto current=requests.Take();
+    Check(current.size()==1&&current[0].preview&&current[0].index==1&&requests.Current(current[0]),"only latest preview publishes");
+    Check(requests.Preview(page,1,100)==S_OK&&state.images==2,"current preview does not poll");
+    Check(requests.Visible(page,{},100)==S_OK&&!requests.Current(current[0]),"close invalidates taken preview before UI delivery");
+    SetEvent(state.release.value);Wait([]{return gallery::PendingWork()==0;});Check(requests.Take().empty(),"late canceled large preview discarded");current.clear();
+    state.mode=Mode::Ready;state.pixelBytes=preview::MaxPixelBytes;
+    Check(requests.Preview(page,0,100)==S_OK,"maximum preview admitted");Wait([]{return gallery::PendingWork()==0;});auto first=requests.Take();
+    Check(Pixels(first)==preview::MaxPixelBytes&&first[0].preview,"large image shares existing per-view lease budget");
+    Check(requests.Preview(page,1,100)==S_OK,"old UI batch retained during replacement");Wait([]{return gallery::PendingWork()==0;});auto blocked=requests.Take();
+    Check(blocked.size()==1&&!blocked[0].thumbnail.image&&blocked[0].thumbnail.status==thumbnail::Status::Busy,"two retained large images cannot exceed sixteen MiB");
+    first.clear();blocked.clear();Check(requests.Visible(page,{},100)==S_OK&&requests.Preview(page,1,100)==S_OK,"actual lease release permits new explicit attempt");
+    Wait([]{return gallery::PendingWork()==0;});auto recovered=requests.Take();Check(Pixels(recovered)==preview::MaxPixelBytes,"preview capacity restored");recovered.clear();
+    state.pixelBytes=4;Check(requests.Visible(page,AllVisible(1),100)==S_OK,"return to thumbnails");Wait([]{return gallery::PendingWork()==0;});auto thumbs=requests.Take();
+    Check(thumbs.size()==1&&!thumbs[0].preview&&thumbs[0].thumbnail.image,"same-index profile transition creates thumbnail ticket");
+    Check(!state.uiQueries&&state.maximumImages<=2,"preview shares bounded background image pool");
+    page.entries[0].kind=snapshot::Kind::NextPage;Check(requests.Preview(page,0,100)==E_INVALIDARG,"navigation entries never request large images");
+}
 }
 int main(){
-    try{ReadyAndLoading();ObsoletePageAndCapacity();VisibleImages();ViewportTicketIdentity();CompleteVisiblePage();CanceledSlotsWakeNewGeneration();FourViewImageCapacity();ResidentPixelLeases();Check(!gallery::PendingWork(),"all background state reclaimed");
+    try{ReadyAndLoading();ObsoletePageAndCapacity();VisibleImages();ViewportTicketIdentity();CompleteVisiblePage();CanceledSlotsWakeNewGeneration();FourViewImageCapacity();ResidentPixelLeases();PreviewReplacement();Check(!gallery::PendingWork(),"all background state reclaimed");
         puts("gallery_requests=passed; stale_pages=discarded; old_viewport_images=discarded; page_work=4; image_threads=2; candidates=101; unfinished_per_view=16; resident_pixels_per_view=16MiB; UI_query=0; GUI=0; pipe=0");return 0;
     }catch(const std::exception& error){fprintf(stderr,"GalleryRequestTests: %s\n",error.what());return 1;}
 }

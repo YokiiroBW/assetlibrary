@@ -24,6 +24,7 @@ struct Ticket {
     std::uint64_t generation=0;
     const std::uint64_t serial=nextTicket.fetch_add(1);
     UINT index=0;
+    bool preview=false;
     snapshot::Location location;
     std::atomic_bool finished{false};
     bool resolved=false; // UI-owned terminal state until this item leaves the viewport.
@@ -128,7 +129,8 @@ void CALLBACK ReadImage(PTP_CALLBACK_INSTANCE instance,void* context,PTP_WORK){
         const auto ticket=work->ticket;const auto state=work->state;
         if(!ticket->cancel->Stopped()){
             Completion completed;completed.generation=ticket->generation;completed.ticket=ticket->serial;completed.index=ticket->index;
-            completed.thumbnail=state->sources.image(ticket->location,ticket->cancel->event.value);
+            completed.preview=ticket->preview;
+            completed.thumbnail=(ticket->preview?state->sources.preview:state->sources.image)(ticket->location,ticket->cancel->event.value);
             if(!ticket->cancel->Stopped()){
                 try{
                     if(completed.thumbnail.image){
@@ -183,26 +185,32 @@ HRESULT Requests::Begin(snapshot::Location location,std::uint64_t generation) no
     }
     return S_OK;
 }
-HRESULT Requests::Visible(const snapshot::Page& page,const VisibleFiles& visible,std::uint64_t generation) noexcept {
+HRESULT Requests::Images(const snapshot::Page& page,const VisibleFiles& visible,std::uint64_t generation,bool preview) noexcept {
     if(GetCurrentThreadId()!=state_->thread)return RPC_E_WRONG_THREAD;
     if(generation!=state_->generation||page.status!=snapshot::Status::Ready||page.epoch!=state_->location.epoch)return S_FALSE;
-    if(visible.count>MaxVisibleFiles||page.entries.size()>snapshot::MaxItems)return E_INVALIDARG;
+    if(visible.count>MaxVisibleFiles||page.entries.size()>snapshot::MaxItems||(preview&&(!state_->sources.preview||visible.count!=1)))return E_INVALIDARG;
     std::array<bool,snapshot::MaxItems> keep{};
     for(UINT at=0;at<visible.count;++at){const auto index=visible.indices[at];
         if(index>=page.entries.size()||page.entries[index].kind!=snapshot::Kind::File||page.entries[index].epoch!=page.epoch||snapshot::Zero(page.entries[index].node)||keep[index])return E_INVALIDARG;keep[index]=true;}
-    for(UINT index=0;index<snapshot::MaxItems;++index)if(!keep[index]&&state_->images[index]){state_->images[index]->cancel->Stop();state_->images[index].reset();}
+    for(UINT index=0;index<snapshot::MaxItems;++index)if(state_->images[index]&&(!keep[index]||state_->images[index]->preview!=preview)){state_->images[index]->cancel->Stop();state_->images[index].reset();}
+    {std::lock_guard<std::mutex> lock(state_->mutex);
+        state_->completed.erase(std::remove_if(state_->completed.begin(),state_->completed.end(),[](const Record& record){return record.ticket&&record.ticket->cancel->Stopped();}),state_->completed.end());}
     for(auto& ticket:state_->inFlight)if(ticket&&ticket->finished&&(ticket->resolved||ticket->cancel->Stopped()))ticket.reset();
     try{
         for(UINT at=0;at<visible.count;++at){const auto index=visible.indices[at];if(state_->images[index])continue;
             const auto slot=std::find(state_->inFlight.begin(),state_->inFlight.end(),nullptr);
             if(slot==state_->inFlight.end())break;
-            auto ticket=std::make_shared<Ticket>();ticket->generation=generation;ticket->index=index;ticket->location={page.entries[index].epoch,page.entries[index].node};
+            auto ticket=std::make_shared<Ticket>();ticket->generation=generation;ticket->index=index;ticket->preview=preview;ticket->location={page.entries[index].epoch,page.entries[index].node};
             state_->images[index]=ticket;*slot=ticket;
             const auto hr=QueueImage(state_,ticket);
-            if(FAILED(hr)){ticket->finished=true;Completion completed;completed.generation=generation;completed.ticket=ticket->serial;completed.index=index;completed.thumbnail.status=thumbnail::Status::Busy;state_->Publish(std::move(completed),ticket);}
+            if(FAILED(hr)){ticket->finished=true;Completion completed;completed.generation=generation;completed.ticket=ticket->serial;completed.index=index;completed.preview=preview;completed.thumbnail.status=thumbnail::Status::Busy;state_->Publish(std::move(completed),ticket);}
         }
         return S_OK;
     }catch(const std::bad_alloc&){return E_OUTOFMEMORY;}
+}
+HRESULT Requests::Visible(const snapshot::Page& page,const VisibleFiles& visible,std::uint64_t generation) noexcept {return Images(page,visible,generation,false);}
+HRESULT Requests::Preview(const snapshot::Page& page,UINT index,std::uint64_t generation) noexcept {
+    VisibleFiles visible;visible.count=1;visible.indices[0]=index;return Images(page,visible,generation,true);
 }
 std::vector<Completion> Requests::Take(){
     std::vector<Record> records;
@@ -223,6 +231,6 @@ bool Requests::Current(const Completion& completion)const noexcept {
     if(completion.page)return true;
     if(completion.index>=snapshot::MaxItems)return false;
     const auto& ticket=state_->images[completion.index];
-    return ticket&&ticket->serial==completion.ticket&&!ticket->cancel->Stopped();
+    return ticket&&ticket->serial==completion.ticket&&ticket->preview==completion.preview&&!ticket->cancel->Stopped();
 }
 }

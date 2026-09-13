@@ -1,6 +1,7 @@
 #include "gallery/ThumbnailClient.h"
 #include "LocalPipePeer.h"
 #include "ThumbnailVectors.generated.h"
+#include "PreviewVectors.generated.h"
 #include <sddl.h>
 #include <atomic>
 #include <cstdio>
@@ -70,6 +71,22 @@ bool Io(HANDLE pipe,HANDLE stop,bool write,BYTE* bytes,DWORD count,DWORD timeout
     }
     return complete&&transferred==count;
 }
+
+void PreviewVectorsAndLimits(){
+    const auto location=Location();
+    for(const auto& vector:PreviewVectors){
+        const auto bytes=Hex(vector.hex);bool valid=false;
+        if(strcmp(vector.direction,"request")==0){const auto request=preview::Request(location,17);valid=bytes.size()==request.size()&&std::equal(bytes.begin(),bytes.end(),request.begin());}
+        else{ULONG length=0;preview::Result result;valid=preview::ResponseHeader(bytes.data(),17,length)&&bytes.size()==16+length&&preview::Decode(bytes.data()+16,length,location,result);if(!valid)Check(!result.image,"invalid preview exposes no pixels");}
+        if(valid!=vector.valid){fprintf(stderr,"preview vector=%s\n",vector.name);Check(false,"independent preview vector decision");}
+    }
+    Bytes maximum(preview::MaxPayload,0);std::memcpy(maximum.data()+4,&location.epoch,16);std::memcpy(maximum.data()+20,&location.node,16);
+    Put32(maximum.data()+36,1600);Put32(maximum.data()+40,1600);Put32(maximum.data()+44,6400);Put32(maximum.data()+48,1);Put32(maximum.data()+52,preview::MaxPixelBytes);
+    preview::Result result;Check(preview::Decode(maximum.data(),maximum.size(),location,result)&&result.image->pixels.size()==10240000,"1600 square preview maximum accepted");
+    Check(!thumbnail::Decode(maximum.data(),maximum.size(),location,result)&&!result.image,"thumbnail never accepts preview allocation");
+    Put32(maximum.data()+40,1601);Check(!preview::Decode(maximum.data(),maximum.size(),location,result),"preview height overflow denied");
+    puts("preview_vectors=20; maximum=1600x1600; thumbnail_boundary=preserved");
+}
 enum class Mode {Ready,Invalid,Partial,Silent};
 class Server {
     local_pipe::Handle stop_{CreateEventW(nullptr,TRUE,FALSE,nullptr)};
@@ -77,20 +94,20 @@ class Server {
     std::vector<std::thread> workers_;
 public:
     std::atomic_ulong received{0},listening{0};
-    explicit Server(Mode mode,unsigned instances=1){
+    explicit Server(Mode mode,unsigned instances=1,bool preview=false){
         std::vector<BYTE> token;Check(local_pipe::UserSid(GetCurrentProcess(),token),"test actual TokenUser");LPWSTR sid=nullptr;
         Check(ConvertSidToStringSidW(reinterpret_cast<TOKEN_USER*>(token.data())->User.Sid,&sid)!=FALSE,"test SID");
         const std::wstring sddl=L"D:P(A;;GA;;;"+std::wstring(sid)+L")";LocalFree(sid);
         PSECURITY_DESCRIPTOR descriptor=nullptr;Check(ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl.c_str(),SDDL_REVISION_1,&descriptor,nullptr)!=FALSE,"test DACL");
         SECURITY_ATTRIBUTES security{sizeof(security),descriptor,FALSE};
         for(unsigned i=0;i<instances;++i){
-            HANDLE pipe=CreateNamedPipeW(thumbnail::PipeName().c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|(i==0?FILE_FLAG_FIRST_PIPE_INSTANCE:0),
+            HANDLE pipe=CreateNamedPipeW((preview?preview::PipeName():thumbnail::PipeName()).c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|(i==0?FILE_FLAG_FIRST_PIPE_INSTANCE:0),
                 PIPE_TYPE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,2,65536,65536,0,&security);
             if(pipe==INVALID_HANDLE_VALUE){LocalFree(descriptor);throw std::runtime_error("thumbnail test endpoint unavailable; do not replace a real Host");}
             pipes_.push_back(std::make_unique<local_pipe::Handle>(pipe));
         }
         LocalFree(descriptor);
-        for(const auto& pipe:pipes_)workers_.emplace_back([&,handle=pipe->value,mode]{
+        for(const auto& pipe:pipes_)workers_.emplace_back([&,handle=pipe->value,mode,preview]{
             local_pipe::Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));OVERLAPPED connection{};connection.hEvent=event.value;
             BOOL connected=ConnectNamedPipe(handle,&connection);const auto error=connected?ERROR_SUCCESS:GetLastError();++listening;
             if(!connected&&error==ERROR_IO_PENDING){
@@ -101,7 +118,7 @@ public:
             if(!connected)return;
             std::array<BYTE,48> request{};if(!Io(handle,stop_.value,false,request.data(),48,500))return;++received;
             if(mode!=Mode::Silent){
-                auto response=Hex(ThumbnailVectors[1].hex);Put32(response.data()+12,U32(request.data()+12));
+                auto response=Hex(preview?PreviewVectors[1].hex:ThumbnailVectors[1].hex);Put32(response.data()+12,U32(request.data()+12));
                 if(mode==Mode::Invalid)response[4]=2;if(mode==Mode::Partial)response.resize(24);
                 if(!Io(handle,stop_.value,true,response.data(),static_cast<DWORD>(response.size()),500))return;
             }
@@ -116,6 +133,7 @@ void Reclaimed(){const auto until=GetTickCount64()+2000;while(thumbnail::Pending
 void Pipes(){
     const auto location=Location();Check(thumbnail::Query({},nullptr).status==thumbnail::Status::InvalidResponse,"root is not an image request");
     {Server server(Mode::Ready);auto image=thumbnail::Query(location,nullptr);Check(image.status==thumbnail::Status::Ready&&image.image,"real pipe PBGRA frame");}Reclaimed();
+    {Server server(Mode::Ready,1,true);auto image=preview::Query(location,nullptr);Check(image.status==thumbnail::Status::Ready&&image.image,"preview endpoint frame uses shared transfer");}Reclaimed();
     {Server server(Mode::Invalid);Check(thumbnail::Query(location,nullptr).status==thumbnail::Status::InvalidResponse,"bad response header");}Reclaimed();
     {Server server(Mode::Partial);local_pipe::Handle cancel(CreateEventW(nullptr,TRUE,FALSE,nullptr));
         std::thread stop([&]{Sleep(40);SetEvent(cancel.value);});const auto result=thumbnail::Query(location,cancel.value);stop.join();Check(result.status==thumbnail::Status::Unavailable&&!result.image,"partial frame canceled without stale image");}Reclaimed();
@@ -123,7 +141,7 @@ void Pipes(){
         std::thread a([&]{first=thumbnail::Query(location,cancel.value);}),b([&]{second=thumbnail::Query(location,cancel.value);});
         const auto until=GetTickCount64()+1000;while(server.received<2&&GetTickCount64()<until)Sleep(1);
         const bool atCapacity=server.received==2&&thumbnail::PendingOperations()==2;
-        const auto third=thumbnail::Query(location,cancel.value);SetEvent(cancel.value);a.join();b.join();
+        const auto third=preview::Query(location,cancel.value);SetEvent(cancel.value);a.join();b.join();
         Check(atCapacity&&third.status==thumbnail::Status::Busy,"third image cannot exceed two retained I/O operations");
         Check(!first.image&&!second.image,"cancellation has no image");}Reclaimed();
     {Server server(Mode::Silent);const auto start=GetTickCount64();auto result=thumbnail::Query(location,nullptr);const auto elapsed=GetTickCount64()-start;
@@ -132,5 +150,5 @@ void Pipes(){
 }
 }
 int main(){
-    try{Vectors();Pipes();return 0;}catch(const std::exception& error){fprintf(stderr,"GalleryThumbnailTests: %s\n",error.what());return 1;}
+    try{Vectors();PreviewVectorsAndLimits();Pipes();return 0;}catch(const std::exception& error){fprintf(stderr,"GalleryThumbnailTests: %s\n",error.what());return 1;}
 }
