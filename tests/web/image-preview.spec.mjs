@@ -75,6 +75,11 @@ for (const viewport of [
     await page.goto(`${browsePath}?view=grid`);
     const row = entryOption(page, item.name);
     await expect(row.locator("img")).toBeVisible();
+    const thumbnail = await row.locator(".image-thumbnail").boundingBox();
+    const pixels = await row.locator("img").boundingBox();
+    expect(pixels.height).toBeGreaterThan(0);
+    expect(pixels.y).toBeGreaterThanOrEqual(thumbnail.y);
+    expect(pixels.y + pixels.height).toBeLessThanOrEqual(thumbnail.y + thumbnail.height + 1);
     await row.click();
     const before = await page.evaluate(() => ({ url: location.href, history: history.length }));
     await page.keyboard.press("Space");
