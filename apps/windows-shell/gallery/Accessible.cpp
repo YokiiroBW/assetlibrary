@@ -164,6 +164,7 @@ public:
     HRESULT STDMETHODCALLTYPE get_accDescription(VARIANT child, BSTR* value) override {
         if (!value) return E_POINTER; *value = nullptr;
         if (!Valid(child)) return E_INVALIDARG;
+        if (model_->preview) return Text(model_->detail.data(),value);
         if (child.lVal && model_->page.entries[static_cast<size_t>(child.lVal - 1)].kind == snapshot::Kind::File) {
             const size_t index = static_cast<size_t>(child.lVal - 1);
             return Text(model_->thumbnailReady[index] ? L"文件，已加载缩略图" :
@@ -174,7 +175,8 @@ public:
     }
     HRESULT STDMETHODCALLTYPE get_accRole(VARIANT child, VARIANT* role) override {
         if (!role) return E_POINTER; VariantInit(role); if (!Valid(child)) return E_INVALIDARG;
-        role->vt = VT_I4; role->lVal = ROLE_SYSTEM_LIST;
+        role->vt = VT_I4; role->lVal = model_->preview ? (child.lVal ? ROLE_SYSTEM_GRAPHIC : ROLE_SYSTEM_PANE) : ROLE_SYSTEM_LIST;
+        if (model_->preview) return S_OK;
         if (child.lVal) role->lVal = model_->page.entries[static_cast<size_t>(child.lVal - 1)].kind == snapshot::Kind::NextPage ?
             ROLE_SYSTEM_LINK : ROLE_SYSTEM_LISTITEM;
         return S_OK;
@@ -183,7 +185,7 @@ public:
         if (!value) return E_POINTER; VariantInit(value); if (!Valid(child)) return E_INVALIDARG;
         value->vt = VT_I4; value->lVal = STATE_SYSTEM_FOCUSABLE;
         if (child.lVal) {
-            const size_t index = static_cast<size_t>(child.lVal - 1); value->lVal |= STATE_SYSTEM_SELECTABLE;
+            const size_t index = static_cast<size_t>(child.lVal - 1); if (!model_->preview) value->lVal |= STATE_SYSTEM_SELECTABLE;
             if (model_->selected[index]) value->lVal |= STATE_SYSTEM_SELECTED;
             if (GetFocus() == model_->window && model_->focus == static_cast<int>(index)) value->lVal |= STATE_SYSTEM_FOCUSED;
             RECT client{}, overlap{}; GetClientRect(model_->window, &client);
@@ -216,7 +218,7 @@ public:
     HRESULT STDMETHODCALLTYPE get_accDefaultAction(VARIANT child, BSTR* value) override {
         if (!value) return E_POINTER; *value = nullptr; if (!Valid(child, false)) return E_INVALIDARG;
         const auto kind = model_->page.entries[static_cast<size_t>(child.lVal - 1)].kind;
-        if (!snapshot::Navigable(kind)) return S_FALSE;
+        if (model_->preview || (!snapshot::Navigable(kind) && kind != snapshot::Kind::File)) return S_FALSE;
         return Text(kind == snapshot::Kind::NextPage ? L"下一页" : L"打开", value);
     }
     HRESULT STDMETHODCALLTYPE accSelect(LONG flags, VARIANT child) override {
@@ -266,7 +268,7 @@ public:
     HRESULT STDMETHODCALLTYPE accDoDefaultAction(VARIANT child) override {
         if (!Valid(child, false) || !model_->activate) return E_INVALIDARG;
         const UINT index = static_cast<UINT>(child.lVal - 1);
-        if (!snapshot::Navigable(model_->page.entries[index].kind)) return E_ACCESSDENIED;
+        if (model_->preview || (!snapshot::Navigable(model_->page.entries[index].kind) && model_->page.entries[index].kind != snapshot::Kind::File)) return E_ACCESSDENIED;
         return model_->activate(model_->context, index);
     }
     HRESULT STDMETHODCALLTYPE put_accName(VARIANT, BSTR) override { return E_ACCESSDENIED; }

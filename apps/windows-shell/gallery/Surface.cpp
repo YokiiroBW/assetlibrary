@@ -37,8 +37,13 @@ bool Contains(const VisibleFiles& files, UINT index) noexcept {
 bool Same(const VisibleFiles& first, const VisibleFiles& second) noexcept {
     return first.count == second.count && std::equal(first.indices.begin(), first.indices.begin() + first.count, second.indices.begin());
 }
-bool PixelsValid(const Pbgra& image) noexcept {
-    return image.width >= 1 && image.width <= 512 && image.height >= 1 && image.height <= 512 &&
+void CopyText(const std::wstring& text, wchar_t* target) noexcept {
+    size_t length = std::min(text.size(),MaxStatusTextChars);
+    if (length < text.size() && length && text[length-1] >= 0xD800 && text[length-1] <= 0xDBFF && text[length] >= 0xDC00 && text[length] <= 0xDFFF) --length;
+    std::copy_n(text.data(),length,target); target[length] = 0;
+}
+bool PixelsValid(const Pbgra& image, UINT maximum = 512) noexcept {
+    return image.width >= 1 && image.width <= maximum && image.height >= 1 && image.height <= maximum &&
         image.stride == image.width * 4 && image.pixels.size() == static_cast<size_t>(image.stride) * image.height;
 }
 }
@@ -46,6 +51,13 @@ bool PixelsValid(const Pbgra& image) noexcept {
 struct Surface::State : std::enable_shared_from_this<State> {
     HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr, statusText = nullptr;
     std::array<HWND, 6> buttons{};
+    std::array<HWND,3> previewButtons{};
+    std::shared_ptr<AccessibleModel> previewModel = std::make_shared<AccessibleModel>();
+    std::shared_ptr<const Pbgra> previewImage;
+    std::array<wchar_t,MaxStatusTextChars + 1> browseStatus{};
+    std::uint64_t previewSerial = 0, presentationSerial = 0;
+    UINT previewIndex = 0;
+    bool previewActive = false, previousEnabled = false, nextEnabled = false;
     Callbacks callbacks;
     std::shared_ptr<AccessibleModel> model = std::make_shared<AccessibleModel>();
     Layout layout;
@@ -95,9 +107,32 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const auto retained = shared_from_this(); const auto callback = callbacks.contextMenu; const auto context = callbacks.context;
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index, point); }
     }
+    const std::shared_ptr<AccessibleModel>& CurrentModel() const noexcept { return previewActive ? previewModel : model; }
+    void RetirePreview() noexcept {
+        previewImage.reset(); RetireUia(previewModel); previewModel->presentation = ++presentationSerial;
+        previewModel->alive = false; previewModel->visible = false; previewModel->window = nullptr; previewModel->context = nullptr; previewModel->focusControl = nullptr; previewModel->accessible = nullptr;
+        previewModel->detail.fill(0); previewModel->focus = -1; previewModel->bounds.fill({});
+        if (!previewModel->page.entries.empty()) { auto& entry = previewModel->page.entries[0]; entry.name.clear(); entry.epoch = {}; entry.node = {}; }
+    }
+    bool Toolbar() noexcept {
+        const auto revision = pageRevision; const bool preview = previewActive;
+        for (HWND button : buttons) { if (button) ShowWindow(button,preview ? SW_HIDE : SW_SHOWNA); if (!Alive() || revision != pageRevision) return false; }
+        for (HWND button : previewButtons) { if (button) ShowWindow(button,preview ? SW_SHOWNA : SW_HIDE); if (!Alive() || revision != pageRevision) return false; }
+        if (previewButtons[1]) EnableWindow(previewButtons[1],previousEnabled);
+        if (previewButtons[2]) EnableWindow(previewButtons[2],nextEnabled);
+        ShowScrollBar(canvas,SB_VERT,preview ? FALSE : TRUE);
+        return Alive() && revision == pageRevision;
+    }
+    void PreviewStep(int delta) noexcept {
+        if (!Alive() || !previewActive || (delta < 0 ? !previousEnabled : !nextEnabled)) return;
+        const auto retained = shared_from_this(); const auto callback = callbacks.previewStep;
+        if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(callbacks.context,delta); }
+    }
+    void PreviewClose() noexcept { if (Alive() && previewActive) Notify(callbacks.previewClose); }
     void Empty(snapshot::Status status, std::uint64_t generation) noexcept {
+        RetirePreview(); previewActive = false; browseStatus.fill(0);
         RetireUia(model);
-        ++model->presentation; model->accessible = nullptr;
+        model->presentation = ++presentationSerial; model->accessible = nullptr;
         ++pageRevision; activationQueued = false;
         images.fill(nullptr); model->thumbnailReady.fill(false); model->thumbnailUnavailable.fill(false); visible = {};
         model->page.entries.clear(); model->page.status = status; model->page.epoch = {};
@@ -135,6 +170,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
             OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
         if (!next) return;
         for (HWND button : buttons) if (button) SendMessageW(button, WM_SETFONT, reinterpret_cast<WPARAM>(next), TRUE);
+        for (HWND button : previewButtons) if (button) SendMessageW(button,WM_SETFONT,reinterpret_cast<WPARAM>(next),TRUE);
         if (statusText) SendMessageW(statusText, WM_SETFONT, reinterpret_cast<WPARAM>(next), TRUE);
         const auto previous = font; font = next; if (previous) DeleteObject(previous);
     }
@@ -143,19 +179,20 @@ struct Surface::State : std::enable_shared_from_this<State> {
         RECT client{}; GetClientRect(window, &client);
         const int width = client.right;
         const int rowHeight = Scale(34), gap = Scale(6), desired = Scale(72);
-        const int columns = std::max(1, std::min(6, (width - gap) / std::max(1, desired + gap)));
-        const int rows = (6 + columns - 1) / columns;
+        const int buttonCount = previewActive ? 3 : 6;
+        const int columns = std::max(1, std::min(buttonCount, (width - gap) / std::max(1, desired + gap)));
+        const int rows = (buttonCount + columns - 1) / columns;
         int toolbarHeight = rows * rowHeight + gap * 2;
-        for (size_t index = 0; index < buttons.size(); ++index) {
+        for (int index = 0; index < buttonCount; ++index) {
             const int column = static_cast<int>(index) % columns, row = static_cast<int>(index) / columns;
             const int buttonWidth = std::max(1, std::min(desired, (width - gap * (columns + 1)) / columns));
-            MoveWindow(buttons[index], gap + column * (buttonWidth + gap), gap + row * rowHeight, buttonWidth, rowHeight - gap, TRUE);
+            MoveWindow(previewActive ? previewButtons[static_cast<size_t>(index)] : buttons[static_cast<size_t>(index)], gap + column * (buttonWidth + gap), gap + row * rowHeight, buttonWidth, rowHeight - gap, TRUE);
         }
         if (!Alive()) return;
         wchar_t summary[MaxStatusTextChars + 1]{};
         const int summaryLength = statusText ? GetWindowTextW(statusText,summary,static_cast<int>(MaxStatusTextChars + 1)) : 0;
         if (statusText && summaryLength > 0) {
-            const int beside = gap + 6 * (desired + gap);
+            const int beside = gap + buttonCount * (desired + gap);
             const bool sameRow = rows == 1 && width - beside - gap >= Scale(180);
             const int left = sameRow ? beside : gap;
             const int top = sameRow ? gap : rows * rowHeight + gap;
@@ -174,10 +211,13 @@ struct Surface::State : std::enable_shared_from_this<State> {
         } else if (statusText) ShowWindow(statusText,SW_HIDE);
         if (!Alive()) return;
         MoveWindow(canvas, 0, toolbarHeight, std::max(1, width), std::max<int>(1, client.bottom - toolbarHeight), TRUE);
-        Reflow(true);
+        if (previewActive) {
+            RECT previewBounds{}; GetClientRect(canvas,&previewBounds); previewModel->bounds[0] = previewBounds;
+            previewModel->visible = shown; InvalidateRect(canvas,nullptr,FALSE);
+        } else Reflow(true);
     }
     void Reflow(bool preserveAnchor) {
-        if (!Alive()) return;
+        if (!Alive() || previewActive) return;
         int oldIndex = -1, oldOffset = 0;
         if (preserveAnchor) for (const auto& item : layout.items) if (item.bounds.bottom > scroll) {
             oldIndex = static_cast<int>(item.index); oldOffset = item.bounds.top - scroll; break;
@@ -195,14 +235,19 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (Alive()) InvalidateRect(canvas, nullptr, FALSE);
     }
     void UpdateVisible(int height) noexcept {
-        const VisibleFiles next = shown ? Visible(layout, layoutItems, scroll, height) : VisibleFiles{};
+        const VisibleFiles next = shown && !previewActive ? Visible(layout, layoutItems, scroll, height) : VisibleFiles{};
         const bool changed = !Same(visible, next); visible = next;
         for (UINT index = 0; index < images.size(); ++index) if (!Contains(next, index)) { images[index].reset(); model->thumbnailReady[index] = false; }
-        model->visible = shown;
+        model->visible = shown && !previewActive;
+        previewModel->visible = shown && previewActive;
         if (changed) Notify(callbacks.viewportChanged);
     }
     void ChangeVisibility(bool value) noexcept {
         const bool changed = shown != value; const auto previous = visible; shown = value;
+        if (!shown && previewActive) {
+            RetirePreview(); previewActive = false; ++pageRevision; SetWindowTextW(statusText,browseStatus.data());
+            try { if (Toolbar()) Resize(); } catch (const std::bad_alloc&) { Empty(snapshot::Status::Unavailable,model->generation + 1); }
+        }
         RECT client{}; if (canvas) GetClientRect(canvas, &client);
         UpdateVisible(client.bottom);
         if (Alive() && changed && Same(previous, visible)) Notify(callbacks.viewportChanged);
@@ -235,7 +280,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (Alive() && revision == model->presentation) Notify(callbacks.selectionChanged);
     }
     HRESULT Select(UINT index, UINT flags) {
-        if (!Alive() || index >= model->page.entries.size()) return E_INVALIDARG;
+        if (!Alive() || previewActive || index >= model->page.entries.size()) return E_INVALIDARG;
         if ((flags & SVSI_EDIT) == SVSI_EDIT) return E_ACCESSDENIED;
         if (flags & SVSI_DESELECTOTHERS) model->selected.fill(false);
         if (flags == SVSI_DESELECT || (flags & (SVSI_DESELECTOTHERS | SVSI_SELECT))) model->selected[index] = (flags & SVSI_SELECT) != 0;
@@ -263,12 +308,21 @@ struct Surface::State : std::enable_shared_from_this<State> {
             UINT flags = SVSI_FOCUSED | SVSI_ENSUREVISIBLE | SVSI_SELECTIONMARK;
             if (!control) flags |= SVSI_DESELECTOTHERS | SVSI_SELECT;
             else if (!model->selected[index]) flags |= SVSI_SELECT;
+            else model->selected[index] = false;
             Select(index, flags);
         }
     }
     bool Key(WPARAM key) {
         if (!Alive()) return false;
         const bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0, shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+        if (GetKeyState(VK_MENU)&0x8000) return false;
+        if (control && (key == VK_RETURN || key == VK_ESCAPE || key == VK_LEFT || key == VK_RIGHT)) return false;
+        if (previewActive) {
+            if (key == VK_ESCAPE) { PreviewClose(); return true; }
+            if (!control && !(GetKeyState(VK_MENU)&0x8000) && (key == VK_LEFT || key == VK_RIGHT)) { PreviewStep(key == VK_LEFT ? -1 : 1); return true; }
+            if (key == VK_F5) { Notify(callbacks.refresh); return true; }
+            return key == VK_SPACE || key == VK_RETURN || key == 'A' || key == VK_UP || key == VK_DOWN || key == VK_HOME || key == VK_END || key == VK_PRIOR || key == VK_NEXT;
+        }
         if (key == VK_F5) { Notify(callbacks.refresh); return true; }
         if (key == VK_APPS || (key == VK_F10 && shift)) {
             POINT point{Scale(12), Scale(12)};
@@ -280,7 +334,11 @@ struct Surface::State : std::enable_shared_from_this<State> {
             for (UINT index = 0; index < model->page.entries.size(); ++index) model->selected[index] = true;
             PublishSelection(); return true;
         }
-        if (key == VK_SPACE && model->focus >= 0) { SelectFromInput(static_cast<UINT>(model->focus), true, shift); return true; }
+        if (key == VK_SPACE && model->focus >= 0) {
+            const auto index = static_cast<UINT>(model->focus);
+            if (!control && model->page.entries[index].kind == snapshot::Kind::File) Activate(index);
+            else SelectFromInput(index,true,shift); return true;
+        }
         LONG direction = 0;
         if (key == VK_LEFT) direction = NAVDIR_LEFT; if (key == VK_RIGHT) direction = NAVDIR_RIGHT;
         if (key == VK_UP) direction = NAVDIR_UP; if (key == VK_DOWN) direction = NAVDIR_DOWN;
@@ -324,6 +382,16 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (IntersectClipRect(dc, client.left, client.top, client.right, client.bottom) == ERROR) { RestoreDC(dc, saved); return; }
         Fill(dc, clip, colors.surface);
         const HGDIOBJ previous = font ? SelectObject(dc, font) : nullptr; SetBkMode(dc, TRANSPARENT);
+        if (previewActive) {
+            RECT name = client; InflateRect(&name,-Scale(12),-Scale(8)); name.bottom = name.top + Scale(24);
+            SetTextColor(dc,colors.ink);
+            DrawTextW(dc,previewModel->page.entries[0].name.c_str(),-1,&name,DT_LEFT|DT_SINGLELINE|DT_END_ELLIPSIS|DT_NOPREFIX);
+            RECT box = client; InflateRect(&box,-Scale(12),-Scale(12)); box.top = name.bottom + Scale(8);
+            const auto pixels = previewImage;
+            if (pixels) PaintImage(dc,*pixels,box);
+            else { SetTextColor(dc,colors.muted); DrawTextW(dc,previewModel->detail.data(),-1,&box,DT_CENTER|DT_WORDBREAK|DT_NOPREFIX); }
+            if (previous) SelectObject(dc,previous); RestoreDC(dc,saved); return;
+        }
         if (model->page.entries.empty()) {
             RECT text{Scale(20), Scale(24), 0, 0}; GetClientRect(canvas, &text); InflateRect(&text, -Scale(20), -Scale(20));
             SetTextColor(dc, colors.muted);
@@ -403,6 +471,13 @@ struct Surface::State : std::enable_shared_from_this<State> {
         return DefSubclassProc(hwnd, message, wParam, lParam);
     }
     void Command(WORD id) {
+        if (previewActive) {
+            if (id == PreviewBackControlId) PreviewClose();
+            else if (id == PreviewPreviousControlId) PreviewStep(-1);
+            else if (id == PreviewNextControlId) PreviewStep(1);
+            return;
+        }
+        const auto oldMode = mode; const auto oldDensity = density;
         if (id == 100) mode = Mode::Gallery;
         else if (id == 101) mode = Mode::List;
         else if (id == 102) density = std::max(MinimumDensityDip, density > 24 ? density - 24 : MinimumDensityDip);
@@ -410,6 +485,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         else if (id == 104) { Notify(callbacks.refresh); return; }
         else if (id == 105) { Notify(callbacks.settings); return; }
         UpdateModeButtons(); model->title = mode == Mode::Gallery ? L"资产库图库" : L"资产库列表"; Reflow(true);
+        if (Alive() && (oldMode != mode || oldDensity != density)) Notify(callbacks.preferencesChanged);
     }
     void UpdateModeButtons() noexcept {
         SendMessageW(buttons[0], BM_SETCHECK, mode == Mode::Gallery ? BST_CHECKED : BST_UNCHECKED, 0);
@@ -426,14 +502,14 @@ struct Surface::State : std::enable_shared_from_this<State> {
         }
         if (message == WM_GETOBJECT && static_cast<LONG>(lParam) == UiaRootObjectId) {
             IRawElementProviderSimple* provider = nullptr;
-            const auto created = CreateUiaRoot(model, &provider); model->uiaUnavailable = FAILED(created);
+            const auto created = CreateUiaRoot(CurrentModel(), &provider); CurrentModel()->uiaUnavailable = FAILED(created);
             if (FAILED(created)) return 0;
             const LRESULT result = UiaReturnRawElementProvider(hwnd, wParam, lParam, provider); provider->Release(); return result;
         }
         if (message == WM_GETOBJECT && static_cast<LONG>(lParam) == OBJID_CLIENT) {
-            if (model->uiaUnavailable) return 0;
+            if (CurrentModel()->uiaUnavailable) return 0;
             IAccessible* accessible = nullptr;
-            if (FAILED(CreateAccessible(model, &accessible))) return 0;
+            if (FAILED(CreateAccessible(CurrentModel(), &accessible))) return 0;
             const LRESULT result = LresultFromObject(IID_IAccessible, wParam, accessible); accessible->Release(); return result;
         }
         if (message == WM_GETDLGCODE) return DLGC_WANTARROWS | DLGC_WANTCHARS;
@@ -441,6 +517,8 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (message == WM_ERASEBKGND) return 1;
         if (message == WM_PRINTCLIENT && wParam) { RECT client{}; GetClientRect(hwnd, &client); Paint(reinterpret_cast<HDC>(wParam), client); return 0; }
         if (message == WM_PAINT) { PAINTSTRUCT paint{}; HDC dc = BeginPaint(hwnd, &paint); if (dc) Paint(dc, paint.rcPaint); EndPaint(hwnd, &paint); return 0; }
+        if (previewActive && (message == WM_MOUSEMOVE || message == WM_MOUSEWHEEL || message == WM_VSCROLL || message == WM_CONTEXTMENU)) return 0;
+        if (previewActive && (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK)) { SetFocus(canvas); return 0; }
         if (message == WM_MOUSEWHEEL) { ScrollTo(scroll - GET_WHEEL_DELTA_WPARAM(wParam) * Scale(48) / WHEEL_DELTA); return 0; }
         if (message == WM_VSCROLL) {
             SCROLLINFO info{sizeof(info), SIF_ALL}; GetScrollInfo(hwnd, SB_VERT, &info); int next = scroll;
@@ -497,6 +575,9 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
     try {
         auto state = std::make_shared<State>(); state->callbacks = callbacks; state->model->lifetimeOwner = callbacks.providerLifetimeOwner;
         auto hr = PrepareAccessibility(*state->model); if (FAILED(hr)) return hr;
+        state->previewModel->preview = true; state->previewModel->alive = false;
+        state->previewModel->lifetimeOwner = callbacks.providerLifetimeOwner; state->previewModel->typeInfo = state->model->typeInfo; state->previewModel->typeInfo->AddRef();
+        state->previewModel->title = L"大图预览"; state->previewModel->page.entries.resize(1); state->previewModel->page.entries[0].name.reserve(255);
         state->window = CreateWindowExW(WS_EX_CONTROLPARENT, L"STATIC", L"资产库", WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN,
             bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, parent, nullptr, GetModuleHandleW(nullptr), nullptr);
         if (!state->window) return HRESULT_FROM_WIN32(GetLastError());
@@ -531,6 +612,13 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             if (!state->buttons[index]) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
             hr = state->Attach(state->buttons[index]); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
         }
+        const wchar_t* previewLabels[] = {L"返回",L"上一张",L"下一张"};
+        for (size_t at=0; at<state->previewButtons.size(); ++at) {
+            state->previewButtons[at] = CreateWindowExW(0,L"BUTTON",previewLabels[at],WS_CHILD|WS_TABSTOP|BS_PUSHBUTTON,0,0,1,1,state->window,
+                reinterpret_cast<HMENU>(static_cast<INT_PTR>(PreviewBackControlId + at)),GetModuleHandleW(nullptr),nullptr);
+            if (!state->previewButtons[at]) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
+            hr = state->Attach(state->previewButtons[at]); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
+        }
         state->statusText = CreateWindowExW(0,L"STATIC",L"",WS_CHILD|SS_LEFT|SS_NOPREFIX,
             0,0,1,1,state->window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(StatusTextControlId)),GetModuleHandleW(nullptr),nullptr);
         if (!state->statusText) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
@@ -563,7 +651,8 @@ HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) n
         state->Empty(page.status, generation);
         if (page.status == snapshot::Status::Ready) state->model->page = std::move(next);
         for (const auto& item : state->model->page.entries) state->layoutItems.push_back({item.kind, 4.0 / 3.0});
-        state->Reflow(false);
+        if (!state->Toolbar()) return S_FALSE;
+        state->Resize();
         if (state->Alive() && state->visible.count == 0) state->Notify(state->callbacks.viewportChanged);
         if (state->Alive()) { NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF); state->PublishSelection(); }
         return S_OK;
@@ -573,14 +662,14 @@ void Surface::Clear(snapshot::Status status, std::uint64_t generation) noexcept 
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
     if (generation < state->model->generation) return;
-    state->Empty(status, generation); NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
+    state->Empty(status, generation); if (!state->Toolbar()) return; state->Resize(); if (!state->Alive()) return; NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
     InvalidateRect(state->canvas, nullptr, FALSE); state->Notify(state->callbacks.viewportChanged);
     if (state->Alive()) state->PublishSelection();
 }
 HRESULT Surface::SetThumbnail(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image) noexcept {
     if (!state_ || !state_->Alive()) return S_FALSE;
     const OwnedState call(state_); const auto& state = call.state;
-    if (generation != state->model->generation ||
+    if (state->previewActive || generation != state->model->generation ||
         index >= state->model->page.entries.size() || state->model->page.entries[index].kind != snapshot::Kind::File || !Contains(state->visible, index)) return S_FALSE;
     if (image && !PixelsValid(*image)) return E_INVALIDARG;
     size_t retained = 0;
@@ -600,9 +689,70 @@ HRESULT Surface::SetThumbnail(UINT index, std::uint64_t generation, std::shared_
         return S_OK;
     } catch (const std::bad_alloc&) { state->images[index].reset(); return E_OUTOFMEMORY; }
 }
+HRESULT Surface::BeginPreview(UINT index, std::uint64_t generation, bool previousEnabled, bool nextEnabled) noexcept {
+    if (!state_ || !state_->Alive()) return E_INVALIDARG;
+    const OwnedState call(state_); const auto& state = call.state;
+    if (!state->shown || generation <= state->previewSerial) return S_FALSE;
+    if (state->model->page.status != snapshot::Status::Ready || index >= state->model->page.entries.size() ||
+        state->model->page.entries[index].kind != snapshot::Kind::File || state->model->page.entries[index].name.size() > 255) return E_INVALIDARG;
+    if (!state->previewActive) GetWindowTextW(state->statusText,state->browseStatus.data(),static_cast<int>(state->browseStatus.size()));
+    state->RetirePreview(); RetireUia(state->model); state->model->presentation = ++state->presentationSerial; state->model->accessible = nullptr; state->model->visible = false;
+    state->images.fill(nullptr); state->model->thumbnailReady.fill(false); state->model->thumbnailUnavailable.fill(false); state->visible = {};
+    state->previewActive = true; state->previewIndex = index; state->previewSerial = generation;
+    state->previousEnabled = previousEnabled; state->nextEnabled = nextEnabled; ++state->pageRevision; state->activationQueued = false;
+    const auto revision = state->pageRevision;
+    try {
+        auto& preview = *state->previewModel; preview.page.entries[0] = state->model->page.entries[index];
+        preview.alive = true; preview.visible = state->shown; preview.window = state->canvas; preview.context = state.get(); preview.focusControl = state->model->focusControl;
+        preview.presentation = ++state->presentationSerial; preview.generation = generation; preview.page.status = snapshot::Status::Ready; preview.page.epoch = state->model->page.epoch;
+        preview.focus = 0; preview.order[0] = 0; preview.selected.fill(false);
+        constexpr wchar_t loading[] = L"正在加载大图预览"; std::copy(std::begin(loading),std::end(loading),preview.detail.begin());
+        SetWindowTextW(state->canvas,L"大图预览"); SetWindowTextW(state->statusText,preview.detail.data());
+        if (!state->Alive() || revision != state->pageRevision || !state->Toolbar()) return S_FALSE;
+        state->Resize();
+        if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
+        SetFocus(state->canvas);
+        if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
+        state->Notify(state->callbacks.viewportChanged); return S_OK;
+    } catch (const std::bad_alloc&) { return E_OUTOFMEMORY; }
+}
+HRESULT Surface::SetPreview(UINT index, std::uint64_t generation, std::shared_ptr<const Pbgra> image, const std::wstring& statusText) noexcept {
+    if (!state_ || !state_->Alive()) return S_FALSE;
+    const OwnedState call(state_); const auto& state = call.state;
+    if (!state->previewActive || !state->shown || index != state->previewIndex || generation != state->previewSerial) return S_FALSE;
+    HRESULT result = S_OK; state->previewImage.reset();
+    if (image && (!PixelsValid(*image,MaxPreviewDimension) || image->pixels.size() > MaxPreviewPixelBytes)) result = E_INVALIDARG;
+    else if (image && image->pixels.capacity() > MaxImageBytes) result = E_OUTOFMEMORY;
+    if (SUCCEEDED(result)) state->previewImage = std::move(image);
+    auto& preview = *state->previewModel;
+    if (FAILED(result) || statusText.empty()) {
+        constexpr wchar_t unavailable[] = L"预览不可用"; constexpr wchar_t ready[] = L"适应窗口";
+        if (state->previewImage) std::copy(std::begin(ready),std::end(ready),preview.detail.begin());
+        else std::copy(std::begin(unavailable),std::end(unavailable),preview.detail.begin());
+    } else CopyText(statusText,preview.detail.data());
+    const auto revision = state->pageRevision;
+    SetWindowTextW(state->statusText,preview.detail.data());
+    if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
+    try { state->Resize(); } catch (const std::bad_alloc&) { state->previewImage.reset(); return E_OUTOFMEMORY; }
+    if (state->Alive() && revision == state->pageRevision) NotifyWinEvent(EVENT_OBJECT_DESCRIPTIONCHANGE,state->canvas,OBJID_CLIENT,1);
+    return result;
+}
+void Surface::EndPreview() noexcept {
+    if (!state_ || !state_->Alive() || !state_->previewActive) return;
+    const OwnedState call(state_); const auto& state = call.state;
+    state->RetirePreview(); state->previewActive = false; ++state->pageRevision; state->activationQueued = false;
+    const auto revision = state->pageRevision;
+    SetWindowTextW(state->canvas,L"资产库图库"); SetWindowTextW(state->statusText,state->browseStatus.data());
+    if (!state->Alive() || revision != state->pageRevision || !state->Toolbar()) return;
+    try { state->Resize(); } catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable,state->model->generation + 1); }
+    if (!state->Alive() || revision != state->pageRevision) return;
+    SetFocus(state->canvas);
+    if (state->Alive() && revision == state->pageRevision) state->Notify(state->callbacks.viewportChanged);
+}
+bool Surface::Previewing() const noexcept { const auto state = state_; return state && state->Alive() && state->previewActive; }
 VisibleFiles Surface::VisibleFileItems() const noexcept { const auto state = state_; return state && state->Alive() ? state->visible : VisibleFiles{}; }
 size_t Surface::RetainedImageBytes() const noexcept {
-    const auto state = state_; size_t bytes = 0; if (state) for (const auto& image : state->images) if (image) bytes += image->pixels.capacity(); return bytes;
+    const auto state = state_; size_t bytes = state && state->previewImage ? state->previewImage->pixels.capacity() : 0; if (state) for (const auto& image : state->images) if (image) bytes += image->pixels.capacity(); return bytes;
 }
 Selection Surface::SelectedItems() const noexcept {
     const auto state = state_; Selection result;
@@ -629,12 +779,19 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
     const OwnedState call(state_); const auto& state = call.state;
     if (message.wParam == VK_TAB) {
         if ((GetKeyState(VK_CONTROL) & 0x8000) || (GetKeyState(VK_MENU) & 0x8000)) return false;
-        std::array<HWND, 7> order{state->canvas, state->buttons[0], state->buttons[1], state->buttons[2], state->buttons[3], state->buttons[4], state->buttons[5]};
-        const auto at = std::find(order.begin(), order.end(), message.hwnd);
-        if (at == order.end()) return false;
+        std::array<HWND,7> order{}; size_t count = 0; order[count++] = state->canvas;
+        if (state->previewActive) { for (HWND button : state->previewButtons) if (IsWindowEnabled(button)) order[count++] = button; }
+        else for (HWND button : state->buttons) order[count++] = button;
+        const auto end = order.begin() + static_cast<ptrdiff_t>(count);
+        const auto at = std::find(order.begin(),end,message.hwnd);
+        if (at == end) return false;
         const auto next = (at - order.begin()) + ((GetKeyState(VK_SHIFT) & 0x8000) ? -1 : 1);
-        if (next < 0 || next >= static_cast<ptrdiff_t>(order.size())) return false;
+        if (next < 0 || next >= static_cast<ptrdiff_t>(count)) return false;
         SetFocus(order[static_cast<size_t>(next)]); return true;
+    }
+    if (state->previewActive && (message.wParam == VK_ESCAPE || message.wParam == VK_LEFT || message.wParam == VK_RIGHT || message.wParam == VK_F5) &&
+        (message.hwnd == state->window || IsChild(state->window,message.hwnd))) {
+        try { return state->Key(message.wParam); } catch (const std::bad_alloc&) { return false; }
     }
     if (message.hwnd != state->canvas && message.hwnd != state->window) return false;
     try { return state->Key(message.wParam); } catch (const std::bad_alloc&) { return false; }
@@ -643,9 +800,8 @@ void Surface::SetStatusText(const std::wstring& text) noexcept {
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
     wchar_t bounded[MaxStatusTextChars + 1]{}, current[MaxStatusTextChars + 1]{};
-    size_t length = std::min(text.size(),MaxStatusTextChars);
-    if (length < text.size() && length > 0 && text[length-1] >= 0xD800 && text[length-1] <= 0xDBFF && text[length] >= 0xDC00 && text[length] <= 0xDFFF) --length;
-    std::copy_n(text.data(),length,bounded);
+    CopyText(text,bounded);
+    if (state->previewActive) { std::copy(std::begin(bounded),std::end(bounded),state->browseStatus.begin()); return; }
     GetWindowTextW(state->statusText,current,static_cast<int>(MaxStatusTextChars + 1));
     if (bounded[0] && std::wcscmp(current,bounded) == 0) return;
     if (!SetWindowTextW(state->statusText,bounded) || !state->Alive()) return;
@@ -661,14 +817,16 @@ void Surface::SetVisible(bool visible) noexcept {
 void Surface::SetMode(Mode mode) noexcept {
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
-    try { state->mode = mode; state->UpdateModeButtons(); state->model->title = mode == Mode::Gallery ? L"资产库图库" : L"资产库列表"; state->Reflow(true); }
+    if (state->mode == mode) return;
+    try { state->mode = mode; state->UpdateModeButtons(); state->model->title = mode == Mode::Gallery ? L"资产库图库" : L"资产库列表"; state->Reflow(true); if (state->Alive()) state->Notify(state->callbacks.preferencesChanged); }
     catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, state->model->generation + 1); state->Notify(state->callbacks.viewportChanged); }
 }
 Mode Surface::CurrentMode() const noexcept { const auto state = state_; return state ? state->mode : Mode::Gallery; }
 void Surface::SetDensity(UINT value) noexcept {
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
-    try { state->density = std::clamp(value, MinimumDensityDip, MaximumDensityDip); state->Reflow(true); }
+    const auto density = std::clamp(value,MinimumDensityDip,MaximumDensityDip); if (density == state->density) return;
+    try { state->density = density; state->Reflow(true); if (state->Alive()) state->Notify(state->callbacks.preferencesChanged); }
     catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable, state->model->generation + 1); state->Notify(state->callbacks.viewportChanged); }
 }
 UINT Surface::Density() const noexcept { const auto state = state_; return state ? state->density : DefaultDensityDip; }

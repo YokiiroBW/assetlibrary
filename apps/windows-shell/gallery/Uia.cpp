@@ -27,7 +27,7 @@ class Element final : public IRawElementProviderSimple, public IRawElementProvid
     IUnknown* owner_;
     const std::uint64_t presentation_;
     const int index_;
-    const bool invokable_;
+    const bool invokable_, preview_;
     bool retired_ = false;
     bool Live() const noexcept { return !retired_ && model_->alive && presentation_ == model_->presentation &&
         (index_ < 0 || static_cast<size_t>(index_) < model_->page.entries.size()); }
@@ -44,7 +44,7 @@ class Element final : public IRawElementProviderSimple, public IRawElementProvid
     }
 public:
     Element(std::shared_ptr<AccessibleModel> model, int index) noexcept : model_(std::move(model)), owner_(model_->lifetimeOwner),
-        presentation_(model_->presentation), index_(index), invokable_(index >= 0 && snapshot::Navigable(model_->page.entries[static_cast<size_t>(index)].kind)) { owner_->AddRef(); ++diagnostics.providers; }
+        presentation_(model_->presentation), index_(index), invokable_(!model_->preview && index >= 0 && (snapshot::Navigable(model_->page.entries[static_cast<size_t>(index)].kind) || model_->page.entries[static_cast<size_t>(index)].kind == snapshot::Kind::File)), preview_(model_->preview) { owner_->AddRef(); ++diagnostics.providers; }
     ~Element() {
         const auto slot = static_cast<size_t>(index_ + 1);
         if (model_->uia[slot] == static_cast<IRawElementProviderSimple*>(this)) model_->uia[slot] = nullptr;
@@ -56,10 +56,10 @@ public:
         if (iid == IID_IUnknown || iid == __uuidof(IRawElementProviderSimple)) *value = static_cast<IRawElementProviderSimple*>(this);
         else if (iid == __uuidof(IRawElementProviderFragment)) *value = static_cast<IRawElementProviderFragment*>(this);
         else if (iid == __uuidof(IRawElementProviderFragmentRoot) && index_ < 0) *value = static_cast<IRawElementProviderFragmentRoot*>(this);
-        else if (iid == __uuidof(ISelectionProvider) && index_ < 0) *value = static_cast<ISelectionProvider*>(this);
-        else if (iid == __uuidof(IScrollProvider) && index_ < 0) *value = static_cast<IScrollProvider*>(this);
-        else if (iid == __uuidof(ISelectionItemProvider) && index_ >= 0) *value = static_cast<ISelectionItemProvider*>(this);
-        else if (iid == __uuidof(IScrollItemProvider) && index_ >= 0) *value = static_cast<IScrollItemProvider*>(this);
+        else if (iid == __uuidof(ISelectionProvider) && index_ < 0 && !preview_) *value = static_cast<ISelectionProvider*>(this);
+        else if (iid == __uuidof(IScrollProvider) && index_ < 0 && !preview_) *value = static_cast<IScrollProvider*>(this);
+        else if (iid == __uuidof(ISelectionItemProvider) && index_ >= 0 && !preview_) *value = static_cast<ISelectionItemProvider*>(this);
+        else if (iid == __uuidof(IScrollItemProvider) && index_ >= 0 && !preview_) *value = static_cast<IScrollItemProvider*>(this);
         else if (iid == __uuidof(IInvokeProvider) && invokable_)
             *value = static_cast<IInvokeProvider*>(this);
         else return E_NOINTERFACE;
@@ -72,16 +72,17 @@ public:
     }
     HRESULT STDMETHODCALLTYPE GetPatternProvider(PATTERNID pattern, IUnknown** value) override {
         if (!value) return E_POINTER; *value = nullptr; if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
+        if (preview_) return S_OK;
         if (index_ < 0 && pattern == UIA_SelectionPatternId) *value = static_cast<ISelectionProvider*>(this);
         else if (index_ < 0 && pattern == UIA_ScrollPatternId) *value = static_cast<IScrollProvider*>(this);
         else if (index_ >= 0 && pattern == UIA_SelectionItemPatternId) *value = static_cast<ISelectionItemProvider*>(this);
         else if (index_ >= 0 && pattern == UIA_ScrollItemPatternId) *value = static_cast<IScrollItemProvider*>(this);
-        else if (index_ >= 0 && pattern == UIA_InvokePatternId && snapshot::Navigable(model_->page.entries[static_cast<size_t>(index_)].kind)) *value = static_cast<IInvokeProvider*>(this);
+        else if (pattern == UIA_InvokePatternId && invokable_) *value = static_cast<IInvokeProvider*>(this);
         if (*value) AddRef(); return S_OK;
     }
     HRESULT STDMETHODCALLTYPE GetPropertyValue(PROPERTYID property, VARIANT* value) override {
         if (!value) return E_POINTER; VariantInit(value); if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
-        if (property == UIA_ControlTypePropertyId) { value->vt = VT_I4; value->lVal = index_ < 0 ? UIA_ListControlTypeId : UIA_ListItemControlTypeId; }
+        if (property == UIA_ControlTypePropertyId) { value->vt = VT_I4; value->lVal = preview_ ? (index_ < 0 ? UIA_PaneControlTypeId : UIA_ImageControlTypeId) : (index_ < 0 ? UIA_ListControlTypeId : UIA_ListItemControlTypeId); }
         else if (property == UIA_NamePropertyId) {
             value->vt = VT_BSTR; value->bstrVal = SysAllocString(index_ < 0 ? model_->title.c_str() : model_->page.entries[static_cast<size_t>(index_)].name.c_str());
             if (!value->bstrVal) return E_OUTOFMEMORY;
@@ -99,7 +100,8 @@ public:
             value->vt = VT_BSTR; value->bstrVal = SysAllocString(identity); if (!value->bstrVal) return E_OUTOFMEMORY;
         } else if (property == UIA_ItemStatusPropertyId || property == UIA_HelpTextPropertyId) {
             const wchar_t* status = nullptr;
-            if (index_ < 0) status = model_->page.status != snapshot::Status::Ready ? snapshot::StatusText(model_->page.status) :
+            if (preview_) status = model_->detail.data();
+            else if (index_ < 0) status = model_->page.status != snapshot::Status::Ready ? snapshot::StatusText(model_->page.status) :
                 model_->page.entries.empty() ? L"此文件夹为空" : L"只读浏览";
             else {
                 const auto at = static_cast<size_t>(index_);
@@ -149,7 +151,7 @@ public:
     HRESULT STDMETHODCALLTYPE GetEmbeddedFragmentRoots(SAFEARRAY** value) override { if (!value) return E_POINTER; *value = nullptr; return Live() ? S_OK : UIA_E_ELEMENTNOTAVAILABLE; }
     HRESULT STDMETHODCALLTYPE SetFocus() override {
         if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
-        return index_ >= 0 ? ChangeSelection(SVSI_FOCUSED | SVSI_ENSUREVISIBLE) : model_->focusControl ? model_->focusControl(model_->context) : E_FAIL;
+        return index_ >= 0 && !preview_ ? ChangeSelection(SVSI_FOCUSED | SVSI_ENSUREVISIBLE) : model_->focusControl ? model_->focusControl(model_->context) : E_FAIL;
     }
     HRESULT STDMETHODCALLTYPE get_FragmentRoot(IRawElementProviderFragmentRoot** value) override {
         if (!value) return E_POINTER; *value = nullptr; if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
@@ -195,7 +197,7 @@ public:
     }
     HRESULT STDMETHODCALLTYPE Invoke() override {
         if (!Live()) return UIA_E_ELEMENTNOTAVAILABLE;
-        return index_ >= 0 && snapshot::Navigable(model_->page.entries[static_cast<size_t>(index_)].kind) && model_->activate ?
+        return invokable_ && model_->activate ?
             model_->activate(model_->context, static_cast<UINT>(index_)) : UIA_E_NOTSUPPORTED;
     }
     HRESULT STDMETHODCALLTYPE ScrollIntoView() override { return ChangeSelection(SVSI_ENSUREVISIBLE | SVSI_NOTAKEFOCUS); }
