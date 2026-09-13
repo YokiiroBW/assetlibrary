@@ -4,6 +4,8 @@
 #include "Capture.h"
 #include <oleacc.h>
 #include <shlobj.h>
+#include <commctrl.h>
+#include <windowsx.h>
 #include <iostream>
 
 namespace {
@@ -33,18 +35,45 @@ IAccessible* Accessible(HWND canvas) {
     IAccessible* result=nullptr;
     Require(SUCCEEDED(AccessibleObjectFromWindow(canvas,static_cast<DWORD>(OBJID_CLIENT),IID_IAccessible,reinterpret_cast<void**>(&result))) && result,"native accessible object"); return result;
 }
-RECT RedBounds(HWND canvas) {
+RECT ColorBounds(HWND canvas, bool green = false) {
     RECT client{}; GetClientRect(canvas,&client); gallery_test::Capture capture(client.right,client.bottom); capture.Draw(canvas);
     RECT found{client.right,client.bottom,0,0};
     for (int y=0;y<capture.height;++y) for(int x=0;x<capture.width;++x) {
         const auto at=static_cast<size_t>((y*capture.width+x)*4);
-        if(capture.pixels[at]==0 && capture.pixels[at+1]==0 && capture.pixels[at+2]==255) {
+        if(capture.pixels[at]==0 && capture.pixels[at+1]==(green?255:0) && capture.pixels[at+2]==(green?0:255)) {
             found.left=std::min<LONG>(found.left,x); found.top=std::min<LONG>(found.top,y); found.right=std::max<LONG>(found.right,x+1); found.bottom=std::max<LONG>(found.bottom,y+1);
         }
     }
     return found;
 }
-struct Scenario { gallery::Surface* surface=nullptr; UINT activated=0,preferences=0,closed=0; int step=0; bool deleteOnViewport=false; };
+RECT RedBounds(HWND canvas) { return ColorBounds(canvas); }
+std::shared_ptr<const gallery::Pbgra> Marked() {
+    auto image=std::make_shared<gallery::Pbgra>(); image->width=1600;image->height=800;image->stride=6400;image->pixels.resize(5120000);
+    for(UINT y=0;y<800;++y)for(UINT x=0;x<1600;++x) {
+        const size_t at=static_cast<size_t>(y)*image->stride+x*4;
+        image->pixels[at+1]=(x>=780 && x<820 && y>=380 && y<420)?255:0;
+        image->pixels[at+2]=image->pixels[at+1]?0:255;image->pixels[at+3]=255;
+    }
+    return image;
+}
+std::wstring Summary(gallery::Surface* surface) {
+    wchar_t text[257]{}; GetWindowTextW(GetDlgItem(surface->Window(),gallery::StatusTextControlId),text,257);return text;
+}
+bool Key(gallery::Surface* surface,HWND window,WPARAM key,int modifier=0) {
+    BYTE saved[256]{},state[256]{};Require(GetKeyboardState(saved)!=FALSE,"read thread keyboard state");CopyMemory(state,saved,sizeof(state));
+    state[VK_CONTROL]=state[VK_MENU]=state[VK_SHIFT]=0;if(modifier)state[modifier]=0x80;SetKeyboardState(state);
+    MSG message{};message.hwnd=window;message.message=WM_KEYDOWN;message.wParam=key;
+    const bool handled=surface->TranslateAccelerator(message);SetKeyboardState(saved);return handled;
+}
+void Wheel(HWND canvas,int delta,POINT point,WORD modifiers=0,HWND receiver=nullptr) {
+    ClientToScreen(canvas,&point);SendMessageW(receiver?receiver:canvas,WM_MOUSEWHEEL,MAKEWPARAM(modifiers,static_cast<WORD>(delta)),MAKELPARAM(point.x,point.y));
+}
+POINT Center(const RECT& rectangle) { return {(rectangle.left+rectangle.right)/2,(rectangle.top+rectangle.bottom)/2}; }
+struct Scenario { gallery::Surface* surface=nullptr; UINT activated=0,preferences=0,closed=0,viewports=0; int step=0; bool deleteOnViewport=false,deleteOnFocus=false; };
+LRESULT CALLBACK DeleteOnCapture(HWND window,UINT message,WPARAM wParam,LPARAM lParam,UINT_PTR,DWORD_PTR reference) {
+    if(message==WM_CAPTURECHANGED) { auto& scenario=*reinterpret_cast<Scenario*>(reference);auto* retired=scenario.surface;scenario.surface=nullptr;delete retired; }
+    return DefSubclassProc(window,message,wParam,lParam);
+}
 }
 int main() {
     if (FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED))) return 2;
@@ -58,7 +87,8 @@ int main() {
         callbacks.preferencesChanged=[](void* context) noexcept { ++static_cast<Scenario*>(context)->preferences; };
         callbacks.previewStep=[](void* context,int delta) noexcept { static_cast<Scenario*>(context)->step=delta; };
         callbacks.previewClose=[](void* context) noexcept { auto& current=*static_cast<Scenario*>(context); ++current.closed; current.surface->EndPreview(); };
-        callbacks.viewportChanged=[](void* context) noexcept { auto& current=*static_cast<Scenario*>(context); if(current.deleteOnViewport && current.surface) { auto* retired=current.surface;current.surface=nullptr;delete retired; } };
+        callbacks.viewportChanged=[](void* context) noexcept { auto& current=*static_cast<Scenario*>(context); ++current.viewports; if(current.deleteOnViewport && current.surface) { auto* retired=current.surface;current.surface=nullptr;delete retired; } };
+        callbacks.focusActivated=[](void* context) noexcept { auto& current=*static_cast<Scenario*>(context);if(current.deleteOnFocus && current.surface) { auto* retired=current.surface;current.surface=nullptr;delete retired; } };
         RECT bounds{0,0,1000,700}; Require(SUCCEEDED(gallery::Surface::Create(parent,bounds,callbacks,&surface)),"surface"); scenario.surface=surface;
         auto page=Page(); surface->SetPage(page,3); surface->SetStatusText(L"当前页30项，已选2项");
         const HWND canvas=FindWindowExW(surface->Window(),nullptr,L"STATIC",nullptr); if(!canvas) throw "canvas";
@@ -90,6 +120,46 @@ int main() {
         auto image=Red(1600,800);std::weak_ptr<const gallery::Pbgra> retained=image;
         Require(SUCCEEDED(surface->SetPreview(1,1,image,L"大图已就绪")),"1600px preview accepted");image.reset();
         const RECT red=RedBounds(canvas);Require(red.right>red.left && std::abs((red.right-red.left)-2*(red.bottom-red.top))<=2,"fit preserves wide-image aspect ratio");
+        const auto requestsBefore=scenario.viewports;
+        Require(Summary(surface).find(L"派生图 1600×800")!=std::wstring::npos,"summary distinguishes derived pixels");
+        surface->SetPreview(1,1,Marked(),L"锚点与捕获验证");
+        Require(Key(surface,canvas,'1') && Summary(surface).find(L"100%")!=std::wstring::npos,"100 percent command");
+        auto marker=ColorBounds(canvas,true); const POINT markerCenter=Center(marker),wheelAnchor{markerCenter.x-100,markerCenter.y-40};
+        const auto initialSummary=Summary(surface);Wheel(canvas,0,wheelAnchor);Wheel(canvas,60,wheelAnchor);
+        Require(Summary(surface)==initialSummary,"zero and fractional wheel do not change scale");
+        Wheel(canvas,60,wheelAnchor,MK_CONTROL);marker=ColorBounds(canvas,true);
+        Require(Summary(surface).find(L"125%")!=std::wstring::npos && std::abs(Center(marker).x-markerCenter.x-25)<=2 && std::abs(Center(marker).y-markerCenter.y-10)<=2,"two fragments zoom around cursor without recentering");
+        Wheel(canvas,-120,wheelAnchor);Require(Summary(surface).find(L"100%")!=std::wstring::npos,"negative wheel zoom");
+        const HWND focusedButton=GetDlgItem(surface->Window(),gallery::PreviewFitControlId);SetFocus(focusedButton);
+        Wheel(canvas,120,wheelAnchor,0,focusedButton);Require(Summary(surface).find(L"125%")!=std::wstring::npos,"button-focused wheel bubbles to root and is consumed exactly once");
+        Key(surface,canvas,'1');
+        marker=ColorBounds(canvas,true);const auto dragStart=Center(marker);
+        SendMessageW(canvas,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));Require(GetCapture()==canvas,"drag obtains native capture");
+        SendMessageW(canvas,WM_MOUSEMOVE,MK_LBUTTON,MAKELPARAM(dragStart.x+45,dragStart.y+20));
+        auto moved=ColorBounds(canvas,true);Require(std::abs(Center(moved).x-Center(marker).x-45)<=1 && std::abs(Center(moved).y-Center(marker).y-20)<=1,"captured pointer moves image");
+        SendMessageW(canvas,WM_LBUTTONUP,0,MAKELPARAM(dragStart.x+45,dragStart.y+20));Require(GetCapture()!=canvas,"button up releases capture");
+        for(UINT cancel : {WM_CANCELMODE,WM_KILLFOCUS,WM_CAPTURECHANGED}) {
+            SendMessageW(canvas,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));
+            if(cancel==WM_CAPTURECHANGED)SetCapture(parent);else if(cancel==WM_KILLFOCUS)SetFocus(parent);else SendMessageW(canvas,cancel,0,0);
+            Require(GetCapture()!=canvas,"cancel/focus/capture loss ends dragging");
+            const auto before=ColorBounds(canvas,true);SendMessageW(canvas,WM_MOUSEMOVE,MK_LBUTTON,MAKELPARAM(dragStart.x+90,dragStart.y+50));
+            const auto after=ColorBounds(canvas,true);Require(EqualRect(&before,&after)!=FALSE,"canceled pointer move cannot pan");
+            if(GetCapture()==parent)ReleaseCapture();
+        }
+        const auto panBefore=ColorBounds(canvas,true);Require(Key(surface,canvas,VK_LEFT,VK_SHIFT),"Shift arrow handled");const auto panAfter=ColorBounds(canvas,true);
+        Require(Center(panAfter).x>Center(panBefore).x && scenario.step==0,"Shift arrow pans instead of switching files");
+        Require(!Key(surface,canvas,VK_ADD,VK_CONTROL) && !Key(surface,canvas,'1',VK_MENU),"modified transform shortcuts remain with host");
+        Key(surface,canvas,'0');const auto fitSummary=Summary(surface);SendMessageW(canvas,WM_LBUTTONDBLCLK,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));
+        Require(Summary(surface).find(L"缩放 100%")!=std::wstring::npos,"double click enters actual pixels");
+        SendMessageW(canvas,WM_LBUTTONDBLCLK,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));Require(Summary(surface)==fitSummary,"double click returns to fit");
+        for(int at=0;at<16;++at)Key(surface,canvas,VK_ADD);
+        Require(Summary(surface).find(L"缩放 400%")!=std::wstring::npos && !IsWindowEnabled(GetDlgItem(surface->Window(),gallery::PreviewZoomInControlId)),"400 percent disables zoom in");
+        const RECT clipped=RedBounds(canvas);RECT client{};GetClientRect(canvas,&client);const int dpiScale=MulDiv(12,static_cast<int>(GetDpiForWindow(parent)),96);
+        Require(clipped.left>=dpiScale && clipped.top>=MulDiv(40,static_cast<int>(GetDpiForWindow(parent)),96) && clipped.right<=client.right-dpiScale && clipped.bottom<=client.bottom-dpiScale,"zoom remains clipped below name and inside picture margins");
+        Key(surface,canvas,'0');for(int at=0;at<20;++at)Key(surface,canvas,VK_SUBTRACT);
+        Require(Summary(surface).find(L"缩放 10%")!=std::wstring::npos && !IsWindowEnabled(GetDlgItem(surface->Window(),gallery::PreviewZoomOutControlId)),"10 percent disables zoom out");
+        Key(surface,canvas,'0');Require(scenario.viewports==requestsBefore && scenario.preferences==0,"transforms do not request images or persist preferences");
+        image=Red(1600,800);retained=image;Require(SUCCEEDED(surface->SetPreview(1,1,image,L"大图已就绪")),"restore image for retained baseline");image.reset();
         const DWORD gdi=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);for(int at=0;at<8;++at)RedBounds(canvas);Require(GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS)==gdi,"preview painting releases temporary GDI buffers");
         CopyMemory(modified,saved,sizeof(saved));modified[VK_CONTROL]=0x80;SetKeyboardState(modified);
         key.wParam=VK_ESCAPE;const bool ctrlEscape=surface->TranslateAccelerator(key);key.wParam=VK_RIGHT;const bool ctrlRight=surface->TranslateAccelerator(key);
@@ -97,16 +167,23 @@ int main() {
         Require(!ctrlEscape && !ctrlRight && !altLeft && scenario.closed==0 && scenario.step==0,"preview preserves modified Explorer navigation shortcuts");
         key.wParam=VK_TAB;Require(surface->TranslateAccelerator(key) && GetFocus()==GetDlgItem(surface->Window(),gallery::PreviewBackControlId),"preview Tab reaches Back");
         key.hwnd=GetFocus();Require(surface->TranslateAccelerator(key) && GetFocus()==GetDlgItem(surface->Window(),gallery::PreviewNextControlId),"preview Tab skips disabled Previous");
+        for(int id : {gallery::PreviewZoomOutControlId,gallery::PreviewZoomInControlId,gallery::PreviewFitControlId,gallery::PreviewActualControlId}) {
+            key.hwnd=GetFocus();Require(surface->TranslateAccelerator(key) && GetFocus()==GetDlgItem(surface->Window(),id),"Tab reaches every enabled native transform button");
+            wchar_t label[40]{};Require(GetWindowTextW(GetFocus(),label,40)>0,"native transform button has accessible text");
+        }
         key.hwnd=GetFocus();Require(!surface->TranslateAccelerator(key),"preview boundary Tab remains with host");key.hwnd=canvas;
         key.wParam=VK_LEFT;surface->TranslateAccelerator(key);Require(scenario.step==0,"disabled previous boundary");
         key.wParam=VK_RIGHT;surface->TranslateAccelerator(key);Require(scenario.step==1,"keyboard next callback");scenario.step=0;
         SendMessageW(GetDlgItem(surface->Window(),gallery::PreviewNextControlId),BM_CLICK,0,0);Require(scenario.step==1,"native next button");
-        Require(SUCCEEDED(surface->BeginPreview(2,2,true,false)) && retained.expired(),"switch releases old image immediately");
+        Key(surface,canvas,'1');SendMessageW(canvas,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));Require(GetCapture()==canvas,"capture before switch");
+        Require(SUCCEEDED(surface->BeginPreview(2,2,true,false)) && retained.expired() && GetCapture()!=canvas,"switch releases old image and capture immediately");
+        Require(Summary(surface).find(L'%')==std::wstring::npos && !IsWindowEnabled(GetDlgItem(surface->Window(),gallery::PreviewActualControlId)),"loading has no old scale or enabled transform");
         name=nullptr;Require(FAILED(preview->get_accName(child,&name)) && !name,"old preview provider retired on switch");preview->Release();preview=nullptr;
         Require(surface->SetPreview(1,1,Red(100,100),L"stale")==S_FALSE,"old serial and index cannot return stale pixels");
         Require(SUCCEEDED(surface->SetPreview(2,2,Red(1600,1600),L"最大派生图")) && surface->RetainedImageBytes()==gallery::MaxPreviewPixelBytes,"maximum preview fits existing persistent budget");
+        Key(surface,canvas,'1');SendMessageW(canvas,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(dragStart.x,dragStart.y));
         auto oversized=std::make_shared<gallery::Pbgra>();oversized->width=1601;oversized->height=1;oversized->stride=6404;oversized->pixels.resize(6404);
-        Require(surface->SetPreview(2,2,oversized,L"invalid")==E_INVALIDARG && surface->RetainedImageBytes()==0,"invalid preview clears prior image");
+        Require(surface->SetPreview(2,2,oversized,L"invalid")==E_INVALIDARG && surface->RetainedImageBytes()==0 && GetCapture()!=canvas && Summary(surface).find(L'%')==std::wstring::npos,"invalid preview clears pixels, scale and capture");
         auto capacity=std::make_shared<gallery::Pbgra>();capacity->width=capacity->height=1;capacity->stride=4;capacity->pixels.resize(4);capacity->pixels.reserve(gallery::MaxImageBytes+1);
         Require(surface->SetPreview(2,2,capacity,L"too large")==E_OUTOFMEMORY && surface->RetainedImageBytes()==0,"preview capacity retains 16MiB limit");
         surface->SetPreview(2,2,nullptr,L"无权访问此预览");key.wParam=VK_ESCAPE;Require(surface->TranslateAccelerator(key) && scenario.closed==1 && !surface->Previewing(),"Escape closes through owner callback");
@@ -118,6 +195,18 @@ int main() {
         surface->SetVisible(false);Require(!surface->Previewing() && surface->RetainedImageBytes()==0,"hide retires preview pixels");surface->SetVisible(true);
         surface->BeginPreview(1,4,false,true);surface->Clear(snapshot::Status::AccessDenied,4);Require(!surface->Previewing() && surface->RetainedImageBytes()==0,"permission clear closes preview");
         surface->SetPage(page,5);scenario.deleteOnViewport=true;surface->BeginPreview(1,5,false,true);surface=scenario.surface;Require(!surface,"begin callback may destroy Surface");
+        scenario.deleteOnViewport=false;
+        for(bool captureReentry : {true,false}) {
+            Require(SUCCEEDED(gallery::Surface::Create(parent,bounds,callbacks,&surface)),"reentry surface");scenario.surface=surface;
+            surface->SetPage(page,1);surface->BeginPreview(1,1,false,true);surface->SetPreview(1,1,Red(1600,800),L"重入验证");
+            const HWND target=FindWindowExW(surface->Window(),nullptr,L"STATIC",nullptr);Key(surface,target,'1');
+            if(captureReentry) {
+                Require(SetWindowSubclass(parent,DeleteOnCapture,77,reinterpret_cast<DWORD_PTR>(&scenario))!=FALSE,"capture callback fixture");SetCapture(parent);
+            } else { SetFocus(parent);scenario.deleteOnFocus=true; }
+            SendMessageW(target,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(300,200));surface=scenario.surface;
+            Require(!surface && !IsWindow(target) && GetCapture()!=target,"SetCapture/SetFocus callback can destroy Surface without retaining stale drag");
+            if(captureReentry)RemoveWindowSubclass(parent,DeleteOnCapture,77);scenario.deleteOnFocus=false;
+        }
         Pump(owner);Require(owner.references==1 && !owner.wrongThread && gallery::InspectUia().providers==0 && gallery::InspectUia().dispatcherWindows==0,"preview owner/provider resources reclaimed");
         std::cout<<"gallery_preview: fit, input, browse restoration, accessibility retirement, stale completion and budgets passed\n";result=0;
     } catch(const char* message) { std::cerr<<message<<'\n'; }

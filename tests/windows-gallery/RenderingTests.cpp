@@ -55,6 +55,20 @@ int wmain(int argc, wchar_t** argv) {
         Require(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS) == gdi, "temporary DIB/DC resources reclaimed after every paint");
         Require(GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS) == user, "painting creates no persistent USER objects");
         if (argc == 2) image.Save(argv[1]);
+        Require(SUCCEEDED(surface->BeginPreview(0,1,false,false)) && SUCCEEDED(surface->SetPreview(0,1,Red(1600,1600),L"裁剪与源DIB上界")),"maximum preview rendering");
+        for(int at=0;at<20;++at)SendMessageW(GetDlgItem(surface->Window(),gallery::PreviewZoomInControlId),BM_CLICK,0,0);
+        wchar_t summary[257]{};GetWindowTextW(GetDlgItem(surface->Window(),gallery::StatusTextControlId),summary,257);
+        Require(std::wstring(summary).find(L"400%")!=std::wstring::npos && surface->RetainedImageBytes()==gallery::MaxPreviewPixelBytes,"400 percent retains only original bounded PBGRA");
+        GetClientRect(canvas,&client);ImageBuffer enlarged(client.right,client.bottom);enlarged.Draw(canvas);
+        const int margin=MulDiv(12,static_cast<int>(GetDpiForWindow(parent)),96),top=MulDiv(40,static_cast<int>(GetDpiForWindow(parent)),96);
+        for(int y=0;y<enlarged.height;++y)for(int x=0;x<enlarged.width;++x) {
+            const auto at=static_cast<size_t>((y*enlarged.width+x)*4);const bool red=enlarged.pixels[at]==0 && enlarged.pixels[at+1]==0 && enlarged.pixels[at+2]==255;
+            Require(red==(x>=margin && x<client.right-margin && y>=top && y<client.bottom-margin),"oversized destination clips precisely to picture region without painting title or margins");
+        }
+        const DWORD previewGdi=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS),previewUser=GetGuiResources(GetCurrentProcess(),GR_USEROBJECTS);
+        for(int at=0;at<32;++at)enlarged.Draw(canvas);
+        Require(GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS)==previewGdi && GetGuiResources(GetCurrentProcess(),GR_USEROBJECTS)==previewUser,"32 zoomed paints release source-sized DIB/DC and USER resources");
+        surface->EndPreview();
         for (UINT index = 1; index < 30; ++index) page.entries.push_back(item);
         surface->SetPage(page, 2);
         auto visible = surface->VisibleFileItems();

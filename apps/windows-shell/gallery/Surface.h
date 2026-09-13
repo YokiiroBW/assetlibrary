@@ -15,6 +15,8 @@ constexpr size_t MaxStatusTextChars = 256;
 constexpr UINT MaxPreviewDimension = 1600;
 constexpr size_t MaxPreviewPixelBytes = 10240000;
 constexpr int PreviewBackControlId = 107, PreviewPreviousControlId = 108, PreviewNextControlId = 109;
+constexpr int PreviewZoomOutControlId = 110, PreviewZoomInControlId = 111;
+constexpr int PreviewFitControlId = 112, PreviewActualControlId = 113;
 constexpr size_t MaxImageBytes = 16u * 1024u * 1024u;
 constexpr UINT MinimumDensityDip = 96, MaximumDensityDip = 256, DefaultDensityDip = 176;
 

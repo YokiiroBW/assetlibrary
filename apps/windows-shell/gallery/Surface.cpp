@@ -1,5 +1,6 @@
 #include "Surface.h"
 #include "Layout.h"
+#include "PreviewViewport.h"
 #include "Accessible.h"
 #include "Uia.h"
 #include "../generated/WorkspaceTheme.generated.h"
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <cstring>
 #include <cwchar>
+#include <cmath>
 #include <new>
 
 namespace gallery {
@@ -51,10 +53,16 @@ bool PixelsValid(const Pbgra& image, UINT maximum = 512) noexcept {
 struct Surface::State : std::enable_shared_from_this<State> {
     HWND window = nullptr, canvas = nullptr, canvasIdentity = nullptr, statusText = nullptr;
     std::array<HWND, 6> buttons{};
-    std::array<HWND,3> previewButtons{};
+    std::array<HWND,7> previewButtons{};
     std::shared_ptr<AccessibleModel> previewModel = std::make_shared<AccessibleModel>();
     std::shared_ptr<const Pbgra> previewImage;
     std::array<wchar_t,MaxStatusTextChars + 1> browseStatus{};
+    std::array<wchar_t,MaxStatusTextChars + 1> previewStatus{};
+    PreviewViewport previewViewport;
+    std::uint64_t previewRevision = 0;
+    int wheelRemainder = 0;
+    bool dragging = false;
+    POINT dragPoint{};
     std::uint64_t previewSerial = 0, presentationSerial = 0;
     UINT previewIndex = 0;
     bool previewActive = false, previousEnabled = false, nextEnabled = false;
@@ -108,7 +116,56 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (callback) { OwnerReference hold(callbacks.lifetimeOwner); callback(context, index, point); }
     }
     const std::shared_ptr<AccessibleModel>& CurrentModel() const noexcept { return previewActive ? previewModel : model; }
+    bool PreviewLive(std::uint64_t revision) const noexcept { return Alive() && previewActive && previewRevision == revision; }
+    void CancelDrag() noexcept {
+        dragging = false;
+        // ReleaseCapture itself sends WM_CAPTURECHANGED; retire state first.
+        if (canvas && GetCapture() == canvas) ReleaseCapture();
+    }
+    void ResetTransform() noexcept { ++previewRevision; previewViewport.Reset(); wheelRemainder = 0; dragging = false; }
+    RECT PreviewBox() const noexcept {
+        RECT box{}; if (canvas) GetClientRect(canvas,&box);
+        InflateRect(&box,-Scale(12),-Scale(12)); box.top = Scale(40); return box;
+    }
+    bool PreviewControls() noexcept {
+        const auto revision = previewRevision;
+        const bool enabled[] = {true,previousEnabled,nextEnabled,previewViewport.CanZoomOut(),
+            previewViewport.CanZoomIn(),previewViewport.Ready(),previewViewport.Ready()};
+        for (size_t at=0; at<previewButtons.size(); ++at) {
+            if (previewButtons[at]) EnableWindow(previewButtons[at],enabled[at]);
+            if (!PreviewLive(revision)) return false;
+        }
+        return true;
+    }
+    bool PreviewText() noexcept {
+        const auto revision = previewRevision;
+        if (previewImage && previewViewport.Ready()) {
+            _snwprintf_s(previewModel->detail.data(),previewModel->detail.size(),_TRUNCATE,
+                L"%s %.0f%% · 当前派生图 %u×%u 像素（100%%为派生像素）；%s",
+                previewViewport.Fitting() ? L"适应窗口" : L"缩放",previewViewport.Scale()*100,
+                previewImage->width,previewImage->height,previewStatus.data());
+            auto& text = previewModel->detail;
+            if (text[MaxStatusTextChars-1] >= 0xD800 && text[MaxStatusTextChars-1] <= 0xDBFF) text[MaxStatusTextChars-1] = 0;
+        } else std::copy(previewStatus.begin(),previewStatus.end(),previewModel->detail.begin());
+        SetWindowTextW(statusText,previewModel->detail.data());
+        return PreviewLive(revision);
+    }
+    void TransformChanged() {
+        const auto revision = previewRevision;
+        if (!PreviewLive(revision) || !PreviewText()) return;
+        Resize();
+        if (!PreviewLive(revision) || !PreviewControls()) return;
+        InvalidateRect(canvas,nullptr,FALSE);
+        NotifyWinEvent(EVENT_OBJECT_DESCRIPTIONCHANGE,canvas,OBJID_CLIENT,1);
+    }
+    void Zoom(double factor, POINT point) {
+        if (previewViewport.ZoomAt(factor,point)) TransformChanged();
+    }
+    POINT PreviewCenter() const noexcept {
+        const RECT box = PreviewBox(); return {box.left+(box.right-box.left)/2,box.top+(box.bottom-box.top)/2};
+    }
     void RetirePreview() noexcept {
+        ResetTransform(); previewStatus.fill(0);
         previewImage.reset(); RetireUia(previewModel); previewModel->presentation = ++presentationSerial;
         previewModel->alive = false; previewModel->visible = false; previewModel->window = nullptr; previewModel->context = nullptr; previewModel->focusControl = nullptr; previewModel->accessible = nullptr;
         previewModel->detail.fill(0); previewModel->focus = -1; previewModel->bounds.fill({});
@@ -118,8 +175,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const auto revision = pageRevision; const bool preview = previewActive;
         for (HWND button : buttons) { if (button) ShowWindow(button,preview ? SW_HIDE : SW_SHOWNA); if (!Alive() || revision != pageRevision) return false; }
         for (HWND button : previewButtons) { if (button) ShowWindow(button,preview ? SW_SHOWNA : SW_HIDE); if (!Alive() || revision != pageRevision) return false; }
-        if (previewButtons[1]) EnableWindow(previewButtons[1],previousEnabled);
-        if (previewButtons[2]) EnableWindow(previewButtons[2],nextEnabled);
+        if (preview && !PreviewControls()) return false;
         ShowScrollBar(canvas,SB_VERT,preview ? FALSE : TRUE);
         return Alive() && revision == pageRevision;
     }
@@ -140,6 +196,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         layout.items.clear(); layout.height = 0; layoutItems.clear(); scroll = 0; hover = anchor = -1;
         if (statusText) { SetWindowTextW(statusText,L""); ShowWindow(statusText,SW_HIDE); }
         if (canvas) { SCROLLINFO info{sizeof(info), SIF_RANGE | SIF_POS, 0, 0, 0, 0, 0}; SetScrollInfo(canvas, SB_VERT, &info, TRUE); }
+        CancelDrag();
     }
     void Retire() noexcept {
         if (retiring) return;
@@ -179,7 +236,8 @@ struct Surface::State : std::enable_shared_from_this<State> {
         RECT client{}; GetClientRect(window, &client);
         const int width = client.right;
         const int rowHeight = Scale(34), gap = Scale(6), desired = Scale(72);
-        const int buttonCount = previewActive ? 3 : 6;
+        const auto revision = pageRevision; const auto transform = previewRevision;
+        const int buttonCount = previewActive ? 7 : 6;
         const int columns = std::max(1, std::min(buttonCount, (width - gap) / std::max(1, desired + gap)));
         const int rows = (buttonCount + columns - 1) / columns;
         int toolbarHeight = rows * rowHeight + gap * 2;
@@ -187,8 +245,9 @@ struct Surface::State : std::enable_shared_from_this<State> {
             const int column = static_cast<int>(index) % columns, row = static_cast<int>(index) / columns;
             const int buttonWidth = std::max(1, std::min(desired, (width - gap * (columns + 1)) / columns));
             MoveWindow(previewActive ? previewButtons[static_cast<size_t>(index)] : buttons[static_cast<size_t>(index)], gap + column * (buttonWidth + gap), gap + row * rowHeight, buttonWidth, rowHeight - gap, TRUE);
+            if (!Alive() || pageRevision != revision || previewRevision != transform) return;
         }
-        if (!Alive()) return;
+        if (!Alive() || pageRevision != revision || previewRevision != transform) return;
         wchar_t summary[MaxStatusTextChars + 1]{};
         const int summaryLength = statusText ? GetWindowTextW(statusText,summary,static_cast<int>(MaxStatusTextChars + 1)) : 0;
         if (statusText && summaryLength > 0) {
@@ -206,13 +265,16 @@ struct Surface::State : std::enable_shared_from_this<State> {
                 if (previous) SelectObject(dc,previous); ReleaseDC(statusText,dc);
             }
             MoveWindow(statusText,left,top,available,height,TRUE);
-            if (!Alive()) return;
+            if (!Alive() || pageRevision != revision || previewRevision != transform) return;
             ShowWindow(statusText,SW_SHOWNA); toolbarHeight = std::max(toolbarHeight,top + height + gap);
         } else if (statusText) ShowWindow(statusText,SW_HIDE);
-        if (!Alive()) return;
+        if (!Alive() || pageRevision != revision || previewRevision != transform) return;
         MoveWindow(canvas, 0, toolbarHeight, std::max(1, width), std::max<int>(1, client.bottom - toolbarHeight), TRUE);
+        if (!Alive() || pageRevision != revision || previewRevision != transform) return;
         if (previewActive) {
             RECT previewBounds{}; GetClientRect(canvas,&previewBounds); previewModel->bounds[0] = previewBounds;
+            previewViewport.Resize(PreviewBox());
+            if (!PreviewText() || !PreviewControls()) return;
             previewModel->visible = shown; InvalidateRect(canvas,nullptr,FALSE);
         } else Reflow(true);
     }
@@ -246,6 +308,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const bool changed = shown != value; const auto previous = visible; shown = value;
         if (!shown && previewActive) {
             RetirePreview(); previewActive = false; ++pageRevision; SetWindowTextW(statusText,browseStatus.data());
+            const auto revision = pageRevision; CancelDrag(); if (!Alive() || pageRevision != revision || shown != value) return;
             try { if (Toolbar()) Resize(); } catch (const std::bad_alloc&) { Empty(snapshot::Status::Unavailable,model->generation + 1); }
         }
         RECT client{}; if (canvas) GetClientRect(canvas, &client);
@@ -318,7 +381,18 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (GetKeyState(VK_MENU)&0x8000) return false;
         if (control && (key == VK_RETURN || key == VK_ESCAPE || key == VK_LEFT || key == VK_RIGHT)) return false;
         if (previewActive) {
+            if (control) return false;
             if (key == VK_ESCAPE) { PreviewClose(); return true; }
+            if (shift && (key == VK_LEFT || key == VK_RIGHT || key == VK_UP || key == VK_DOWN)) {
+                const int step = Scale(32);
+                if (previewViewport.Pan(key == VK_LEFT ? step : key == VK_RIGHT ? -step : 0,
+                    key == VK_UP ? step : key == VK_DOWN ? -step : 0)) TransformChanged();
+                return true;
+            }
+            if (key == VK_ADD || key == VK_OEM_PLUS) { Zoom(1.25,PreviewCenter()); return true; }
+            if (key == VK_SUBTRACT || key == VK_OEM_MINUS) { Zoom(.8,PreviewCenter()); return true; }
+            if (key == '0' || key == VK_NUMPAD0) { if (previewViewport.Fit()) TransformChanged(); return true; }
+            if (key == '1' || key == VK_NUMPAD1) { if (previewViewport.ActualSize()) TransformChanged(); return true; }
             if (!control && !(GetKeyState(VK_MENU)&0x8000) && (key == VK_LEFT || key == VK_RIGHT)) { PreviewStep(key == VK_LEFT ? -1 : 1); return true; }
             if (key == VK_F5) { Notify(callbacks.refresh); return true; }
             return key == VK_SPACE || key == VK_RETURN || key == 'A' || key == VK_UP || key == VK_DOWN || key == VK_HOME || key == VK_END || key == VK_PRIOR || key == VK_NEXT;
@@ -357,7 +431,7 @@ struct Surface::State : std::enable_shared_from_this<State> {
         }
         return direction != 0 || key == VK_HOME || key == VK_END || key == VK_PRIOR || key == VK_NEXT;
     }
-    void PaintImage(HDC destination, const Pbgra& image, const RECT& box) noexcept {
+    void PaintImage(HDC destination, const Pbgra& image, const RECT& box, const PreviewPlacement* placement = nullptr) noexcept {
         if (box.right <= box.left || box.bottom <= box.top) return;
         BITMAPINFO info{}; info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER); info.bmiHeader.biWidth = static_cast<LONG>(image.width);
         info.bmiHeader.biHeight = -static_cast<LONG>(image.height); info.bmiHeader.biPlanes = 1; info.bmiHeader.biBitCount = 32; info.bmiHeader.biCompression = BI_RGB;
@@ -367,8 +441,10 @@ struct Surface::State : std::enable_shared_from_this<State> {
             std::memcpy(bits, image.pixels.data(), image.pixels.size()); const HGDIOBJ old = SelectObject(source, bitmap);
             const double factor = std::min(static_cast<double>(box.right - box.left) / image.width,
                 static_cast<double>(box.bottom - box.top) / image.height);
-            const int width = std::max(1, static_cast<int>(image.width * factor)), height = std::max(1, static_cast<int>(image.height * factor));
-            const int left = box.left + (box.right - box.left - width) / 2, top = box.top + (box.bottom - box.top - height) / 2;
+            const int width = std::max(1, placement ? static_cast<int>(std::lround(placement->width)) : static_cast<int>(image.width * factor));
+            const int height = std::max(1, placement ? static_cast<int>(std::lround(placement->height)) : static_cast<int>(image.height * factor));
+            const int left = placement ? static_cast<int>(std::lround(placement->left)) : box.left + (box.right - box.left - width) / 2;
+            const int top = placement ? static_cast<int>(std::lround(placement->top)) : box.top + (box.bottom - box.top - height) / 2;
             const BLENDFUNCTION blend{AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
             AlphaBlend(destination, left, top, width, height, source, 0, 0, static_cast<int>(image.width), static_cast<int>(image.height), blend);
             SelectObject(source, old);
@@ -386,9 +462,12 @@ struct Surface::State : std::enable_shared_from_this<State> {
             RECT name = client; InflateRect(&name,-Scale(12),-Scale(8)); name.bottom = name.top + Scale(24);
             SetTextColor(dc,colors.ink);
             DrawTextW(dc,previewModel->page.entries[0].name.c_str(),-1,&name,DT_LEFT|DT_SINGLELINE|DT_END_ELLIPSIS|DT_NOPREFIX);
-            RECT box = client; InflateRect(&box,-Scale(12),-Scale(12)); box.top = name.bottom + Scale(8);
+            RECT box = PreviewBox();
             const auto pixels = previewImage;
-            if (pixels) PaintImage(dc,*pixels,box);
+            if (pixels && previewViewport.Ready()) {
+                const auto placement = previewViewport.Placement();
+                if (IntersectClipRect(dc,box.left,box.top,box.right,box.bottom) != ERROR) PaintImage(dc,*pixels,box,&placement);
+            }
             else { SetTextColor(dc,colors.muted); DrawTextW(dc,previewModel->detail.data(),-1,&box,DT_CENTER|DT_WORDBREAK|DT_NOPREFIX); }
             if (previous) SelectObject(dc,previous); RestoreDC(dc,saved); return;
         }
@@ -453,7 +532,11 @@ struct Surface::State : std::enable_shared_from_this<State> {
                 if (state->Alive()) { InvalidateRect(state->canvas, nullptr, FALSE); state->Notify(state->callbacks.focusActivated); }
                 if (isCanvas || isRoot) return 0;
             }
-            if (message == WM_KILLFOCUS) { InvalidateRect(state->canvas, nullptr, FALSE); return 0; }
+            if (message == WM_KILLFOCUS || message == WM_CANCELMODE) {
+                state->CancelDrag(); if (state->Alive()) InvalidateRect(state->canvas, nullptr, FALSE); return 0;
+            }
+            if (message == WM_CAPTURECHANGED && isCanvas) { state->dragging = false; return 0; }
+            if (message == WM_MOUSEWHEEL && isRoot && state->previewActive && state->PreviewWheel(wParam,lParam)) return 0;
             if (message == WM_CTLCOLORSTATIC && isRoot && reinterpret_cast<HWND>(lParam) == state->statusText) {
                 const auto dc = reinterpret_cast<HDC>(wParam); SetTextColor(dc,state->colors.muted);
                 SetBkColor(dc,state->colors.surface_strong); SetDCBrushColor(dc,state->colors.surface_strong);
@@ -475,6 +558,10 @@ struct Surface::State : std::enable_shared_from_this<State> {
             if (id == PreviewBackControlId) PreviewClose();
             else if (id == PreviewPreviousControlId) PreviewStep(-1);
             else if (id == PreviewNextControlId) PreviewStep(1);
+            else if (id == PreviewZoomOutControlId) Zoom(.8,PreviewCenter());
+            else if (id == PreviewZoomInControlId) Zoom(1.25,PreviewCenter());
+            else if (id == PreviewFitControlId) { if (previewViewport.Fit()) TransformChanged(); }
+            else if (id == PreviewActualControlId) { if (previewViewport.ActualSize()) TransformChanged(); }
             return;
         }
         const auto oldMode = mode; const auto oldDensity = density;
@@ -490,6 +577,45 @@ struct Surface::State : std::enable_shared_from_this<State> {
     void UpdateModeButtons() noexcept {
         SendMessageW(buttons[0], BM_SETCHECK, mode == Mode::Gallery ? BST_CHECKED : BST_UNCHECKED, 0);
         SendMessageW(buttons[1], BM_SETCHECK, mode == Mode::List ? BST_CHECKED : BST_UNCHECKED, 0);
+    }
+    bool PreviewWheel(WPARAM wParam, LPARAM lParam) {
+        if (GetKeyState(VK_MENU)&0x8000) return false;
+        POINT point{GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam)}; ScreenToClient(canvas,&point);
+        const auto box = PreviewBox(); if (!PtInRect(&box,point)) return false;
+        if (!previewViewport.Ready()) return true;
+        wheelRemainder += GET_WHEEL_DELTA_WPARAM(wParam);
+        const int steps = wheelRemainder / WHEEL_DELTA; wheelRemainder %= WHEEL_DELTA;
+        if (steps) Zoom(std::pow(1.25,steps),point);
+        return true;
+    }
+    LRESULT PreviewPointer(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+        const auto revision = previewRevision;
+        const POINT point{GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam)};
+        if (message == WM_LBUTTONUP) { CancelDrag(); return 0; }
+        if (message == WM_MOUSEMOVE) {
+            if (dragging && GetCapture() == canvas) {
+                if (!(wParam & MK_LBUTTON)) { CancelDrag(); return 0; }
+                const auto previous = dragPoint; dragPoint = point;
+                if (previewViewport.Pan(static_cast<double>(point.x)-previous.x,static_cast<double>(point.y)-previous.y)) TransformChanged();
+            }
+            return 0;
+        }
+        if (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK) {
+            if ((wParam & (MK_CONTROL|MK_SHIFT)) || (GetKeyState(VK_MENU)&0x8000)) return DefSubclassProc(hwnd,message,wParam,lParam);
+            const RECT box = PreviewBox(); if (!PtInRect(&box,point)) return 0;
+            SetFocus(canvas); if (!PreviewLive(revision)) return 0;
+            if (message == WM_LBUTTONDBLCLK) {
+                CancelDrag(); if (!PreviewLive(revision)) return 0;
+                if (previewViewport.Fitting() ? previewViewport.ActualSize() : previewViewport.Fit()) TransformChanged();
+            } else if (previewViewport.CanPan()) {
+                // SetCapture can synchronously retire this preview via the previous owner's callback.
+                dragging = true; dragPoint = point; SetCapture(canvas);
+                if (!PreviewLive(revision)) return 0;
+                if (GetCapture() != canvas) dragging = false;
+            }
+            return 0;
+        }
+        return DefSubclassProc(hwnd,message,wParam,lParam);
     }
     LRESULT CanvasMessage(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
         if (message == ActivationMessage) {
@@ -517,8 +643,9 @@ struct Surface::State : std::enable_shared_from_this<State> {
         if (message == WM_ERASEBKGND) return 1;
         if (message == WM_PRINTCLIENT && wParam) { RECT client{}; GetClientRect(hwnd, &client); Paint(reinterpret_cast<HDC>(wParam), client); return 0; }
         if (message == WM_PAINT) { PAINTSTRUCT paint{}; HDC dc = BeginPaint(hwnd, &paint); if (dc) Paint(dc, paint.rcPaint); EndPaint(hwnd, &paint); return 0; }
-        if (previewActive && (message == WM_MOUSEMOVE || message == WM_MOUSEWHEEL || message == WM_VSCROLL || message == WM_CONTEXTMENU)) return 0;
-        if (previewActive && (message == WM_LBUTTONDOWN || message == WM_LBUTTONDBLCLK)) { SetFocus(canvas); return 0; }
+        if (previewActive && message == WM_MOUSEWHEEL) return PreviewWheel(wParam,lParam) ? 0 : DefSubclassProc(hwnd,message,wParam,lParam);
+        if (previewActive && (message == WM_VSCROLL || message == WM_CONTEXTMENU)) return 0;
+        if (previewActive && (message == WM_MOUSEMOVE || message == WM_LBUTTONDOWN || message == WM_LBUTTONUP || message == WM_LBUTTONDBLCLK)) return PreviewPointer(hwnd,message,wParam,lParam);
         if (message == WM_MOUSEWHEEL) { ScrollTo(scroll - GET_WHEEL_DELTA_WPARAM(wParam) * Scale(48) / WHEEL_DELTA); return 0; }
         if (message == WM_VSCROLL) {
             SCROLLINFO info{sizeof(info), SIF_ALL}; GetScrollInfo(hwnd, SB_VERT, &info); int next = scroll;
@@ -612,7 +739,7 @@ HRESULT Surface::Create(HWND parent, const RECT& bounds, const Callbacks& callba
             if (!state->buttons[index]) { const auto error = HRESULT_FROM_WIN32(GetLastError()); DestroyWindow(state->window); return error; }
             hr = state->Attach(state->buttons[index]); if (FAILED(hr)) { DestroyWindow(state->window); return hr; }
         }
-        const wchar_t* previewLabels[] = {L"返回",L"上一张",L"下一张"};
+        const wchar_t* previewLabels[] = {L"返回",L"上一张",L"下一张",L"缩小",L"放大",L"适应窗口",L"预览100%"};
         for (size_t at=0; at<state->previewButtons.size(); ++at) {
             state->previewButtons[at] = CreateWindowExW(0,L"BUTTON",previewLabels[at],WS_CHILD|WS_TABSTOP|BS_PUSHBUTTON,0,0,1,1,state->window,
                 reinterpret_cast<HMENU>(static_cast<INT_PTR>(PreviewBackControlId + at)),GetModuleHandleW(nullptr),nullptr);
@@ -648,7 +775,9 @@ HRESULT Surface::SetPage(const snapshot::Page& page, std::uint64_t generation) n
     if (generation < state->model->generation) return S_FALSE;
     try {
         snapshot::Page next = page;
+        const auto revision = state->pageRevision + 1;
         state->Empty(page.status, generation);
+        if (!state->Alive() || state->pageRevision != revision) return S_FALSE;
         if (page.status == snapshot::Status::Ready) state->model->page = std::move(next);
         for (const auto& item : state->model->page.entries) state->layoutItems.push_back({item.kind, 4.0 / 3.0});
         if (!state->Toolbar()) return S_FALSE;
@@ -662,7 +791,9 @@ void Surface::Clear(snapshot::Status status, std::uint64_t generation) noexcept 
     if (!state_ || !state_->Alive()) return;
     const OwnedState call(state_); const auto& state = call.state;
     if (generation < state->model->generation) return;
-    state->Empty(status, generation); if (!state->Toolbar()) return; state->Resize(); if (!state->Alive()) return; NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
+    const auto revision = state->pageRevision + 1;
+    state->Empty(status, generation); if (!state->Alive() || state->pageRevision != revision || !state->Toolbar()) return;
+    state->Resize(); if (!state->Alive() || state->pageRevision != revision) return; NotifyWinEvent(EVENT_OBJECT_REORDER, state->canvas, OBJID_CLIENT, CHILDID_SELF);
     InvalidateRect(state->canvas, nullptr, FALSE); state->Notify(state->callbacks.viewportChanged);
     if (state->Alive()) state->PublishSelection();
 }
@@ -706,8 +837,9 @@ HRESULT Surface::BeginPreview(UINT index, std::uint64_t generation, bool previou
         preview.alive = true; preview.visible = state->shown; preview.window = state->canvas; preview.context = state.get(); preview.focusControl = state->model->focusControl;
         preview.presentation = ++state->presentationSerial; preview.generation = generation; preview.page.status = snapshot::Status::Ready; preview.page.epoch = state->model->page.epoch;
         preview.focus = 0; preview.order[0] = 0; preview.selected.fill(false);
-        constexpr wchar_t loading[] = L"正在加载大图预览"; std::copy(std::begin(loading),std::end(loading),preview.detail.begin());
-        SetWindowTextW(state->canvas,L"大图预览"); SetWindowTextW(state->statusText,preview.detail.data());
+        constexpr wchar_t loading[] = L"正在加载大图预览"; std::copy(std::begin(loading),std::end(loading),state->previewStatus.begin());
+        state->CancelDrag(); if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
+        SetWindowTextW(state->canvas,L"大图预览"); if (!state->Alive() || revision != state->pageRevision || !state->PreviewText()) return S_FALSE;
         if (!state->Alive() || revision != state->pageRevision || !state->Toolbar()) return S_FALSE;
         state->Resize();
         if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
@@ -720,21 +852,23 @@ HRESULT Surface::SetPreview(UINT index, std::uint64_t generation, std::shared_pt
     if (!state_ || !state_->Alive()) return S_FALSE;
     const OwnedState call(state_); const auto& state = call.state;
     if (!state->previewActive || !state->shown || index != state->previewIndex || generation != state->previewSerial) return S_FALSE;
-    HRESULT result = S_OK; state->previewImage.reset();
+    HRESULT result = S_OK; state->previewImage.reset(); state->ResetTransform();
+    const auto transform = state->previewRevision;
     if (image && (!PixelsValid(*image,MaxPreviewDimension) || image->pixels.size() > MaxPreviewPixelBytes)) result = E_INVALIDARG;
     else if (image && image->pixels.capacity() > MaxImageBytes) result = E_OUTOFMEMORY;
     if (SUCCEEDED(result)) state->previewImage = std::move(image);
-    auto& preview = *state->previewModel;
+    if (state->previewImage) state->previewViewport.Reset(state->previewImage->width,state->previewImage->height);
+    state->previewViewport.Resize(state->PreviewBox());
+    state->previewStatus.fill(0);
     if (FAILED(result) || statusText.empty()) {
-        constexpr wchar_t unavailable[] = L"预览不可用"; constexpr wchar_t ready[] = L"适应窗口";
-        if (state->previewImage) std::copy(std::begin(ready),std::end(ready),preview.detail.begin());
-        else std::copy(std::begin(unavailable),std::end(unavailable),preview.detail.begin());
-    } else CopyText(statusText,preview.detail.data());
+        constexpr wchar_t unavailable[] = L"预览不可用";
+        if (!state->previewImage) std::copy(std::begin(unavailable),std::end(unavailable),state->previewStatus.begin());
+    } else CopyText(statusText,state->previewStatus.data());
     const auto revision = state->pageRevision;
-    SetWindowTextW(state->statusText,preview.detail.data());
-    if (!state->Alive() || revision != state->pageRevision) return S_FALSE;
+    state->CancelDrag();
+    if (!state->PreviewLive(transform) || revision != state->pageRevision || !state->PreviewText()) return S_FALSE;
     try { state->Resize(); } catch (const std::bad_alloc&) { state->previewImage.reset(); return E_OUTOFMEMORY; }
-    if (state->Alive() && revision == state->pageRevision) NotifyWinEvent(EVENT_OBJECT_DESCRIPTIONCHANGE,state->canvas,OBJID_CLIENT,1);
+    if (state->PreviewLive(transform) && revision == state->pageRevision) NotifyWinEvent(EVENT_OBJECT_DESCRIPTIONCHANGE,state->canvas,OBJID_CLIENT,1);
     return result;
 }
 void Surface::EndPreview() noexcept {
@@ -742,7 +876,9 @@ void Surface::EndPreview() noexcept {
     const OwnedState call(state_); const auto& state = call.state;
     state->RetirePreview(); state->previewActive = false; ++state->pageRevision; state->activationQueued = false;
     const auto revision = state->pageRevision;
-    SetWindowTextW(state->canvas,L"资产库图库"); SetWindowTextW(state->statusText,state->browseStatus.data());
+    state->CancelDrag(); if (!state->Alive() || revision != state->pageRevision) return;
+    SetWindowTextW(state->canvas,L"资产库图库"); if (!state->Alive() || revision != state->pageRevision) return;
+    SetWindowTextW(state->statusText,state->browseStatus.data());
     if (!state->Alive() || revision != state->pageRevision || !state->Toolbar()) return;
     try { state->Resize(); } catch (const std::bad_alloc&) { state->Empty(snapshot::Status::Unavailable,state->model->generation + 1); }
     if (!state->Alive() || revision != state->pageRevision) return;
@@ -779,7 +915,7 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
     const OwnedState call(state_); const auto& state = call.state;
     if (message.wParam == VK_TAB) {
         if ((GetKeyState(VK_CONTROL) & 0x8000) || (GetKeyState(VK_MENU) & 0x8000)) return false;
-        std::array<HWND,7> order{}; size_t count = 0; order[count++] = state->canvas;
+        std::array<HWND,8> order{}; size_t count = 0; order[count++] = state->canvas;
         if (state->previewActive) { for (HWND button : state->previewButtons) if (IsWindowEnabled(button)) order[count++] = button; }
         else for (HWND button : state->buttons) order[count++] = button;
         const auto end = order.begin() + static_cast<ptrdiff_t>(count);
@@ -789,7 +925,9 @@ bool Surface::TranslateAccelerator(const MSG& message) noexcept {
         if (next < 0 || next >= static_cast<ptrdiff_t>(count)) return false;
         SetFocus(order[static_cast<size_t>(next)]); return true;
     }
-    if (state->previewActive && (message.wParam == VK_ESCAPE || message.wParam == VK_LEFT || message.wParam == VK_RIGHT || message.wParam == VK_F5) &&
+    if (state->previewActive && (message.wParam == VK_ESCAPE || message.wParam == VK_LEFT || message.wParam == VK_RIGHT || message.wParam == VK_UP || message.wParam == VK_DOWN || message.wParam == VK_F5 ||
+        message.wParam == VK_ADD || message.wParam == VK_SUBTRACT || message.wParam == VK_OEM_PLUS || message.wParam == VK_OEM_MINUS ||
+        message.wParam == '0' || message.wParam == '1' || message.wParam == VK_NUMPAD0 || message.wParam == VK_NUMPAD1) &&
         (message.hwnd == state->window || IsChild(state->window,message.hwnd))) {
         try { return state->Key(message.wParam); } catch (const std::bad_alloc&) { return false; }
     }
