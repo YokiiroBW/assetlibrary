@@ -1,14 +1,15 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using AssetLibrary.Windows.Client;
 
 namespace AssetLibrary.Windows.AssetHost;
 
 [SupportedOSPlatform("windows")]
 internal static class WicThumbnailDecoder
 {
-    internal static ThumbnailPixels Decode(byte[] png)
+    internal static ThumbnailPixels Decode(byte[] png, DerivedImageProfile profile = DerivedImageProfile.Thumbnail512)
     {
-        var expected = PngThumbnailContainer.Validate(png);
+        var expected = PngThumbnailContainer.Validate(png, profile);
         var initialized = CoInitializeEx(IntPtr.Zero, 0);
         Marshal.ThrowExceptionForHR(initialized);
         try { return DecodeInitialized(png, expected); }

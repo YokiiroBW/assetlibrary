@@ -7,11 +7,15 @@ internal sealed class ConnectedSession(ClientTransport transport, ClientSession 
     private readonly SnapshotStore snapshots = new(new ReadOnlyClient(transport), session.ExpiresAt);
     private ThumbnailSession? thumbnails;
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    private ThumbnailSession Images => thumbnails ??= new ThumbnailSession(transport, snapshots,
+        new ThumbnailDecoder().DecodeAsync, new ThumbnailDecoder().DecodePreviewAsync);
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     internal Task<ThumbnailResponse> ReadThumbnailAsync(ThumbnailRequest request, CancellationToken token)
     {
-        thumbnails ??= new ThumbnailSession(transport, snapshots, new ThumbnailDecoder().DecodeAsync);
-        return thumbnails.ReadAsync(request, token);
+        return Images.ReadAsync(request, token);
     }
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    internal Task<ThumbnailResponse> ReadPreviewAsync(ThumbnailRequest request, CancellationToken token) => Images.ReadPreviewAsync(request, token);
     internal bool IsRevoked => snapshots.IsRevoked;
     internal static SnapshotResponse Unavailable(Guid epoch, bool denied) =>
         new(denied ? SnapshotStatus.AccessDenied : SnapshotStatus.Unavailable, epoch, Array.Empty<SnapshotItem>());

@@ -13,14 +13,19 @@ internal sealed class ThumbnailLiveFixture : IAsyncDisposable
     private readonly SnapshotStore store;
     private readonly ThumbnailSession thumbnails;
     private readonly ThumbnailPipeServer server;
+    private readonly PreviewPipeServer previewServer;
+    internal string PreviewEndpoint { get; } = PreviewPipeServer.Endpoint + ".test." + Guid.NewGuid().ToString("N");
     internal string Endpoint { get; } = ThumbnailPipeServer.Endpoint + ".test." + Guid.NewGuid().ToString("N");
     internal SnapshotResponse Page { get; private set; } = null!;
     private ThumbnailLiveFixture(ClientTransport transport, DateTimeOffset expiry)
     {
         this.transport = transport;
         store = new SnapshotStore(new ReadOnlyClient(transport), expiry);
-        thumbnails = new ThumbnailSession(transport, store, new ThumbnailDecoder(ThumbnailTestSupport.Executable).DecodeAsync);
-        server = new ThumbnailPipeServer(thumbnails.ReadAsync, Endpoint);
+        var decoder = new ThumbnailDecoder(ThumbnailTestSupport.Executable);
+        thumbnails = new ThumbnailSession(transport, store, decoder.DecodeAsync, decoder.DecodePreviewAsync);
+        var capacity = new ImageClientCapacity();
+        server = new ThumbnailPipeServer(thumbnails.ReadAsync, capacity, Endpoint);
+        previewServer = new PreviewPipeServer(thumbnails.ReadPreviewAsync, capacity, PreviewEndpoint);
     }
     internal static async Task<ThumbnailLiveFixture> OpenAsync(CancellationToken token)
     {
@@ -45,7 +50,7 @@ internal sealed class ThumbnailLiveFixture : IAsyncDisposable
     {
         try
         {
-            await server.DisposeAsync(); await thumbnails.DisposeAsync(); await store.DisposeAsync();
+            await previewServer.DisposeAsync(); await server.DisposeAsync(); await thumbnails.DisposeAsync(); await store.DisposeAsync();
             using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(3));
             await transport.SignOutAsync(deadline.Token);
         }

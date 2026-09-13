@@ -6,7 +6,9 @@ namespace AssetLibrary.Windows.Tests;
 public sealed class ThumbnailAdmissionTests
 {
     [TestMethod]
-    public async Task ASecondImageCannotConsumeTheNavigationSlot()
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task ASecondImageCannotConsumeTheNavigationSlot(bool preview)
     {
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -23,7 +25,9 @@ public sealed class ThumbnailAdmissionTests
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var first = transport.ThumbnailAsync(ThumbnailTestSupport.LibraryId, ThumbnailTestSupport.EntryId, deadline.Token);
         await entered.Task.WaitAsync(deadline.Token);
-        var second = transport.ThumbnailAsync(ThumbnailTestSupport.LibraryId, ThumbnailTestSupport.EntryId, deadline.Token);
+        var second = preview
+            ? transport.PreviewAsync(ThumbnailTestSupport.LibraryId, ThumbnailTestSupport.EntryId, deadline.Token)
+            : transport.ThumbnailAsync(ThumbnailTestSupport.LibraryId, ThumbnailTestSupport.EntryId, deadline.Token);
         try
         {
             _ = await new ReadOnlyClient(transport).LibrariesAsync(null, null, deadline.Token);

@@ -1,13 +1,15 @@
 using System.Buffers.Binary;
+using AssetLibrary.Windows.Client;
 
 namespace AssetLibrary.Windows.AssetHost;
 
 internal static class PngThumbnailContainer
 {
     internal const int MaximumBytes = 2097152;
-    internal static (uint Width, uint Height) Validate(ReadOnlySpan<byte> bytes)
+    internal static (uint Width, uint Height) Validate(ReadOnlySpan<byte> bytes, DerivedImageProfile profile = DerivedImageProfile.Thumbnail512)
     {
-        if (bytes.Length is < 45 or > MaximumBytes || !bytes[..8].SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
+        var specification = DerivedImageSpecification.For(profile);
+        if (bytes.Length < 45 || bytes.Length > specification.MaximumEncodedBytes || !bytes[..8].SequenceEqual(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }))
         { throw Invalid(); }
         var offset = 8; var chunks = 0; var dataSeen = false; uint width = 0; uint height = 0;
         while (offset < bytes.Length)
@@ -21,9 +23,9 @@ internal static class PngThumbnailContainer
             if (chunks == 1)
             {
                 if (!type.SequenceEqual("IHDR"u8) || size != 13) { throw Invalid(); }
-                (width, height) = Header(bytes.Slice(offset + 8, size));
+                (width, height) = Header(bytes.Slice(offset + 8, size), specification.MaximumEdge);
             }
-            else if (type.SequenceEqual("IHDR"u8) || type.SequenceEqual("acTL"u8) || type.SequenceEqual("fcTL"u8) || type.SequenceEqual("fdAT"u8))
+            else if (type.SequenceEqual("IHDR"u8) || IsAnimationChunk(type))
             { throw Invalid(); }
             if (type.SequenceEqual("IDAT"u8)) { dataSeen = true; }
             offset += size + 12;
@@ -36,10 +38,13 @@ internal static class PngThumbnailContainer
         throw Invalid();
     }
 
-    private static (uint Width, uint Height) Header(ReadOnlySpan<byte> header)
+    private static bool IsAnimationChunk(ReadOnlySpan<byte> type) =>
+        type.SequenceEqual("acTL"u8) || type.SequenceEqual("fcTL"u8) || type.SequenceEqual("fdAT"u8);
+
+    private static (uint Width, uint Height) Header(ReadOnlySpan<byte> header, int maximumEdge)
     {
         var width = BinaryPrimitives.ReadUInt32BigEndian(header); var height = BinaryPrimitives.ReadUInt32BigEndian(header[4..]);
-        if (width is < 1 or > 512 || height is < 1 or > 512 || (ulong)width * height > 262144
+        if (width < 1 || width > maximumEdge || height < 1 || height > maximumEdge || (ulong)width * height > (ulong)maximumEdge * (ulong)maximumEdge
             || header[8] != 8 || header[9] is not (0 or 2 or 3 or 4 or 6) || header[10] != 0 || header[11] != 0 || header[12] > 1)
         { throw Invalid(); }
         return (width, height);

@@ -13,8 +13,10 @@ internal sealed class ThumbnailHttpReader(HttpClient client, SemaphoreSlim admis
     internal const int MaximumBytes = 2 * 1024 * 1024;
     private readonly SemaphoreSlim imageAdmission = new(1, 1);
 
-    internal async Task<byte[]> ReadAsync(Guid library, Guid entry, CancellationToken token)
+    internal async Task<byte[]> ReadAsync(Guid library, Guid entry, CancellationToken token,
+        DerivedImageProfile profile = DerivedImageProfile.Thumbnail512)
     {
+        var specification = DerivedImageSpecification.For(profile);
         if (library == Guid.Empty || entry == Guid.Empty) { throw new ArgumentException("Stable thumbnail IDs required."); }
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(20));
@@ -23,14 +25,14 @@ internal sealed class ThumbnailHttpReader(HttpClient client, SemaphoreSlim admis
         {
             await imageAdmission.WaitAsync(deadline.Token).ConfigureAwait(false);
             entered = true;
-            return await RetryAsync(library, entry, deadline.Token).ConfigureAwait(false);
+            return await RetryAsync(library, entry, specification, deadline.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException) when (!token.IsCancellationRequested) { throw new ThumbnailHttpException(504); }
         catch (HttpRequestException) { throw new ThumbnailHttpException(503); }
         finally { if (entered) { imageAdmission.Release(); } }
     }
 
-    private async Task<byte[]> RetryAsync(Guid library, Guid entry, CancellationToken token)
+    private async Task<byte[]> RetryAsync(Guid library, Guid entry, DerivedImageSpecification specification, CancellationToken token)
     {
         for (var attempt = 0; ; ++attempt)
         {
@@ -39,12 +41,12 @@ internal sealed class ThumbnailHttpReader(HttpClient client, SemaphoreSlim admis
             try
             {
                 using var request = new HttpRequestMessage(HttpMethod.Get,
-                    $"assetlink/v1/libraries/{library:D}/entries/{entry:D}/image?variant=thumbnail");
+                    $"assetlink/v1/libraries/{library:D}/entries/{entry:D}/image?variant={specification.HttpVariant}");
                 using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
                 if (response.StatusCode != HttpStatusCode.TooManyRequests)
                 {
                     if (response.StatusCode != HttpStatusCode.OK) { throw new ThumbnailHttpException((int)response.StatusCode); }
-                    return await ReadPngAsync(response, token).ConfigureAwait(false);
+                    return await ReadPngAsync(response, specification.MaximumEncodedBytes, token).ConfigureAwait(false);
                 }
                 if (attempt == 2) { throw new ThumbnailHttpException(429); }
                 retry = response.Headers.RetryAfter?.Delta
@@ -57,10 +59,10 @@ internal sealed class ThumbnailHttpReader(HttpClient client, SemaphoreSlim admis
         }
     }
 
-    private static async Task<byte[]> ReadPngAsync(HttpResponseMessage response, CancellationToken token)
+    private static async Task<byte[]> ReadPngAsync(HttpResponseMessage response, int maximumBytes, CancellationToken token)
     {
         var length = response.Content.Headers.ContentLength;
-        if (response.Content.Headers.ContentType?.MediaType != "image/png" || length is null or < 33 or > MaximumBytes
+        if (response.Content.Headers.ContentType?.MediaType != "image/png" || length is null or < 33 || length > maximumBytes
             || response.Content.Headers.ContentEncoding.Count != 0)
         { throw new InvalidDataException("Invalid derived PNG representation."); }
         await using var stream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);

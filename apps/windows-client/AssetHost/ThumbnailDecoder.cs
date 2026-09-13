@@ -1,16 +1,18 @@
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
+using AssetLibrary.Windows.Client;
 
 namespace AssetLibrary.Windows.AssetHost;
 
 [SupportedOSPlatform("windows")]
 internal sealed class ThumbnailDecoder(string? executable = null)
 {
-    internal async Task<ThumbnailPixels> DecodeAsync(byte[] png, CancellationToken token)
+    internal Task<ThumbnailPixels> DecodeAsync(byte[] png, CancellationToken token) => DecodeAsync(png, DerivedImageProfile.Thumbnail512, token);
+    internal Task<ThumbnailPixels> DecodePreviewAsync(byte[] png, CancellationToken token) => DecodeAsync(png, DerivedImageProfile.Preview1600, token);
+    private async Task<ThumbnailPixels> DecodeAsync(byte[] png, DerivedImageProfile profile, CancellationToken token)
     {
-        var expected = PngThumbnailContainer.Validate(png);
+        var expected = PngThumbnailContainer.Validate(png, profile);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(3));
         using var job = new ThumbnailDecodeJob();
@@ -21,10 +23,10 @@ internal sealed class ThumbnailDecoder(string? executable = null)
         using var startup = new ThumbnailDecodeStartup(job.Handle.DangerousGetHandle(), handles);
         var path = executable ?? Path.Combine(AppContext.BaseDirectory, "AssetLibrary.Host.exe");
         deadline.Token.ThrowIfCancellationRequested();
-        using var process = startup.Start(Path.GetFullPath(path), handles);
+        using var process = startup.Start(Path.GetFullPath(path), handles, profile);
         input.DisposeLocalCopyOfClientHandle(); output.DisposeLocalCopyOfClientHandle(); errors.DisposeLocalCopyOfClientHandle();
         using var cancellation = deadline.Token.Register(job.Terminate);
-        var pixels = ThumbnailDecodeWire.ReadOutputAsync(output, deadline.Token);
+        var pixels = ThumbnailDecodeWire.ReadOutputAsync(output, deadline.Token, profile);
         var diagnostic = ReadDiagnosticAsync(errors, deadline.Token);
         try
         {
@@ -33,7 +35,7 @@ internal sealed class ThumbnailDecoder(string? executable = null)
             var result = await pixels.ConfigureAwait(false);
             await diagnostic.ConfigureAwait(false);
             await WaitForExitAsync(process, deadline.Token).ConfigureAwait(false);
-            if (!GetExitCodeProcess(process, out var code) || code != 0 || (result.Width, result.Height) != expected)
+            if (!ThumbnailDecodeJob.SuccessfulExit(process) || (result.Width, result.Height) != expected)
             { throw new InvalidDataException("Thumbnail helper result rejected."); }
             return result;
         }
@@ -59,21 +61,5 @@ internal sealed class ThumbnailDecoder(string? executable = null)
             if (total == bytes.Length) { throw new InvalidDataException("Thumbnail diagnostic limit exceeded."); }
         }
     }
-    internal static async Task WaitForExitAsync(SafeProcessHandle process, CancellationToken token)
-    {
-        while (true)
-        {
-            var state = WaitForSingleObject(process, 0);
-            if (state == 0) { return; }
-            if (state != 258) { throw new IOException("Thumbnail child wait failed."); }
-            await Task.Delay(10, token).ConfigureAwait(false);
-        }
-    }
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static extern uint WaitForSingleObject(SafeProcessHandle handle, uint timeout);
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GetExitCodeProcess(SafeProcessHandle process, out uint code);
+    internal static Task WaitForExitAsync(SafeProcessHandle process, CancellationToken token) => ThumbnailDecodeJob.WaitForExitAsync(process, token);
 }

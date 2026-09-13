@@ -12,6 +12,7 @@ internal static class Program
         try
         {
             if (args is ["--decode-thumbnail"]) { return await ThumbnailDecodeHelper.RunAsync().ConfigureAwait(false); }
+            if (args is ["--decode-preview"]) { return await ThumbnailDecodeHelper.RunPreviewAsync().ConfigureAwait(false); }
             if (args is ["--user-session"]) { return await UserSessionHost.RunAsync().ConfigureAwait(false); }
             if (args is ["--shutdown-user-session"]) { return await UserSessionHost.ShutdownAsync().ConfigureAwait(false); }
             if (args is ["--notify-session-changed"]) { return ShellSessionNotifier.Notify(); }

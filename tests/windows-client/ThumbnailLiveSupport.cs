@@ -23,15 +23,16 @@ internal static class ThumbnailLiveSupport
         throw new InvalidOperationException("Explicit synthetic image fixture directory is required.");
     }
 
-    internal static async Task<ThumbnailResponse> ReadPipeAsync(string endpoint, ThumbnailRequest request, CancellationToken token)
+    internal static async Task<ThumbnailResponse> ReadPipeAsync(string endpoint, ThumbnailRequest request, CancellationToken token,
+        DerivedImageProfile profile = DerivedImageProfile.Thumbnail512)
     {
         await using var pipe = await LocalPipe.OpenClientAsync(endpoint, token);
-        await pipe.WriteAsync(ThumbnailProtocol.EncodeRequest(request), token);
+        await pipe.WriteAsync(ImageProjectionProtocol.EncodeRequest(profile, request), token);
         var header = new byte[16]; await pipe.ReadExactlyAsync(header, token);
         var size = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(8));
-        Assert.IsLessThanOrEqualTo((uint)ThumbnailProtocol.MaximumPayload, size);
+        Assert.IsLessThanOrEqualTo((uint)(56 + DerivedImageSpecification.For(profile).MaximumDecodedBytes), size);
         var frame = new byte[16 + size]; header.CopyTo(frame, 0);
         await pipe.ReadExactlyAsync(frame.AsMemory(16), token);
-        return ThumbnailProtocol.DecodeResponse(frame, request);
+        return ImageProjectionProtocol.DecodeResponse(profile, frame, request);
     }
 }

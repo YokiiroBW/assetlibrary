@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
+using AssetLibrary.Windows.Client;
 
 namespace AssetLibrary.Windows.AssetHost;
 
@@ -29,8 +30,10 @@ internal sealed class ThumbnailDecodeStartup : IDisposable
         catch { Dispose(); throw; }
     }
 
-    internal SafeProcessHandle Start(string executable, IntPtr[] pipes)
+    internal SafeProcessHandle Start(string executable, IntPtr[] pipes, DerivedImageProfile profile = DerivedImageProfile.Thumbnail512)
     {
+        _ = DerivedImageSpecification.For(profile);
+        var mode = profile == DerivedImageProfile.Preview1600 ? "--decode-preview" : "--decode-thumbnail";
         var startup = new Startup
         {
             Size = 112,
@@ -43,7 +46,7 @@ internal sealed class ThumbnailDecodeStartup : IDisposable
         var environment = Marshal.StringToHGlobalUni(EnvironmentBlock());
         try
         {
-            if (!CreateProcess(executable, ('"' + executable + "\" --decode-thumbnail\0").ToCharArray(), IntPtr.Zero, IntPtr.Zero,
+            if (!CreateProcess(executable, ('"' + executable + "\" " + mode + '\0').ToCharArray(), IntPtr.Zero, IntPtr.Zero,
                 true, 0x08080400, environment, Path.GetDirectoryName(executable)!, ref startup, out var child))
             { throw new IOException("Thumbnail process creation failed."); }
             using var thread = new SafeFileHandle(child.ThreadHandle, true);

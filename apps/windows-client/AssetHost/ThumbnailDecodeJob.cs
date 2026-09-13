@@ -20,6 +20,17 @@ internal sealed class ThumbnailDecodeJob : IDisposable
         && (limits.Flags & 0x2308) == 0x2308 && limits.Processes == 1
         && limits.ProcessBytes is > 0 and <= 128 * 1024 * 1024 && limits.JobBytes is > 0 and <= 128 * 1024 * 1024;
     internal void Terminate() => _ = TerminateJobObject(Handle, 2);
+    internal static bool SuccessfulExit(SafeProcessHandle process) => GetExitCodeProcess(process, out var code) && code == 0;
+    internal static async Task WaitForExitAsync(SafeProcessHandle process, CancellationToken token)
+    {
+        while (true)
+        {
+            var state = WaitForSingleObject(process, 0);
+            if (state == 0) { return; }
+            if (state != 258) { throw new IOException("Image child wait failed."); }
+            await Task.Delay(10, token).ConfigureAwait(false);
+        }
+    }
     public void Dispose() => Handle.Dispose();
 
     // JOBOBJECT_EXTENDED_LIMIT_INFORMATION layout for the frozen Windows x64 target.
@@ -46,4 +57,11 @@ internal sealed class ThumbnailDecodeJob : IDisposable
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool TerminateJobObject(SafeFileHandle job, uint exitCode);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    private static extern uint WaitForSingleObject(SafeProcessHandle handle, uint timeout);
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetExitCodeProcess(SafeProcessHandle process, out uint code);
 }

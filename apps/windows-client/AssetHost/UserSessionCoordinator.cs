@@ -38,6 +38,15 @@ public sealed class UserSessionCoordinator : IAsyncDisposable
                 unavailableEpoch, request.Node));
         }
     }
+    public Task<ThumbnailResponse> ReadPreviewAsync(ThumbnailRequest request, CancellationToken token)
+    {
+        lock (gate)
+        {
+            return snapshots?.ReadPreviewAsync(request, token) ?? Task.FromResult(new ThumbnailResponse(
+                status.State == ConnectionState.AccessDenied ? ThumbnailStatus.AccessDenied : ThumbnailStatus.Unavailable,
+                request.Epoch, request.Node));
+        }
+    }
 
     public SnapshotResponse Query(SnapshotRequest request)
     {

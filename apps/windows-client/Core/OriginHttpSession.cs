@@ -61,6 +61,8 @@ internal sealed class OriginHttpSession : IDisposable
     }
 
     internal Task<byte[]> ThumbnailAsync(Guid library, Guid entry, CancellationToken token) => thumbnails.ReadAsync(library, entry, token);
+    internal Task<byte[]> PreviewAsync(Guid library, Guid entry, CancellationToken token) =>
+        thumbnails.ReadAsync(library, entry, token, DerivedImageProfile.Preview1600);
 
     private static ClientException Failure(int status) => new(status, status switch
     {

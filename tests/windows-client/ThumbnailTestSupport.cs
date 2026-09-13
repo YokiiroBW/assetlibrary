@@ -43,4 +43,6 @@ internal static class ThumbnailTestSupport
     internal static ClientTransport SuccessfulTransport() => Transport((request, _) =>
         request.RequestUri!.AbsolutePath.EndsWith("/image", StringComparison.Ordinal)
             ? Task.FromResult(ImageResponse()) : PageAsync(request));
+    internal static Task<ThumbnailResponse> ReadImageAsync(ThumbnailSession session, ThumbnailRequest request, bool preview, CancellationToken token) =>
+        preview ? session.ReadPreviewAsync(request, token) : session.ReadAsync(request, token);
 }

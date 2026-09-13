@@ -13,10 +13,12 @@ internal static class UserSessionHost
         // Reserve the production endpoint before loading credentials. A second launch never retries login.
         await using var control = new ControlPipeServer(session);
         await using var snapshots = new SnapshotPipeServer(session.Query, LocalPipe.SnapshotEndpoint);
-        await using var thumbnails = new ThumbnailPipeServer(session.ReadThumbnailAsync);
+        var imageClients = new ImageClientCapacity();
+        await using var thumbnails = new ThumbnailPipeServer(session.ReadThumbnailAsync, imageClients);
+        await using var previews = new PreviewPipeServer(session.ReadPreviewAsync, imageClients);
         using var stopping = new CancellationTokenSource();
         var initialization = session.InitializeAsync(stopping.Token);
-        try { await Task.WhenAny(control.Completion, snapshots.Completion, thumbnails.Completion).Unwrap().ConfigureAwait(false); }
+        try { await Task.WhenAny(control.Completion, snapshots.Completion, thumbnails.Completion, previews.Completion).Unwrap().ConfigureAwait(false); }
         finally { await stopping.CancelAsync().ConfigureAwait(false); await initialization.ConfigureAwait(false); }
         return 0;
     }
