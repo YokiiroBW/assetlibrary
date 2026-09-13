@@ -36,52 +36,59 @@ IMAGE_PREVIEW_FILES = (
     "LICENSE.SkiaSharp.txt", "THIRD-PARTY-NOTICES.SkiaSharp.txt",
 )
 
+IMAGE_SUPERVISOR_PATH = "/app/image-supervisor"
+IMAGE_SUPERVISOR_FILES = ("AssetLibrary.ImageSupervisor", "LICENSE.NET.txt", "THIRD-PARTY-NOTICES.NET.txt")
+IMAGE_SOCKET_PATH = "/run/assetlibrary-image/decoder.sock"
+IMAGE_ENV_KEYS = {"core": "CORE", "setup": "SETUP", "postgres": "POSTGRES", "image": "IMAGE_PREVIEW"}
 
-def image_preview_manifest(package: Path, revision: str, source: Path, image_id: str) -> dict:
+
+def _native_image_manifest(package: Path, revision: str, source: Path, image_id: str, *,
+                           payload: tuple[str, ...], native: tuple[str, ...], directory: str,
+                           lock_relative: str, component: str) -> dict:
     """Verify the actual image payload without executing the decoder or enabling it."""
     RELEASE.assert_no_link_components(package, package)
     if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
-        raise RELEASE.ReleaseBuildError("invalid image preview source revision")
+        raise RELEASE.ReleaseBuildError("invalid " + component + " source revision")
     if re.fullmatch(r"sha256:[0-9a-f]{64}", image_id) is None:
-        raise RELEASE.ReleaseBuildError("invalid image preview container image identity")
-    expected = {*IMAGE_PREVIEW_FILES, "SHA256SUMS", "SOURCE_REVISION"}
+        raise RELEASE.ReleaseBuildError("invalid " + component + " container image identity")
+    expected = {*payload, "SHA256SUMS", "SOURCE_REVISION"}
     files = {relative.as_posix(): path for path, relative in RELEASE.iter_artifact_files(package)}
     if set(files) != expected or {path.name for path in package.iterdir()} != expected:
-        raise RELEASE.ReleaseBuildError("image preview payload has missing or unexpected files")
+        raise RELEASE.ReleaseBuildError(component + " payload has missing or unexpected files")
     if files["SOURCE_REVISION"].stat().st_size != 41 or files["SOURCE_REVISION"].read_text(encoding="ascii") != revision + "\n":
-        raise RELEASE.ReleaseBuildError("image preview source revision differs from the image")
+        raise RELEASE.ReleaseBuildError(component + " source revision differs from the image")
     if files["SHA256SUMS"].stat().st_size > 1024:
-        raise RELEASE.ReleaseBuildError("image preview checksum list exceeds its bound")
+        raise RELEASE.ReleaseBuildError(component + " checksum list exceeds its bound")
     checksums = {}
     for line in files["SHA256SUMS"].read_text(encoding="ascii").splitlines():
         match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9_.-]+)", line)
         if match is None or match[2] in checksums:
-            raise RELEASE.ReleaseBuildError("invalid image preview checksum list")
+            raise RELEASE.ReleaseBuildError("invalid " + component + " checksum list")
         checksums[match[2]] = match[1]
-    if set(checksums) != set(IMAGE_PREVIEW_FILES):
-        raise RELEASE.ReleaseBuildError("image preview checksum list must cover every payload file")
-    for name in IMAGE_PREVIEW_FILES:
+    if set(checksums) != set(payload):
+        raise RELEASE.ReleaseBuildError(component + " checksum list must cover every payload file")
+    for name in payload:
         path = files[name]
         if not 0 < path.stat().st_size <= 256 * 1024 * 1024:
-            raise RELEASE.ReleaseBuildError("image preview file is empty or exceeds its bound")
+            raise RELEASE.ReleaseBuildError(component + " file is empty or exceeds its bound")
         if RELEASE.sha256_file(path) != checksums[name]:
-            raise RELEASE.ReleaseBuildError("image preview content checksum differs")
-    for name in IMAGE_PREVIEW_FILES[:2]:
+            raise RELEASE.ReleaseBuildError(component + " content checksum differs")
+    for name in native:
         with files[name].open("rb") as stream:
             header = stream.read(64)
         if (len(header) != 64 or header[:7] != b"\x7fELF\x02\x01\x01"
                 or header[16:18] not in (b"\x02\x00", b"\x03\x00") or header[18:20] != b"\x3e\x00"):
-            raise RELEASE.ReleaseBuildError("image preview requires native Linux x86-64 ELF artifacts")
+            raise RELEASE.ReleaseBuildError(component + " requires native Linux x86-64 ELF artifacts")
     if os.name != "nt":
         if any(not path.stat().st_mode & 0o004 for path in files.values()):
-            raise RELEASE.ReleaseBuildError("image preview payload is not readable by the non-root runtime")
-        if not files[IMAGE_PREVIEW_FILES[0]].stat().st_mode & 0o001:
-            raise RELEASE.ReleaseBuildError("image preview worker is not executable by the non-root runtime")
-    lock = source / "services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.linux-x64.lock.json"
+            raise RELEASE.ReleaseBuildError(component + " payload is not readable by the non-root runtime")
+        if not files[payload[0]].stat().st_mode & 0o001:
+            raise RELEASE.ReleaseBuildError(component + " worker is not executable by the non-root runtime")
+    lock = source / lock_relative
     RELEASE.assert_no_link_components(lock, source)
     return {
         "source_revision": revision, "runtime_identifier": "linux-x64", "image_id": image_id,
-        "executable": IMAGE_PREVIEW_PATH + "/" + IMAGE_PREVIEW_FILES[0],
+        "executable": directory + "/" + payload[0],
         "release_lock_sha256": RELEASE.sha256_file(lock),
         "files": [{"path": name, "length": path.stat().st_size, "sha256": RELEASE.sha256_file(path)}
                   for name, path in sorted(files.items())],
@@ -89,17 +96,46 @@ def image_preview_manifest(package: Path, revision: str, source: Path, image_id:
     }
 
 
-def inspect_image_preview(docker: str, image_id: str, destination: Path, source: Path, revision: str) -> dict:
+def image_preview_manifest(package: Path, revision: str, source: Path, image_id: str) -> dict:
+    return _native_image_manifest(package, revision, source, image_id, payload=IMAGE_PREVIEW_FILES,
+                                  native=IMAGE_PREVIEW_FILES[:2], directory=IMAGE_PREVIEW_PATH,
+                                  lock_relative="services/worker-supervisor/ImagePreview/locks/AssetLibrary.ImagePreview.Worker.linux-x64.lock.json",
+                                  component="image preview")
+
+
+def image_supervisor_manifest(package: Path, revision: str, source: Path, image_id: str) -> dict:
+    manifest = _native_image_manifest(package, revision, source, image_id, payload=IMAGE_SUPERVISOR_FILES,
+                                      native=IMAGE_SUPERVISOR_FILES[:1], directory=IMAGE_SUPERVISOR_PATH,
+                                      lock_relative="services/worker-supervisor/ImageSupervisor/locks/AssetLibrary.ImageSupervisor.linux-x64.lock.json",
+                                      component="image supervisor")
+    manifest.update({"socket": IMAGE_SOCKET_PATH, "decoder_uid": 1655, "core_uid": 1654,
+                     "state_file": "/run/assetlibrary-image/supervisor-state.bin",
+                     "runtime_validation": "required_on_target_not_performed_by_builder",
+                     "startup_capabilities": ["CHOWN", "SETUID", "SETGID", "KILL"],
+                     "steady_capabilities": ["CHOWN", "SETUID", "SETGID", "KILL"]})
+    return manifest
+
+
+def _inspect_native_image(docker: str, image_id: str, destination: Path, source: Path, revision: str,
+                          directory: str, validate) -> dict:
     name = "assetlibrary-preview-inspect-" + uuid.uuid4().hex
     command([docker, "create", "--name", name, "--network", "none", "--read-only",
              "--entrypoint", "/bin/false", image_id], cwd=source, capture=True)
     try:
         destination.mkdir()
-        command([docker, "cp", name + ":" + IMAGE_PREVIEW_PATH + "/.", str(destination)], cwd=source)
-        return image_preview_manifest(destination, revision, source, image_id)
+        command([docker, "cp", name + ":" + directory + "/.", str(destination)], cwd=source)
+        return validate(destination, revision, source, image_id)
     finally:
         # This exact, newly created inspection container was never started.
         command([docker, "rm", name], cwd=source)
+
+
+def inspect_image_preview(docker: str, image_id: str, destination: Path, source: Path, revision: str) -> dict:
+    return _inspect_native_image(docker, image_id, destination, source, revision, IMAGE_PREVIEW_PATH, image_preview_manifest)
+
+
+def inspect_image_supervisor(docker: str, image_id: str, destination: Path, source: Path, revision: str) -> dict:
+    return _inspect_native_image(docker, image_id, destination, source, revision, IMAGE_SUPERVISOR_PATH, image_supervisor_manifest)
 
 
 def command(arguments: list[str], *, cwd: Path, capture: bool = False) -> str:
@@ -152,9 +188,9 @@ def build(args: argparse.Namespace) -> dict:
         if info.get("Architecture") != "amd64" or not info.get("RepoDigests"):
             raise RELEASE.ReleaseBuildError("base image has no immutable amd64 provenance")
         resolved[argument] = {"requested": image, "digest": info["RepoDigests"][0], "id": info["Id"]}
-    tags = {name: f"assetlibrary/nas-{name}:{revision}" for name in ("core", "setup", "postgres")}
+    tags = {name: f"assetlibrary/nas-{name}:{revision}" for name in IMAGE_ENV_KEYS}
     image_ids = {}
-    for stage in ("core", "setup"):
+    for stage in ("core", "setup", "image"):
         invocation = [docker, "build", "--platform", "linux/amd64", "--file", "infra/docker/nas/Dockerfile",
                       "--target", stage, "--tag", tags[stage], "--build-arg", "SOURCE_REVISION=" + revision]
         for argument, identity in resolved.items():
@@ -165,6 +201,10 @@ def build(args: argparse.Namespace) -> dict:
             raise RELEASE.ReleaseBuildError("built image source label mismatch")
         image_ids[stage] = info["Id"]
     preview = inspect_image_preview(docker, image_ids["core"], output / "image-preview-inspection", source, revision)
+    supervisor = inspect_image_supervisor(docker, image_ids["image"], output / "image-supervisor-inspection", source, revision)
+    container_decoder = inspect_image_preview(docker, image_ids["image"], output / "image-container-decoder-inspection", source, revision)
+    if container_decoder["files"] != preview["files"]:
+        raise RELEASE.ReleaseBuildError("Core and image container decoder payloads differ")
     command([docker, "tag", resolved["POSTGRES_IMAGE"]["digest"], tags["postgres"]], cwd=source)
     image_ids["postgres"] = resolved["POSTGRES_IMAGE"]["id"]
     bundle = output / "assetlibrary-nas"
@@ -174,13 +214,13 @@ def build(args: argparse.Namespace) -> dict:
     (bundle / "nasctl.sh").chmod(0o755)
     env = ["ASSETLIBRARY_SOURCE_REVISION=" + revision]
     for name in tags:
-        env += [f"ASSETLIBRARY_{name.upper()}_IMAGE={tags[name]}", f"ASSETLIBRARY_{name.upper()}_IMAGE_ID={image_ids[name]}"]
+        env += [f"ASSETLIBRARY_{IMAGE_ENV_KEYS[name]}_IMAGE={tags[name]}", f"ASSETLIBRARY_{IMAGE_ENV_KEYS[name]}_IMAGE_ID={image_ids[name]}"]
     (bundle / "images.env").write_text("\n".join(env) + "\n", encoding="utf-8", newline="\n")
     save_images_archive(docker, list(tags.values()), bundle / "images.tar", source)
     manifest = {"format_version": 1, "product": "AssetLibrary/NAS/read-only/v1", "source_revision": revision,
                 "source_tree": tree, "base_images": resolved, "images": tags, "image_ids": image_ids,
                 "asset_writes": False, "native_deployment_validation": "not_executed_by_builder",
-                "image_preview": preview}
+                "image_preview": preview, "image_container": {"supervisor": supervisor, "decoder": container_decoder}}
     RELEASE.write_json(bundle / "build-manifest.json", manifest)
     lines = [f"{RELEASE.sha256_file(path)}  {relative.as_posix()}" for path, relative in RELEASE.iter_artifact_files(bundle)]
     (bundle / "SHA256SUMS").write_text("\n".join(lines) + "\n", encoding="ascii", newline="\n")

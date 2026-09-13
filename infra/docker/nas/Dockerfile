@@ -70,6 +70,45 @@ RUN dotnet restore services/worker-supervisor/ImagePreview/AssetLibrary.ImagePre
     && chmod 0555 AssetLibrary.ImagePreview.Worker \
     && chmod 0444 libSkiaSharp.so LICENSE.SkiaSharp.txt THIRD-PARTY-NOTICES.SkiaSharp.txt SHA256SUMS SOURCE_REVISION
 
+FROM image-preview AS image-supervisor-build
+ARG SOURCE_REVISION
+RUN dotnet restore services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj \
+       --locked-mode -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true -p:SelfContained=true \
+       -p:AssetLibraryReleaseLockRoot=/src/services/worker-supervisor/ImageSupervisor/locks \
+    && dotnet publish services/worker-supervisor/ImageSupervisor/AssetLibrary.ImageSupervisor.csproj \
+       --configuration Release --self-contained true --no-restore \
+       -p:RuntimeIdentifier=linux-x64 -p:PublishAot=true \
+       -p:AssetLibraryReleaseLockRoot=/src/services/worker-supervisor/ImageSupervisor/locks \
+       -p:ContinuousIntegrationBuild=true -p:SourceRevisionId="$SOURCE_REVISION" \
+       -p:PathMap=/src=/_/src -p:UseSharedCompilation=false -p:DebugType=None -p:DebugSymbols=false \
+       --output /out-image-supervisor \
+    && mkdir /image-supervisor-package \
+    && cp /out-image-supervisor/AssetLibrary.ImageSupervisor /image-supervisor-package/ \
+    && cp /opt/dotnet/LICENSE.txt /image-supervisor-package/LICENSE.NET.txt \
+    && cp /opt/dotnet/ThirdPartyNotices.txt /image-supervisor-package/THIRD-PARTY-NOTICES.NET.txt \
+    && cd /image-supervisor-package \
+    && test -x AssetLibrary.ImageSupervisor \
+    && sha256sum AssetLibrary.ImageSupervisor LICENSE.NET.txt THIRD-PARTY-NOTICES.NET.txt > SHA256SUMS \
+    && printf '%s\n' "$SOURCE_REVISION" > SOURCE_REVISION \
+    && chmod 0555 AssetLibrary.ImageSupervisor \
+    && chmod 0444 LICENSE.NET.txt THIRD-PARTY-NOTICES.NET.txt SHA256SUMS SOURCE_REVISION
+
+FROM native-base AS image
+ARG SOURCE_REVISION
+WORKDIR /app
+COPY --from=image-supervisor-build /image-supervisor-package/ ./image-supervisor/
+COPY --from=image-preview /image-preview-package/ ./workers/image-preview/
+# Named-volume copy-up preserves the directory boundary before PID1 binds.
+RUN mkdir -p /run/assetlibrary-image \
+    && chown 0:1654 /run/assetlibrary-image && chmod 0710 /run/assetlibrary-image
+USER 0:0
+LABEL org.opencontainers.image.title="AssetLibrary NAS image supervisor" \
+      org.opencontainers.image.revision="$SOURCE_REVISION" io.assetlibrary.role="nas-image-supervisor"
+HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
+    CMD ["/app/image-supervisor/AssetLibrary.ImageSupervisor", "--health"]
+ENTRYPOINT ["/app/image-supervisor/AssetLibrary.ImageSupervisor"]
+CMD []
+
 FROM native-base AS core
 ARG SOURCE_REVISION
 ENV DOTNET_ROOT=/opt/dotnet PATH=/opt/dotnet:$PATH \
@@ -85,7 +124,8 @@ COPY --from=web /src/apps/web/dist/ ./wwwroot/
 COPY infra/docker/nas/entrypoint.sh /app/entrypoint.sh
 RUN chmod 0555 /app/entrypoint.sh && mkdir -p /var/lib/assetlibrary /etc/dotnet \
     && printf '%s\n' /opt/dotnet > /etc/dotnet/install_location_x64 \
-    && chown 1654:1654 /var/lib/assetlibrary
+    && chown 1654:1654 /var/lib/assetlibrary \
+    && mkdir -p /run/assetlibrary-image && chown 0:1654 /run/assetlibrary-image && chmod 0710 /run/assetlibrary-image
 USER 1654:1654
 LABEL org.opencontainers.image.title="AssetLibrary NAS read-only server" \
       org.opencontainers.image.revision="$SOURCE_REVISION" io.assetlibrary.role="nas-core"

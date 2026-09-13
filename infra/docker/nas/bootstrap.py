@@ -126,6 +126,64 @@ def settings_digest(value: dict) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 
 
+def verify_image_container(document: object, deployment: str, name: str, image_id: str,
+                           revision: str, *, running: bool) -> dict:
+    """Read Docker's actual container configuration, never infer it from Ready IPC."""
+    if (not isinstance(document, list) or len(document) != 1 or not isinstance(document[0], dict)
+            or not re.fullmatch(r"assetlibrary-[a-z0-9-]{1,32}", name)
+            or not re.fullmatch(r"sha256:[0-9a-f]{64}", image_id)
+            or not re.fullmatch(r"[0-9a-f]{40}", revision)):
+        raise DeploymentError("deployment_image_inspection_invalid")
+    deployment = str(uuid.UUID(deployment))
+    container = document[0]
+    config, host, state = container.get("Config", {}), container.get("HostConfig", {}), container.get("State", {})
+    labels = config.get("Labels", {})
+    if (container.get("Image") != image_id or labels.get("io.assetlibrary.deployment") != deployment
+            or labels.get("io.assetlibrary.product") != "nas-read-only-v1"
+            or labels.get("io.assetlibrary.role") != "nas-image-supervisor"
+            or labels.get("org.opencontainers.image.revision") != revision
+            or labels.get("com.docker.compose.project") != name
+            or labels.get("com.docker.compose.service") != "image"):
+        raise DeploymentError("deployment_image_identity_mismatch")
+    executable = "/app/image-supervisor/AssetLibrary.ImageSupervisor"
+    if (config.get("User") != "0:0" or config.get("Entrypoint") != [executable]
+            or config.get("Cmd") not in (None, []) or container.get("Path") != executable
+            or container.get("Args") not in (None, []) or host.get("Init") not in (None, False)):
+        raise DeploymentError("deployment_image_pid1_invalid")
+    caps = lambda values: {value.removeprefix("CAP_") for value in values or []}
+    if (caps(host.get("CapAdd")) != {"CHOWN", "SETUID", "SETGID", "KILL"}
+            or caps(host.get("CapDrop")) != {"ALL"}
+            or set(host.get("SecurityOpt") or []) not in ({"no-new-privileges"}, {"no-new-privileges:true"}, {"no-new-privileges=true"})
+            or host.get("Privileged") is not False or host.get("ReadonlyRootfs") is not True):
+        raise DeploymentError("deployment_image_privilege_policy_invalid")
+    if (host.get("NetworkMode") != "none" or host.get("PidMode") not in ("", "private")
+            or host.get("IpcMode") != "private" or host.get("UTSMode") not in ("", "private")
+            or host.get("PortBindings") or host.get("PublishAllPorts") or config.get("ExposedPorts")
+            or host.get("Devices") or host.get("DeviceRequests") or host.get("VolumesFrom")):
+        raise DeploymentError("deployment_image_namespace_policy_invalid")
+    environment = config.get("Env") or []
+    if (not isinstance(environment, list) or len(environment) > 1
+            or any(not isinstance(value, str) or not value.startswith("PATH=") or len(value) > 4096 for value in environment)
+            or host.get("Tmpfs")):
+        raise DeploymentError("deployment_image_environment_policy_invalid")
+    if host.get("Memory") != 512 * 1024 * 1024 or host.get("CpuShares") != 256:
+        raise DeploymentError("deployment_image_limits_invalid")
+    if host.get("RestartPolicy", {}).get("Name") != "unless-stopped":
+        raise DeploymentError("deployment_image_restart_policy_invalid")
+    mounts = container.get("Mounts", [])
+    if (len(mounts) != 1 or mounts[0].get("Type") != "volume"
+            or mounts[0].get("Name") != name + "-image-ipc"
+            or mounts[0].get("Destination") != "/run/assetlibrary-image" or mounts[0].get("RW") is not True):
+        raise DeploymentError("deployment_image_mount_policy_invalid")
+    if config.get("Healthcheck", {}).get("Test") != ["CMD", executable, "--health"]:
+        raise DeploymentError("deployment_image_health_command_invalid")
+    if running and (state.get("Running") is not True or state.get("Pid", 0) <= 0
+                    or state.get("Health", {}).get("Status") != "healthy"):
+        raise DeploymentError("deployment_image_unavailable")
+    return {"status": "image_healthy" if running else "image_configuration_verified",
+            "configuration_verified": True, "target_platform_probes": "separate_evidence_required"}
+
+
 def initialize_volume(path: Path, role: str, deployment: str, uid: int) -> None:
     require_path(path)
     marker = path / ".assetlibrary-owner.json"
@@ -334,8 +392,12 @@ def operator(args: argparse.Namespace) -> int:
 def main() -> int:
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("identity", "render-env", "render-mounts", "prepare", "migrate", "ensure-key", "operator", "certificate"))
+    parser.add_argument("action", choices=("identity", "render-env", "render-mounts", "verify-image-container", "prepare", "migrate", "ensure-key", "operator", "certificate"))
     parser.add_argument("--deployment-id")
+    parser.add_argument("--deployment-name")
+    parser.add_argument("--image-id")
+    parser.add_argument("--source-revision")
+    parser.add_argument("--running", action="store_true")
     parser.add_argument("--operation", choices=("initialize-key", "rotate-key", "bootstrap", "recover"))
     parser.add_argument("--account")
     parser.add_argument("--display-name")
@@ -345,6 +407,13 @@ def main() -> int:
     try:
         if args.action == "identity":
             print(uuid.uuid4())
+            return 0
+        if args.action == "verify-image-container":
+            data = sys.stdin.buffer.read(65537)
+            if len(data) > 65536:
+                raise DeploymentError("deployment_image_inspection_too_large")
+            print(json.dumps(verify_image_container(json.loads(data), args.deployment_id, args.deployment_name,
+                                                   args.image_id, args.source_revision, running=args.running)))
             return 0
         if args.action.startswith("render-"):
             data = sys.stdin.buffer.read(65537)

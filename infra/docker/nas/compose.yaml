@@ -64,8 +64,10 @@ services:
     security_opt: [no-new-privileges:true]
     environment:
       ASSETLIBRARY_IMAGE_PREVIEW_WORKER: "${ASSETLIBRARY_IMAGE_PREVIEW_WORKER:-}"
+      ASSETLIBRARY_IMAGE_PREVIEW_SOCKET: "${ASSETLIBRARY_IMAGE_PREVIEW_SOCKET:-}"
     volumes:
       - core-state:/var/lib/assetlibrary
+      - image-ipc:/run/assetlibrary-image:ro
     # assets.compose.json adds only read_only bind mounts at /assets/<source_key>.
     ports:
       - "${ASSETLIBRARY_BIND_ADDRESS:?}:${ASSETLIBRARY_HTTPS_PORT:?}:${ASSETLIBRARY_HTTPS_PORT:?}"
@@ -78,6 +80,31 @@ services:
     mem_limit: 1g
     cpu_shares: 1024
     stop_grace_period: 60s
+    restart: unless-stopped
+
+  image:
+    image: "${ASSETLIBRARY_IMAGE_PREVIEW_IMAGE:?use the image identity from the build manifest}"
+    profiles: [image]
+    user: "0:0"
+    labels: *owner
+    init: false
+    read_only: true
+    network_mode: none
+    ipc: private
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, KILL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - image-ipc:/run/assetlibrary-image
+    healthcheck:
+      test: [CMD, /app/image-supervisor/AssetLibrary.ImageSupervisor, --health]
+      interval: 15s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    mem_limit: 512m
+    cpu_shares: 256
+    stop_grace_period: 10s
     restart: unless-stopped
 
   setup:
@@ -134,4 +161,7 @@ volumes:
     labels: *owner
   setup-state:
     name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-setup-state"
+    labels: *owner
+  image-ipc:
+    name: "${ASSETLIBRARY_DEPLOYMENT_NAME:?}-image-ipc"
     labels: *owner
