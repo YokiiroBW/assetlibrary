@@ -26,8 +26,11 @@ def load(name: str, relative: str):
     return module
 
 
-BUILDER = load("nas_container_builder", "scripts/build_nas_deployment.py")
-BOOTSTRAP = load("nas_container_bootstrap", "infra/docker/nas/bootstrap.py")
+# The shared repository discovery command is not isolated. Its load_tests hook
+# below delegates this suite to a genuinely isolated interpreter, preserving
+# the publisher's import guard rather than modifying sys.flags or root CI.
+BUILDER = load("nas_container_builder", "scripts/build_nas_deployment.py") if sys.flags.isolated else None
+BOOTSTRAP = load("nas_container_bootstrap", "infra/docker/nas/bootstrap.py") if sys.flags.isolated else None
 REVISION = "a" * 40
 IMAGE = "sha256:" + "b" * 64
 DEPLOYMENT = "6d0c7db7-a2f3-4967-bc6a-1b6d8d994cef"
@@ -441,6 +444,22 @@ exit 9
         self.assertNotEqual(0, result.returncode)
         self.assertIn("control file changed", result.stderr)
         self.assertEqual([], self.calls())
+
+
+def load_tests(loader, tests, pattern):
+    if sys.flags.isolated or tests.countTestCases() == 0:
+        return tests
+
+    class IsolatedNasSuite(unittest.TestCase):
+        def test_nas_packaging_contracts_in_isolated_python(self):
+            command = [sys.executable, "-I", "-B", "-m", "unittest", "discover", "-s", "tests/repository",
+                       "-p", Path(__file__).name, "-v"]
+            for name_pattern in loader.testNamePatterns or []:
+                command += ["-k", name_pattern]
+            result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=120)
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    return unittest.TestSuite([IsolatedNasSuite("test_nas_packaging_contracts_in_isolated_python")])
 
 
 if __name__ == "__main__":
