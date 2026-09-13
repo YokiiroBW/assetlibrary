@@ -9,9 +9,8 @@ internal static class ImageWorkerEntry
 {
     public static int Run(string[] arguments)
     {
-        var probeMode = arguments.Length == 1 && OperatingSystem.IsLinux()
-            && arguments[0] is "--probe-isolation" or "--probe-memory" or "--probe-cpu" or "--probe-threads";
-        if (arguments.Length != 0 && !probeMode) return 2;
+        using var isolation = ImageWorkerIsolation.Create(arguments);
+        if (isolation is null) return 2;
         // Unix Console streams duplicate their descriptors and lazily initialize Console.Out.
         // The sandbox deliberately allows only the original fd 0/1, never arbitrary dup/open.
         using var input = OperatingSystem.IsLinux()
@@ -22,13 +21,11 @@ internal static class ImageWorkerEntry
             : Console.OpenStandardOutput();
         try
         {
-            using var probe = probeMode && OperatingSystem.IsLinux() ? LinuxImageProbe.Prepare(arguments[0]) : null;
+            isolation.PrepareProbe();
             // No host configuration, environment credentials or original paths are read here.
             Warmup();
-            var confined = OperatingSystem.IsLinux() ? LinuxImageIsolation.Enter()
-                : OperatingSystem.IsWindows() && WindowsImageIsolation.IsEnforced();
-            if (!confined) throw new ImageDecodeException(ImageWorkerStatus.Unavailable);
-            if (OperatingSystem.IsLinux() && probe is not null) return probe.Run(output);
+            if (!isolation.Enter()) throw new ImageDecodeException(ImageWorkerStatus.Unavailable);
+            if (isolation.RunProbe(output) is { } resultCode) return resultCode;
             output.Write(ImageWorkerProtocol.Header((int)ImageWorkerStatus.Ready, 0, 0));
             output.Flush();
             var headerBytes = new byte[ImageWorkerProtocol.HeaderBytes];

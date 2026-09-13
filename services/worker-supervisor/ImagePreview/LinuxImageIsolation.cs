@@ -41,7 +41,7 @@ internal static class LinuxImageIsolation
         }
     }
 
-    private static bool AddressSpaceFits()
+    internal static bool AddressSpaceFits()
     {
         // setrlimit does not revoke existing reservations; reject an already oversized runtime.
         using var input = File.OpenRead("/proc/self/statm");
@@ -64,7 +64,7 @@ internal static class LinuxImageIsolation
                 | capabilities.EffectiveHigh | capabilities.PermittedHigh | capabilities.InheritableHigh) == 0;
     }
 
-    private static bool Limit(int resource, ulong ceiling)
+    internal static bool Limit(int resource, ulong ceiling)
     {
         if (Native.GetLimit(resource, out var previous) != 0) return false;
         var limit = new ResourceLimit { Current = Math.Min(previous.Current, ceiling), Maximum = Math.Min(previous.Maximum, ceiling) };
