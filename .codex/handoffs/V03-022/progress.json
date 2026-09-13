@@ -1,0 +1,62 @@
+{
+  "status": "delivered_and_cleaned",
+  "base": "5733232",
+  "integration_worktree": "C:/YOKI/Codex/AssetLibrary-worktrees/V03-022",
+  "integration_branch": "codex/v03-022-explorer-large-preview-integration",
+  "agents": {
+    "Surface": "completed and integrated",
+    "Host": "completed and integrated",
+    "Preferences": "completed and integrated"
+  },
+  "integrated": [
+    "c10eddf ADR0022 and preview-v1",
+    "9b7fe8c shared bounded native image protocol/requests",
+    "f6dd888 actual View quick preview and preferences",
+    "d116e7b/f851555/4593274/cb0f154/8cf937b Surface module",
+    "629e1a0/85a13a4/1682c53 Host module",
+    "c5ef104/378494b Preferences module",
+    "addcaf205aa88af19d858eeae9770bb2f5c9b1ef frozen runtime package"
+  ],
+  "verified": [
+    "Windows120",
+    "Setup23",
+    "Shell13",
+    "Gallery12",
+    "Package6",
+    "ReleaseLocks16",
+    "FinalSetupCLI8",
+    "NativeLive3 methods with corrected image-test scheduling",
+    "Actual Explorer gallery/large preview/preferences/cleanup"
+  ],
+  "live_fixture": {
+    "status": "disposed",
+    "cleanup_receipt": "windows-preview7-delivery/core-cleanup.json",
+    "cleanup_required": false
+  },
+  "native": {
+    "broker": ".runtime/preview-live/native/broker.json",
+    "broker_window": 4065224,
+    "broker_pid": 33404,
+    "original_window": 133910,
+    "original_pid": 6212,
+    "original_creation": "134335976399732731",
+    "installed": "preview.7 retained",
+    "host_or_settings_before": [],
+    "connection_before": false,
+    "remembered_before": false,
+    "owned_windows_remaining": 0,
+    "host_or_settings_after": [],
+    "connection_after": false,
+    "remembered_after": false,
+    "preferences": "Gallery/200 retained; no sensitive identifiers"
+  },
+  "next": [],
+  "package": {
+    "version": "0.3.0-preview.7",
+    "source_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef",
+    "bytes": 155495031,
+    "sha256": "4c1c328c8b37bbb9e4f0ad38658619bca267dd3a25892d7ac9340e5054ad7702",
+    "path": ".runtime/releases/windows/AssetLibrary-0.3.0-preview.7-win-x64.zip",
+    "unsigned": true
+  }
+}

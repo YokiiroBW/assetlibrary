@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="c098dca0-7582-4486-8a4d-009b84d51d36" name="Administrator@YOKIIRONETBOOK 2026-09-13 14:40:49" runUser="YOKIIRONETBOOK\Administrator" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-09-13T14:40:49.5459565+08:00" queuing="2026-09-13T14:40:49.5459566+08:00" start="2026-09-13T14:40:46.2735798+08:00" finish="2026-09-13T14:40:51.6102144+08:00" />
+  <TestSettings name="default" id="1b7bb864-d220-43ae-8f04-4de14ee42f76">
+    <Deployment runDeploymentRoot="Administrator_YOKIIRONETBOOK_2026-09-13_14_40_49" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="6ebd4336-9825-46e8-8ba8-50a7edc0b961" testId="1c5b0f47-7228-899f-811b-b5cdcdd4d888" testName="RealHttpsCoreAuthenticatesPagesSearchesDetailsAndRevokes" computerName="YOKIIRONETBOOK" duration="00:00:04.3837568" startTime="2026-09-13T14:40:46.5887638+08:00" endTime="2026-09-13T14:40:50.9833950+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6ebd4336-9825-46e8-8ba8-50a7edc0b961" />
+    <UnitTestResult executionId="13e2b7bd-eb28-4211-b0e7-c43b12d44654" testId="14b8a34d-63eb-84d1-921d-4c933ed7bf20" testName="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe (Preview1600)" computerName="YOKIIRONETBOOK" duration="00:00:02.8456353" startTime="2026-09-13T14:40:48.7269350+08:00" endTime="2026-09-13T14:40:51.5732803+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="13e2b7bd-eb28-4211-b0e7-c43b12d44654" />
+    <UnitTestResult executionId="1ad08469-7fab-4f8d-9e60-720e8764c38c" testId="1e3d1b4d-3700-8c64-8f97-0ac8d67958ef" testName="RealHttpsHostProjectsNestedPagesAndSeparatesInaccessibleIdentity" computerName="YOKIIRONETBOOK" duration="00:00:04.4169496" startTime="2026-09-13T14:40:46.5887589+08:00" endTime="2026-09-13T14:40:51.0161111+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ad08469-7fab-4f8d-9e60-720e8764c38c" />
+    <UnitTestResult executionId="cfa916ee-b86e-4968-a5fb-8d85e30a9c09" testId="1789555e-ce60-8e73-a210-35f88f5d8984" testName="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe (Thumbnail512)" computerName="YOKIIRONETBOOK" duration="00:00:02.1219024" startTime="2026-09-13T14:40:46.5887680+08:00" endTime="2026-09-13T14:40:48.7240191+08:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cfa916ee-b86e-4968-a5fb-8d85e30a9c09">
+      <Output>
+        <ErrorInfo>
+          <Message>测试方法 AssetLibrary.Windows.Tests.ThumbnailLiveTests。RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe 引发了异常: &#xD;
+AssetLibrary.Windows.Client.ClientException: 请求过于频繁，请稍后重试。</Message>
+          <StackTrace>   at AssetLibrary.Windows.Client.OriginHttpSession.SendAsync(String path, HttpMethod method, String body, String csrfToken, CancellationToken token, String requestId, Boolean expectNoContent) in /_/apps/windows-client/Core/OriginHttpSession.cs:line 50&#xD;
+   at AssetLibrary.Windows.Client.ClientTransport.SignInAsync(String account, String password, CancellationToken token) in /_/apps/windows-client/Core/ClientTransport.cs:line 28&#xD;
+   at AssetLibrary.Windows.Tests.ThumbnailLiveFixture.OpenAsync(CancellationToken token) in /_/tests/windows-client/ThumbnailLiveFixture.cs:line 37&#xD;
+   at AssetLibrary.Windows.Tests.ThumbnailLiveFixture.OpenAsync(CancellationToken token) in /_/tests/windows-client/ThumbnailLiveFixture.cs:line 46&#xD;
+   at AssetLibrary.Windows.Tests.ThumbnailLiveTests.RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe(DerivedImageProfile profile) in /_/tests/windows-client/ThumbnailLiveTests.cs:line 20&#xD;
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407&#xD;
+</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe (Thumbnail512)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-022\tests\windows-client\bin\release\net10.0\assetlibrary.windows.tests.dll" id="1789555e-ce60-8e73-a210-35f88f5d8984">
+      <TestCategory>
+        <TestCategoryItem TestCategory="NativeLive" />
+      </TestCategory>
+      <Execution id="cfa916ee-b86e-4968-a5fb-8d85e30a9c09" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Tests.ThumbnailLiveTests" name="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe" />
+    </UnitTest>
+    <UnitTest name="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe (Preview1600)" storage="c:\yoki\codex\assetlibrary-worktrees\v03-022\tests\windows-client\bin\release\net10.0\assetlibrary.windows.tests.dll" id="14b8a34d-63eb-84d1-921d-4c933ed7bf20">
+      <TestCategory>
+        <TestCategoryItem TestCategory="NativeLive" />
+      </TestCategory>
+      <Execution id="13e2b7bd-eb28-4211-b0e7-c43b12d44654" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Tests.ThumbnailLiveTests" name="RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe" />
+    </UnitTest>
+    <UnitTest name="RealHttpsHostProjectsNestedPagesAndSeparatesInaccessibleIdentity" storage="c:\yoki\codex\assetlibrary-worktrees\v03-022\tests\windows-client\bin\release\net10.0\assetlibrary.windows.tests.dll" id="1e3d1b4d-3700-8c64-8f97-0ac8d67958ef">
+      <TestCategory>
+        <TestCategoryItem TestCategory="NativeLive" />
+      </TestCategory>
+      <Execution id="1ad08469-7fab-4f8d-9e60-720e8764c38c" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Tests.HostLiveTests" name="RealHttpsHostProjectsNestedPagesAndSeparatesInaccessibleIdentity" />
+    </UnitTest>
+    <UnitTest name="RealHttpsCoreAuthenticatesPagesSearchesDetailsAndRevokes" storage="c:\yoki\codex\assetlibrary-worktrees\v03-022\tests\windows-client\bin\release\net10.0\assetlibrary.windows.tests.dll" id="1c5b0f47-7228-899f-811b-b5cdcdd4d888">
+      <TestCategory>
+        <TestCategoryItem TestCategory="NativeLive" />
+      </TestCategory>
+      <Execution id="6ebd4336-9825-46e8-8ba8-50a7edc0b961" />
+      <TestMethod codeBase="C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll" adapterTypeName="executor://mstestadapter/v4" className="AssetLibrary.Windows.Tests.LiveCoreTests" name="RealHttpsCoreAuthenticatesPagesSearchesDetailsAndRevokes" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1c5b0f47-7228-899f-811b-b5cdcdd4d888" executionId="6ebd4336-9825-46e8-8ba8-50a7edc0b961" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="14b8a34d-63eb-84d1-921d-4c933ed7bf20" executionId="13e2b7bd-eb28-4211-b0e7-c43b12d44654" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e3d1b4d-3700-8c64-8f97-0ac8d67958ef" executionId="1ad08469-7fab-4f8d-9e60-720e8764c38c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1789555e-ce60-8e73-a210-35f88f5d8984" executionId="cfa916ee-b86e-4968-a5fb-8d85e30a9c09" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="列表中未列出的结果" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="所有已加载的结果" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="4" executed="4" passed="3" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>已为 C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll 启用测试并行化(Workers: 16，Scope: ClassLevel)&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

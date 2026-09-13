@@ -1,0 +1,21 @@
+test_cli_is_isolated_read_only_and_fails_closed (test_windows_release_locks.WindowsReleaseLockTests.test_cli_is_isolated_read_only_and_fails_closed) ... ok
+test_cli_uses_selected_root_policy_with_exact_legacy_exception (test_windows_release_locks.WindowsReleaseLockTests.test_cli_uses_selected_root_policy_with_exact_legacy_exception) ... ok
+test_custom_policy_and_missing_metadata_are_not_silently_skipped (test_windows_release_locks.WindowsReleaseLockTests.test_custom_policy_and_missing_metadata_are_not_silently_skipped) ... ok
+test_default_package_cannot_be_removed_or_disguised_as_project (test_windows_release_locks.WindowsReleaseLockTests.test_default_package_cannot_be_removed_or_disguised_as_project) ... ok
+test_duplicate_json_and_case_variant_package_ids_fail (test_windows_release_locks.WindowsReleaseLockTests.test_duplicate_json_and_case_variant_package_ids_fail) ... ok
+test_exact_six_projects_and_required_groups_pass (test_windows_release_locks.WindowsReleaseLockTests.test_exact_six_projects_and_required_groups_pass) ... ok
+test_missing_and_extra_locks_fail (test_windows_release_locks.WindowsReleaseLockTests.test_missing_and_extra_locks_fail) ... ok
+test_missing_default_lock_fails (test_windows_release_locks.WindowsReleaseLockTests.test_missing_default_lock_fails) ... ok
+test_missing_invalid_and_short_hashes_fail_in_both_lock_types (test_windows_release_locks.WindowsReleaseLockTests.test_missing_invalid_and_short_hashes_fail_in_both_lock_types) ... ok
+test_missing_wrong_and_extra_rid_groups_fail (test_windows_release_locks.WindowsReleaseLockTests.test_missing_wrong_and_extra_rid_groups_fail) ... ok
+test_project_version_ranges_may_change_without_package_hashes (test_windows_release_locks.WindowsReleaseLockTests.test_project_version_ranges_may_change_without_package_hashes) ... ok
+test_release_only_build_package_is_hashed_and_globally_consistent (test_windows_release_locks.WindowsReleaseLockTests.test_release_only_build_package_is_hashed_and_globally_consistent) ... ok
+test_release_only_package_license_is_audited_and_rejected (test_windows_release_locks.WindowsReleaseLockTests.test_release_only_package_license_is_audited_and_rejected) ... ok
+test_rid_group_cannot_override_baseline_package (test_windows_release_locks.WindowsReleaseLockTests.test_rid_group_cannot_override_baseline_package) ... ok
+test_same_id_version_and_hash_drift_fail (test_windows_release_locks.WindowsReleaseLockTests.test_same_id_version_and_hash_drift_fail) ... ok
+test_settings_default_requires_its_existing_rid_group (test_windows_release_locks.WindowsReleaseLockTests.test_settings_default_requires_its_existing_rid_group) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.464s
+
+OK

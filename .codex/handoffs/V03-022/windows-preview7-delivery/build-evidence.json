@@ -1,0 +1,70 @@
+{
+  "version": "0.3.0-preview.7",
+  "rid": "win-x64",
+  "unsignedPreview": true,
+  "sourceCommit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef",
+  "manifestSha256": "51af7127f63e10dd4bb4b9ff4446780b0d5792f6615d79039fe5f2528e5d78aa",
+  "imports": {
+    "AssetLibrary.Setup.exe": [
+      "advapi32.dll",
+      "api-ms-win-crt-convert-l1-1-0.dll",
+      "api-ms-win-crt-environment-l1-1-0.dll",
+      "api-ms-win-crt-filesystem-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll",
+      "api-ms-win-crt-locale-l1-1-0.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-string-l1-1-0.dll",
+      "api-ms-win-crt-time-l1-1-0.dll",
+      "api-ms-win-crt-utility-l1-1-0.dll",
+      "kernel32.dll",
+      "ole32.dll",
+      "oleaut32.dll",
+      "shell32.dll",
+      "user32.dll"
+    ],
+    "AssetLibrary.Host.exe": [
+      "advapi32.dll",
+      "api-ms-win-crt-convert-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll",
+      "api-ms-win-crt-locale-l1-1-0.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-string-l1-1-0.dll",
+      "api-ms-win-crt-time-l1-1-0.dll",
+      "kernel32.dll",
+      "shell32.dll",
+      "user32.dll"
+    ],
+    "AssetLibrary.Settings.exe": [
+      "advapi32.dll",
+      "api-ms-win-crt-convert-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll",
+      "api-ms-win-crt-locale-l1-1-0.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-string-l1-1-0.dll",
+      "api-ms-win-crt-time-l1-1-0.dll",
+      "kernel32.dll",
+      "shell32.dll",
+      "user32.dll"
+    ],
+    "AssetLibrary.Explorer.dll": [
+      "advapi32.dll",
+      "comctl32.dll",
+      "gdi32.dll",
+      "kernel32.dll",
+      "msimg32.dll",
+      "ole32.dll",
+      "oleacc.dll",
+      "oleaut32.dll",
+      "shell32.dll",
+      "shlwapi.dll",
+      "uiautomationcore.dll",
+      "user32.dll"
+    ]
+  }
+}

@@ -4,7 +4,7 @@
   "requirements_frozen_at": "2026-08-31",
   "current_milestone": "V0.1",
   "status": "windows_native_gallery_delivered",
-  "next_action": "Gallery preview.6 delivered/installed. Continue the next user-selected feature; NAS image isolation, full-image preview, mode persistence, signing and Android physical devices remain separate. No active gallery fixture or G4 run.",
+  "next_action": "Explorer preview.7 delivered/installed: fit1600 image preview and cross-directory/process mode+density defaults. Continue the next user-selected feature; NAS image isolation, zoom/pan/original-file workflows, sync/signing and Android physical devices remain separate. No active fixture or G4 run.",
   "architecture_contract_status": "frozen",
   "implementation_status": "v01_001_to_v01_026_completed_except_v01_008_partial_v03_android_delivered_windows_partial",
   "notes": [
@@ -76,18 +76,19 @@
     "User explicitly authorized distinct development windows with final unified acceptance. V03-005 created four native Codex worktrees/threads for Windows (V03-006), image preview server (V03-007), Web (V03-008), Android (V03-009). Worktrees were verified against the same git-common-dir and assigned unique branches; task scaffolds reuse codex-new-task.py. Native window initial command approvals differ from this coordinator permission profile; startup analysis is in progress, preview contract not yet frozen, and no new product feature or release gate has been completed by this planning step.",
     "V03-005 checkpoint3890793 integrates Android1838b96/815e2f6, Web238c61c/4e633e8/d944300/d11085e, and Windows diagnostics453e10b/ba9fcbb/046dbde. Frozen wire/ADR0019/pins38aedca and bounded real image fixture5edf25c are committed. Web65 distinct browser cases and Android77 distinct client/repository cases passed in owned worktrees; coordinator reviewed code and representative screenshots. Root fixture Python8 and .NET6/Release passed. Real Core image consumer acceptance, Windows LPAC/Linux sandbox validation, Explorer entry and production packaging/deployment remain uncompleted. Existing NAS and release gates unchanged.",
     "2026-09-12: Windows preview.2 ZIP delivered after real install, native sidebar/paging/Chinese folders/session invalidation and Settings startup. See docs/releases/WINDOWS_EXPLORER_PREVIEW.md and V03-005/windows-product-delivery. Failed preview.1 retained as negative evidence. Test Core138 sources unchanged and6 roles/resources cleaned; final installation retained, test configuration removed.",
-    "2026-09-13: Explorer gallery preview.6 delivered after actual Core/Explorer image, pagination, selection, own summary, resize and logout acceptance. 148 sources unchanged and6 roles/runtime cleaned; test profiles removed, installation retained. See windows-gallery-delivery; G4 remains waived/not performed."
+    "2026-09-13: Explorer gallery preview.6 delivered after actual Core/Explorer image, pagination, selection, own summary, resize and logout acceptance. 148 sources unchanged and6 roles/runtime cleaned; test profiles removed, installation retained. See windows-gallery-delivery; G4 remains waived/not performed.",
+    "2026-09-13: V03-022 integrated V03-023/024/025 and delivered preview.7 after actual Core/Explorer large-image, preferences across fresh process, selection restore and logout acceptance. 542 installed files verified; 148 sources unchanged; all test resources cleaned. G4 remains waived/not performed."
   ],
   "architecture_quality_gate": "M0-009 and the V01-009 Alpha integration audit are mandatory; feature and release targets remain independently gated",
   "active_work": {
     "milestone": "V0.3 browse/preview wave",
-    "coordinator_task": "V03-005",
+    "coordinator_task": "V03-022",
     "coordinator_thread": "01a0801a-4c6c-7d92-b0be-ce0150f8b115",
     "tasks": [],
-    "stage": "gallery_delivered",
+    "stage": "preview7_delivered",
     "windows_entry": "native Explorer; G1/G2/G3 measured, G4 waived/not performed",
     "command_approvals": "User authorized owned desktop tests and delivery. Original Explorer was not restarted; no HKLM/UAC/security-policy changes.",
-    "contract_commit": "2ebda30",
-    "integration_checkpoint": "03a95f9b90154c8594922c7b2ad0f49ac1521083"
+    "contract_commit": "c10eddf",
+    "integration_checkpoint": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
   }
 }

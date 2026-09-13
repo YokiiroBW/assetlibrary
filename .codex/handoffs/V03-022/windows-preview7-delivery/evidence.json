@@ -1,0 +1,62 @@
+{
+  "status": "passed_for_scoped_preview7_delivery",
+  "package": {
+    "version": "0.3.0-preview.7",
+    "source_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef",
+    "bytes": 155495031,
+    "sha256": "4c1c328c8b37bbb9e4f0ad38658619bca267dd3a25892d7ac9340e5054ad7702",
+    "path": ".runtime/releases/windows/AssetLibrary-0.3.0-preview.7-win-x64.zip",
+    "unsigned": true
+  },
+  "installed_files_verified": 542,
+  "explorer_pid": 28748,
+  "reopened_explorer_pid": 17596,
+  "original_explorer": {
+    "pid": 6212,
+    "window": 133910,
+    "creation_filetime": "134335976399732731",
+    "restarted": false
+  },
+  "behavior": [
+    "Space and double-click preview inside Explorer without new navigation history",
+    "JPG/PNG/WebP preview; EXIF orientation; transparent PNG; fit in wide/narrow windows",
+    "Left/right current-page files, status ordinal excludes directories; invalid image clears old pixels",
+    "Escape restores original selected landscape.jpg and gallery scroll position",
+    "List default survives page and directory changes",
+    "Gallery density 200 restored in new process: decrease saved176, increase restored200",
+    "Preview lifecycle leaves preference record unchanged",
+    "Logout clears large image/page; owned windows, Host, Settings and fixture connection removed"
+  ],
+  "tests": {
+    "windows_offline": 120,
+    "setup": 23,
+    "shell": 13,
+    "gallery": 12,
+    "package": 6,
+    "release_locks": 16,
+    "setup_cli": 8,
+    "native_live_final_methods": 3,
+    "repository": 79,
+    "repository_note": "Includes the 16 release-lock tests already reported separately."
+  },
+  "native_live_note": "Initial four DataRow runs: three passed and one sign-in429. Trial allows two concurrent logins; three parallel test classes competed. Fixed image test shares one login and is DoNotParallelize. Final image method passed both profiles; two unchanged other NativeLive methods retain initial passing evidence.",
+  "server_fixture": "Unchanged Core and LPAC image worker artifacts from V03-005; no server code changes in this iteration.",
+  "cleanup": {
+    "synthetic_files_unchanged": 148,
+    "postgres_roles_removed": 6,
+    "core_postgres_exited": true,
+    "fixture_runtime_removed": true,
+    "https_listener_closed": true,
+    "connection_removed": true,
+    "remembered_absent": true,
+    "owned_windows_remaining": 0
+  },
+  "limits": [
+    "G4 user-waived and not executed",
+    "NAS image engine/isolation remains separate",
+    "Fit preview only; no zoom/pan/original-file editing/sync/time line/full-library infinite scroll",
+    "Windows11 old bottom count: owned toolbar summary authoritative",
+    "Unsigned; old occupied preview.1 pending cleanup, no forced DLL deletion",
+    "No fresh Windows G1/G2/G3 certification or full V0.3/Android physical-device claim"
+  ]
+}

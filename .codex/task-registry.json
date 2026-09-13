@@ -1027,14 +1027,77 @@
       "id": "V03-022",
       "title": "explorer-large-preview-integration",
       "module": "explorer-large-preview-integration",
-      "status": "ready",
-      "depends_on": [],
+      "status": "completed",
+      "depends_on": [
+        "V03-019",
+        "V03-020",
+        "V03-021"
+      ],
       "owner": "windows-coordinator",
       "branch": "codex/v03-022-explorer-large-preview-integration",
       "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-022",
       "task_file": ".codex/tasks/V03-022.md",
       "handoff": ".codex/handoffs/V03-022/summary.md",
-      "thread_deep_link": ""
+      "thread_deep_link": "",
+      "execution_status": "Integrated in preview.7; actual Core/Explorer current-page large image and persistent display defaults accepted; owned test resources cleaned. G4 waived/not run.",
+      "integrated_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
+    },
+    {
+      "id": "V03-023",
+      "title": "native-large-preview-surface",
+      "module": "native-large-preview-surface",
+      "status": "completed",
+      "depends_on": [
+        "V03-019",
+        "V03-020",
+        "V03-021"
+      ],
+      "owner": "windows-preview-surface-owner",
+      "branch": "codex/v03-023-native-large-preview-surface",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\AssetLibrary-worktrees\\V03-023",
+      "task_file": ".codex/tasks/V03-023.md",
+      "handoff": ".codex/handoffs/V03-023/summary.md",
+      "thread_deep_link": "",
+      "execution_status": "Integrated in preview.7; actual Core/Explorer current-page large image and persistent display defaults accepted; owned test resources cleaned. G4 waived/not run.",
+      "integrated_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
+    },
+    {
+      "id": "V03-024",
+      "title": "large-preview-host",
+      "module": "large-preview-host",
+      "status": "completed",
+      "depends_on": [
+        "V03-019",
+        "V03-020",
+        "V03-021"
+      ],
+      "owner": "windows-preview-host-owner",
+      "branch": "codex/v03-024-large-preview-host",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\AssetLibrary-worktrees\\V03-024",
+      "task_file": ".codex/tasks/V03-024.md",
+      "handoff": ".codex/handoffs/V03-024/summary.md",
+      "thread_deep_link": "",
+      "execution_status": "Integrated in preview.7; actual Core/Explorer current-page large image and persistent display defaults accepted; owned test resources cleaned. G4 waived/not run.",
+      "integrated_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
+    },
+    {
+      "id": "V03-025",
+      "title": "explorer-browse-preferences",
+      "module": "explorer-browse-preferences",
+      "status": "completed",
+      "depends_on": [
+        "V03-019",
+        "V03-020",
+        "V03-021"
+      ],
+      "owner": "windows-preferences-owner",
+      "branch": "codex/v03-025-explorer-browse-preferences",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\AssetLibrary-worktrees\\V03-025",
+      "task_file": ".codex/tasks/V03-025.md",
+      "handoff": ".codex/handoffs/V03-025/summary.md",
+      "thread_deep_link": "",
+      "execution_status": "Integrated in preview.7; actual Core/Explorer current-page large image and persistent display defaults accepted; owned test resources cleaned. G4 waived/not run.",
+      "integrated_commit": "addcaf205aa88af19d858eeae9770bb2f5c9b1ef"
     }
   ]
 }

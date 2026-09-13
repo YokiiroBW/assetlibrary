@@ -1,0 +1,17 @@
+Window: "AssetLibrary 图库验证 — 合成图像 / 非产品客户端", App: GalleryHarness.exe.
+	0 窗口 AssetLibrary 图库验证 — 合成图像 / 非产品客户端 Secondary Actions: Raise
+		1 文本 资产库
+			2 窗格 大图预览 Description: 合成1600px测试图 · 适应窗口（非Core图片）
+				55 图像 合成图库测试条目（非产品图片）2 Description: 合成1600px测试图 · 适应窗口（非Core图片） ID: {00000003-0000-0000-0000-000000000000}
+			51 按钮 返回 ID: 107
+			52 按钮 上一张 ID: 108
+			53 按钮 下一张 ID: 109
+			54 文本 合成1600px测试图 · 适应窗口（非Core图片） ID: 106
+		44 标题栏
+			45 菜单栏 系统 ID: MenuBar
+				46 菜单项目 系统
+			47 按钮 最小化
+			48 按钮 最大化
+			49 按钮 关闭
+
+The focused UI element is 55 图像 合成图库测试条目（非产品图片）2 Description: 合成1600px测试图 · 适应窗口（非Core图片） ID: {00000003-0000-0000-0000-000000000000}.

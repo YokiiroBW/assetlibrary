@@ -1,0 +1,20 @@
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-client\bin\Release\net10.0\AssetLibrary.Windows.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+VSTest 版本 18.0.2 (x64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+  失败 RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe (Thumbnail512) [2 s]
+  错误消息:
+   测试方法 AssetLibrary.Windows.Tests.ThumbnailLiveTests。RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe 引发了异常: 
+AssetLibrary.Windows.Client.ClientException: 请求过于频繁，请稍后重试。
+  堆栈跟踪:
+     at AssetLibrary.Windows.Client.OriginHttpSession.SendAsync(String path, HttpMethod method, String body, String csrfToken, CancellationToken token, String requestId, Boolean expectNoContent) in /_/apps/windows-client/Core/OriginHttpSession.cs:line 50
+   at AssetLibrary.Windows.Client.ClientTransport.SignInAsync(String account, String password, CancellationToken token) in /_/apps/windows-client/Core/ClientTransport.cs:line 28
+   at AssetLibrary.Windows.Tests.ThumbnailLiveFixture.OpenAsync(CancellationToken token) in /_/tests/windows-client/ThumbnailLiveFixture.cs:line 37
+   at AssetLibrary.Windows.Tests.ThumbnailLiveFixture.OpenAsync(CancellationToken token) in /_/tests/windows-client/ThumbnailLiveFixture.cs:line 46
+   at AssetLibrary.Windows.Tests.ThumbnailLiveTests.RealCoreDerivedPngTravelsThroughOwnedWicJobAndTestPipe(DerivedImageProfile profile) in /_/tests/windows-client/ThumbnailLiveTests.cs:line 20
+   at Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.Execution.TestMethodInfo.ExecuteInternalAsync(Object[] arguments, CancellationTokenSource timeoutTokenSource) in /_/src/Adapter/MSTestAdapter.PlatformServices/Execution/TestMethodInfo.cs:line 407
+
+结果文件: C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\.runtime\preview-live\test-results\preview-native-live.trx
+
+失败!  - 失败:     1，通过:     3，已跳过:     0，总计:     4，持续时间: 4 s - AssetLibrary.Windows.Tests.dll (net10.0)

@@ -1,6 +1,6 @@
-能力,preview.6状态,证据,边界
+能力,preview.7状态,证据,边界
 原生Explorer图库与真实Core,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/real-gallery-final.png,Windows11 x64；本机隔离Core图片非NAS引擎上线
-图库与列表切换及密度,同源与实机通过,.codex/handoffs/V03-005/windows-gallery-preview3/real-images-list.png,模式与密度不跨目录持久保存
+图库与列表切换及密度,同源与实机通过,.codex/handoffs/V03-005/windows-gallery-preview3/real-images-list.png,preview.7已持久化；见V03-022偏好与新进程证据
 宽窄重排与滚动裁剪,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/narrow-scroll.png,工具栏摘要不盖canvas
 完整可见集合与分批加载,同源及桌面通过,.codex/handoffs/V03-021/tests.md,101候选与16未完成每视图；四视图共64任务和2图片I/O
 共享图片内存预算,回归通过,.codex/handoffs/V03-021/tests.md,已接纳图像跨缓存和队列共16MiB每视图；瞬态I/O单独有界
@@ -11,5 +11,8 @@
 退出后清图与摘要,最终包实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/after-logout.png,系统导航历史未清除但不能恢复旧文件
 原件安全与临时服务清理,已验证,.codex/handoffs/V03-005/windows-gallery-delivery/core-cleanup.json,148源文件hash/mtime不变且6角色移除
 安装升级与发行完整性,最终EXE与实机通过,.codex/handoffs/V03-005/windows-gallery-delivery/install-01-stdout.json,未签名；旧preview.1占用延期清理
-完整预览与时间轴及全库连续滚动,后续范围,docs/adr/ADR-0021_Explorer原生图库与缩略图边界.md,本轮当前有界页缩略图；文件写入未启用
+缩放原件与时间轴及全库连续滚动,后续范围,docs/adr/ADR-0021_Explorer原生图库与缩略图边界.md,preview.7有当前页fit1600大图；缩放与文件写入未启用
 G4长期稳定性,用户豁免且未测试,docs/decisions/2026-09-12_G4用户豁免与G3验收范围.md,不执行20轮或8小时
+当前页大图快速查看与切图,preview.7最终包实机通过,.codex/handoffs/V03-022/windows-preview7-delivery/explorer-large-jpg.jpg,Space/Enter/双击；左右和原生按钮；目录和分页不参与切图
+模式密度跨目录与进程记忆,preview.7实机通过,.codex/handoffs/V03-022/windows-preview7-delivery/evidence.json,HKCU16B只存模式密度；新进程200减到176再加回200
+大图失败与返回及退出清理,preview.7实机通过,.codex/handoffs/V03-022/windows-preview7-delivery/README.md,坏图清旧像素；Esc保留原选择；logout清大图回根

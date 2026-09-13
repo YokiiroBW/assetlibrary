@@ -1,0 +1,8 @@
+C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\tests\windows-setup\bin\Release\net10.0-windows\AssetLibrary.Windows.Setup.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+VSTest 版本 18.0.2 (x64)
+
+正在启动测试执行，请稍候...
+总共 1 个测试文件与指定模式相匹配。
+结果文件: C:\YOKI\Codex\AssetLibrary-worktrees\V03-022\.runtime\preview7-setup-results\setup-tests.trx
+
+已通过! - 失败:     0，通过:    23，已跳过:     0，总计:    23，持续时间: 216 ms - AssetLibrary.Windows.Setup.Tests.dll (net10.0)
