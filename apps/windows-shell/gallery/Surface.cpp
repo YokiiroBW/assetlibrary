@@ -406,6 +406,9 @@ struct Surface::State : std::enable_shared_from_this<State> {
         const bool control = (GetKeyState(VK_CONTROL) & 0x8000) != 0, shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
         if (GetKeyState(VK_MENU)&0x8000) return false;
         if (control && (key == VK_RETURN || key == VK_ESCAPE || key == VK_LEFT || key == VK_RIGHT)) return false;
+        // A page can be loading while the owner still has an automatic preview
+        // pending. Direct canvas input must cancel that intent as well.
+        if (key == VK_ESCAPE && !previewActive && callbacks.previewClose) { Notify(callbacks.previewClose); return true; }
         if (previewActive) {
             if (control) return false;
             if (key == VK_ESCAPE) { PreviewClose(); return true; }

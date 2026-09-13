@@ -591,6 +591,41 @@ void PageCancellationAndRevocation(){
         Check(control.locations[3]==502&&!IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"explicit recovery after failed root navigation begins at physical anchor");
     }
 }
+void CrossPageCancelAndNewerIntent(){
+    for(const bool routed:{false,true}){
+        PageControl control;pageControl=&control;
+        control.page=[&control](const snapshot::Location& location,HANDLE cancel,ULONG ordinal){
+            if(ordinal==2){const auto until=GetTickCount64()+5000;
+                while(!control.releasePage&&GetTickCount64()<until){if(WaitForSingleObject(cancel,1)==WAIT_OBJECT_0)return snapshot::Page{};}}
+            return CursorPage(location,location.node.Data1==502?700ul:800ul);
+        };
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);ActivateAt(fixture,window,1);
+        Await([&]{return control.previews==1&&gallery::PendingWork()==0;});Click(window,gallery::PreviewNextControlId);
+        Await([&]{return control.calls==2;});Check(fixture.Count()==0,"cross-page loading retires old preview");
+        if(routed){MSG escape{};escape.hwnd=Canvas(window);escape.message=WM_KEYDOWN;escape.wParam=VK_ESCAPE;
+            Check(fixture.view.value->TranslateAccelerator(&escape)==S_OK,"pending preview Escape handled by Shell accelerator");}
+        else SendMessageW(Canvas(window),WM_KEYDOWN,VK_ESCAPE,0);
+        control.releasePage=true;ReadyCursor(fixture,700);
+        Check(control.previews==1&&!IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId))&&
+            IsWindowEnabled(GetDlgItem(window,gallery::PagePreviousControlId)),"Escape during loading leaves resulting page in browse mode");
+    }
+    for(const bool afterSelection:{false,true}){
+        PageControl control;pageControl=&control;
+        control.page=[](const snapshot::Location& location,HANDLE,ULONG){return CursorPage(location,location.node.Data1==502?700ul:800ul);};
+        VisibleFixture fixture;const auto window=fixture.Open();ReadyCursor(fixture,502);ActivateAt(fixture,window,1);
+        Await([&]{return control.previews==1&&gallery::PendingWork()==0;});
+        bool replaced=false;std::function<void()> newer;
+        newer=[&]{int focused=-1;fixture.items.value->GetFocusedItem(&focused);
+            if(fixture.Count()==3&&EntryAt(fixture,0).node.Data1==7000&&(!afterSelection||focused==0)){
+                replaced=true;ActivateAt(fixture,window,1);
+            }else fixture.browser.value->querying=newer;};
+        fixture.browser.value->querying=newer;Click(window,gallery::PreviewNextControlId);
+        Await([&]{return replaced&&gallery::PendingWork()==0;},"newer same-generation preview intent during page commit");
+        fixture.browser.value->querying={};
+        Check(control.previews==2&&control.lastPreviewNode==7001&&IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),
+            "automatic first-file preview cannot replace a newer preview from SetPage or SelectItem reentry");
+    }
+}
 void ProductionUiaDllLifetime(const wchar_t* path){
     proof::Library library(path,product::ClassId);auto root=library.Root();
     proof::Item entry(snapshot::MakePidl({{301},{302},snapshot::Kind::Library,L"hidden DLL lifecycle fixture"}));auto child=proof::Bind(root.value,entry);
@@ -608,7 +643,7 @@ void ProductionUiaDllLifetime(const wchar_t* path){
 }
 int wmain(int argc,wchar_t** argv){
     if(argc!=2)return 2;if(FAILED(CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED)))return 1;
-    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();PreferencesAndPreview();PreviewViewRaces();PageRoundTripAndRetry();PageBounds();CrossPagePreview();CrossPageWithoutFiles();PageCancellationAndRevocation();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
+    int result=0;try{InterfacesAndFinalRelease();QuotaAndExternalDestroy();PublicNotification();DestroyReentry();CreationReentry();CompareReentry();LoadingVisibility();WideVisiblePage();BrowserStatus();ViewUiaRetirement();PreferencesAndPreview();PreviewViewRaces();PageRoundTripAndRetry();PageBounds();CrossPagePreview();CrossPageWithoutFiles();PageCancellationAndRevocation();CrossPageCancelAndNewerIntent();ProductionRoute(argv[1]);ProductionUiaDllLifetime(argv[1]);Check(!cleanupFailed,"temporary notification directory removed");
         puts("gallery_view=passed; last_Release=retired_before_zero; external_destroy=idempotent; shared_quota=4; public_notification=NewDelivery; root_navigation=same_browser; hidden_IPC=0; registry_writes=0; real_Explorer=0");
     }catch(const std::exception& error){fprintf(stderr,"GalleryViewTests: %s\n",error.what());result=1;}
     CoUninitialize();return result;
