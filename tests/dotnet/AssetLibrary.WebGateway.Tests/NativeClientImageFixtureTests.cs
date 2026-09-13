@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace AssetLibrary.WebGateway.Tests;
 
 [TestClass]
@@ -45,5 +47,74 @@ public sealed class NativeClientImageFixtureTests
         Directory.CreateDirectory(unstaged);
         File.WriteAllText(Path.Combine(unstaged, "sample.dat"), "Synthetic unverified input.");
         Assert.Throws<AssertFailedException>(() => new NativeClientSampleAssets(runtime, unstaged));
+    }
+
+    [TestMethod]
+    [DataRow(128)]
+    [DataRow(129)]
+    public void ImageCountAccepts128AndRejects129(int count)
+    {
+        var staged = Path.Combine(runtime, "native-image-fixtures");
+        Directory.CreateDirectory(staged);
+        for (var index = 1; index <= count; index++)
+        {
+            File.WriteAllBytes(Path.Combine(staged, index.ToString("D3", CultureInfo.InvariantCulture) + ".png"), [42]);
+        }
+        if (count == 129)
+        {
+            Assert.Throws<AssertFailedException>(() => new NativeClientSampleAssets(runtime, staged));
+            Assert.IsFalse(Directory.Exists(Path.Combine(runtime, "assets", "native", "图片样例")));
+            return;
+        }
+        var assets = new NativeClientSampleAssets(runtime, staged);
+        Assert.AreEqual(266, assets.FileCount);
+        Assert.AreEqual(128, Directory.EnumerateFiles(Path.Combine(assets.LibraryRoot, "图片样例")).Count());
+        assets.VerifyUnchanged();
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void DirectFixtureCopyEnforces64MiBWithoutPython(bool extraByte)
+    {
+        var staged = Path.Combine(runtime, "native-image-fixtures");
+        Directory.CreateDirectory(staged);
+        CreateSizedFile(Path.Combine(staged, "first.png"), 33554432);
+        CreateSizedFile(Path.Combine(staged, "second.png"), 33554432);
+        if (extraByte) { CreateSizedFile(Path.Combine(staged, "third.png"), 1); }
+        var stamps = Directory.EnumerateFiles(staged).ToDictionary(path => path, File.GetLastWriteTimeUtc);
+        if (extraByte)
+        {
+            Assert.Throws<AssertFailedException>(() => new NativeClientSampleAssets(runtime, staged));
+        }
+        else
+        {
+            var assets = new NativeClientSampleAssets(runtime, staged);
+            Assert.AreEqual(140, assets.FileCount);
+            assets.VerifyUnchanged();
+        }
+        var copied = Path.Combine(runtime, "assets", "native", "图片样例");
+        var copiedBytes = Directory.EnumerateFiles(copied).Sum(path => new FileInfo(path).Length);
+        if (extraByte) { Assert.IsLessThanOrEqualTo(67108864L, copiedBytes); }
+        else { Assert.AreEqual(67108864, copiedBytes); }
+        foreach (var (path, stamp) in stamps) { Assert.AreEqual(stamp, File.GetLastWriteTimeUtc(path)); }
+    }
+
+    [TestMethod]
+    [DataRow(0L)]
+    [DataRow(33554433L)]
+    public void DirectFixtureCopyStillRejectsInvalidSingleFileLength(long length)
+    {
+        var staged = Path.Combine(runtime, "native-image-fixtures");
+        Directory.CreateDirectory(staged);
+        CreateSizedFile(Path.Combine(staged, "oversized.png"), length);
+        Assert.Throws<AssertFailedException>(() => new NativeClientSampleAssets(runtime, staged));
+        Assert.IsFalse(File.Exists(Path.Combine(runtime, "assets", "native", "图片样例", "oversized.png")));
+    }
+
+    private static void CreateSizedFile(string path, long size)
+    {
+        using var stream = File.Create(path);
+        stream.SetLength(size);
     }
 }

@@ -51,11 +51,19 @@ V03-005 提供两个显式可选参数，默认行为和原138文件样例保持
 --image-preview-worker <absolute-published-worker-executable>
 ```
 
-图片目录必须带 `kind=synthetic_preview_integration_inputs` 的生成manifest，最多32个文件，逐文件长度/强hash验证后才复制到本次私密runtime。图片进入同一个被扫描库的 `图片样例/` 目录，客户端可通过既有搜索得到稳定UUID，不需要改变认证连接JSON。不得将个人素材目录作为此参数。默认清除从外部继承的图片模式环境变量，只有显式参数才启用。
+图片目录必须带 `kind=synthetic_preview_integration_inputs` 的生成manifest，最多128个文件，单文件最多32MiB、合计最多64MiB；Python staging与C#夹具分别限制实际复制字节数，不能绕过Python取消C#总量限制。逐文件长度/强hash验证后才复制到本次私密runtime。图片进入同一个被扫描库的 `图片样例/` 目录，客户端可通过既有搜索得到稳定UUID，不需要改变认证连接JSON。不得将个人素材目录作为此参数。默认清除从外部继承的图片模式环境变量，只有显式参数才启用。
 
 可复现的10项合成输入随仓库保存在 `tests/integration/native-clients/fixtures/image-preview-v1`，总文件内容约357KB，直接作为image-fixtures参数即可，不需要安装图片生成库。图片由本项目绘制：四色与白边的JPEG/PNG/WebP、方向6的JPEG、透明椭圆PNG、中文目录内改名的相同JPEG，以及4项主动/损坏/超大头拒绝输入。manifest的mtime仅记录生成时来源；实际只读验证使用本次私密样例的真实mtime。预期失败文件不能当正常图片展示，也不能据样例存在宣称decoder通过。
 
 worker参数只传给真实Host的 `ASSETLIBRARY_IMAGE_PREVIEW_WORKER`，必须是已发布、已验证的独立decoder，仍走生产相同的隔离/ready检查；没有fixture bypass或假服务注入。没有设置worker或隔离不成立时，图片端点应返回契约503，而不能算真实图片验收通过。
+
+原生跨100项分页测试可生成120张真实合成图片，无需重新绘制或增加图片库：
+
+```text
+python -I -B tests/integration/native-clients/make_page_corpus.py --output .runtime/corpus
+```
+
+脚本固定逐字节复用上述已登记的landscape.jpg、landscape.png、transparent.png，各40份，命名001..120并按原格式保留后缀；读回强hash后输出相同kind的manifest。输出只能位于当前worktree的.runtime或系统临时目录，必须不存在，不覆盖旧证据；120份不提交二进制。将该目录传给 `--image-fixtures` 后，原138文件不变，总数258、图片样例目录120项。相同内容不同物理路径是有意副本，名称只是为测试排序；生成成功不代表解码、Core或Explorer跨页操作已通过，真实验收由调用线程完成。
 
 合成图片的原hash/mtime继续参加既有结束核验；任何图片模式运行仍须等待Host、数据库/角色、私密临时目录与监听器完整清理。生成样例、启动服务与UI fixture通过都不能替代真实派生内容验收。
 

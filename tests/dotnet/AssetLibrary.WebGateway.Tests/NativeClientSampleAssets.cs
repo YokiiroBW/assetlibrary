@@ -59,17 +59,41 @@ internal sealed class NativeClientSampleAssets
             AttributesToSkip = FileAttributes.ReparsePoint,
             IgnoreInaccessible = false,
             MaxRecursionDepth = 16,
-        }).Take(33).ToArray();
-        Assert.IsTrue(images.Length is >= 1 and <= 32);
+        }).Take(129).ToArray();
+        Assert.IsTrue(images.Length is >= 1 and <= 128);
+        long totalBytes = 0;
         foreach (var image in images)
         {
             Assert.AreEqual((FileAttributes)0, File.GetAttributes(image) & FileAttributes.ReparsePoint);
-            Assert.IsTrue(new FileInfo(image).Length is > 0 and <= 33554432);
             var filename = Path.Combine(LibraryRoot, "图片样例", Path.GetRelativePath(expected, image));
             Directory.CreateDirectory(Path.GetDirectoryName(filename)!);
-            File.Copy(image, filename, overwrite: false);
-            using var copied = File.OpenRead(filename);
-            snapshots.Add(filename, (SHA256.HashData(copied), File.GetLastWriteTimeUtc(filename)));
+            CopyImage(image, filename, ref totalBytes);
         }
+    }
+
+    private void CopyImage(string image, string filename, ref long totalBytes)
+    {
+        using var source = File.OpenRead(image);
+        Assert.IsTrue(source.Length is > 0 and <= 33554432);
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        long fileBytes = 0;
+        using (var target = new FileStream(filename, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            var buffer = new byte[65536];
+            int read;
+            while ((read = source.Read(buffer)) != 0)
+            {
+                fileBytes += read;
+                totalBytes += read;
+                Assert.IsTrue(fileBytes <= 33554432 && totalBytes <= 67108864, "Synthetic images exceed their byte budget.");
+                digest.AppendData(buffer, 0, read);
+                target.Write(buffer, 0, read);
+            }
+        }
+        Assert.IsGreaterThan(0L, fileBytes);
+        using var copied = File.OpenRead(filename);
+        var copiedDigest = SHA256.HashData(copied);
+        CollectionAssert.AreEqual(digest.GetHashAndReset(), copiedDigest, "Synthetic image copy hash changed.");
+        snapshots.Add(filename, (copiedDigest, File.GetLastWriteTimeUtc(filename)));
     }
 }

@@ -62,7 +62,7 @@ def stage_image_fixtures(source: Path, runtime: Path) -> Path:
         raise ValueError("synthetic image manifest is invalid or exceeds its bound")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     entries = manifest.get("files", [])
-    if manifest.get("kind") != "synthetic_preview_integration_inputs" or not isinstance(entries, list) or not 1 <= len(entries) <= 32:
+    if manifest.get("kind") != "synthetic_preview_integration_inputs" or not isinstance(entries, list) or not 1 <= len(entries) <= 128:
         raise ValueError("only an explicit bounded synthetic preview corpus may be staged")
     destination = runtime / "native-image-fixtures"
     destination.mkdir(exist_ok=False)
