@@ -30,6 +30,7 @@ internal static class StaticImageDecoder
             throw new ImageDecodeException(ImageWorkerStatus.Invalid);
         }
 
+        bitmap.SetImmutable(); // Decoding is complete; subsequent SKImage wrappers may share these read-only pixels.
         return ResizeAndEncode(bitmap, codec.EncodedOrigin, profile, srgb);
     }
 
@@ -56,6 +57,7 @@ internal static class StaticImageDecoder
             canvas.Flush();
         }
 
+        target.SetImmutable(); // The canvas has been disposed, so encoding cannot observe further writes.
         using var rendered = SKImage.FromBitmap(target);
         using var encoded = rendered.Encode(SKEncodedImageFormat.Png, 100)
             ?? throw new ImageDecodeException(ImageWorkerStatus.Limit);
