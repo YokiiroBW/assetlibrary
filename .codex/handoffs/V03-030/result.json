@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "V03-030",
+  "title": "explorer-zoom-integration",
+  "milestone": "V0.3",
+  "status": "partial",
+  "owner": "windows-zoom-coordinator",
+  "branch": "codex/v03-030-explorer-zoom-integration",
+  "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-030",
+  "commit": "f5ce292e2c6cb8e80b54fea10382448dcb2132d4",
+  "changed_files": [],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 71,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md"
+  },
+  "risks": [
+    "Final package, actual Explorer acceptance and cleanup remain; no installed preview.8 claim."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/V03-030/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "Windows Explorer presentation geometry/Surface plus integration and package",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ADR0022 preview lifecycle and current bounded PBGRA",
+      "Existing Surface GDI/native controls/UIA/MSAA and View request ownership",
+      "Existing per-user installer/package and RID locks"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "No server business changes, table writes, new IPC or image decoder calls"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [
+      "ADR0024 and shared PreviewViewport.h presentation contract; wire API unchanged"
+    ],
+    "architecture_tests": [
+      "Baseline verify_repository passed",
+      "Strict C++ Shell build and13 tests",
+      "Gallery13 across V031/V032",
+      "Setup23, package6, release lock16 passed"
+    ],
+    "technical_debt": [
+      "Real package and Explorer validation pending"
+    ]
+  }
+}

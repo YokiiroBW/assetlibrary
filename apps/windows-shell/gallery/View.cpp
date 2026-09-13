@@ -193,7 +193,7 @@ class View final:public IShellView,public IFolderView {
                     const auto serial=previewSerial_;
                     const wchar_t* text=L"暂时无法显示图片，可返回后重试";
                     switch(item.thumbnail.status){
-                    case thumbnail::Status::Ready:text=item.thumbnail.image?L"适应窗口":L"暂时无法显示图片";break;
+                    case thumbnail::Status::Ready:text=item.thumbnail.image?L"预览图已就绪":L"暂时无法显示图片";break;
                     case thumbnail::Status::Unsupported:text=L"此文件暂不支持图片预览";break;
                     case thumbnail::Status::Busy:text=L"图片服务繁忙，可返回后重试";break;
                     case thumbnail::Status::InvalidResponse:text=L"图片数据校验失败";break;

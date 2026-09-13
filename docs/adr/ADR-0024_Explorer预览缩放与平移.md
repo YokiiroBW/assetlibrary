@@ -20,3 +20,5 @@
 保持现有单张1600PBGRA、16MiB持久容量及最大10,240,000B源DIB。仅改变绘制目标矩形并裁剪到图片区域，禁止按缩放后尺寸创建位图、重解码或保存第二份放大像素。图库thumbnail绘制与预算不变。变换O(1)、切图仍限当前101项；50万资产不增加全库工作。无新依赖、框架、服务端契约、数据库或原文件写入。
 
 验收须覆盖几何锚点/边界/DPI、真实HWND缩放与拖动/捕获取消/迟到/权限清理、UIA原生按钮及旧代理退役、实际GDI像素裁剪与资源稳定；最终真实Core→Host→Explorer仍需实测。G4沿用用户豁免，不安排20轮/8小时，不宣布完整V0.3。
+
+原生输入/绘制约束沿用微软文档：[SetCapture与释放](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setcapture)、[滚轮坐标/碎片刻度及父链传播](https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-mousewheel)、[AlphaBlend目标矩形与预乘透明度](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-alphablend)。

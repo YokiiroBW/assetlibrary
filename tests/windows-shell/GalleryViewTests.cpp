@@ -420,6 +420,16 @@ void PreferencesAndPreview(){
     Await([&]{return control.previews==1&&gallery::PendingWork()==0;},"open-large-preview");
     const auto first=control.lastPreviewNode.load();oldGallery.Retired();
     Check(IsWindowVisible(GetDlgItem(window,gallery::PreviewBackControlId)),"large preview stays within same Explorer child");
+    const auto previewSummary=OwnSummary(window);const auto pageReads=control.calls.load(),imageReads=control.images.load();
+    for(int step=0;step<3;++step)SendMessageW(GetDlgItem(window,gallery::PreviewZoomInControlId),BM_CLICK,0,0);
+    Pump(10);
+    Check(OwnSummary(window)!=previewSummary,"zoom updates the presented summary");
+    SendMessageW(GetDlgItem(window,gallery::PreviewActualControlId),BM_CLICK,0,0);
+    SendMessageW(GetDlgItem(window,gallery::PreviewFitControlId),BM_CLICK,0,0);
+    Pump(10);
+    Check(control.previews==1&&control.calls==pageReads&&control.images==imageReads&&gallery::PendingWork()==0,
+        "zoom and reset reuse current pixels without preview, thumbnail or directory I/O");
+    Check(preferenceWrites==beforePreview,"zoom is not persisted as a browsing preference");
     SendMessageW(GetDlgItem(window,gallery::PreviewNextControlId),BM_CLICK,0,0);
     Await([&]{return control.previews==2&&gallery::PendingWork()==0;},"next-large-preview");
     Check(first!=control.lastPreviewNode&&!IsWindowEnabled(GetDlgItem(window,gallery::PreviewNextControlId)),"next reaches second file and stops at current-page boundary");

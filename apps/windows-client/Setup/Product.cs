@@ -6,7 +6,7 @@ namespace AssetLibrary.Windows.Setup;
 internal static class Product
 {
     internal const string Owner = "AssetLibrary.Windows.Explorer";
-    internal const string Version = "0.3.0-preview.7";
+    internal const string Version = "0.3.0-preview.8";
     internal const string Clsid = "{BBC992DE-CE5D-48C8-A86C-7230C7D72B02}";
     internal const string ManifestName = "manifest.json";
     internal const string OwnerFile = ".assetlibrary-owner.json";
