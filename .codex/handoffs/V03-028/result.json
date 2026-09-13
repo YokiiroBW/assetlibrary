@@ -9,6 +9,19 @@
   "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-028",
   "commit": "a173210614b283e087200fd85109f3624efbeb5a",
   "changed_files": [
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/README.md",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/cleanup-readback.json",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/evidence.json",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/image-identity.json",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-jpg-0.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-jpg-1.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-png-0.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-png-1.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-webp-0.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/landscape-webp-1.png",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/run.log",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/runner.py.txt",
+    ".codex/handoffs/V03-028/linux-seccomp-c775b7d/source-identity.json",
     ".codex/handoffs/V03-028/linux-tests-a87b44c/README.md",
     ".codex/handoffs/V03-028/linux-tests-a87b44c/build.log",
     ".codex/handoffs/V03-028/linux-tests-a87b44c/commands.json",
@@ -70,6 +83,15 @@
       "skipped": 0,
       "report": "windows-lpac-c775b7d/README.md",
       "scope": "One existing real NativeAOT LPAC+Job thumbnail test only; separate source/platform evidence, not added to historical Linux counters."
+    },
+    "linux_original_seccomp_regression": {
+      "tested_source_revision": "c775b7d2b221479510f958f7e302a676b024e778",
+      "same_worker_sources_as": "7f092904dbadcf1276bb9daf5b565946ecccbdad",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "report": "linux-seccomp-c775b7d/README.md",
+      "scope": "Six existing synthetic JPEG/PNG/WebP no-argument requests at profiles0/1 on dev-230; actual PNG CRC, exit and cleanup; no syscall-probe or NAS claims."
     }
   },
   "risks": [
@@ -102,7 +124,8 @@
       "45 affected tests passed and1 Linux platform test explicitly skipped on Windows.",
       "Diff review checked fixed path/UID0, environment mutual exclusion, no half-close/EOF wait, bounded wire sizes, cancellation and deferred semaphore disposal.",
       "Frozen integrationa87b44c tested on dev-230 in isolated2GiB/2CPU containers:93 unique passes/0 failures/38 platform or live-fixture skips; actual Linux SO_PEERCRED and real source-broker passed. No code changes. Both containers removed and absence verified.",
-      "Coordinator-requested immutable c775b7d Windows NativeAOT locked publish and one existing LPAC+Job PNG test passed; source archive3564 files unchanged, no product code or configuration edits, sandbox and owned processes cleared. Evidence-only supplement."
+      "Coordinator-requested immutable c775b7d Windows NativeAOT locked publish and one existing LPAC+Job PNG test passed; source archive3564 files unchanged, no product code or configuration edits, sandbox and owned processes cleared. Evidence-only supplement.",
+      "Existing verify_nas_worker helpers reused for six immutable c775 image requests through original LinuxImageIsolation no-argument path; all6 passed under UID1654/capdropALL/NNP/read-only/networknone/512MiB. Exact containers removed, corpus unchanged. No product code or protocol edits."
     ],
     "technical_debt": [
       "Linux/container peer identity, broker capacity/reap and final deployment checks required from root."

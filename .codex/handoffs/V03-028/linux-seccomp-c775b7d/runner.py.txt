@@ -1,0 +1,108 @@
+import asyncio
+import hashlib
+import json
+import re
+from pathlib import Path
+from types import SimpleNamespace
+
+import verify_nas_worker as shared
+
+ROOT = Path(__file__).resolve().parent
+IMAGE = 'sha256:4b5eff7925e192f99c3ebdd269dc86060c6542afc7b32b3c61cd88ecc975feac'
+REVISION = 'c775b7d2b221479510f958f7e302a676b024e778'
+
+
+class SixCaseRunner(shared.Runner):
+    def verify_container_policy(self, info, probe):
+        shared.require(probe is None, 'probes_not_in_scope')
+        config, host = info['Config'], info['HostConfig']
+        shared.require(config['User'] == '1654:1654' and config['Entrypoint'] == [shared.WORKER]
+                       and not config.get('Cmd') and not info['Args'], 'wrong_entrypoint_or_args')
+        shared.require(host['ReadonlyRootfs'] and host['NetworkMode'] == 'none' and host['Init']
+                       and host['Memory'] == 512 * 1024 * 1024, 'wrong_container_limits')
+        shared.require({item.upper() for item in host['CapDrop']} == {'ALL'}
+                       and not host.get('CapAdd') and not host['Privileged']
+                       and set(host['SecurityOpt']) in ({'no-new-privileges'}, {'no-new-privileges:true'}),
+                       'wrong_container_security')
+        shared.require(not info['Mounts'] and not host.get('Tmpfs') and not host.get('Binds')
+                       and not host.get('Devices'), 'unexpected_mounts_or_devices')
+        self.report['container_policy'] = {'user':config['User'],'memory_bytes':host['Memory'],
+            'readonly':True,'network':'none','cap_drop':['ALL'],'no_new_privileges':True,
+            'init':True,'mounts':[],'entrypoint':config['Entrypoint'],'arguments':[],
+            'seccomp_override':False,'production_deployment':False}
+
+    async def acquire(self, case, probe):
+        shared.require(probe is None, 'probes_not_in_scope')
+        cidfile = self.evidence / (case + '.cid')
+        arguments = ['container','create','--cidfile',str(cidfile),'--name',self.token+'-'+case,
+            '--label','io.assetlibrary.task=V03-028',
+            '--label','io.assetlibrary.worker-test='+self.token,'--label','io.assetlibrary.worker-case='+case,
+            '--interactive','--init','--user','1654:1654','--cap-drop','ALL',
+            '--security-opt','no-new-privileges:true','--read-only','--network','none','--memory','512m',
+            '--workdir','/app/workers/image-preview','--entrypoint',shared.WORKER,self.image]
+        self.report.setdefault('create_commands',[]).append(arguments)
+        self.creation_unconfirmed = True
+        try:
+            await shared.command(self.args.docker, arguments)
+        finally:
+            if cidfile.exists():
+                shared.regular(cidfile)
+                shared.require(cidfile.stat().st_size <= 65, 'cidfile_limit')
+                identifiers = [cidfile.read_text(encoding='ascii').strip()]
+            else:
+                raw = await shared.command(self.args.docker,['container','ls','--all','--quiet','--no-trunc',
+                    '--filter','label=io.assetlibrary.worker-test='+self.token,
+                    '--filter','label=io.assetlibrary.worker-case='+case])
+                identifiers = raw.decode('ascii').split()
+            shared.require(len(identifiers) <= 1,'ambiguous_owned_container')
+            if identifiers:
+                identifier = identifiers[0]
+                shared.require(re.fullmatch(r'[0-9a-f]{64}',identifier) is not None,'invalid_container_id')
+                self.current_id = identifier
+                self.report['owned_container_ids'].append(identifier)
+                self.save()
+                info = await self.inspect(identifier)
+                shared.require(info['Config']['Labels'].get('io.assetlibrary.task') == 'V03-028','task_label_mismatch')
+                self.creation_unconfirmed = False
+        shared.require(self.current_id is not None,'container_create_unconfirmed')
+        self.verify_container_policy(await self.inspect(self.current_id),probe)
+        if not self.report.get('worker_artifacts'):
+            artifacts=[]
+            for name in ('AssetLibrary.ImagePreview.Worker','libSkiaSharp.so'):
+                destination = ROOT / name
+                await shared.command(self.args.docker,['container','cp',self.current_id+':/app/workers/image-preview/'+name,str(destination)])
+                artifacts.append({'name':name,'bytes':destination.stat().st_size,'sha256':shared.digest(destination)})
+            self.report['worker_artifacts']=artifacts
+            self.save()
+
+    async def run_cases(self):
+        self.report['docker_kernel']=json.loads(await shared.command(self.args.docker,['info','--format','{{json .KernelVersion}}']))
+        image=json.loads(await shared.command(self.args.docker,['image','inspect',self.image]))[0]
+        shared.require(image['Id']==IMAGE and image['Os']=='linux' and image['Architecture']=='amd64'
+            and image['Config']['Labels'].get('org.opencontainers.image.revision')==REVISION,'image_provenance_mismatch')
+        self.report['image_labels']=image['Config']['Labels']
+        for name in ('landscape.jpg','landscape.png','landscape.webp'):
+            for profile in (0,1):
+                await self.execute(name.replace('.','-')+'-'+str(profile),name=name,profile=profile)
+
+
+def main():
+    evidence=ROOT/'evidence'
+    evidence.mkdir(mode=0o700)
+    manifest={'source_revision':REVISION,'image_ids':{'core':IMAGE}}
+    build_manifest=ROOT/'image-identity.json'
+    build_manifest.write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
+    args=SimpleNamespace(docker=str(ROOT/'docker-sudo'),corpus=ROOT/'corpus',build_manifest=build_manifest)
+    snapshot=shared.corpus_snapshot(args.corpus)
+    runner=SixCaseRunner(args,manifest,evidence,snapshot)
+    runner.report.update({'kind':'linux_original_seccomp_six_case_regression',
+        'runner_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        'scope':'Six no-argument image requests only; no container-decoder/probe mode; no syscall denial attribution.',
+        'shared_helpers':['corpus_snapshot','validate_png','bounded_read','Runner.execute','Runner.clean']})
+    result=asyncio.run(runner.run())
+    print(json.dumps({key:runner.report[key] for key in ('status','source_revision','image_id','source_unchanged','cleanup_verified')},sort_keys=True))
+    return result
+
+
+if __name__=='__main__':
+    raise SystemExit(main())

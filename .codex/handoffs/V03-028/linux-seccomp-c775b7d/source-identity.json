@@ -1,0 +1,28 @@
+{
+  "testedImageSource": "c775b7d2b221479510f958f7e302a676b024e778",
+  "coordinatorFinalSource": "7f092904dbadcf1276bb9daf5b565946ecccbdad",
+  "workerCsAndCsprojFiles": 14,
+  "allGitBlobsEqual": true,
+  "workerGitBlobs": {
+    "services/worker-supervisor/ImagePreview/AssetLibrary.ImagePreview.Worker.csproj": "21349dcd0ee8bcca67e0f15124a08ac52eb78288",
+    "services/worker-supervisor/ImagePreview/ImageInputPolicy.cs": "35b50c3f77cb5139748ce707e215a18181222c5e",
+    "services/worker-supervisor/ImagePreview/ImageWorkerIsolation.cs": "c9ea23bd4c11f67cb984bbe9d48de45933bc81e8",
+    "services/worker-supervisor/ImagePreview/ImageWorkerProtocol.cs": "6bd1f04d3749b499c43d7c5255fc814547055b56",
+    "services/worker-supervisor/ImagePreview/LinuxContainerIdentity.cs": "d621cb65a5451d70da704ea38b60b9290ad79a32",
+    "services/worker-supervisor/ImagePreview/LinuxContainerIsolation.cs": "075b375d65b3b672af55eb7384f8dd411609063a",
+    "services/worker-supervisor/ImagePreview/LinuxContainerMemory.cs": "9a58ca88af7101a19bc9f59680c4ca0f5fd9fa4c",
+    "services/worker-supervisor/ImagePreview/LinuxContainerProbe.cs": "9832eface45c9aa39bbe7edad6ffb9612b4a8329",
+    "services/worker-supervisor/ImagePreview/LinuxContainerStatus.cs": "aa215a9ce23e4881bacb34511d39baa89649e8e3",
+    "services/worker-supervisor/ImagePreview/LinuxImageIsolation.cs": "aa627163f630a939b9409855f2f11a420b30aec9",
+    "services/worker-supervisor/ImagePreview/LinuxImageProbe.cs": "59adf5fd6c5edf5a9cc1bdff1f43311043244ff0",
+    "services/worker-supervisor/ImagePreview/Program.cs": "4ca00161fa6cae47349be9931d7dadbceedfa808",
+    "services/worker-supervisor/ImagePreview/StaticImageDecoder.cs": "2868250fbbaf5a168315ef6f8d4f4bcb8a234c85",
+    "services/worker-supervisor/ImagePreview/WindowsImageIsolation.cs": "6c6cc2b6a8d80320d0dd8a216d4051a3780c4ef5"
+  },
+  "sharedHelper": "tests/integration/native-clients/verify_nas_worker.py",
+  "executedHelperSha256": "aaf86d785716ad41c7f13af5a1f42171ec2b77eebf98bd6564ffc4a417b1377c",
+  "gitHelperSha256": "02783cf51917e18e0a7041fc376062dac5061687848b59c4970e437b63d9d1c2",
+  "sharedHelperEqualAfterCrlfNormalization": true,
+  "helperLineEndingNote": "Windows git archive/export uses CRLF; executed helper matches pinned Git source after CRLF-to-LF normalization only. No code edits.",
+  "downloadedPngSha256Verified": 6
+}

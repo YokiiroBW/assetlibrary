@@ -1,0 +1,7 @@
+{
+  "checkedUtc": "2026-09-13T11:32:02.2187437Z",
+  "command": "sudo -n docker container ls --all --quiet --no-trunc --filter label=io.assetlibrary.task=V03-028",
+  "exitCode": 0,
+  "remainingIds": [],
+  "remainingCount": 0
+}

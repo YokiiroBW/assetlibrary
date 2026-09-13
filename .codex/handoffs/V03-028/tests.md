@@ -1,5 +1,9 @@
 # V03-028 测试记录
 
+## 后续Linux原seccomp无参数路径（c775b7d）
+
+仅JPEG/PNG/WebP各profile0/1共6/6通过，实际镜像4b5eff79…、UID1654、capdropALL、NNP、read-only、networknone、memory512MiB，无参数entrypoint选择旧LinuxImageIsolation。所有返回PNG全CRC/尺寸通过，Worker与容器exit0/noOOM；六容器精确清理、最终标签列表0、corpusSHA/mtime不变。见[JSON原始结果、派生PNG、命令和清理](linux-seccomp-c775b7d/README.md)。复用现verify_nas_worker工具，仅覆盖六个正常图片用例，不归因Docker已有io_uring拒绝为新正控，不宣称NAS或最大边界通过。
+
 ## 后续Windows旧隔离路径单项（c775b7d）
 
 不可变c775b7d2b221479510f958f7e302a676b024e778在自有.runtime副本实际win-x64 NativeAOT发布；SDK10.0.111/MSVC14.44，原RID锁locked restore且哈希不变，严格测试项目build0warning/0error。仅NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail执行1项通过/0失败/0skip；现有LPAC+Job下Ready、512×300真实PNG与exit0。临时sandbox前后0、剩余自有Worker0，3564个归档文件未改。见[原始TRX、命令、哈希及清理](windows-lpac-c775b7d/README.md)。不重复运行Windows门禁/G4，不将此正常图回归扩张为最大图片或NAS验收。
