@@ -12,6 +12,8 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release, 
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(stopping);
         deadline.CancelAfter(TimeSpan.FromSeconds(8));
         ImageReply reply;
+        var stage = "ready";
+        int? childExitCode = null;
         try { circuit.Begin(); }
         catch (IOException) { throw new ImageStateFailure(); }
         using var monitor = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
@@ -35,8 +37,10 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release, 
             disconnected = Task.CompletedTask;
             try { await LocalImageFrames.WriteEmptyAsync(client, ImageWorkerStatus.Ready, deadline.Token).ConfigureAwait(false); }
             catch (IOException) { throw new ImageClientRejected(); }
+            stage = "input";
             var request = await ForwardInputAsync(client, child, deadline.Token).ConfigureAwait(false);
             disconnected = WatchDisconnectAsync(client, deadline, ClientAbandoned, monitor.Token);
+            stage = "result";
             reply = await ReadResultAsync(child, request.Profile, deadline.Token).ConfigureAwait(false);
             await diagnostic.ConfigureAwait(false);
             infrastructureFailed = reply.Frame.Status == (int)ImageWorkerStatus.Unavailable;
@@ -52,12 +56,19 @@ internal sealed class ImageExchange(ImageCircuitLedger circuit, Action release, 
         {
             await early.CancelAsync().ConfigureAwait(false); await monitor.CancelAsync().ConfigureAwait(false);
             await disconnected.ConfigureAwait(false);
-            if (child is not null) { await child.StopAsync().ConfigureAwait(false); child.Dispose(); }
+            if (child is not null)
+            {
+                await child.StopAsync().ConfigureAwait(false);
+                childExitCode = child.ExitCode;
+                child.Dispose();
+            }
             await diagnostics.CancelAsync().ConfigureAwait(false);
             try { await diagnostic.ConfigureAwait(false); }
             catch (Exception failure) when (failure is IOException or InvalidDataException or OperationCanceledException) { /* Already bounded, terminated and reaped. */ }
         }
         if (cancelled) infrastructureFailed = ImageCircuitState.InfrastructureCancellation(Volatile.Read(ref clientAbandoned) != 0, operatorStopping.IsCancellationRequested);
+        if (infrastructureFailed && childExitCode is { } exitCode)
+            Console.Error.WriteLine($"image_supervisor:failed stage={stage} exit={exitCode}");
         if (!infrastructureFailed)
         {
             try { circuit.CompleteHealthy(); }
