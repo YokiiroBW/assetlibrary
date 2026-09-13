@@ -1022,6 +1022,19 @@
       "thread_deep_link": "",
       "integrated_commit": "03a95f9b90154c8594922c7b2ad0f49ac1521083",
       "execution_status": "Integrated and accepted in preview.6 with root real Core/Explorer evidence; documented OS/NAS/follow-up limits retained."
+    },
+    {
+      "id": "V03-022",
+      "title": "explorer-large-preview-integration",
+      "module": "explorer-large-preview-integration",
+      "status": "ready",
+      "depends_on": [],
+      "owner": "windows-coordinator",
+      "branch": "codex/v03-022-explorer-large-preview-integration",
+      "worktree": "C:\\YOKI\\Codex\\AssetLibrary-worktrees\\V03-022",
+      "task_file": ".codex/tasks/V03-022.md",
+      "handoff": ".codex/handoffs/V03-022/summary.md",
+      "thread_deep_link": ""
     }
   ]
 }
