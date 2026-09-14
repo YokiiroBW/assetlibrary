@@ -41,9 +41,9 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
     public GatewayAuthenticationRuntime Runtime => Services.GetRequiredService<GatewayAuthenticationRuntime>();
     public IServiceProvider Services => application.Services;
 
-    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null)
+    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false)
     {
-        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings, certificateValidity);
+        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings, certificateValidity, serviceReadEnabled);
         var certificate = await TrialCertificate.LoadAsync(configuration, CancellationToken.None);
         TrialDatabaseConnections? connections = null;
         PostgresDatabaseReadinessProbe? readiness = null;

@@ -8,7 +8,7 @@ internal static class TrialHostIntegrationReadiness
     public static async Task AssertReadyAsync(PostgresDatabaseReadinessProbe migrations, TrialDatabaseConnections connections)
     {
         var result = await new TrialRuntimeReadinessProbe(migrations, connections).CheckAsync(CancellationToken.None);
-        Assert.IsTrue(result.IsReady, "Real database and module-role readiness");
+        Assert.IsTrue(result.IsReady, "Real database and module-role readiness: " + result.PublicCode);
     }
 
     public static async Task AssertWrongModuleLoginFailsAsync(TrialHostIntegrationFixture host)

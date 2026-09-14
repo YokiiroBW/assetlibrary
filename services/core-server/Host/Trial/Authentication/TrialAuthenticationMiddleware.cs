@@ -17,6 +17,13 @@ internal sealed class TrialAuthenticationMiddleware(
             return;
         }
 
+        if (context.Request.Headers.ContainsKey("Authorization"))
+        {
+            await context.RequestServices.GetRequiredService<ServiceReadAuthenticationHandler>()
+                .InvokeAsync(context, next).ConfigureAwait(false);
+            return;
+        }
+
         TrialAuthenticationResponses.PreventCaching(context.Response);
         if (!trust.Allows(context.Request))
         {

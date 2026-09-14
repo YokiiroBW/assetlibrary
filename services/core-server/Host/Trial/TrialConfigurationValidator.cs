@@ -12,6 +12,10 @@ internal static class TrialConfigurationValidator
             throw new TrialConfigurationException("trial_configuration_version_invalid");
         }
 
+        if (configuration.ServiceReadMaximumLifetimeDays is < 30 or > 365)
+        {
+            throw new TrialConfigurationException("trial_service_read_lifetime_invalid");
+        }
         ValidateOrigin(configuration.PublicOrigin, configuration.BindHost);
         TrialPrivateState.RequireDirectory(configuration.StatePath);
         TrialPrivateState.RequireContained(configuration.StatePath, configurationPath);

@@ -29,7 +29,9 @@ internal static class TrialHost
             if (operatorAction is not null)
             {
                 var runtime = application.Services.GetRequiredService<GatewayAuthenticationRuntime>();
-                var result = await TrialAdministratorOperator.ExecuteAsync(
+                var result = operatorAction.StartsWith("service-", StringComparison.Ordinal)
+                    ? await ServiceReadOperator.ExecuteAsync(operatorAction, application.Services, Console.OpenStandardInput(), CancellationToken.None).ConfigureAwait(false)
+                    : await TrialAdministratorOperator.ExecuteAsync(
                     operatorAction, runtime, Console.OpenStandardInput(), CancellationToken.None).ConfigureAwait(false);
                 await Console.Out.WriteLineAsync(result.Json).ConfigureAwait(false);
                 return result.ExitCode;

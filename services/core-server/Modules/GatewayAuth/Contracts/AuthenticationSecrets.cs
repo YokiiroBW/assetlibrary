@@ -63,76 +63,42 @@ public sealed class LocalSecret : IDisposable
     }
 }
 
-public sealed class BrowserSessionToken : IDisposable
+// Shared opaque byte ownership/encoding only; authentication APIs still require sealed token types.
+public abstract class AuthenticationToken : IDisposable
 {
     internal const int ByteLength = 32;
     private byte[]? value;
 
-    internal BrowserSessionToken(byte[] value)
+    private protected AuthenticationToken(byte[] value)
     {
         ArgumentNullException.ThrowIfNull(value);
-        if (value.Length != ByteLength)
-        {
-            throw new ArgumentException("A browser session token has an invalid length.", nameof(value));
-        }
-
+        if (value.Length != ByteLength) throw new ArgumentException("An authentication token has an invalid length.", nameof(value));
         this.value = value;
     }
 
-    internal ReadOnlySpan<byte> Value => value
-        ?? throw new ObjectDisposedException(nameof(BrowserSessionToken));
-
-    public static BrowserSessionToken Parse(string encoded) =>
-        new(AuthenticationTokenEncoding.Decode(encoded, nameof(encoded)));
-
+    internal ReadOnlySpan<byte> Value => value ?? throw new ObjectDisposedException(GetType().Name);
     public string Export() => AuthenticationTokenEncoding.Encode(Value);
-
     public void Dispose()
     {
         var owned = Interlocked.Exchange(ref value, null);
-        if (owned is not null)
-        {
-            CryptographicOperations.ZeroMemory(owned);
-        }
+        if (owned is not null) CryptographicOperations.ZeroMemory(owned);
+        GC.SuppressFinalize(this);
     }
-
     public override string ToString() => "[redacted]";
 }
 
-public sealed class BrowserCsrfToken : IDisposable
+public sealed class BrowserSessionToken : AuthenticationToken
 {
-    internal const int ByteLength = 32;
-    private byte[]? value;
+    internal BrowserSessionToken(byte[] value) : base(value) { }
+    public static BrowserSessionToken Parse(string encoded) =>
+        new(AuthenticationTokenEncoding.Decode(encoded, nameof(encoded)));
+}
 
-    internal BrowserCsrfToken(byte[] value)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-        if (value.Length != ByteLength)
-        {
-            throw new ArgumentException("A browser CSRF token has an invalid length.", nameof(value));
-        }
-
-        this.value = value;
-    }
-
-    internal ReadOnlySpan<byte> Value => value
-        ?? throw new ObjectDisposedException(nameof(BrowserCsrfToken));
-
+public sealed class BrowserCsrfToken : AuthenticationToken
+{
+    internal BrowserCsrfToken(byte[] value) : base(value) { }
     public static BrowserCsrfToken Parse(string encoded) =>
         new(AuthenticationTokenEncoding.Decode(encoded, nameof(encoded)));
-
-    public string Export() => AuthenticationTokenEncoding.Encode(Value);
-
-    public void Dispose()
-    {
-        var owned = Interlocked.Exchange(ref value, null);
-        if (owned is not null)
-        {
-            CryptographicOperations.ZeroMemory(owned);
-        }
-    }
-
-    public override string ToString() => "[redacted]";
 }
 
 public sealed class BrowserSessionCredentials : IDisposable

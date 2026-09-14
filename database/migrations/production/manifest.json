@@ -262,6 +262,22 @@
       "owner_role": "assetlibrary_gateway_auth_owner",
       "path": "0021_gateway_auth_interactive_reads.sql",
       "sha256": "887e6738daca27e88063b507044271fb50c18a48fe3261e20706a5780cee2c62"
+    },
+    {
+      "name": "gateway_auth_service_credentials",
+      "path": "0022_gateway_auth_service_credentials.sql",
+      "version": 22,
+      "module": "GatewayAuth",
+      "owner_role": "assetlibrary_gateway_auth_owner",
+      "sha256": "6d439975c58ab859a3e7e8eb150e93bde9fe2366c623fe4005fdd94fc546b0d6"
+    },
+    {
+      "name": "library_storage_service_read_grants",
+      "path": "0023_library_storage_service_read_grants.sql",
+      "version": 23,
+      "module": "LibraryStorage",
+      "owner_role": "assetlibrary_library_storage_owner",
+      "sha256": "5f89eab85d30485435ec49f0ef362ef0d40361b963a2827b40d0d05daad4bff8"
     }
   ]
 }

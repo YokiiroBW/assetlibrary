@@ -7,7 +7,7 @@ namespace AssetLibrary.WebGateway.Tests;
 
 internal static class TrialHostIntegrationConfiguration
 {
-    public static async Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null)
+    public static async Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false)
     {
         var state = Path.Combine(settings.RuntimeRoot, "state");
         TrialHostIntegrationPrivateDirectory.Create(state);
@@ -38,6 +38,7 @@ internal static class TrialHostIntegrationConfiguration
         var configuration = new TrialConfiguration
         {
             FormatVersion = 1,
+            ServiceReadEnabled = serviceReadEnabled,
             DeploymentId = Guid.NewGuid(),
             PublicOrigin = TrialTestTls.ReserveOrigin().GetLeftPart(UriPartial.Authority),
             StatePath = state,

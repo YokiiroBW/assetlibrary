@@ -17,6 +17,8 @@ internal sealed record TrialConfiguration
     public required int FormatVersion { get; init; }
     public required Guid DeploymentId { get; init; }
     public required string PublicOrigin { get; init; }
+    public bool ServiceReadEnabled { get; init; }
+    public int ServiceReadMaximumLifetimeDays { get; init; } = 365;
     public string BindHost { get; init; } = "127.0.0.1";
     public required string StatePath { get; init; }
     public required string TlsCertificateFile { get; init; }

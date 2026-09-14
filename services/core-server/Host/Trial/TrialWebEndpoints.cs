@@ -20,6 +20,7 @@ internal static class TrialWebEndpoints
         TrialAuthentication.Map(application);
         TrialImageEndpoints.Map(application);
         application.MapAssetLibraryControl((context, payload, token) =>
+            ServiceReadAuthenticationHandler.IsServiceRequest(context) ? ServiceReadControl.HandleAsync(context, payload, token) :
             context.RequestServices.GetRequiredService<TrialManagementGateway>().HandleAsync(context, payload, token));
         TrialReadinessEndpoint.Map(application, configuration.DeploymentId, readiness);
         application.UseStaticFiles(new StaticFileOptions

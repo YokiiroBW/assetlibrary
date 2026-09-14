@@ -23,6 +23,7 @@ internal static class TrialIdentityServices
                 provider.GetRequiredService<ILoggerFactory>())
             : testComposition.Authentication(connections.Gateway, provider.GetRequiredService<IDataProtectionProvider>(),
                 provider.GetRequiredService<ILoggerFactory>()));
+        TrialServiceReadComposition.Configure(services, configuration, connections);
         TrialAuthentication.Configure(services, configuration.Origin);
     }
 }

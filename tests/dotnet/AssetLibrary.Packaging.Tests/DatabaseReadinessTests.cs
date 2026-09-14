@@ -10,7 +10,7 @@ public sealed class DatabaseReadinessTests
     [TestMethod]
     public void EmbeddedManifestMatchesCurrentProductionContract()
     {
-        const int approvedLatestVersion = 21;
+        const int approvedLatestVersion = 23;
         var contract = DatabaseMigrationContract.LoadCurrent();
 
         Assert.AreEqual(16, contract.PostgreSqlMajor);
