@@ -1,0 +1,324 @@
+{
+  "count": 53,
+  "note": "Environment/platform gates are missing evidence, not passed. TS063 real service integration is separately executed by the isolated runner.",
+  "tests": [
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"never_read\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"wrong_count\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "AnExpiredDiscoveryNeverBecomesAnEmptySuccessfulIndex",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (False)",
+      "reason": "Literal backslash filenames require a POSIX filesystem.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (LibraryStorage,\"assetlibrary_library_storage_runtime\",\"DELETE FROM task_health.durable_task WHERE false\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "CommitGuardRejectsLostAndCancelledLeasesBeforeCallingTheAssetCommit",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (ScanReconciliation,\"assetlibrary_scan_reconciliation_runtime\",\"DELETE FROM asset_identity.filesystem_entry WHERE false\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "ExpiredIncompleteScanRestartsWithoutPublishingOldPartialRows",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "OfflineLibraryDoesNotDisableSiblingAndRetryProbesRecoveryImmediately",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "ARealDirectoryPermissionDenialIsOfflineAndRecoversWithoutIndexDeletion",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "SharedConnectionMechanicsPreserveEveryModuleRoleBoundary (TaskHealth,\"assetlibrary_task_health_runtime\",\"DELETE FROM library_storage.library_root WHERE false\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "CrashBetweenAcceptAndEnqueueRecoversOneDurableTask",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"incomplete\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "DatabaseCapacityFailureKeepsTheSourceAndPublishesNoPartialIndex",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "PosixBackslashNamesAreRejectedWithoutChangingPhysicalIdentity (True)",
+      "reason": "Literal backslash filenames require a POSIX filesystem.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"nonzero\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "RunningCancellationAbortsOnlyStagedObservations",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "RecoveredCommittedSnapshotRepairsAnExpiredFinalAttempt",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "ConcurrentStartsShareOneActiveTaskAcrossDistinctRequestKeys",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "QueuedCancellationIsDurableIdempotentAndAllowsANewAttempt",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"stderr_limit\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "FailedOrUnresponsiveProcessesCannotCommitAndAreReaped (\"oversized\")",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "CompletedSnapshotSurvivesLostJournalAcknowledgement",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "RegistrationScanAndReplayPreservePhysicalFilesAndImmutableIdentity",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "ReadCore",
+      "test": "NativeProcessTerminatesOnCancellationAndLeavesItsSourceUnchanged",
+      "reason": "Native read-only integration is provided by the required PostgreSQL/Host test runner.",
+      "passed": false
+    },
+    {
+      "suite": "WebGateway",
+      "test": "RealHttpsServiceReadsReauthorizeEveryPageAndPersistCredentialLifecycle",
+      "reason": "Real trial E2E was not enabled; this is not execution evidence.",
+      "passed": false
+    },
+    {
+      "suite": "WebGateway",
+      "test": "RealBrowserCreatesScansSearchesAndResumesAnUnmodifiedPhysicalLibrary",
+      "reason": "Real trial E2E was not enabled; this is not execution evidence.",
+      "passed": false
+    },
+    {
+      "suite": "WebGateway",
+      "test": "PostgreSqlPagesDetailsAnchorsAndScopesKeepTheirBoundaries",
+      "reason": "The required PostgreSQL driver supplies the interactive read fixture.",
+      "passed": false
+    },
+    {
+      "suite": "WebGateway",
+      "test": "ServeProductionCoreForNativeClientsUntilExplicitStopOrDeadline",
+      "reason": "Native client temporary server was not requested; this is not execution evidence.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RecoveryDoesNotAdoptLegacyOrMalformedRecords",
+      "reason": "Published Windows worker is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "NativeAotDecoderRunsInsideLpacAndReturnsARealThumbnail",
+      "reason": "The platform runner must provide the actual published NativeAOT decoder executable.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "LpacWinHttpInitializationBlocksThisTestedPath",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "CleanupFailureRetainsOwnershipForRecovery",
+      "reason": "Published Windows worker is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "InProcessComCannotReadHostOnlyMarker",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "ParentCrashKillsWorkerEvenWhileControllerKeepsStdinOpen",
+      "reason": "The pinned runtime and owned crash-parent tool are required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "WorkerCannotReadHostFileOrWriteItsRxDirectory",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RealLinuxPeerUsesEffectiveUserAndRejectsUnconnectedSocket",
+      "reason": "SO_PEERCRED requires actual Linux; protocol tests use an explicit fake peer.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "SuccessfulProfileDisposalRemovesBothOwnedDirectories",
+      "reason": "Published Windows worker is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "CancellationTerminatesSleepingWorkerAndReaps",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "InheritableEventOutsideStdioWhitelistIsNotShared",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "KernelCpuQuotaTerminatesWithMeasuredPeriodicOvershoot",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "LeafSymbolicLinkIsRejected",
+      "reason": "This Windows token cannot create a file symbolic link; Linux or a capable Windows runner must supply this evidence.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "StartupCancellationKeepsItsErrorWhenCleanupAlsoFails",
+      "reason": "Published Windows worker is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RealPostgresRoundTripPreservesUnchangedImageAdmission",
+      "reason": "The existing owned PostgreSQL runner must supply the trial test connection.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RealHttpsImageTrustAndInvisibleEntryRulesPreserveTheJsonContract",
+      "reason": "The existing real Core/PostgreSQL fixture must supply its private connection file.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "LpacWinsockInitializationBlocksThisTestedPath",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RealHostSourceChildStreamsVerifiedBytesAndReleasesTheOriginalHandle",
+      "reason": "The source-broker runner must provide the real built Host and pinned dotnet executable.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "JobRejectsAnotherProcess",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RealCoreReturnsTheDeclaredEngineStateWithoutOriginalFallback",
+      "reason": "The existing real Core/PostgreSQL fixture must supply its private connection file.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "ChangedPositiveTimestampDoesNotHideLiveOwnedWorker",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "RecoveryToleratesAlreadyDeletedOwnedProfileBeforeJournalUpdate",
+      "reason": "Published Windows worker is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "CommittedMemoryIsBoundedByJobRatherThanGc",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    },
+    {
+      "suite": "Preview",
+      "test": "OutOfProcessTransferBrokerCannotCreateAJob",
+      "reason": "The owned native Windows confinement probe is required.",
+      "passed": false
+    }
+  ]
+}

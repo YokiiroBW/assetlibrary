@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "aggregate_tests": 1,
+  "resource_cleanup": "verified",
+  "original_hash_and_mtime": "unchanged",
+  "persistence_checks": [
+    "failed_grant_preserves_existing_acl",
+    "ordinary_admin_disabled_grant_denied",
+    "disabled_revoke_allowed",
+    "grant_retry_single_audit",
+    "conflicting_operation_denied",
+    "stale_retry_no_resurrection",
+    "runtime_direct_write_denied",
+    "database_restart_lifecycle_state",
+    "verified_backup_restore_lifecycle_state",
+    "migration_failure_atomic_recovery"
+  ],
+  "boundary": "real PG16.15 and pinned HTTPS; HIBP test responder; no browser UI or platform consumer",
+  "code_commit": "6fcb807b0ccc502ae5bce713da9108c13dc92561",
+  "synthetic_originals": 138,
+  "postgresql": "16.15",
+  "dotnet_sdk": "10.0.111",
+  "host_transport": "pinned HTTPS actual TrialHostFactory",
+  "migration_count": 23,
+  "module_login_count": 6,
+  "report_sha256": "af63271f32ff52a951fe1cd2faf464a6c449c0b047f6742e9f1c80459c1f00a5",
+  "dotnet_suites": [
+    {
+      "suite": "AssetLink",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "trx_sha256": "4e0c66f0cd91ebf45493c87dee0209be4e01ef1078b7a7d63791e3188f199e86"
+    },
+    {
+      "suite": "Build",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "trx_sha256": "420641f9a5cad5a9220f32f03dbd015a93850aa07d52684de058007beb89d376"
+    },
+    {
+      "suite": "Packaging",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "trx_sha256": "7e6936fdfbd9d0fec80b5c0140a29f7c77f3ca5048707a3c90f6bda333615468"
+    },
+    {
+      "suite": "Preview",
+      "passed": 111,
+      "failed": 0,
+      "skipped": 24,
+      "trx_sha256": "fe86ff60c7f2a03ed90772818567cc17edfd082e52045625e54139b159f36687"
+    },
+    {
+      "suite": "ReadCore",
+      "passed": 57,
+      "failed": 0,
+      "skipped": 25,
+      "trx_sha256": "73e3c353e0ed77027bf84ab582b7e6fbf4896718a92c8731b7463486533bd586"
+    },
+    {
+      "suite": "TaskHealth",
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "trx_sha256": "d33321805729a9d57bd6b4d5f42d8ffaeafeddf207fada59f414177c808f16a4"
+    },
+    {
+      "suite": "TransferOperation",
+      "passed": 64,
+      "failed": 0,
+      "skipped": 0,
+      "trx_sha256": "d0a96c662e05f08ee49579348c12c7153fd4792f151cdabbbb19be82646d9505"
+    },
+    {
+      "suite": "WebGateway",
+      "passed": 104,
+      "failed": 0,
+      "skipped": 4,
+      "trx_sha256": "3260c1da50597360372cda101407b68a2b81d71f6d4f0f085abdfcf04fff6df3"
+    }
+  ]
+}
