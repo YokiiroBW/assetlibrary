@@ -1,0 +1,67 @@
+{
+  "task_id": "TS-062",
+  "title": "资产只读服务身份最小接入方案",
+  "status": "ready_for_review",
+  "owner": "AssetLibrary TS062 planning worker",
+  "branch": "work/ts-062",
+  "worktree": "C:/YOKI/Codex/tianshu-peiban-bot/worktrees/TS-062/assetlibrary",
+  "commit": "Resolve final HEAD from coordinator delivery; baseline 555f337271c3b8690d96a4a5a72d796d1c0a7536",
+  "changed_files": [
+    ".codex/tasks/TS-062.md",
+    ".codex/handoffs/TS-062/summary.md",
+    ".codex/handoffs/TS-062/result.json",
+    ".codex/handoffs/TS-062/tests.md",
+    ".codex/handoffs/TS-062/port-evidence.json",
+    "docs/handoffs/TS-062.md",
+    "docs/integrations/tianshu/service-read-plan.md",
+    "docs/integrations/tianshu/CCP-TS062-service-read.md",
+    "tests/integration/tianshu/TS062.md",
+    "tests/integration/tianshu/verify_service_read.py"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "report": "tests.md",
+    "repository": "passed; Alpha blocked",
+    "locked_restore": "passed",
+    "release_build": "passed; zero warnings/errors",
+    "http": "TS060 evidence inherited, input unchanged; not rerun",
+    "service_identity_http": "not implemented",
+    "platform": "not connected"
+  },
+  "risks": [
+    "CCP and exact implementation ownership require coordinator adjudication.",
+    "Later implementation needs credential persistence and LibraryStorage-owned permission management migrations; this task adds none.",
+    "In-flight transaction snapshots may complete after revocation; later queries must reauthorize.",
+    "No service identity HTTP, real platform integration, 500k scale, NAS, deduplication, classification or publishing acceptance."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/TS-062/summary.md",
+  "architecture_review": {
+    "module": "AssetLibrary integration planning and isolated public-port verification",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "ReadOnlyBrowseService and IAuthorizedReadModelQuery",
+      "ReadOnlyAssetLinkProtocol and existing SDK/control shapes",
+      "authenticated_principal and library_permission with per-query authorization",
+      "Existing public-port test classes and unchanged TS060 HTTP evidence"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "No production changes or database access; proposal requires LibraryStorage-owned public grant port instead of cross-module table writes.",
+      "Platform a94d345 public docs inspected using git show only."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": ["Unapproved CCP only; no formal contracts, generated SDK or migrations modified."],
+    "architecture_tests": [
+      "verify_repository passed, including architecture, migration manifest and SDK checks",
+      "8 real Application/AssetLink tests with explicit query/principal doubles passed",
+      "Final diff scope and whitespace review"
+    ],
+    "technical_debt": []
+  }
+}
