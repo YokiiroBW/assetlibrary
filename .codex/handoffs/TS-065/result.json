@@ -1,0 +1,90 @@
+{
+  "task_id": "TS-065",
+  "title": "AssetLibrary read-only duplicate candidate analysis and curation preview",
+  "status": "ready_for_review",
+  "owner": "AssetLibrary TS-065 worker",
+  "branch": "work/ts-065",
+  "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-065\\assetlibrary",
+  "baseline": "ff8e8a1fc405870d5a82e44cc344c9e083df059a",
+  "commit_note": "Implementation and documentation commits; the delivery HEAD is recorded in .runtime/dsh-delivery/delivery.json.",
+  "changed_files": [
+    "services/core-server/Modules/AssetIdentity/Contracts/DedupContracts.cs",
+    "services/core-server/Modules/AssetIdentity/Contracts/DedupPorts.cs",
+    "services/core-server/Modules/AssetIdentity/Domain/DedupAnalysisEntry.cs",
+    "services/core-server/Modules/AssetIdentity/Domain/DedupAnalysisPolicy.cs",
+    "services/core-server/Modules/AssetIdentity/Domain/DedupPlanPolicy.cs",
+    "services/core-server/Modules/AssetIdentity/Domain/DedupScopePolicy.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupAnalyzer.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupPlanBuilder.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupPlanDigest.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupPlanItemFactory.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupScopeResolver.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupSourceCollector.cs",
+    "services/core-server/Modules/AssetIdentity/Infrastructure/DedupInfrastructure.cs",
+    "services/core-server/Modules/AssetIdentity/Infrastructure/DedupPathGuard.cs",
+    "services/core-server/Modules/AssetIdentity/Infrastructure/DedupReadWindow.cs",
+    "services/core-server/Modules/AssetIdentity/Infrastructure/SystemDedupContentReader.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupEvidenceTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupGlobalUsings.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupPathContractTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupPlanTests.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupScenario.cs",
+    "tests/dotnet/AssetLibrary.ReadCore.Tests/DedupSourceScopeTests.cs",
+    "docs/integrations/tianshu/dedup-readonly-preview.md",
+    "docs/handoffs/TS-065.md",
+    ".codex/handoffs/TS-065/summary.md",
+    ".codex/handoffs/TS-065/result.json",
+    ".codex/handoffs/TS-065/tests.md"
+  ],
+  "changed_contracts": [],
+  "tests": [
+    "dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release --no-build --no-restore: Passed 96, Failed 0, Skipped 25 (pre-existing PostgreSQL/POSIX conditional cases)",
+    "dotnet test ... --filter FullyQualifiedName~Dedup: Passed 44, Failed 0, Skipped 0 (this slice)",
+    "dotnet build services/core-server and tests/dotnet/AssetLibrary.ReadCore.Tests -c Release: succeeded with 0 warnings and 0 errors under TreatWarningsAsErrors",
+    "python -I -B scripts/validate_architecture_baseline.py: passed (566 architecture inputs, 0 issues)",
+    "python -I -B scripts/validate_dotnet_source.py: passed (605 C# files, no duplicated blocks, no sensitive logging)"
+  ],
+  "risks": [
+    "No execution entry point by design: the preview cannot move, copy, rename or delete anything, and production file writing remains owned by OperationTrash/TransferSync and their gates.",
+    "No HTTP endpoint, no TianShu projection and no GatewayAuth permission-contract change; composition-root wiring needs the coordinator to assign module ownership.",
+    "Perceptual/near-duplicate detection, classification and preference ranking are not implemented and stay unavailable, so A11 is not claimed complete.",
+    "50k-asset complexity is argued as bounded (one length pass plus one strong hash per candidate, no pairwise comparison) but has no real-scale run, power-loss or cross-process recovery evidence.",
+    "Verification used a borrowed local .NET SDK 10.0.111 and the existing offline NuGet cache because this machine has no matching SDK and no outbound network; no system or global configuration was changed."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": [
+    "1. Implementation commit (modules plus tests).",
+    "2. Handoff and delivery commit (docs and .codex records)."
+  ],
+  "handoff_summary": "Read-only exact-duplicate candidate analysis and reviewable curation preview for already registered libraries and explicitly isolated inbound sources. Exact byte duplicates require an identical complete strong hash; file names and sizes are never evidence; animations, re-encodings, revisions, sidecars and reparse points stay separate assets; unreachable or unreadable input is reported as an incomplete scan rather than as deletion. No execution entry point, no auto-cleanup, no shared contract, migration, root lock or release-gate change.",
+  "architecture_review": {
+    "module": "AssetIdentity only. Contracts, Domain, Application and Infrastructure each hold their own layer responsibilities; no other module was modified.",
+    "dependency_direction_ok": true,
+    "dependency_notes": [
+      "Contracts <- Domain <- Application <- Infrastructure; Domain references no filesystem, database, network or provider type.",
+      "The dependency on ScanReconciliation internal layers was removed: the architecture gate forbids cross-module internal access and it formed the cycle assetidentity -> scanreconciliation -> assetidentity."
+    ],
+    "reused_existing_logic": [
+      "RelativeAssetPath, LibraryId, CanonicalLibraryRoot, StorageAvailability and Sha256Digest used as published by their owning modules.",
+      "The shared read-only exclusion policy (thumbnail caches, temp files, .part/.partial) is mirrored so both walks hide the same names.",
+      "No scanner, file-operation engine, plan executor or write path was copied."
+    ],
+    "duplicated_logic": [
+      "Only the read-only directory walk is implemented in this module, because depending on another module's internal discovery port is forbidden and would create a module cycle."
+    ],
+    "cross_module_access": "None to internal layers. Only public Contracts-layer types from other modules are referenced.",
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "verify_repository architecture baseline passed with 0 issues after the module was placed under the mandated <Module>/<Layer> layout.",
+      "validate_dotnet_source passed: no duplicated token blocks and no sensitive logging.",
+      "Release build of the core server and the ReadCore test project passed with warnings treated as errors."
+    ],
+    "technical_debt": [
+      "No execution entry point (intentional for this slice); production writing stays with OperationTrash/TransferSync.",
+      "No HTTP gateway or platform projection was added.",
+      "Near-duplicate, classification and preference ranking remain unimplemented and explicitly unavailable."
+    ]
+  }
+}
