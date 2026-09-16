@@ -33,7 +33,7 @@ dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests
   -> Passed! - Failed: 0, Passed: 96, Skipped: 25, Total: 121
 
 dotnet test ... --filter "FullyQualifiedName~Dedup"
-  -> Passed! - Failed: 0, Passed: 44, Skipped: 0, Total: 44     # 本切片新增用例
+  -> Passed! - Failed: 0, Passed: 39, Skipped: 0, Total: 39     # 本切片新增用例
 
 python -I -B scripts/validate_architecture_baseline.py
   -> 通过；Architecture inputs scanned: 566；0 issue
@@ -42,7 +42,7 @@ python -I -B scripts/validate_dotnet_source.py
   -> .NET source policy passed (605 C# files scanned)
 ```
 
-25 项跳过全部是既有条件用例（需要 PostgreSQL 或非 Windows 平台），与本切片无关；本切片的 44 项**无跳过**。
+25 项跳过全部是既有条件用例（需要 PostgreSQL 或非 Windows 平台），与本切片无关；本切片的 39 项**无跳过**。
 
 ## 边界与替身说明
 

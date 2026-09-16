@@ -25,7 +25,7 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release` | 96 通过 / 0 失败 / 25 跳过（既有 PG、POSIX 条件用例）；本切片新增 44 项 |
+| `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release` | 96 通过 / 0 失败 / 25 跳过（既有 PG、POSIX 条件用例）；本切片新增 39 项 |
 | `dotnet build services/core-server + tests/... -c Release` | 成功，0 警告 0 错误 |
 | `python -I -B scripts/validate_architecture_baseline.py` | 通过（566 输入，0 问题） |
 | `python -I -B scripts/validate_dotnet_source.py` | 通过（605 文件） |

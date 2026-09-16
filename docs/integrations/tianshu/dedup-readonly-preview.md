@@ -34,7 +34,7 @@
 
 ## 验证
 
-- `AssetLibrary.ReadCore.Tests`：**96 通过、0 失败、25 跳过**（跳过项为既有 PostgreSQL/POSIX 条件用例，与本切片无关）。其中本切片新增 **44 项**。
+- `AssetLibrary.ReadCore.Tests`：**96 通过、0 失败、25 跳过**（跳过项为既有 PostgreSQL/POSIX 条件用例，与本切片无关）。其中本切片新增 **39 项**。
 - `python -I -B scripts/validate_architecture_baseline.py`：通过（566 份架构输入）。
 - `python -I -B scripts/validate_dotnet_source.py`：通过（605 个 C# 文件）。
 - 全部为 `.runtime/sandbox-storage` 下的合成隔离验证；未接触真实 NAS、真实库、账号、生产数据库或设备。

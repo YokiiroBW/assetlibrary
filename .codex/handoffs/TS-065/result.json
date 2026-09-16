@@ -39,7 +39,7 @@
   "changed_contracts": [],
   "tests": [
     "dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release --no-build --no-restore: Passed 96, Failed 0, Skipped 25 (pre-existing PostgreSQL/POSIX conditional cases)",
-    "dotnet test ... --filter FullyQualifiedName~Dedup: Passed 44, Failed 0, Skipped 0 (this slice)",
+    "dotnet test ... --filter FullyQualifiedName~Dedup: Passed 39, Failed 0, Skipped 0 (this slice)",
     "dotnet build services/core-server and tests/dotnet/AssetLibrary.ReadCore.Tests -c Release: succeeded with 0 warnings and 0 errors under TreatWarningsAsErrors",
     "python -I -B scripts/validate_architecture_baseline.py: passed (566 architecture inputs, 0 issues)",
     "python -I -B scripts/validate_dotnet_source.py: passed (605 C# files, no duplicated blocks, no sensitive logging)"
