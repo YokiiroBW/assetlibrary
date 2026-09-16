@@ -53,7 +53,7 @@ public sealed class DedupEvidenceTests
             DedupAnalysisFactory.Request(
             [
                 DedupAnalysisFactory.Source(library, "library", DedupSourceRole.RegisteredLibrary),
-                DedupAnalysisFactory.Source(staging, "holding"),
+                DedupAnalysisFactory.Source(staging, "holding", DedupSourceRole.InboundStaging),
             ]));
 
         Assert.AreEqual(1, plan.Statistics.ByteDuplicateGroups);

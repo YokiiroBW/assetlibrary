@@ -52,11 +52,50 @@ public static class DedupScopePolicy
             throw new ArgumentException("Every dedup source needs its own identity.", nameof(sources));
         }
 
-        var accepted = new List<DedupSourceRequest>(sources.Count);
-        var rejected = new List<DedupRejectedSourceRequest>();
+        // Every source is validated against the fixed registered and output roots first, so the
+        // local overlap check below can compare roots only: a root that was refused is neutral
+        // ground and must not be walked, but it must not decide the verdict for another source
+        // either. Without this split the answer would depend on submission order.
+        var inspected = new List<(DedupSourceRequest Source, DedupSourceRejection Rejection)>(sources.Count);
         foreach (var source in sources)
         {
-            var rejection = Inspect(source, accepted, rejected, registeredRoots, managedOutputRoots);
+            inspected.Add((source, InspectAgainstRoots(source, registeredRoots, managedOutputRoots)));
+        }
+
+        // A directory submitted both as a managed library and as exactly the same isolated inbound
+        // staging root is a role contradiction, not a race: the registered side is refused as well,
+        // so the verdict does not depend on which of the two happened to be listed first. A merely
+        // nested staging directory is not a contradiction; it is refused on its own rule below.
+        for (var index = 0; index < inspected.Count; index++)
+        {
+            var entry = inspected[index];
+            if (entry.Rejection == DedupSourceRejection.None
+                && entry.Source.Role == DedupSourceRole.RegisteredLibrary
+                && inspected.Any(other =>
+                    other.Source.Role == DedupSourceRole.InboundStaging
+                    && IsWithin(entry.Source.Root, other.Source.Root)
+                    && IsWithin(other.Source.Root, entry.Source.Root)))
+            {
+                inspected[index] = entry with { Rejection = DedupSourceRejection.ManagedLibraryOverlap };
+            }
+        }
+
+        var accepted = new List<DedupSourceRequest>(sources.Count);
+        var rejected = new List<DedupRejectedSourceRequest>();
+        foreach (var entry in inspected)
+        {
+            var source = entry.Source;
+            var rejection = entry.Rejection;
+
+            // A source already refused on its own rule is neutral ground: it is not walked, so it
+            // must not withdraw a valid sibling either. Only two otherwise-acceptable sources that
+            // share physical ground are a duplicate registration.
+            if (rejection == DedupSourceRejection.None
+                && accepted.Any(candidate => Overlaps(source.Root, candidate.Root)))
+            {
+                rejection = DedupSourceRejection.DuplicateSourceRegistration;
+            }
+
             if (rejection == DedupSourceRejection.None)
             {
                 accepted.Add(source);
@@ -69,10 +108,8 @@ public static class DedupScopePolicy
         return new DedupAnalysisScope(accepted, rejected);
     }
 
-    private static DedupSourceRejection Inspect(
+    private static DedupSourceRejection InspectAgainstRoots(
         DedupSourceRequest source,
-        List<DedupSourceRequest> accepted,
-        List<DedupRejectedSourceRequest> rejected,
         IReadOnlyList<CanonicalLibraryRoot> registeredRoots,
         IReadOnlyList<CanonicalLibraryRoot> managedOutputRoots)
     {
@@ -81,25 +118,19 @@ public static class DedupScopePolicy
             return DedupSourceRejection.SourceRootInvalid;
         }
 
-        // The same physical directory, or a directory that contains one already submitted, would be
-        // walked twice and every file counted twice. The reverse relation (a parent submitted after
-        // its child) is caught when that parent is inspected.
-        if (accepted.Any(candidate => IsWithin(source.Root, candidate.Root))
-            || rejected.Any(candidate => IsWithin(source.Root, candidate.Source.Root)))
-        {
-            return DedupSourceRejection.DuplicateSourceRegistration;
-        }
-
-        if (source.Role == DedupSourceRole.RegisteredLibrary
-            && !registeredRoots.Any(root => IsWithin(source.Root, root)))
+        if (source.Role == DedupSourceRole.RegisteredLibrary)
         {
             // A registered source must be one of this installation's own roots; an unknown library
             // id is not a licence to read an arbitrary directory.
-            return DedupSourceRejection.RegisteredLibraryUnknown;
+            if (!registeredRoots.Any(root => IsWithin(source.Root, root)))
+            {
+                return DedupSourceRejection.RegisteredLibraryUnknown;
+            }
         }
-
-        if (IsNestedInRegisteredLibrary(source, registeredRoots))
+        else if (registeredRoots.Any(managed => Overlaps(source.Root, managed)))
         {
+            // Inbound staging must be its own isolated directory. Being the library root itself, or
+            // its parent, or anything inside it, would re-import managed content as fresh inbound.
             return DedupSourceRejection.ManagedLibraryOverlap;
         }
 
@@ -110,18 +141,6 @@ public static class DedupScopePolicy
 
         return DedupSourceRejection.None;
     }
-
-    /// <summary>
-    /// True when an inbound source sits inside a managed library root instead of being that root.
-    /// Reading the library root itself is the normal in-place curation case; reading a directory
-    /// nested in it is what would make a managed library look like fresh inbound content.
-    /// </summary>
-    private static bool IsNestedInRegisteredLibrary(
-        DedupSourceRequest source,
-        IReadOnlyList<CanonicalLibraryRoot> registeredRoots) =>
-        source.Role == DedupSourceRole.InboundStaging
-        && registeredRoots.Any(managed =>
-            !IsWithin(managed, source.Root) && IsWithin(source.Root, managed));
 
     private static bool IsPhysicallyUsable(CanonicalLibraryRoot root)
     {

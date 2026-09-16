@@ -241,8 +241,10 @@ public sealed class SystemDedupFileDiscovery : IDedupFileDiscovery
 
 
 /// <summary>
-/// Probes whether a source can be read right now. A reparse point or a missing directory is
-/// reported as offline instead of being treated as an empty source.
+/// Probes whether a source can be reached at all. A missing or unreachable directory is reported as
+/// offline instead of being treated as an empty source. A reparse point is deliberately left to the
+/// walk, which owns the ancestry check and names the refusal precisely rather than reporting a
+/// handleable directory as unavailable.
 /// </summary>
 public sealed class SystemDedupSourceAvailability : IDedupSourceAvailability
 {
@@ -253,16 +255,8 @@ public sealed class SystemDedupSourceAvailability : IDedupSourceAvailability
         cancellationToken.ThrowIfCancellationRequested();
         try
         {
-            var path = root.Value;
-            if (!Directory.Exists(path))
-            {
-                return ValueTask.FromResult(StorageAvailability.Offline);
-            }
-
-            var attributes = File.GetAttributes(path);
-            var usable = (attributes & FileAttributes.Directory) != 0
-                && (attributes & FileAttributes.ReparsePoint) == 0;
-            return ValueTask.FromResult(usable ? StorageAvailability.Online : StorageAvailability.Offline);
+            return ValueTask.FromResult(
+                Directory.Exists(root.Value) ? StorageAvailability.Online : StorageAvailability.Offline);
         }
         catch (UnauthorizedAccessException)
         {

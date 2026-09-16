@@ -377,6 +377,13 @@ public enum DedupRecountReason
     SourceRejected = 6,
     NewFileObserved = 7,
     ScanIncomplete = 8,
+
+    /// <summary>
+    /// Content could not be verified on either side of the comparison, for example a file whose
+    /// length had no peer and was therefore never read. The plan stays current only while every
+    /// recorded metadata observation matches; nothing here is a content guarantee.
+    /// </summary>
+    ContentUnverified = 9,
 }
 
 public sealed record DedupRecountRequest(

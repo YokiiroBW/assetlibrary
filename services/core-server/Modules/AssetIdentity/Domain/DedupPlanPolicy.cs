@@ -41,34 +41,17 @@ public static class DedupPlanPolicy
 
         foreach (var item in plan.Items)
         {
-            if (item.State == DedupPlanItemState.NotAnalyzed)
-            {
-                // The earlier preview never read this file, so nothing about it can have changed
-                // and nothing about it may be claimed.
-                continue;
-            }
-
+            // Every recorded observation is compared, including files the earlier preview never read
+            // (a unique length, an excluded name or an exhausted budget). Those carry no content
+            // guarantee, but their path, length and write time were recorded and must still match,
+            // otherwise the stored preview no longer describes these sources.
             if (!observed.TryGetValue(item.SourceIdentity, out var fresh))
             {
                 disappeared.Add(item.SourceIdentity);
                 continue;
             }
 
-            switch (fresh.State)
-            {
-                case DedupPlanItemState.Unreadable:
-                    unreadable.Add(item.SourceIdentity);
-                    reasons.Add(ToReason(fresh.Failure));
-                    break;
-                case DedupPlanItemState.NotAnalyzed:
-                    // Still present but no longer covered by the analysis budget or by discovery.
-                    reasons.Add(DedupRecountReason.ScanIncomplete);
-                    changed.Add(item.SourceIdentity);
-                    break;
-                default:
-                    DetectChange(item, fresh, reasons, changed);
-                    break;
-            }
+            Compare(item, fresh, reasons, changed, unreadable);
         }
 
         var newItems = current.Items
@@ -80,7 +63,7 @@ public static class DedupPlanPolicy
             reasons.Add(DedupRecountReason.NewFileObserved);
         }
 
-        var status = SelectStatus(current, reasons, changed, disappeared, unreadable);
+        var status = SelectStatus(plan, current, reasons, changed, disappeared, unreadable);
         return new DedupRecountResult(
             plan.AnalysisId,
             status,
@@ -107,21 +90,83 @@ public static class DedupPlanPolicy
             : new RelativeAssetPath(sourceIdentity[(separator + 1)..]);
     }
 
+    /// <summary>
+    /// Compares one recorded item against the same item as the fresh read observed it. Content is
+    /// only compared when both sides actually hold content evidence; otherwise the metadata that was
+    /// recorded decides, and the result says the content is still unverified.
+    /// </summary>
+    private static void Compare(
+        DedupPlanItem previous,
+        DedupPlanItem fresh,
+        SortedSet<DedupRecountReason> reasons,
+        SortedSet<string> changed,
+        SortedSet<string> unreadable)
+    {
+        if (fresh.State == DedupPlanItemState.Unreadable)
+        {
+            unreadable.Add(previous.SourceIdentity);
+            reasons.Add(ToReason(fresh.Failure));
+            return;
+        }
+
+        if (fresh.State == DedupPlanItemState.NotAnalyzed)
+        {
+            // Still present, but the fresh read spent no budget on it. Nothing about its content is
+            // claimed, and the recorded metadata decides whether the stored observation still holds.
+            if (!string.Equals(BuildMetadataKey(previous), BuildMetadataKey(fresh), StringComparison.Ordinal))
+            {
+                reasons.Add(DedupRecountReason.MetadataChanged);
+                changed.Add(previous.SourceIdentity);
+            }
+            else
+            {
+                reasons.Add(DedupRecountReason.ContentUnverified);
+            }
+
+            return;
+        }
+
+        if (previous.State == DedupPlanItemState.Unreadable)
+        {
+            // The file is readable now although it was not before: new evidence, not a stale plan.
+            reasons.Add(DedupRecountReason.ContentChanged);
+            changed.Add(previous.SourceIdentity);
+            return;
+        }
+
+        if (previous.State == DedupPlanItemState.NotAnalyzed)
+        {
+            // Content that was never verified cannot be compared, so the plan must not be called
+            // current. Any recorded metadata difference is a change; otherwise it is simply still
+            // unverifiable against the earlier observation.
+            if (!string.Equals(BuildMetadataKey(previous), BuildMetadataKey(fresh), StringComparison.Ordinal))
+            {
+                reasons.Add(DedupRecountReason.MetadataChanged);
+                changed.Add(previous.SourceIdentity);
+            }
+            else
+            {
+                reasons.Add(DedupRecountReason.ContentUnverified);
+            }
+
+            return;
+        }
+
+        DetectChange(previous, fresh, reasons, changed);
+    }
+
     private static void DetectChange(
         DedupPlanItem previous,
         DedupPlanItem fresh,
         SortedSet<DedupRecountReason> reasons,
         SortedSet<string> changed)
     {
-        var previousKey = BuildIdentityKey(previous);
-        var freshKey = BuildIdentityKey(fresh);
-        if (string.Equals(previousKey, freshKey, StringComparison.Ordinal))
+        if (string.Equals(BuildContentKey(previous), BuildContentKey(fresh), StringComparison.Ordinal))
         {
             return;
         }
 
-        var contentChanged = previous.Length != fresh.Length
-            || !string.Equals(previous.Sha256, fresh.Sha256, StringComparison.Ordinal)
+        var contentChanged = !string.Equals(previous.Sha256, fresh.Sha256, StringComparison.Ordinal)
             || previous.StructureHash != fresh.StructureHash;
         reasons.Add(contentChanged
             ? DedupRecountReason.ContentChanged
@@ -129,13 +174,25 @@ public static class DedupPlanPolicy
         changed.Add(previous.SourceIdentity);
     }
 
-    private static string BuildIdentityKey(DedupPlanItem item) =>
+    /// <summary>Every content fact this plan recorded for one item.</summary>
+    private static string BuildContentKey(DedupPlanItem item) =>
+        string.Join(
+            '|',
+            BuildMetadataKey(item),
+            item.Sha256 ?? "unhashed",
+            item.StructureHash);
+
+    /// <summary>
+    /// The facts that are known even when content was never read. A difference here is a real
+    /// difference even for a file this preview could not verify.
+    /// </summary>
+    private static string BuildMetadataKey(DedupPlanItem item) =>
         string.Join(
             '|',
             item.Length,
-            item.Sha256 ?? "none",
-            item.StructureHash,
-            item.LastWriteTimeUtc.UtcTicks);
+            item.LastWriteTimeUtc.UtcTicks,
+            item.ReadState.ToString(),
+            item.SkipReason.ToString());
 
     private static DedupRecountReason ToReason(DedupReadFailure failure) => failure switch
     {
@@ -146,6 +203,7 @@ public static class DedupPlanPolicy
     };
 
     private static DedupRecountStatus SelectStatus(
+        DedupCurationPlan plan,
         DedupCurationPlan current,
         SortedSet<DedupRecountReason> reasons,
         SortedSet<string> changed,
@@ -187,10 +245,44 @@ public static class DedupPlanPolicy
             return DedupRecountStatus.NewContent;
         }
 
-        // The plan digest covers every recorded observation, so an identical digest is a stronger
-        // statement than the per-item loop alone and is used as the final tie-break.
-        return reasons.Count == 0
-            ? DedupRecountStatus.Identical
-            : DedupRecountStatus.SourceChanged;
+        // Unverified content is a statement about what this comparison could not prove, not a
+        // difference: a file that was never read and did not change keeps the plan current.
+        var differences = reasons.Where(reason => reason != DedupRecountReason.ContentUnverified).ToArray();
+        var digestMatches = string.Equals(plan.PlanDigest, current.PlanDigest, StringComparison.Ordinal);
+        if (differences.Length > 0 || !digestMatches || !ContentEvidenceStillMatches(plan, current))
+        {
+            return DedupRecountStatus.SourceChanged;
+        }
+
+        return DedupRecountStatus.Identical;
+    }
+
+    /// <summary>
+    /// True when every item the stored plan recorded a content hash for still carries that same hash
+    /// in the fresh read. This is the explicit proof the review asked for: a plan may not be called
+    /// current unless the content facts it states are the content facts the sources still have.
+    /// </summary>
+    private static bool ContentEvidenceStillMatches(DedupCurationPlan plan, DedupCurationPlan current)
+    {
+        if (plan.Items.Count != current.Items.Count)
+        {
+            return false;
+        }
+
+        var observed = current.Items.ToDictionary(item => item.SourceIdentity, StringComparer.Ordinal);
+        foreach (var item in plan.Items)
+        {
+            if (!observed.TryGetValue(item.SourceIdentity, out var fresh))
+            {
+                return false;
+            }
+
+            if (!string.Equals(BuildContentKey(item), BuildContentKey(fresh), StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

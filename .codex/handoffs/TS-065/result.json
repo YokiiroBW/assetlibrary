@@ -38,17 +38,23 @@
   ],
   "changed_contracts": [],
   "tests": [
-    "dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release --no-build --no-restore: Passed 96, Failed 0, Skipped 25 (pre-existing PostgreSQL/POSIX conditional cases)",
-    "dotnet test ... --filter FullyQualifiedName~Dedup: Passed 39, Failed 0, Skipped 0 (this slice)",
+    "dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release --no-build --no-restore: Passed 106, Failed 0, Skipped 25 (pre-existing PostgreSQL/POSIX conditional cases)",
+    "dotnet test ... --filter FullyQualifiedName~Dedup: Passed 49, Failed 0, Skipped 0 (this slice)","python -I -B scripts/verify_repository.py: passed, exit 0 (566 architecture inputs, 607 C# files, 21 migration tests, 14 architecture rule tests)","Coordinator reproduction probe rerun against the rebuilt assembly: all five previously failing lines now report the fixed outcome (SourceChanged/Disappeared and accepted=1 rejected=1 or accepted=0 rejected=1)",
     "dotnet build services/core-server and tests/dotnet/AssetLibrary.ReadCore.Tests -c Release: succeeded with 0 warnings and 0 errors under TreatWarningsAsErrors",
     "python -I -B scripts/validate_architecture_baseline.py: passed (566 architecture inputs, 0 issues)",
     "python -I -B scripts/validate_dotnet_source.py: passed (605 C# files, no duplicated blocks, no sensitive logging)"
+  ],
+  "review_fixes": [
+    "Recount now compares every recorded observation, including items the earlier preview never read: their length, write time, read state and skip reason must still match, and the digest binds length, complete strong hash, structure hash and write time.",
+    "Content that was never hashed is reported as ContentUnverified instead of being treated as either a change or a content guarantee.",
+    "Overlap validation is symmetric: sources are first judged against the fixed registered and output roots, then against every other submitted source in both directions, so child-then-parent, parent-then-child, the same directory twice, an inbound root equal to or containing a registered library, and output backflow are all refused regardless of order. A registered library root remains analysable in place.",
+    "Coordinator reproduction probe rerun against the rebuilt assembly: unique_changed SourceChanged/current=False, unique_deleted Disappeared/removed=1, child_then_parent accepted=1 rejected=1, inbound_parent_of_library accepted=0 rejected=1, inbound_same_as_library accepted=0 rejected=1."
   ],
   "risks": [
     "No execution entry point by design: the preview cannot move, copy, rename or delete anything, and production file writing remains owned by OperationTrash/TransferSync and their gates.",
     "No HTTP endpoint, no TianShu projection and no GatewayAuth permission-contract change; composition-root wiring needs the coordinator to assign module ownership.",
     "Perceptual/near-duplicate detection, classification and preference ranking are not implemented and stay unavailable, so A11 is not claimed complete.",
-    "50k-asset complexity is argued as bounded (one length pass plus one strong hash per candidate, no pairwise comparison) but has no real-scale run, power-loss or cross-process recovery evidence.",
+    "Complexity is bounded only by static argument (one length pass plus one strong hash per candidate, no pairwise comparison); there is no 500k or near-scale run, no measured throughput, memory or duration, and no power-loss or cross-process recovery evidence.",
     "Verification used a borrowed local .NET SDK 10.0.111 and the existing offline NuGet cache because this machine has no matching SDK and no outbound network; no system or global configuration was changed."
   ],
   "blocked_by": [],

@@ -30,19 +30,19 @@ dotnet build tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Test
 
 dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj \
     -c Release --no-build --no-restore
-  -> Passed! - Failed: 0, Passed: 96, Skipped: 25, Total: 121
+  -> Passed! - Failed: 0, Passed: 106, Skipped: 25, Total: 131
 
 dotnet test ... --filter "FullyQualifiedName~Dedup"
-  -> Passed! - Failed: 0, Passed: 39, Skipped: 0, Total: 39     # 本切片新增用例
+  -> Passed! - Failed: 0, Passed: 49, Skipped: 0, Total: 49     # 本切片用例
 
 python -I -B scripts/validate_architecture_baseline.py
   -> 通过；Architecture inputs scanned: 566；0 issue
 
 python -I -B scripts/validate_dotnet_source.py
-  -> .NET source policy passed (605 C# files scanned)
+  -> .NET source policy passed (607 C# files scanned)
 ```
 
-25 项跳过全部是既有条件用例（需要 PostgreSQL 或非 Windows 平台），与本切片无关；本切片的 39 项**无跳过**。
+25 项跳过全部是既有条件用例（需要 PostgreSQL 或非 Windows 平台），与本切片无关；本切片的 49 项**无跳过**。
 
 ## 边界与替身说明
 
@@ -57,3 +57,20 @@ python -I -B scripts/validate_dotnet_source.py
 2. `DedupPlanPolicy.Recount` 把 `根|相对路径` 整体当资产路径构造 → 已改为只取相对部分。
 3. 计划摘要曾包含每次运行的 `AnalysisId`/`LibraryId`，使同一批文件的两次预览摘要必然不同 → 已改为只覆盖本次观察证据。
 4. 自有只读遍历曾把目录当文件上报、且未检查祖先重解析点 → 已按端口语义只上报文件，并在遍历前检查整条祖先链。
+
+## 验收返修复验（第二轮）
+
+协调者探针的原始五条复现行，在重建后的程序集上运行副本 `.runtime/review-repro/`（隔离合成目录）结果：
+
+```
+unique_changed: status=SourceChanged current=False digestEqual=False length=6->18
+unique_deleted: status=Disappeared current=False digestEqual=False removed=1
+child_then_parent: accepted=1 rejected=1
+inbound_parent_of_library: accepted=0 rejected=1
+inbound_same_as_library: accepted=0 rejected=1
+```
+
+对应新增的正式断言：
+
+- `DedupRecountRegressionTests`：独长文件改大小 / 同长改写 / 仅写入时间变化 / 被删除 / 已哈希单文件同长改写 / 混合组同时改写与删除 / 未读取内容如实标注未验证 —— 每条同时断言状态、`PlanStillCurrent`、摘要是否一致、变更/消失/新增集合与新计划统计。
+- `DedupOverlapTests`：子先父后与父先子后、同一目录两次提交、inbound 等于或包含已登记库、输出回流在任一顺序 —— 全部双向断言；并保留「已登记库根可原地分析」这一合法用例。

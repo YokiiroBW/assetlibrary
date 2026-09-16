@@ -118,6 +118,16 @@ internal sealed class DedupScenario : IDisposable
         File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddMinutes(1));
     }
 
+    /// <summary>
+    /// Moves a file's write time forward without touching its bytes. This is the case a content
+    /// hash cannot see, so it proves the recorded metadata is compared on its own.
+    /// </summary>
+    public void Touch(string relativePath)
+    {
+        var path = EnsureInside(relativePath);
+        File.SetLastWriteTimeUtc(path, File.GetLastWriteTimeUtc(path).AddMinutes(1));
+    }
+
     public void Delete(string relativePath) => File.Delete(EnsureInside(relativePath));
 
     /// <summary>Runs one analysis against this scenario with the real read-only adapters.</summary>
@@ -208,10 +218,15 @@ internal static class DedupAnalysisFactory
         CancellationToken cancellationToken = default) =>
         Create(scenario).RecountAsync(request, cancellationToken);
 
+    /// <summary>
+    /// Builds a source request for a library root that this installation has registered. The role
+    /// follows the root: reading a registered root is the normal in-place curation case, while only
+    /// a directory that is not a managed root may be submitted as isolated inbound staging.
+    /// </summary>
     public static DedupSourceRequest Source(
         CanonicalLibraryRoot root,
         string displayName,
-        DedupSourceRole role = DedupSourceRole.InboundStaging,
+        DedupSourceRole role = DedupSourceRole.RegisteredLibrary,
         LibraryId? libraryId = null) =>
         new(
             DedupSourceId.New(),

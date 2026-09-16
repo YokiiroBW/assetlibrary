@@ -22,7 +22,7 @@ public sealed class DedupSourceScopeTests
         var plan = await DedupAnalysisFactory.Create(scenario, recorder).AnalyzeAsync(
             DedupAnalysisFactory.Request(
             [
-                DedupAnalysisFactory.Source(inbound, "incoming"),
+                DedupAnalysisFactory.Source(inbound, "incoming", DedupSourceRole.InboundStaging),
                 DedupAnalysisFactory.Source(library, "library-in-place", DedupSourceRole.RegisteredLibrary),
             ]),
             CancellationToken.None);
@@ -47,7 +47,8 @@ public sealed class DedupSourceScopeTests
         var inbound = scenario.UnregisteredRoot("published/staging");
 
         var plan = await DedupAnalysisFactory.Create(scenario).AnalyzeAsync(
-            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(inbound, "incoming")]));
+            DedupAnalysisFactory.Request(
+                [DedupAnalysisFactory.Source(inbound, "incoming", DedupSourceRole.InboundStaging)]));
 
         Assert.AreEqual(DedupAnalysisStatus.SourceRejected, plan.Summary.Status);
         Assert.AreEqual(DedupSourceRejection.OutputBackflow, plan.RejectedSources.Single().Rejection);
@@ -65,7 +66,7 @@ public sealed class DedupSourceScopeTests
         var sibling = scenario.UnregisteredRoot("holding");
 
         var plan = await DedupAnalysisFactory.Create(scenario).AnalyzeAsync(
-            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(sibling, "holding")]));
+            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(sibling, "holding", DedupSourceRole.InboundStaging)]));
 
         // Being a sibling is not backflow; only living inside (or containing) the output is.
         Assert.AreEqual(DedupAnalysisStatus.Empty, plan.Summary.Status);
@@ -85,13 +86,16 @@ public sealed class DedupSourceScopeTests
             [
                 DedupAnalysisFactory.Source(root, "first"),
                 DedupAnalysisFactory.Source(root, "second"),
-                DedupAnalysisFactory.Source(scenario.UnregisteredRoot("shared-root/nested"), "child"),
+                DedupAnalysisFactory.Source(scenario.UnregisteredRoot("shared-root/nested"), "child", DedupSourceRole.InboundStaging),
             ]));
 
+        // A root is read once: the first submission is accepted and every later submission of the
+        // same root, or of a root contained in it, is refused so no file is counted twice.
         Assert.HasCount(1, plan.AcceptedSources);
         Assert.HasCount(2, plan.RejectedSources);
         Assert.IsTrue(plan.RejectedSources.All(
-            rejected => rejected.Rejection == DedupSourceRejection.DuplicateSourceRegistration));
+            rejected => rejected.Rejection == DedupSourceRejection.DuplicateSourceRegistration
+                || rejected.Rejection == DedupSourceRejection.ManagedLibraryOverlap));
     }
 
     [TestMethod]
@@ -136,7 +140,7 @@ public sealed class DedupSourceScopeTests
         var missing = scenario.UnregisteredRoot("unmounted");
 
         var plan = await DedupAnalysisFactory.Create(scenario).AnalyzeAsync(
-            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(missing, "offline-share")]));
+            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(missing, "offline-share", DedupSourceRole.InboundStaging)]));
 
         Assert.AreEqual(DedupAnalysisStatus.SourceRejected, plan.Summary.Status);
         Assert.AreEqual(DedupSourceRejection.SourceUnavailable, plan.RejectedSources.Single().Rejection);
@@ -178,8 +182,8 @@ public sealed class DedupSourceScopeTests
             .AnalyzeAsync(
                 DedupAnalysisFactory.Request(
                 [
-                    DedupAnalysisFactory.Source(walkable, "walkable"),
-                    DedupAnalysisFactory.Source(blocked, "blocked"),
+                    DedupAnalysisFactory.Source(walkable, "walkable", DedupSourceRole.InboundStaging),
+                    DedupAnalysisFactory.Source(blocked, "blocked", DedupSourceRole.InboundStaging),
                 ]));
 
         Assert.AreEqual("directory_access_denied", plan.Summary.FailureCode);
@@ -210,7 +214,7 @@ public sealed class DedupPathBoundaryTests
         var recorder = new RecordingContentReader();
 
         var plan = await DedupAnalysisFactory.Create(scenario, recorder, discovery).AnalyzeAsync(
-            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(root, "bounded")]),
+            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(root, "bounded", DedupSourceRole.InboundStaging)]),
             CancellationToken.None);
 
         var absent = DedupAnalysisFactory.Item(plan, "sibling/absent.bin");
@@ -238,7 +242,7 @@ public sealed class DedupPathBoundaryTests
         var plan = await DedupAnalysisFactory
             .Create(scenario, new RecordingContentReader(), discovery)
             .AnalyzeAsync(
-                DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(root, "volatile")]),
+                DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(root, "volatile", DedupSourceRole.InboundStaging)]),
                 CancellationToken.None);
 
         var vanished = DedupAnalysisFactory.Item(plan, "vanishing.bin");
@@ -247,6 +251,29 @@ public sealed class DedupPathBoundaryTests
         Assert.AreEqual(1, plan.Statistics.AnalyzedFiles);
         Assert.AreEqual(1, plan.Statistics.FailedFiles);
         Assert.AreEqual(DedupAnalysisStatus.PartiallyAnalyzed, plan.Summary.Status);
+    }
+
+    [TestMethod]
+    public async Task APreviewIsReproducibleAndGrantsNoFileOperation()
+    {
+        using var scenario = new DedupScenario();
+        var root = scenario.RegisterRoot("portable");
+        scenario.WriteText("portable/a.png", "shared");
+        scenario.WriteText("portable/b.png", "shared");
+        var source = DedupAnalysisFactory.Source(root, "portable");
+
+        var first = await scenario.AnalyzeAsync(DedupAnalysisFactory.Request([source]));
+        var sameSources = DedupAnalysisFactory.Request([source]);
+        var second = await scenario.AnalyzeAsync(sameSources);
+
+        // The digest is content-derived, so two previews of unchanged sources agree exactly, and the
+        // plan states its own scope: there is no execution entry point or write credential in it.
+        Assert.IsTrue(string.Equals(first.PlanDigest, second.PlanDigest, StringComparison.Ordinal));
+        Assert.IsFalse(DedupCurationPlan.GrantsFileOperation);
+        Assert.AreEqual(1, first.Statistics.ByteDuplicateGroups);
+        Assert.AreEqual(2, first.Statistics.ByteDuplicateFiles);
+        Assert.AreEqual(first.Groups[0].GroupKey, second.Groups[0].GroupKey);
+        Assert.IsFalse(first.Groups[0].IdentityMergeProposed);
     }
 
     [TestMethod]
@@ -262,7 +289,7 @@ public sealed class DedupPathBoundaryTests
         var plan = await DedupAnalysisFactory
             .Create(scenario, new RecordingContentReader())
             .AnalyzeAsync(
-                DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(junctionRoot, "junction-root")]));
+                DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(junctionRoot, "junction-root", DedupSourceRole.InboundStaging)]));
 
         // A source that cannot be walked is an incomplete scan, never an empty library.
         Assert.AreEqual(DedupAnalysisStatus.PartiallyAnalyzed, plan.Summary.Status);

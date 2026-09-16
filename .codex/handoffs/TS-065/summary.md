@@ -25,12 +25,21 @@
 
 | 命令 | 结果 |
 | --- | --- |
-| `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release` | 96 通过 / 0 失败 / 25 跳过（既有 PG、POSIX 条件用例）；本切片新增 39 项 |
+| `dotnet test tests/dotnet/AssetLibrary.ReadCore.Tests -c Release` | 106 通过 / 0 失败 / 25 跳过（既有 PG、POSIX 条件用例）；切片用例全绿 |
 | `dotnet build services/core-server + tests/... -c Release` | 成功，0 警告 0 错误 |
 | `python -I -B scripts/validate_architecture_baseline.py` | 通过（566 输入，0 问题） |
 | `python -I -B scripts/validate_dotnet_source.py` | 通过（605 文件） |
 
 SDK 解析、离线包源与全部原始命令见 `tests.md`。
+
+## 验收返修（第二轮）
+
+协调验收 `d9d4cf4` 裁决 changes_requested，两项 P1 已修复并以正式断言与协调者探针复验：
+
+1. **计划复核覆盖全部已记录事实。** 每条计划记录（含从未读取的独长/超预算文件）的长度、写入时间、读取状态与跳过原因都参与比较；摘要绑定长度、完整强哈希、结构指纹与写入时间；只有无差异、摘要一致且内容证据仍匹配时才返回 `Identical`。未读取项以 `ContentUnverified` 如实标注，既不伪造内容保证也不谎报失效。
+2. **重叠判定对称。** 先按固定登记根/输出根裁决，再对请求内先后出现的源做双向重叠检查；角色矛盾按 `ManagedLibraryOverlap` 拒绝登记侧。子先父后、父先子后、同目录两次提交、inbound 等于/包含已登记库、输出回流在任一顺序下都拒绝，合法原地分析保持可用。
+
+协调者探针副本见 `.runtime/review-repro/`；原始五条复现行现输出 `SourceChanged`/`Disappeared` 与 `accepted=1 rejected=1`/`accepted=0 rejected=1`。
 
 ## 架构审查
 
@@ -49,6 +58,6 @@ SDK 解析、离线包源与全部原始命令见 `tests.md`。
 1. 生产写入仍归 `OperationTrash`/`TransferSync` 及其门禁，本切片不提供执行入口。
 2. 未接入天枢、未新增公网 API、未改 `GatewayAuth` 权限合同。
 3. 近似/同源查重、分类与优选未实现，保持 unavailable。
-4. 50 万资产复杂度有界性已论证但无真实规模跑测；无断电/跨进程恢复证据。
+4. 复杂度有界性**仅为静态论证**；本轮无 50 万或任何接近规模的跑测，无吞吐/内存/耗时实测，亦无断电/跨进程恢复证据。
 
 **无 BLOCKED 项。** 合同缺口（执行入口、平台身份与投影）属于卡明确排除范围，已记录为后续任务而非阻断。

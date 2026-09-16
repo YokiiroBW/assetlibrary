@@ -89,6 +89,9 @@ public static class DedupPlanDigest
 
         foreach (var item in items.OrderBy(candidate => candidate.SourceIdentity, StringComparer.Ordinal))
         {
+            // Every fact this preview recorded about the file is bound into the digest, including the
+            // length, the complete strong hash, the sampled structure hash and the write time. Only
+            // binding the group key would leave a changed singleton digest-identical to its old self.
             Append(canonical, "item", string.Join(
                 '|',
                 item.SourceIdentity,
@@ -97,6 +100,10 @@ public static class DedupPlanDigest
                 item.Failure.ToString(),
                 item.SkipReason.ToString(),
                 item.Category.ToString(),
+                item.Length.ToString(CultureInfo.InvariantCulture),
+                item.Sha256 ?? "unhashed",
+                item.StructureHash.ToString(CultureInfo.InvariantCulture),
+                item.LastWriteTimeUtc.UtcTicks.ToString(CultureInfo.InvariantCulture),
                 item.GroupKey ?? string.Empty,
                 string.Join(',', item.Relations.OrderBy(value => value).Select(value => value.ToString()))));
         }

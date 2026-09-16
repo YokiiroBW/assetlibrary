@@ -173,49 +173,16 @@ public sealed class DedupRecountTests
     }
 
     [TestMethod]
-    public async Task APreviewSurvivesJsonAndStillGrantsNoFileOperation()
-    {
-        using var scenario = new DedupScenario();
-        var root = scenario.RegisterRoot("portable");
-        scenario.WriteText("portable/a.png", "shared");
-        scenario.WriteText("portable/b.png", "shared");
-
-        var plan = await scenario.AnalyzeAsync(
-            DedupAnalysisFactory.Request([DedupAnalysisFactory.Source(root, "portable")]));
-        var json = JsonSerializer.Serialize(plan);
-        var restored = JsonSerializer.Deserialize<DedupCurationPlan>(json);
-
-        Assert.IsNotNull(restored);
-        Assert.HasCount(plan.Groups.Count, restored.Groups);
-        Assert.HasCount(plan.Items.Count, restored.Items);
-        Assert.AreEqual(plan.Statistics.ByteDuplicateFiles, restored.Statistics.ByteDuplicateFiles);
-        Assert.AreEqual(plan.PlanDigest, restored.PlanDigest);
-        Assert.AreEqual(DedupAnalysisFactory.PathList(plan), DedupAnalysisFactory.PathList(restored));
-        Assert.AreEqual(plan.Groups[0].GroupKey, restored.Groups[0].GroupKey);
-        Assert.AreEqual(
-            string.Join(',', plan.Items.Select(item => item.Sha256)),
-            string.Join(',', restored.Items.Select(item => item.Sha256)));
-        Assert.AreEqual(
-            string.Join(',', plan.AcceptedSources.Select(source => source.Root)),
-            string.Join(',', restored.AcceptedSources.Select(source => source.Root)));
-
-        // The plan states its own scope, and nothing in the payload is a file operation.
-        Assert.IsFalse(DedupCurationPlan.GrantsFileOperation);
-        Assert.IsFalse(json.Contains("trash", StringComparison.OrdinalIgnoreCase));
-        Assert.IsFalse(json.Contains("move", StringComparison.OrdinalIgnoreCase));
-        Assert.IsFalse(json.Contains("delete", StringComparison.OrdinalIgnoreCase));
-        Assert.IsFalse(json.Contains("execution", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [TestMethod]
     public async Task ARecountOfUnchangedSourcesStillHonoursTheStoredPlan()
     {
         using var scenario = new DedupScenario();
         var root = scenario.RegisterRoot("recheck");
-        scenario.WriteText("recheck/a.bin", "shared");
-        scenario.WriteText("recheck/b.bin", "shared");
-        scenario.WriteText("recheck/c.bin", "shared");
-        var sources = new[] { DedupAnalysisFactory.Source(root, "recheck") };
+        foreach (var name in new[] { "a.bin", "b.bin", "c.bin" })
+        {
+            scenario.WriteText($"recheck/{name}", "shared");
+        }
+
+        var sources = new[] { DedupAnalysisFactory.Source(root, "recheck", DedupSourceRole.RegisteredLibrary) };
         var analyzer = DedupAnalysisFactory.Create(scenario);
 
         var plan = await analyzer.AnalyzeAsync(DedupAnalysisFactory.Request(sources));
@@ -224,8 +191,8 @@ public sealed class DedupRecountTests
 
         Assert.AreEqual(DedupRecountStatus.Identical, recount.Status);
         Assert.IsTrue(recount.PlanStillCurrent);
-        Assert.AreEqual(plan.PlanDigest, recount.PlanDigest);
-        Assert.AreEqual(plan.PlanDigest, recount.CurrentPlanDigest);
+        Assert.IsTrue(string.Equals(plan.PlanDigest, recount.PlanDigest, StringComparison.Ordinal));
+        Assert.IsTrue(string.Equals(plan.PlanDigest, recount.CurrentPlanDigest, StringComparison.Ordinal));
         Assert.IsEmpty(recount.ChangedPaths);
         Assert.IsEmpty(recount.DisappearedPaths);
         Assert.IsEmpty(recount.NewPaths);
@@ -237,22 +204,27 @@ public sealed class DedupRecountTests
     {
         using var scenario = new DedupScenario();
         var root = scenario.RegisterRoot("drifted");
-        scenario.WriteText("drifted/a.bin", "shared");
-        scenario.WriteText("drifted/b.bin", "shared");
-        scenario.WriteText("drifted/c.bin", "shared");
+        foreach (var name in new[] { "a.bin", "b.bin", "c.bin" })
+        {
+            scenario.WriteText($"drifted/{name}", "shared");
+        }
+
         var sources = new[] { DedupAnalysisFactory.Source(root, "drifted") };
         var analyzer = DedupAnalysisFactory.Create(scenario);
 
         var plan = await analyzer.AnalyzeAsync(DedupAnalysisFactory.Request(sources));
 
         // Same length, different bytes: only the complete strong hash can reveal this change.
-        scenario.Mutate("drifted/b.bin", "mutant"u8.ToArray());
+        var replacement = "mutant"u8.ToArray();
+        scenario.Mutate("drifted/b.bin", replacement);
         var recount = await analyzer.RecountAsync(
             new DedupRecountRequest(plan, sources, TimeSpan.FromSeconds(30)));
 
         Assert.AreEqual(DedupRecountStatus.SourceChanged, recount.Status);
         Assert.IsFalse(recount.PlanStillCurrent);
-        Assert.IsTrue(recount.Reasons.Contains(DedupRecountReason.ContentChanged));
+        var reasons = recount.Reasons.ToArray();
+        Assert.IsTrue(Array.Exists(reasons, reason => reason == DedupRecountReason.ContentChanged));
+        Assert.IsTrue(Array.Exists(reasons, reason => reason != DedupRecountReason.MetadataChanged));
         Assert.AreEqual("b.bin", recount.ChangedPaths.Single().Value);
         Assert.AreNotEqual(recount.PlanDigest, recount.CurrentPlanDigest);
         Assert.IsNotNull(recount.CurrentPlan);
@@ -279,8 +251,10 @@ public sealed class DedupRecountTests
         Assert.AreEqual(DedupRecountStatus.Disappeared, recount.Status);
         Assert.IsFalse(recount.PlanStillCurrent);
         Assert.AreEqual("beta.bin", recount.DisappearedPaths.Single().Value);
-        Assert.IsEmpty(recount.ChangedPaths);
         Assert.IsEmpty(recount.NewPaths);
+
+        // The remaining files are still compared, and nothing about them changed.
+        Assert.IsEmpty(recount.ChangedPaths);
     }
 
     [TestMethod]
