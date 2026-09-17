@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AssetLibrary.Modules.AssetIdentity.Dedup.Contracts;
 using AssetLibrary.Modules.AssetIdentity.Dedup.Jobs;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
@@ -22,6 +23,10 @@ public interface IDedupJobSignal
 /// immutable payload, runs the module's analyzer under a bounded timeout and heartbeat, and files the
 /// report only while the lease it holds is still the current one.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Maintainability",
+    "CA1506:Avoid excessive class coupling",
+    Justification = "A worker for one task type runs two kinds of work under the same lease, fence and cancellation discovery. The count is the union of the two payload shapes, the lease lifecycle they share and the finish vocabulary TaskHealth accepts; splitting it would duplicate the fence rather than reduce coupling.")]
 public sealed class DedupJobWorker(
     DedupJobService service,
     DedupReportRegistry reports,
@@ -30,7 +35,35 @@ public sealed class DedupJobWorker(
     DedupExecutionOptions options,
     TimeProvider timeProvider)
 {
+    private readonly DedupRecheckRunner rechecks = service.Rechecks;
+
+    /// <summary>
+    /// Runs one claimed dedup task. The module's own payload decides which work this attempt is: an
+    /// analysis or a recheck of one report version. Both kinds come from the durable record, so a
+    /// reclaimed task re-runs what was requested rather than whatever the configuration says now.
+    /// </summary>
     public async Task RunAsync(DurableTaskLease lease, DedupResolvedSource source, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+        var payload = DedupJobPayloadReader.Read(lease.Payload);
+        if (payload.Kind == DedupJobPayloadReader.PayloadKind.Recheck)
+        {
+            await RunRecheckAsync(
+                lease,
+                source,
+                payload.Recheck ?? throw new ReadOnlyTrialException("dedup_payload_invalid"),
+                cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        await RunAnalysisAsync(lease, source, payload.Limits, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task RunAnalysisAsync(
+        DurableTaskLease lease,
+        DedupResolvedSource source,
+        DedupAnalysisLimits limits,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(lease);
         ArgumentNullException.ThrowIfNull(source);
@@ -48,7 +81,6 @@ public sealed class DedupJobWorker(
 
             // The ceilings come from the task's own payload, so a reclaimed task re-runs the analysis
             // that was requested rather than whatever ceiling happens to be configured now.
-            var limits = DedupJobPayloadReader.Read(lease.Payload).Limits;
             reports.RecordLimits(lease.TaskId.Value, limits);
             var plan = await service.AnalyzeAsync(source, limits, analysis.Token).ConfigureAwait(false);
 
@@ -56,6 +88,53 @@ public sealed class DedupJobWorker(
             // ran can never leave a reviewable result behind for a later attempt to adopt.
             _ = await heartbeat.CommitAsync(
                 _ => PublishAsync(lease.TaskId.Value, source, limits, plan),
+                cancellationToken).ConfigureAwait(false);
+            await FinishAsync(lease, DurableTaskFinishKind.Succeeded, null, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception error)
+        {
+            var kind = Classify(error, heartbeat);
+            await FinishAsync(lease, kind, Code(kind, error), CancellationToken.None).ConfigureAwait(false);
+        }
+        finally
+        {
+            await work.CancelAsync().ConfigureAwait(false);
+            await monitor.ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Runs one claimed recheck under its own lease. A recheck enumerates and hashes like an analysis,
+    /// so it needs the same heartbeat, the same fence and the same cancellation discovery; what differs
+    /// is the work, which is the module's recheck runner rather than the analyzer.
+    /// </summary>
+    private async Task RunRecheckAsync(
+        DurableTaskLease lease,
+        DedupResolvedSource source,
+        DedupJobPayloadReader.RecheckTarget target,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(lease);
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(target);
+        using var work = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var heartbeat = new DedupLeaseHeartbeat(lease, tasks, guard, options, work);
+        var monitor = heartbeat.MonitorAsync(timeProvider);
+        try
+        {
+            if (!await heartbeat.ConfirmAsync(work.Token).ConfigureAwait(false))
+            {
+                throw new LeaseLostException();
+            }
+
+            // The outcome is filed inside the fenced commit for the same reason a report is: a lease
+            // that expired mid-recheck must not leave an answer behind that a later attempt owns.
+            _ = await heartbeat.CommitAsync(
+                async token =>
+                {
+                    await rechecks.RunAsync(lease.TaskId.Value, source, target, token).ConfigureAwait(false);
+                    return 0;
+                },
                 cancellationToken).ConfigureAwait(false);
             await FinishAsync(lease, DurableTaskFinishKind.Succeeded, null, cancellationToken).ConfigureAwait(false);
         }
@@ -214,25 +293,74 @@ public static class DedupJobPayloadReader
         using var document = System.Text.Json.JsonDocument.Parse(payload.Value);
         var root = document.RootElement;
         if (!Guid.TryParse(root.GetProperty("library_id").GetString(), out var libraryId)
-            || libraryId == Guid.Empty
-            || !Guid.TryParse(root.GetProperty("analysis_id").GetString(), out var analysisId)
+            || libraryId == Guid.Empty)
+        {
+            throw new ReadOnlyTrialException("dedup_payload_invalid");
+        }
+
+        // An older payload without a kind is an analysis: the field was added when the workbench
+        // learned to run a recheck, and a task enqueued before that still means what it meant then.
+        var kind = root.TryGetProperty("kind", out var kindNode) ? kindNode.GetString() : "analysis";
+        return kind switch
+        {
+            "analysis" => Analysis(root, libraryId),
+            "recheck" => Recheck(root, libraryId),
+            _ => throw new ReadOnlyTrialException("dedup_payload_invalid"),
+        };
+    }
+
+    private static Payload Analysis(JsonElement root, Guid libraryId)
+    {
+        if (!Guid.TryParse(root.GetProperty("analysis_id").GetString(), out var analysisId)
             || analysisId == Guid.Empty)
         {
             throw new ReadOnlyTrialException("dedup_payload_invalid");
         }
 
         return new Payload(
+            PayloadKind.Analysis,
             new DedupAnalysisId(analysisId),
             new LibraryId(libraryId),
             new DedupAnalysisLimits(
                 root.GetProperty("maximum_files").GetInt32(),
                 root.GetProperty("maximum_bytes").GetInt64(),
                 root.GetProperty("maximum_file_bytes").GetInt32(),
-                root.GetProperty("hash_concurrency").GetInt32()));
+                root.GetProperty("hash_concurrency").GetInt32()),
+            null);
     }
 
+    private static Payload Recheck(JsonElement root, Guid libraryId)
+    {
+        if (!Guid.TryParse(root.GetProperty("report_task_id").GetString(), out var reportTaskId)
+            || reportTaskId == Guid.Empty
+            || !root.TryGetProperty("generation", out var generation)
+            || generation.GetInt64() <= 0
+            || root.GetProperty("plan_digest") is not { ValueKind: System.Text.Json.JsonValueKind.String } digest
+            || string.IsNullOrEmpty(digest.GetString()))
+        {
+            throw new ReadOnlyTrialException("dedup_payload_invalid");
+        }
+
+        return new Payload(
+            PayloadKind.Recheck,
+            null,
+            new LibraryId(libraryId),
+            DedupAnalysisLimits.Default,
+            new RecheckTarget(reportTaskId, generation.GetInt64(), digest.GetString()!));
+    }
+
+    public enum PayloadKind
+    {
+        Analysis = 0,
+        Recheck = 1,
+    }
+
+    public sealed record RecheckTarget(Guid ReportTaskId, long Generation, string PlanDigest);
+
     public sealed record Payload(
-        DedupAnalysisId AnalysisId,
+        PayloadKind Kind,
+        DedupAnalysisId? AnalysisId,
         LibraryId LibraryId,
-        DedupAnalysisLimits Limits);
+        DedupAnalysisLimits Limits,
+        RecheckTarget? Recheck);
 }

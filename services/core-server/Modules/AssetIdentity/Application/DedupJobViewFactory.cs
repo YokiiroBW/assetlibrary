@@ -49,8 +49,18 @@ internal sealed class DedupJobViewFactory(DedupReportRegistry reports, TimeProvi
             details.CreatedAt,
             details.UpdatedAt,
             details.FailureCode,
-            DedupJobContractText.RetentionBoundary);
+            DedupJobContractText.RetentionBoundary,
+            AcceptedLimits(taskId));
     }
+
+    /// <summary>
+    /// The budget this job was accepted under. It is the same value the durable payload carries and the
+    /// worker runs with, so a page can state the ceiling that is actually enforced instead of repeating
+    /// a number of its own. A job that has not been claimed yet has not recorded its budget, and the
+    /// installation ceiling is then the honest answer.
+    /// </summary>
+    private DedupAnalysisLimits AcceptedLimits(Guid taskId) =>
+        reports.LimitsOf(taskId) ?? DedupAnalysisLimits.Default;
 
     /// <summary>
     /// Facts about a job whose report is gone. A missing report is reported as missing: it is never

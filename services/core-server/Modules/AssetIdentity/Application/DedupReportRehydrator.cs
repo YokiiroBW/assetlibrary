@@ -6,15 +6,21 @@ namespace AssetLibrary.Modules.AssetIdentity.Dedup.Application;
 
 /// <summary>
 /// Rebuilds a retained report into the module's own plan shape, so a recheck runs the published
-/// <see cref="DedupAnalyzer.RecountAsync"/> comparison instead of a second, weaker one.
+/// <see cref="DedupAnalyzer.RecountAsync"/> comparison instead of a second, weaker one. It rebuilds
+/// from the report's complete bounded facts, never from its display sections: a section is a question
+/// a reader asked, and the files that answer no question are exactly the evidence a recheck needs.
 /// </summary>
 public static class DedupReportRehydrator
 {
     public static DedupCurationPlan ToPlan(DedupReport report)
     {
         ArgumentNullException.ThrowIfNull(report);
-        var items = new List<DedupPlanItem>(
-            report.DuplicateItemCount + report.Unverified.Count + report.Unreadable.Count);
+        var items = new List<DedupPlanItem>(report.Facts.Count);
+        foreach (var fact in report.Facts)
+        {
+            items.Add(DedupReportItemMapper.ToPlanItem(fact));
+        }
+
         var groups = new List<DedupPlanGroup>(report.Groups.Count);
         foreach (var group in report.Groups)
         {
@@ -24,11 +30,8 @@ public static class DedupReportRehydrator
                 [.. group.Members.Select(DedupFileIdentity.Of)],
                 AssetRelation.ByteDuplicate,
                 group.IdentityMergeProposed));
-            items.AddRange(group.Members.Select(DedupReportItemMapper.ToPlanItem));
         }
 
-        items.AddRange(report.Unverified.Select(DedupReportItemMapper.ToPlanItem));
-        items.AddRange(report.Unreadable.Select(DedupReportItemMapper.ToPlanItem));
         return new DedupCurationPlan(
             report.AnalysisId,
             report.AnalyzedAt,
@@ -36,10 +39,26 @@ public static class DedupReportRehydrator
             report.AcceptedSources,
             report.RejectedSources,
             items,
-            groups,
+            [.. groups.OrderBy(group => group.GroupKey, StringComparer.Ordinal)],
             report.Statistics,
             report.Summary,
             report.PlanDigest);
+    }
+
+    /// <summary>
+    /// Rebuilds the request a recheck needs. The roots come from the report's own accepted sources, so
+    /// a recheck reads exactly the directories the original analysis was allowed to read instead of
+    /// whatever a caller submits now. The report's truncation is carried across, because a comparison
+    /// against part of a run must state that limit instead of implying the whole run still holds.
+    /// </summary>
+    public static DedupRecountRequest Recount(DedupReport report, TimeSpan timeout)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+        return new DedupRecountRequest(
+            ToPlan(report),
+            SourcesOf(report),
+            timeout,
+            report.Truncated);
     }
 
     /// <summary>

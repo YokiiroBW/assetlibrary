@@ -50,18 +50,38 @@ internal static class DedupFileIdentity
 
 /// <summary>
 /// Decides which section one finding belongs to. It is the only place that classifies findings, so a
-/// file the run never read cannot drift into the verified section through a second code path.
+/// file the run never read cannot drift into the verified section through a second code path, and one
+/// file can never be shown in two sections at once.
 /// </summary>
 internal static class DedupFindingClassifier
 {
     /// <summary>
-    /// True when this run knows the file's length but never proved its bytes: it had no same-length
-    /// peer, or it fell outside the read budget. This is a statement about what was compared.
+    /// The one section a finding is displayed in. The decision is ordered and total: a read failure is
+    /// reported as unreadable even though it also has no hash, because "the run could not read it" is
+    /// the more specific and more actionable fact. Without that order an unreadable file would appear
+    /// in both sections and a recheck built from them would count it twice.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability",
         "CA1506:Avoid excessive class coupling",
         Justification = "A classification rule is stated in its own vocabulary — plan-item state, read state and failure kind — so it lives in one place instead of being inferred at each render site.")]
+    public static DedupFindingKind Section(DedupReportItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        return IsUnreadable(item)
+            ? DedupFindingKind.Unreadable
+            : IsUnverified(item) ? DedupFindingKind.Unverified : DedupFindingKind.Unique;
+    }
+
+    /// <summary>
+    /// True when this run knows the file's length but never proved its bytes: it had no same-length
+    /// peer, or it fell outside the read budget. This is a statement about what was compared.
+    /// The hash test comes last so an unreadable file is claimed by the unreadable rule instead.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Maintainability",
+        "CA1506:Avoid excessive class coupling",
+        Justification = "Same reason as Section: the rule is expressed in the report's own state vocabulary and must stay beside it.")]
     public static bool IsUnverified(DedupReportItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
@@ -77,7 +97,7 @@ internal static class DedupFindingClassifier
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Maintainability",
         "CA1506:Avoid excessive class coupling",
-        Justification = "Same reason as IsUnverified: the rule is expressed in the report's own state vocabulary and must stay beside it.")]
+        Justification = "Same reason as Section: the rule is expressed in the report's own state vocabulary and must stay beside it.")]
     public static bool IsUnreadable(DedupReportItem item)
     {
         ArgumentNullException.ThrowIfNull(item);

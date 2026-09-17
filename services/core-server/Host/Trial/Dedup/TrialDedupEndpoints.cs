@@ -20,8 +20,7 @@ internal static class TrialDedupEndpoints
 {
     private const string Prefix = "/assetlink/v1/dedup/";
 
-    private static IReadOnlyList<string> Operations =>
-        ["start", "status", "results", "cancel", "revalidate", "export"];
+    private static IReadOnlyList<string> Operations => TrialDedupOperation.Names;
 
     public static void Map(IEndpointRouteBuilder endpoints)
     {
@@ -47,6 +46,8 @@ internal static class TrialDedupEndpoints
     Justification = "An HTTP adapter's whole job is to name every operation and its result type once. The count is the size of the authorized surface, and its only calls into the core are the coordinator's public operations.")]
 internal static class TrialDedupOperations
 {
+    public static bool AddressesReport(string operation) => TrialDedupOperation.AddressesReport(operation);
+
     public static async Task<IResult> InvokeAsync(HttpContext context, string operation)
     {
         try
@@ -112,7 +113,10 @@ internal static class TrialDedupOperations
         DedupResolvedSource source,
         CancellationToken cancellationToken)
     {
-        var taskId = request.RequireTaskId();
+        // Only the four operations that address a report require its task id. A start and a cancel
+        // name the job through the library and the caller's operation key instead, which is the whole
+        // reason the key is mandatory: that is what makes a retry replay one job rather than two.
+        var taskId = RequiresTaskId(operation) ? request.RequireTaskId() : Guid.Empty;
         return operation switch
         {
             "start" => TrialDedupJson.Job(await dedup.Jobs.StartAsync(
@@ -132,12 +136,8 @@ internal static class TrialDedupOperations
                 source,
                 request.Operation(source.LibraryId.Value),
                 cancellationToken).ConfigureAwait(false)),
-            "revalidate" => TrialDedupPageJson.Recheck(await dedup.Jobs.RevalidateAsync(
-                source,
-                taskId,
-                request.ExpectedDigest,
-                request.Operation(source.LibraryId.Value),
-                cancellationToken).ConfigureAwait(false)),
+            "revalidate" => await RevalidateAsync(dedup, request, source, taskId, cancellationToken)
+                .ConfigureAwait(false),
             "export" => TrialDedupExportJson.Export(await dedup.Jobs.ExportAsync(
                 source,
                 taskId,
@@ -147,6 +147,37 @@ internal static class TrialDedupOperations
             _ => throw new ReadOnlyTrialException("invalid_request"),
         };
     }
+
+    /// <summary>
+    /// Answers a recheck request. A request that names no recheck task is a request to start one; a
+    /// request that names one is a poll for its outcome. Both answer the same shape, so a page can tell
+    /// "queued" from "finished" instead of guessing from an absent result.
+    /// </summary>
+    private static async ValueTask<JsonObject> RevalidateAsync(
+        TrialDedupServices dedup,
+        TrialDedupRequest request,
+        DedupResolvedSource source,
+        Guid taskId,
+        CancellationToken cancellationToken)
+    {
+        if (request.RecheckTaskId is not { } recheckTaskId)
+        {
+            var accepted = await dedup.Jobs.RevalidateAsync(source, taskId, request.ExpectedDigest, cancellationToken)
+                .ConfigureAwait(false);
+            return TrialDedupPageJson.Recheck(new DedupRecheckState(
+                RecheckRunState.Pending,
+                null,
+                taskId,
+                accepted.RecheckTaskId,
+                source.DisplayName));
+        }
+
+        return TrialDedupPageJson.Recheck(await dedup.Jobs
+            .RecheckStateAsync(source, taskId, recheckTaskId, cancellationToken)
+            .ConfigureAwait(false));
+    }
+
+    private static bool RequiresTaskId(string operation) => TrialDedupOperation.AddressesReport(operation);
 
     /// <summary>
     /// Resolves the library the caller names into the root the composition root authorizes. The value
@@ -178,4 +209,26 @@ internal static class TrialDedupOperations
         "application/json",
         Encoding.UTF8,
         status);
+}
+
+/// <summary>
+/// The per-operation facts of the workbench's wire surface, stated once so the route table and the
+/// request validation cannot disagree about which operations exist or which of them address a report.
+/// </summary>
+internal static class TrialDedupOperation
+{
+    /// <summary>
+    /// Every operation answers POST. A read must never start or change an analysis, so none of them is
+    /// reachable through a method a browser or a crawler issues on its own.
+    /// </summary>
+    public static IReadOnlyList<string> Names { get; } =
+        ["start", "status", "results", "cancel", "revalidate", "export"];
+
+    /// <summary>
+    /// True for the operations that name one retained report version. A start creates that identity
+    /// from the library and the caller's operation key, and a cancel addresses the job the same way,
+    /// so requiring a task id from them would refuse the request the page actually sends.
+    /// </summary>
+    public static bool AddressesReport(string operation) =>
+        operation is "status" or "results" or "revalidate" or "export";
 }

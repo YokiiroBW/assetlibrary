@@ -38,7 +38,38 @@ internal static class TrialDedupJson
             ["failure_code"] = view.FailureCode,
             ["retention_notice"] = view.RetentionBoundary,
             ["read_only_notice"] = DedupJobContractText.ReadOnlyBoundary,
+            ["limits"] = Limits(view.Limits),
         };
+    }
+
+    /// <summary>
+    /// The budget the job was accepted under, sent so the page can state the ceiling that is enforced
+    /// rather than one of its own. It is the same value the durable payload carries.
+    /// </summary>
+    public static JsonObject Limits(DedupAnalysisLimits limits)
+    {
+        ArgumentNullException.ThrowIfNull(limits);
+        return new JsonObject
+        {
+            ["maximum_files"] = limits.MaximumFiles,
+            ["maximum_bytes"] = limits.MaximumBytes,
+            ["maximum_file_bytes"] = limits.MaximumFileBytes,
+            ["hash_concurrency"] = limits.HashConcurrency,
+        };
+    }
+
+    /// <summary>
+    /// The same four facts on the shape an export document already carries, so exporting a plan states
+    /// the ceiling its evidence was produced under in exactly the shape a job reports it.
+    /// </summary>
+    public static JsonObject Limits(DedupAnalysisLimitsSnapshot limits)
+    {
+        ArgumentNullException.ThrowIfNull(limits);
+        return Limits(new DedupAnalysisLimits(
+            limits.MaximumFiles,
+            limits.MaximumBytes,
+            limits.MaximumFileBytes,
+            limits.HashConcurrency));
     }
 
     public static JsonObject Error(int status, string code) => new()

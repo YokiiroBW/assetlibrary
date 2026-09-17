@@ -9,12 +9,14 @@ import type {
   DedupPage,
   DedupPlanStatement,
   DedupRecheck,
+  DedupRecheckState,
   DedupStatistics,
   DedupSummary,
 } from "./dedupTypes";
 
 const states: readonly DedupJobState[] = ["queued", "leased", "succeeded", "failed", "cancelled"];
 const kinds = ["ByteDuplicateGroup", "Unverified", "Unreadable", "Unique"] as const;
+const recheckStates: readonly DedupRecheckState[] = ["pending", "completed", "refused"];
 
 export function decodeJob(value: unknown): DedupJob {
   const body = record(value, "dedup job");
@@ -35,6 +37,7 @@ export function decodeJob(value: unknown): DedupJob {
     failure_code: optionalString(body.failure_code, "failure_code"),
     retention_notice: string(body.retention_notice, "retention_notice"),
     read_only_notice: string(body.read_only_notice, "read_only_notice"),
+    limits: decodeLimits(body.limits),
   };
 }
 
@@ -60,8 +63,14 @@ export function decodePage(value: unknown): DedupPage {
 
 export function decodeRecheck(value: unknown): DedupRecheck {
   const body = record(value, "dedup recheck");
+  const state = string(body.state, "state");
+  if (!(recheckStates as readonly string[]).includes(state)) throw new TypeError("state is invalid");
   return {
+    state: state as DedupRecheckState,
+    state_text: string(body.state_text, "state_text"),
     task_id: string(body.task_id, "task_id"),
+    recheck_task_id: string(body.recheck_task_id, "recheck_task_id"),
+    completed: boolean(body.completed, "completed"),
     // The status is rendered through its server-provided text, so an unknown future status is shown
     // as stated rather than silently mapped onto a local guess.
     status: string(body.status, "status"),
@@ -74,8 +83,10 @@ export function decodeRecheck(value: unknown): DedupRecheck {
     plan_digest: string(body.plan_digest, "plan_digest"),
     previous_plan_digest: optionalString(body.previous_plan_digest, "previous_plan_digest"),
     analysis_version: string(body.analysis_version, "analysis_version"),
+    failure_code: optionalString(body.failure_code, "failure_code"),
     report_available: boolean(body.report_available, "report_available"),
     retention_notice: string(body.retention_notice, "retention_notice"),
+    read_only_notice: string(body.read_only_notice, "read_only_notice"),
   };
 }
 

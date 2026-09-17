@@ -34,8 +34,12 @@
   color: var(--muted);
 }
 .dedup-scope-controls select {
+  /* The basis is the width the reader gains on a wide screen; on a stacked column the same 240px basis
+     would become a 240px tall box, so the height is pinned to the touch target instead. */
   flex: 1 1 240px;
+  block-size: 44px;
   min-height: 44px;
+  max-height: 44px;
   min-width: 0;
   padding: 8px 10px;
   border: 1px solid var(--line);

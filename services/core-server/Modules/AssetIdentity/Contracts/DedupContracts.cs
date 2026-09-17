@@ -384,12 +384,26 @@ public enum DedupRecountReason
     /// recorded metadata observation matches; nothing here is a content guarantee.
     /// </summary>
     ContentUnverified = 9,
+
+    /// <summary>
+    /// The stored preview does not hold every file its own run observed, so this comparison covers
+    /// part of a run. It is not a difference between the preview and the source, and it is not a
+    /// statement that the preview is current: it is the limit of what was compared.
+    /// </summary>
+    SnapshotTruncated = 10,
 }
 
+/// <summary>
+/// A recheck of one stored preview against a fresh read of its own sources.
+/// <paramref name="IncompleteSnapshot"/> states that the stored preview does not hold every file its
+/// run observed, so the comparison covers part of a run even when every file it does hold is
+/// unchanged. Saying so is the difference between "nothing changed" and "the part I kept did not".
+/// </summary>
 public sealed record DedupRecountRequest(
     DedupCurationPlan Plan,
     IReadOnlyList<DedupSourceRequest> Sources,
-    TimeSpan Timeout);
+    TimeSpan Timeout,
+    bool IncompleteSnapshot = false);
 
 public sealed record DedupRecountResult(
     DedupAnalysisId AnalysisId,

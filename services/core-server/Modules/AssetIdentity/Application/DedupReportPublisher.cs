@@ -36,6 +36,7 @@ internal sealed class DedupReportPublisher(DedupReportRegistry reports)
             RejectedSources = plan.RejectedSources,
             AcceptedLibraryIds = [source.LibraryId.Value.ToString("D")],
             Groups = projection.Duplicates,
+            Facts = projection.Facts,
             Unverified = projection.Unverified,
             Unreadable = projection.Unreadable,
             Statistics = plan.Statistics,

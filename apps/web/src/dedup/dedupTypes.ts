@@ -28,6 +28,11 @@ export interface DedupJob {
   failure_code: string | null;
   retention_notice: string;
   read_only_notice: string;
+  /**
+   * The budget the server accepted this job under. The page states this rather than a ceiling of its
+   * own: a number the page invented would describe a limit nothing enforces.
+   */
+  limits: DedupLimits;
 }
 
 export interface DedupLimits {
@@ -138,8 +143,20 @@ export const dedupKinds: readonly { kind: DedupFindingKind; label: string; note:
   { kind: "Unreadable", label: "本次不可读", note: "本次读取失败或权限被拒绝，文件本身未必有问题。" },
 ];
 
+/**
+ * The answer to a recheck. A recheck is a durable background task, so this shape has two states: a
+ * receipt that names the task and the version it will verify, and the outcome once that task has one.
+ * The state travels as its own field, because a page must never read "not finished" as "nothing changed".
+ */
+export type DedupRecheckState = "pending" | "completed" | "refused";
+
 export interface DedupRecheck {
+  state: DedupRecheckState;
+  state_text: string;
   task_id: string;
+  /** The recheck's own durable task. A poll names it so the server answers about this run, not a newer one. */
+  recheck_task_id: string;
+  completed: boolean;
   status: string;
   status_text: string;
   plan_still_current: boolean;
@@ -150,8 +167,10 @@ export interface DedupRecheck {
   plan_digest: string;
   previous_plan_digest: string | null;
   analysis_version: string;
+  failure_code: string | null;
   report_available: boolean;
   retention_notice: string;
+  read_only_notice: string;
 }
 
 /**

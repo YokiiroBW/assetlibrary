@@ -181,12 +181,35 @@ public sealed class DedupReportRegistry
     private readonly Dictionary<DedupReportKey, Entry> reports = [];
     private readonly Dictionary<Guid, DedupReportKey> latest = [];
     private readonly Dictionary<Guid, DedupAnalysisLimits> limitsOf = [];
+    private readonly Dictionary<Guid, DedupRecheckRun> rechecks = [];
     private long published;
 
     public DedupReportRegistry(int maximumReports)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumReports);
         this.maximumReports = maximumReports;
+    }
+
+    /// <summary>
+    /// Files what one recheck found, keyed by the recheck's own durable task. A recheck runs in the
+    /// background, so its outcome has to live somewhere the next status call can read; keeping it beside
+    /// the reports means it is bounded by the same retention as the evidence it describes.
+    /// </summary>
+    public void RecordRecheck(Guid recheckTaskId, DedupRecheckRun run)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+        lock (gate)
+        {
+            rechecks[recheckTaskId] = run;
+        }
+    }
+
+    public DedupRecheckRun? RecheckOf(Guid recheckTaskId)
+    {
+        lock (gate)
+        {
+            return rechecks.GetValueOrDefault(recheckTaskId);
+        }
     }
 
     public static DedupReportRegistry Default { get; } = new(DedupJobContractText.MaximumRetainedReports);

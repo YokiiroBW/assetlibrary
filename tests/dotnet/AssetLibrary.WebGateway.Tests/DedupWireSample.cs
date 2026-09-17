@@ -13,6 +13,12 @@ namespace AssetLibrary.WebGateway.Tests;
 internal static class DedupWireSample
 {
     public static readonly Guid TaskId = Guid.Parse("88888888-8888-4888-8888-888888888888");
+
+    /// <summary>
+    /// The durable task a recheck runs under. It is a different task from the analysis it verifies,
+    /// because the recheck has its own lease, its own cancellation and its own answer.
+    /// </summary>
+    public static readonly Guid RecheckTaskId = Guid.Parse("99999999-9999-4999-8999-999999999999");
     public static readonly Guid SourceId = Guid.Parse("99999999-9999-4999-8999-999999999999");
     public static readonly Guid LibraryId = Guid.Parse("11111111-1111-4111-8111-111111111111");
 
@@ -72,6 +78,7 @@ internal static class DedupWireSample
             RejectedSources = [],
             AcceptedLibraryIds = [LibraryId.ToString("D")],
             Groups = [Group()],
+            Facts = [Item("photos/beach.png"), Item("backup/beach.png"), UnreadableItem("locked/blocked.bin")],
             Unverified = [],
             Unreadable = [],
             Statistics = Statistics(),
@@ -89,6 +96,10 @@ internal static class DedupWireSample
             IdentityMergeProposed: false,
             [Item("photos/beach.png"), Item("backup/beach.png")]);
 
+        /// <summary>
+        /// One comparison fact of the retained report. The unreadable one travels in the facts list too,
+        /// because a recheck has to compare it even though no section shows it.
+        /// </summary>
         internal static DedupReportItem Item(string relativePath) => new(
             new DedupSourceId(SourceId),
             "设计素材",
@@ -104,6 +115,23 @@ internal static class DedupWireSample
             "group-1",
             DedupCategory.ByteDuplicateGroup,
             [AssetRelation.ByteDuplicate]);
+
+        /// <summary>A file the sample run could not read: it has no hash and belongs to no group.</summary>
+        internal static DedupReportItem UnreadableItem(string relativePath) => new(
+            new DedupSourceId(SourceId),
+            "设计素材",
+            relativePath,
+            4096,
+            null,
+            null,
+            new DateTimeOffset(2026, 9, 1, 8, 0, 0, TimeSpan.Zero),
+            DedupPlanItemState.Unreadable,
+            DedupItemReadState.ReadFailed,
+            DedupReadFailure.PermissionDenied,
+            DedupSkipReason.None,
+            null,
+            DedupCategory.Unreadable,
+            []);
 
         internal static DedupPlanStatistics Statistics() => new(
             ObservedEntries: 120,

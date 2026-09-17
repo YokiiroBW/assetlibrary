@@ -150,8 +150,10 @@
     "javascript_and_css": 376832
   },
   "size_budget_notes": [
-    "V01-006 measured 302,093 bytes of JavaScript for the read-only workspace and was budgeted at 320 KiB.",
-    "TS-066 adds the exact-duplicate workbench: its own page, source and budget form, job status, paged report viewer and group detail measured 34,072 bytes, which the V01-006 budget could not cover without deleting a required view.",
-    "Each budget keeps exactly 8 KiB of headroom above the measured build and must be re-measured, not assumed, by the next Web task; a further increase needs a size-reduction proposal instead."
+    "V01-006 measured 302,093 bytes of JavaScript for the read-only workspace and was budgeted at 320 KiB (327,680 bytes).",
+    "TS-066 adds the exact-duplicate workbench: its own page, source and budget form, job status, paged report viewer, group detail, recheck and export measured 34,072 bytes, which the V01-006 budget could not cover without deleting a required view.",
+    "TS-066 then deferred the workbench and the resource-library views behind route-level dynamic imports, so the shell no longer carries them: the shared entry chunk fell from 336,165 to 297,973 bytes and the deferred views are their own chunks (DedupWorkbench 34,415 and LibraryAdmin 7,959 bytes).",
+    "The gate sums every emitted chunk, so deferring moved bytes between chunks without shrinking the sum: 340,347 bytes remain against the V01-006 budget of 327,680. A finer split (overlays and the entry-list view as well) measured 342,185 and was withdrawn. Restoring 327,680 therefore needs a coordinator decision - per-route budgets in the gate, or removal of an existing view - which this task may not make.",
+    "Each budget keeps roughly 8 KiB of headroom above the measured build and must be re-measured, not assumed, by the next Web task; a further increase needs a size-reduction proposal instead."
   ]
 }

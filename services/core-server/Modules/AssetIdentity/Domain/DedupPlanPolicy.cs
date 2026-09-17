@@ -10,7 +10,10 @@ namespace AssetLibrary.Modules.AssetIdentity.Dedup.Domain;
 /// </summary>
 public static class DedupPlanPolicy
 {
-    public static DedupRecountResult Recount(DedupCurationPlan plan, DedupCurationPlan current)
+    public static DedupRecountResult Recount(
+        DedupCurationPlan plan,
+        DedupCurationPlan current,
+        bool incompleteSnapshot = false)
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(current);
@@ -21,6 +24,12 @@ public static class DedupPlanPolicy
         var changed = new SortedSet<string>(StringComparer.Ordinal);
         var disappeared = new SortedSet<string>(StringComparer.Ordinal);
         var unreadable = new SortedSet<string>(StringComparer.Ordinal);
+        if (incompleteSnapshot)
+        {
+            // The stored preview does not hold every file its run observed. A comparison over part of
+            // a run must say so, or "unchanged" would describe a scan that never happened.
+            reasons.Add(DedupRecountReason.SnapshotTruncated);
+        }
 
         if (current.RejectedSources.Count > 0)
         {

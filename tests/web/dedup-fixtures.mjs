@@ -15,6 +15,20 @@ export const dedupLibrary = {
   access_level: "library_administrator",
 };
 
+/**
+ * The budget the server states for a run. The page renders these numbers instead of its own, so the
+ * fixture carries them on the job exactly as the Host does.
+ */
+export function dedupLimits(overrides = {}) {
+  return {
+    maximum_files: 200_000,
+    maximum_bytes: 2_147_483_648,
+    maximum_file_bytes: 268_435_456,
+    hash_concurrency: 4,
+    ...overrides,
+  };
+}
+
 export function dedupJob(overrides = {}) {
   return {
     task_id: taskId,
@@ -31,6 +45,7 @@ export function dedupJob(overrides = {}) {
     failure_code: null,
     retention_notice: "服务器只保留最近 8 份分析结果；旧结果不保证仍可读取。",
     read_only_notice: "查重只读取文件内容用于计算哈希，不会移动、复制或删除任何文件。",
+    limits: dedupLimits(),
     ...overrides,
   };
 }
@@ -164,6 +179,42 @@ function memberPage(state, groupKey) {
 }
 
 /**
+ * A recheck as the server answers it: a receipt for a pending run, or an outcome once the durable task
+ * has one. The page must render the receipt as "still checking" rather than as a clean plan, so the two
+ * shapes are built from one body here and only the state differs.
+ */
+export function dedupRecheck(overrides = {}) {
+  const state = overrides.state ?? "completed";
+  return {
+    state,
+    state_text:
+      state === "pending"
+        ? "复核已在后台排队，完成后结果才会显示。"
+        : state === "refused"
+          ? "复核未执行，报告版本已不再保留或被取代。"
+          : "复核已完成。",
+    task_id: taskId,
+    recheck_task_id: "99999999-9999-4999-8999-999999999999",
+    completed: state === "completed",
+    status: state === "completed" ? "PlanCurrent" : "",
+    status_text: state === "completed" ? "当前计划仍然有效。" : "",
+    plan_still_current: state === "completed",
+    reasons: [],
+    changed_paths: [],
+    disappeared_paths: [],
+    new_paths: [],
+    plan_digest: "digest-4f2a9c7b",
+    previous_plan_digest: state === "completed" ? "digest-4f2a9c7b" : null,
+    analysis_version: state === "completed" ? `${taskId}:1` : "",
+    failure_code: state === "refused" ? "dedup_report_not_retained" : null,
+    report_available: state === "completed",
+    retention_notice: "服务器只保留最近 8 份分析结果；旧结果不保证仍可读取。",
+    read_only_notice: "查重只读取文件内容用于计算哈希，不会移动、复制或删除任何文件。",
+    ...overrides,
+  };
+}
+
+/**
  * A dedup workbench fixture. It answers only the six authorized operations and records every request so
  * a test can assert what the page sent — including that it never sends a filesystem path.
  */
@@ -171,21 +222,7 @@ export async function mockDedup(page, options = {}) {
   const state = {
     job: options.job ?? dedupJob(),
     page: options.page ?? dedupPage(),
-    recheck: {
-      task_id: taskId,
-      status: "PlanCurrent",
-      status_text: "当前计划仍然有效。",
-      plan_still_current: true,
-      reasons: [],
-      changed_paths: [],
-      disappeared_paths: [],
-      new_paths: [],
-      plan_digest: "digest-4f2a9c7b",
-      previous_plan_digest: "digest-4f2a9c7b",
-      analysis_version: `${taskId}:1`,
-      report_available: true,
-      retention_notice: "服务器只保留最近 8 份分析结果；旧结果不保证仍可读取。",
-    },
+    recheck: dedupRecheck(options.recheck),
     requests: [],
     failure: null,
   };
@@ -223,7 +260,17 @@ export async function mockDedup(page, options = {}) {
       // A group request answers with that group's members, never with the section listing: the two are
       // different shapes, which is why the server answers one or the other and never both.
       if (operation === "results") return body.group_key === undefined ? state.page : memberPage(state, body.group_key);
-      if (operation === "revalidate") return state.recheck;
+      if (operation === "revalidate") {
+        // A request that names the recheck's task polls that run; one that names none files it. Filing
+        // answers with a receipt, and the poll answers with the outcome, which is how the page learns
+        // the background comparison finished without ever holding a request open for it.
+        if (body.recheck_task_id !== undefined) return state.recheck;
+        return dedupRecheck({
+          state: "pending",
+          recheck_task_id: state.recheck.recheck_task_id,
+          plan_digest: body.plan_digest,
+        });
+      }
       if (operation === "export")
         return {
           format_version: 1,

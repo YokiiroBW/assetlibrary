@@ -2,9 +2,10 @@ import { categoryLabels, formatBytes } from "../libraryMetadata";
 import type { DedupLibraryChoice, DedupLimits } from "./dedupTypes";
 
 /**
- * Source selection and the budget of the run about to be started. The budget is stated before the
- * button is pressed, because hitting a ceiling is a normal outcome of a read-only scan and the reader
- * should know the ceiling in advance rather than discover it in the result.
+ * Source selection and the budget of the run about to be started. The budget shown is the one the server
+ * accepted for the version on screen — the page never states a ceiling of its own — because hitting a
+ * ceiling is a normal outcome of a read-only scan and the reader should know the enforced number in
+ * advance rather than discover it in the result.
  */
 export function DedupAnalysisForm({
   choices,
@@ -17,7 +18,7 @@ export function DedupAnalysisForm({
 }: {
   choices: readonly DedupLibraryChoice[];
   selectedId: string | null;
-  limits: DedupLimits;
+  limits: DedupLimits | null;
   scanning: boolean;
   canStart: boolean;
   onSelect: (libraryId: string) => void;
@@ -54,24 +55,32 @@ export function DedupAnalysisForm({
           该资源库的存储当前不可访问。分析仍会启动，但读取失败会记为不可读而不是没有重复。
         </p>
       )}
-      <dl className="dedup-budget">
-        <div>
-          <dt>文件数上限</dt>
-          <dd>{limits.maximum_files.toLocaleString("zh-CN")}</dd>
-        </div>
-        <div>
-          <dt>读取总量上限</dt>
-          <dd>{formatBytes(String(limits.maximum_bytes))}</dd>
-        </div>
-        <div>
-          <dt>单文件上限</dt>
-          <dd>{formatBytes(String(limits.maximum_file_bytes))}</dd>
-        </div>
-        <div>
-          <dt>并发读取</dt>
-          <dd>{limits.hash_concurrency}</dd>
-        </div>
-      </dl>
+      {limits === null ? (
+        // Before any version exists the page has no budget to state, because the server has not accepted
+        // one yet. It says that instead of printing numbers nothing is enforcing.
+        <p className="dedup-note">
+          尚未开始分析：预算由服务器在其自身上限内确定，开始后这里会显示本次任务实际接受的预算。
+        </p>
+      ) : (
+        <dl className="dedup-budget">
+          <div>
+            <dt>文件数上限</dt>
+            <dd>{limits.maximum_files.toLocaleString("zh-CN")}</dd>
+          </div>
+          <div>
+            <dt>读取总量上限</dt>
+            <dd>{formatBytes(String(limits.maximum_bytes))}</dd>
+          </div>
+          <div>
+            <dt>单文件上限</dt>
+            <dd>{formatBytes(String(limits.maximum_file_bytes))}</dd>
+          </div>
+          <div>
+            <dt>并发读取</dt>
+            <dd>{limits.hash_concurrency}</dd>
+          </div>
+        </dl>
+      )}
       <p className="dedup-note">
         只做完整的强哈希比较，不会移动、复制或删除任何文件；达到上限或读取失败的部分会单独列出，不会算作没有重复。
       </p>

@@ -5,10 +5,12 @@ using AssetLibrary.Modules.LibraryStorage.Contracts;
 namespace AssetLibrary.Modules.AssetIdentity.Dedup.Application;
 
 /// <summary>
-/// Places the findings of one analyzed plan into the three reviewable sections the workbench shows.
-/// The order is fixed and total, because a cursor is only meaningful while the same question returns
-/// the same sequence: content that was never read is never folded into the duplicate section, and a
-/// file with no same-length peer is never presented as verified content.
+/// Places the findings of one analyzed plan into the sections the workbench shows, and beside them the
+/// complete bounded comparison facts a recheck needs. The two are deliberately different: a section is
+/// a question a reader asks ("which files are byte duplicates?"), while the facts are what this run
+/// observed about every file it retained. Deriving the facts back out of the sections is impossible —
+/// a verified file with no duplicate peer appears in no section, and a display rule may legitimately
+/// show one file in more than one — so they are kept instead of reconstructed.
 /// </summary>
 internal static class DedupFindingProjection
 {
@@ -23,6 +25,16 @@ internal static class DedupFindingProjection
         var truncated = plan.Items.Count > maximumItems;
         var retained = truncated ? plan.Items.Take(maximumItems).ToArray() : [.. plan.Items];
         var byIdentity = retained.ToDictionary(item => item.SourceIdentity, StringComparer.Ordinal);
+
+        // One fact per file, in the plan's own stable order. A plan cannot name one file twice, and if
+        // it ever did, taking the first occurrence keeps one identity to one fact instead of throwing
+        // inside a page read.
+        var facts = retained
+            .DistinctBy(item => item.SourceIdentity, StringComparer.Ordinal)
+            .OrderBy(item => item.SourceIdentity, StringComparer.Ordinal)
+            .Select(item => DedupReportItemMapper.ToReportItem(item, roots))
+            .ToArray();
+
         var duplicates = new List<DedupReportGroup>(plan.Groups.Count);
         var claimed = new HashSet<string>(StringComparer.Ordinal);
 
@@ -56,24 +68,28 @@ internal static class DedupFindingProjection
                 [.. members.Select(member => DedupReportItemMapper.ToReportItem(member, roots))]));
         }
 
-        // Everything with a proven-hash peer is already in a group; what remains keeps the same
-        // ordering basis, so one report has one stable sequence a cursor can advance through.
-        var remainder = retained
-            .Where(item => !claimed.Contains(item.SourceIdentity))
-            .OrderBy(item => item.SourceIdentity, StringComparer.Ordinal)
-            .Select(item => DedupReportItemMapper.ToReportItem(item, roots))
+        // A file already shown as a member of a proven duplicate group is not repeated in the sections
+        // that describe what could not be proven, so a reader counts each file exactly once.
+        var unclaimed = facts
+            .Where(item => !claimed.Contains(DedupFileIdentity.Of(item)))
             .ToArray();
         return new DedupReportProjection(
             duplicates,
-            [.. remainder.Where(DedupFindingClassifier.IsUnverified)],
-            [.. remainder.Where(DedupFindingClassifier.IsUnreadable)],
+            [.. unclaimed.Where(item => DedupFindingClassifier.Section(item) == DedupFindingKind.Unverified)],
+            [.. unclaimed.Where(item => DedupFindingClassifier.Section(item) == DedupFindingKind.Unreadable)],
+            facts,
             truncated);
     }
 }
 
-/// <summary>The three sections a report exposes, plus whether the run had to leave items out.</summary>
+/// <summary>
+/// The evidence one report exposes: complete bounded facts, the display sections derived from them,
+/// and whether the run had to leave items out. <paramref name="Facts"/> is the only list a recheck may
+/// rebuild a plan from.
+/// </summary>
 internal sealed record DedupReportProjection(
     IReadOnlyList<DedupReportGroup> Duplicates,
     IReadOnlyList<DedupReportItem> Unverified,
     IReadOnlyList<DedupReportItem> Unreadable,
+    IReadOnlyList<DedupReportItem> Facts,
     bool Truncated);

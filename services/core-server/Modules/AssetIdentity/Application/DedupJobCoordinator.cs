@@ -54,11 +54,22 @@ public interface IDedupJobCoordinator
         DedupOperation operation,
         CancellationToken cancellationToken);
 
-    ValueTask<DedupRecheckView> RevalidateAsync(
+    /// <summary>
+    /// Files a recheck of one retained report version as a durable background task. It answers with the
+    /// receipt rather than the outcome: the recheck enumerates and hashes, so it is never run inside a
+    /// request, and <see cref="RecheckStateAsync"/> is how a caller learns the result afterwards.
+    /// </summary>
+    ValueTask<DedupRecheckAccepted> RevalidateAsync(
         DedupResolvedSource source,
         Guid taskId,
         string? expectedDigest,
-        DedupOperation operation,
+        CancellationToken cancellationToken);
+
+    /// <summary>The state of one accepted recheck, addressed by the receipt's own durable task.</summary>
+    ValueTask<DedupRecheckState> RecheckStateAsync(
+        DedupResolvedSource source,
+        Guid reportTaskId,
+        Guid recheckTaskId,
         CancellationToken cancellationToken);
 
     ValueTask<DedupExportDocument> ExportAsync(

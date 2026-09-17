@@ -25,8 +25,15 @@ public sealed class DedupJobService : IDedupJobCoordinator
     private readonly DedupResultsReader reader;
     private readonly DedupExportBuilder exporter;
     private readonly DedupJobStarter starter;
-    private readonly DedupRecheckRunner recheck;
+    private readonly DedupRecheckScheduler rechecks;
     private readonly DedupReportPublisher publisher;
+    private readonly DedupReportRegistry retained;
+
+    /// <summary>
+    /// The recheck executor, shared with the worker so both entry points drive one implementation. A
+    /// second executor over the same registry would be a second place the comparison rules could drift.
+    /// </summary>
+    internal DedupRecheckRunner Rechecks { get; }
 
     public DedupJobService(
         DedupAnalyzer analyzer,
@@ -41,13 +48,15 @@ public sealed class DedupJobService : IDedupJobCoordinator
         this.tasks = tasks ?? throw new ArgumentNullException(nameof(tasks));
         this.inspector = inspector ?? throw new ArgumentNullException(nameof(inspector));
         this.options = options ?? throw new ArgumentNullException(nameof(options));
+        retained = reports;
         ArgumentNullException.ThrowIfNull(timeProvider);
         views = new DedupJobViewFactory(reports, timeProvider);
         reader = new DedupResultsReader(reports, views);
         exporter = new DedupExportBuilder(reports, timeProvider);
         publisher = new DedupReportPublisher(reports);
         starter = new DedupJobStarter(reports, tasks, inspector, views, timeProvider);
-        recheck = new DedupRecheckRunner(analyzer, reports, publisher, views, options, timeProvider);
+        rechecks = new DedupRecheckScheduler(tasks, views, timeProvider);
+        Rechecks = new DedupRecheckRunner(analyzer, reports, publisher, options, timeProvider);
     }
 
     public ValueTask<DedupJobView> StartAsync(
@@ -109,16 +118,45 @@ public sealed class DedupJobService : IDedupJobCoordinator
         return views.Of(source, taskId, updated);
     }
 
-    public async ValueTask<DedupRecheckView> RevalidateAsync(
+    /// <summary>
+    /// Files a recheck as a durable task and answers at once. The recheck itself runs on the background
+    /// path, so this never enumerates or hashes inside a request.
+    /// </summary>
+    public async ValueTask<DedupRecheckAccepted> RevalidateAsync(
         DedupResolvedSource source,
         Guid taskId,
         string? expectedDigest,
-        DedupOperation operation,
         CancellationToken cancellationToken)
     {
-        operation.Validate();
         _ = await RequireAsync(taskId, cancellationToken).ConfigureAwait(false);
-        return await recheck.RevalidateAsync(source, taskId, expectedDigest, cancellationToken).ConfigureAwait(false);
+        return await rechecks.AcceptAsync(source, taskId, expectedDigest, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// The state of one recheck as its own durable task records it. A caller that asked for a recheck
+    /// polls this instead of holding a request open, and the answer states whether the run has finished.
+    /// </summary>
+    public ValueTask<DedupRecheckState> RecheckStateAsync(
+        DedupResolvedSource source,
+        Guid reportTaskId,
+        Guid recheckTaskId,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        cancellationToken.ThrowIfCancellationRequested();
+        var run = retained.RecheckOf(recheckTaskId);
+        if (run is null)
+        {
+            return ValueTask.FromResult(new DedupRecheckState(
+                RecheckRunState.Pending, null, reportTaskId, recheckTaskId, source.DisplayName));
+        }
+
+        return ValueTask.FromResult(new DedupRecheckState(
+            run.Completed ? RecheckRunState.Completed : RecheckRunState.Refused,
+            run,
+            reportTaskId,
+            recheckTaskId,
+            source.DisplayName));
     }
 
     public async ValueTask<DedupExportDocument> ExportAsync(

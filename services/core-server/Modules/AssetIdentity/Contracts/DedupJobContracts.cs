@@ -45,7 +45,8 @@ public sealed record DedupJobView(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     string? FailureCode,
-    string RetentionBoundary);
+    string RetentionBoundary,
+    DedupAnalysisLimits Limits);
 
 /// <summary>
 /// Why a finished analysis has no readable report. A restart or an evicted entry is reported as a
@@ -117,6 +118,16 @@ public sealed record DedupReport
     public required IReadOnlyList<DedupRejectedSource> RejectedSources { get; init; }
     public required IReadOnlyList<string> AcceptedLibraryIds { get; init; }
     public required IReadOnlyList<DedupReportGroup> Groups { get; init; }
+
+    /// <summary>
+    /// Every comparison fact this run retained, exactly once per file, in one stable order. The three
+    /// display sections below are derived views that may overlap in what they show; a recheck must not
+    /// be reconstructed from them, because a verified file with no duplicate peer appears in none of
+    /// them and an unreadable file can appear in two. This list is what proves whether the source still
+    /// holds the evidence the report claims.
+    /// </summary>
+    public required IReadOnlyList<DedupReportItem> Facts { get; init; }
+
     public required IReadOnlyList<DedupReportItem> Unverified { get; init; }
     public required IReadOnlyList<DedupReportItem> Unreadable { get; init; }
     public required DedupPlanStatistics Statistics { get; init; }
@@ -200,6 +211,55 @@ public sealed record DedupRecheckView(
     string AnalysisVersion,
     Guid TaskId,
     bool ReportAvailable);
+
+/// <summary>
+/// What one recheck found, as its durable task recorded it. The report version it verified is part of
+/// the value, so a caller can tell a fresh answer from one about evidence that has since been replaced.
+/// </summary>
+public sealed record DedupRecheckRun(
+    bool Completed,
+    DedupRecountStatus Status,
+    bool PlanStillCurrent,
+    IReadOnlyList<string> Reasons,
+    IReadOnlyList<string> ChangedPaths,
+    IReadOnlyList<string> DisappearedPaths,
+    IReadOnlyList<string> NewPaths,
+    string PlanDigest,
+    string? PreviousPlanDigest,
+    long VerifiedGeneration,
+    string AnalysisVersion,
+    string? FailureCode);
+
+/// <summary>
+/// How far a recheck has got. A recheck is a durable background task, so "asked for" and "answered"
+/// are different states a page must be able to tell apart instead of treating a missing answer as one.
+/// </summary>
+public enum RecheckRunState
+{
+    /// <summary>The durable task has not produced an outcome yet.</summary>
+    Pending = 0,
+
+    /// <summary>The recheck ran and its outcome is the answer.</summary>
+    Completed = 1,
+
+    /// <summary>
+    /// The recheck did not run to an answer: the retained version it named is gone or was replaced.
+    /// It is reported as its own state, because "not checked" must never read as "nothing changed".
+    /// </summary>
+    Refused = 2,
+}
+
+/// <summary>
+/// The answer to a recheck request. The receipt names the recheck's own durable task, and the outcome
+/// carries the verified version so a caller can tell a fresh answer from one about evidence that has
+/// since been replaced.
+/// </summary>
+public sealed record DedupRecheckState(
+    RecheckRunState State,
+    DedupRecheckRun? Run,
+    Guid ReportTaskId,
+    Guid RecheckTaskId,
+    string LibraryDisplayName);
 
 /// <summary>
 /// The exportable plan document. It is a plan only: it carries the source version, the latest
@@ -345,6 +405,7 @@ public static class DedupText
         DedupRecountReason.NewFileObserved => "观察到新的文件",
         DedupRecountReason.ScanIncomplete => "扫描不完整",
         DedupRecountReason.ContentUnverified => "内容未经验证",
+        DedupRecountReason.SnapshotTruncated => "保留的证据不完整，本次对照只覆盖报告保留的部分",
         _ => "未说明原因",
     };
 

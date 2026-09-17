@@ -65,6 +65,7 @@ internal static class TrialHostFactory
             connections,
             libraries,
             provider.GetRequiredService<ILoggerFactory>()));
+        TrialDedupComposition.Register(services);
     }
 
 }

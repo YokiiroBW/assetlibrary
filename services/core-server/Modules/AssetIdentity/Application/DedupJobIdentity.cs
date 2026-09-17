@@ -64,12 +64,29 @@ internal static class DedupJobWire
 
 /// <summary>
 /// The immutable, replay-safe job payload: a reclaimed task re-runs exactly the analysis that was
-/// requested, under the same ceilings, without consulting mutable state.
+/// requested, under the same ceilings, without consulting mutable state. A recheck carries the report
+/// version it verifies instead of an analysis id, because a recheck that adopted a newer version would
+/// answer about evidence nobody asked about.
 /// </summary>
 internal static class DedupJobPayload
 {
+    /// <summary>The payload a start writes: which library, under which ceilings.</summary>
     public static JsonObjectPayload Create(LibraryId libraryId, DedupAnalysisId analysisId, DedupAnalysisLimits limits) =>
         new($$"""
-            {"library_id":"{{libraryId.Value:D}}","analysis_id":"{{analysisId.Value:D}}","version":1,"maximum_files":{{limits.MaximumFiles}},"maximum_bytes":{{limits.MaximumBytes}},"maximum_file_bytes":{{limits.MaximumFileBytes}},"hash_concurrency":{{limits.HashConcurrency}}}
+            {"kind":"analysis","library_id":"{{libraryId.Value:D}}","analysis_id":"{{analysisId.Value:D}}","version":1,"maximum_files":{{limits.MaximumFiles}},"maximum_bytes":{{limits.MaximumBytes}},"maximum_file_bytes":{{limits.MaximumFileBytes}},"hash_concurrency":{{limits.HashConcurrency}}}
+            """);
+
+    /// <summary>
+    /// The payload a recheck writes: which report version is being verified and the digest the caller
+    /// believed it was verifying. Both are read from the durable record by the worker, so a request that
+    /// arrives after the report was replaced cannot recheck the newer one under the older name.
+    /// </summary>
+    public static JsonObjectPayload CreateRecheck(
+        LibraryId libraryId,
+        Guid reportTaskId,
+        long generation,
+        string planDigest) =>
+        new($$"""
+            {"kind":"recheck","library_id":"{{libraryId.Value:D}}","report_task_id":"{{reportTaskId:D}}","generation":{{generation}},"plan_digest":"{{planDigest}}","version":1}
             """);
 }

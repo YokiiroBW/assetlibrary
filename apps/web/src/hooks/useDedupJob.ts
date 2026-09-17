@@ -12,6 +12,7 @@ import type {
 
 const pollMilliseconds = 2_000;
 const pageSize = 50;
+const recheckPollMilliseconds = 1_500;
 
 /** One read of one slice of a report version. */
 interface LoadParameters {
@@ -69,7 +70,7 @@ export interface DedupJobState {
 
 /**
  * State of one dedup workbench session for one library and one open section. It owns request sequencing
- * — start once, poll while the job is active, page by signed cursor, recheck one version — and never
+ * — start once, poll while the job is active, page by signed cursor, follow a recheck — and never
  * interprets a result itself: counts, freshness and incompleteness come from the server's own fields.
  *
  * The operation key is minted once per library and kept across retries so a resubmitted start is the
@@ -80,7 +81,6 @@ export function useDedupJob(
   libraryId: string | null,
   section: DedupFindingKind,
   onExported?: (receipt: DedupExportReceipt) => void,
-  onRecheck?: (recheck: DedupRecheck) => void,
 ): DedupJobHandle {
   const [state, setState] = useState<DedupView>(initial);
   const [revision, setRevision] = useState(0);
@@ -98,6 +98,8 @@ export function useDedupJob(
   // A read asked for while another one is on the wire, and a counter that wakes the effect serving it.
   const queued = useRef<LoadParameters | null>(null);
   const [queuedRevision, setQueuedRevision] = useState(0);
+  const exportedReceipt = useRef(onExported);
+  exportedReceipt.current = onExported;
   useEffect(() => {
     current.current = libraryId;
     operationKey.current = crypto.randomUUID();
@@ -233,6 +235,45 @@ export function useDedupJob(
     void load(job.task_id, section, groupKey, null, false);
   }, [libraryId, wantedSlice, revision, load]);
 
+  // A recheck is a durable background task, so filing one only produces a receipt. This effect follows
+  // that receipt's own task until the server has an outcome, which is why the recheck button finishes
+  // immediately: the comparison runs on the background path rather than inside the button's request.
+  useEffect(() => {
+    const receipt = state.recheck;
+    const job = state.job;
+    if (libraryId === null || job === null || receipt === null) return;
+    if (receipt.state !== "pending" || receipt.recheck_task_id === "") return;
+    let disposed = false;
+    let timer: number | undefined;
+    const step = async () => {
+      if (disposed) return;
+      try {
+        const next = await client.revalidate(
+          libraryId,
+          job.task_id,
+          receipt.plan_digest,
+          operationKey.current,
+          new AbortController().signal,
+          receipt.recheck_task_id,
+        );
+        if (disposed || current.current !== libraryId) return;
+        setState((previous) => ({ ...previous, status: "ready", recheck: next, message: null, statusCode: null }));
+        if (next.state === "pending") timer = window.setTimeout(() => void step(), recheckPollMilliseconds);
+      } catch (error: unknown) {
+        if (disposed || isAbort(error)) return;
+        // A poll that fails does not invent an answer: the receipt stays pending and the page keeps the
+        // sentence it already has, so an unread outcome is never shown as a finished comparison.
+        timer = window.setTimeout(() => void step(), recheckPollMilliseconds * 3);
+      }
+    };
+
+    timer = window.setTimeout(() => void step(), recheckPollMilliseconds);
+    return () => {
+      disposed = true;
+      window.clearTimeout(timer);
+    };
+  }, [client, libraryId, state.job, state.recheck, revision]);
+
   const execute = useCallback(
     async (action: "start" | "cancel" | "recheck" | "export") => {
       if (libraryId === null || mutation.current !== null) return;
@@ -257,10 +298,7 @@ export function useDedupJob(
             if (current.current === libraryId) setState((previous) => ({ ...previous, ...changes }));
           },
           exported: (receipt) => {
-            if (current.current === libraryId) onExported?.(receipt);
-          },
-          rechecked: (recheck) => {
-            if (current.current === libraryId) onRecheck?.(recheck);
+            if (current.current === libraryId) exportedReceipt.current?.(receipt);
           },
         });
       } catch (error: unknown) {
@@ -274,7 +312,7 @@ export function useDedupJob(
         if (current.current === libraryId) setState((previous) => ({ ...previous, pending: false }));
       }
     },
-    [client, libraryId, onExported, onRecheck],
+    [client, libraryId],
   );
 
   const visible: DedupView =
@@ -318,7 +356,6 @@ interface ActionContext {
   /** Records the operation key the task now on screen belongs to, so later operations name it. */
   adopt: (operationKey: string) => void;
   exported: (receipt: DedupExportReceipt) => void;
-  rechecked: (recheck: DedupRecheck) => void;
 }
 
 /**
@@ -328,15 +365,19 @@ interface ActionContext {
  */
 async function performAction(action: "start" | "cancel" | "recheck" | "export", context: ActionContext) {
   if (action === "start") {
+    // The page restates the budget the server accepted for the version on screen, so a new analysis of
+    // the same library runs under the ceiling the reader has already been shown. Before any version
+    // exists the page states no budget at all and the server applies its own.
+    const limits = context.state.job?.limits;
     // The first request of this mount names the operation by the library, so pressing the button twice
     // without a reload resolves to the same durable task instead of reading the same directories twice.
-    const known = await context.client.start(context.libraryId, context.libraryId, false, context.signal);
+    const known = await context.client.start(context.libraryId, context.libraryId, false, context.signal, limits);
     // A version that is still running, or one that finished and whose report the server can still serve,
     // is the version this library has. Only a run that already ended without a readable report leaves the
     // reader's request to be carried out as a new analysis under a key of its own.
     const job = retained(known)
       ? known
-      : await context.client.start(context.libraryId, context.operationKey, false, context.signal);
+      : await context.client.start(context.libraryId, context.operationKey, false, context.signal, limits);
     context.adopt(job.task_id === known.task_id ? context.libraryId : context.operationKey);
     context.settle({
       status: "ready",
@@ -358,6 +399,8 @@ async function performAction(action: "start" | "cancel" | "recheck" | "export", 
   const job = context.state.job;
   if (job === null) return;
   if (action === "recheck") {
+    // Filing a recheck answers with a receipt; the page's own effect follows that task to its outcome.
+    // The receipt replaces any earlier recheck, so a new request never displays the previous answer.
     const recheck = await context.client.revalidate(
       context.libraryId,
       job.task_id,
@@ -366,7 +409,6 @@ async function performAction(action: "start" | "cancel" | "recheck" | "export", 
       context.signal,
     );
     context.settle({ status: "ready", recheck, message: null, statusCode: null });
-    context.rechecked(recheck);
     return;
   }
 

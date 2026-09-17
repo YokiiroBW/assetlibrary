@@ -1,5 +1,13 @@
 import { expect, test } from "../../apps/web/node_modules/@playwright/test/index.mjs";
-import { dedupGroup, dedupJob, dedupLibrary, dedupPage, dedupSummary, mockDedup } from "./dedup-fixtures.mjs";
+import {
+  dedupGroup,
+  dedupJob,
+  dedupLibrary,
+  dedupPage,
+  dedupRecheck,
+  dedupSummary,
+  mockDedup,
+} from "./dedup-fixtures.mjs";
 
 const dedupPath = "/dedup";
 const libraryId = dedupLibrary.library_id;
@@ -25,8 +33,10 @@ test("the workbench states its scope and budget before any analysis is started",
   await expect(page.getByText(/不会移动、复制或删除任何文件/).first()).toBeVisible();
   await expect(page.getByText(/结果不代表其他资源库/)).toBeVisible();
   await expect(page.getByRole("heading", { name: "分析来源与预算" })).toBeVisible();
-  await expect(page.getByText("文件数上限")).toBeVisible();
-  await expect(page.getByText("读取总量上限")).toBeVisible();
+  // Before a run exists the page states no ceiling of its own: it says the server determines the budget
+  // rather than printing a number nothing enforces.
+  await expect(page.getByText(/预算由服务器在其自身上限内确定/)).toBeVisible();
+  await expect(page.getByText("文件数上限")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "开始分析" })).toBeDisabled();
   expect(state.requests).toHaveLength(0);
   await page.getByLabel("已登记资源库").selectOption(libraryId);
@@ -48,9 +58,33 @@ test("starting analysis shows the server's own state and never fabricates a resu
   });
   // No request may ever carry a filesystem path: the server resolves the root itself.
   expect(JSON.stringify(state.requests)).not.toContain("C:/");
+  // The numbers the page shows are the server's accepted budget, not a ceiling the page made up: the
+  // first start states none, and this one shows what the server answered with.
+  await expect(page.getByText("文件数上限")).toBeVisible();
+  await expect(page.getByText("256.0 MB")).toBeVisible();
+  await expect(page.getByText("2.0 GB")).toBeVisible();
   state.job = dedupJob({ state: "leased" });
   await expect(page.getByText("正在分析", { exact: true })).toBeVisible({ timeout: 6_000 });
   await page.screenshot({ path: testInfo.outputPath("dedup-scanning-1440.png"), animations: "disabled" });
+});
+
+test("a run of the same library restates the budget the server already accepted", async ({ page }) => {
+  const state = await mockDedup(page, { job: dedupJob({ state: "succeeded", report_available: true }) });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByText("文件数上限")).toBeVisible();
+  // A second press of the same button is only possible once the page is idle again, so the run that
+  // restates the budget is the one the reader asks for after seeing a finished version.
+  state.job = dedupJob({ state: "failed", report_available: false, can_cancel: false, can_retry: true });
+  await expect(page.getByRole("button", { name: "开始分析" })).toBeEnabled({ timeout: 6_000 });
+  state.job = dedupJob({ state: "queued", report_available: false });
+  await page.getByRole("button", { name: "开始分析" }).click();
+  await expect
+    .poll(() => state.requests.filter((request) => request.operation === "start").at(-1)?.body.maximum_files)
+    .toBe(200_000);
+  const restated = state.requests.filter((request) => request.operation === "start").at(-1);
+  expect(restated.body.maximum_bytes).toBe(2_147_483_648);
+  expect(restated.body.maximum_file_bytes).toBe(268_435_456);
 });
 
 test("a complete run lists groups, counts and evidence separately from unverified items", async ({
@@ -161,9 +195,45 @@ test("a stale plan is reported as stale instead of being exported as current", a
   await expect(page.getByText("当前计划已过期，建议重新分析。")).toBeVisible();
   await expect(page.getByText(/请重新分析后再导出/)).toBeVisible();
   await expect(page.getByText(/变化 1 项 · 消失 1 项 · 新增 1 项/)).toBeVisible();
-  const recheck = state.requests.find((request) => request.operation === "revalidate");
-  expect(recheck.body.plan_digest).toBe("digest-4f2a9c7b");
+  // Filing a recheck names the plan, and following it names the recheck's own durable task: the page
+  // polls the run it filed instead of filing a second one.
+  const filed = state.requests.find((request) => request.operation === "revalidate");
+  expect(filed.body.plan_digest).toBe("digest-4f2a9c7b");
+  expect(filed.body.recheck_task_id).toBeUndefined();
+  const polled = state.requests.filter((request) => request.operation === "revalidate").at(-1);
+  expect(polled.body.recheck_task_id).toBe("99999999-9999-4999-8999-999999999999");
   expect(state.requests.some((request) => request.operation === "export")).toBeFalsy();
+});
+
+test("a recheck that has not finished yet is not shown as a plan with nothing changed", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  // The background task never produces an outcome in this test, so the page sits with the receipt. It
+  // must say so rather than render an empty change list, which would read as a verified plan.
+  state.recheck = dedupRecheck({ state: "pending" });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText("复核已在后台排队，完成后结果才会显示。")).toBeVisible();
+  await expect(page.getByText(/现在还没有任何对照结论/)).toBeVisible();
+  await expect(page.getByText(/变化 0 项/)).toHaveCount(0);
+});
+
+test("a recheck the server refused states that no comparison happened", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  state.recheck = dedupRecheck({
+    state: "refused",
+    reasons: ["要复核的报告版本已不再保留。"],
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText("复核未执行，报告版本已不再保留或被取代。")).toBeVisible();
+  await expect(page.getByText("要复核的报告版本已不再保留。")).toBeVisible();
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeVisible();
 });
 
 test("cancelling is a request about the analysis only and keeps the page honest", async ({ page }, testInfo) => {
@@ -294,12 +364,42 @@ test("narrow, dark and reduced-motion layouts stack without horizontal overflow"
     await startAnalysis(page);
     await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+    // A stacked control keeps its touch height instead of stretching to the width it would have had in a
+    // row: a select that inherited the 240px flex basis vertically would be a 240px tall box here.
+    const select = await page.getByLabel("已登记资源库").boundingBox();
+    expect(select.height).toBeLessThanOrEqual(46);
+    expect(select.height).toBeGreaterThanOrEqual(44);
+    expect(Math.round(select.width)).toBeLessThanOrEqual(viewport.width);
     await page.screenshot({
       path: testInfo.outputPath(`dedup-${viewport.name}.png`),
       animations: "disabled",
       fullPage: true,
     });
   }
+});
+
+test("the workbench overview is captured unscrolled at desktop and phone widths", async ({ page }, testInfo) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  // The reader's first screen, without scrolling: the reader must be able to judge the overview before
+  // deciding to scroll, so this is what is recorded rather than a full-page stitched image.
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: testInfo.outputPath("dedup-overview-1440.png"), animations: "disabled" });
+  await expect(page.getByText(/重新核对只读取本次分析记录的来源/)).toBeVisible();
+  for (const width of [390, 320]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 640 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const select = await page.getByLabel("已登记资源库").boundingBox();
+    expect(select.height).toBeLessThanOrEqual(46);
+    await page.screenshot({ path: testInfo.outputPath(`dedup-overview-${width}.png`), animations: "disabled" });
+  }
+  expect(
+    state.requests.every((request) => request.operation !== "start" || request.body.library_id !== undefined),
+  ).toBe(true);
 });
 
 test("long Chinese names and keyboard order stay usable", async ({ page }) => {

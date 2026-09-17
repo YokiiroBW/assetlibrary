@@ -117,7 +117,7 @@ internal static class DedupReadPlanner
 
     public static List<DedupAnalysisEntry> Apply(
         List<DedupAnalysisEntry> entries,
-        List<DedupAnalysisEntry> planned,
+        IReadOnlyList<DedupAnalysisEntry> planned,
         IReadOnlyList<ContentReadResult> reads,
         IReadOnlyDictionary<long, int> buckets)
     {

@@ -14,20 +14,12 @@ import type { DedupSection } from "../workspaceRoutes";
 import type { Library } from "../types";
 
 /**
- * The budget this page states before a run starts. It mirrors the server's accepted ceilings so the
- * reader knows in advance that a bounded scan is a normal outcome, not a failure.
- */
-const limits = {
-  maximum_files: 200_000,
-  maximum_bytes: 2_147_483_648,
-  maximum_file_bytes: 268_435_456,
-  hash_concurrency: 4,
-};
-
-/**
  * The exact-duplicate workbench. Its sections appear in one fixed order — source and budget, start,
  * current job, results, the open group's detail, then recheck and export — so the reader always finds
  * the same thing in the same place, and every section says which report version it describes.
+ *
+ * The recheck it renders is the one the job handle holds. A recheck outlives the button press that
+ * filed it, so its state belongs to the job that filed it rather than to a second copy kept elsewhere.
  */
 export function DedupPage({
   libraries,
@@ -38,7 +30,6 @@ export function DedupPage({
   section,
   selectedId,
   dedup,
-  recheck,
   exported,
   onSelectLibrary,
   onSelectSection,
@@ -52,7 +43,6 @@ export function DedupPage({
   section: DedupSection;
   selectedId: string | null;
   dedup: DedupJobHandle;
-  recheck: DedupRecheck | null;
   exported: DedupExportReceipt | null;
   onSelectLibrary: (libraryId: string) => void;
   onSelectSection: (section: DedupSection) => void;
@@ -87,7 +77,7 @@ export function DedupPage({
           availability: item.availability,
         }))}
         selectedId={selectedId}
-        limits={limits}
+        limits={dedup.job?.limits ?? null}
         scanning={scanning}
         canStart={library !== null && selectedId !== null && !dedup.pending}
         onSelect={onSelectLibrary}
@@ -107,13 +97,7 @@ export function DedupPage({
       ) : library === null ? (
         <LoadingState label="正在读取资源库" />
       ) : (
-        <DedupReport
-          dedup={dedup}
-          section={section}
-          recheck={recheck}
-          exported={exported}
-          onSelectSection={onSelectSection}
-        />
+        <DedupReport dedup={dedup} section={section} exported={exported} onSelectSection={onSelectSection} />
       )}
     </section>
   );
@@ -127,13 +111,11 @@ export function DedupPage({
 function DedupReport({
   dedup,
   section,
-  recheck,
   exported,
   onSelectSection,
 }: {
   dedup: DedupJobHandle;
   section: DedupSection;
-  recheck: DedupRecheck | null;
   exported: DedupExportReceipt | null;
   onSelectSection: (section: DedupSection) => void;
 }) {
@@ -163,7 +145,7 @@ function DedupReport({
         </p>
       )}
       {dedup.page !== null && <DedupResults dedup={dedup} section={section} onSelectSection={onSelectSection} />}
-      {dedup.page !== null && <DedupFollowUp dedup={dedup} recheck={recheck} exported={exported} />}
+      {dedup.page !== null && <DedupFollowUp dedup={dedup} exported={exported} />}
     </>
   );
 }
@@ -305,16 +287,11 @@ function DedupStatistics({ summary }: { summary: DedupSummary }) {
 /**
  * The two closing operations. Both are bound to the version on screen: recheck answers about the plan
  * the reader is looking at, and the export writes that same version rather than the newest one.
+ *
+ * The recheck is a background task, so this section also exists while one is queued: it says so rather
+ * than showing an empty change list, which would read as a plan that nothing changed.
  */
-function DedupFollowUp({
-  dedup,
-  recheck,
-  exported,
-}: {
-  dedup: DedupJobHandle;
-  recheck: DedupRecheck | null;
-  exported: DedupExportReceipt | null;
-}) {
+function DedupFollowUp({ dedup, exported }: { dedup: DedupJobHandle; exported: DedupExportReceipt | null }) {
   const version = dedup.page!.summary.analysis_version;
   return (
     <section className="dedup-followup" aria-labelledby="dedup-followup-heading">
@@ -337,16 +314,28 @@ function DedupFollowUp({
           已导出结果版本 {exported.analysis_version} 的计划文档，文件名 {exported.file_name}。
         </p>
       )}
-      {recheck !== null && <RecheckNotice recheck={recheck} />}
+      {dedup.recheck !== null && <RecheckNotice recheck={dedup.recheck} />}
     </section>
   );
 }
 
 /**
- * The outcome of a recheck. When the plan on screen is no longer current the page says so and asks for a
- * new analysis instead of exporting what it is showing.
+ * The outcome of a recheck. A recheck runs on the background path, so this section also exists while one
+ * is still queued: it says the comparison has not produced an answer yet instead of showing an empty
+ * change list, which would read as "nothing changed". When the plan on screen is no longer current the
+ * page says so and asks for a new analysis instead of exporting what it is showing.
  */
 function RecheckNotice({ recheck }: { recheck: DedupRecheck }) {
+  if (recheck.state === "pending") {
+    return (
+      <div className="dedup-note" role="status">
+        <h3>核对结果</h3>
+        <p>{recheck.state_text}</p>
+        <p>复核在后台任务中执行，本页会自动读取它的结果；现在还没有任何对照结论。</p>
+      </div>
+    );
+  }
+
   return (
     <div className={recheck.plan_still_current ? "dedup-complete" : "dedup-warning"} role="status">
       <h3>核对结果</h3>
@@ -356,6 +345,7 @@ function RecheckNotice({ recheck }: { recheck: DedupRecheck }) {
         {recheck.new_paths.length} 项
       </p>
       {recheck.reasons.length > 0 && <p>{recheck.reasons.join("；")}</p>}
+      {!recheck.completed && <p>{recheck.state_text}</p>}
       {!recheck.plan_still_current && (
         <p>本次核对的结果与当前展示的计划不一致，请重新分析后再导出，避免导出过期计划。</p>
       )}

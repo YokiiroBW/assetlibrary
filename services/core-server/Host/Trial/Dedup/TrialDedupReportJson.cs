@@ -30,26 +30,79 @@ internal static class TrialDedupPageJson
         };
     }
 
-    public static JsonObject Recheck(DedupRecheckView view)
+    /// <summary>
+    /// The answer to a recheck request. A recheck runs on the background path, so this answer exists in
+    /// two states: a receipt that names the durable task and the version it will verify, and the outcome
+    /// once that task has one. The state is a field rather than something a caller infers from which keys
+    /// are present, because a page must never read "not finished yet" as "nothing changed".
+    /// </summary>
+    public static JsonObject Recheck(DedupRecheckState state)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(state);
+        var run = state.Run;
         return new JsonObject
         {
-            ["task_id"] = view.TaskId.ToString("D"),
-            ["status"] = view.Status.ToString(),
-            ["status_text"] = DedupText.Describe(view.Status),
-            ["plan_still_current"] = view.PlanStillCurrent,
-            ["reasons"] = new JsonArray([.. view.Reasons.Select(reason => JsonValue.Create(reason))]),
-            ["changed_paths"] = new JsonArray([.. view.ChangedPaths.Select(path => JsonValue.Create(path))]),
-            ["disappeared_paths"] = new JsonArray([.. view.DisappearedPaths.Select(path => JsonValue.Create(path))]),
-            ["new_paths"] = new JsonArray([.. view.NewPaths.Select(path => JsonValue.Create(path))]),
-            ["plan_digest"] = view.PlanDigest,
-            ["previous_plan_digest"] = view.PreviousPlanDigest,
-            ["analysis_version"] = view.AnalysisVersion,
-            ["report_available"] = view.ReportAvailable,
+            ["state"] = StateName(state.State),
+            ["state_text"] = StateText(state.State),
+            ["task_id"] = state.ReportTaskId.ToString("D"),
+            ["recheck_task_id"] = state.RecheckTaskId.ToString("D"),
+            ["completed"] = run?.Completed ?? false,
+            ["status"] = run is null ? string.Empty : Recount(run.Status),
+            ["status_text"] = run is null ? string.Empty : DedupText.Describe(run.Status),
+            ["plan_still_current"] = run?.PlanStillCurrent ?? false,
+            ["reasons"] = Paths(run?.Reasons),
+            ["changed_paths"] = Paths(run?.ChangedPaths),
+            ["disappeared_paths"] = Paths(run?.DisappearedPaths),
+            ["new_paths"] = Paths(run?.NewPaths),
+            ["plan_digest"] = run?.PlanDigest ?? string.Empty,
+            ["previous_plan_digest"] = run?.PreviousPlanDigest,
+            ["analysis_version"] = run?.AnalysisVersion ?? string.Empty,
+            ["failure_code"] = run?.FailureCode,
+            ["report_available"] = run?.Completed ?? false,
             ["retention_notice"] = DedupJobContractText.RetentionBoundary,
+            ["read_only_notice"] = DedupJobContractText.ReadOnlyBoundary,
         };
     }
+
+    /// <summary>An absent list is an empty list on the wire, never a missing key a page has to guess at.</summary>
+    private static JsonArray Paths(IReadOnlyList<string>? values) =>
+        new([.. (values ?? []).Select(value => JsonValue.Create(value))]);
+
+    /// <summary>
+    /// The wire names of the recount outcomes, as one table. The module states the same vocabulary for the
+    /// evidence it records in an export, and a table here keeps the two spellings comparable by eye rather
+    /// than by a second copy of the same branch list.
+    /// </summary>
+    private static readonly Dictionary<DedupRecountStatus, string> RecountNames = new()
+    {
+        [DedupRecountStatus.Identical] = "identical",
+        [DedupRecountStatus.SourceChanged] = "source_changed",
+        [DedupRecountStatus.UnreadableNow] = "unreadable_now",
+        [DedupRecountStatus.Disappeared] = "disappeared",
+        [DedupRecountStatus.NewContent] = "new_content",
+        [DedupRecountStatus.Timeout] = "timeout",
+    };
+
+    private static string Recount(DedupRecountStatus status) =>
+        RecountNames.TryGetValue(status, out var name)
+            ? name
+            : throw new ArgumentOutOfRangeException(nameof(status));
+
+    private static string StateName(RecheckRunState state) => state switch
+    {
+        RecheckRunState.Pending => "pending",
+        RecheckRunState.Completed => "completed",
+        RecheckRunState.Refused => "refused",
+        _ => throw new ArgumentOutOfRangeException(nameof(state)),
+    };
+
+    private static string StateText(RecheckRunState state) => state switch
+    {
+        RecheckRunState.Pending => "复核已在后台排队，完成后结果才会显示。",
+        RecheckRunState.Completed => "复核已完成。",
+        RecheckRunState.Refused => "复核未执行，报告版本已不再保留或被取代。",
+        _ => throw new ArgumentOutOfRangeException(nameof(state)),
+    };
 }
 
 /// <summary>
@@ -76,13 +129,7 @@ internal static class TrialDedupExportJson
             ["retention_notice"] = document.RetentionBoundary,
             ["grants_file_operation"] = document.GrantsFileOperation,
             ["read_only_notice"] = DedupJobContractText.ReadOnlyBoundary,
-            ["limits"] = new JsonObject
-            {
-                ["maximum_files"] = document.Limits.MaximumFiles,
-                ["maximum_bytes"] = document.Limits.MaximumBytes,
-                ["maximum_file_bytes"] = document.Limits.MaximumFileBytes,
-                ["hash_concurrency"] = document.Limits.HashConcurrency,
-            },
+            ["limits"] = TrialDedupJson.Limits(document.Limits),
             ["sources"] = new JsonArray([.. document.Sources.Select(Source)]),
             ["rejected_sources"] = new JsonArray([.. document.RejectedSources.Select(Rejected)]),
             ["statistics"] = TrialDedupJson.Statistics(document.Statistics),

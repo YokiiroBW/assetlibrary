@@ -44,7 +44,7 @@ public sealed class DedupAnalyzer
                 DedupRecountLimits.Derive(request.Plan),
                 request.Timeout),
             cancellationToken).ConfigureAwait(false);
-        return DedupPlanPolicy.Recount(request.Plan, current);
+        return DedupPlanPolicy.Recount(request.Plan, current, request.IncompleteSnapshot);
     }
 }
 
@@ -140,7 +140,7 @@ internal sealed class DedupAnalysisRunner
             var read = await batches
                 .ReadAsync(planned, request.Limits, bounded.Token)
                 .ConfigureAwait(false);
-            var resolved = DedupReadPlanner.Apply(entries, planned, read, buckets);
+            var resolved = DedupReadPlanner.Apply(entries, read.Attempted, read.Reads, buckets);
             return plans.Build(
                 request,
                 scope,
@@ -148,7 +148,7 @@ internal sealed class DedupAnalysisRunner
                 DedupAnalysisPolicy.BuildGroups(resolved),
                 DedupAnalysisPolicy.DetectRelations(resolved),
                 failures,
-                scanBoundsReached,
+                scanBoundsReached || read.Attempted.Count < planned.Count,
                 DedupReadPlanner.SelectStatus(resolved, failures));
         }
         catch (OperationCanceledException) when (
@@ -168,13 +168,18 @@ internal sealed class DedupAnalysisRunner
 }
 
 /// <summary>
-/// A recheck must use the ceilings the preview was produced under, otherwise "unchanged" could mean
-/// "not looked at this run".
+/// A recheck must be able to look at least as far as the preview it is verifying, otherwise a source
+/// that gained a file would be reported as one whose recorded files disappeared. The ceilings are
+/// therefore never tighter than the installation's: what a recheck may compare is bounded by the same
+/// budget every other run is bounded by, and the case where a run really could not cover its own
+/// evidence is reported as an incomplete snapshot instead of being hidden behind a smaller ceiling.
 /// </summary>
 internal static class DedupRecountLimits
 {
-    public static DedupAnalysisLimits Derive(DedupCurationPlan plan) =>
-        new(
+    public static DedupAnalysisLimits Derive(DedupCurationPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        return new DedupAnalysisLimits(
             Math.Max(plan.Statistics.ObservedEntries, DedupAnalysisLimits.DefaultMaximumFiles),
             Math.Max(plan.Statistics.ReadBytes, DedupAnalysisLimits.DefaultMaximumBytes),
             plan.Items.Count == 0
@@ -183,4 +188,5 @@ internal static class DedupRecountLimits
                     plan.Items.Max(item => item.Length),
                     1,
                     DedupAnalysisLimits.DefaultMaximumFileBytes));
+    }
 }

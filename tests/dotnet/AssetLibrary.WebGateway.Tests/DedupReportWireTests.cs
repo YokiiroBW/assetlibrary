@@ -36,7 +36,8 @@ public sealed class DedupReportWireTests
             CreatedAt: new DateTimeOffset(2026, 9, 17, 9, 0, 0, TimeSpan.Zero),
             UpdatedAt: new DateTimeOffset(2026, 9, 17, 9, 4, 0, TimeSpan.Zero),
             FailureCode: null,
-            RetentionBoundary: DedupJobContractText.RetentionBoundary);
+            RetentionBoundary: DedupJobContractText.RetentionBoundary,
+            Limits: DedupAnalysisLimits.Default);
 
         var wire = Decode(TrialDedupJson.Job(view));
 
@@ -55,7 +56,8 @@ public sealed class DedupReportWireTests
             "updated_at",
             "failure_code",
             "retention_notice",
-            "read_only_notice");
+            "read_only_notice",
+            "limits");
         Wire.Text(wire, "task_id", DedupWireSample.TaskId.ToString("D"));
         Wire.Text(wire, "retention_notice", DedupJobContractText.RetentionBoundary);
         Wire.Text(wire, "read_only_notice", DedupJobContractText.ReadOnlyBoundary);
@@ -63,6 +65,16 @@ public sealed class DedupReportWireTests
         // only by accident here, so the answer states it.
         Wire.Text(wire, "failure_code", null);
         Assert.IsTrue(wire["report_available"]!.GetValue<bool>());
+
+        // The budget a page states is the budget the server accepted, so it travels with the job.
+        var limits = Wire.Node(wire, "limits");
+        Wire.Exact(limits, "maximum_files", "maximum_bytes", "maximum_file_bytes", "hash_concurrency");
+        Assert.AreEqual(
+            DedupAnalysisLimits.Default.MaximumBytes,
+            limits["maximum_bytes"]!.GetValue<long>());
+        Assert.AreEqual(
+            DedupAnalysisLimits.Default.MaximumFileBytes,
+            limits["maximum_file_bytes"]!.GetValue<int>());
     }
 
     [TestMethod]
@@ -181,46 +193,6 @@ public sealed class DedupReportWireTests
         Wire.Text(member, "state_text", DedupText.Describe(DedupPlanItemState.Analyzed));
         Wire.Text(member, "read_state_text", DedupText.Describe(DedupItemReadState.ContentVerified));
         Assert.AreEqual(2, Wire.Items(group, "members").Count);
-    }
-
-    [TestMethod]
-    public void RecheckAnswerKeepsANotRecheckedPlanDistinguishableFromACurrentOne()
-    {
-        var view = new DedupRecheckView(
-            DedupRecountStatus.SourceChanged,
-            PlanStillCurrent: false,
-            Reasons: ["内容已变化：photos/beach.png"],
-            ChangedPaths: ChangedPath,
-            DisappearedPaths: [],
-            NewPaths: [],
-            PlanDigest: "digest-4f2a9c7b",
-            PreviousPlanDigest: "digest-0f0f0f0f",
-            AnalysisVersion: DedupWireSample.Version(2),
-            TaskId: DedupWireSample.TaskId,
-            ReportAvailable: true);
-
-        var wire = Decode(TrialDedupPageJson.Recheck(view));
-
-        Wire.Exact(
-            wire,
-            "task_id",
-            "status",
-            "status_text",
-            "plan_still_current",
-            "reasons",
-            "changed_paths",
-            "disappeared_paths",
-            "new_paths",
-            "plan_digest",
-            "previous_plan_digest",
-            "analysis_version",
-            "report_available",
-            "retention_notice");
-        Wire.Text(wire, "status", nameof(DedupRecountStatus.SourceChanged));
-        Wire.Text(wire, "status_text", DedupText.Describe(DedupRecountStatus.SourceChanged));
-        Wire.Text(wire, "previous_plan_digest", "digest-0f0f0f0f");
-        Assert.IsFalse(wire["plan_still_current"]!.GetValue<bool>());
-        CollectionAssert.AreEqual(ChangedPath, Wire.Items(wire, "changed_paths").Select(Wire.Text).ToArray());
     }
 
 

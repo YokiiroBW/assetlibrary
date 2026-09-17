@@ -45,35 +45,52 @@ internal sealed class DedupScopeResolver(
 
 /// <summary>
 /// Submits planned reads in bounded batches so the in-flight window and the cancellation scope stay
-/// explicit. Every answer is checked against its request before it is accepted.
+/// explicit. Every answer is checked against its request before it is accepted, and the byte ceiling is
+/// re-accounted against the bytes actually read: the length recorded during discovery is only what the
+/// file was then, and a file that grew since must not be able to spend a budget that was already used.
 /// </summary>
 internal sealed class DedupContentReadBatch(IDedupContentReader contentReader)
 {
-    public async ValueTask<IReadOnlyList<ContentReadResult>> ReadAsync(
+    public async ValueTask<DedupContentReadOutcome> ReadAsync(
         List<DedupAnalysisEntry> planned,
         DedupAnalysisLimits limits,
         CancellationToken cancellationToken)
     {
         var results = new List<ContentReadResult>(planned.Count);
         var batchSize = Math.Max(limits.HashConcurrency * 8, 16);
+        var remaining = limits.MaximumBytes;
         for (var offset = 0; offset < planned.Count; offset += batchSize)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var requests = new DedupContentReadRequest[Math.Min(batchSize, planned.Count - offset)];
-            for (var index = 0; index < requests.Length; index++)
+            var requests = new List<DedupContentReadRequest>(Math.Min(batchSize, planned.Count - offset));
+            for (var index = offset; index < Math.Min(offset + batchSize, planned.Count); index++)
             {
-                var entry = planned[offset + index];
-                requests[index] = new DedupContentReadRequest(
+                var entry = planned[index];
+                if (entry.Length > remaining)
+                {
+                    // The planned byte total already admitted this file, but the budget is spent on
+                    // bytes that were really read instead of on lengths that were merely seen.
+                    planned[index] = entry with { SkipReason = DedupSkipReason.ExceedsBudget };
+                    continue;
+                }
+
+                remaining -= entry.Length;
+                requests.Add(new DedupContentReadRequest(
                     entry.SourceIdentity,
                     entry.Root,
                     entry.RelativePath,
-                    limits.MaximumFileBytes);
+                    limits.MaximumFileBytes));
+            }
+
+            if (requests.Count == 0)
+            {
+                continue;
             }
 
             var read = await contentReader
                 .ReadAsync(requests, limits.HashConcurrency, cancellationToken)
                 .ConfigureAwait(false);
-            if (read.Count != requests.Length)
+            if (read.Count != requests.Count)
             {
                 throw new InvalidOperationException("The content reader must answer every request exactly once.");
             }
@@ -81,6 +98,15 @@ internal sealed class DedupContentReadBatch(IDedupContentReader contentReader)
             results.AddRange(read);
         }
 
-        return results;
+        var attempted = planned.Where(entry => entry.SkipReason != DedupSkipReason.ExceedsBudget).ToArray();
+        return new DedupContentReadOutcome(results, attempted);
     }
 }
+
+/// <summary>
+/// What one read pass produced: the answers, in request order, and the entries those answers belong to.
+/// The two are kept together because a re-accounted budget can leave planned entries unread.
+/// </summary>
+internal sealed record DedupContentReadOutcome(
+    IReadOnlyList<ContentReadResult> Reads,
+    IReadOnlyList<DedupAnalysisEntry> Attempted);

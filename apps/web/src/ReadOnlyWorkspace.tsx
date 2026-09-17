@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AssetLinkClient } from "./assetLinkClient";
 import { isAccessFailure } from "./hooks/queryState";
 import { useBrowse } from "./hooks/useBrowse";
@@ -9,25 +9,46 @@ import { useEntry, useLibrary } from "./hooks/useResource";
 import { useEntrySelection } from "./hooks/useEntrySelection";
 import { useNarrowWorkspace } from "./hooks/useNarrowWorkspace";
 import { useWorkspaceNavigation } from "./hooks/useWorkspaceNavigation";
-import { RegisterLibraryForm } from "./RegisterLibraryForm";
-import { LibraryCategoryDialog } from "./LibraryCategoryDialog";
-import { LibraryCatalogPage } from "./LibraryCatalogPage";
-import { ScanTasksPage } from "./ScanTasksPage";
+import { WorkspaceBreadcrumbs, WorkspaceHeader, WorkspaceSidebar } from "./WorkspaceNavigation";
 import { EntryCollectionPage } from "./EntryCollectionPage";
 import { EntryDetails } from "./EntryDetails";
-import { WorkspaceBreadcrumbs, WorkspaceHeader, WorkspaceSidebar } from "./WorkspaceNavigation";
-import { EmptyState, ErrorState, WorkspaceLink } from "./WorkspacePrimitives";
+import { RegisterLibraryForm } from "./RegisterLibraryForm";
+import { LibraryCategoryDialog } from "./LibraryCategoryDialog";
+import { ImagePreview } from "./ImagePreview";
+import { EmptyState, ErrorState, LoadingState, WorkspaceLink } from "./WorkspacePrimitives";
 import { browseRoute, collectionKey, dedupRoute } from "./workspaceRoutes";
-import type { DedupSection } from "./workspaceRoutes";
-import { DedupPage } from "./dedup/DedupPage";
-import { DedupClient } from "./dedup/dedupClient";
-import { useDedupJob } from "./hooks/useDedupJob";
-import type { DedupExportReceipt, DedupFindingKind, DedupRecheck } from "./dedup/dedupTypes";
+import type { DedupExportReceipt } from "./dedup/dedupTypes";
 import { parentPath } from "./libraryMetadata";
 import type { BrowserSession, BrowseOptions, EntryDetail, Library, SearchOptions } from "./types";
 import type { EntryRow } from "./VirtualEntryList";
 import { ImageRequests } from "./imageRequests";
-import { ImagePreview } from "./ImagePreview";
+
+/**
+ * The three overlays the shell can raise — registering a library, editing its category and the quick
+ * look image — are loaded when the reader asks for one. They are dialogs over the view that is already
+ * on screen, so nothing needs their bytes until one is opened.
+ */
+
+/**
+ * The resource-library views — the catalog, its forms and the scan task page — are loaded when the
+ * reader opens one of their routes rather than with the workspace. They are whole views the reader only
+ * reaches from the navigation, so a reader who stays in the entry lists never pays for their bytes. The
+ * shell still owns where they navigate and what they are allowed to do; only their rendering is deferred.
+ */
+const LibraryAdmin = lazy(async () => {
+  const module = await import("./LibraryAdmin");
+  return { default: module.LibraryAdmin };
+});
+
+/**
+ * The exact-duplicate workbench is loaded when the reader opens its route rather than with the shell.
+ * The page and its own conversation are a separate view of the same session, so the reader who never
+ * opens it never pays for its bytes; the shell hands it the same adapter and route state as before.
+ */
+const DedupWorkbench = lazy(async () => {
+  const module = await import("./dedup/DedupWorkbench");
+  return { default: module.DedupWorkbench };
+});
 
 export function ReadOnlyWorkspace({
   session,
@@ -56,18 +77,6 @@ export function ReadOnlyWorkspace({
   const quick = quickLook?.route === route ? quickLook.row : null;
   const [imageRevision, setImageRevision] = useState(0);
   const [dedupExport, setDedupExport] = useState<DedupExportReceipt | null>(null);
-  const [dedupRecheck, setDedupRecheck] = useState<DedupRecheck | null>(null);
-  // The workbench speaks through the same adapter as every other view, so the browser keeps exactly one
-  // place that reaches the network and one place that attaches the session's CSRF header.
-  const dedupClient = useMemo(() => new DedupClient(client), [client]);
-  const dedupSection: DedupFindingKind = route.page === "dedup" ? findingKind(route.kind) : "ByteDuplicateGroup";
-  const dedupJob = useDedupJob(
-    dedupClient,
-    route.page === "dedup" ? route.libraryId : null,
-    dedupSection,
-    setDedupExport,
-    setDedupRecheck,
-  );
   const [imageAccessLoss, setImageAccessLoss] = useState<{ libraryId: string } | null>(null);
   const imageAccessLost = useCallback(
     (status: number, libraryId: string) => {
@@ -303,45 +312,41 @@ export function ReadOnlyWorkspace({
         <div className="workspace-main" id="workspace-content" tabIndex={-1}>
           <WorkspaceBreadcrumbs route={route} library={library} navigate={navigate} />
           <div className={`page-layout ${collection && !narrow ? "with-details" : ""}`}>
-            {(route.page === "home" || route.page === "libraries") && (
-              <LibraryCatalogPage
-                home={route.page === "home"}
-                category={route.page === "libraries" ? route.category : null}
-                libraries={libraries}
-                admin={session.is_system_administrator}
-                navigate={navigate}
-                register={() => setRegistering(true)}
-                editCategory={setEditingCategory}
-              />
-            )}
-            {route.page === "tasks" && (
-              <ScanTasksPage
-                libraries={libraries}
-                library={library}
-                selectedId={route.libraryId}
-                libraryError={resource.status === "error" ? resource.message : null}
-                retryLibrary={resource.reload}
-                scan={scan}
-                admin={session.is_system_administrator}
-                navigate={navigate}
-              />
+            {(route.page === "home" || route.page === "libraries" || route.page === "tasks") && (
+              <Suspense fallback={<LoadingState label="正在载入资源库管理" />}>
+                <LibraryAdmin
+                  route={route.page}
+                  category={route.page === "libraries" ? route.category : null}
+                  libraryId={route.page === "tasks" ? route.libraryId : null}
+                  libraries={libraries}
+                  library={library}
+                  libraryError={resource.status === "error" ? resource.message : null}
+                  retryLibrary={resource.reload}
+                  scan={scan}
+                  admin={session.is_system_administrator}
+                  navigate={navigate}
+                  register={() => setRegistering(true)}
+                  editCategory={setEditingCategory}
+                />
+              </Suspense>
             )}
             {route.page === "dedup" && (
-              <DedupPage
-                libraries={libraries}
-                library={library}
-                libraryError={resource.status === "error" ? resource.message : null}
-                retryLibrary={resource.reload}
-                admin={session.is_system_administrator}
-                section={route.kind}
-                selectedId={route.libraryId}
-                dedup={dedupJob}
-                recheck={dedupRecheck}
-                exported={dedupExport}
-                onSelectLibrary={(libraryId) => navigate(dedupRoute(libraryId || null))}
-                onSelectSection={(section) => navigate(dedupRoute(route.libraryId, { kind: section }))}
-                onStart={dedupJob.start}
-              />
+              <Suspense fallback={<LoadingState label="正在载入精确查重工作台" />}>
+                <DedupWorkbench
+                  client={client}
+                  libraries={libraries}
+                  library={library}
+                  libraryError={resource.status === "error" ? resource.message : null}
+                  retryLibrary={resource.reload}
+                  admin={session.is_system_administrator}
+                  section={route.kind}
+                  selectedId={route.libraryId}
+                  exported={dedupExport}
+                  onExported={setDedupExport}
+                  onSelectLibrary={(libraryId) => navigate(dedupRoute(libraryId || null))}
+                  onSelectSection={(section) => navigate(dedupRoute(route.libraryId, { kind: section }))}
+                />
+              </Suspense>
             )}
             {collection && (
               <div className="collection-wrapper">
@@ -437,12 +442,4 @@ export function ReadOnlyWorkspace({
       )}
     </main>
   );
-}
-
-/**
- * Maps the route's section name onto the server's finding kind. Navigation only carries the name of the
- * open section; which kinds exist and what they mean is the contract's business.
- */
-function findingKind(section: DedupSection): DedupFindingKind {
-  return section === "groups" ? "ByteDuplicateGroup" : section === "unverified" ? "Unverified" : "Unreadable";
 }
