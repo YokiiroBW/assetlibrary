@@ -53,7 +53,9 @@ test("starting analysis shows the server's own state and never fabricates a resu
   await page.screenshot({ path: testInfo.outputPath("dedup-scanning-1440.png"), animations: "disabled" });
 });
 
-test("a complete run lists groups, counts and evidence separately from unverified items", async ({ page }, testInfo) => {
+test("a complete run lists groups, counts and evidence separately from unverified items", async ({
+  page,
+}, testInfo) => {
   const state = await mockDedup(page, {
     job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false, analysis_version: "v1" }),
   });
@@ -66,7 +68,11 @@ test("a complete run lists groups, counts and evidence separately from unverifie
   await expect(page.getByText(/强哈希一致/).first()).toBeVisible();
   await expect(page.getByText("本次不可读", { exact: true })).toBeVisible();
   await expect(page.getByText(/本次分析覆盖|未能读取|达到预算上限/).first()).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath("dedup-results-1440.png"), animations: "disabled", fullPage: true });
+  await page.screenshot({
+    path: testInfo.outputPath("dedup-results-1440.png"),
+    animations: "disabled",
+    fullPage: true,
+  });
   const results = state.requests.filter((request) => request.operation === "results");
   expect(results).toHaveLength(1);
   expect(results[0].body.kind).toBe("ByteDuplicateGroup");
@@ -169,7 +175,11 @@ test("cancelling is a request about the analysis only and keeps the page honest"
   await page.getByRole("button", { name: "取消分析" }).click();
   await expect(page.getByText(/已请求取消，仅取消分析本身/)).toBeVisible();
   await expect(page.getByRole("button", { name: "取消分析" })).toBeDisabled();
-  await page.screenshot({ path: testInfo.outputPath("dedup-cancelled-1440.png"), animations: "disabled", fullPage: true });
+  await page.screenshot({
+    path: testInfo.outputPath("dedup-cancelled-1440.png"),
+    animations: "disabled",
+    fullPage: true,
+  });
   const cancel = state.requests.find((request) => request.operation === "cancel");
   expect(Object.keys(cancel.body).sort()).toEqual(["library_id", "operation_key"]);
 });
@@ -217,10 +227,15 @@ test("an incomplete scan states its limits and labels the budget evidence apart 
   // A partial run states how much of the budget it used rather than presenting itself as a complete scan.
   await expect(page.getByText(/已读取/)).toBeVisible();
   await expect(page.getByText(/达到预算上限|未能读取/).first()).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath("dedup-incomplete-1440.png"), animations: "disabled", fullPage: true });
+  await page.screenshot({
+    path: testInfo.outputPath("dedup-incomplete-1440.png"),
+    animations: "disabled",
+    fullPage: true,
+  });
 });
 
-test("opening a group in the wide layout puts its detail beside the list and returns focus on close", async ({  page,
+test("opening a group in the wide layout puts its detail beside the list and returns focus on close", async ({
+  page,
 }, testInfo) => {
   await mockDedup(page, {
     job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
@@ -237,6 +252,10 @@ test("opening a group in the wide layout puts its detail beside the list and ret
   expect(detail.x).toBeGreaterThan(list.x + list.width - 1);
   expect(Math.round(detail.width)).toBe(360);
   await page.screenshot({ path: testInfo.outputPath("dedup-detail-1440.png"), animations: "disabled", fullPage: true });
+  // Closing returns the reader to the row that opened the detail, and the next section still works.
+  await page.getByRole("button", { name: "关闭重复组详情" }).click();
+  await expect(page.locator(".dedup-detail")).toHaveCount(0);
+  await expect(row).toBeFocused();
 });
 
 test("a discarded report is stated as unreadable rather than shown as no duplicates", async ({ page }) => {
