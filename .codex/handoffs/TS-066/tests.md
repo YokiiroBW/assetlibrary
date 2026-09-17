@@ -19,10 +19,10 @@
 - `AssetLibrary.TransferOperation.Tests` 64 / 0 / 64
 - `AssetLibrary.ReadCore.Tests` 106 / 25 / 131（含 TS065 的 49 项查重用例，跳过项均为既有 PostgreSQL/POSIX 条件用例）
 - `AssetLibrary.Packaging.Tests` 63 / 0 / 63
-- `AssetLibrary.WebGateway.Tests` 112 / 4 / 116（含本卡新增的 8 项线格式契约用例）
+- `AssetLibrary.WebGateway.Tests` 115 / 4 / 119（含本卡新增的 8 项线格式契约用例与 3 项端点路由用例）
 - `AssetLibrary.Preview.Tests` 111 / 24 / 135
 
-合计 **503 通过 / 53 跳过 / 0 失败**。
+合计 **506 通过 / 53 跳过 / 0 失败**。
 
 ### 1.1 线格式契约用例（`DedupReportWireTests` / `DedupExportWireTests` / `DedupRefusalWireTests`）
 
@@ -41,6 +41,25 @@
 这些用例的**有效性经过反向探针确认**：把 `TrialDedupJson.Job` 里的 `analysis_version` 临时改名为
 `analysis_ver`，用例立即失败并打印完整键集合（`keys: task_id,...,analysis_ver,...`）；改回后恢复通过。
 因此这不是一组恒真的断言，而是真正锁住了 C# ↔ TypeScript 之间唯一没有被其他门禁覆盖的接缝。
+
+### 1.2 端点路由与只读边界用例（`DedupEndpointRoutingTests`，3 项）
+
+`TrialWebEndpoints.Configure` 把六个操作注册在既有 `/assetlink/v1` 面内，而浏览器套件用的是夹具拦截，
+所以「路由真的存在」这件事原本没有门禁。这组用例在环回地址上以**真实 HTTPS**（自签证书 + 测试信任回调）
+启动一个最小宿主并挂上与试运行宿主相同的 `TrialDedupEndpoints.Map`，然后：
+
+- 逐个 POST 六个操作路径，断言 **403 `permission_denied`**（而不是 404）——路径存在且被守卫；
+- 断言未知路径 `/assetlink/v1/dedup/analyse` 返回 404，GET `/status` 返回 405——查询绝不能启动或改变分析；
+- 直接对共享读取器 `AssetLinkRequestBody` 断言：`Content-Length` 超 64 KiB 抛
+  `RequestBodyTooLargeException`（对应 413）、流式超限同样抛错、非 JSON 内容类型抛
+  `UnsupportedRequestMediaTypeException`（对应 415）。
+
+同样经过反向探针：把 `Operations` 里的 `export` 临时改名为 `export_plan`，用例立即以
+`Forbidden 应为 / NotFound 实际` 失败；改回后恢复通过。生产文件已确认与提交版本一致（`git diff` 为空）。
+
+这组用例只覆盖到授权之后的那一步：认证中间件依赖数据库账号存储（`GatewayAuthenticationRuntime`），
+本机不可用，因此「已登录管理员在环回地址上走通六个操作」这一条仍未在任何门禁中执行，如实记录在
+第 5 节。
 
 | 命令 | 结果 |
 | --- | --- |
@@ -102,6 +121,7 @@
   重新向服务端读取状态而不是自行猜测（`revision` 触发重读）。拒绝码与状态码的对应由
   `DedupRefusalWireTests` 锁定。
 - **Host 与页面之间的键与类型**：见 1.1（本卡新增的 8 项线格式契约用例）。
+- **六个操作的路由与只读边界**：见 1.2（本卡新增的 3 项端点路由用例）。
 - **取消/重启/旧租约迟到结果**：TaskHealth 的租约围栏与 `DedupJobWorker` 的 `LeaseLostException` 负责；
   页面只展示服务端状态，取消后按钮禁用。
 - **任务/报告版本绑定游标**：游标由服务端 HMAC 签发并绑定 `DedupReportKey`；页面把游标当不透明字符串使用，
@@ -115,4 +135,7 @@
   需要 PostgreSQL 服务或二进制（`--postgres-bin` / `--postgres-external`），本机二者都没有，也没有
   docker，因此未运行。`tests/integration/read-only-trial/browser.mjs` 目前也只有库登记步骤，没有查重操作；
   若要在真实环境覆盖本卡，需要在那里补一个查重步骤，再由具备 PostgreSQL 的环境执行。
+- **已登录管理员走通六个操作**：认证中间件需要数据库账号存储
+  （`GatewayAuthenticationRuntime` 依赖 `PostgresAuthenticationStore`），本机不可用，因此端到端用例只覆盖
+  到「未登录一律 403」为止；授权之后的调用链由 1.1 的线格式用例与 13 项浏览器用例分别覆盖两端。
 - **多实例并发**：本卡未新增调度器，跨实例互斥由 TaskHealth 既有租约保证，未在本机做多进程验证。

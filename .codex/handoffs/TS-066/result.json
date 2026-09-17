@@ -66,15 +66,15 @@
     "deletions": 65
   },
   "tests": {
-    "passed": 582,
+    "passed": 585,
     "failed": 0,
     "skipped": 53,
     "report": ".codex/handoffs/TS-066/tests.md",
     "dotnet": {
-      "passed": 503,
+      "passed": 506,
       "failed": 0,
       "skipped": 53,
-      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests grew by the 8 new dedup wire-contract cases."
+      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests grew by 8 dedup wire-contract cases and 3 dedup endpoint-routing cases."
     },
     "browser": {
       "passed": 79,
@@ -90,7 +90,8 @@
     "release_gate": "check_release_gates.py --target v0.1-start: RELEASE_GATE_ALLOWED",
     "web_boundary": "validate_web_source.py passed; validate_web_dependencies.py --require-build-artifacts passed",
     "missing": [
-      "Real PostgreSQL/HTTPS/Chromium end-to-end (tests/integration/read-only-trial/run_e2e.py) was NOT executed: no PostgreSQL service or binaries and no docker on this machine. It also has no dedup step yet. Recorded as missing evidence, not as passing."
+      "Real PostgreSQL/HTTPS/Chromium end-to-end (tests/integration/read-only-trial/run_e2e.py) was NOT executed: no PostgreSQL service or binaries and no docker on this machine. It also has no dedup step yet. Recorded as missing evidence, not as passing.",
+      "A signed-in administrator walking the six operations over HTTPS was NOT executed: the trial authentication middleware needs a database-backed GatewayAuthenticationRuntime, so the endpoint-routing cases cover the anonymous 403 boundary and the wire cases cover the answer shapes, but not the authorized round trip."
     ]
   },
   "risks": [
@@ -128,7 +129,8 @@
       "validate_web_source.py passed: exactly one fetch( in the Web source (the AssetLink adapter), no browser storage, no console logging and no write capability in production source.",
       "dotnet build with TreatWarningsAsErrors passed at zero warnings; CA1506/ASP0016/CS0122/CS8754 findings were fixed rather than suppressed where a real fix existed.",
       "Chromium regression suite: 79 passed / 0 failed, including 13 workbench cases covering denial, CSRF header presence, cancel, stale recheck, discarded report, long Chinese names, keyboard order, 320/390/1024/1440 viewports, dark mode and reduced motion.",
-      "Eight new dedup wire-contract cases serialize the real Host builders (TrialDedupJson, TrialDedupPageJson, TrialDedupExportJson) and assert the exact key set and JSON token kinds the page decoder requires, that nullable fields appear as explicit nulls, that source_failures is an object array, that the exported document denies file-operation authority, and that every number fits a JavaScript safe integer. The assertion was proved effective by a reverse probe: renaming analysis_version to analysis_ver made the case fail immediately."
+      "Eight new dedup wire-contract cases serialize the real Host builders (TrialDedupJson, TrialDedupPageJson, TrialDedupExportJson) and assert the exact key set and JSON token kinds the page decoder requires, that nullable fields appear as explicit nulls, that source_failures is an object array, that the exported document denies file-operation authority, and that every number fits a JavaScript safe integer. The assertion was proved effective by a reverse probe: renaming analysis_version to analysis_ver made the case fail immediately.",
+      "Three new endpoint-routing cases start a minimal host over real HTTPS on a loopback port with the same route map the trial host installs, and prove all six operations answer 403 rather than 404 to an anonymous caller, that an unknown path is 404 and a GET is 405, and that the shared bounded body reader refuses an oversized or non-JSON body. Proved effective by a reverse probe: renaming the export route made the case fail with Forbidden expected / NotFound actual."
     ],
     "technical_debt": [
       "In-process report registry: bounded and disclosed, but not restart-durable. A durable variant needs an AssetIdentity-owned migration starting at 0024, which this card does not add.",
