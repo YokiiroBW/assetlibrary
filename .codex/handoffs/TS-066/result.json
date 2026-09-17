@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "TS-066",
   "title": "资产库精确查重网页工作台",
@@ -7,10 +7,10 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "2d890e72d9a49cc49d1ce91b014c25b433e0bb7e",
+  "commit": "eacf26edd60b15a52733431610ec87d3a4c660c0",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
-  "fix_round_from_commit": "2d890e72d9a49cc49d1ce91b014c25b433e0bb7e",
-  "fix_round_authority": "docs/development/dsh/TS-066-review-fixes.md",
+  "fix_round_from_commit": "e492d28",
+  "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-2.md",
   "changed_files": [
     ".codex/handoffs/TS-066/module-boundaries.md",
     ".codex/handoffs/TS-066/summary.md",
@@ -75,27 +75,27 @@
   ],
   "changed_contracts": [],
   "diff": {
-    "files": 63,
-    "insertions": 8698,
-    "deletions": 113,
-    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..32d75b7f35a40225f7c01ed7b435a11d6d268d18.",
+    "files": 75,
+    "insertions": 9738,
+    "deletions": 160,
+    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..eacf26edd60b15a52733431610ec87d3a4c660c0.",
     "fix_round": {
-      "files": 45,
-      "insertions": 1999,
-      "deletions": 572,
-      "note": "The fix round itself, against 2d890e72d9a49cc49d1ce91b014c25b433e0bb7e."
+      "files": 24,
+      "insertions": 1183,
+      "deletions": 191,
+      "note": "The second fix round, against e492d28."
     }
   },
   "tests": {
-    "passed": 592,
+    "passed": 516,
     "failed": 0,
     "skipped": 53,
     "report": ".codex/handoffs/TS-066/tests.md",
     "dotnet": {
-      "passed": 509,
+      "passed": 516,
       "failed": 0,
       "skipped": 53,
-      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests grew by 13 dedup wire-contract cases and 6 dedup endpoint-routing cases (115 -> 118 passing, 4 skipped)."
+      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests grew by three DedupRecheckFence cases in this round and ReadCore by four growth/budget cases; WebGateway is 121 passing / 4 skipped."
     },
     "browser": {
       "passed": 83,
@@ -104,24 +104,24 @@
       "repeat_each_2": "22 passed / 0 failed (previous round, unchanged cases)"
     },
     "strict_build": "passed, zero warnings/errors with TreatWarningsAsErrors",
-    "format": "dotnet format --verify-no-changes passed; prettier --check passed",
-    "typecheck": "tsc --noEmit passed",
-    "production_build": "vite build passed: entry index-*.js 297,973 B + DedupWorkbench-*.js 34,415 B + LibraryAdmin-*.js 7,959 B = 340,347 B total (budget 344,064 B), CSS 32,394 B (budget 32,768 B)",
-    "repository": "verify_repository.py passed (fast architecture gate, 14 architecture tests)",
+    "format": "dotnet format --verify-no-changes passed; prettier --check . ../../tests/web passed",
+    "typecheck": "tsc --project tsconfig.json --noEmit passed. The worktree's pnpm store was missing @types/react, @types/react-dom and @tanstack/react-virtual, so those three locked versions were relinked from another AssetLibrary worktree before the check; the earlier `tsc --noEmit` that returned 0 was type-resolving nothing and is not counted as evidence. No tracked file changed.",
+    "production_build": "vite build passed: entry index-*.js 297,503 B + DedupWorkbench-*.js 33,876 B + LibraryAdmin-*.js 7,959 B = 339,338 B total, CSS 32,394 B",
+    "repository": "verify_repository.py FAILED: it runs validate_web_dependencies.py, which reports the build over the restored budget (javascript 339,338 > 327,680 and javascript_and_css 371,732 > 360,448). Every other check inside verify_repository.py passes; the single failing leaf is the Web size budget, escalated rather than waived.",
     "release_gate": "check_release_gates.py --target v0.1-start: RELEASE_GATE_ALLOWED",
-    "web_boundary": "validate_web_source.py passed; validate_web_dependencies.py --require-build-artifacts passed; validate_dotnet_source.py passed (636 files)",
+    "web_boundary": "validate_web_source.py passed; validate_dotnet_source.py passed (642 files); validate_web_dependencies.py --require-build-artifacts FAILED on the restored JavaScript budget only (its dependency, licence and allow-list parts pass)",
     "missing": [
-      "Real PostgreSQL/HTTPS/Chromium end-to-end (tests/integration/read-only-trial/run_e2e.py) was NOT executed: no PostgreSQL service or binaries, no docker and no wsl on this machine. It also has no dedup step yet. Recorded as missing evidence, not as passing. Exact commands and the missing items are in docs/handoffs/TS-066.md section 7.4.",
-      "A signed-in administrator walking the six operations over HTTPS was NOT executed: the trial authentication middleware needs a database-backed GatewayAuthenticationRuntime, so the endpoint-routing cases cover the anonymous 403 boundary and the wire cases cover the answer shapes, but not the authorized round trip.",
-      "The recheck path under a real durable task store was NOT executed for the same reason: acceptance rules, payload encoding/decoding and the page's three states are covered, but claim / heartbeat / commit fence / late-arrival rejection against real PostgreSQL is not."
+      "The read-only trial (tests/integration/read-only-trial/run_e2e.py --execute) WAS executed this round against real PostgreSQL 16.15 binaries, real migrations, the real HTTPS Core and real Chromium, and it reaches the final mobile step. It fails there on a defect that predates TS-066: at 390px a double-click on a result entry enters the quick image preview and the details drawer is not rendered, so the step's 资产详情 dialog assertion cannot pass. The trial still contains no dedup step. Recorded as blocked, never as passing; the probe output is in docs/handoffs/TS-066.md section 7.4.",
+      "A signed-in administrator walking the six operations over HTTPS is still not exercised end to end: the trial authentication middleware needs a database-backed GatewayAuthenticationRuntime, so the endpoint-routing cases cover the anonymous 403 boundary and the wire cases cover the answer shapes, but not the authorized round trip. The trial's own browser phase does authenticate a real administrator over HTTPS/TLS and walks registration, scanning, browsing, search and the desktop detail pane.",
+      "The recheck path under a real durable task store is still not exercised: claim / heartbeat / commit fence / late-arrival rejection against real PostgreSQL is covered only by the synthetic fence probe (DedupRecheckFenceTests), which does assert that no filesystem read happens while the commit guard is open."
     ]
   },
   "risks": [
     "Report retention is a bounded in-process registry (8 reports, <=20000 items each): reports do not survive a service restart, which the contract states as RetentionBoundary and the page shows as 本次结果已不可读取. Durable reports would need a new migration and coordinator approval.",
-    "Web build budget: eng/web-dependency-policy.json still carries JavaScript 344,064 B and combined 376,832 B. The fix round deferred the workbench and the resource-library views behind route-level dynamic imports (entry chunk 336,165 -> 297,973 B), but the gate sums every emitted chunk, so deferring moves bytes instead of shrinking them: 340,347 B remain against the V01-006 budget of 327,680 B. Restoring 327,680 needs a coordinator decision (per-route budgets in the gate, or removing a required view); the card neither waives the gate nor changes its unit of measure.",
+    "Web build budget is over by 11,658 B with the gate restored to the V01-006 values (JavaScript 327,680; combined 360,448). This round removed 1,009 B of genuine duplication (shared response primitives, shared failure helpers, no modulepreload polyfill) and the measured floor after every behaviour-preserving cut is 339,338 B. The dedup feature's net marginal cost is 34,575 B against 25,587 B of headroom at 5d9dc39. Closing the gap needs a coordinator decision: per-route budgets in the gate, retiring an existing view to pay for the new one, or accepting a documented budget rise. The card neither waives the gate nor changes its unit of measure.",
     "The spec's >=1200px two-column breakpoint is 1px away from the shell's 1199px collapse breakpoint; the page follows the spec literally and the alternative is a one-line media-query change.",
-    "Real-SQL end-to-end evidence is missing, so the endpoints have only been exercised through unit/browser fixtures and the trial host composition.",
-    "Five justified CA1506 suppressions exist on the workbench facade, the worker carrying both payload shapes, the finding classifier, the composition root and the authorized HTTP surface. DedupJobWorker's suppression is deliberate: it must hold the analysis and recheck shapes together so the lease fencing stays in one place."
+    "The read-only trial's final mobile step is blocked by a defect outside this card's scope (narrow-view quick preview suppresses the details drawer). It needs its own card; while it stands, read-only-trial-e2e cannot go green for any branch.",
+    "Six justified CA1506 suppressions exist on the workbench facade, the worker carrying both payload shapes, the finding classifier, the recheck runner, the composition root and the authorized HTTP surface. DedupJobWorker's and DedupRecheckRunner's are deliberate: each must hold related shapes together so the lease fencing stays in one place."
   ],
   "blocked_by": [],
   "recommended_merge_order": 0,
@@ -154,13 +154,14 @@
       "dotnet build with TreatWarningsAsErrors passed at zero warnings; CA1506/ASP0016/CS0122/CS8754 findings were fixed rather than suppressed where a real fix existed.",
       "Chromium regression suite: 83 passed / 0 failed, including 17 workbench cases covering denial, CSRF header presence, cancel, a pending recheck that must not read as unchanged, a refused recheck, the budget being restated from the server's accepted value, discarded reports, long Chinese names, keyboard order, 320/390/1024/1440 viewports, dark mode and reduced motion. The 390/320 cases assert the mobile select is 44-46 px tall after the flex-basis defect.",
       "Thirteen new dedup wire-contract cases serialize the real Host builders (TrialDedupJson, TrialDedupPageJson, TrialDedupExportJson, TrialDedupReportJson.Recheck) and assert the exact key set and JSON token kinds the page decoder requires, that nullable fields appear as explicit nulls, that source_failures is an object array, that the exported document denies file-operation authority, that every number fits a JavaScript safe integer, and that a recheck receipt distinguishes pending from unchanged. The assertion was proved effective by a reverse probe: renaming analysis_version to analysis_ver made the case fail immediately.",
-      "Six new endpoint-routing cases start a minimal host over real HTTPS on a loopback port with the same route map the trial host installs, and prove all six operations answer 403 rather than 404 to an anonymous caller, that an unknown path is 404 and a GET is 405, that the shared bounded body reader refuses an oversized or non-JSON body, and that task_id is required per operation rather than per endpoint (start/cancel accept the browser's real payload). Proved effective by a reverse probe: renaming the export route made the case fail with Forbidden expected / NotFound actual."
+      "Six new endpoint-routing cases start a minimal host over real HTTPS on a loopback port with the same route map the trial host installs, and prove all six operations answer 403 rather than 404 to an anonymous caller, that an unknown path is 404 and a GET is 405, that the shared bounded body reader refuses an oversized or non-JSON body, and that task_id is required per operation rather than per endpoint (start/cancel accept the browser's real payload). Proved effective by a reverse probe: renaming the export route made the case fail with Forbidden expected / NotFound actual.",
+      "The second fix round added DedupRecheckFenceTests (3 cases) driving a synthetic two-file library through the real DedupJobWorker with a commit guard that records how many transactions are open and a discovery probe that records whether any read happened while one was. They prove the scan reads outside the fence, the verdict is filed inside a fresh fence that re-reads the version, a superseded version is refused with dedup_version_conflict instead of being filed, and a cancelled scan reads no further and files nothing. AssetLibrary.ReadCore.Tests added four growth/budget cases proving the byte ceiling is settled on real read lengths rather than planned lengths, that a whole-plan overrun is bounded regardless of batch layout, that an answer longer than its permit fails the run instead of spending the budget, and that ReadBytes equals the sum of ContentVerified items."
     ],
     "technical_debt": [
       "In-process report registry: bounded and disclosed, but not restart-durable. A durable variant needs an AssetIdentity-owned migration starting at 0024, which this card does not add.",
       "IDedupJobSignal is an in-process wake-up only; losing it costs one polling interval and it carries no business fact.",
       "The real-PostgreSQL trial path still lacks a dedup step, so this workbench's HTTP surface and its recheck task have no database-backed end-to-end evidence yet.",
-      "Web build budgets stay at 344,064 B / 376,832 B with the measured numbers and the reason 327,680 B cannot hold the added page recorded in size_budget_notes; the next Web task must re-measure instead of assuming headroom, and restoring the V01-006 budget needs a coordinator decision about the gate's summing unit."
+      "The shared Web budget is over by 11,658 B with the V01-006 numbers restored and every behaviour-preserving reduction applied; the next Web task must not assume headroom, and the gate's summing unit needs a coordinator decision."
     ]
   }
 }

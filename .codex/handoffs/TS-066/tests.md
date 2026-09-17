@@ -11,18 +11,40 @@
 | `dotnet build AssetLibrary.slnx --configuration Release --no-restore`           | 通过，0 警告 0 错误                                                                                                                                                                                 |
 | `dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore` | 通过                                                                                                                                                                                                |
 
-测试项目明细（通过 / 跳过 / 总计）：
+测试项目明细（通过 / 跳过 / 总计，**第二轮复验值**）：
 
 - `AssetLibrary.AssetLink.Tests` 13 / 0 / 13
 - `AssetLibrary.Build.Tests` 2 / 0 / 2
 - `AssetLibrary.TaskHealth.Tests` 32 / 0 / 32
 - `AssetLibrary.TransferOperation.Tests` 64 / 0 / 64
-- `AssetLibrary.ReadCore.Tests` 106 / 25 / 131（含 TS065 的 49 项查重用例，跳过项均为既有 PostgreSQL/POSIX 条件用例）
+- `AssetLibrary.ReadCore.Tests` 110 / 25 / 135（含 TS065 的 49 项查重用例与第二轮新增 4 项增长/预算用例；跳过项均为既有 PostgreSQL/POSIX 条件用例）
 - `AssetLibrary.Packaging.Tests` 63 / 0 / 63
-- `AssetLibrary.WebGateway.Tests` 118 / 4 / 122（含本卡新增的 13 项线格式契约用例与 6 项端点路由用例）
+- `AssetLibrary.WebGateway.Tests` 121 / 4 / 125（含本卡新增的 13 项线格式契约用例、6 项端点路由用例与第二轮的 3 项复核围栏用例）
 - `AssetLibrary.Preview.Tests` 111 / 24 / 135
 
-合计 **509 通过 / 53 跳过 / 0 失败**。
+合计 **516 通过 / 53 跳过 / 0 失败**（第二轮提交 `eacf26e`）。
+
+### 1.0 第二轮新增用例
+
+**`DedupRecheckFenceTests`（3 项，`AssetLibrary.WebGateway.Tests`）** —— 针对「复核扫描曾整个跑在
+`heartbeat.CommitAsync` 内、持 Postgres 行锁遍历目录」这一阻塞。夹具 `DedupRecheckSyntheticLibrary`
+在系统临时目录建一个两文件同内容（2048 B）的合成库；`DedupRecheckFenceDoubles.FenceProbeGuard`
+实现 `IDurableTaskCommitGuard`，记录**提交次数**与**同时在开的事务数**；`DedupRecheckFenceFixture.ProbeDiscovery`
+包装真实发现端口，记录「读取发生时的围栏是否打开」「读取次数」「是否被取消」。用例：
+`ARecheckScansWithNoFenceHeldAndFilesOnlyItsVerdictUnderOne`（扫描期间围栏从未打开，结论在恰好一次围栏内落盘）、
+`AVerdictIsRefusedInsteadOfFiledWhenTheVersionItVerifiedIsNoLongerRetained`（版本被丢弃后期望
+`dedup_version_conflict`）、`ARecheckThatIsCancelledMidScanReadsNoFurtherAndFilesNothing`。
+
+**`DedupGrowthBudgetTests`（4 项，`AssetLibrary.ReadCore.Tests`）** —— 针对「预算按扫描旧长度扣费、
+`read_bytes` 不等于实际读取」这一阻塞：真实长度结算、整份计划超预算时无论批次布局都有界、
+读取器返回超过许可字节时该答案失败且失败原因可见、`ReadBytes` 恒等于 `ContentVerified` 条目长度之和。
+
+### 1.0.1 第一轮（`2d890e7`）用例明细，保留备查
+
+- `AssetLibrary.ReadCore.Tests` 106 / 25 / 131
+- `AssetLibrary.WebGateway.Tests` 118 / 4 / 122
+
+合计 509 通过 / 53 跳过 / 0 失败。
 
 ### 1.1 线格式契约用例（13 项：`DedupReportWireTests` / `DedupExportWireTests` / `DedupRefusalWireTests` / `DedupRecheckWireTests`）
 
@@ -131,21 +153,39 @@
 截图存放于 `.runtime/dedup-frontend-evidence/`（12 张，由用例在断言通过后 `animations: "disabled"` 拍摄；
 概览三张为未滚动首屏，其余为 `fullPage`）。该目录是运行产物，不入提交；用例本身带截图语句，重跑即可复现。
 
-## 3.1 构建体积实测（返修项 6 的证据）
+## 3.1 构建体积实测
 
-`validate_web_dependencies.py` 第 118 行对 `dist/assets/*.js` **全量求和**，因此延迟加载只把字节从入口
-分包搬到异步分包，总和不变。下列数字来自 `vite build` 后的 `dist/assets` 实测（工作目录 `apps/web`）：
+`validate_web_dependencies.py` 对 `dist/assets/*.js` **全量求和**，因此延迟加载只把字节从入口分包搬到
+异步分包，总和不变。下列数字来自 `vite build` 后的 `dist/assets` 实测（工作目录 `apps/web`）：
 
-| 拆法                                    | 入口分包   | 异步分包                                     | 求和       | 与 327680 预算的差 |
-| --------------------------------------- | ---------- | -------------------------------------------- | ---------- | ------------------ |
-| 全部静态（上一轮提交 `a3edff5` 的状态） | 336165     | —                                            | 336165     | +8485              |
-| 工作台路由级动态导入                    | 305162     | `DedupWorkbench` 34458                       | 339620     | +11940             |
-| ＋资源库管理页动态导入（当前提交）      | **297973** | `DedupWorkbench` 34415 + `LibraryAdmin` 7959 | **340347** | **+12667**         |
-| 再拆叠加层与条目视图（已试并**撤回**）  | 297973     | 更多碎片，总额 342185                        | 342185     | +14505             |
+| 拆法                                                    | 入口分包   | 异步分包                                     | 求和       | 与 327680 预算的差 |
+| ------------------------------------------------------- | ---------- | -------------------------------------------- | ---------- | ------------------ |
+| 全部静态（`a3edff5` 的状态）                            | 336165     | —                                            | 336165     | +8485              |
+| 工作台路由级动态导入                                    | 305162     | `DedupWorkbench` 34458                       | 339620     | +11940             |
+| ＋资源库管理页动态导入（第一轮 `e492d28`）              | 297973     | `DedupWorkbench` 34415 + `LibraryAdmin` 7959 | 340347     | +12667             |
+| ＋复用既有响应原语/失败助手、关闭 modulePreload（`eacf26e`） | **297503** | `DedupWorkbench` **33876** + `LibraryAdmin` 7959 | **339338** | **+11658**         |
+| 再拆叠加层与条目视图（已试并**撤回**）                  | 297973     | 更多碎片，总额 342185                        | 342185     | +14505             |
 
-更细的拆法反而更大（碎片化开销与共享模块被两个分包各带一份）。要把预算恢复到 327680，只剩两条路，
-都超出本卡授权范围：①门禁改为「入口分包 + 各自异步分包」的分项预算；②删掉规格要求的一个既有视图。
-本卡保留可复核的实测数字，并把结论写进交接第 4.4 与第 7 节。
+### 3.2 第二轮逐项实测（每一项都是独立一次构建后的 `dist/assets` 求和）
+
+| 候选                                                              | 实测 Δ    | 处置                                                                   |
+| ----------------------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
+| `vite.config.mjs`：`modulePreload: { polyfill: false }`           | **−532**  | 采用（目标浏览器均原生支持 `modulepreload`，polyfill 永不被执行）       |
+| `dedupResponses.ts` 复用 `assetLinkResponses` 的响应原语          | **−276**  | 采用（同一判定只有一份，壳与工作台不会对「合法响应」产生分歧）          |
+| `useDedupJob.ts` 复用 `queryState.ts` 的 `failure/isAbort/isAccessFailure` | **−211**  | 采用（原先是逐字重复实现，只差一句错误文案）                            |
+| 删除 `dedupTypes.ts`/`dedupResponses.ts` 中零读取者的两个字段     | −92       | **未采用**：它们来自服务端响应，删除会缩小线格式覆盖面，收益与语义不符 |
+| 去掉 `DedupRoute.group`/`.cursor`                                 | −163      | **未采用**：会砍掉 `?group=`/`?cursor=` 深链                            |
+| `sourcemap: false`                                                | −145      | **未采用**：与功能无关，且证据截图/排查需要源码映射                     |
+| 手写 `manualChunks`（合并为单包）                                 | +245→**−245**（求和反而降 245） | 未采用：整体更碎，且厂商分包 **+285**（多出 `rolldown-runtime` 分片） |
+| 合并两个异步视图为一个                                                | **+478**  | 未采用                                                                 |
+| 撤销 `LibraryAdmin` 的动态导入（改回静态）                        | **+371**  | 未采用（说明动态导入本身是净收益）                                     |
+| `build.target: "es2022"`                                          | **0**     | 无收益（Vite 8/rolldown 已是该层级）                                   |
+| `cssCodeSplit` / `legalComments` / `oxc` 选项                     | **0**     | 无收益                                                                 |
+| 删除 `dedupResponses.ts` 里零引用的 `errorMessage()` 导出          | **0**     | 无收益（压缩器已摇树）——「删死代码」在此项目并不自动省字节             |
+
+门禁口径下 340347 → **339338**，仍差 **11658**。要恢复绿只剩三条路，都超出本卡授权范围：
+①门禁改为「入口分包 + 各自异步分包」的分项预算；②明确退役一个规格要求的既有视图；
+③协调批准一次有记录的预算上调。本卡保留可复核的实测数字，并把结论写进交接第 4.4 与第 7 节。
 
 ## 4. 覆盖到的失败与边界（夹具驱动）
 
@@ -175,16 +215,22 @@
 
 ## 5. 未执行（证据缺失，不记为通过）
 
-- **真实 PostgreSQL / HTTPS / Chromium 端到端**：`python -I -B tests/integration/read-only-trial/run_e2e.py`
-  需要 PostgreSQL 服务或二进制（`--postgres-bin` / `--postgres-external`），本机二者都没有，也没有
-  docker 与 wsl（已核查 `PATH`、`C:\Program Files*`、`C:\ProgramData`、`C:\tools`、`C:\YOKI\Codex` 深度 4），
-  因此未运行。`tests/integration/read-only-trial/browser.mjs` 目前也只有库登记步骤，没有查重操作；
-  若要在真实环境覆盖本卡，需要在那里补一个查重步骤，再由具备 PostgreSQL 的环境执行。具体命令与缺失项
-  写在交接文档第 7.4 节，交协调者执行；本机未修改任何系统策略、未安装服务。
-- **已登录管理员走通六个操作**：认证中间件需要数据库账号存储
-  （`GatewayAuthenticationRuntime` 依赖 `PostgresAuthenticationStore`），本机不可用，因此端到端用例只覆盖
-  到「未登录一律 403」为止；授权之后的调用链由 1.1 的线格式用例与 17 项浏览器用例分别覆盖两端。
-- **复核在真实租约下的执行**：`DedupRecheckScheduler` / `DedupRecheckRunner` 需要真实
-  `IDurableTaskStore`（PostgreSQL）才能端到端跑通；本机只能覆盖到受理规则、载荷编解码与页面侧三态呈现，
-  「认领 → 心跳 → 提交围栏 → 迟到拒绝」这一整段**未在本机执行**，与上一条同一原因、同一环境缺口。
+- **真实 PostgreSQL / HTTPS / Chromium 端到端：已执行，最后一步被既有缺陷阻断。** 第一轮记的「本机无
+  PostgreSQL 二进制」是错的——PostgreSQL **16.15 的二进制**（非服务）存在于
+  `C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\postgresql-16.15\pgsql\bin` 与
+  `%TEMP%\V01-014-tooling-and-tests\tooling\postgresql\pgsql\bin`，`run_e2e.py --execute` 能自己起临时集群
+  （仍无 docker、无 wsl；需要 `git` 在 `PATH` 上）。本轮已跑通：临时集群初始化、真实迁移、真实 HTTPS Core、
+  真实 Chromium 管理员登录、登记合成库、首次扫描、目录浏览、搜索、桌面宽度详情。
+  唯一失败点在 `browser.mjs` 的 390×844 段：双击结果条目后找不到 `资产详情` 对话框。加入诊断后的实测输出为
+  `DRAWER_PROBE {"width":390,"dialogs":["图片预览"],"asides":["资源库导航"],"hasEntry":true}` ——
+  窄屏双击同时进入快速预览，详情抽屉因此不渲染；`EntryDetails.tsx` 的窄屏分支与 `useNarrowWorkspace`
+  （1199px）在**基线 `5d9dc39` 就已存在**，不是本卡引入。**未记为通过**，命令、探针输出与建议见交接第 7.4 节。
+- **已登录管理员走通六个操作**：认证中间件需要数据库账号存储（`GatewayAuthenticationRuntime` 依赖
+  `PostgresAuthenticationStore`），本次真实闭环的浏览器段确实以真实管理员会话完成了登录与登记/扫描/浏览/
+  搜索，但**六个查重操作本身**仍未在真实 HTTPS 上被管理员账号走通：`run_e2e.py` 尚无查重步骤，而浏览器段
+  现在卡在上述既有缺陷上。未登录边界与答案形状分别由 1.2 与 1.1 覆盖。
+- **复核在真实租约下的执行**：`prepare → scan → file` 三段与围栏内外分工已由第二轮的
+  `DedupRecheckFenceTests` 用**真实 `DedupJobWorker`** 加合成围栏探针覆盖（断言扫描期间围栏从不打开、
+  结论在恰好一次围栏内落盘、版本被替换时拒绝、取消后不落盘）；但对着**真实 PostgreSQL** 的
+  「认领 → 心跳 → 提交围栏 → 迟到拒绝」整段仍未在本机执行，与上一条同一环境缺口。
 - **多实例并发**：本卡未新增调度器，跨实例互斥由 TaskHealth 既有租约保证，未在本机做多进程验证。
