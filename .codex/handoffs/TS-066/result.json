@@ -7,7 +7,7 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "66a0cee",
+  "commit": "a3edff50b1abde4603dd5cecd85f13354a948cad",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
   "changed_files": [
     ".codex/handoffs/TS-066/module-boundaries.md",
