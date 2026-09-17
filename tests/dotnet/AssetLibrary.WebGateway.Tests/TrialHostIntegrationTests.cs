@@ -1,9 +1,9 @@
-using System.Text.Json;
 using AssetLibrary.CoreServer.Hosting;
 
 namespace AssetLibrary.WebGateway.Tests;
 
 [TestClass]
+[DoNotParallelize]
 public sealed class TrialHostIntegrationTests
 {
     [TestMethod]
@@ -13,20 +13,7 @@ public sealed class TrialHostIntegrationTests
         var assets = new TrialHostIntegrationAssets(settings.RuntimeRoot);
         await using var host = await TrialHostIntegrationFixture.CreateAsync(settings);
         await TrialHostIntegrationReadiness.AssertWrongModuleLoginFailsAsync(host);
-        var key = await TrialAdministratorOperator.ExecuteAsync("initialize-key", host.Runtime, Stream.Null, CancellationToken.None);
-        Assert.AreEqual(0, key.ExitCode, "Initialize protected operator key");
-        var bootstrapJson = JsonSerializer.SerializeToUtf8Bytes(new
-        {
-            authorization_id = Guid.NewGuid().ToString("D"),
-            operation_id = Guid.NewGuid().ToString("D"),
-            account_name = "trial-admin",
-            display_name = "试用管理员",
-            expires_at = DateTimeOffset.UtcNow.AddMinutes(5),
-            password = TrialHostIntegrationAuthentication.Password,
-        });
-        using var bootstrapInput = new MemoryStream(bootstrapJson);
-        var administrator = await TrialAdministratorOperator.ExecuteAsync("bootstrap", host.Runtime, bootstrapInput, CancellationToken.None);
-        Assert.AreEqual(0, administrator.ExitCode, administrator.Json);
+        await TrialOperatorBootstrap.InitializeAsync(host);
         await TrialHostIntegrationReadModel.AssertEmptyAsync(host.Services);
         await host.StartAsync();
         var libraryId = await TrialHostIntegrationBrowser.RunAsync(host, settings, assets, "initial");

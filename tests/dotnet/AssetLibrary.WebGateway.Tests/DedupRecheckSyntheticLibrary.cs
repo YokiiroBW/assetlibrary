@@ -45,6 +45,17 @@ internal sealed class DedupRecheckSyntheticLibrary : IDisposable
     public DedupJobPayloadReader.RecheckTarget Target { get; }
 
     /// <summary>
+    /// The version a reader of this library would see now: the newest retained report the library owns.
+    /// It is what a late verdict must never replace.
+    /// </summary>
+    public (Guid TaskId, long Generation)? CurrentVersion =>
+        Registry.TryLatest(Source.LibraryId.Value, out var key, out _) ? (key.TaskId, key.Generation) : null;
+
+    /// <summary>The plan digest of one retained version, so a test can prove which one survived.</summary>
+    public string? DigestOf(Guid taskId, long generation) =>
+        Registry.TryGet(new DedupReportKey(taskId, generation), out var report) ? report.PlanDigest : null;
+
+    /// <summary>
     /// The module's own analyzer over this library. A caller that needs to observe the walk supplies its
     /// own discovery; everything else is the product's real implementation, never a stand-in for it.
     /// </summary>
@@ -115,6 +126,24 @@ internal sealed class DedupRecheckSyntheticLibrary : IDisposable
     /// </summary>
     public void DropVersion() =>
         Registry.DiscardTask(Target.ReportTaskId);
+
+    /// <summary>
+    /// Runs a second real analysis of the same library and files it under a new job, the way a reader who
+    /// starts the analysis again leaves the registry behind. The old version stays readable — retention
+    /// keeps it — so a recheck bound to it cannot tell it has been replaced by asking whether its own key
+    /// still resolves. That is exactly the case the previous round did not cover.
+    /// </summary>
+    public async Task<DedupJobPayloadReader.RecheckTarget> PublishNewerAsync()
+    {
+        var analyzer = AnalyzerFor(new SystemDedupFileDiscovery());
+        return await PublishAsync(
+            analyzer,
+            Registry,
+            Source,
+            Canonical,
+            new DedupAnalysisLimits(MaximumFiles: 100, MaximumBytes: 8_000_000, MaximumFileBytes: 1_000_000))
+            .ConfigureAwait(false);
+    }
 
     /// <summary>Two synthetic files with identical content, so a real pass finds exactly one group.</summary>
     private static void WriteSyntheticPair(string root)

@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Entry, EntryView, Library, SearchHitReason } from "./types";
 import type { useEntrySelection } from "./hooks/useEntrySelection";
 import type { WorkspacePosition } from "./hooks/useWorkspaceNavigation";
+import { useVirtualizer } from "./hooks/useRowWindow";
 import { entryType, formatBytes, formatDate } from "./libraryMetadata";
 import { WorkspaceIcon } from "./WorkspaceIcon";
 import { DerivedImage } from "./DerivedImage";
@@ -58,9 +58,6 @@ export function VirtualEntryList({
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
-  useEffect(() => {
-    virtualizer.measure();
-  }, [view, columns]);
   useLayoutEffect(() => {
     if (restored.current === position || rows.length === 0 || restoring) return;
     restored.current = position;
@@ -68,7 +65,7 @@ export function VirtualEntryList({
     const index = rows.findIndex((row) => row.entry.entry_id === position.focusedId);
     if (index >= 0 && (document.activeElement === document.body || scroll.current?.contains(document.activeElement))) {
       pendingFocus.current = position.focusedId;
-      virtualizer.scrollToIndex(Math.floor(index / columns), { align: "auto" });
+      virtualizer.scrollToIndex(Math.floor(index / columns));
     }
   }, [position, rows.length, columns, restoring]);
   useLayoutEffect(() => {
@@ -86,7 +83,7 @@ export function VirtualEntryList({
     if (event.ctrlKey || event.metaKey) selection.focus(row.entry.entry_id);
     else selection.select(row.entry.entry_id, event);
     pendingFocus.current = row.entry.entry_id;
-    virtualizer.scrollToIndex(Math.floor(Math.max(0, Math.min(rows.length - 1, index)) / columns), { align: "auto" });
+    virtualizer.scrollToIndex(Math.floor(Math.max(0, Math.min(rows.length - 1, index)) / columns));
   };
   const keyDown = (event: KeyboardEvent<HTMLDivElement>, row: EntryRow, index: number) => {
     const offsets: Record<string, number> = { ArrowDown: columns, ArrowUp: -columns, ArrowRight: 1, ArrowLeft: -1 };

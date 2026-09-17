@@ -15,6 +15,24 @@ internal sealed class DedupReportPublisher(DedupReportRegistry reports)
         Guid taskId,
         DedupAnalysisLimits limits,
         DedupResolvedSource source,
+        DedupCurationPlan plan) =>
+        reports.Publish(DedupReportComposer.Compose(taskId, limits, source, plan));
+
+    /// <summary>Drops the retained report of a job whose attempt was abandoned or superseded.</summary>
+    public void Discard(Guid taskId) => reports.DiscardTask(taskId);
+}
+
+/// <summary>
+/// Turns a finished plan into the report body that gets filed. It is separate from the publisher because
+/// two callers need the body before they can file it: a fresh analysis files it outright, while a recheck
+/// must hand it to a compare-and-file step so a version that moved on is refused instead of overwritten.
+/// </summary>
+internal static class DedupReportComposer
+{
+    public static DedupReport Compose(
+        Guid taskId,
+        DedupAnalysisLimits limits,
+        DedupResolvedSource source,
         DedupCurationPlan plan)
     {
         ArgumentNullException.ThrowIfNull(limits);
@@ -24,7 +42,7 @@ internal sealed class DedupReportPublisher(DedupReportRegistry reports)
             plan,
             DedupSourceRoots.Of(plan),
             DedupJobContractText.MaximumRetainedItemsPerReport);
-        return reports.Publish(new DedupReport
+        return new DedupReport
         {
             AnalysisId = plan.AnalysisId,
             TaskId = taskId,
@@ -45,11 +63,8 @@ internal sealed class DedupReportPublisher(DedupReportRegistry reports)
             Limits = limits,
             Truncated = projection.Truncated,
             RetentionBoundary = DedupJobContractText.RetentionBoundary,
-        });
+        };
     }
-
-    /// <summary>Drops the retained report of a job whose attempt was abandoned or superseded.</summary>
-    public void Discard(Guid taskId) => reports.DiscardTask(taskId);
 }
 
 /// <summary>

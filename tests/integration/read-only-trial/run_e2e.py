@@ -40,10 +40,10 @@ def load_fixture():
     return module
 
 
-def prepare_database(module, fixture, created_logins: list[str]) -> dict[str, object]:
-    database = fixture.fresh_database("trial_e2e")
+def prepare_database(module, fixture, created_logins: list[str], label: str) -> dict[str, object]:
+    database = fixture.fresh_database(label)
     module.MIGRATIONS.apply_migrations(
-        fixture.runner_tools(database), fixture.manifest, fixture.backup_directory("trial_e2e")
+        fixture.runner_tools(database), fixture.manifest, fixture.backup_directory(label)
     )
     roles = {
         "audit": "assetlibrary_database_auditor",
@@ -68,6 +68,93 @@ COMMIT;
     return {"host": fixture.host, "port": fixture.port, "database": database, "logins": logins}
 
 
+# One entry per real trial: the test class that must run and pass, and the scenarios it contributes.
+# Each gets its own owned database, its own runtime root and its own state directory: a trial that rotates
+# the administrator passphrase, initializes the protected operator key or drops a retained report would
+# otherwise decide the next trial's outcome, and both of these trials really do all three.
+TRIALS = (
+    {
+        "label": "trial_e2e",
+        "test_class": "TrialHostIntegrationTests",
+        "state_directory": "state",
+        "scenarios": [
+            "protected_operator_bootstrap", "runtime_role_boundary", "real_browser_registration",
+            "real_worker_initial_scan", "browse_and_full_path_search", "desktop_and_mobile_dark",
+            "ordinary_user_and_hidden_library_denial", "origin_and_csrf_denial",
+            "persistent_session_restart", "offline_login", "offline_snapshot_preservation",
+            "failed_scan_retry", "queued_scan_cancellation_retry", "administrator_recovery_replay",
+            "old_session_revocation", "unchanged_source_hash_and_mtime", "owned_tls_container_disposal",
+        ],
+    },
+    {
+        "label": "trial_e2e_dedup",
+        "test_class": "DedupTrialIntegrationTests",
+        "state_directory": "state-dedup",
+        "scenarios": [
+            "dedup_start_status_results_revalidate_export_cancel", "dedup_authorization_refusal",
+            "dedup_real_lease_and_post_restart_unreadable_report", "dedup_source_unchanged",
+            "dedup_version_bound_export_refusal",
+        ],
+    },
+)
+
+
+def run_trial(options, module, fixture, trial, runtime: Path, created_logins: list[str]) -> tuple[int, str]:
+    """Runs one real trial against its own owned database and runtime root, and returns its exit code."""
+    # A trial owns the whole runtime root it is pointed at: the protected operator key, the TLS key files
+    # and the host state all live under it, so two trials never share one. The name keeps the fixture's
+    # own guard meaningful — the settings loader only accepts an `al20-` directory under the temp root.
+    root = Path(runtime) / f"al20-{trial['label']}"
+    root.mkdir(parents=True, exist_ok=True)
+    settings = prepare_database(module, fixture, created_logins, trial["label"])
+    settings.update({
+        "runtime_root": str(root),
+        "web_root": str(options.web_root.resolve()),
+        "node": str(options.node.resolve()),
+        "playwright_module": str(options.playwright_module.resolve()),
+        "browser_script": str(ROOT / "tests/integration/read-only-trial/browser.mjs"),
+        "evidence": str(options.evidence.resolve()),
+        "dotnet": str(options.dotnet.resolve()),
+        "host_dll": str(ROOT / "services/core-server/Host/bin/Release/net10.0/AssetLibrary.CoreServer.Host.dll"),
+    })
+    settings_file = root / f"test-settings-{trial['label']}.json"
+    settings_file.write_text(json.dumps(settings), encoding="utf-8")
+    environment = os.environ.copy()
+    environment["ASSETLIBRARY_TRIAL_E2E_REQUIRED"] = "1"
+    environment["ASSETLIBRARY_TRIAL_E2E_SETTINGS"] = str(settings_file)
+    trx = f"{trial['label']}.trx"
+    command = [
+        str(options.dotnet), "test",
+        str(ROOT / "tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj"),
+        "--configuration", "Release", "--no-build", "--no-restore",
+        "--filter", f"FullyQualifiedName~{trial['test_class']}",
+        "--logger", "console;verbosity=normal", "--logger", f"trx;LogFileName={trx}",
+        "--results-directory", str(options.evidence),
+    ]
+    environment["DOTNET_GENERATE_ASPNET_CERTIFICATE"] = "false"
+    environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1"
+    with subprocess.Popen(command, cwd=ROOT, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                          text=True, encoding="utf-8", start_new_session=os.name != "nt",
+                          creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as process:
+        try:
+            output, _ = process.communicate(timeout=300)
+        except subprocess.TimeoutExpired:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                               capture_output=True, timeout=15, check=False)
+            else:
+                os.killpg(process.pid, signal.SIGKILL)
+            process.communicate(timeout=15)
+            raise RuntimeError(f"the real trial {trial['label']} exceeded its deadline") from None
+    (options.evidence / f"runner-{trial['label']}.log").write_text(output, encoding="utf-8")
+    print(output)
+    if process.returncode == 0:
+        counters = ET.parse(options.evidence / trx).find(".//{*}Counters")
+        if counters is None or counters.attrib.get("total") != "1" or counters.attrib.get("passed") != "1":
+            raise RuntimeError(f"the required real trial {trial['label']} must actually execute and pass")
+    return process.returncode, output
+
+
 def main() -> int:
     options = arguments()
     if not options.execute:
@@ -84,6 +171,8 @@ def main() -> int:
     (options.evidence / "run.json").write_text(json.dumps({
         "run_id": run_id, "source_revision": revision, "working_tree_dirty": dirty,
         "web_root": str(options.web_root.resolve()), "playwright_module": str(options.playwright_module.resolve()),
+        "trials": [trial["label"] for trial in TRIALS],
+        "trial_runtime_roots": {trial["label"]: f"<temp>/al20-{trial['label']}" for trial in TRIALS},
     }, indent=2), encoding="utf-8")
     print(f"REAL_TRIAL_EVIDENCE {options.evidence}", flush=True)
     module = load_fixture()
@@ -98,61 +187,13 @@ def main() -> int:
         created_logins: list[str] = []
         try:
             fixture_type.setUpClass()
-            settings = prepare_database(module, fixture, created_logins)
-            settings.update({
-                "runtime_root": str(runtime),
-                "web_root": str(options.web_root.resolve()),
-                "node": str(options.node.resolve()),
-                "playwright_module": str(options.playwright_module.resolve()),
-                "browser_script": str(ROOT / "tests/integration/read-only-trial/browser.mjs"),
-                "evidence": str(options.evidence.resolve()),
-                "dotnet": str(options.dotnet.resolve()),
-                "host_dll": str(ROOT / "services/core-server/Host/bin/Release/net10.0/AssetLibrary.CoreServer.Host.dll"),
-            })
-            settings_file = runtime / "test-settings.json"
-            settings_file.write_text(json.dumps(settings), encoding="utf-8")
-            environment = os.environ.copy()
-            environment["ASSETLIBRARY_TRIAL_E2E_REQUIRED"] = "1"
-            environment["ASSETLIBRARY_TRIAL_E2E_SETTINGS"] = str(settings_file)
-            command = [
-                str(options.dotnet), "test",
-                str(ROOT / "tests/dotnet/AssetLibrary.WebGateway.Tests/AssetLibrary.WebGateway.Tests.csproj"),
-                "--configuration", "Release", "--no-build", "--no-restore",
-                "--filter", "FullyQualifiedName~TrialHostIntegrationTests",
-                "--logger", "console;verbosity=normal", "--logger", "trx;LogFileName=trial-e2e.trx",
-                "--results-directory", str(options.evidence),
-            ]
-            environment["DOTNET_GENERATE_ASPNET_CERTIFICATE"] = "false"
-            environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1"
-            with subprocess.Popen(command, cwd=ROOT, env=environment, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                  text=True, encoding="utf-8", start_new_session=os.name != "nt",
-                                  creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as process:
-                try:
-                    output, _ = process.communicate(timeout=300)
-                except subprocess.TimeoutExpired:
-                    if os.name == "nt":
-                        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                                       capture_output=True, timeout=15, check=False)
-                    else:
-                        os.killpg(process.pid, signal.SIGKILL)
-                    process.communicate(timeout=15)
-                    raise RuntimeError("the real trial runner exceeded its deadline") from None
-            (options.evidence / "runner.log").write_text(output, encoding="utf-8")
-            print(output)
-            if process.returncode == 0:
-                counters = ET.parse(options.evidence / "trial-e2e.trx").find(".//{*}Counters")
-                if counters is None or counters.attrib.get("total") != "1" or counters.attrib.get("passed") != "1":
-                    raise RuntimeError("the required real trial must actually execute and pass")
+            results = [run_trial(options, module, fixture, trial, runtime, created_logins) for trial in TRIALS]
+            exit_code = max(result[0] for result in results)
+            if exit_code == 0:
                 (options.evidence / "acceptance.json").write_text(json.dumps({
-                    "status": "passed", "run_id": run_id, "aggregate_tests_passed": 1, "skipped": 0,
-                    "scenarios": ["protected_operator_bootstrap", "runtime_role_boundary", "real_browser_registration",
-                                  "real_worker_initial_scan", "browse_and_full_path_search", "desktop_and_mobile_dark",
-                                  "ordinary_user_and_hidden_library_denial", "origin_and_csrf_denial",
-                                  "persistent_session_restart", "offline_login", "offline_snapshot_preservation",
-                                  "failed_scan_retry", "queued_scan_cancellation_retry", "administrator_recovery_replay",
-                                  "old_session_revocation", "unchanged_source_hash_and_mtime", "owned_tls_container_disposal"],
+                    "status": "passed", "run_id": run_id, "aggregate_tests_passed": len(TRIALS), "skipped": 0,
+                    "scenarios": [scenario for trial in TRIALS for scenario in trial["scenarios"]],
                 }, indent=2), encoding="utf-8")
-            exit_code = process.returncode
         finally:
             cleaned = fixture.doCleanups()
             try:

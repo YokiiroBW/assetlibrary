@@ -7,9 +7,22 @@ namespace AssetLibrary.WebGateway.Tests;
 
 internal static class TrialHostIntegrationConfiguration
 {
-    public static async Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false)
+    /// <summary>
+    /// One private state directory per trial. The runtime root is shared by every real trial in one run,
+    /// and a state directory holds that host's TLS certificate, operator key and connection files: two
+    /// trials writing one certificate is a conflict about the fixture, not about either product path. The
+    /// name is the caller's, so a trial states which directory it owns rather than racing for a shared one.
+    /// </summary>
+    public static Task<TrialConfiguration> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false) =>
+        CreateAsync(settings, "state", certificateValidity, serviceReadEnabled);
+
+    public static async Task<TrialConfiguration> CreateAsync(
+        TrialHostIntegrationSettings settings,
+        string stateDirectory,
+        TimeSpan? certificateValidity = null,
+        bool serviceReadEnabled = false)
     {
-        var state = Path.Combine(settings.RuntimeRoot, "state");
+        var state = Path.Combine(settings.RuntimeRoot, stateDirectory);
         TrialHostIntegrationPrivateDirectory.Create(state);
         var keys = Path.Combine(state, "keys");
         TrialHostIntegrationPrivateDirectory.Create(keys);

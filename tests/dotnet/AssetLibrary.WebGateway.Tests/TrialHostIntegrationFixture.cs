@@ -41,9 +41,17 @@ internal sealed class TrialHostIntegrationFixture : IAsyncDisposable
     public GatewayAuthenticationRuntime Runtime => Services.GetRequiredService<GatewayAuthenticationRuntime>();
     public IServiceProvider Services => application.Services;
 
-    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false)
+    public static async Task<TrialHostIntegrationFixture> CreateAsync(TrialHostIntegrationSettings settings, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false) =>
+        await CreateAsync(settings, "state", certificateValidity, serviceReadEnabled);
+
+    /// <summary>
+    /// Builds one host over a named private state directory. A real trial owns its own certificate, key
+    /// files and connection files, so two trials in one run never write the same host state.
+    /// </summary>
+    public static async Task<TrialHostIntegrationFixture> CreateAsync(
+        TrialHostIntegrationSettings settings, string stateDirectory, TimeSpan? certificateValidity = null, bool serviceReadEnabled = false)
     {
-        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings, certificateValidity, serviceReadEnabled);
+        var configuration = await TrialHostIntegrationConfiguration.CreateAsync(settings, stateDirectory, certificateValidity, serviceReadEnabled);
         var certificate = await TrialCertificate.LoadAsync(configuration, CancellationToken.None);
         TrialDatabaseConnections? connections = null;
         PostgresDatabaseReadinessProbe? readiness = null;

@@ -50,7 +50,26 @@ internal sealed class DedupRecheckFenceFixture : IDisposable
     public DedupRecheckRun? Run { get; private set; }
 
     /// <summary>When set, a newer analysis lands while the scan is running.</summary>
-    public bool ReplacedDuringScan { get; set; }
+    public bool NewAnalysisDuringScan { get; set; }
+
+    /// <summary>When set, the version being rechecked is dropped while the scan is running.</summary>
+    public bool DropVersionDuringScan { get; set; }
+
+    /// <summary>
+    /// The version a reader of this library would see now, read back from the scenario rather than from
+    /// the fixture, so the assertion names the product's own notion of "current".
+    /// </summary>
+    public (Guid TaskId, long Generation)? CurrentVersion => library.CurrentVersion;
+
+    /// <summary>The plan digest of one retained version, so a test can prove which one survived.</summary>
+    public string? DigestOf((Guid TaskId, long Generation) version) =>
+        library.DigestOf(version.TaskId, version.Generation);
+
+    /// <summary>The version this fixture's recheck was asked to verify, which stays readable after it runs.</summary>
+    public (Guid TaskId, long Generation) VerifiedVersion => (library.Target.ReportTaskId, library.Target.Generation);
+
+    /// <summary>The plan digest of the version this fixture's recheck was asked to verify.</summary>
+    public string VerifiedDigest => library.Target.PlanDigest;
 
     /// <summary>When set, the scan is cancelled from inside the walk.</summary>
     public bool CancelDuringScan { get; set; }
@@ -96,20 +115,7 @@ internal sealed class DedupRecheckFenceFixture : IDisposable
     public async Task RunRecheckAsync()
     {
         var target = library.Target;
-        var lease = new DurableTaskLease(
-            new DurableTaskId(Guid.NewGuid()),
-            DedupExecutionOptions.TaskType,
-            DedupJobPayload.CreateRecheck(
-                library.Source.LibraryId,
-                target.ReportTaskId,
-                target.Generation,
-                target.PlanDigest),
-            TaskPriority.P3,
-            Attempt: 1,
-            MaxAttempts: 2,
-            new TaskLeaseIdentity(new LeaseOwner("fixture"), new LeaseToken(Guid.NewGuid()), 1),
-            DateTimeOffset.UtcNow.AddMinutes(5),
-            CancellationRequested: false);
+        var lease = DedupRecheckLeaseFactory.ForRecheck(target, library.Source.LibraryId);
         await worker.RunAsync(lease, library.Source, CancellationToken.None);
         Run = library.Registry.RecheckOf(lease.TaskId.Value);
     }
@@ -121,6 +127,14 @@ internal sealed class DedupRecheckFenceFixture : IDisposable
     /// analysis leaves behind: the key stops resolving, and only the fenced re-read at the end notices.
     /// </summary>
     internal void Supersede() => library.DropVersion();
+
+    /// <summary>
+    /// Files a newer analysis of the same library under a new job while the scan is running, leaving the
+    /// version being rechecked fully readable. This is the normal case, not an edge case: retention keeps
+    /// the older version, so the recheck's own key still resolves and only a comparison against the
+    /// library's current version can tell that its answer is no longer wanted.
+    /// </summary>
+    internal async Task PublishNewerAsync() => await library.PublishNewerAsync().ConfigureAwait(false);
 
     /// <summary>Counts the files a walk visited and cancels one from inside it, when a test asks for that.</summary>
     internal sealed class ProbeObservation
@@ -168,11 +182,18 @@ internal sealed class DedupRecheckFenceFixture : IDisposable
                     throw new OperationCanceledException("The recheck was cancelled while it was reading.");
                 }
 
-                if (Fixture is { ReplacedDuringScan: true })
+                if (Fixture is { DropVersionDuringScan: true })
+                {
+                    // The retained version disappears mid-scan, which is what a lost lease leaves behind.
+                    Fixture.DropVersionDuringScan = false;
+                    Fixture.Supersede();
+                }
+
+                if (Fixture is { NewAnalysisDuringScan: true })
                 {
                     // A newer analysis lands mid-scan, which is the race a long walk makes possible.
-                    Fixture.ReplacedDuringScan = false;
-                    Fixture.Supersede();
+                    Fixture.NewAnalysisDuringScan = false;
+                    await Fixture.PublishNewerAsync().ConfigureAwait(false);
                 }
 
                 yield return file;

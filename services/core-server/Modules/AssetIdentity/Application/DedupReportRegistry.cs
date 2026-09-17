@@ -252,22 +252,6 @@ public sealed class DedupReportRegistry
         }
     }
 
-    /// <summary>
-    /// Files the newest recheck evidence beside the version it verified. Evidence belongs to one
-    /// version, so it is dropped with that version instead of being carried over to newer results.
-    /// </summary>
-    public void StoreEvidence(DedupReportKey key, DedupRecheckEvidence evidence)
-    {
-        ArgumentNullException.ThrowIfNull(evidence);
-        lock (gate)
-        {
-            if (reports.TryGetValue(key, out var entry))
-            {
-                reports[key] = entry with { Evidence = evidence };
-            }
-        }
-    }
-
     public DedupRecheckEvidence? EvidenceOf(DedupReportKey key)
     {
         lock (gate)
@@ -307,6 +291,75 @@ public sealed class DedupReportRegistry
         key = default;
         report = null!;
         return false;
+    }
+
+    /// <summary>
+    /// Files a later version of one report against the version it was produced from, in one step. The
+    /// comparison and the write happen under the same lock because they are one decision: keeping an old
+    /// version readable is normal retention, so "the key is still there" cannot prove it is still the
+    /// version a reader would see, and a check made outside this lock can be overtaken by an analysis that
+    /// publishes in between. Answering <see cref="FileOutcome.Superseded"/> therefore covers both a dropped
+    /// version and a library that has moved on to a newer one.
+    /// </summary>
+    public FileOutcome FileIfCurrent(
+        Guid libraryId,
+        DedupReportKey expected,
+        string expectedDigest,
+        DedupReport next,
+        DedupRecheckEvidence evidence)
+    {
+        ArgumentNullException.ThrowIfNull(next);
+        ArgumentNullException.ThrowIfNull(evidence);
+        lock (gate)
+        {
+            if (!reports.TryGetValue(expected, out var entry))
+            {
+                return FileOutcome.Superseded;
+            }
+
+            if (!string.Equals(entry.Report.PlanDigest, expectedDigest, StringComparison.Ordinal)
+                || !latest.TryGetValue(libraryId, out var current)
+                || current != expected)
+            {
+                return FileOutcome.Superseded;
+            }
+
+            var key = new DedupReportKey(next.TaskId, ++published);
+            reports[key] = new Entry(next, DedupCursorPolicy.NewSecret(), evidence);
+            latest[libraryId] = key;
+            while (reports.Count > maximumReports)
+            {
+                EvictOldest();
+            }
+
+            return new FileOutcome(true, key);
+        }
+    }
+
+    /// <summary>
+    /// Files a recheck verdict that produced no new plan version, so the evidence lands beside the version
+    /// it verified under the same comparison rule.
+    /// </summary>
+    public FileOutcome StoreEvidenceIfCurrent(
+        Guid libraryId,
+        DedupReportKey expected,
+        string expectedDigest,
+        DedupRecheckEvidence evidence)
+    {
+        ArgumentNullException.ThrowIfNull(evidence);
+        lock (gate)
+        {
+            if (!reports.TryGetValue(expected, out var entry)
+                || !string.Equals(entry.Report.PlanDigest, expectedDigest, StringComparison.Ordinal)
+                || !latest.TryGetValue(libraryId, out var current)
+                || current != expected)
+            {
+                return FileOutcome.Superseded;
+            }
+
+            reports[expected] = entry with { Evidence = evidence };
+            return new FileOutcome(false, expected);
+        }
     }
 
     public byte[]? SecretOf(DedupReportKey key)
@@ -365,4 +418,13 @@ public sealed class DedupReportRegistry
     }
 
     private sealed record Entry(DedupReport Report, byte[] Secret, DedupRecheckEvidence? Evidence);
+}
+
+/// <summary>
+/// What a compare-and-file did. <see cref="Superseded"/> means the version it was asked about is no longer
+/// the one a reader of that library would see, so the caller must report a refusal instead of evidence.
+/// </summary>
+public readonly record struct FileOutcome(bool Filed, DedupReportKey Key)
+{
+    public static FileOutcome Superseded { get; } = new(false, default);
 }

@@ -97,8 +97,9 @@ internal sealed record DedupRecheckPreparation(
 /// recheck enumerates and hashes a real directory, so the scan is prepared and then performed with no
 /// fence held: a filesystem walk inside a fenced commit would hold the durable task's row for the length
 /// of a library read, and a slow share would turn one recheck into a lock every other attempt waits on.
-/// Only the verdict is filed inside the fence, and it is filed after re-reading the exact version it was
-/// asked about, so a report that moved on while the scan ran is never answered with stale evidence.
+/// Only the verdict is filed inside the fence, by a compare-and-file step that also checks the version is
+/// still the one a reader would see, so a report that moved on while the scan ran is never answered with
+/// stale evidence and never overwritten by it.
 /// </summary>
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Maintainability",
@@ -107,7 +108,6 @@ internal sealed record DedupRecheckPreparation(
 internal sealed class DedupRecheckRunner(
     DedupAnalyzer analyzer,
     DedupReportRegistry reports,
-    DedupReportPublisher publisher,
     IDedupSourceAvailability availability,
     DedupExecutionOptions options,
     TimeProvider timeProvider)
@@ -178,9 +178,10 @@ internal sealed class DedupRecheckRunner(
     }
 
     /// <summary>
-    /// Files the verdict of a completed scan. It re-reads the exact version the payload named and refuses
-    /// to answer for it if the registry has since moved on, so the outcome that becomes durable always
-    /// belongs to the version that was verified.
+    /// Files the verdict of a completed scan. It hands the verdict to one compare-and-file step that both
+    /// checks the version is still the one a reader would see and writes the outcome, so the outcome that
+    /// becomes durable always belongs to the version that was verified and can never displace a newer
+    /// analysis that published while the scan ran.
     /// </summary>
     public void File(
         Guid recheckTaskId,
@@ -192,23 +193,45 @@ internal sealed class DedupRecheckRunner(
         ArgumentNullException.ThrowIfNull(preparation);
         var target = preparation.Target;
         var key = preparation.Key;
-        if (!reports.TryGet(key, out var report)
-            || report.LibraryId != source.LibraryId
-            || !string.Equals(report.PlanDigest, target.PlanDigest, StringComparison.Ordinal))
+        var evidence = Evidence(result);
+        // The plan the recheck produced becomes the next version of the same job, and the old one stays
+        // readable: a reader can still see what was verified and what replaced it. Both the "next version"
+        // and the "no new version" paths compare and write in the same registry step.
+        var outcome = result.CurrentPlan is { } current
+            // The next version is composed first and handed to one compare-and-file step, so a library that
+            // moved on while the scan ran is refused instead of having its newer report overwritten.
+            ? reports.FileIfCurrent(
+                source.LibraryId.Value,
+                key,
+                target.PlanDigest,
+                Compose(target.ReportTaskId, key, source, current),
+                evidence)
+            : reports.StoreEvidenceIfCurrent(source.LibraryId.Value, key, target.PlanDigest, evidence);
+        if (!outcome.Filed)
         {
-            // The version was replaced or dropped while the scan ran. Its verdict is no longer an answer
-            // about anything a reader can look up, so it is reported as superseded rather than filed.
+            // The version was dropped, or the library moved on to a newer analysis, while the scan ran. The
+            // verdict is no longer an answer about anything a reader can look up, so it is reported as
+            // superseded rather than filed.
             reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Superseded(target, key));
             return;
         }
 
-        // The plan the recheck produced becomes the next version of the same job, and the old one stays
-        // readable: a reader can still see what was verified and what replaced it.
-        var published = result.CurrentPlan is { } current
-            ? publisher.Publish(target.ReportTaskId, report.Limits, source, current)
-            : key;
-        reports.StoreEvidence(published, Evidence(result));
-        reports.RecordRecheck(recheckTaskId, Completed(target, key, published, result));
+        reports.RecordRecheck(recheckTaskId, Completed(target, key, outcome.Key, result));
+    }
+
+    /// <summary>
+    /// The next version of the rechecked job. The ceilings are a property of the job rather than of this
+    /// pass, so they are read back from the version that was verified and restated unchanged. The caller
+    /// has already proved that version is readable, so the fallback is the module's own default.
+    /// </summary>
+    private DedupReport Compose(
+        Guid taskId,
+        DedupReportKey key,
+        DedupResolvedSource source,
+        DedupCurationPlan plan)
+    {
+        var limits = reports.TryGet(key, out var verified) ? verified.Limits : DedupAnalysisLimits.Default;
+        return DedupReportComposer.Compose(taskId, limits, source, plan);
     }
 
     private static DedupRecheckRun Completed(

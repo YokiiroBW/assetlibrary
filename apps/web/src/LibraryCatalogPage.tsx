@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "./hooks/useRowWindow";
 import { accessLabel, categoryLabels, libraryCategories } from "./libraryMetadata";
 import { browseRoute } from "./workspaceRoutes";
 import { EmptyState, ErrorState, LoadingState, WorkspaceLink, type Navigate } from "./WorkspacePrimitives";

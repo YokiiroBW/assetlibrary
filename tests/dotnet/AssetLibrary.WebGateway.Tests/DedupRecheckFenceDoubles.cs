@@ -1,9 +1,31 @@
 using AssetLibrary.Modules.AssetIdentity.Contracts;
+using AssetLibrary.Modules.AssetIdentity.Dedup.Application;
 using AssetLibrary.Modules.AssetIdentity.Dedup.Contracts;
+using AssetLibrary.Modules.AssetIdentity.Dedup.Jobs;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.TaskHealth.Contracts;
 
 namespace AssetLibrary.WebGateway.Tests;
+
+/// <summary>
+/// The lease a test hands the worker, built the way the host builds one for a claimed recheck. It is a
+/// factory rather than inline construction so the lease vocabulary stays out of the fixture that measures
+/// the fence, which is about when the commit is open and not about how a lease is shaped.
+/// </summary>
+internal static class DedupRecheckLeaseFactory
+{
+    public static DurableTaskLease ForRecheck(DedupJobPayloadReader.RecheckTarget target, LibraryId libraryId) =>
+        new(
+            new DurableTaskId(Guid.NewGuid()),
+            DedupExecutionOptions.TaskType,
+            DedupJobPayload.CreateRecheck(libraryId, target.ReportTaskId, target.Generation, target.PlanDigest),
+            TaskPriority.P3,
+            Attempt: 1,
+            MaxAttempts: 2,
+            new TaskLeaseIdentity(new LeaseOwner("fixture"), new LeaseToken(Guid.NewGuid()), 1),
+            DateTimeOffset.UtcNow.AddMinutes(5),
+            CancellationRequested: false);
+}
 
 /// <summary>
 /// The probes one recheck is observed through: a walk that records whether a file was read while the

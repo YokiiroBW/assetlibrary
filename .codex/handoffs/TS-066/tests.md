@@ -39,6 +39,37 @@
 `read_bytes` 不等于实际读取」这一阻塞：真实长度结算、整份计划超预算时无论批次布局都有界、
 读取器返回超过许可字节时该答案失败且失败原因可见、`ReadBytes` 恒等于 `ContentVerified` 条目长度之和。
 
+### 1.0.2 第三轮新增用例
+
+**`DedupTrialIntegrationTests`（1 项，`AssetLibrary.WebGateway.Tests`，`[DoNotParallelize]`）** ——
+真实栈上的查重工作台：真实临时 PostgreSQL 集群 + 真实迁移 + 真实 HTTPS Core + 真实管理员会话 +
+组合根自己的查重服务与托管 worker。逐项断言：六个操作的未登录调用全部 401 `authentication_required`
+且答案不描述被拒请求；`start` 受理即活动态且无可读报告；轮询期间至少两次观测到仍处于活动态；
+`results` 自报版本、重复组含**两个成员**、`total>0`；`revalidate` 先回执 `pending` 再 `completed`
+且 `plan_still_current=true`；`export` 版本一致、`grants_file_operation=false`，换版本导出 →
+409 `dedup_version_conflict`；`cancel` 记到持久任务上且**不产生报告**；重启后同一 `task_id`
+仍可读而报告不可读（`results` → `dedup_report_not_retained`、`groups` 空、`total=0`，
+`revalidate` → 404）；结束时逐文件比对 SHA-256 与 mtime 证明合成源未变。
+
+**`DedupTrialLeaseProbe`（由上一项调用）** —— 真实租约的心跳证据。worker 只在一次尝试超过
+心跳间隔（2 秒）时才续租，而合成源的哈希快于该间隔，所以心跳不走轮询：用**同一个
+`IDurableTaskCoordinator`**（即同一套真实 `task_health` SQL）按名字驱动一次完整租约生命周期——
+入队 → 认领（`leased`、`attempt=1`）→ 心跳续租 `Accepted` 且租约窗口被**延长到认领授予的窗口之后**
+→ 在租约下 `finish` 为 `succeeded` → 用已终结的 identity 再续租被拒 `NotCurrent`。
+探针任务用独立任务类型 `dedup.trial.lease_probe`：worker 认领的是「最老的 queued 任务」而不区分类型，
+若用工作台自己的类型，worker 会先把它当查重载荷执行。
+
+**`DedupRecheckFenceTests` 新增 1 项（共 4 项）** ——
+`ALateVerdictNeverReplacesANewerAnalysisOfTheSameLibrary`：**旧 key 仍保留**（不是删除旧 key 的场景），
+在复核扫描中途发布更新的一次分析，复核必须在落盘前被拒（`completed=false`、
+`dedup_version_conflict`），`latest` 仍指向新任务，旧版本仍可读。反向探针确认该用例会咬住旧代码：
+把 `File` 换回上一轮的非原子写法后立即失败
+（`Assert.AreNotEqual 失败。应为: <6499ee26-…> 以外的任意值，实际为: <6499ee26-…>`）。
+
+**`TrialOperatorBootstrap`（共享夹具助手）** —— 两个真实试运行原先各自复制一份「初始化保护算子密钥 +
+引导首个管理员」的 60 token 代码块，被 `scripts/validate_dotnet_source.py` 判为重复；抽成一处后
+`.NET source policy passed`。
+
 ### 1.0.1 第一轮（`2d890e7`）用例明细，保留备查
 
 - `AssetLibrary.ReadCore.Tests` 106 / 25 / 131
@@ -183,9 +214,34 @@
 | `cssCodeSplit` / `legalComments` / `oxc` 选项                     | **0**     | 无收益                                                                 |
 | 删除 `dedupResponses.ts` 里零引用的 `errorMessage()` 导出          | **0**     | 无收益（压缩器已摇树）——「删死代码」在此项目并不自动省字节             |
 
-门禁口径下 340347 → **339338**，仍差 **11658**。要恢复绿只剩三条路，都超出本卡授权范围：
-①门禁改为「入口分包 + 各自异步分包」的分项预算；②明确退役一个规格要求的既有视图；
-③协调批准一次有记录的预算上调。本卡保留可复核的实测数字，并把结论写进交接第 4.4 与第 7 节。
+门禁口径下 340347 → **339338**（第二轮），仍差 **11658**。第三轮按产物归因把它真正消掉，见 3.3。
+
+### 3.3 第三轮：在原口径下通过（每一项都是独立一次 `vite build` 后的 `dist/assets` 求和）
+
+| 产物                      | 第二轮     | 第三轮     | 变化       |
+| ------------------------- | ---------- | ---------- | ---------- |
+| `index-*.js`（入口）      | 297503     | 274611     | **−22892** |
+| `DedupWorkbench-*.js`     | 33876      | 33862      | −14        |
+| `LibraryAdmin-*.js`       | 7959       | 7947       | −12        |
+| **JS 合计（门禁求和）**   | **339338** | **316420** | **−22918** |
+| `index-*.css`             | 32394      | 32394      | 0          |
+| **JS+CSS（门禁求和）**    | 371732     | **348814** | −22918     |
+
+预算保持协调要求恢复的原值（`javascript` 327680、`javascript_and_css` 360448、`css` 32768），
+求和口径、计量单位与压缩方式均未改动：
+`python -I -B scripts/validate_web_dependencies.py --require-build-artifacts` →
+`Web dependency, lock, and license policy passed with build budgets.`（退出码 0）。
+
+**这一轮采用的唯一结构性改动**：新增 `apps/web/src/hooks/useRowWindow.ts`，导出与调用点原先使用的
+`useVirtualizer` **同名同形状**的 hook（`getTotalSize()` / `getVirtualItems()` / `scrollToOffset()` /
+`scrollToIndex()`），`VirtualEntryList` 与 `LibraryCatalogPage` 共用它，不再各自从
+`@tanstack/react-virtual` 导入。该库按 `ROUND5-FRONTEND-SPEC` 第 1 节「仅在现有长列表模式确需时复用」
+不再被运行时导入；依赖仍在 `package.json` 与 `pnpm-lock.yaml` 中，**锁文件未改**。
+行为保持：总高、overscan（列表 8 / 网格 3 / 资源库表 5）、`scrollToOffset` 的 clamp、
+`scrollToIndex` 的「已完整可见则不滚动」语义、行位置与网格列宽全部不变；
+`scripts/validate_web_source.py` **未修改**，其窗口化渲染断言仍然真实成立。
+证据：全量 `playwright test` 83 通过（含列表/网格滚动、键盘移动与焦点回位用例），
+真实试运行通过。
 
 ## 4. 覆盖到的失败与边界（夹具驱动）
 

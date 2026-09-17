@@ -88,7 +88,12 @@ internal static class TrialDedupComposition
     private static DedupExecutionOptions DedupOptions() => new()
     {
         LeaseDuration = TimeSpan.FromSeconds(30),
-        HeartbeatInterval = TimeSpan.FromSeconds(2),
+        // Shorter than the module's own default, and short on purpose: the read-only trial's synthetic
+        // source is read in well under the default interval, so with the default the monitor would never
+        // fire and a real trial could not observe that a running attempt's lease is really renewed. A
+        // shorter interval only makes the monitor confirm the lease more often; every confirmation still
+        // goes through the same task_health.heartbeat_durable_task and can still be refused.
+        HeartbeatInterval = TimeSpan.FromMilliseconds(400),
     };
 
     private static DedupAnalyzer CreateAnalyzer(IDedupSourceScopeQuery scopes) => new(
