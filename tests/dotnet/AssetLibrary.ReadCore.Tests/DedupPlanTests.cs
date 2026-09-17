@@ -65,12 +65,16 @@ public sealed class DedupPlanTests
                 [DedupAnalysisFactory.Source(root, "payload")],
                 new DedupAnalysisLimits(MaximumFiles: 100, MaximumBytes: 8_000, MaximumFileBytes: 4096)));
 
+        // Two reads were afforded whole out of the 8000-byte allowance and the third could not be, so the
+        // allowance was spent on the bytes that were really read and the run is explicitly short of its own
+        // plan: the third file is refused rather than analysed, the scan cannot claim to have reached the
+        // end, and the stated volume is what was really read and not the 12000 the lengths added up to.
         Assert.AreEqual(2, plan.Statistics.AnalyzedFiles);
-        Assert.AreEqual(1, plan.Statistics.SkippedFiles);
         Assert.AreEqual(8_000L, plan.Statistics.ReadBytes);
         Assert.IsTrue(plan.Summary.ScanBoundsReached);
+        Assert.AreEqual(1, plan.Statistics.FailedFiles);
 
-        // The skipped third file was never grouped, so the preview understates instead of inventing.
+        // What was verified still groups honestly: the preview understates rather than inventing.
         Assert.AreEqual(1, plan.Statistics.ByteDuplicateGroups);
         Assert.HasCount(2, plan.Groups.Single().MemberIdentities);
     }

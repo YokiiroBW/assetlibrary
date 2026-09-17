@@ -73,19 +73,50 @@ internal sealed class DedupRecheckScheduler(
 public sealed record DedupRecheckAccepted(Guid RecheckTaskId, string AnalysisVersion, string PlanDigest);
 
 /// <summary>
-/// Runs one accepted recheck under the lease it was claimed with. It re-reads the sources of the
-/// report the payload names, runs the module's published recount comparison, and files the outcome
-/// beside the job. A version that no longer exists is not silently re-bound: the run states that the
-/// report it was asked about is gone.
+/// What one attempt is about to verify, read from the retained report before any byte is read. A refusal
+/// is <see cref="Refused"/>: it has already been filed as the outcome, so the attempt has nothing left to
+/// scan and must not treat the absence of work as a failure.
 /// </summary>
+internal sealed record DedupRecheckPreparation(
+    DedupJobPayloadReader.RecheckTarget Target,
+    DedupReportKey Key,
+    string PlanDigest,
+    DedupRecountRequest Request)
+{
+    public static DedupRecheckPreparation Refused { get; } = new(
+        new DedupJobPayloadReader.RecheckTarget(Guid.Empty, 0, string.Empty),
+        new DedupReportKey(Guid.Empty, 0),
+        string.Empty,
+        null!);
+
+    public bool CanScan => Request is not null;
+}
+
+/// <summary>
+/// Runs one accepted recheck under the lease it was claimed with. It is deliberately split in two. A
+/// recheck enumerates and hashes a real directory, so the scan is prepared and then performed with no
+/// fence held: a filesystem walk inside a fenced commit would hold the durable task's row for the length
+/// of a library read, and a slow share would turn one recheck into a lock every other attempt waits on.
+/// Only the verdict is filed inside the fence, and it is filed after re-reading the exact version it was
+/// asked about, so a report that moved on while the scan ran is never answered with stale evidence.
+/// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Maintainability",
+    "CA1506:Avoid excessive class coupling",
+    Justification = "One recheck is inherently the join of the retained report, the module's analyzer, the lease fence's payload vocabulary and every outcome a pass can end in. Its refusals already live in DedupRecheckRefusals; splitting the remaining three steps would put the fence check in a different type from the scan it guards, which is exactly the property this type exists to keep in one place.")]
 internal sealed class DedupRecheckRunner(
     DedupAnalyzer analyzer,
     DedupReportRegistry reports,
     DedupReportPublisher publisher,
+    IDedupSourceAvailability availability,
     DedupExecutionOptions options,
     TimeProvider timeProvider)
 {
-    public async ValueTask RunAsync(
+    /// <summary>
+    /// Decides whether this attempt can scan at all, without touching the filesystem. Every refusal is
+    /// filed here as the final outcome, because no scan will follow to discover it.
+    /// </summary>
+    public async ValueTask<DedupRecheckPreparation> PrepareAsync(
         Guid recheckTaskId,
         DedupResolvedSource source,
         DedupJobPayloadReader.RecheckTarget target,
@@ -96,28 +127,80 @@ internal sealed class DedupRecheckRunner(
         var key = new DedupReportKey(target.ReportTaskId, target.Generation);
         if (!reports.TryGet(key, out var report) || report.LibraryId != source.LibraryId)
         {
-            reports.RecordRecheck(recheckTaskId, Missing(target));
-            return;
+            reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Missing(target));
+            return DedupRecheckPreparation.Refused;
         }
 
         if (!string.Equals(report.PlanDigest, target.PlanDigest, StringComparison.Ordinal))
         {
             // The retained version is no longer the one the caller asked about. Answering about it would
             // present newer evidence as the result of an older question.
-            reports.RecordRecheck(recheckTaskId, Superseded(target, key));
-            return;
+            reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Superseded(target, key));
+            return DedupRecheckPreparation.Refused;
         }
 
         var sources = DedupReportRehydrator.SourcesOf(report);
         if (sources.Count == 0)
         {
-            reports.RecordRecheck(recheckTaskId, Rejected(target, key));
-            return;
+            reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Rejected(target, key));
+            return DedupRecheckPreparation.Refused;
         }
 
-        var result = await analyzer.RecountAsync(
-            DedupReportRehydrator.Recount(report, options.RecheckTimeout),
-            cancellationToken).ConfigureAwait(false);
+        // A source whose share went away would make every byte of this run unreadable. Spending a whole
+        // pass to discover that would hold the attempt for the length of a walk over a share that is not
+        // there, so it is refused now and the durable task ends with a code a caller can act on.
+        foreach (var candidate in sources)
+        {
+            var state = await availability.CheckAsync(candidate.Root, cancellationToken).ConfigureAwait(false);
+            if (state != StorageAvailability.Online)
+            {
+                reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Unreachable(target, key));
+                return DedupRecheckPreparation.Refused;
+            }
+        }
+
+        // The request is taken from the retained report now, so the scan has no reason to look at the
+        // registry again and cannot be handed a newer version halfway through.
+        return new DedupRecheckPreparation(
+            target,
+            key,
+            report.PlanDigest,
+            DedupReportRehydrator.Recount(report, options.RecheckTimeout));
+    }
+
+    /// <summary>Performs the scan. This is the part that must never run while a fence is held.</summary>
+    public Task<DedupRecountResult> ScanAsync(
+        DedupRecheckPreparation preparation,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(preparation);
+        return analyzer.RecountAsync(preparation.Request, cancellationToken);
+    }
+
+    /// <summary>
+    /// Files the verdict of a completed scan. It re-reads the exact version the payload named and refuses
+    /// to answer for it if the registry has since moved on, so the outcome that becomes durable always
+    /// belongs to the version that was verified.
+    /// </summary>
+    public void File(
+        Guid recheckTaskId,
+        DedupResolvedSource source,
+        DedupRecheckPreparation preparation,
+        DedupRecountResult result)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(preparation);
+        var target = preparation.Target;
+        var key = preparation.Key;
+        if (!reports.TryGet(key, out var report)
+            || report.LibraryId != source.LibraryId
+            || !string.Equals(report.PlanDigest, target.PlanDigest, StringComparison.Ordinal))
+        {
+            // The version was replaced or dropped while the scan ran. Its verdict is no longer an answer
+            // about anything a reader can look up, so it is reported as superseded rather than filed.
+            reports.RecordRecheck(recheckTaskId, DedupRecheckRefusals.Superseded(target, key));
+            return;
+        }
 
         // The plan the recheck produced becomes the next version of the same job, and the old one stays
         // readable: a reader can still see what was verified and what replaced it.
@@ -145,48 +228,6 @@ internal sealed class DedupRecheckRunner(
         VerifiedGeneration: target.Generation,
         AnalysisVersion: published.VersionText,
         FailureCode: null);
-
-    private static DedupRecheckRun Missing(DedupJobPayloadReader.RecheckTarget target) => new(
-        Completed: false,
-        Status: DedupRecountStatus.SourceChanged,
-        PlanStillCurrent: false,
-        Reasons: ["要复核的报告版本已不再保留。"],
-        ChangedPaths: [],
-        DisappearedPaths: [],
-        NewPaths: [],
-        PlanDigest: target.PlanDigest,
-        PreviousPlanDigest: null,
-        VerifiedGeneration: target.Generation,
-        AnalysisVersion: string.Empty,
-        FailureCode: "dedup_report_not_retained");
-
-    private static DedupRecheckRun Superseded(DedupJobPayloadReader.RecheckTarget target, DedupReportKey key) => new(
-        Completed: false,
-        Status: DedupRecountStatus.SourceChanged,
-        PlanStillCurrent: false,
-        Reasons: ["要复核的报告版本已被更新的版本取代，本次复核未执行。"],
-        ChangedPaths: [],
-        DisappearedPaths: [],
-        NewPaths: [],
-        PlanDigest: target.PlanDigest,
-        PreviousPlanDigest: null,
-        VerifiedGeneration: target.Generation,
-        AnalysisVersion: key.VersionText,
-        FailureCode: "dedup_version_conflict");
-
-    private static DedupRecheckRun Rejected(DedupJobPayloadReader.RecheckTarget target, DedupReportKey key) => new(
-        Completed: false,
-        Status: DedupRecountStatus.SourceChanged,
-        PlanStillCurrent: false,
-        Reasons: ["报告没有可复核的来源范围。"],
-        ChangedPaths: [],
-        DisappearedPaths: [],
-        NewPaths: [],
-        PlanDigest: target.PlanDigest,
-        PreviousPlanDigest: null,
-        VerifiedGeneration: target.Generation,
-        AnalysisVersion: key.VersionText,
-        FailureCode: "dedup_scope_rejected");
 
     /// <summary>
     /// The evidence a later export ships. Counts are recorded beside the paths so a plan can state how

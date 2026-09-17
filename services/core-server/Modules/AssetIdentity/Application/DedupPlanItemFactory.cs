@@ -60,9 +60,11 @@ internal static class DedupPlanItemFactory
             groups.Count,
             groups.Sum(group => group.MemberIdentities.Count),
             groups.Sum(group => group.Length * (group.MemberIdentities.Count - 1)),
+            // The volume is a claim about bytes this run really read, so only a verified read contributes.
+            // A refused read reports what it found instead of what it read, and charging that number here
+            // would state a volume the run never consumed.
             items
-                .Where(item => item.ReadState is DedupItemReadState.ContentVerified
-                    or DedupItemReadState.ReadFailed)
+                .Where(item => item.ReadState == DedupItemReadState.ContentVerified)
                 .Sum(item => item.Length),
             AdditionalReadAttempts: 0);
     }

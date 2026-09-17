@@ -91,7 +91,7 @@ export function record(value: unknown, name: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function array(value: unknown, name: string): unknown[] {
+export function array(value: unknown, name: string): unknown[] {
   if (!Array.isArray(value)) {
     throw new TypeError(`${name} must be an array`);
   }
@@ -113,8 +113,27 @@ export function string(value: unknown, name: string): string {
   return value;
 }
 
-function optionalString(value: unknown, name: string): string | null {
+export function optionalString(value: unknown, name: string): string | null {
   return value === null || value === undefined ? null : string(value, name);
+}
+
+/**
+ * The boolean and non-negative-integer predicates. They live here, beside the other response primitives,
+ * because three decoders accept the same shapes: keeping one copy is what stops the accepted value from
+ * drifting between the scan and the duplicate workbench.
+ */
+export function boolean(value: unknown, name: string): boolean {
+  if (typeof value !== "boolean") {
+    throw new TypeError(`${name} must be a boolean`);
+  }
+  return value;
+}
+
+export function integer(value: unknown, name: string): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    throw new TypeError(`${name} must be a non-negative integer`);
+  }
+  return value;
 }
 
 function isAccessLevel(value: string): value is Library["access_level"] {

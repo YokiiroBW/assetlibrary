@@ -134,6 +134,13 @@ public enum DedupReadFailure
     UnsafePath = 5,
     SourceHasNoReparsePointFreeParents = 6,
     TooLarge = 7,
+
+    /// <summary>
+    /// The file is no longer within the byte budget the run still has unspent. It is not a statement
+    /// about the file's own size ceiling, and it is never a claim that the file is unreadable: the run
+    /// simply stopped before reading it, and it says so instead of omitting the file.
+    /// </summary>
+    ExceedsUnspentBudget = 8,
 }
 
 /// <summary>
@@ -438,6 +445,7 @@ public static class DedupContractText
         DedupReadFailure.UnsafePath => "path_escape_rejected",
         DedupReadFailure.SourceHasNoReparsePointFreeParents => "path_reparse_escape_rejected",
         DedupReadFailure.TooLarge => "file_exceeds_per_file_ceiling",
+        DedupReadFailure.ExceedsUnspentBudget => "file_exceeds_unspent_budget",
         _ => "unknown_read_failure",
     };
 

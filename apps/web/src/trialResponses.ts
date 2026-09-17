@@ -1,4 +1,4 @@
-import { record, string } from "./assetLinkResponses";
+import { boolean, integer as count, record, string } from "./assetLinkResponses";
 import type { BrowserSession, LibraryScan, ScanState, StorageSource } from "./types";
 
 export function decodeSession(body: Record<string, unknown>): BrowserSession {
@@ -55,16 +55,6 @@ function isScanState(value: string): value is ScanState {
   return (
     value === "queued" || value === "leased" || value === "succeeded" || value === "failed" || value === "cancelled"
   );
-}
-
-function boolean(value: unknown, name: string): boolean {
-  if (typeof value !== "boolean") throw new TypeError(`${name} is invalid`);
-  return value;
-}
-
-function count(value: unknown, name: string): number {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) throw new TypeError(`${name} is invalid`);
-  return value;
 }
 
 function nonempty(value: unknown, name: string): string {

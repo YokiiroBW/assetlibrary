@@ -16,5 +16,8 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
+    // The module-preload polyfill is a fallback for browsers without native `modulepreload`, and every
+    // browser this workspace targets has it. Shipping the fallback would spend bytes on code that never runs.
+    modulePreload: { polyfill: false },
   },
 });

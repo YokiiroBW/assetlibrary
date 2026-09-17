@@ -83,7 +83,6 @@ internal static class DedupReadPlanner
         ArgumentNullException.ThrowIfNull(buckets);
         var planned = new List<DedupAnalysisEntry>(entries.Count);
         var attemptedFiles = 0;
-        long attemptedBytes = 0;
         var boundsReached = false;
         for (var index = 0; index < entries.Count; index++)
         {
@@ -95,19 +94,21 @@ internal static class DedupReadPlanner
                 continue;
             }
 
-            if (entry.Length > limits.MaximumFileBytes
-                || attemptedFiles >= limits.MaximumFiles
-                || attemptedBytes + entry.Length > limits.MaximumBytes)
+            // Only the per-file ceiling and the file count are decided here. A file's own size is the one
+            // number discovery can still speak for, and the count is what bounds the run's work.
+            if (entry.Length > limits.MaximumFileBytes || attemptedFiles >= limits.MaximumFiles)
             {
-                // The budget is a ceiling on bytes and files actually read. Running out of it is
-                // reported instead of being silently rounded down to "unique".
                 entries[index] = entry with { SkipReason = DedupSkipReason.ExceedsBudget };
                 boundsReached = true;
                 continue;
             }
 
+            // The byte ceiling is deliberately not decided here. The length discovery saw is a guess about
+            // a file that may have changed since, so admitting files by it would both reject files the
+            // budget could have afforded and admit files it cannot. It is settled on the bytes the reads
+            // really consume, which is the only number the run can be held to, and running out of it is
+            // reported instead of being silently rounded down to "unique".
             attemptedFiles++;
-            attemptedBytes += entry.Length;
             planned.Add(entry with { ReadState = DedupItemReadState.SkippedByBudget });
         }
 
@@ -116,18 +117,20 @@ internal static class DedupReadPlanner
     }
 
     public static List<DedupAnalysisEntry> Apply(
-        List<DedupAnalysisEntry> entries,
+        IReadOnlyList<DedupAnalysisEntry> baseEntries,
         IReadOnlyList<DedupAnalysisEntry> planned,
-        IReadOnlyList<ContentReadResult> reads,
+        DedupContentReadOutcome outcome,
         IReadOnlyDictionary<long, int> buckets)
     {
-        ArgumentNullException.ThrowIfNull(entries);
+        ArgumentNullException.ThrowIfNull(baseEntries);
         ArgumentNullException.ThrowIfNull(planned);
-        ArgumentNullException.ThrowIfNull(reads);
+        ArgumentNullException.ThrowIfNull(outcome);
+        ArgumentNullException.ThrowIfNull(buckets);
         var resolved = new Dictionary<string, DedupAnalysisEntry>(StringComparer.Ordinal);
-        for (var index = 0; index < planned.Count; index++)
+        var reads = outcome.Reads;
+        for (var index = 0; index < outcome.Attempted.Count; index++)
         {
-            var entry = planned[index];
+            var entry = outcome.Attempted[index];
             var read = reads[index];
             if (!string.Equals(read.RelativePath.Value, entry.RelativePath.Value, StringComparison.Ordinal))
             {
@@ -138,6 +141,9 @@ internal static class DedupReadPlanner
             resolved[entry.SourceIdentity] = read.Failure == DedupReadFailure.None && read.Sha256 is not null
                 ? entry with
                 {
+                    // The length a read verified replaces the length discovery saw. Keeping the stale number
+                    // would make the preview and its byte total describe a file that is no longer there.
+                    Length = read.Length,
                     Signature = new ContentSignature(
                         read.Length,
                         new Sha256Digest(read.Sha256),
@@ -148,30 +154,60 @@ internal static class DedupReadPlanner
                 }
                 : entry with
                 {
+                    // A refused read is charged nothing. The entry keeps the length the answer state it found
+                    // because that is what the preview has to explain, but no byte of it was read, so the
+                    // read volume must never claim it: only a verified read contributes there.
+                    Length = read.Length,
                     ReadState = DedupItemReadState.ReadFailed,
                     Failure = read.Failure,
                 };
         }
 
-        var result = new List<DedupAnalysisEntry>(entries.Count);
-        foreach (var entry in entries)
+        var skipped = SkipReasons(planned);
+
+        var result = new List<DedupAnalysisEntry>(baseEntries.Count);
+        foreach (var entry in baseEntries)
         {
-            result.Add(resolved.TryGetValue(entry.SourceIdentity, out var read)
-                ? read
-                : entry with
-                {
-                    ReadState = entry.ReadState == DedupItemReadState.NotRead
-                        && entry.SkipReason != DedupSkipReason.None
-                            ? DedupItemReadState.SkippedByBudget
-                            : entry.ReadState,
-                    SkipReason = entry.SkipReason == DedupSkipReason.None
-                        ? DedupAnalysisPolicy.SkipReasonFor(entry, buckets)
-                        : entry.SkipReason,
-                });
+            if (resolved.TryGetValue(entry.SourceIdentity, out var read))
+            {
+                result.Add(read);
+                continue;
+            }
+
+            // The base entry is what the plan and the read pass worked from, so a file the settled budget
+            // never requested keeps the skip reason they gave it instead of looking like an untouched file.
+            var reason = skipped.TryGetValue(entry.SourceIdentity, out var marked)
+                ? marked
+                : entry.SkipReason;
+            if (reason == DedupSkipReason.None)
+            {
+                reason = DedupAnalysisPolicy.SkipReasonFor(entry, buckets);
+            }
+
+            result.Add(entry with { SkipReason = reason, ReadState = ReasonState(entry, reason) });
         }
 
         return result;
     }
+
+    private static Dictionary<string, DedupSkipReason> SkipReasons(IReadOnlyList<DedupAnalysisEntry> planned)
+    {
+        var skipped = new Dictionary<string, DedupSkipReason>(StringComparer.Ordinal);
+        foreach (var entry in planned)
+        {
+            if (entry.SkipReason != DedupSkipReason.None)
+            {
+                skipped[entry.SourceIdentity] = entry.SkipReason;
+            }
+        }
+
+        return skipped;
+    }
+
+    private static DedupItemReadState ReasonState(DedupAnalysisEntry entry, DedupSkipReason reason) =>
+        entry.ReadState == DedupItemReadState.NotRead && reason != DedupSkipReason.None
+            ? DedupItemReadState.SkippedByBudget
+            : entry.ReadState;
 
     public static DedupAnalysisStatus SelectStatus(
         IReadOnlyList<DedupAnalysisEntry> entries,

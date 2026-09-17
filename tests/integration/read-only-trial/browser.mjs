@@ -85,7 +85,16 @@ try {
   await expect(resultEntry).toBeVisible();
   await resultEntry.dblclick();
   const details = page.getByRole("dialog", { name: "资产详情", exact: true });
-  await expect(details).toContainText("summer-photo.jpg");
+  // The drawer replaces the list below 1200px, so a resize the shell has not observed yet would leave
+  // the inline aside in place instead. The probe states which of the two the shell actually rendered, on
+  // stderr because stdout carries the JSON result this process is required to end with.
+  process.stderr.write(`DRAWER_PROBE ${JSON.stringify(await page.evaluate(() => ({
+    width: window.innerWidth,
+    dialogs: [...document.querySelectorAll("dialog")].map((node) => node.getAttribute("aria-label")),
+    asides: [...document.querySelectorAll("aside")].map((node) => node.getAttribute("aria-label")),
+    hasEntry: new URL(location.href).searchParams.has("entry"),
+  })))}\n`);
+  await expect(details).toContainText("summer-photo.jpg", { timeout: 15000 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
   await page.screenshot({

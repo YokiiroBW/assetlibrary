@@ -1,5 +1,7 @@
 import { AssetLinkApiError } from "../assetLinkError";
-import { record, string } from "../assetLinkResponses";
+// The response primitives are shared with the shell's own decoders rather than copied: one accepted
+// shape means the workbench and the rest of the workspace cannot disagree about what a valid body is.
+import { array, boolean, integer, optionalString, record, string } from "../assetLinkResponses";
 import type {
   DedupExportPlan,
   DedupGroup,
@@ -229,26 +231,6 @@ function decodeItem(value: unknown): DedupItem {
 
 function paths(value: unknown): string[] {
   return array(value, "paths").map((path) => string(path, "path"));
-}
-
-function array(value: unknown, name: string): unknown[] {
-  if (!Array.isArray(value)) throw new TypeError(`${name} is not a list`);
-  return value;
-}
-
-function boolean(value: unknown, name: string): boolean {
-  if (typeof value !== "boolean") throw new TypeError(`${name} is not a boolean`);
-  return value;
-}
-
-function integer(value: unknown, name: string): number {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
-    throw new TypeError(`${name} is not a non-negative integer`);
-  return value;
-}
-
-function optionalString(value: unknown, name: string): string | null {
-  return value === null || value === undefined ? null : string(value, name);
 }
 
 export function errorMessage(error: unknown): string {

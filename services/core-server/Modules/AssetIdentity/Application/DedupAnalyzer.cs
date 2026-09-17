@@ -140,7 +140,11 @@ internal sealed class DedupAnalysisRunner
             var read = await batches
                 .ReadAsync(planned, request.Limits, bounded.Token)
                 .ConfigureAwait(false);
-            var resolved = DedupReadPlanner.Apply(entries, read.Attempted, read.Reads, buckets);
+            var resolved = DedupReadPlanner.Apply(entries, planned, read, buckets);
+
+            // A file whose real size no longer fits the permit the budget could grant it was left unread.
+            // That is a bounded run even though every planned entry was attempted, and saying so is what
+            // stops an incomplete preview from reading as "everything else is unique".
             return plans.Build(
                 request,
                 scope,
@@ -148,7 +152,10 @@ internal sealed class DedupAnalysisRunner
                 DedupAnalysisPolicy.BuildGroups(resolved),
                 DedupAnalysisPolicy.DetectRelations(resolved),
                 failures,
-                scanBoundsReached || read.Attempted.Count < planned.Count,
+                scanBoundsReached
+                    || read.CeilingRefused
+                    || read.Attempted.Count < planned.Count
+                    || read.ByteCeilingOverrun,
                 DedupReadPlanner.SelectStatus(resolved, failures));
         }
         catch (OperationCanceledException) when (

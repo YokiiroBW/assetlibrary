@@ -49,7 +49,16 @@ internal static class TrialDedupComposition
         var reports = new DedupReportRegistry(DedupJobContractText.MaximumRetainedReports);
         var tasks = CreateTasks(connections, loggerFactory);
         var execution = new PostgresTaskExecution(connections.Task);
-        var jobs = new DedupJobService(CreateAnalyzer(scopes), reports, tasks, execution, options, TimeProvider.System);
+        var jobs = new DedupJobService(
+            CreateAnalyzer(scopes),
+            reports,
+            tasks,
+            execution,
+            // The same availability port the analyzer checks, so a recheck refuses a share that is not
+            // readable before it walks it rather than discovering it one unreadable file at a time.
+            new SystemDedupSourceAvailability(),
+            options,
+            TimeProvider.System);
         return new TrialDedupServices(
             jobs,
             new DedupJobWorker(jobs, reports, tasks, execution, options, TimeProvider.System),

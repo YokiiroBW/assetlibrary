@@ -1,4 +1,6 @@
 
+using System.Security.Cryptography;
+
 namespace AssetLibrary.ReadCore.Tests;
 
 /// <summary>
@@ -293,11 +295,60 @@ internal sealed class RecordingContentReader : IDedupContentReader
 }
 
 /// <summary>
-/// Discovery that reports one extra relative name beside the files the walk found. Both entries
-/// share a content length so the analysis actually tries to read them.
+/// Discovery that reports every file with one length whatever it really is on disk, so a test can place a
+/// file whose real size no longer matches the size the scan saw and prove the read pass settles the byte
+/// ceiling on what it really read instead of on that stale number.
+/// </summary>
+internal sealed class UnderstatingDiscovery(long reportedLength) : IDedupFileDiscovery
+{
+    private readonly SystemDedupFileDiscovery inner = new();
+
+    public async IAsyncEnumerable<DiscoveredFile> DiscoverAsync(
+        CanonicalLibraryRoot root,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        await foreach (var entry in inner.DiscoverAsync(root, cancellationToken).ConfigureAwait(false))
+        {
+            yield return entry with { Length = reportedLength };
+        }
+    }
+}
+
+/// <summary>Reads content without ever respecting the permit it was given.</summary>
+internal sealed class DisregardingContentReader(long claimedLength) : IDedupContentReader
+{
+    public List<DedupContentReadRequest> Requests { get; } = [];
+
+    public Task<IReadOnlyList<ContentReadResult>> ReadAsync(
+        IReadOnlyList<DedupContentReadRequest> requests,
+        int concurrency,
+        CancellationToken cancellationToken)
+    {
+        Requests.AddRange(requests);
+        IReadOnlyList<ContentReadResult> read =
+        [
+            .. requests.Select(request => new ContentReadResult(
+                request.RelativePath,
+                claimedLength,
+                new string('a', 64),
+                StructureHash: 7,
+                DateTimeOffset.UnixEpoch,
+                DedupReadFailure.None)),
+        ];
+        return Task.FromResult(read);
+    }
+}
+
+/// <summary>
+/// Discovery that reports one extra relative name beside the files the walk found. Both entries share a
+/// content length so the analysis actually tries to read them, and the legitimate file's length is the
+/// real one so a read permit never has to refuse a file that is exactly as large as it was said to be.
 /// </summary>
 internal sealed class EscapingDiscovery : IDedupFileDiscovery
 {
+    /// <summary>The real length of the legitimate fixture {@see DedupPathBoundaryTests} writes.</summary>
+    private const int LegitLength = 29;
+
     private readonly string extraName;
 
     public EscapingDiscovery(CanonicalLibraryRoot root, string extraName)
@@ -316,7 +367,7 @@ internal sealed class EscapingDiscovery : IDedupFileDiscovery
             new RelativeAssetPath("legit.bin"),
             IsReparsePoint: false,
             IsExcluded: false,
-            Length: 28,
+            Length: LegitLength,
             DateTimeOffset.UnixEpoch);
         await Task.Yield();
         cancellationToken.ThrowIfCancellationRequested();
@@ -324,7 +375,7 @@ internal sealed class EscapingDiscovery : IDedupFileDiscovery
             new RelativeAssetPath(extraName),
             IsReparsePoint: false,
             IsExcluded: false,
-            Length: 28,
+            Length: LegitLength,
             DateTimeOffset.UnixEpoch);
         _ = candidate;
     }

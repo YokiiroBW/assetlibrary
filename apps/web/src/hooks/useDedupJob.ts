@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AssetLinkApiError } from "../assetLinkError";
+import { failure, isAbort, isAccessFailure } from "./queryState";
 import { DedupClient } from "../dedup/dedupClient";
 import type {
   DedupExportReceipt,
@@ -165,7 +165,7 @@ export function useDedupJob(
         }));
       } catch (error: unknown) {
         if (isAbort(error)) return;
-        setState((previous) => ({ ...previous, loadingMore: false, ...details(error) }));
+        setState((previous) => ({ ...previous, loadingMore: false, status: "error", ...failure(error) }));
       } finally {
         if (activeLoad.current === requestKey) activeLoad.current = null;
         if (query.current === controller) query.current = null;
@@ -204,8 +204,9 @@ export function useDedupJob(
           if (disposed || isAbort(error)) return;
           // A task the server no longer knows about cannot be resumed; the reader is told to analyze
           // again rather than being left with a job that will never move.
-          if (error instanceof AssetLinkApiError && (error.status === 404 || error.status === 403)) {
-            setState((previous) => ({ ...previous, job: null, ...details(error) }));
+          const lost = failure(error);
+          if (isAccessFailure(lost.statusCode)) {
+            setState((previous) => ({ ...previous, job: null, status: "error", ...lost }));
             return;
           }
           timer = window.setTimeout(() => void step(), pollMilliseconds * 3);
@@ -303,10 +304,10 @@ export function useDedupJob(
         });
       } catch (error: unknown) {
         if (isAbort(error) || current.current !== libraryId) return;
-        const failure = details(error);
+        const refused = failure(error);
         // A refused start or cancel is re-read from the server instead of being guessed here.
-        if (failure.statusCode === 400 || failure.statusCode === 409) setRevision((value) => value + 1);
-        setState((previous) => ({ ...previous, ...failure }));
+        if (refused.statusCode === 400 || refused.statusCode === 409) setRevision((value) => value + 1);
+        setState((previous) => ({ ...previous, status: "error", ...refused }));
       } finally {
         if (mutation.current === controller) mutation.current = null;
         if (current.current === libraryId) setState((previous) => ({ ...previous, pending: false }));
@@ -462,16 +463,4 @@ function save(document: unknown, fileName: string) {
   anchor.rel = "noopener";
   anchor.click();
   URL.revokeObjectURL(url);
-}
-
-function details(error: unknown): { status: "error"; message: string; statusCode: number | null } {
-  if (error instanceof AssetLinkApiError) {
-    return { status: "error", message: error.message, statusCode: error.status };
-  }
-
-  return { status: "error", message: "请求未被执行，请稍后重试。", statusCode: null };
-}
-
-function isAbort(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
 }

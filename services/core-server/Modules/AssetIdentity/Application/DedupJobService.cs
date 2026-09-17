@@ -40,10 +40,12 @@ public sealed class DedupJobService : IDedupJobCoordinator
         DedupReportRegistry reports,
         IDurableTaskCoordinator tasks,
         IDurableTaskInspector inspector,
+        IDedupSourceAvailability availability,
         DedupExecutionOptions options,
         TimeProvider timeProvider)
     {
         ArgumentNullException.ThrowIfNull(reports);
+        ArgumentNullException.ThrowIfNull(availability);
         this.analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
         this.tasks = tasks ?? throw new ArgumentNullException(nameof(tasks));
         this.inspector = inspector ?? throw new ArgumentNullException(nameof(inspector));
@@ -56,7 +58,7 @@ public sealed class DedupJobService : IDedupJobCoordinator
         publisher = new DedupReportPublisher(reports);
         starter = new DedupJobStarter(reports, tasks, inspector, views, timeProvider);
         rechecks = new DedupRecheckScheduler(tasks, views, timeProvider);
-        Rechecks = new DedupRecheckRunner(analyzer, reports, publisher, options, timeProvider);
+        Rechecks = new DedupRecheckRunner(analyzer, reports, publisher, availability, options, timeProvider);
     }
 
     public ValueTask<DedupJobView> StartAsync(

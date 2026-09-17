@@ -118,6 +118,8 @@ public sealed class DedupJobWorker(
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(target);
         using var work = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        using var scan = CancellationTokenSource.CreateLinkedTokenSource(work.Token);
+        scan.CancelAfter(options.RecheckTimeout);
         var heartbeat = new DedupLeaseHeartbeat(lease, tasks, guard, options, work);
         var monitor = heartbeat.MonitorAsync(timeProvider);
         try
@@ -127,13 +129,30 @@ public sealed class DedupJobWorker(
                 throw new LeaseLostException();
             }
 
-            // The outcome is filed inside the fenced commit for the same reason a report is: a lease
-            // that expired mid-recheck must not leave an answer behind that a later attempt owns.
+            // Whether this attempt has anything to scan is decided before any byte is read, and a refusal
+            // is already filed: there is nothing to fence afterwards, so the attempt is simply done.
+            var preparation = await rechecks
+                .PrepareAsync(lease.TaskId.Value, source, target, scan.Token)
+                .ConfigureAwait(false);
+            if (!preparation.CanScan)
+            {
+                await FinishAsync(lease, DurableTaskFinishKind.Succeeded, null, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            // The scan runs with no fence held. A recheck walks and hashes a whole directory, and doing
+            // that inside the fenced commit would hold the durable task's row for as long as the share
+            // takes to answer, so a slow NAS would block every other attempt on the same task.
+            var result = await rechecks.ScanAsync(preparation, scan.Token).ConfigureAwait(false);
+
+            // Only the verdict is filed inside the fence, and it re-reads the exact version the payload
+            // named, so a lease that expired mid-scan cannot leave an answer behind for a later attempt to
+            // adopt and a version that moved on is never answered with stale evidence.
             _ = await heartbeat.CommitAsync(
-                async token =>
+                _ =>
                 {
-                    await rechecks.RunAsync(lease.TaskId.Value, source, target, token).ConfigureAwait(false);
-                    return 0;
+                    rechecks.File(lease.TaskId.Value, source, preparation, result);
+                    return ValueTask.FromResult(0);
                 },
                 cancellationToken).ConfigureAwait(false);
             await FinishAsync(lease, DurableTaskFinishKind.Succeeded, null, cancellationToken).ConfigureAwait(false);
