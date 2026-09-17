@@ -19,6 +19,7 @@ internal static class TrialWebEndpoints
         TrialAuthentication.Use(application);
         TrialAuthentication.Map(application);
         TrialImageEndpoints.Map(application);
+        TrialDedupEndpoints.Map(application);
         application.MapAssetLibraryControl((context, payload, token) =>
             ServiceReadAuthenticationHandler.IsServiceRequest(context) ? ServiceReadControl.HandleAsync(context, payload, token) :
             context.RequestServices.GetRequiredService<TrialManagementGateway>().HandleAsync(context, payload, token));
@@ -31,7 +32,7 @@ internal static class TrialWebEndpoints
             },
         });
         // Only product routes serve the shell. Missing APIs and asset files must remain 404.
-        foreach (var route in new[] { "/", "/libraries", "/libraries/{libraryId:guid}", "/categories/{category}", "/search", "/tasks" })
+        foreach (var route in new[] { "/", "/libraries", "/libraries/{libraryId:guid}", "/categories/{category}", "/search", "/tasks", "/dedup" })
         {
             application.MapGet(route, async (HttpContext context) =>
             {

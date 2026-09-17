@@ -145,8 +145,13 @@
     { "exact": "vite", "license": "MIT" }
   ],
   "size_budgets_bytes": {
-    "javascript": 327680,
+    "javascript": 344064,
     "css": 32768,
-    "javascript_and_css": 360448
-  }
+    "javascript_and_css": 376832
+  },
+  "size_budget_notes": [
+    "V01-006 measured 302,093 bytes of JavaScript for the read-only workspace and was budgeted at 320 KiB.",
+    "TS-066 adds the exact-duplicate workbench: its own page, source and budget form, job status, paged report viewer and group detail measured 34,072 bytes, which the V01-006 budget could not cover without deleting a required view.",
+    "Each budget keeps exactly 8 KiB of headroom above the measured build and must be re-measured, not assumed, by the next Web task; a further increase needs a size-reduction proposal instead."
+  ]
 }

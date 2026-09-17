@@ -41,6 +41,7 @@ internal static class TrialHostFactory
         builder.Services.AddSingleton(configuration);
         builder.Services.AddHostedService<TrialProcessControl>();
         builder.Services.AddHostedService<TrialScanWorker>();
+        builder.Services.AddHostedService<TrialDedupWorker>();
         builder.Services.AddHostedService<TrialAvailabilityWorker>();
         builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromSeconds(30));
 
@@ -60,6 +61,10 @@ internal static class TrialHostFactory
         TrialImagePreviewConfiguration.Configure(services, configuration, libraries.Store, workers);
         services.AddSingleton<IInitialScanCoordinator>(provider =>
             TrialScanComposition.Create(connections, libraries, workers, provider.GetRequiredService<ILoggerFactory>()));
+        services.AddSingleton(provider => TrialDedupComposition.Create(
+            connections,
+            libraries,
+            provider.GetRequiredService<ILoggerFactory>()));
     }
 
 }

@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Text;
 using AssetLibrary.Modules.GatewayAuth.Application;
 using AssetLibrary.Modules.GatewayAuth.Infrastructure;
@@ -11,7 +10,7 @@ namespace AssetLibrary.CoreServer.Adapters.AssetLink;
 
 public static class ReadOnlyAssetLinkEndpoints
 {
-    public const int MaximumRequestBytes = 64 * 1024;
+    public const int MaximumRequestBytes = AssetLinkRequestBody.MaximumBytes;
 
     public static IServiceCollection AddAssetLibraryReadOnlyGateway(this IServiceCollection services)
     {
@@ -41,12 +40,7 @@ public static class ReadOnlyAssetLinkEndpoints
                 AssetLinkProtocolResponse response;
                 try
                 {
-                    if (!context.Request.HasJsonContentType())
-                    {
-                        throw new UnsupportedRequestMediaTypeException();
-                    }
-
-                    var payload = await ReadBoundedBodyAsync(
+                    var payload = await AssetLinkRequestBody.ReadAsync(
                         context.Request,
                         context.RequestAborted).ConfigureAwait(false);
                     response = await handler(
@@ -82,50 +76,5 @@ public static class ReadOnlyAssetLinkEndpoints
                     Encoding.UTF8,
                     response.StatusCode);
             });
-    }
-
-    private static async ValueTask<string> ReadBoundedBodyAsync(
-        HttpRequest request,
-        CancellationToken cancellationToken)
-    {
-        if (request.ContentLength > MaximumRequestBytes)
-        {
-            throw new RequestBodyTooLargeException();
-        }
-
-        var writer = new ArrayBufferWriter<byte>();
-        var buffer = ArrayPool<byte>.Shared.Rent(8192);
-        try
-        {
-            while (true)
-            {
-                var read = await request.Body.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
-                if (read == 0)
-                {
-                    break;
-                }
-
-                if (writer.WrittenCount + read > MaximumRequestBytes)
-                {
-                    throw new RequestBodyTooLargeException();
-                }
-
-                writer.Write(buffer.AsSpan(0, read));
-            }
-
-            return new UTF8Encoding(false, true).GetString(writer.WrittenSpan);
-        }
-        finally
-        {
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
-    }
-
-    private sealed class RequestBodyTooLargeException : Exception
-    {
-    }
-
-    private sealed class UnsupportedRequestMediaTypeException : Exception
-    {
     }
 }

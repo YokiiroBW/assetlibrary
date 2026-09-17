@@ -17,7 +17,12 @@ import { EntryCollectionPage } from "./EntryCollectionPage";
 import { EntryDetails } from "./EntryDetails";
 import { WorkspaceBreadcrumbs, WorkspaceHeader, WorkspaceSidebar } from "./WorkspaceNavigation";
 import { EmptyState, ErrorState, WorkspaceLink } from "./WorkspacePrimitives";
-import { browseRoute, collectionKey } from "./workspaceRoutes";
+import { browseRoute, collectionKey, dedupRoute } from "./workspaceRoutes";
+import type { DedupSection } from "./workspaceRoutes";
+import { DedupPage } from "./dedup/DedupPage";
+import { DedupClient } from "./dedup/dedupClient";
+import { useDedupJob } from "./hooks/useDedupJob";
+import type { DedupExportReceipt, DedupFindingKind, DedupRecheck } from "./dedup/dedupTypes";
 import { parentPath } from "./libraryMetadata";
 import type { BrowserSession, BrowseOptions, EntryDetail, Library, SearchOptions } from "./types";
 import type { EntryRow } from "./VirtualEntryList";
@@ -50,6 +55,19 @@ export function ReadOnlyWorkspace({
   const [quickLook, setQuickLook] = useState<{ row: EntryRow; route: typeof route } | null>(null);
   const quick = quickLook?.route === route ? quickLook.row : null;
   const [imageRevision, setImageRevision] = useState(0);
+  const [dedupExport, setDedupExport] = useState<DedupExportReceipt | null>(null);
+  const [dedupRecheck, setDedupRecheck] = useState<DedupRecheck | null>(null);
+  // The workbench speaks through the same adapter as every other view, so the browser keeps exactly one
+  // place that reaches the network and one place that attaches the session's CSRF header.
+  const dedupClient = useMemo(() => new DedupClient(client), [client]);
+  const dedupSection: DedupFindingKind = route.page === "dedup" ? findingKind(route.kind) : "ByteDuplicateGroup";
+  const dedupJob = useDedupJob(
+    dedupClient,
+    route.page === "dedup" ? route.libraryId : null,
+    dedupSection,
+    setDedupExport,
+    setDedupRecheck,
+  );
   const [imageAccessLoss, setImageAccessLoss] = useState<{ libraryId: string } | null>(null);
   const imageAccessLost = useCallback(
     (status: number, libraryId: string) => {
@@ -66,7 +84,9 @@ export function ReadOnlyWorkspace({
   const libraries = useLibraries(client, route.page === "libraries" ? (route.category ?? undefined) : undefined);
   const catalogDenied = isAccessFailure(libraries.state.statusCode);
   const currentId =
-    route.page === "browse" || route.page === "tasks" || route.page === "search" ? route.libraryId : null;
+    route.page === "browse" || route.page === "tasks" || route.page === "search" || route.page === "dedup"
+      ? route.libraryId
+      : null;
   const resource = useLibrary(client, catalogDenied ? null : currentId);
   const libraryDenied = catalogDenied || isAccessFailure(resource.statusCode);
   const options: BrowseOptions | undefined =
@@ -186,9 +206,11 @@ export function ReadOnlyWorkspace({
           ? "资源库管理"
           : route.page === "tasks"
             ? "扫描任务"
-            : route.page === "search"
-              ? "搜索结果"
-              : (library?.display_name ?? "资产浏览");
+            : route.page === "dedup"
+              ? "精确查重"
+              : route.page === "search"
+                ? "搜索结果"
+                : (library?.display_name ?? "资产浏览");
     document.title = `${title} · AssetLibrary`;
     setMobileNavigation(false);
   }, [scope, library?.display_name]);
@@ -304,6 +326,23 @@ export function ReadOnlyWorkspace({
                 navigate={navigate}
               />
             )}
+            {route.page === "dedup" && (
+              <DedupPage
+                libraries={libraries}
+                library={library}
+                libraryError={resource.status === "error" ? resource.message : null}
+                retryLibrary={resource.reload}
+                admin={session.is_system_administrator}
+                section={route.kind}
+                selectedId={route.libraryId}
+                dedup={dedupJob}
+                recheck={dedupRecheck}
+                exported={dedupExport}
+                onSelectLibrary={(libraryId) => navigate(dedupRoute(libraryId || null))}
+                onSelectSection={(section) => navigate(dedupRoute(route.libraryId, { kind: section }))}
+                onStart={dedupJob.start}
+              />
+            )}
             {collection && (
               <div className="collection-wrapper">
                 {libraries.state.status === "error" && (
@@ -398,4 +437,12 @@ export function ReadOnlyWorkspace({
       )}
     </main>
   );
+}
+
+/**
+ * Maps the route's section name onto the server's finding kind. Navigation only carries the name of the
+ * open section; which kinds exist and what they mean is the contract's business.
+ */
+function findingKind(section: DedupSection): DedupFindingKind {
+  return section === "groups" ? "ByteDuplicateGroup" : section === "unverified" ? "Unverified" : "Unreadable";
 }

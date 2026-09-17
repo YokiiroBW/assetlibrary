@@ -1,0 +1,49 @@
+# TS-066 职责与依赖表
+
+依据：`docs/development/dsh/ROUND5-MODULE-BOUNDARIES.md`（用户要求「在 handoff 或内部 architecture_review 先写职责与依赖表」）。
+本表在继续扩展实现之前写出，之后的代码结构以本表为准；偏离处已在末节列出并说明原因。
+
+## 1. 职责归属
+
+| 关注点 | 唯一规则所有者 | 说明 |
+| --- | --- | --- |
+| 强哈希重复证据、分析/重新核对/计划规则 | **AssetIdentity**（`Dedup` 子命名空间） | `DedupAnalyzer`、`DedupPlanPolicy`、`DedupReportPublisher`、`DedupFindingClassifier`。本卡不新增第二套扫描器或哈希实现。 |
+| 结果与报告版本 | **AssetIdentity**（`Dedup/Application`） | `DedupReportRegistry`：有界进程内保留、游标签名、版本绑定、重新核对证据。 |
+| 通用任务状态 / 租约 / 幂等 / 取消 / 恢复 | **TaskHealth**（不变更） | 只通过公开端口使用 `IDurableTaskCoordinator`、`IDurableTaskInspector`、`IDurableTaskCommitGuard`。本卡**没有**向 TaskHealth 增加任何重复组、哈希或首选文件业务，也没有改动其 Contracts/Infrastructure。 |
+| 已登记库记录与库根 | **LibraryStorage**（不变更） | 通过公开端口 `ILibraryScanTargetQuery` 取库根；不读取其内部存储，不写其表。 |
+| 组合与装配 | **Host（组合根）** `services/core-server/Host/Trial` | 把「已认证的库查询 + 文件访问 + 分析器 + 任务端口」接起来；不承载业务规则。 |
+| HTTP 传输 | **Host** `Host/Trial/Dedup` | 只做请求校验、身份与授权复核、调用应用层、序列化响应。 |
+
+## 2. 新增/改动单元与依赖
+
+| 单元 | 层 | 只负责 | 调用端口 | 数据归属 |
+| --- | --- | --- | --- | --- |
+| `Contracts/DedupJobContracts.cs` | Contracts | 作业视图、报告、结果页、重新核对、导出文档、保留边界常量与用词 | 无（纯契约） | 无 |
+| `Contracts/DedupPorts.cs`（TS065 已有） | Contracts | 发现/读取/可用性/作用域/时钟端口 | 无 | 无 |
+| `Application/DedupJobCoordinator.cs` | Application | 六个授权操作的门面接口与「已授权来源」记录 | 无 | 无 |
+| `Application/DedupJobService.cs` | Application | 业务流门面：启动/状态/结果/取消/复核/导出，逐次复核库范围 | `IDurableTaskCoordinator`、`IDurableTaskInspector`（TaskHealth 公开契约） | 不持有持久数据 |
+| `Application/DedupJobStarter.cs` | Application | 受理规则：一库一操作键一作业、同一时刻只允许一个活动尝试、载荷只带上限与库 id | `IDurableTaskCoordinator`、`IDurableTaskInspector` | 无 |
+| `Application/DedupRecheckRunner.cs` | Application | 重新核对：重建原计划与来源后调用既有 `DedupAnalyzer.RecountAsync` | 无（仅本模块分析器） | 无 |
+| `Application/DedupReportPublisher.cs` | Application | 把完成的分析登记为当前报告版本，并登记本次作业上限 | 无 | 写入 `DedupReportRegistry` |
+| `Application/DedupReportRegistry.cs` | Application | 有界保留（8 份报告 / 每份 ≤20000 项）、游标 HMAC、版本绑定、重新核对证据 | 无 | **进程内**报告，非持久；边界以 `RetentionBoundary` 明示给前端 |
+| `Application/DedupResultsReader.cs` | Application | 结果分页与游标续读；报告缺失时显式返回 `ReportAvailable:false` | 无 | 只读 |
+| `Application/DedupFindingProjection.cs` / `DedupFindingClassifier.cs` | Application | 把计划项分入「重复组 / 未验证 / 不可读」三段的唯一判定点 | 无 | 无 |
+| `Application/DedupReportRehydrator.cs` | Application | 从报告重建计划与来源请求（重新核对只用报告自身的已接受来源） | 无 | 只读 |
+| `Application/DedupExportBuilder.cs` | Application | 组装导出计划文档；`GrantsFileOperation:false`，无执行指令、无确认令牌 | 无 | 只读 |
+| `Application/DedupJobWorker.cs` | Application | 单个已认领任务的执行：心跳续租、取消发现、围栏提交后登记报告 | `IDurableTaskCoordinator`、`IDurableTaskCommitGuard` | 不写持久数据 |
+| `Application/DedupJobIdentity.cs` | Application | 作业标识派生、状态/复核状态用词、不可变任务载荷 | 无 | 无 |
+
+## 3. 边界核对
+
+- **业务不落在 core/server/页面入口**：扫描与哈希只发生在 `DedupJobWorker` 的既有后台执行路径上，HTTP 请求线程与前端都不做遍历或哈希；Host 只装配，`Host/Trial/Dedup` 只做校验与调用。
+- **不复制跨模块规则**：作业状态机、租约、幂等、取消、恢复全部复用 TaskHealth 公开端口；库范围复用 LibraryStorage 公开查询端口；重复判定复用 TS065 的 `DedupAnalyzer` / `DedupPlanPolicy`。本卡未新增第二个调度器或第二个扫描器。
+- **不绕过公开端口**：未引用任何其他模块的 `Infrastructure`，未写其他模块的表，未直接读 LibraryStorage 内部存储。
+- **授权逐次复核**：每次结果分页、重新核对、导出都重新用 Host 传入的「已授权来源」校验库 id；前端隐藏按钮不构成权限。
+- **只读边界**：新增端点不含移动/复制/删除，导出只给计划；`RetentionBoundary` 与 `ReadOnlyBoundary` 都在契约里，前端直接展示。
+- **持久化**：**未新增迁移**。报告是有界进程内保留，并在接口中如实声明；不以临时文件冒充可靠恢复数据库能力。
+
+## 4. 与边界文档的偏离及理由
+
+1. `Application/DedupJobService.cs` 带一个 `CA1506` 抑制：它是本模块**单个工作台**的公开端口聚合，类型计数来自六个授权操作及其结果记录的形状，不是跨模块耦合。每条规则本身都拆在独立组件里（starter / recheck / reader / exporter / publisher）。
+2. `Application/DedupFindingClassifier.cs` 带两个 `CA1506` 抑制：判定规则用报告自身的状态词汇表达，必须与被判定的记录放在一起，否则同一规则会在渲染侧被重新推导。
+3. `Application/DedupJobWorker.cs` 定义了 `IDedupJobSignal`（进程内唤醒信号）。它不承载业务事实，作业事实仍只在持久任务中；这是「不新增调度器」下的最小唤醒通道，丢弃信号只损失一个轮询周期。

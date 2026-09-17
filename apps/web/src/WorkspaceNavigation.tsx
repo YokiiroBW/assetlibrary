@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { categoryLabels, libraryCategories } from "./libraryMetadata";
 import type { BrowserSession, Library } from "./types";
-import { browseRoute, type SearchRoute, type WorkspaceRoute } from "./workspaceRoutes";
+import { browseRoute, dedupRoute, type SearchRoute, type WorkspaceRoute } from "./workspaceRoutes";
 import { WorkspaceIcon } from "./WorkspaceIcon";
 import { Modal, WorkspaceLink, type Navigate } from "./WorkspacePrimitives";
 
@@ -51,6 +51,15 @@ export function WorkspaceSidebar({
         >
           <WorkspaceIcon name="tasks" />
           扫描任务
+        </WorkspaceLink>
+        <WorkspaceLink
+          route={dedupRoute(null)}
+          navigate={navigate}
+          current={route.page === "dedup"}
+          onFollow={closeMobile}
+        >
+          <WorkspaceIcon name="search" />
+          精确查重
         </WorkspaceLink>
       </nav>
       <div className="nav-label">
@@ -245,6 +254,10 @@ export function WorkspaceBreadcrumbs({
   if (route.page === "libraries")
     segments.push({ label: route.category ? categoryLabels[route.category] : "资源库管理" });
   if (route.page === "tasks") segments.push({ label: "扫描任务" });
+  if (route.page === "dedup") {
+    segments.push({ label: "精确查重", route: dedupRoute(null) });
+    if (library) segments.push({ label: library.display_name });
+  }
   if (route.page === "search") segments.push({ label: "搜索结果" });
   if (route.page === "browse") {
     if (library)

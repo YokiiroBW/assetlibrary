@@ -1,0 +1,294 @@
+/* 精确查重工作台：只使用既有色板与基础组件，区块顺序与间距固定，窄屏改为纵向堆叠。 */
+.dedup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 4px 32px;
+}
+.dedup-page > * {
+  min-width: 0;
+}
+.dedup-section-heading {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--ink);
+}
+.dedup-scope,
+.dedup-status,
+.dedup-statistics,
+.dedup-followup,
+.dedup-results,
+.dedup-detail {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+}
+.dedup-scope-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.dedup-scope-controls label {
+  color: var(--muted);
+}
+.dedup-scope-controls select {
+  flex: 1 1 240px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+}
+.dedup-scope-controls button,
+.dedup-actions button,
+.dedup-results button,
+.dedup-sections button {
+  min-height: 44px;
+  min-width: 44px;
+}
+.dedup-budget,
+.dedup-facts,
+.dedup-member-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px 16px;
+  margin: 14px 0 0;
+}
+.dedup-budget div,
+.dedup-facts div,
+.dedup-member-facts div {
+  min-width: 0;
+}
+.dedup-budget dt,
+.dedup-facts dt,
+.dedup-member-facts dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.dedup-budget dd,
+.dedup-facts dd,
+.dedup-member-facts dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+.dedup-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.dedup-warning,
+.dedup-incomplete,
+.dedup-complete {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 8px;
+  background: var(--surface);
+}
+.dedup-warning,
+.dedup-incomplete {
+  border-left-color: var(--danger);
+}
+.dedup-complete {
+  border-left-color: var(--positive);
+}
+.dedup-warning h3,
+.dedup-incomplete h3,
+.dedup-complete h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+.dedup-warning p,
+.dedup-incomplete p,
+.dedup-complete p {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+.dedup-incomplete ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+  overflow-wrap: anywhere;
+}
+.dedup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.dedup-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.dedup-sections button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  transition: background-color 140ms ease-out;
+}
+.dedup-sections button span {
+  color: var(--muted);
+}
+.dedup-sections button.is-current {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.dedup-sections button.is-current span {
+  color: var(--accent);
+}
+.dedup-result-count {
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.dedup-group-list,
+.dedup-item-list,
+.dedup-member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dedup-group-row {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) minmax(80px, auto) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 14px;
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  transition: background-color 140ms ease-out;
+}
+.dedup-group-row:disabled {
+  opacity: 1;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.dedup-group-count {
+  font-weight: 600;
+}
+.dedup-group-size,
+.dedup-group-hash,
+.dedup-group-state {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.dedup-group-hash {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+.dedup-item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) minmax(70px, auto) minmax(90px, auto) minmax(120px, auto);
+  gap: 8px 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.dedup-item-name {
+  font-weight: 600;
+}
+.dedup-item-path,
+.dedup-item-state,
+.dedup-item-time {
+  color: var(--muted);
+}
+.dedup-detail-heading,
+.dedup-member-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.dedup-detail-heading h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.dedup-hash {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+.dedup-member {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.dedup-detail,
+.dedup-detail-heading {
+  scroll-margin-top: 16px;
+}
+/* The results and the opened group share a row only where the specification gives them one: from
+   1200px the list keeps the remaining width and the detail holds 360px, and below that the detail is a
+   block of its own under the list. */
+.dedup-split {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+@media (min-width: 1200px) {
+  .dedup-split {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .dedup-split > .dedup-results {
+    flex: 1 1 auto;
+  }
+  .dedup-split > .dedup-detail {
+    flex: 0 0 360px;
+    min-width: 300px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dedup-sections button,
+  .dedup-group-row {
+    transition: none;
+  }
+}
+@media (max-width: 1199px) {
+  .dedup-group-row,
+  .dedup-item-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  .dedup-page {
+    gap: 16px;
+  }
+  .dedup-scope,
+  .dedup-status,
+  .dedup-statistics,
+  .dedup-followup,
+  .dedup-results,
+  .dedup-detail {
+    padding: 14px;
+  }
+  .dedup-scope-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dedup-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .dedup-sections button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

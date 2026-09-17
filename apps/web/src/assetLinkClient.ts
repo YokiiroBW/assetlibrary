@@ -30,6 +30,8 @@ import type {
 const endpoint = "/assetlink/v1/control";
 const pageSize = 100;
 const timeoutMilliseconds = 5_000;
+/** The workbench's report reads answer a bounded page, so they fit inside the same request budget. */
+const dedupTimeoutMilliseconds = 15_000;
 
 export class AssetLinkClient {
   public constructor(private readonly csrfToken = "") {}
@@ -194,6 +196,33 @@ export class AssetLinkClient {
     );
   }
 
+  /**
+   * The exact-duplicate workbench conversation. It is not part of the control envelope: the workbench
+   * has its own bounded operation paths, which this adapter is the single place allowed to reach. Only a
+   * library identifier is ever sent, so the server always reads the root it resolved itself.
+   */
+  public dedup(
+    operation: string,
+    body: Record<string, unknown>,
+    signal: AbortSignal,
+    decode: (value: unknown) => unknown,
+  ): Promise<unknown> {
+    return this.transport(
+      `/assetlink/v1/dedup/${operation}`,
+      "POST",
+      JSON.stringify(body),
+      signal,
+      async (response) => {
+        const text = await response.text();
+        const payload: unknown = text.length === 0 ? null : JSON.parse(text);
+        if (!response.ok) throw dedupFailure(payload, response.status);
+        return decode(payload);
+      },
+      false,
+      dedupTimeoutMilliseconds,
+    );
+  }
+
   private request<T>(
     operation: string,
     body: Record<string, unknown>,
@@ -257,12 +286,13 @@ export class AssetLinkClient {
     signal: AbortSignal,
     decode: (response: Response, signal: AbortSignal) => Promise<T>,
     imageRequest = false,
+    budgetMilliseconds = timeoutMilliseconds,
   ): Promise<T> {
     signal.throwIfAborted();
     const controller = new AbortController();
     const cancelFromCaller = () => controller.abort(signal.reason);
     signal.addEventListener("abort", cancelFromCaller, { once: true });
-    const timeout = window.setTimeout(() => controller.abort(), imageRequest ? 20_000 : timeoutMilliseconds);
+    const timeout = window.setTimeout(() => controller.abort(), imageRequest ? 20_000 : budgetMilliseconds);
     try {
       for (let attempt = 0; ; attempt++) {
         const response = await fetch(path, {
@@ -330,4 +360,23 @@ function pageBody(cursor: string | null): Record<string, unknown> {
 
 function invalidResponse(status: number): AssetLinkApiError {
   return new AssetLinkApiError(status, "invalid_response", "服务返回了无法识别的响应。");
+}
+
+/**
+ * Turns a workbench error body into a typed failure. The server's own message is kept when it sent one,
+ * because "结果游标已过期" and "没有权限" call for different actions from the reader.
+ */
+function dedupFailure(payload: unknown, status: number): AssetLinkApiError {
+  if (payload !== null && typeof payload === "object" && "error" in payload) {
+    const error = (payload as { error?: unknown }).error;
+    if (error !== null && typeof error === "object") {
+      const code = (error as { code?: unknown }).code;
+      const message = (error as { message?: unknown }).message;
+      if (typeof code === "string" && typeof message === "string") {
+        return new AssetLinkApiError(status, code, message);
+      }
+    }
+  }
+
+  return invalidResponse(status);
 }

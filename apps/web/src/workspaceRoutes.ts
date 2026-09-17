@@ -25,13 +25,28 @@ export interface SearchRoute {
   fromLibraryId: string | null;
   fromPath: string;
 }
+export interface DedupRoute {
+  page: "dedup";
+  libraryId: string | null;
+  kind: DedupSection;
+  group: string | null;
+  cursor: string | null;
+}
 export type WorkspaceRoute =
   | { page: "home" }
   | { page: "libraries"; category: LibraryCategory | null }
   | { page: "tasks"; libraryId: string | null }
+  | DedupRoute
   | BrowseRoute
   | SearchRoute
   | { page: "invalid" };
+
+/**
+ * The three reviewable sections of a dedup report. Navigation only names which one is open; it never
+ * decides what belongs in it.
+ */
+export const dedupSections = ["groups", "unverified", "unreadable"] as const;
+export type DedupSection = (typeof dedupSections)[number];
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function validIdentifier(value: string): boolean {
@@ -52,6 +67,10 @@ export function browseRoute(libraryId: string, path = "", changes: Partial<Brows
     anchorId: null,
     ...changes,
   };
+}
+
+export function dedupRoute(libraryId: string | null, changes: Partial<DedupRoute> = {}): DedupRoute {
+  return { page: "dedup", libraryId, kind: "groups", group: null, cursor: null, ...changes };
 }
 
 export function parseWorkspaceRoute(location: Pick<Location, "pathname" | "search">): WorkspaceRoute {
@@ -90,6 +109,13 @@ export function parseWorkspaceRoute(location: Pick<Location, "pathname" | "searc
       });
     }
     if (pathname === "/tasks") return { page: "tasks", libraryId: id("library") };
+    if (pathname === "/dedup")
+      return dedupRoute(id("library"), {
+        kind: choice(one("section"), dedupSections, "groups"),
+        // A group key is an opaque server-issued value, so it is only bounded and never parsed here.
+        group: one("group") === null ? null : bounded(one("group")!, 200),
+        cursor: one("cursor") === null ? null : bounded(one("cursor")!, 1024),
+      });
     if (pathname === "/search") {
       const scope = choice(one("scope"), ["all", "library", "directory"] as const, "all");
       const selectedLibrary = id("library");
@@ -133,6 +159,13 @@ export function routeHref(route: WorkspaceRoute): string {
   if (route.page === "tasks") {
     path = "/tasks";
     set("library", route.libraryId);
+  }
+  if (route.page === "dedup") {
+    path = "/dedup";
+    set("library", route.libraryId);
+    if (route.kind !== "groups") set("section", route.kind);
+    set("group", route.group);
+    set("cursor", route.cursor);
   }
   if (route.page === "browse") {
     path = `/libraries/${route.libraryId}`;
@@ -180,6 +213,8 @@ export function collectionKey(route: WorkspaceRoute): string {
       route.libraryId,
       route.path,
     ]);
+  // Opening a group or the next page is a change within one result set, not a different collection.
+  if (route.page === "dedup") return JSON.stringify([route.page, route.libraryId, route.kind]);
   return routeHref(route);
 }
 
