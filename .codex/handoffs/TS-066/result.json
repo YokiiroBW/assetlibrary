@@ -7,7 +7,7 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "629f8acf91737e5a30ba995a16f60fb49273ea71",
+  "commit": "eacf26edd60b15a52733431610ec87d3a4c660c0",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
   "fix_round_from_commit": "e492d28",
   "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-2.md",
@@ -76,13 +76,13 @@
   "changed_contracts": [],
   "diff": {
     "files": 75,
-    "insertions": 9861,
+    "insertions": 9738,
     "deletions": 160,
-    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..629f8acf91737e5a30ba995a16f60fb49273ea71.",
+    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..eacf26edd60b15a52733431610ec87d3a4c660c0 (产品代码提交；其后的 629f8ac 与 89a5539 只改交接与交付记录)。",
     "fix_round": {
-      "files": 28,
-      "insertions": 1439,
-      "deletions": 324,
+      "files": 24,
+      "insertions": 1183,
+      "deletions": 191,
       "note": "The second fix round, against e492d28."
     }
   },
@@ -163,5 +163,7 @@
       "The real-PostgreSQL trial path still lacks a dedup step, so this workbench's HTTP surface and its recheck task have no database-backed end-to-end evidence yet.",
       "The shared Web budget is over by 11,658 B with the V01-006 numbers restored and every behaviour-preserving reduction applied; the next Web task must not assume headroom, and the gate's summing unit needs a coordinator decision."
     ]
-  }
+  },
+  "handoff_records_head": "89a55398b9e578acc6384036cbcb8eae33b96c26",
+  "worktree_clean_at": "89a55398b9e578acc6384036cbcb8eae33b96c26"
 }
