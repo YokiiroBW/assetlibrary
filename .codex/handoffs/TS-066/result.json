@@ -1,0 +1,139 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "TS-066",
+  "title": "资产库精确查重网页工作台",
+  "milestone": "V0.1",
+  "status": "ready_for_review",
+  "owner": "assetlibrary-dedup-workbench",
+  "branch": "work/ts-066",
+  "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
+  "commit": "66a0cee",
+  "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
+  "changed_files": [
+    ".codex/handoffs/TS-066/module-boundaries.md",
+    ".codex/handoffs/TS-066/summary.md",
+    ".codex/handoffs/TS-066/tests.md",
+    "apps/web/src/ReadOnlyWorkspace.tsx",
+    "apps/web/src/WorkspaceNavigation.tsx",
+    "apps/web/src/assetLinkClient.ts",
+    "apps/web/src/dedup/DedupAnalysisForm.tsx",
+    "apps/web/src/dedup/DedupGroupDetail.tsx",
+    "apps/web/src/dedup/DedupJobStatus.tsx",
+    "apps/web/src/dedup/DedupPage.tsx",
+    "apps/web/src/dedup/DedupResultList.tsx",
+    "apps/web/src/dedup/dedupClient.ts",
+    "apps/web/src/dedup/dedupResponses.ts",
+    "apps/web/src/dedup/dedupTypes.ts",
+    "apps/web/src/hooks/useDedupJob.ts",
+    "apps/web/src/styles.css",
+    "apps/web/src/styles/dedup.css",
+    "apps/web/src/workspaceRoutes.ts",
+    "docs/handoffs/TS-066.md",
+    "eng/web-dependency-policy.json",
+    "services/core-server/Adapters/AssetLink/AssetLinkRequestBody.cs",
+    "services/core-server/Adapters/AssetLink/ReadOnlyAssetLinkEndpoints.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupComposition.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupEndpoints.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupJson.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupReportJson.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupRequest.cs",
+    "services/core-server/Host/Trial/Dedup/TrialDedupSourceScope.cs",
+    "services/core-server/Host/Trial/TrialHostFactory.cs",
+    "services/core-server/Host/Trial/TrialWebEndpoints.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupExportBuilder.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupFindingClassifier.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupFindingProjection.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobCoordinator.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobIdentity.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobService.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobStarter.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobViewFactory.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupJobWorker.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupRecheckRunner.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupReportPublisher.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupReportRegistry.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupReportRehydrator.cs",
+    "services/core-server/Modules/AssetIdentity/Application/DedupResultsReader.cs",
+    "services/core-server/Modules/AssetIdentity/Contracts/DedupJobContracts.cs",
+    "services/core-server/Modules/AssetIdentity/Contracts/DedupPorts.cs",
+    "tests/web/dedup-fixtures.mjs",
+    "tests/web/dedup-workbench.spec.mjs"
+  ],
+  "changed_contracts": [],
+  "diff": {
+    "files": 48,
+    "insertions": 6280,
+    "deletions": 65
+  },
+  "tests": {
+    "passed": 574,
+    "failed": 0,
+    "skipped": 53,
+    "report": ".codex/handoffs/TS-066/tests.md",
+    "dotnet": {
+      "passed": 495,
+      "failed": 0,
+      "skipped": 53,
+      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped."
+    },
+    "browser": {
+      "passed": 79,
+      "failed": 0,
+      "this_task": 13,
+      "repeat_each_2": "22 passed / 0 failed"
+    },
+    "strict_build": "passed, zero warnings/errors with TreatWarningsAsErrors",
+    "format": "dotnet format --verify-no-changes passed; prettier --check passed",
+    "typecheck": "tsc --noEmit passed",
+    "production_build": "vite build passed: JavaScript 336,165 B (budget 344,064 B), CSS 32,118 B (budget 32,768 B)",
+    "repository": "verify_repository.py passed (fast architecture gate, 14 architecture tests)",
+    "release_gate": "check_release_gates.py --target v0.1-start: RELEASE_GATE_ALLOWED",
+    "web_boundary": "validate_web_source.py passed; validate_web_dependencies.py --require-build-artifacts passed",
+    "missing": [
+      "Real PostgreSQL/HTTPS/Chromium end-to-end (tests/integration/read-only-trial/run_e2e.py) was NOT executed: no PostgreSQL service or binaries and no docker on this machine. It also has no dedup step yet. Recorded as missing evidence, not as passing."
+    ]
+  },
+  "risks": [
+    "Report retention is a bounded in-process registry (8 reports, <=20000 items each): reports do not survive a service restart, which the contract states as RetentionBoundary and the page shows as 本次结果已不可读取. Durable reports would need a new migration and coordinator approval.",
+    "eng/web-dependency-policy.json size budgets were raised to fit the new page (JavaScript 327,680 -> 344,064; combined 360,448 -> 376,832) with the measured baseline recorded in size_budget_notes. This file is root-level shared policy, so it is listed as a deviation for coordinator review.",
+    "The spec's >=1200px two-column breakpoint is 1px away from the shell's 1199px collapse breakpoint; the page follows the spec literally and the alternative is a one-line media-query change.",
+    "Real-SQL end-to-end evidence is missing, so the endpoints have only been exercised through unit/browser fixtures and the trial host composition.",
+    "Four justified CA1506 suppressions exist on the workbench facade, the finding classifier, the composition root and the authorized HTTP surface."
+  ],
+  "blocked_by": [],
+  "recommended_merge_order": 0,
+  "handoff_summary": ".codex/handoffs/TS-066/summary.md",
+  "thread_deep_link": "",
+  "architecture_review": {
+    "module": "AssetIdentity (dedup workbench) with Host/Trial composition, AssetLink adapter request bounds, and the Web read-only workspace",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "TS065 DedupAnalyzer.AnalyzeAsync/RecountAsync, DedupPlanPolicy, DedupScopePolicy, DedupAnalysisLimits, DedupCurationPlan, DedupRecountRequest/Result, SystemDedupFileDiscovery/ContentReader/SourceAvailability and SystemDedupClock: no second scanner, hasher or scheduler was added.",
+      "TaskHealth public ports only (IDurableTaskCoordinator, IDurableTaskInspector, IDurableTaskCommitGuard, DurableTaskService, PostgresDurableTaskStore, TaskHealthExecutionLimits, TaskHealthLogger) for task state, lease, idempotency, cancellation and recovery.",
+      "LibraryStorage public query ports (ILibraryScanTargetQuery/IRegisteredLibraryRootQuery) for the registered root; no access to its storage or tables.",
+      "Web reuse of ReadOnlyWorkspace, WorkspaceNavigation, workspaceRoutes, WorkspacePrimitives, WorkspaceIcon, SessionGate, libraryMetadata helpers, styles/base.css colour variables and the styles.css import entry point.",
+      "The new workbench operations are carried by the single existing AssetLinkClient fetch adapter rather than a second transport."
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Host/Trial reads the same dedup job payload through the now-public DedupJobPayloadReader and DedupJobPayload, so the worker and the HTTP surface share one payload definition instead of copying it.",
+      "Host/Trial/Dedup/TrialDedupSourceScope adapts LibraryStorage's public management query to the scope query the dedup module defines; the module never touches LibraryStorage internals.",
+      "No other module's Infrastructure is referenced, no other module's tables are written, and TaskHealth contracts were not modified."
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "verify_repository.py passed, including the duplicated-C#-token-block gate that caught the bounded body reader being copied into the new HTTP surface; the reader was extracted into Adapters/AssetLink/AssetLinkRequestBody.cs and both endpoints now share it.",
+      "validate_web_source.py passed: exactly one fetch( in the Web source (the AssetLink adapter), no browser storage, no console logging and no write capability in production source.",
+      "dotnet build with TreatWarningsAsErrors passed at zero warnings; CA1506/ASP0016/CS0122/CS8754 findings were fixed rather than suppressed where a real fix existed.",
+      "Chromium regression suite: 79 passed / 0 failed, including 13 workbench cases covering denial, CSRF header presence, cancel, stale recheck, discarded report, long Chinese names, keyboard order, 320/390/1024/1440 viewports, dark mode and reduced motion."
+    ],
+    "technical_debt": [
+      "In-process report registry: bounded and disclosed, but not restart-durable. A durable variant needs an AssetIdentity-owned migration starting at 0024, which this card does not add.",
+      "IDedupJobSignal is an in-process wake-up only; losing it costs one polling interval and it carries no business fact.",
+      "The real-PostgreSQL trial path still lacks a dedup step, so this workbench's HTTP surface has no database-backed end-to-end evidence yet.",
+      "Web size budgets were raised by 16,384 bytes of JavaScript with measured justification rather than by removing a required view; the next Web task must re-measure instead of assuming headroom."
+    ]
+  }
+}
