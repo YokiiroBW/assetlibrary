@@ -25,14 +25,16 @@
     结果列表、重复组详情；`hooks/useDedupJob.ts` 负责请求、分页、单一在途读取与切片记忆。
   - `styles/dedup.css`：只用 `dedup` 类与既有颜色变量；≥1200px 双列（详情 360px）、768–1199px 下置、
     ≤767px 纵排；效果只有颜色/透明度；`prefers-reduced-motion` 降级。
-- **测试**：`tests/web/dedup-workbench.spec.mjs` 13 项 + `tests/web/dedup-fixtures.mjs`。
+- **测试**：`tests/web/dedup-workbench.spec.mjs` 13 项 + `tests/web/dedup-fixtures.mjs`；
+  `tests/dotnet/AssetLibrary.WebGateway.Tests/Dedup*WireTests.cs` 8 项线格式契约用例（直接断言真实 Host
+  序列化出的键集合与页面解码器一致，并以反向探针确认断言有效）。
 
 ## 验证结论
 
 | 门禁 | 结果 |
 | --- | --- |
 | Release 构建（`TreatWarningsAsErrors`） | 0 警告 0 错误 |
-| 全量 .NET 测试 | 通过（495 通过 / 53 跳过，跳过均为既有 PostgreSQL/POSIX 条件用例） |
+| 全量 .NET 测试 | 通过（503 通过 / 53 跳过，跳过均为既有 PostgreSQL/POSIX 条件用例） |
 | `verify_repository.py` | 通过 |
 | `check_release_gates.py --target v0.1-start` | `RELEASE_GATE_ALLOWED` |
 | `validate_web_source.py` / `validate_web_dependencies.py` | 通过 |

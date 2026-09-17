@@ -19,10 +19,28 @@
 - `AssetLibrary.TransferOperation.Tests` 64 / 0 / 64
 - `AssetLibrary.ReadCore.Tests` 106 / 25 / 131（含 TS065 的 49 项查重用例，跳过项均为既有 PostgreSQL/POSIX 条件用例）
 - `AssetLibrary.Packaging.Tests` 63 / 0 / 63
-- `AssetLibrary.WebGateway.Tests` 104 / 4 / 108
+- `AssetLibrary.WebGateway.Tests` 112 / 4 / 116（含本卡新增的 8 项线格式契约用例）
 - `AssetLibrary.Preview.Tests` 111 / 24 / 135
 
-合计 **495 通过 / 53 跳过 / 0 失败**。
+合计 **503 通过 / 53 跳过 / 0 失败**。
+
+### 1.1 线格式契约用例（`DedupReportWireTests` / `DedupExportWireTests` / `DedupRefusalWireTests`）
+
+浏览器套件跑的是手写夹具，所以「Host 真正序列化出来的键」与「页面解码器要读的键」之间原本没有任何门禁。
+新增的 8 项用例直接调用真实 Host 构造器（`TrialDedupJson` / `TrialDedupPageJson` / `TrialDedupExportJson`），
+序列化后再解析，逐键断言页面解码器 `apps/web/src/dedup/dedupResponses.ts` 要求的**完整键集合**与 JSON
+类型，并断言：
+
+- `failure_code` / `performed_at` / `previous_plan_digest` 这类可空字段**以显式 null 出现**，不是缺键；
+- `source_failures` 是对象数组（`source_id` + `reason_code`），不是裸字符串；
+- 报告版本以 `任务 id:代数` 绑定，页面后续每次调用都带这个值；
+- 导出的计划文档自带 `grants_file_operation = false` 与只读声明；
+- 全部数字都是整数且落在 JavaScript 安全整数范围内（2^53−1），`maximum_bytes` 仍是 JSON 数字而不是字符串；
+- 每个拒绝码映射到调用方可处理的状态码（400/403/404/409/503），且带可读中文文案。
+
+这些用例的**有效性经过反向探针确认**：把 `TrialDedupJson.Job` 里的 `analysis_version` 临时改名为
+`analysis_ver`，用例立即失败并打印完整键集合（`keys: task_id,...,analysis_ver,...`）；改回后恢复通过。
+因此这不是一组恒真的断言，而是真正锁住了 C# ↔ TypeScript 之间唯一没有被其他门禁覆盖的接缝。
 
 | 命令 | 结果 |
 | --- | --- |
@@ -81,7 +99,9 @@
 - **拒绝/授权**：非管理员账号显示无权限页；导出 403 显示服务端文案而不是空计划。
 - **CSRF**：夹具对每个查重请求校验 `X-AssetLibrary-CSRF`，缺失即抛错，因此所有用例都隐含覆盖该头。
 - **同键冲突**：受理规则由服务端 `dedup_already_running` / `idempotency_conflict` 承担；页面在 400/409 时
-  重新向服务端读取状态而不是自行猜测（`revision` 触发重读）。
+  重新向服务端读取状态而不是自行猜测（`revision` 触发重读）。拒绝码与状态码的对应由
+  `DedupRefusalWireTests` 锁定。
+- **Host 与页面之间的键与类型**：见 1.1（本卡新增的 8 项线格式契约用例）。
 - **取消/重启/旧租约迟到结果**：TaskHealth 的租约围栏与 `DedupJobWorker` 的 `LeaseLostException` 负责；
   页面只展示服务端状态，取消后按钮禁用。
 - **任务/报告版本绑定游标**：游标由服务端 HMAC 签发并绑定 `DedupReportKey`；页面把游标当不透明字符串使用，

@@ -66,15 +66,15 @@
     "deletions": 65
   },
   "tests": {
-    "passed": 574,
+    "passed": 582,
     "failed": 0,
     "skipped": 53,
     "report": ".codex/handoffs/TS-066/tests.md",
     "dotnet": {
-      "passed": 495,
+      "passed": 503,
       "failed": 0,
       "skipped": 53,
-      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped."
+      "note": "Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests grew by the 8 new dedup wire-contract cases."
     },
     "browser": {
       "passed": 79,
@@ -127,7 +127,8 @@
       "verify_repository.py passed, including the duplicated-C#-token-block gate that caught the bounded body reader being copied into the new HTTP surface; the reader was extracted into Adapters/AssetLink/AssetLinkRequestBody.cs and both endpoints now share it.",
       "validate_web_source.py passed: exactly one fetch( in the Web source (the AssetLink adapter), no browser storage, no console logging and no write capability in production source.",
       "dotnet build with TreatWarningsAsErrors passed at zero warnings; CA1506/ASP0016/CS0122/CS8754 findings were fixed rather than suppressed where a real fix existed.",
-      "Chromium regression suite: 79 passed / 0 failed, including 13 workbench cases covering denial, CSRF header presence, cancel, stale recheck, discarded report, long Chinese names, keyboard order, 320/390/1024/1440 viewports, dark mode and reduced motion."
+      "Chromium regression suite: 79 passed / 0 failed, including 13 workbench cases covering denial, CSRF header presence, cancel, stale recheck, discarded report, long Chinese names, keyboard order, 320/390/1024/1440 viewports, dark mode and reduced motion.",
+      "Eight new dedup wire-contract cases serialize the real Host builders (TrialDedupJson, TrialDedupPageJson, TrialDedupExportJson) and assert the exact key set and JSON token kinds the page decoder requires, that nullable fields appear as explicit nulls, that source_failures is an object array, that the exported document denies file-operation authority, and that every number fits a JavaScript safe integer. The assertion was proved effective by a reverse probe: renaming analysis_version to analysis_ver made the case fail immediately."
     ],
     "technical_debt": [
       "In-process report registry: bounded and disclosed, but not restart-durable. A durable variant needs an AssetIdentity-owned migration starting at 0024, which this card does not add.",
