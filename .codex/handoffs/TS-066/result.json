@@ -7,7 +7,7 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "eacf26edd60b15a52733431610ec87d3a4c660c0",
+  "commit": "629f8acf91737e5a30ba995a16f60fb49273ea71",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
   "fix_round_from_commit": "e492d28",
   "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-2.md",
@@ -76,13 +76,13 @@
   "changed_contracts": [],
   "diff": {
     "files": 75,
-    "insertions": 9738,
+    "insertions": 9861,
     "deletions": 160,
-    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..eacf26edd60b15a52733431610ec87d3a4c660c0.",
+    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..629f8acf91737e5a30ba995a16f60fb49273ea71.",
     "fix_round": {
-      "files": 24,
-      "insertions": 1183,
-      "deletions": 191,
+      "files": 28,
+      "insertions": 1439,
+      "deletions": 324,
       "note": "The second fix round, against e492d28."
     }
   },
