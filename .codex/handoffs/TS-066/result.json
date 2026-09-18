@@ -7,7 +7,7 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "da74b08",
+  "commit": "c03c77c",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
   "fix_round_from_commit": "1b8873c",
   "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-4.md",
@@ -206,6 +206,6 @@
       "The shared Web budget passes with 11,094 B of headroom; the next Web task must not assume more, and the gate's summing unit still needs a coordinator decision if the feature set grows."
     ]
   },
-  "handoff_records_head": "da74b08",
-  "worktree_clean_at": "da74b08"
+  "handoff_records_head": "c03c77c",
+  "worktree_clean_at": "c03c77c"
 }
