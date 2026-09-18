@@ -193,6 +193,74 @@ function memberPage(state, groupKey) {
 }
 
 /**
+ * The answer to a request for one section. A section the fixture's own page already describes is served as
+ * it stands; a section it does not is served as that section's shape at the same version, because a server
+ * answers the section that was asked for rather than the one it happens to hold. A page whose kind named
+ * another section would let a read of one section put another section's list on screen.
+ */
+function kindPage(state, kind, groupKey) {
+  if (groupKey !== undefined) return memberPage(state, groupKey);
+  if (kind === undefined || kind === state.page.kind) return state.page;
+  const shape =
+    kind === "Unverified"
+      ? { kind_text: "本次未验证内容的文件", groups: [], items: [unverifiedItem()] }
+      : kind === "Unreadable"
+        ? { kind_text: "本次读取失败的文件", groups: [], items: [unreadableItem()] }
+        : { kind_text: "完整强哈希一致的重复组", groups: state.page.groups, items: [] };
+  return { ...state.page, ...shape, kind, total: shape.groups.length > 0 ? state.page.total : shape.items.length };
+}
+
+/** The one file the fixture reports as unverified: it was in scope and its content was never read. */
+export function unverifiedItem(overrides = {}) {
+  return {
+    source_id: "33333333-3333-4333-8333-333333333333",
+    root: "C:/fixture-storage",
+    relative_path: "raw/unknown.bin",
+    name: "unknown.bin",
+    length: 1024,
+    sha256: null,
+    structure_hash: null,
+    last_write_time_utc: "2026-09-01T16:00:00Z",
+    state: "Unverified",
+    state_text: "本次未读取",
+    read_state: "NotRead",
+    read_state_text: "本次未读取",
+    failure: "None",
+    skip_reason: "None",
+    group_key: null,
+    category: "Unknown",
+    relations: [],
+    relation_notes: [],
+    ...overrides,
+  };
+}
+
+/** The one file the fixture reports as unreadable: it was in scope and reading it failed. */
+export function unreadableItem(overrides = {}) {
+  return {
+    source_id: "44444444-4444-4444-8444-444444444444",
+    root: "C:/fixture-storage",
+    relative_path: "locked/denied.bin",
+    name: "denied.bin",
+    length: 2048,
+    sha256: null,
+    structure_hash: null,
+    last_write_time_utc: "2026-09-02T09:30:00Z",
+    state: "Unreadable",
+    state_text: "本次读取失败",
+    read_state: "Failed",
+    read_state_text: "本次读取失败",
+    failure: "AccessDenied",
+    skip_reason: "None",
+    group_key: null,
+    category: "Unknown",
+    relations: [],
+    relation_notes: [],
+    ...overrides,
+  };
+}
+
+/**
  * A recheck as the server answers it: a receipt for a pending run, or an outcome once the durable task
  * has one. The page must render the receipt as "still checking" rather than as a clean plan, so the two
  * shapes are built from one body here and only the state differs.
@@ -307,7 +375,7 @@ export async function mockDedup(page, options = {}) {
         next_cursor: null,
       };
     }
-    return body.group_key === undefined ? state.page : memberPage(state, body.group_key);
+    return kindPage(state, body.kind, body.group_key);
   };
   const planNow = () => ({
     format_version: 1,
@@ -361,7 +429,12 @@ export async function mockDedup(page, options = {}) {
     const body = route.request().postDataJSON();
     if (!route.request().headers()["x-assetlibrary-csrf"]) throw new Error("A memory CSRF token is required");
     state.requests.push({ operation, body });
-    if (state.beforeAnswer !== null) await state.beforeAnswer({ operation, body, state });
+    // A page answer is the page as it stood when the request was made: a recheck files a new version by
+    // moving the fixture's page forward, and an answer that was already on its way is about the version the
+    // server held when it was asked — which is what makes a superseded answer superseded. A read that is
+    // held is answered with the page it was held for rather than with whatever the server holds by then.
+    let held = null;
+    if (state.beforeAnswer !== null) held = (await state.beforeAnswer({ operation, body, state })) ?? null;
     // A failure can be aimed at one operation or at every one of them. Aiming it at one is how a test
     // exercises a refused export while the page is still following a recheck it also has to answer.
     const refused =
@@ -379,7 +452,7 @@ export async function mockDedup(page, options = {}) {
       if (operation === "status" || operation === "cancel") return state.job;
       // A group request answers with that group's members, never with the section listing: the two are
       // different shapes, which is why the server answers one or the other and never both.
-      if (operation === "results") return pageNow(body);
+      if (operation === "results") return held?.page ?? pageNow(body);
       if (operation === "revalidate") {
         // A request that names the recheck's task polls that run; one that names none files it. Filing
         // answers with a receipt, and the poll answers with the outcome, which is how the page learns

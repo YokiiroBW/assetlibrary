@@ -1,22 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSliceLoader } from "./dedupSliceLoader";
 import { failure, isAbort, isAccessFailure } from "./queryState";
 import { DedupClient } from "../dedup/dedupClient";
 import { performAction, type DedupAction } from "../dedup/dedupActions";
 import { emptyDedupView, type DedupJobHandle, type DedupView } from "../dedup/dedupJobState";
-import type { DedupExportReceipt, DedupFindingKind, DedupGroup, DedupJob, DedupPage } from "../dedup/dedupTypes";
+import { newerThan, sameJob, sliceIdentity, sliceKey } from "./dedupSlices";
+import type { DedupExportReceipt, DedupFindingKind, DedupGroup } from "../dedup/dedupTypes";
 
 const pollMilliseconds = 2_000;
-const pageSize = 50;
 const recheckPollMilliseconds = 1_500;
-
-/** One read of one slice of a report version, kept so a read asked for during another can be queued. */
-type LoadParameters = {
-  taskId: string;
-  kind: DedupFindingKind;
-  groupKey: string | null;
-  cursor: string | null;
-  more: boolean;
-};
 
 /**
  * State of one dedup workbench session for one library and one open section. It owns request sequencing
@@ -61,16 +53,30 @@ export function useDedupJob(
   liveVersion.current = reportVersion;
   const operationKey = useRef<string>(crypto.randomUUID());
   const activeLoad = useRef<string | null>(null);
-  // A read asked for while another one is on the wire, and a counter that wakes the effect serving it.
-  const queued = useRef<LoadParameters | null>(null);
-  const [queuedRevision, setQueuedRevision] = useState(0);
+  // The section and the group the reader has open right now. They are read by the recovery path after a
+  // read ends rather than from that read's closure, because the reader may have moved on while it was on
+  // the wire and it is what they moved to that has to be read, not what this read was for.
+  const liveSection = useRef(section);
+  liveSection.current = section;
+  const liveGroup = useRef(groupKey);
+  liveGroup.current = groupKey;
+  /**
+   * The slice the reader is asking for right now: the task, section and group this render is showing. It is
+   * what makes "the reader came back to a section whose answer is still on screen" tellable from "the reader
+   * never left": the answer on screen belongs to the slice that was asked for when it arrived, so coming
+   * back is a different ask and has to be read again, while staying put is not an ask at all.
+   */
+  const liveWanted = useRef<string | null>(null);
+  /** The slice a read is being made for right now, so coming back to it does not send a second request. */
+  const reading = useRef<string | null>(null);
+  /** Whether the read that just ended was aborted by the read that took its place on the wire. */
+  const replaced = useRef(false);
   const exportedReceipt = useRef(onExported);
   exportedReceipt.current = onExported;
   useEffect(() => {
     current.current = libraryId;
     operationKey.current = crypto.randomUUID();
     activeLoad.current = null;
-    queued.current = null;
     readSlice.current = null;
     readVersion.current = null;
     setGroupKey(null);
@@ -86,81 +92,26 @@ export function useDedupJob(
     setRevision((value) => value + 1);
   }, [client, libraryId]);
 
-  /**
-   * Loads one section of the open report version. A missing report is not an empty result: the page
-   * states that it must be analyzed again instead of showing zero duplicates.
-   *
-   * A read asked for while another one is on the wire is served by the queued effect once the wire is
-   * free, so the queued read is kept whole rather than the callback being re-created for it.
-   */
-  const load = useCallback(
-    async (taskId: string, kind: DedupFindingKind, groupKey: string | null, cursor: string | null, more: boolean) => {
-      if (libraryId === null) return;
-      // A read already on the wire is not interrupted. A different read that is wanted now is queued
-      // instead, so a rapid open-and-close cannot leave the page without the list it still needs.
-      const requestKey = [libraryId, taskId, kind, groupKey, cursor, more].join("\u0000");
-      if (activeLoad.current !== null) {
-        queued.current = { taskId, kind, groupKey, cursor, more };
-        setQueuedRevision((value) => value + 1);
-        return;
-      }
-      activeLoad.current = requestKey;
-      // The read is recorded when its answer is applied rather than when it starts, so the page can ask
-      // again for a slice whose answer was dropped or whose page was cleared. The version is part of the
-      // record: the same slice read at a newer version is a different answer.
-      const version = liveVersion.current ?? "";
-      const controller = new AbortController();
-      query.current?.abort();
-      query.current = controller;
-      // A read that replaces what is already on screen keeps the list in place: removing it would move
-      // the rows the reader is looking at and take the focus target away with them.
-      if (more) setState((previous) => ({ ...previous, loadingMore: true }));
-      else if (live.current.page === null) setState((previous) => ({ ...previous, status: "loading" }));
-      try {
-        const page = await client.results(
-          libraryId,
-          taskId,
-          { kind, groupKey: groupKey ?? undefined, cursor, pageSize },
-          controller.signal,
-        );
-        if (current.current !== libraryId || controller.signal.aborted) return;
-        // The version the server answered with is the version this answer belongs to, and it is the
-        // server's own name for it rather than an increment derived here.
-        const answered = page.analysis_version === "" ? version : page.analysis_version;
-        // The record is the switch the read effect compares against, so it is built the same way: the task
-        // and the version the answer belongs to, then the section and the open group.
-        readSlice.current = [libraryId, `${taskId}:${answered}`, kind, groupKey ?? ""].join("\u0000");
-        readVersion.current = answered;
-        setState((previous) => ({
-          ...previous,
-          status: "ready",
-          loadingMore: false,
-          page,
-          group: groupKey === null ? null : groupFrom(groupKey, page),
-          recheck: groupKey === null ? previous.recheck : null,
-          message: null,
-          statusCode: null,
-        }));
-        if (!more && answered !== "")
-          setReportVersion((previous) => (newerThan(previous, answered) ? answered : previous));
-      } catch (error: unknown) {
-        if (isAbort(error)) return;
-        setState((previous) => ({ ...previous, loadingMore: false, status: "error", ...failure(error) }));
-      } finally {
-        if (activeLoad.current === requestKey) activeLoad.current = null;
-        if (query.current === controller) query.current = null;
-      }
-    },
-    [client, libraryId],
-  );
-
-  // The read that was asked for while another one was on the wire, served as soon as the wire is free.
-  useEffect(() => {
-    const wanted = queued.current;
-    if (wanted === null || activeLoad.current !== null) return;
-    queued.current = null;
-    void load(wanted.taskId, wanted.kind, wanted.groupKey, wanted.cursor, wanted.more);
-  }, [queuedRevision, load]);
+  // The read controller, built here and given the refs it works through: it is the only place a read is
+  // dispatched, so every rule about which read wins lives in one function.
+  const load = useSliceLoader({
+    client,
+    libraryId,
+    state: live,
+    current,
+    activeLoad,
+    reading,
+    replaced,
+    liveVersion,
+    readSlice,
+    readVersion,
+    liveSection,
+    liveGroup,
+    liveWanted,
+    query,
+    setState,
+    setReportVersion,
+  });
 
   // Reading a report and following its progress are the same effect: a succeeded job with a retained
   // report is read, and an active job is polled until it settles.
@@ -213,20 +164,33 @@ export function useDedupJob(
   // Changing section, closing the open group, or a report becoming readable changes what this page is
   // reading. The switch is the report's identity — its task and the version the server holds for it —
   // because a poll that changes nothing else must not restart the read, while a recheck that files a new
-  // version of the same task must.
+  // version of the same task must. A read that is wanted while another is on the wire is handed to the
+  // running one by `load` and served the moment it ends, so this effect never waits for a busy wire.
   const reportSwitch =
     state.job === null || !state.job.report_available ? "" : `${state.job.task_id}:${reportVersion ?? ""}`;
   const wantedSlice =
-    reportSwitch === "" ? null : `${libraryId ?? ""}\u0000${reportSwitch}\u0000${section}\u0000${groupKey ?? ""}`;
+    reportSwitch === ""
+      ? null
+      : sliceKey(libraryId ?? "", state.job?.task_id ?? "", reportVersion ?? "", section, groupKey);
+  // The reader's current ask, recorded as this render states it so `load` can tell "the reader is still
+  // here" from "the reader came back": only the first means the answer on screen is the answer to the ask.
+  liveWanted.current = state.job === null ? null : sliceIdentity(libraryId ?? "", state.job.task_id, section, groupKey);
   useEffect(() => {
     const job = live.current.job;
     if (libraryId === null || job === null || !job.report_available || wantedSlice === null) return;
-    // The answer on screen is this slice at the server's current version, so there is nothing to read. A
-    // version the server has moved on from is not that answer, which is what makes a recheck re-read the
-    // report it filed instead of leaving the previous one on screen.
-    if (readSlice.current === wantedSlice && readVersion.current === reportVersion) return;
+    // The answer on screen is this slice at the version the server holds for it, so there is nothing to
+    // read. The slice is compared by identity rather than by the versioned key, because the key a render
+    // builds is the version the render holds: a version the server has moved on from is not that answer,
+    // which is what makes a recheck re-read the report it filed instead of leaving the previous one on
+    // screen. An answer the page has already left is not that answer either, so coming back to a section
+    // reads it again rather than showing the section the reader left — `load` drops an answer for a slice
+    // that is no longer wanted, and this is the read that replaces it.
+    const onScreen =
+      readVersion.current === reportVersion &&
+      readSlice.current === sliceIdentity(libraryId, job.task_id, section, groupKey);
+    if (onScreen) return;
     void load(job.task_id, section, groupKey, null, false);
-  }, [libraryId, wantedSlice, reportVersion, revision, load]);
+  }, [libraryId, wantedSlice, reportVersion, revision, load, section, groupKey]);
 
   // A recheck is a durable background task, so filing one only produces a receipt, and this effect follows
   // that receipt's own task until the server has an outcome. A completed recheck has filed the version it
@@ -341,49 +305,5 @@ export function useDedupJob(
     cancel: () => void execute("cancel"),
     runRecheck: () => void execute("recheck"),
     exportPlan: () => void execute("export"),
-  };
-}
-
-/**
- * Whether a version the server named is later than the one the page is holding. Versions are the task's
- * identity and its generation, and a generation only ever moves forward for a task, so the number after
- * the last colon is the whole comparison. A version that cannot be read that way is taken as later, which
- * keeps a name the page does not understand from freezing it on an older one.
- */
-function newerThan(current: string | null, next: string): boolean {
-  if (current === null || current === next) return true;
-  const held = Number.parseInt(current.slice(current.lastIndexOf(":") + 1), 10);
-  const answered = Number.parseInt(next.slice(next.lastIndexOf(":") + 1), 10);
-  if (Number.isNaN(held) || Number.isNaN(answered)) return true;
-  return answered >= held;
-}
-
-/**
- * Whether a status answer says anything the page is not already showing. A durable task's own update time
- * only moves when its state, its cancellation record or its lease changes, so comparing it together with
- * the fields the page renders is enough to tell a real update from the same facts parsed again.
- */
-function sameJob(current: DedupJob, next: DedupJob): boolean {
-  return (
-    current.task_id === next.task_id &&
-    current.state === next.state &&
-    current.report_available === next.report_available &&
-    current.cancellation_requested === next.cancellation_requested &&
-    current.can_cancel === next.can_cancel &&
-    current.can_retry === next.can_retry &&
-    current.analysis_version === next.analysis_version &&
-    current.updated_at === next.updated_at &&
-    current.failure_code === next.failure_code
-  );
-}
-
-function groupFrom(groupKey: string, page: DedupPage): DedupGroup {
-  return {
-    group_key: groupKey,
-    length: page.items[0]?.length ?? 0,
-    evidence_hash: page.items[0]?.sha256 ?? "",
-    member_count: page.total,
-    identity_merge_proposed: false,
-    members: page.items,
   };
 }

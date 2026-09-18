@@ -1,0 +1,207 @@
+import type { MutableRefObject } from "react";
+import type { DedupClient } from "../dedup/dedupClient";
+import { groupFrom, newerThan, sliceIdentity, sliceKey } from "./dedupSlices";
+import { isAbort, failure } from "./queryState";
+import type { DedupFindingKind, DedupPage } from "../dedup/dedupTypes";
+import type { DedupView } from "../dedup/dedupJobState";
+
+const pageSize = 50;
+
+/** Everything the read controller needs from the page it serves, all of it live rather than captured. */
+export interface LoadContext {
+  readonly client: DedupClient;
+  readonly libraryId: string | null;
+  readonly state: MutableRefObject<DedupView>;
+  readonly activeLoad: MutableRefObject<string | null>;
+  readonly reading: MutableRefObject<string | null>;
+  readonly replaced: MutableRefObject<boolean>;
+  /** The library the page is open on now. A read whose library is gone is not written to the page. */
+  readonly current: MutableRefObject<string | null>;
+  readonly liveVersion: MutableRefObject<string | null>;
+  readonly readSlice: MutableRefObject<string | null>;
+  readonly readVersion: MutableRefObject<string | null>;
+  readonly liveSection: MutableRefObject<DedupFindingKind>;
+  readonly liveGroup: MutableRefObject<string | null>;
+  readonly liveWanted: MutableRefObject<string | null>;
+  readonly query: MutableRefObject<AbortController | null>;
+  readonly setState: (update: (previous: DedupView) => DedupView) => void;
+  readonly setReportVersion: (update: (previous: string | null) => string | null) => void;
+}
+
+/** One read: the task, the section or open group, the paging cursor, and whether it pages the list. */
+export type LoadSlice = (
+  taskId: string,
+  kind: DedupFindingKind,
+  groupKey: string | null,
+  cursor: string | null,
+  more: boolean,
+) => Promise<void>;
+
+/**
+ * Builds the read controller of one dedup workbench session.
+ *
+ * Request control rests on three facts, all of them refs so that a re-render cannot reset them:
+ * - what the reader wants (`liveSection`, `liveGroup`, `liveVersion`), recorded as each render states it;
+ * - what is on screen (`readSlice`, `readVersion`), recorded only when an answer is applied;
+ * - what is being read (`reading`), recorded when a request goes out and cleared when it ends.
+ *
+ * From those, at most one read is in flight for the slice the reader wants, and it is dispatched only if
+ * that slice's answer is not already on screen. A read wanted while another is on the wire preempts it:
+ * the read for the slice the reader left is aborted and its place taken, so what is being read is always
+ * the slice they selected rather than the one they passed through. An answer is written only if it is for
+ * the slice the reader wants; an answer for a section, a group or a version they have moved on from is
+ * dropped, and the read that ends is the one that reads what they want now.
+ */
+export function useSliceLoader(context: LoadContext): LoadSlice {
+  const {
+    client,
+    libraryId,
+    state,
+    activeLoad,
+    reading,
+    replaced,
+    liveVersion,
+    readSlice,
+    readVersion,
+    liveSection,
+    liveGroup,
+    liveWanted,
+    query,
+    current,
+    setState,
+    setReportVersion,
+  } = context;
+  const load: LoadSlice = async (
+    taskId: string,
+    kind: DedupFindingKind,
+    groupKey: string | null,
+    cursor: string | null,
+    more: boolean,
+  ) => {
+    {
+      if (libraryId === null) return;
+      const requestKey = [libraryId, taskId, kind, groupKey, cursor, more].join("\u0000");
+      // What this read asks for. It is compared at answer time against the reader's own current section and
+      // group, never against this call's arguments, because by then those describe what they asked for
+      // before — which is the whole point of the comparison.
+      const asked = sliceIdentity(libraryId, taskId, kind, groupKey);
+      // The answer this read would fetch is already on screen and the reader is on that slice, so there is
+      // nothing to read. A slice whose answer the page has left, or a version the server has moved on from,
+      // is not that answer, so it is read — and reading it takes the place of whatever is on the wire. The
+      // version compared against is the page's own: the version the render states, or, in the window between
+      // an answer recording its version and the render that states it, the version that answer recorded.
+      // Without the second, the read that just answered would not recognise its own answer as being on
+      // screen and would read the same slice a second time.
+      const version = liveVersion.current ?? readVersion.current ?? "";
+      const showing = readSlice.current === sliceKey(libraryId, taskId, version, kind, groupKey);
+      // The answer on screen is the answer to this ask only while the reader is still here and no other
+      // slice has taken the wire: a read that went out for another slice will answer that slice rather than
+      // this one, so the answer on screen is not what this ask is waiting for and it is read again.
+      const superseding = activeLoad.current !== null && reading.current !== asked;
+      if (!more && showing && !superseding && liveWanted.current === asked) return;
+      // The slice the reader wants is already on the wire, so this is the same read asked for twice and
+      // nothing is sent: the answer on its way is the answer to this ask. A read for another slice is one
+      // the reader has moved on from, so it is aborted and its place taken rather than left to answer a
+      // slice nobody is looking at — what is being read is always the slice they selected.
+      if (activeLoad.current !== null) {
+        if (reading.current === asked) return;
+        activeLoad.current = null;
+        query.current?.abort();
+        query.current = null;
+      }
+      activeLoad.current = requestKey;
+      reading.current = asked;
+      const controller = new AbortController();
+      query.current = controller;
+      replaced.current = false;
+      // A read that replaces what is already on screen keeps the list in place: removing it would move the
+      // rows the reader is looking at and take the focus target away with them. The first read of a slice
+      // the page holds no answer for is the one that may state it is loading; a read of a slice the page has
+      // left does not blank what is on screen, it replaces it when its own answer arrives.
+      if (more) setState((previous) => ({ ...previous, loadingMore: true }));
+      else if (state.current.page === null && !showing) setState((previous) => ({ ...previous, status: "loading" }));
+      try {
+        const page: DedupPage = await client.results(
+          libraryId,
+          taskId,
+          { kind, groupKey: groupKey ?? undefined, cursor, pageSize },
+          controller.signal,
+        );
+        if (current.current !== libraryId || controller.signal.aborted) {
+          // A read that was aborted is not the read the page is waiting for, so it does not start the next
+          // one: the read that replaced it is already on the wire and will.
+          replaced.current = true;
+          return;
+        }
+        // An answer for a slice the reader has left is not written to the page, and it does not become the
+        // record of what is on screen either: the reader is looking at another section or another group, so
+        // this answer is not the page's answer. What is compared is the slice, not the version, because a
+        // read that was wanted before the page knew the report version is still the read the page wanted —
+        // the version it belongs to is the one the server names in this very answer.
+        const nowWanted = sliceIdentity(libraryId, taskId, liveSection.current, liveGroup.current);
+        if (!more && asked !== nowWanted) return;
+        // The version this answer belongs to is the one the server names in it, and the server's own name is
+        // the authority for it rather than an increment derived here. An answer that names no version is the
+        // version the page asked for, read live rather than from this call's closure: what the page asked for
+        // when the read went out is not what it is asking for now. An answer the server names an older
+        // version in is about a version the server has moved on from, so it is dropped and the version it
+        // holds now is read instead.
+        const answered = page.analysis_version === "" ? (liveVersion.current ?? "") : page.analysis_version;
+        if (
+          liveVersion.current !== null &&
+          liveVersion.current !== answered &&
+          newerThan(liveVersion.current, answered)
+        )
+          return;
+        // The record is the switch the read effect compares against, so it is built the same way: the task
+        // and the version the answer belongs to, then the section and the open group.
+        readSlice.current = sliceKey(libraryId, taskId, answered, kind, groupKey);
+        readVersion.current = answered;
+        setState((previous) => ({
+          ...previous,
+          status: "ready",
+          loadingMore: false,
+          page,
+          group: groupKey === null ? null : groupFrom(groupKey, page),
+          recheck: groupKey === null ? previous.recheck : null,
+          message: null,
+          statusCode: null,
+        }));
+        if (!more && answered !== "")
+          setReportVersion((previous) => (newerThan(previous, answered) ? answered : previous));
+      } catch (error: unknown) {
+        if (isAbort(error)) return;
+        setState((previous) => ({ ...previous, loadingMore: false, status: "error", ...failure(error) }));
+      } finally {
+        if (activeLoad.current === requestKey) activeLoad.current = null;
+        if (reading.current === asked) reading.current = null;
+        if (query.current === controller) query.current = null;
+        // The read that just ended is the only thing that knows the wire is free, so it is the one that
+        // starts the next read — waiting for an effect to notice would lose the wake-up, because an effect
+        // cannot run while the wire was busy. What it reads is what the reader wants now, not what this read
+        // was for: they may have moved to another section, another group, or a version the server filed while
+        // it was on the wire, and what is on screen is the answer to the slice they left rather than the one
+        // they selected.
+        if (replaced.current) return;
+        const job = state.current.job;
+        if (job === null || !job.report_available) return;
+        const nowWanted = sliceIdentity(libraryId, job.task_id, liveSection.current, liveGroup.current);
+        // What is on screen is the reader's own slice when the answer on screen is the one this read just
+        // wrote for it, at the version the page holds — which this render may not have caught up with yet. A
+        // slice the reader has left, or one whose answer the server has since superseded, is not that answer,
+        // so it is read rather than left standing.
+        const onScreen =
+          readSlice.current ===
+            sliceKey(libraryId, job.task_id, readVersion.current ?? "", liveSection.current, liveGroup.current) &&
+          readVersion.current === (liveVersion.current ?? "");
+        if (onScreen) return;
+        // A read for that slice is already on the wire, so it will answer it and this one is not repeated.
+        if (reading.current === nowWanted) return;
+        void load(job.task_id, liveSection.current, liveGroup.current, null, false);
+      }
+    }
+  };
+  // The controller never captures a render: everything it reads about the page it reads through the refs
+  // it was given, so a new one per render behaves exactly like the previous one.
+  return load;
+}

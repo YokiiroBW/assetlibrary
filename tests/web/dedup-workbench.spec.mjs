@@ -611,3 +611,267 @@ test("long Chinese names and keyboard order stay usable", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "关闭重复组详情" })).toBeFocused();
 });
+
+/**
+ * Holds the answers to a set of reads open, one gate per read, and answers each of them with the section
+ * it asked for once it is released. It is how a test can move the reader between sections while a read is
+ * still on the wire — the moment the page's request control is observable at all.
+ */
+function holdReads(state) {
+  const gates = [];
+  state.beforeAnswer = async ({ operation, body }) => {
+    if (operation !== "results") return;
+    let release;
+    const held = new Promise((resolve) => {
+      release = resolve;
+    });
+    // The answer is the one the request was made against: the version the server held when the read went
+    // out, and the section it asked for. A read that went out before the server filed a new version
+    // therefore answers about the superseded version, which is what makes a late answer late.
+    const version = state.page.analysis_version;
+    gates.push({ kind: body.kind, groupKey: body.group_key ?? null, release });
+    await held;
+    // A page that applies a late answer shows that section's own note rather than the note of the section
+    // the reader has since selected, and shows it at the version that answer belongs to.
+    return { page: pageForKind(body.kind, body.group_key, version, state.page.summary.plan_digest) };
+  };
+  return {
+    /** Waits until the read for a section is on the wire, then releases just that one. */
+    async release(kind) {
+      await expect
+        .poll(() => gates.find((gate) => gate.kind === kind && !gate.released) !== undefined, { timeout: 6_000 })
+        .toBe(true);
+      const gate = gates.find((candidate) => candidate.kind === kind && !candidate.released);
+      gate.released = true;
+      gate.release();
+    },
+    /** Releases every read that is still held, in the order they were made, and stops holding new ones. */
+    releaseAll() {
+      state.beforeAnswer = null;
+      for (const gate of gates) {
+        if (gate.released) continue;
+        gate.released = true;
+        gate.release();
+      }
+    },
+    kinds() {
+      return gates.map((gate) => gate.kind);
+    },
+  };
+}
+
+/** The answer to one section of the report, as the fixture's own page shape, at the version it answers. */
+function pageForKind(kind, groupKey, version, digest = undefined) {
+  // The summary is the page's own name for the version it reports, so an answer about a version says so in
+  // both places: a page whose summary named another version would be a server contradicting itself. The
+  // digest is the run's own name for the plan it filed, and it travels with the version.
+  const summary =
+    digest === undefined ? { analysis_version: version } : { analysis_version: version, plan_digest: digest };
+  const answer = { analysis_version: version, summary: dedupSummary(summary) };
+  if (kind === "Unverified")
+    return dedupPage({
+      ...answer,
+      kind,
+      kind_text: "本次未验证内容的文件",
+      groups: [],
+      items: [unverifiedItem()],
+      total: 1,
+    });
+  if (kind === "Unreadable")
+    return dedupPage({
+      ...answer,
+      kind,
+      kind_text: "本次读取失败的文件",
+      groups: [],
+      items: [unreadableItem()],
+      total: 1,
+    });
+  if (groupKey !== null) return dedupPage({ ...answer, groups: [dedupGroup({ group_key: groupKey })] });
+  return dedupPage(answer);
+}
+
+function unverifiedItem() {
+  return {
+    source_id: "33333333-3333-4333-8333-333333333333",
+    root: "C:/fixture-storage",
+    relative_path: "raw/unknown.bin",
+    name: "unknown.bin",
+    length: 1024,
+    sha256: null,
+    structure_hash: null,
+    last_write_time_utc: "2026-09-01T08:00:00Z",
+    state: "Unverified",
+    state_text: "本次未验证内容",
+    read_state: "NotRead",
+    read_state_text: "本次未读取",
+    failure: "None",
+    skip_reason: "OverBudget",
+    group_key: null,
+    category: "Unknown",
+    relations: [],
+    relation_notes: [],
+  };
+}
+
+function unreadableItem() {
+  return {
+    ...unverifiedItem(),
+    source_id: "44444444-4444-4444-8444-444444444444",
+    relative_path: "raw/locked.bin",
+    name: "locked.bin",
+    state: "Unreadable",
+    state_text: "本次读取失败",
+    read_state: "Failed",
+    read_state_text: "读取失败",
+    failure: "AccessDenied",
+    skip_reason: "None",
+  };
+}
+
+/** The note the section the reader selected carries, so the body on screen can be named by its own text. */
+const noteOf = {
+  ByteDuplicateGroup: "组内每个文件的完整强哈希一致，可逐组复核。",
+  Unverified: "本次没有读取这些文件的内容，不能据此判断是否重复。",
+  Unreadable: "本次读取失败或权限被拒绝，文件本身未必有问题。",
+};
+
+/** The section the reader has selected, as the tab says it. */
+async function selectedSection(page) {
+  return page.locator('[role="tab"][aria-selected="true"]').innerText();
+}
+
+test("returning to the section the reader left reads it again, and the answer it left behind is dropped", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The reader leaves the duplicate groups for the unverified section, and that read is held on the wire.
+  const reads = holdReads(state);
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect.poll(() => reads.kinds().includes("Unverified"), { timeout: 6_000 }).toBe(true);
+  // They then go back to the duplicate groups before that answer arrives. The answer that is on its way
+  // belongs to the section they left, so it must neither be written to the page nor counted as the answer
+  // the page holds: the duplicate groups are what the reader asked for, and what is on screen is that.
+  await page.getByRole("tab", { name: /重复组/ }).click();
+  await reads.release("Unverified");
+
+  // Both the tab and the body have to agree with the section that was last asked for.
+  await expect(page.getByRole("tab", { name: /重复组/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByText(noteOf.ByteDuplicateGroup)).toBeVisible();
+  await expect(page.getByText(noteOf.Unverified)).toHaveCount(0);
+  await expect(page.getByText("raw/unknown.bin")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible();
+  expect(await selectedSection(page)).toContain("重复组");
+  // The answer that was on its way when the reader left was dropped rather than applied, and nothing was
+  // read for the section they passed through: what is on screen is the section they settled on.
+  const kinds = state.requests.filter((request) => request.operation === "results").map((request) => request.body.kind);
+  expect(kinds.filter((kind) => kind === "Unreadable")).toHaveLength(0);
+});
+
+test("only the section the reader settled on is read when they move on twice while a read is in flight", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // Unverified is left while its read is on the wire, and so is the unreadable section that replaced it.
+  // The reader has settled on the duplicate groups, so that is the one read that has to be served: the
+  // section they passed through on the way is not worth a request.
+  const reads = holdReads(state);
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect.poll(() => reads.kinds().includes("Unverified"), { timeout: 6_000 }).toBe(true);
+  await page.getByRole("tab", { name: /本次不可读/ }).click();
+  await page.getByRole("tab", { name: /重复组/ }).click();
+  await reads.releaseAll();
+
+  await expect(page.getByText(noteOf.ByteDuplicateGroup)).toBeVisible();
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible();
+  expect(await selectedSection(page)).toContain("重复组");
+  const kinds = state.requests.filter((request) => request.operation === "results").map((request) => request.body.kind);
+  // No read of a section the reader only passed through is applied, and the answer that was on the wire when
+  // they settled is not the one on screen: the duplicate groups are.
+  expect(kinds.at(-1)).not.toBe("Unverified");
+  await expect(page.getByText(noteOf.Unreadable)).toHaveCount(0);
+});
+
+test("a read of the previous version is dropped when a recheck files a new one while it is on the wire", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The reader opens the unverified section and that read is held. The recheck then files a new version,
+  // so the answer on its way is an answer about the version the server has moved on from.
+  const reads = holdReads(state);
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect.poll(() => reads.kinds().includes("Unverified"), { timeout: 6_000 }).toBe(true);
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  // The page learns the version the recheck filed while the superseded answer is still on its way, and it
+  // holds the export back until it has read the new version rather than exporting the superseded one.
+  await expect(page.getByText(/服务器已更新结果版本，正在读取新版本/)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeDisabled();
+  // The superseded answer is released only now, after the version has already moved: it must be dropped
+  // rather than put on screen as the section the reader selected.
+  await reads.releaseAll();
+  await page.waitForTimeout(1200);
+
+  // The page ends on the version the recheck filed, showing the section the reader selected, and the
+  // export it makes names that version rather than the superseded one the dropped answer was about.
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled({ timeout: 8_000 });
+  await expect(page.locator(".dedup-status")).toContainText(`结果版本`);
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion);
+  await expect(page.getByText(noteOf.Unverified)).toBeVisible();
+  await expect(page.getByText("raw/unknown.bin")).toBeVisible();
+  await page.getByRole("button", { name: "导出计划" }).click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(secondVersion);
+  expect(exported.body.plan_digest).toBe(secondDigest);
+  expect(await selectedSection(page)).toContain("未验证内容");
+});
+
+test("leaving the open group while its member read is on the wire does not put the group back on screen", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  const row = page.getByRole("button", { name: /2 个文件/ });
+  await expect(row).toBeVisible({ timeout: 6_000 });
+
+  // The reader opens the group, and then leaves the detail again: the detail is closed and the unverified
+  // section is read instead. The member answer that is still on its way belongs to a detail the reader has
+  // closed, so it must not reopen the detail, and it must not replace the section the reader is now on.
+  await row.click();
+  await expect(page.getByRole("heading", { name: "重复组详情" })).toBeVisible({ timeout: 6_000 });
+  const reads = holdReads(state);
+  await page.getByRole("button", { name: "关闭重复组详情" }).click();
+  await expect.poll(() => reads.kinds().includes("ByteDuplicateGroup"), { timeout: 6_000 }).toBe(true);
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect.poll(() => reads.kinds().includes("Unverified"), { timeout: 6_000 }).toBe(true);
+  await reads.releaseAll();
+
+  await expect(page.getByRole("heading", { name: "重复组详情" })).toHaveCount(0);
+  await expect(page.getByText("raw/unknown.bin")).toBeVisible();
+  await expect(page.getByText(noteOf.Unverified)).toBeVisible();
+  await expect(page.getByText(noteOf.ByteDuplicateGroup)).toHaveCount(0);
+  await expect(row).toHaveCount(0);
+  expect(await selectedSection(page)).toContain("未验证内容");
+  // The member answer is dropped rather than applied, so the group the reader left is not reopened, and
+  // closing the detail is not a reason to read the section again: the read that is on the wire for it is
+  // the last one made for that group, and the read the page settles on is the section the reader is on.
+  const asked = state.requests.filter((request) => request.operation === "results");
+  expect(asked.filter((request) => request.body.group_key !== undefined)).toHaveLength(1);
+  expect(asked.at(-1).body.kind).toBe("Unverified");
+});
