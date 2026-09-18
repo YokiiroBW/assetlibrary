@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { formatBytes, formatDate } from "../libraryMetadata";
 import { isAccessFailure } from "../hooks/queryState";
-import type { DedupJobHandle } from "../hooks/useDedupJob";
+import type { DedupJobHandle } from "./dedupJobState";
 import type { useLibraries } from "../hooks/useLibraries";
 import { dedupKinds } from "./dedupTypes";
 import type { DedupExportReceipt, DedupRecheck, DedupSummary } from "./dedupTypes";
@@ -124,7 +124,13 @@ function DedupReport({
       {dedup.message !== null && <ErrorState message={dedup.message} />}
       {dedup.status === "loading" && dedup.job === null && <LoadingState label="正在读取查重任务" />}
       {dedup.job !== null && (
-        <DedupJobStatus job={dedup.job} page={dedup.page} pending={dedup.pending} onCancel={dedup.cancel} />
+        <DedupJobStatus
+          job={dedup.job}
+          page={dedup.page}
+          pending={dedup.pending}
+          reportVersion={dedup.reportVersion}
+          onCancel={dedup.cancel}
+        />
       )}
       {dedup.status === "idle" && dedup.job === null && (
         <p className="dedup-note" role="status">
@@ -288,6 +294,11 @@ function DedupStatistics({ summary }: { summary: DedupSummary }) {
  * The two closing operations. Both are bound to the version on screen: recheck answers about the plan
  * the reader is looking at, and the export writes that same version rather than the newest one.
  *
+ * A completed recheck files the version it produced as the task's new report, so the page re-reads that
+ * version. While it is re-reading, the export is withheld instead of being offered for the version the
+ * server has already replaced: an export names the version it writes, and the old one is refused rather
+ * than re-bound.
+ *
  * The recheck is a background task, so this section also exists while one is queued: it says so rather
  * than showing an empty change list, which would read as a plan that nothing changed.
  */
@@ -302,13 +313,18 @@ function DedupFollowUp({ dedup, exported }: { dedup: DedupJobHandle; exported: D
         <button type="button" className="secondary" onClick={dedup.runRecheck} disabled={dedup.pending}>
           重新核对
         </button>
-        <button type="button" className="primary" onClick={dedup.exportPlan} disabled={dedup.pending}>
+        <button type="button" className="primary" onClick={dedup.exportPlan} disabled={dedup.pending || dedup.stale}>
           导出计划
         </button>
       </div>
       <p className="dedup-note">
         两个操作都绑定结果版本 {version}。重新核对只读取本次分析记录的来源；导出的是一份计划文档，不会执行任何文件操作。
       </p>
+      {dedup.stale && (
+        <p className="dedup-note" role="status">
+          服务器已更新结果版本，正在读取新版本 {dedup.reportVersion ?? ""}；读取完成前不能导出，避免导出已被取代的版本。
+        </p>
+      )}
       {exported !== null && (
         <p className="dedup-note" role="status">
           已导出结果版本 {exported.analysis_version} 的计划文档，文件名 {exported.file_name}。

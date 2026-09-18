@@ -18,15 +18,22 @@ export function DedupJobStatus({
   job,
   page,
   pending,
+  reportVersion,
   onCancel,
 }: {
   job: DedupJob;
   page: DedupPage | null;
   pending: boolean;
+  /** The version the server currently holds for this task, which is the one the page is bound to. */
+  reportVersion: string | null;
   onCancel: () => void;
 }) {
   const statistics = page?.summary.statistics ?? null;
   const plan = page?.summary.plan ?? null;
+  // A recheck files a new version of the same task, so the job's own field can name a version the server
+  // has already replaced. The version the server named last is stated instead, and it is stated the same
+  // way here as it is beside the results, so one version is never shown two different ways.
+  const version = reportVersion ?? page?.summary.analysis_version ?? job.analysis_version;
   return (
     <section className="dedup-status" aria-labelledby="dedup-status-heading">
       <h2 id="dedup-status-heading" className="dedup-section-heading">
@@ -43,7 +50,7 @@ export function DedupJobStatus({
         </div>
         <div>
           <dt>结果版本</dt>
-          <dd>{job.analysis_version}</dd>
+          <dd>{version}</dd>
         </div>
         <div>
           <dt>更新时间</dt>

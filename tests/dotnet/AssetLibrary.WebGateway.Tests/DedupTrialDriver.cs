@@ -265,6 +265,9 @@ internal sealed record DedupTrialAnswer(int Status, JsonObject Payload)
 
     public string AnalysisVersion => Required("analysis_version").GetValue<string>();
 
+    /// <summary>The digest of the plan this answer is about: an exported document's own plan digest.</summary>
+    public string DocumentPlanDigest => Required("plan_digest").GetValue<string>();
+
     public DateTimeOffset CreatedAt => Required("created_at").GetValue<DateTimeOffset>();
 
     public DateTimeOffset UpdatedAt => Required("updated_at").GetValue<DateTimeOffset>();

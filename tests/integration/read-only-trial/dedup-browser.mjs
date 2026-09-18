@@ -28,6 +28,7 @@ const browser = await chromium.launch({
 });
 let page;
 const operations = [];
+const calls = [];
 const failures = [];
 try {
   const context = await browser.newContext({
@@ -44,18 +45,30 @@ try {
   // really called the Core instead of a route handler installed by this script. Console errors and
   // refused responses are collected too, because a page that reports a failure in its own words would
   // otherwise leave the trial guessing why a step did not happen.
+  //
+  // The export and the recheck are recorded with their bodies and answers as well, because what this
+  // trial has to prove is that the version the page exports is the version the server holds — which can
+  // only be compared against the server's own answer for that version.
+  const revalidateAnswers = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.pathname.startsWith("/assetlink/v1/dedup/")) operations.push(url.pathname);
+    if (!url.pathname.startsWith("/assetlink/v1/dedup/")) return;
+    operations.push(url.pathname);
+    if (url.pathname.endsWith("/export") || url.pathname.endsWith("/revalidate")) {
+      calls.push({ operation: url.pathname.split("/").at(-1), body: request.postDataJSON() });
+    }
   });
   page.on("console", (message) => {
     if (message.type() === "error") failures.push(`console: ${message.text()}`);
   });
   page.on("pageerror", (error) => failures.push(`pageerror: ${error.message}`));
-  page.on("response", (response) => {
+  page.on("response", async (response) => {
     const url = new URL(response.url());
-    if (url.pathname.startsWith("/assetlink/v1/dedup/") && response.status() >= 400) {
-      failures.push(`response: ${response.status()} ${url.pathname}`);
+    if (!url.pathname.startsWith("/assetlink/v1/dedup/")) return;
+    if (response.status() >= 400) failures.push(`response: ${response.status()} ${url.pathname}`);
+    if (url.pathname.endsWith("/revalidate")) {
+      const text = await response.text().catch(() => "");
+      if (text.length > 0) revalidateAnswers.push(JSON.parse(text));
     }
   });
 
@@ -118,16 +131,40 @@ try {
   await expect(detail).toHaveCount(0);
   await expect(group).toBeFocused();
 
-  // 4. export: the document the page saves is the one the server produced for the version on screen.
-  //    It is exported before the recheck rather than after, and not by preference: filing a recheck makes
-  //    the server file that recheck's own report as a new version of the library's result, so a page that
-  //    still holds the version it read would export a superseded version and be refused. The page's own
-  //    recheck is therefore the step that follows the document it was verifying.
-  const exporting = page.waitForEvent("download", { timeout: 60000 }).catch(() => null);
-  await page.getByRole("button", { name: "导出计划", exact: true }).click();
+  // 4. recheck: filed as its own durable task, so the page reports its own outcome rather than guessing
+  //    one, and it says the plan it compared is still current. A completed recheck files the version it
+  //    produced as the library's new result, so this step is what moves the version the page is bound to.
+  await page.getByRole("button", { name: "重新核对", exact: true }).click();
+  // The recheck outcome announces itself as status, and the export receipt will too, so it is waited for
+  // by its own heading rather than by being the first one on the page.
+  const recheck = page.locator(".dedup-followup [role=status]").filter({ hasText: "核对结果" });
+  await expect(recheck).toBeVisible({ timeout: 90000 });
+  await expect(recheck).toContainText("来源未变化", { timeout: 90000 });
+
+  // 5. the page confirms the version the server now holds before anything is exported from it. This is
+  //    the step that the previous round's ordering avoided: the page has to re-read the report the
+  //    recheck filed rather than keep showing the version it read before the recheck.
+  const outcome = revalidateAnswers.filter((answer) => answer.state === "completed").at(-1);
+  assert.ok(outcome, "the recheck must answer with its outcome");
+  assert.ok(outcome.analysis_version, "a completed recheck names the version it filed");
+  await expect(page.locator(".dedup-statistics .dedup-note").first()).toContainText(
+    `结果版本 ${outcome.analysis_version}`,
+    { timeout: 60000 },
+  );
+  await expect(page.locator(".dedup-followup")).toContainText(`结果版本 ${outcome.analysis_version}`, {
+    timeout: 60000,
+  });
+  const exporting = page.getByRole("button", { name: "导出计划", exact: true });
+  await expect(exporting).toBeEnabled({ timeout: 60000 });
+
+  // 6. export: the document the page saves is the version the server filed and the page confirmed. The
+  //    server refuses an export bound to a version it no longer holds, so an export that succeeds here is
+  //    the server's own statement that the page is on the current version.
+  const download = page.waitForEvent("download", { timeout: 60000 }).catch(() => null);
+  await exporting.click();
   const receipt = page.locator(".dedup-followup [role=status]").filter({ hasText: "已导出结果版本" });
   await expect(receipt).toBeVisible({ timeout: 30000 });
-  const saved = await exporting;
+  const saved = await download;
   const planPath = join(settings.evidence, "dedup-plan-exported.json");
   if (saved !== null) {
     await saved.saveAs(planPath);
@@ -146,23 +183,37 @@ try {
   const plan = JSON.parse(await readFile(planPath, "utf8"));
   assert.equal(plan.grants_file_operation, false, "an exported plan grants no file operation");
   assert.equal(plan.library_id, settings.library_id, "the exported plan is the one for this library");
-  const version = plan.analysis_version;
-  assert.ok(version, "the exported plan names the version it exports");
-  assert.ok(
-    await page.locator(".dedup-followup").innerText().then((text) => text.includes(version)),
-    `the page must report the version it exported: ${version}`,
+  // The document, the page and the server all name one version, and it is the server's own name for it.
+  assert.equal(
+    plan.analysis_version,
+    outcome.analysis_version,
+    "the exported document is the version the server holds",
+  );
+  assert.equal(plan.plan_digest, outcome.plan_digest, "the exported document is the plan the server holds");
+  const exportCall = calls.filter((call) => call.operation === "export").at(-1);
+  assert.ok(exportCall, "the page must have asked the server to export");
+  assert.equal(exportCall.body.analysis_version, outcome.analysis_version, "the export names the current version");
+  assert.equal(exportCall.body.plan_digest, outcome.plan_digest, "the export names the current plan");
+  await expect(receipt).toContainText(outcome.analysis_version);
+  await expect(page.locator(".dedup-statistics .dedup-note").first()).toContainText(
+    `结果版本 ${outcome.analysis_version}`,
   );
 
-  // 5. recheck: filed as its own durable task, so the page reports its own outcome rather than guessing
-  //    one, and it says the plan it compared is still current.
-  await page.getByRole("button", { name: "重新核对", exact: true }).click();
-  // Both the export receipt and the recheck outcome announce themselves as status, so the recheck is
-  // waited for by its own heading rather than by being the first one on the page.
-  const recheck = page.locator(".dedup-followup [role=status]").filter({ hasText: "核对结果" });
-  await expect(recheck).toBeVisible({ timeout: 90000 });
-  await expect(recheck).toContainText("来源未变化", { timeout: 90000 });
+  // 7. nothing in this run was refused: the page named the version the server holds, so the Core's own
+  //    version check had nothing to reject. The refusal itself is a separate negative case, proven where
+  //    it can be aimed at the server directly, in the WebGateway integration trial; what this run adds is
+  //    that the successful flow is not reaching that check by holding a superseded version.
+  assert.deepEqual(
+    failures.filter((failure) => failure.includes("409") || failure.includes("dedup_version_conflict")),
+    [],
+    "no step of the flow may be refused for a version conflict",
+  );
+  assert.ok(
+    revalidateAnswers.some((answer) => answer.state === "pending"),
+    "the recheck must have been followed as a background task, not answered inline",
+  );
 
-  // 6. cancel: a second library, so this start is a new durable task rather than the finished one, and
+  // 8. cancel: a second library, so this start is a new durable task rather than the finished one, and
   //    the request lands while the worker is still holding it.
   await page.goto(new URL(`/dedup?library=${settings.second_library_id}`, settings.origin).href);
   await expect(page.locator("#dedup-library")).toHaveValue(settings.second_library_id);

@@ -1,72 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { failure, isAbort, isAccessFailure } from "./queryState";
 import { DedupClient } from "../dedup/dedupClient";
-import type {
-  DedupExportReceipt,
-  DedupFindingKind,
-  DedupGroup,
-  DedupJob,
-  DedupPage,
-  DedupRecheck,
-} from "../dedup/dedupTypes";
+import { performAction, type DedupAction } from "../dedup/dedupActions";
+import { emptyDedupView, type DedupJobHandle, type DedupView } from "../dedup/dedupJobState";
+import type { DedupExportReceipt, DedupFindingKind, DedupGroup, DedupJob, DedupPage } from "../dedup/dedupTypes";
 
 const pollMilliseconds = 2_000;
 const pageSize = 50;
 const recheckPollMilliseconds = 1_500;
 
-/** One read of one slice of a report version. */
-interface LoadParameters {
+/** One read of one slice of a report version, kept so a read asked for during another can be queued. */
+type LoadParameters = {
   taskId: string;
   kind: DedupFindingKind;
   groupKey: string | null;
   cursor: string | null;
   more: boolean;
-}
-
-type LoadSection = (
-  taskId: string,
-  kind: DedupFindingKind,
-  groupKey: string | null,
-  cursor: string | null,
-  more: boolean,
-) => Promise<void>;
-
-interface DedupView {
-  status: "idle" | "loading" | "ready" | "error";
-  pending: boolean;
-  loadingMore: boolean;
-  job: DedupJob | null;
-  page: DedupPage | null;
-  group: DedupGroup | null;
-  recheck: DedupRecheck | null;
-  message: string | null;
-  statusCode: number | null;
-}
-
-const initial: DedupView = {
-  status: "idle",
-  pending: false,
-  loadingMore: false,
-  job: null,
-  page: null,
-  group: null,
-  recheck: null,
-  message: null,
-  statusCode: null,
 };
-
-export interface DedupJobState {
-  readonly status: DedupView["status"];
-  readonly pending: boolean;
-  readonly loadingMore: boolean;
-  readonly job: DedupJob | null;
-  readonly page: DedupPage | null;
-  readonly group: DedupGroup | null;
-  readonly recheck: DedupRecheck | null;
-  readonly message: string | null;
-  readonly statusCode: number | null;
-  readonly kind: DedupFindingKind;
-}
 
 /**
  * State of one dedup workbench session for one library and one open section. It owns request sequencing
@@ -82,19 +32,35 @@ export function useDedupJob(
   section: DedupFindingKind,
   onExported?: (receipt: DedupExportReceipt) => void,
 ): DedupJobHandle {
-  const [state, setState] = useState<DedupView>(initial);
+  const [state, setState] = useState<DedupView>(emptyDedupView);
   const [revision, setRevision] = useState(0);
   /** The group whose members this page is showing. Null means the section listing is shown. */
   const [groupKey, setGroupKey] = useState<string | null>(null);
+  /**
+   * The report version this page is bound to, as the server named it. A recheck files a new version of
+   * the same task, so the version — not the job — is what says whether the slice on screen is the
+   * server's current one.
+   */
+  const [reportVersion, setReportVersion] = useState<string | null>(null);
+  /**
+   * The slice whose answer is on screen, and the version that answer is the server's answer at. Both have
+   * to match the wanted slice for the page to be showing the server's current version. They are refs
+   * because they record what a read did, and that record has to survive the extra mount React performs in
+   * development — a state written there would be reset and the read repeated.
+   */
+  const readSlice = useRef<string | null>(null);
+  const readVersion = useRef<string | null>(null);
   const query = useRef<AbortController | null>(null);
   const mutation = useRef<AbortController | null>(null);
   const current = useRef(libraryId);
   const live = useRef(state);
   live.current = state;
+  // A read records the version that is current when its answer arrives, not the one from the render its
+  // callback was created in, so the version is held in a ref and the callback stays stable.
+  const liveVersion = useRef(reportVersion);
+  liveVersion.current = reportVersion;
   const operationKey = useRef<string>(crypto.randomUUID());
   const activeLoad = useRef<string | null>(null);
-  /** The slice whose answer is on screen. A cleared page forgets it, so the slice can be read again. */
-  const fulfilled = useRef<string | null>(null);
   // A read asked for while another one is on the wire, and a counter that wakes the effect serving it.
   const queued = useRef<LoadParameters | null>(null);
   const [queuedRevision, setQueuedRevision] = useState(0);
@@ -104,25 +70,30 @@ export function useDedupJob(
     current.current = libraryId;
     operationKey.current = crypto.randomUUID();
     activeLoad.current = null;
-    fulfilled.current = null;
     queued.current = null;
+    readSlice.current = null;
+    readVersion.current = null;
     setGroupKey(null);
+    // The version belongs to the library that is open, so it is dropped with the rest of that library's
+    // state: a version read for one library must never be exported against another.
+    setReportVersion(null);
     mutation.current?.abort();
     query.current?.abort();
 
     // Switching library, or losing it, must not leave the previous library's findings on screen. No
     // analysis is requested here: the reader's own start is the only thing that begins one.
-    setState(libraryId === null ? initial : { ...initial, status: "loading" });
+    setState(libraryId === null ? emptyDedupView : { ...emptyDedupView, status: "loading" });
     setRevision((value) => value + 1);
   }, [client, libraryId]);
 
   /**
    * Loads one section of the open report version. A missing report is not an empty result: the page
    * states that it must be analyzed again instead of showing zero duplicates.
+   *
+   * A read asked for while another one is on the wire is served by the queued effect once the wire is
+   * free, so the queued read is kept whole rather than the callback being re-created for it.
    */
-  // A read asked for while another one is on the wire is served by this handle once the wire is free,
-  // so the handle is typed on its own rather than inferred through the callback it points at.
-  const load: LoadSection = useCallback(
+  const load = useCallback(
     async (taskId: string, kind: DedupFindingKind, groupKey: string | null, cursor: string | null, more: boolean) => {
       if (libraryId === null) return;
       // A read already on the wire is not interrupted. A different read that is wanted now is queued
@@ -134,9 +105,10 @@ export function useDedupJob(
         return;
       }
       activeLoad.current = requestKey;
-      // The slice is recorded as loaded when the answer is applied rather than when the read starts: the
-      // page must be able to ask again for a slice whose answer was dropped or whose page was cleared.
-      const sliceKey = [libraryId, taskId, kind, groupKey].join("\u0000");
+      // The read is recorded when its answer is applied rather than when it starts, so the page can ask
+      // again for a slice whose answer was dropped or whose page was cleared. The version is part of the
+      // record: the same slice read at a newer version is a different answer.
+      const version = liveVersion.current ?? "";
       const controller = new AbortController();
       query.current?.abort();
       query.current = controller;
@@ -152,7 +124,13 @@ export function useDedupJob(
           controller.signal,
         );
         if (current.current !== libraryId || controller.signal.aborted) return;
-        if (!more) fulfilled.current = sliceKey;
+        // The version the server answered with is the version this answer belongs to, and it is the
+        // server's own name for it rather than an increment derived here.
+        const answered = page.analysis_version === "" ? version : page.analysis_version;
+        // The record is the switch the read effect compares against, so it is built the same way: the task
+        // and the version the answer belongs to, then the section and the open group.
+        readSlice.current = [libraryId, `${taskId}:${answered}`, kind, groupKey ?? ""].join("\u0000");
+        readVersion.current = answered;
         setState((previous) => ({
           ...previous,
           status: "ready",
@@ -163,6 +141,8 @@ export function useDedupJob(
           message: null,
           statusCode: null,
         }));
+        if (!more && answered !== "")
+          setReportVersion((previous) => (newerThan(previous, answered) ? answered : previous));
       } catch (error: unknown) {
         if (isAbort(error)) return;
         setState((previous) => ({ ...previous, loadingMore: false, status: "error", ...failure(error) }));
@@ -183,7 +163,7 @@ export function useDedupJob(
   }, [queuedRevision, load]);
 
   // Reading a report and following its progress are the same effect: a succeeded job with a retained
-  // report is loaded exactly once, and an active job is re-read until it settles.
+  // report is read, and an active job is polled until it settles.
   useEffect(() => {
     if (libraryId === null) return;
     const job = live.current.job;
@@ -197,13 +177,20 @@ export function useDedupJob(
         try {
           const next = await client.status(libraryId, job.task_id, new AbortController().signal);
           if (disposed || current.current !== libraryId) return;
-          setState((previous) => ({ ...previous, status: "ready", job: next, message: null, statusCode: null }));
+          // An answer that says what is already on screen is not applied. Every status answer is a new
+          // object once parsed, so writing it unconditionally would re-render, re-run this effect and read
+          // again: a settled job would be polled forever.
+          setState((previous) =>
+            previous.job !== null && sameJob(previous.job, next)
+              ? previous
+              : { ...previous, status: "ready", job: next, message: null, statusCode: null },
+          );
           if (next.state === "queued" || next.state === "leased")
             timer = window.setTimeout(() => void step(), pollMilliseconds);
         } catch (error: unknown) {
           if (disposed || isAbort(error)) return;
-          // A task the server no longer knows about cannot be resumed; the reader is told to analyze
-          // again rather than being left with a job that will never move.
+          // A task the server no longer knows about cannot be resumed, so the reader is told to analyze
+          // again rather than left with a job that will never move.
           const lost = failure(error);
           if (isAccessFailure(lost.statusCode)) {
             setState((previous) => ({ ...previous, job: null, status: "error", ...lost }));
@@ -223,31 +210,46 @@ export function useDedupJob(
     };
   }, [client, libraryId, section, state.job, revision, load]);
 
-  // Changing section, closing the open group, or a report becoming readable is a change of what this
-  // page is reading, so the slice is read. The switch is the report's identity rather than the job
-  // object, because a poll that changes nothing else must not restart the read.
-  const reportSwitch = state.job === null ? "" : `${state.job.task_id}:${state.job.report_available}`;
+  // Changing section, closing the open group, or a report becoming readable changes what this page is
+  // reading. The switch is the report's identity — its task and the version the server holds for it —
+  // because a poll that changes nothing else must not restart the read, while a recheck that files a new
+  // version of the same task must.
+  const reportSwitch =
+    state.job === null || !state.job.report_available ? "" : `${state.job.task_id}:${reportVersion ?? ""}`;
   const wantedSlice =
     reportSwitch === "" ? null : `${libraryId ?? ""}\u0000${reportSwitch}\u0000${section}\u0000${groupKey ?? ""}`;
   useEffect(() => {
     const job = live.current.job;
     if (libraryId === null || job === null || !job.report_available || wantedSlice === null) return;
-    if (fulfilled.current === wantedSlice) return;
+    // The answer on screen is this slice at the server's current version, so there is nothing to read. A
+    // version the server has moved on from is not that answer, which is what makes a recheck re-read the
+    // report it filed instead of leaving the previous one on screen.
+    if (readSlice.current === wantedSlice && readVersion.current === reportVersion) return;
     void load(job.task_id, section, groupKey, null, false);
-  }, [libraryId, wantedSlice, revision, load]);
+  }, [libraryId, wantedSlice, reportVersion, revision, load]);
 
-  // A recheck is a durable background task, so filing one only produces a receipt. This effect follows
-  // that receipt's own task until the server has an outcome, which is why the recheck button finishes
-  // immediately: the comparison runs on the background path rather than inside the button's request.
+  // A recheck is a durable background task, so filing one only produces a receipt, and this effect follows
+  // that receipt's own task until the server has an outcome. A completed recheck has filed the version it
+  // produced as the task's new report, so recording that version is what makes the slice on screen read as
+  // the superseded one it now is and makes the read switch read the new one. A refused recheck filed no
+  // version, so nothing about the version on screen changes.
   useEffect(() => {
     const receipt = state.recheck;
     const job = state.job;
     if (libraryId === null || job === null || receipt === null) return;
+    if (receipt.state === "completed" && receipt.analysis_version !== "")
+      setReportVersion((previous) =>
+        newerThan(previous, receipt.analysis_version) ? receipt.analysis_version : previous,
+      );
     if (receipt.state !== "pending" || receipt.recheck_task_id === "") return;
     let disposed = false;
     let timer: number | undefined;
     const step = async () => {
       if (disposed) return;
+      // A poll is not sent for a run the page already has an outcome for: the receipt the page holds is
+      // that answer, so asking again would only repeat what is already on screen.
+      const answered = live.current.recheck;
+      if (answered !== null && answered.state !== "pending") return;
       try {
         const next = await client.revalidate(
           libraryId,
@@ -276,7 +278,7 @@ export function useDedupJob(
   }, [client, libraryId, state.job, state.recheck, revision]);
 
   const execute = useCallback(
-    async (action: "start" | "cancel" | "recheck" | "export") => {
+    async (action: DedupAction) => {
       if (libraryId === null || mutation.current !== null) return;
       if ((action === "cancel" || action === "recheck" || action === "export") && live.current.job === null) return;
       const controller = new AbortController();
@@ -295,7 +297,7 @@ export function useDedupJob(
           settle: (changes) => {
             // A start or a cancel replaces what the page is showing, so the slice it had is no longer
             // loaded and must be read again when the new job has a report.
-            if (changes.page === null) fulfilled.current = null;
+            if (changes.page === null) readSlice.current = null;
             if (current.current === libraryId) setState((previous) => ({ ...previous, ...changes }));
           },
           exported: (receipt) => {
@@ -317,10 +319,16 @@ export function useDedupJob(
   );
 
   const visible: DedupView =
-    current.current === libraryId ? state : { ...initial, status: libraryId === null ? "idle" : "loading" };
+    current.current === libraryId ? state : { ...emptyDedupView, status: libraryId === null ? "idle" : "loading" };
+  // A recheck files a new version, and between that filing and this page's read of it the version on
+  // screen is superseded. An export names the version it writes, so it is not offered in that window: the
+  // comparison is between the version the server answered with and the version the server last named.
+  const stale = visible.page !== null && readVersion.current !== reportVersion;
   return {
     ...visible,
     kind: section,
+    reportVersion,
+    stale,
     openGroup: (group: DedupGroup) => setGroupKey(group.group_key),
     closeGroup: () => setGroupKey(null),
     more: () => {
@@ -336,107 +344,37 @@ export function useDedupJob(
   };
 }
 
-/** The value the page receives: the server's facts plus the operations it may ask for. */
-export interface DedupJobHandle extends DedupJobState {
-  openGroup: (group: DedupGroup) => void;
-  closeGroup: () => void;
-  more: () => void;
-  start: () => void;
-  cancel: () => void;
-  runRecheck: () => void;
-  exportPlan: () => void;
-}
-
-interface ActionContext {
-  client: DedupClient;
-  libraryId: string;
-  state: DedupView;
-  operationKey: string;
-  signal: AbortSignal;
-  settle: (changes: Partial<DedupView>) => void;
-  /** Records the operation key the task now on screen belongs to, so later operations name it. */
-  adopt: (operationKey: string) => void;
-  exported: (receipt: DedupExportReceipt) => void;
+/**
+ * Whether a version the server named is later than the one the page is holding. Versions are the task's
+ * identity and its generation, and a generation only ever moves forward for a task, so the number after
+ * the last colon is the whole comparison. A version that cannot be read that way is taken as later, which
+ * keeps a name the page does not understand from freezing it on an older one.
+ */
+function newerThan(current: string | null, next: string): boolean {
+  if (current === null || current === next) return true;
+  const held = Number.parseInt(current.slice(current.lastIndexOf(":") + 1), 10);
+  const answered = Number.parseInt(next.slice(next.lastIndexOf(":") + 1), 10);
+  if (Number.isNaN(held) || Number.isNaN(answered)) return true;
+  return answered >= held;
 }
 
 /**
- * Performs one operation and records only what the server answered. A successful start or cancel never
- * fabricates a result set: the page shows the job's own state and waits for a report. An analysis only
- * ever begins because the reader asked for one; opening the page never starts a run.
+ * Whether a status answer says anything the page is not already showing. A durable task's own update time
+ * only moves when its state, its cancellation record or its lease changes, so comparing it together with
+ * the fields the page renders is enough to tell a real update from the same facts parsed again.
  */
-async function performAction(action: "start" | "cancel" | "recheck" | "export", context: ActionContext) {
-  if (action === "start") {
-    // The page restates the budget the server accepted for the version on screen, so a new analysis of
-    // the same library runs under the ceiling the reader has already been shown. Before any version
-    // exists the page states no budget at all and the server applies its own.
-    const limits = context.state.job?.limits;
-    // The first request of this mount names the operation by the library, so pressing the button twice
-    // without a reload resolves to the same durable task instead of reading the same directories twice.
-    const known = await context.client.start(context.libraryId, context.libraryId, false, context.signal, limits);
-    // A version that is still running, or one that finished and whose report the server can still serve,
-    // is the version this library has. Only a run that already ended without a readable report leaves the
-    // reader's request to be carried out as a new analysis under a key of its own.
-    const job = retained(known)
-      ? known
-      : await context.client.start(context.libraryId, context.operationKey, false, context.signal, limits);
-    context.adopt(job.task_id === known.task_id ? context.libraryId : context.operationKey);
-    context.settle({
-      status: "ready",
-      job,
-      page: null,
-      group: null,
-      recheck: null,
-      message: null,
-      statusCode: null,
-    });
-    return;
-  }
-
-  if (action === "cancel") {
-    const job = await context.client.cancel(context.libraryId, context.operationKey, context.signal);
-    context.settle({ status: "ready", job, message: null, statusCode: null });
-    return;
-  }
-  const job = context.state.job;
-  if (job === null) return;
-  if (action === "recheck") {
-    // Filing a recheck answers with a receipt; the page's own effect follows that task to its outcome.
-    // The receipt replaces any earlier recheck, so a new request never displays the previous answer.
-    const recheck = await context.client.revalidate(
-      context.libraryId,
-      job.task_id,
-      context.state.page?.summary.plan_digest ?? "",
-      context.operationKey,
-      context.signal,
-    );
-    context.settle({ status: "ready", recheck, message: null, statusCode: null });
-    return;
-  }
-
-  const document = await context.client.exportPlan(
-    context.libraryId,
-    job.task_id,
-    context.state.page?.summary.analysis_version ?? job.analysis_version,
-    context.state.page?.summary.plan_digest ?? "",
-    context.signal,
+function sameJob(current: DedupJob, next: DedupJob): boolean {
+  return (
+    current.task_id === next.task_id &&
+    current.state === next.state &&
+    current.report_available === next.report_available &&
+    current.cancellation_requested === next.cancellation_requested &&
+    current.can_cancel === next.can_cancel &&
+    current.can_retry === next.can_retry &&
+    current.analysis_version === next.analysis_version &&
+    current.updated_at === next.updated_at &&
+    current.failure_code === next.failure_code
   );
-  const fileName = `dedup-plan-${job.task_id}.json`;
-  save(document, fileName);
-  context.exported({
-    analysis_version: document.analysis_version,
-    file_name: fileName,
-    plan_digest: document.plan_digest,
-  });
-  context.settle({ status: "ready", message: null, statusCode: null });
-}
-
-/**
- * Whether the library's own version is worth showing as it stands. A queued or leased analysis is still
- * running, a finished one with a retained report can be read, and a finished one whose report was
- * discarded is still the version the library has: it is reported as unreadable rather than started over.
- */
-function retained(job: DedupJob): boolean {
-  return job.state === "queued" || job.state === "leased" || job.state === "succeeded";
 }
 
 function groupFrom(groupKey: string, page: DedupPage): DedupGroup {
@@ -448,19 +386,4 @@ function groupFrom(groupKey: string, page: DedupPage): DedupGroup {
     identity_merge_proposed: false,
     members: page.items,
   };
-}
-
-/**
- * Saves the exported plan under a name that names the job it came from. It writes only the plan the
- * server produced: nothing here can move, copy or delete a source file.
- */
-function save(document: unknown, fileName: string) {
-  const blob = new Blob([JSON.stringify(document, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const anchor = window.document.createElement("a");
-  anchor.href = url;
-  anchor.download = fileName;
-  anchor.rel = "noopener";
-  anchor.click();
-  URL.revokeObjectURL(url);
 }

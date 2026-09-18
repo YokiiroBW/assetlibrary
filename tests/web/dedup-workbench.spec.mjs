@@ -6,13 +6,37 @@ import {
   dedupPage,
   dedupRecheck,
   dedupSummary,
+  firstDigest,
+  firstVersion,
   mockDedup,
+  secondDigest,
+  secondLibrary,
+  secondVersion,
 } from "./dedup-fixtures.mjs";
 
 const dedupPath = "/dedup";
 const libraryId = dedupLibrary.library_id;
 /** The report version a completed run publishes: the task identity plus its generation. */
-const reportVersion = `${dedupJob().task_id}:1`;
+const reportVersion = firstVersion;
+
+/**
+ * Holds the answer to one operation open until the returned function is called. It is how a test can act
+ * while a read or a status poll is still on the wire, which is the only moment some of the page's rules
+ * are observable at all.
+ */
+function holdAnswers(state, operations) {
+  let release = () => {};
+  const held = new Promise((resolve) => {
+    release = resolve;
+  });
+  state.beforeAnswer = async ({ operation }) => {
+    if (operations.includes(operation)) await held;
+  };
+  return () => {
+    state.beforeAnswer = null;
+    release();
+  };
+}
 
 /**
  * Walks to the workbench and starts one run. Every test needs the same three steps, so they are shared
@@ -174,12 +198,164 @@ test("switching section re-reads that section and keeps the version in the URL",
   expect(last.body.kind).toBe("Unverified");
 });
 
+test("a completed recheck moves the page onto the version it filed, and the export writes that version", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByText(new RegExp(`结果版本 ${firstVersion}`)).first()).toBeVisible();
+  const reads = () => state.requests.filter((request) => request.operation === "results");
+  expect(reads()).toHaveLength(1);
+
+  // The background comparison finishes and the server files the version it produced.
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.locator(".dedup-followup [role=status]").filter({ hasText: "核对结果" })).toBeVisible();
+  await expect(page.getByText(new RegExp(`结果版本 ${secondVersion}`)).first()).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByText(new RegExp(`结果版本 ${secondVersion}`)).first()).toBeVisible();
+  // The page re-read the report at the version the server now holds rather than reusing the answer it had.
+  expect(reads()).toHaveLength(2);
+  expect(reads().at(-1).body.task_id).toBe(state.job.task_id);
+
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled({ timeout: 6_000 });
+  await page.getByRole("button", { name: "导出计划" }).click();
+  await expect(page.locator(".dedup-followup [role=status]").filter({ hasText: "已导出结果版本" })).toContainText(
+    secondVersion,
+  );
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  // The export names the version the page is showing and the digest that version holds — the one the page
+  // re-read after the recheck, not the digest the recheck was filed with.
+  expect(exported.body.analysis_version).toBe(secondVersion);
+  expect(exported.body.plan_digest).toBe(secondDigest);
+  expect(state.requests.filter((request) => request.operation === "revalidate").at(0).body.plan_digest).toBe(
+    firstDigest,
+  );
+  // No answer in the whole flow was refused: the version the page exported is the one the server holds.
+  expect(
+    state.requests.some((request) => request.operation === "export" && request.body.plan_digest === firstDigest),
+  ).toBeFalsy();
+});
+
+test("a recheck that finished before the page asked about it is applied on the first poll", async ({ page }) => {
+  // The run is finished and its version filed before the page files the recheck, so the first answer the
+  // page gets about the run is already the outcome and no pending state is ever shown to the reader.
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText("当前计划仍然有效。")).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByText(new RegExp(`结果版本 ${secondVersion}`)).first()).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled({ timeout: 6_000 });
+  await page.getByRole("button", { name: "导出计划" }).click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(secondVersion);
+  expect(exported.body.plan_digest).toBe(secondDigest);
+});
+
+test("a refused recheck files no version, so the page keeps the one it holds and can still export it", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+    recheck: dedupRecheck({ state: "refused", reasons: ["要复核的报告版本已不再保留。"] }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText("复核未执行，报告版本已不再保留或被取代。")).toBeVisible();
+  // Nothing was filed, so the version on screen is still the server's current one and is still exportable.
+  await expect(page.getByText(new RegExp(`结果版本 ${firstVersion}`)).first()).toBeVisible();
+  expect(state.requests.filter((request) => request.operation === "results")).toHaveLength(1);
+  await page.getByRole("button", { name: "导出计划" }).click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(firstVersion);
+  expect(exported.body.plan_digest).toBe(firstDigest);
+});
+
+test("the export is withheld while the version the server filed is still being read", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  // Every read is held from here on, so the page is between the version the server filed and its own read
+  // of it for as long as the test wants.
+  const release = holdAnswers(state, ["results"]);
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText(/服务器已更新结果版本，正在读取新版本/)).toBeVisible({ timeout: 6_000 });
+  const exporting = page.getByRole("button", { name: "导出计划" });
+  await expect(exporting).toBeDisabled();
+  await expect(exporting).toContainText("导出计划");
+  expect(state.requests.some((request) => request.operation === "export")).toBeFalsy();
+  release();
+  await expect(exporting).toBeEnabled({ timeout: 6_000 });
+  await exporting.click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(secondVersion);
+});
+
+test("an export the server refuses for a superseded version is reported instead of silently re-bound", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  const release = holdAnswers(state, ["results"]);
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText(/服务器已更新结果版本，正在读取新版本/)).toBeVisible({ timeout: 6_000 });
+  // The version moves again while the page is still reading, so the version it ends up holding is one the
+  // server no longer has. The server's own version check is what refuses it, and the page must say so
+  // rather than present the refused answer as an export.
+  state.failure = {
+    export: { status: 409, code: "dedup_version_conflict", message: "导出的版本与当前保留的报告版本不一致。" },
+  };
+  release();
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled({ timeout: 6_000 });
+  await page.getByRole("button", { name: "导出计划" }).click();
+  await expect(page.getByText("导出的版本与当前保留的报告版本不一致。")).toBeVisible();
+  const attempted = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(attempted.body.analysis_version).toBe(secondVersion);
+  await expect(page.locator(".dedup-followup [role=status]").filter({ hasText: "已导出结果版本" })).toHaveCount(0);
+});
+
+test("an answer for a library the reader has left is not applied to the library now open", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+    libraries: [dedupLibrary, secondLibrary],
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The reader switches library while the first library's read is still on the wire. The answer that
+  // arrives afterwards belongs to the library that was left, so it must not become the open page.
+  const release = holdAnswers(state, ["results"]);
+  await page.getByLabel("已登记资源库").selectOption(secondLibrary.library_id);
+  await expect(page.locator(".dedup-status")).toHaveCount(0);
+  await expect(page.getByText("尚未开始分析")).toBeVisible();
+  release();
+  await page.waitForTimeout(500);
+  await expect(page.locator(".dedup-status")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "分析结果" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toHaveCount(0);
+  await expect(page.getByText("尚未开始分析")).toBeVisible();
+});
+
 test("a stale plan is reported as stale instead of being exported as current", async ({ page }) => {
   const state = await mockDedup(page, {
     job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
   });
   state.recheck = {
-    ...state.recheck,
+    ...dedupRecheck(),
     status: "PlanStale",
     status_text: "当前计划已过期，建议重新分析。",
     plan_still_current: false,
@@ -198,7 +374,7 @@ test("a stale plan is reported as stale instead of being exported as current", a
   // Filing a recheck names the plan, and following it names the recheck's own durable task: the page
   // polls the run it filed instead of filing a second one.
   const filed = state.requests.find((request) => request.operation === "revalidate");
-  expect(filed.body.plan_digest).toBe("digest-4f2a9c7b");
+  expect(filed.body.plan_digest).toBe(firstDigest);
   expect(filed.body.recheck_task_id).toBeUndefined();
   const polled = state.requests.filter((request) => request.operation === "revalidate").at(-1);
   expect(polled.body.recheck_task_id).toBe("99999999-9999-4999-8999-999999999999");

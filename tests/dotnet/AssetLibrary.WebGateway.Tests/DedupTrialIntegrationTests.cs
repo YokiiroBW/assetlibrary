@@ -148,11 +148,18 @@ public sealed class DedupTrialIntegrationTests
         Assert.IsTrue(rechecked.Completed, rechecked.FailureCode ?? "A recheck of an unchanged library must complete.");
         Assert.IsTrue(rechecked.PlanStillCurrent, "Nothing changed on disk, so the plan is still current.");
 
-        // 5. export: the document states the version it exports and that it grants no file operation.
+        // 5. export: the document states the version it exports and that it grants no file operation. The
+        //    version it is bound to is the one the recheck filed, which is the version the page re-reads.
         var exported = await dedup.ExportAsync(library, first.TaskId, rechecked.AnalysisVersion, rechecked.RecheckPlanDigest);
         Assert.AreEqual(rechecked.AnalysisVersion, exported.AnalysisVersion);
+        Assert.AreEqual(rechecked.RecheckPlanDigest, exported.DocumentPlanDigest);
         Assert.IsFalse(exported.GrantsFileOperation, "An exported plan is never an execution instruction.");
         Assert.IsGreaterThan(0, exported.GroupCount);
+        // The version the recheck superseded is refused rather than re-bound, which is the negative case
+        // that makes the successful export above mean the page is on the current version.
+        var superseded = await dedup.ExportAsync(library, first.TaskId, analyzed.AnalysisVersion, page.PlanDigest);
+        Assert.AreEqual(409, superseded.Status, "An export bound to a superseded version is refused, not re-bound.");
+        Assert.AreEqual("dedup_version_conflict", superseded.Code);
         var mismatched = await dedup.ExportWithVersionAsync(library, first.TaskId, "00000000-0000-0000-0000-000000000000:9");
         Assert.AreEqual(409, mismatched.Status, "An export bound to another version is refused, not re-bound.");
         Assert.AreEqual("dedup_version_conflict", mismatched.Code);
