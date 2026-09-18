@@ -3,6 +3,35 @@
 所有命令都在任务检出 `C:/YOKI/Codex/tianshu-peiban-bot/worktrees/TS-066/assetlibrary` 内、使用合成数据执行。
 非零退出码均如实记录，缺证据项不记为通过。
 
+### 1.0.5 第六轮（`9dd41d3`）用例与实测
+
+浏览器（`tests/web/dedup-workbench.spec.mjs`，本卡新增 4 项，共 27 项）：全部针对卡与
+`TS-066-r5-review-2026-09-18.md` 的复现路径「正常显示重复组 → 点击未验证内容并延迟 `results` 回复 →
+立即切回重复组 → 释放延迟回复」。每条都断言**最终所选分类**（tab 的 `aria-selected`）与**正文**
+（说明文本、条目路径、详情标题、`data-dedup-group` 行数），不只看请求次数：
+
+| 用例                                                          | 断言要点                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 切回读者离开的分类会重新读取它，且它留下的答案被丢弃          | 释放延迟的未验证答案后：重复组 tab 选中、重复组说明与 `2 个文件` 可见；`raw/unknown.bin` 计数 0、未验证说明计数 0；未发出任何 `Unreadable` 读取。                                                                                                              |
+| 慢请求下 B→C 返回 C 时屏上是 C                                | 最后一次 `results` 读取不是 `Unverified`；未验证内容 tab 选中、其说明可见；重复组说明计数 0。                                                                                                                                                                  |
+| 复核完成、旧页迟到时仍以新版本导出                            | 读取新版本期间显示「正在读取新版本…」且「导出计划」禁用；读取完成后导出启用、`.dedup-status` 含 `:2`、未验证内容正文可见、导出请求体为新版本与新摘要。                                                                                                          |
+| 成员读取在途时关闭详情，迟到答案不重开详情                    | 无「重复组详情」标题、`data-dedup-group` 行数 0、未验证内容正文与说明可见、重复组说明计数 0、所选分类为未验证内容；组键读取恰好 1 次且最后一次读取为 `Unverified`。                                                                                             |
+
+测试夹具（`tests/web/dedup-fixtures.mjs`）本轮同步修正两处**夹具保真度**问题，都是为让上述断言有意义：
+按 `kind` 路由分页（服务器回答被问的那一段，未验证/不可读各有自己的条目），以及被延迟的 `results`
+回答在**捕获时刻**取版本与摘要（否则释放后会把新版本交给旧读取，夹具自己制造出「旧读取写新版本」的假象）。
+
+协调方探针：`.runtime/review-queue.spec.mjs`（原样运行，`--config .runtime/review-queue.config.mjs
+--reporter=line`）修复前 `1 failed`（`Expected "ByteDuplicateGroup" Received "Unverified"`），修复后
+`1 passed (1.7s)`。
+
+真实试运行：`trial_e2e_dedup` 1/1 通过（1 分 7 秒），证据目录
+`.runtime/review-ts066-r6/real-trial/20260918T175100Z-c5db4d67`（`run.json`、`trial_e2e_dedup.trx`、
+`acceptance.json`、`dedup-plan-exported.json`、`dedup-browser.json`、`dedup-browser-cancelled.png`）。
+导出文档实测 `analysis_version=f3128227-887d-c0f0-bba3-cf7e865b39cd:2`、
+`plan_digest=d7b9e2d14fa4dfa1d8140830f25dfe74d73a822bafb4278174e24b28a6e69e32`、
+`grants_file_operation=false`。
+
 ## 1. .NET 与仓库门禁
 
 | 命令                                                                            | 结果                                                                                                                                                                                                |
