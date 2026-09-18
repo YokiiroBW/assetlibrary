@@ -50,14 +50,7 @@
 409 `dedup_version_conflict`；`cancel` 记到持久任务上且**不产生报告**；重启后同一 `task_id`
 仍可读而报告不可读（`results` → `dedup_report_not_retained`、`groups` 空、`total=0`，
 `revalidate` → 404）；结束时逐文件比对 SHA-256 与 mtime 证明合成源未变。
-
-**`DedupTrialLeaseProbe`（由上一项调用）** —— 真实租约的心跳证据。worker 只在一次尝试超过
-心跳间隔（2 秒）时才续租，而合成源的哈希快于该间隔，所以心跳不走轮询：用**同一个
-`IDurableTaskCoordinator`**（即同一套真实 `task_health` SQL）按名字驱动一次完整租约生命周期——
-入队 → 认领（`leased`、`attempt=1`）→ 心跳续租 `Accepted` 且租约窗口被**延长到认领授予的窗口之后**
-→ 在租约下 `finish` 为 `succeeded` → 用已终结的 identity 再续租被拒 `NotCurrent`。
-探针任务用独立任务类型 `dedup.trial.lease_probe`：worker 认领的是「最老的 queued 任务」而不区分类型，
-若用工作台自己的类型，worker 会先把它当查重载荷执行。
+（第四轮已把租约、取消与重启三段换成更严的断言，见 1.0.3；本节保留第三轮口径备查。）
 
 **`DedupRecheckFenceTests` 新增 1 项（共 4 项）** ——
 `ALateVerdictNeverReplacesANewerAnalysisOfTheSameLibrary`：**旧 key 仍保留**（不是删除旧 key 的场景），
@@ -70,8 +63,64 @@
 引导首个管理员」的 60 token 代码块，被 `scripts/validate_dotnet_source.py` 判为重复；抽成一处后
 `.NET source policy passed`。
 
-### 1.0.1 第一轮（`2d890e7`）用例明细，保留备查
+### 1.0.3 第四轮新增用例
 
+**`tests/web/row-window.spec.mjs`（3 项，Chromium）** —— 行窗口在**闲置**时不得持续渲染：
+
+| 用例                                                       | 断言                                                                                                                                                     |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `an idle asset list renders once and stays still`           | 100 项资产列表加载完成后 `waitForTimeout(1200)`，console 与 `pageerror` 中 `Maximum update depth exceeded` **0 次**；窗口化渲染仍生效（可视行数 < 总数） |
+| `an idle library list renders once and stays still`         | 80 个资源库列表同上，且 `role=list` 的「资源库列表」仍在                                                                                                 |
+| `the asset window follows a scroll, a resize, a view change and the keyboard` | 滚动（`scrollTop=1200`）、缩放（1024×700）、列表↔网格切换、`End` 键后窗口与焦点都跟随；全程无递归更新                                  |
+
+反向探针：把 `useRowWindow` 的比较改回「恒假 + `[getScrollElement]` 依赖」后 3 项全部失败；
+协调者探针 `.runtime/review-window.spec.mjs` 从 `IDLE_MAXIMUM_UPDATE_DEPTH_ERRORS=7` 变为 **0 并通过**。
+
+**`DedupTrialLeaseReader`（试运行助手，只读）** —— 以模块自身的 `ModulePostgresSession(TaskHealth)`
+读 `task_health.durable_task` 的 `state/lease_owner/lease_generation/heartbeat_at/lease_until/
+cancellation_requested_at`。`WaitForClaimAsync` 等到 `leased` 且 `lease_generation>0`（失败即报错），
+`ObserveWhileActiveAsync` 每 25 ms 采样直到任务settle或窗口关闭。**产品侧没有任何测试钩子**，
+读到的是 `heartbeat_durable_task` 真实写下的列。
+
+**`DedupTrialIntegrationTests` 第四轮的收紧**（同一个用例内，替换第三轮对应段落）：
+
+- 租约续期：认领时记录 `lease_until`，在**仍为 `leased`** 的采样中要求至少两次，且
+  `heartbeat_at` 前进、`lease_until` 越过认领窗口、`cancellation_requested_at` 为空。
+  实测 `heartbeat_at` 由 `…26.700` 前进到 `…27.247`（约 110 ms 步进，心跳间隔设为 100 ms）。
+  第三轮的「终态 `updated-created > 400 ms`」不再作为续期证据。
+- 取消运行中任务：第二个操作键 `start` → 确认 `leased` 且尚未请求取消 → `cancel` →
+  终态**必须** `cancelled`（`succeeded` 判失败）→ 无报告 → 回读持久行确认 `cancellation_requested_at` 非空。
+- 重启：先断言重启前报告可读且 `total>0`，重启后断言同一 `task_id`、状态不变、
+  `report_available=false`、`results` → `dedup_report_not_retained`、`revalidate` → 404。
+- 合成库隔离：`DedupTrialAssets` 现在为**两个**库各写一份填充（`dedup-library` 与
+  `dedup-browser-library`），因为注册会拒绝重叠根，而浏览器段落需要一个能真正重新开始分析的库。
+- 填充由 16×16 MiB 改为 32×63 MiB（单文件严格小于 64 MiB 上限）：本机文件缓存会让 256 MiB
+  在 130 ms 内读完，比一个心跳间隔还短，租约续期就无从观察。
+
+**`tests/integration/read-only-trial/dedup-browser.mjs` + `DedupTrialBrowser` + `TrialBrowserProcess`** ——
+真实 Chromium 页面闭环：SPKI 固定宿主证书、真实管理员口令登录、页面自身点击完成
+登录 → 选库 → 开始分析 → 状态/结果（重复组两名成员、开合详情后焦点回到该行）→ 导出计划
+（文档 `grants_file_operation=false`、版本与页面所报一致）→ 重新核对（`来源未变化`）→
+第二个库开始分析并在运行中取消（页面「已取消」+「本次分析没有可读取的结果」）。
+`TrialBrowserProcess` 是**两个**试运行共用的进程外壳（原先只有浏览试运行自己一份，抽取后
+`validate_dotnet_source.py` 的 60-token 重复块检查通过）。
+`run_e2e.py` 新增 `--trial` 聚焦开关与每个试运行的 `deadline_seconds`。
+
+**`DedupReportRegistryEvidenceTests`（2 项，`AssetLibrary.WebGateway.Tests`）** —— 钉住注册表两个
+「比较并写入」步骤各自回答什么，因为调用方用同一个 `Filed` 标志读两个不同的问题：
+
+| 用例                                                     | 断言                                                                                                                                                     |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EvidenceAgainstTheCurrentVersionIsStoredAndNamesThatVersion` | `StoreEvidenceIfCurrent` 在**成功**时返回 `Filed=false` 但 `Key` 指向被写入的那一版（这正是它与 `Superseded` 的区别），当前版本不移动，证据可读回 |
+| `EvidenceAgainstAVersionTheLibraryMovedOnFromIsRefused`  | 库已前移到更新的分析后，返回 `Superseded`（`Key=default`），旧版本上**没有**任何证据                                                                     |
+
+反向探针：把 `StoreEvidenceIfCurrent` 的返回值改成 `new FileOutcome(true, expected)` 后第一项立即失败
+（`Assert.IsFalse 失败。'condition' 表达式:'outcome.Filed'`），改回后 2 项全绿。
+核实记录：`DedupRecheckRunner.File` 里 `result.CurrentPlan is null` 那条分支在可达路径上不会执行——
+`DedupPlanPolicy.Recount` 恒把非空 `current` 放进 `DedupRecountResult`（全仓仅此一处构造该记录），
+因此生产中的 `!outcome.Filed` 只可能来自 `FileIfCurrent` 的版本比较。据此**不改签名**（不扩大重构）。
+
+### 1.0.1 第一轮（`2d890e7`）用例明细，保留备查
 - `AssetLibrary.ReadCore.Tests` 106 / 25 / 131
 - `AssetLibrary.WebGateway.Tests` 118 / 4 / 122
 
@@ -240,8 +289,28 @@
 行为保持：总高、overscan（列表 8 / 网格 3 / 资源库表 5）、`scrollToOffset` 的 clamp、
 `scrollToIndex` 的「已完整可见则不滚动」语义、行位置与网格列宽全部不变；
 `scripts/validate_web_source.py` **未修改**，其窗口化渲染断言仍然真实成立。
-证据：全量 `playwright test` 83 通过（含列表/网格滚动、键盘移动与焦点回位用例），
+证据：全量 `playwright test` 86 通过（含列表/网格滚动、键盘移动与焦点回位用例），
 真实试运行通过。
+
+### 3.4 第四轮：稳定订阅后复测（独立一次 `vite build`）
+
+| 产物                      | 第二轮     | 第三轮     | 第四轮     | 相对第二轮 |
+| ------------------------- | ---------- | ---------- | ---------- | ---------- |
+| `index-*.js`（入口）      | 297503     | 274611     | 274777     | **−22726** |
+| `DedupWorkbench-*.js`     | 33876      | 33862      | 33862      | −14        |
+| `LibraryAdmin-*.js`       | 7959       | 7947       | 7947       | −12        |
+| **JS 合计（门禁求和）**   | **339338** | **316420** | **316586** | **−22752** |
+| `index-*.css`             | 32394      | 32394      | 32394      | 0          |
+| **JS+CSS（门禁求和）**    | 371732     | 348814     | **348980** | −22752     |
+
+第四轮的 +166 B 全部来自 `useRowWindow.ts` 的稳定订阅与几何比较（含注释）。门禁仍为原值与原口径，
+`validate_web_dependencies.py --require-build-artifacts` 通过（退出码 0）。
+
+**稳定订阅做了什么**：`getScrollElement` 被存进 ref 而不是当依赖（元素身份是唯一状态，
+`useLayoutEffect` 无依赖数组，`setNode` 只在元素真的换了才写入），几何量在调用 setter 之前先与上一次
+**比较**，未变化时不写入。React 对「同值同引用」才会跳过渲染，新对象一定触发渲染，所以比较必须在
+setter 之前——这正是本轮缺陷的根因。订阅只在 `node` 变化时重建，回调是稳定引用，
+挂载/卸载、容器替换、列表↔网格切换与缩放各自只做该做的事。
 
 ## 4. 覆盖到的失败与边界（夹具驱动）
 
@@ -271,22 +340,29 @@
 
 ## 5. 未执行（证据缺失，不记为通过）
 
-- **真实 PostgreSQL / HTTPS / Chromium 端到端：已执行，最后一步被既有缺陷阻断。** 第一轮记的「本机无
-  PostgreSQL 二进制」是错的——PostgreSQL **16.15 的二进制**（非服务）存在于
+- **旧的只读浏览试运行：最后一步被既有缺陷阻断（不是本卡引入）。** 第一轮记的「本机无 PostgreSQL 二进制」
+  是错的——PostgreSQL **16.15 的二进制**（非服务）存在于
   `C:\YOKI\Codex\worktrees\V01-004\.runtime\sandbox-storage\V01-004\postgresql-16.15\pgsql\bin` 与
   `%TEMP%\V01-014-tooling-and-tests\tooling\postgresql\pgsql\bin`，`run_e2e.py --execute` 能自己起临时集群
-  （仍无 docker、无 wsl；需要 `git` 在 `PATH` 上）。本轮已跑通：临时集群初始化、真实迁移、真实 HTTPS Core、
+  （仍无 docker、无 wsl；需要 `git` 在 `PATH` 上）。已跑通：临时集群初始化、真实迁移、真实 HTTPS Core、
   真实 Chromium 管理员登录、登记合成库、首次扫描、目录浏览、搜索、桌面宽度详情。
-  唯一失败点在 `browser.mjs` 的 390×844 段：双击结果条目后找不到 `资产详情` 对话框。加入诊断后的实测输出为
+  唯一失败点在 `browser.mjs` 的 390×844 段：双击结果条目后找不到 `资产详情` 对话框。实测输出为
   `DRAWER_PROBE {"width":390,"dialogs":["图片预览"],"asides":["资源库导航"],"hasEntry":true}` ——
   窄屏双击同时进入快速预览，详情抽屉因此不渲染；`EntryDetails.tsx` 的窄屏分支与 `useNarrowWorkspace`
-  （1199px）在**基线 `5d9dc39` 就已存在**，不是本卡引入。**未记为通过**，命令、探针输出与建议见交接第 7.4 节。
-- **已登录管理员走通六个操作**：认证中间件需要数据库账号存储（`GatewayAuthenticationRuntime` 依赖
-  `PostgresAuthenticationStore`），本次真实闭环的浏览器段确实以真实管理员会话完成了登录与登记/扫描/浏览/
-  搜索，但**六个查重操作本身**仍未在真实 HTTPS 上被管理员账号走通：`run_e2e.py` 尚无查重步骤，而浏览器段
-  现在卡在上述既有缺陷上。未登录边界与答案形状分别由 1.2 与 1.1 覆盖。
-- **复核在真实租约下的执行**：`prepare → scan → file` 三段与围栏内外分工已由第二轮的
-  `DedupRecheckFenceTests` 用**真实 `DedupJobWorker`** 加合成围栏探针覆盖（断言扫描期间围栏从不打开、
-  结论在恰好一次围栏内落盘、版本被替换时拒绝、取消后不落盘）；但对着**真实 PostgreSQL** 的
-  「认领 → 心跳 → 提交围栏 → 迟到拒绝」整段仍未在本机执行，与上一条同一环境缺口。
+  （1199px）在**基线 `5d9dc39` 就已存在**，不是本卡引入。**未记为通过**，命令、探针输出与建议见交接第 7.4
+  与第 9 节；本卡未改共享壳绕过它。
+- **已登录管理员走通六个操作：已执行（第四轮）。** 第四轮起 `run_e2e.py` 有独立的 `trial_e2e_dedup`
+  试运行：HTTP 契约段落 + **真实 Chromium 页面闭环**（登录 → 选库 → 分析 → 状态/结果 → 导出 →
+  重新核对 → 第二个库运行中取消），全部打真实 Core、无任何路由 mock，实测 1/1 通过。
+  可用 `--trial trial_e2e_dedup` 单独执行；整轮 `run_e2e.py` 的退出码仍会被上一条既有缺陷拖成 1。
+- **复核在真实租约下的执行：已执行（第四轮）。** 试运行里 `revalidate` 段落跑在真实 worker 的真实租约下
+  （回执 `pending` → `completed` → `plan_still_current=true`），并且租约续期本身改为直接读
+  `task_health.durable_task` 的 `heartbeat_at`/`lease_until` 断言（见 1.0.3）。
+  但**「迟到复核不得覆盖新报告」这一竞争仍不在试运行里**：worker 单线程串行认领，扫描与落盘之间不会插进
+  另一次分析，因此该竞争继续由进程内确定性用例
+  `DedupRecheckFenceTests.ALateVerdictNeverReplacesANewerAnalysisOfTheSameLibrary` 覆盖（含反向探针）。
+- **复核后页面不重载新版本（本轮发现的既有缺口，未修）。** 落一次复核会让服务端把复核自己的报告作为该库
+  结果的新版本落盘，页面用于判定「要不要重读切片」的键（`task_id:report_available`）没有变化，因此页面
+  仍显示复核前的版本；此时导出会被 409 `dedup_version_conflict` 拒绝。浏览器试运行因此把导出排在复核之前。
+  不在本轮四张卡范围内，已记入交接第 9 节，建议单开卡。
 - **多实例并发**：本卡未新增调度器，跨实例互斥由 TaskHealth 既有租约保证，未在本机做多进程验证。

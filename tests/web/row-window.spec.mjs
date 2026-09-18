@@ -117,9 +117,7 @@ test("the asset window follows a scroll, a resize, a view change and the keyboar
   await list.evaluate((element) => {
     element.scrollTop = 1200;
   });
-  await expect
-    .poll(async () => page.locator("[data-entry-id]").first().getAttribute("data-entry-id"))
-    .not.toBe(before);
+  await expect.poll(async () => page.locator("[data-entry-id]").first().getAttribute("data-entry-id")).not.toBe(before);
   expect(await rows.count()).toBeLessThan(assetPage().length);
 
   // A narrower container re-measures: the same list still renders a bounded window of rows.
