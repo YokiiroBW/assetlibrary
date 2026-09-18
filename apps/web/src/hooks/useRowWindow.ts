@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /** One rendered row, with where it sits in the scroll container. */
 export interface RowWindowItem {
@@ -30,15 +30,28 @@ export interface RowWindowOptions {
 /** How many rows outside the viewport are rendered, so a fast scroll does not show an empty band. */
 const defaultOverscan = 4;
 
-/** Re-reads the container's own geometry, which a resize or a column change invalidates. */
-function useViewport(element: RefObject<HTMLElement | null>, recompute: () => void): void {
-  useEffect(() => {
-    const node = element.current;
-    if (!node) return;
-    const observer = new ResizeObserver(() => recompute());
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [element, recompute]);
+/** The container's own geometry, which is the only thing a fixed-height window has to measure. */
+interface RowWindowGeometry {
+  offset: number;
+  height: number;
+}
+
+/**
+ * The element the caller's accessor currently names. It is read after every render rather than depended
+ * on: a caller writing `getScrollElement: () => node.current` hands over a fresh function on every render,
+ * so treating that identity as a change would re-subscribe, re-measure and render again on every pass.
+ * Only the element itself is state, and the setter is given the same element back when it has not moved,
+ * which is a no-op for React rather than a reason to render.
+ */
+function useScrollElement(getScrollElement: () => HTMLElement | null): HTMLElement | null {
+  const accessor = useRef(getScrollElement);
+  accessor.current = getScrollElement;
+  const [node, setNode] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    const current = accessor.current();
+    setNode((previous) => (previous === current ? previous : current));
+  });
+  return node;
 }
 
 /**
@@ -54,6 +67,11 @@ function useViewport(element: RefObject<HTMLElement | null>, recompute: () => vo
  *
  * The shape it answers with is the one the callers were already written against, so replacing what
  * computed the window did not change how either list renders or how a keyboard move scrolls.
+ *
+ * Nothing here updates state for its own sake: a scroll, a resize or a re-subscribe only writes the
+ * viewport when the measured geometry is actually different, so an idle list renders once and stays put.
+ * That matters because the callers pass their scroll accessor inline, and a hook that treated a new
+ * function identity as a new subscription would loop: subscribe, measure, write state, render, subscribe.
  */
 export function useVirtualizer({
   count,
@@ -61,40 +79,52 @@ export function useVirtualizer({
   estimateSize,
   overscan = defaultOverscan,
 }: RowWindowOptions): RowWindow {
-  const element = useRef<HTMLElement | null>(null);
-  const [viewport, setViewport] = useState({ offset: 0, height: 0 });
+  const node = useScrollElement(getScrollElement);
+  const [geometry, setGeometry] = useState<RowWindowGeometry>({ offset: 0, height: 0 });
+  const measured = useRef(geometry);
   const frame = useRef(0);
-  const recompute = useCallback(() => {
-    const node = getScrollElement();
-    element.current = node;
-    if (!node) return;
-    setViewport({ offset: node.scrollTop, height: node.clientHeight });
-  }, [getScrollElement]);
+  // The accessor is read at call time, never captured, so the callbacks below stay identical across
+  // renders even though the caller passes a new function every time.
+  const accessor = useRef(getScrollElement);
+  accessor.current = getScrollElement;
+  const measure = useCallback(() => {
+    const element = accessor.current();
+    if (!element) return;
+    const next = { offset: element.scrollTop, height: element.clientHeight };
+    const previous = measured.current;
+    // The comparison is what stops the loop: an unchanged geometry is not a state change, so React is
+    // not asked to render again.
+    if (previous.offset === next.offset && previous.height === next.height) return;
+    measured.current = next;
+    setGeometry(next);
+  }, []);
   useEffect(() => {
-    const node = getScrollElement();
-    element.current = node;
-    if (!node) return;
+    if (!node) return undefined;
+    measure();
     // A scroll fires far more often than a frame, so the read is coalesced into one per frame.
     const onScroll = () => {
       if (frame.current !== 0) return;
       frame.current = window.requestAnimationFrame(() => {
         frame.current = 0;
-        recompute();
+        measure();
       });
     };
-    recompute();
+    // The observer belongs to this exact element, so a container that is swapped in is observed and the
+    // one that was swapped out stops being observed.
+    const observer = new ResizeObserver(() => measure());
+    observer.observe(node);
     node.addEventListener("scroll", onScroll, { passive: true });
     return () => {
+      observer.disconnect();
       node.removeEventListener("scroll", onScroll);
       if (frame.current !== 0) window.cancelAnimationFrame(frame.current);
       frame.current = 0;
     };
-  }, [getScrollElement, recompute]);
-  useViewport(element, recompute);
+  }, [measure, node]);
   const rowHeight = estimateSize();
   const totalSize = count * rowHeight;
-  const first = Math.max(0, Math.floor(viewport.offset / rowHeight) - overscan);
-  const visible = Math.ceil(viewport.height / rowHeight) + overscan * 2 + 1;
+  const first = Math.max(0, Math.floor(geometry.offset / rowHeight) - overscan);
+  const visible = Math.ceil(geometry.height / rowHeight) + overscan * 2 + 1;
   const rows: RowWindowItem[] = [];
   for (let index = first; index < Math.min(count, first + visible); index++) {
     rows.push({ index, start: index * rowHeight, size: rowHeight });
@@ -102,26 +132,26 @@ export function useVirtualizer({
 
   const scrollToOffset = useCallback(
     (offset: number) => {
-      const node = getScrollElement();
-      if (!node) return;
-      node.scrollTop = Math.max(0, Math.min(offset, Math.max(0, totalSize - node.clientHeight)));
-      recompute();
+      const element = accessor.current();
+      if (!element) return;
+      element.scrollTop = Math.max(0, Math.min(offset, Math.max(0, totalSize - element.clientHeight)));
+      measure();
     },
-    [getScrollElement, recompute, totalSize],
+    [measure, totalSize],
   );
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      const node = getScrollElement();
-      if (!node) return;
+      const element = accessor.current();
+      if (!element) return;
       const target = Math.max(0, Math.min(index, Math.max(0, count - 1))) * rowHeight;
       const bottom = target + rowHeight;
       // A row already fully on screen is left alone, so a keyboard move one step past the edge scrolls by
       // one row rather than recentring the list under the reader.
-      if (target >= node.scrollTop && bottom <= node.scrollTop + node.clientHeight) return;
-      scrollToOffset(target < node.scrollTop ? target : bottom - node.clientHeight);
+      if (target >= element.scrollTop && bottom <= element.scrollTop + element.clientHeight) return;
+      scrollToOffset(target < element.scrollTop ? target : bottom - element.clientHeight);
     },
-    [count, getScrollElement, rowHeight, scrollToOffset],
+    [count, measure, rowHeight, scrollToOffset],
   );
 
   return {

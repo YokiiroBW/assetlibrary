@@ -30,6 +30,7 @@ public sealed class DedupTrialIntegrationTests
         await host.StartAsync();
         var session = await TrialHostIntegrationHttp.SignInAsync(host);
         var dedup = new DedupTrialDriver(host, session);
+        var leases = new DedupTrialLeaseReader(host);
         await dedup.AssertRefusesAnUnauthorizedCallerAsync();
         var library = await dedup.RegisterAsync(assets.LibraryRoot, "精确查重验证");
 
@@ -40,14 +41,47 @@ public sealed class DedupTrialIntegrationTests
         Assert.IsTrue(first.State is "queued" or "leased", $"A new analysis starts active, observed {first.State}.");
         Assert.IsFalse(first.ReportAvailable, "A job that has not finished has no report to read.");
         Assert.AreEqual(string.Empty, first.AnalysisVersion, "An unfinished job names no version.");
+
+        // The attempt is really claimed by the worker, and its lease really advances while it runs. The
+        // lease is read from the store's own columns rather than inferred from how long the attempt took:
+        // a terminal task's timestamps move because it finished, so only a sample taken while it is still
+        // leased can show that a renewal happened. The window is wide enough to cover several of the
+        // worker's heartbeat intervals, so two live samples that disagree about the lease are a renewal
+        // rather than a coincidence of timing.
+        var claimed = await leases.WaitForClaimAsync(first.TaskId);
+        Assert.AreEqual("trial-dedup", claimed.Owner, "The claim names the worker that holds it.");
+        Assert.IsNotNull(claimed.LeaseUntil, "A claimed attempt has a lease window.");
+        var window = claimed.LeaseUntil.Value;
+        // The job's own answers are polled while the lease is being watched, not after it: an attempt on
+        // this source is short, and a reader that only looked once the lease window had closed would only
+        // ever see the finished job.
         var observations = new List<DedupTrialObservation>();
-        var analyzed = await dedup.WaitForReportAsync(library, first.TaskId, observations);
+        var polling = dedup.WaitForReportAsync(library, first.TaskId, observations);
+        var observed = await leases.ObserveWhileActiveAsync(first.TaskId, TimeSpan.FromSeconds(5));
+        var analyzed = await polling;
+        var renewed = observed.Where(sample => sample.State == "leased").ToArray();
+        Assert.IsGreaterThanOrEqualTo(
+            2,
+            renewed.Length,
+            $"The attempt must still be leased while it is sampled, observed {string.Join('/', observed.Select(sample => $"{sample.State}@{sample.HeartbeatAt:HH:mm:ss.fff}"))}.");
+        Assert.IsTrue(
+            renewed[^1].HeartbeatAt > renewed[0].HeartbeatAt,
+            $"The lease must be renewed while the attempt runs: heartbeat {renewed[0].HeartbeatAt:O} → {renewed[^1].HeartbeatAt:O}.");
+        Assert.IsTrue(
+            renewed[^1].LeaseUntil > window,
+            $"A renewal must extend the lease window past the claim's own: {window:O} → {renewed[^1].LeaseUntil:O}.");
+        Assert.IsNull(
+            renewed[^1].CancellationRequestedAt,
+            "Nothing asked for this attempt to be cancelled.");
         Assert.AreEqual(DedupTrialDriver.AnalysisVersion(first.TaskId, 1), analyzed.AnalysisVersion);
         Assert.AreEqual("succeeded", analyzed.State, "A finished analysis is a succeeded durable task.");
 
-        // The attempt is really observed while it is still active — a job that reported a report on the
+        // The attempt was really observed while it was still active — a job that reported a report on the
         // first poll would prove nothing about how it got there.
-        Assert.IsGreaterThanOrEqualTo(2, observations.Count, "The attempt must be observable while it runs.");
+        Assert.IsGreaterThanOrEqualTo(
+            2,
+            observations.Count,
+            $"The attempt must be observable while it runs, observed {string.Join('/', observations.Select(item => item.State))}.");
         Assert.IsTrue(
             observations[0].State is "queued" or "leased",
             $"The first observation is of an attempt that has not finished, observed {observations[0].State}.");
@@ -125,34 +159,57 @@ public sealed class DedupTrialIntegrationTests
 
         // 6. cancel: a real cancellation request against the very task the worker is holding. The job is
         //    addressed the way the page addresses it — by the library and the operation key the start used,
-        //    which is what makes a retry replay one job instead of creating a second one.
+        //    which is what makes a retry replay one job instead of creating a second one. The attempt is
+        //    confirmed claimed and still running before the request, so what follows is the cancellation of
+        //    work in progress rather than the cancellation of a job that had already finished.
         var operation = Guid.NewGuid();
         var second = await dedup.StartAsync(library, operation);
         Assert.IsTrue(
             second.State is "queued" or "leased",
             $"A second analysis must be accepted while the first one is finished, observed {second.State}.");
+        Assert.IsFalse(second.ReportAvailable, "A second analysis has no report while it runs.");
+        var running = await leases.WaitForClaimAsync(second.TaskId);
+        Assert.AreEqual("leased", running.State, "The attempt that is about to be cancelled is really running.");
+        Assert.IsNull(running.CancellationRequestedAt, "Nothing had asked for this attempt to stop yet.");
         var cancelled = await dedup.CancelAsync(library, operation);
         Assert.IsTrue(
-            cancelled.CancellationRequested || cancelled.State is "cancelled" or "succeeded",
-            $"Cancellation must be recorded on the durable task, observed {cancelled.State}.");
+            cancelled.CancellationRequested,
+            $"The cancellation must be recorded on the durable task, observed {cancelled.State}.");
         var settled = await dedup.WaitForTerminalAsync(library, second.TaskId);
-        Assert.IsTrue(
-            settled.State is "cancelled" or "succeeded",
-            $"The cancelled attempt must settle, observed {settled.State}.");
+        Assert.AreEqual(
+            "cancelled",
+            settled.State,
+            "Cancelling a running analysis ends it as cancelled; a run that finished anyway would mean the request arrived too late to be one.");
+        Assert.IsTrue(settled.CancellationRequested, "The durable task keeps the cancellation it recorded.");
         Assert.IsFalse(
             settled.ReportAvailable,
             "A cancelled analysis reports no plan: cancellation is not a result.");
+        var cancelledRow = await leases.ReadAsync(second.TaskId);
+        Assert.IsNotNull(cancelledRow, "The cancelled attempt is still a durable task.");
+        Assert.AreEqual("cancelled", cancelledRow.State);
+        Assert.IsNotNull(cancelledRow.CancellationRequestedAt, "The store recorded when cancellation was asked for.");
         Assert.AreEqual(
             second.TaskId,
             (await dedup.JobAsync(library, second.TaskId)).TaskId,
             "A cancelled job is still addressable by the task id the caller was given.");
 
-        // The lease survives a restart because TaskHealth owns it: the task is still there afterwards.
+        // The first analysis is still the library's readable report at this point: the second attempt was
+        // cancelled before it produced anything, so what the restart below is about to lose is a report
+        // that really was readable.
+        var beforeRestart = await dedup.JobAsync(library, first.TaskId);
+        Assert.AreEqual("succeeded", beforeRestart.State, "The first analysis is still the library's finished job.");
+        Assert.IsTrue(beforeRestart.ReportAvailable, "Its report is readable before the restart.");
+        var readable = await dedup.ResultsAsync(library, first.TaskId);
+        Assert.IsTrue(readable.ReportAvailable, "Its findings are readable before the restart.");
+        Assert.IsGreaterThan(0, readable.Total, "The report that is about to be lost really had findings.");
+
+        // The task survives a restart because TaskHealth owns it; the report does not, because retention is
+        // bounded and in process. The job must say so rather than read as an analysis that found nothing.
         await host.RestartAsync();
-        var afterRestart = await dedup.JobAsync(library, settled.TaskId);
-        Assert.AreEqual(settled.TaskId, afterRestart.TaskId, "A durable task outlives the process that ran it.");
+        var afterRestart = await dedup.JobAsync(library, first.TaskId);
+        Assert.AreEqual(first.TaskId, afterRestart.TaskId, "A durable task outlives the process that ran it.");
         Assert.AreEqual(
-            settled.State,
+            beforeRestart.State,
             afterRestart.State,
             "A restart must not change what the durable task already recorded about itself.");
         Assert.IsFalse(
@@ -161,14 +218,34 @@ public sealed class DedupTrialIntegrationTests
 
         // And an operation that addresses that report states the same thing rather than answering about
         // nothing: a report that is not readable is never presented as an analysis that found nothing.
-        var gone = await dedup.ResultsAsync(library, settled.TaskId);
+        var gone = await dedup.ResultsAsync(library, first.TaskId);
         Assert.IsFalse(gone.ReportAvailable, "A report that is gone is not readable.");
         Assert.IsEmpty(gone.Groups);
         Assert.AreEqual(0, gone.Total);
         Assert.AreEqual("dedup_report_not_retained", gone.SummaryFailureCode);
-        var unreadable = await dedup.RevalidateRefusalAsync(library, settled.TaskId);
+        var unreadable = await dedup.RevalidateRefusalAsync(library, first.TaskId);
         Assert.AreEqual(404, unreadable.Status);
         Assert.AreEqual("dedup_report_not_retained", unreadable.Code);
+
+        // The task the restart found is the same one, and the cancellation it recorded is still there.
+        var settledAfterRestart = await dedup.JobAsync(library, second.TaskId);
+        Assert.AreEqual("cancelled", settledAfterRestart.State, "A restart does not undo a cancellation.");
+        Assert.IsFalse(settledAfterRestart.ReportAvailable, "The cancelled attempt still has no report.");
+
+        // And the whole workbench in a real browser. The HTTP driver above states the wire contract; this
+        // states that the page an administrator actually uses reaches the same server, drives the same six
+        // operations and reports the same facts — with nothing mocked between them.
+        var secondLibrary = await dedup.RegisterAsync(assets.BrowserLibraryRoot, "精确查重浏览器验证");
+        var browser = await DedupTrialBrowser.RunAsync(
+            host, settings, library, secondLibrary, assets.LibraryRoot, assets.BrowserLibraryRoot);
+        foreach (var called in new[] { "start", "status", "results", "cancel", "revalidate", "export" })
+        {
+            Assert.Contains(
+                $"/assetlink/v1/dedup/{called}",
+                browser.Operations,
+                $"The page must really call {called} against the host.");
+        }
+
         Assert.IsEmpty(assets.Unchanged());
     }
 }
@@ -185,10 +262,16 @@ internal sealed class DedupTrialAssets
     /// intervals on this machine's disk, while every one of them stays under the per-file ceiling the
     /// analysis is given — a larger single file would be reported as too large rather than read.
     /// </summary>
-    private const int PaddingParts = 16;
+    private const int PaddingParts = 32;
 
-    /// <summary>Each padding file's size, comfortably under the 64 MiB per-file ceiling.</summary>
-    private const int PaddingPartBytes = 16 * 1024 * 1024;
+    /// <summary>
+    /// Each padding file's size, strictly under the 64 MiB per-file ceiling the analysis is given: a file
+    /// at the ceiling exactly would be reported as too large instead of read. The total is deliberately
+    /// larger than this machine's page cache for the trial's runtime root, because an analyser that read
+    /// it all from cache would finish in about a tenth of one heartbeat interval, and a trial could then
+    /// never observe that a running attempt's lease is really renewed.
+    /// </summary>
+    private const int PaddingPartBytes = 63 * 1024 * 1024;
 
     /// <summary>How many files the trial writes in total: the pair, the two unique notes and the padding.</summary>
     public const int ExpectedFileCount = PaddingParts + 4;
@@ -218,27 +301,21 @@ internal sealed class DedupTrialAssets
         // Inside the configured storage source's allowed root, which is <runtime>/assets: the trial
         // authorizes exactly that root, so a source outside it is refused before a byte is read — which
         // is the behaviour this fixture must not work around.
-        LibraryRoot = Path.Combine(Directory.CreateDirectory(Path.Combine(runtimeRoot, "assets")).FullName, "dedup-library");
-        Directory.CreateDirectory(Path.Combine(LibraryRoot, "set-a"));
-        Directory.CreateDirectory(Path.Combine(LibraryRoot, "set-b"));
-        // One byte-identical pair, written separately so neither file is a link or a copy on write.
-        Write("set-a/original.bin", DuplicateBytes());
-        Write("set-b/copy.bin", DuplicateBytes());
-        Write("unique/readme.txt", Readme);
-        Write("unique/notes_中文.txt", Notes);
-        // Padding, so the analysis is long enough to outlive several heartbeat intervals. It is written as
-        // several files because a single file over the per-file ceiling would be reported as too large
-        // instead of read, and it is unique content, so it can never be mistaken for a duplicate.
-        for (var part = 0; part < PaddingParts; part++)
-        {
-            Write($"unique/padding-{part:D2}.bin", PaddingBytes(part));
-        }
+        var assets = Directory.CreateDirectory(Path.Combine(runtimeRoot, "assets")).FullName;
+        LibraryRoot = Populate(Path.Combine(assets, "dedup-library"));
+        // A second registration of its own, so the browser phase has a library whose start is a genuinely
+        // new durable task. Registration refuses a root that overlaps another library's, so this one is a
+        // sibling directory with its own copy rather than a subdirectory of the first.
+        BrowserLibraryRoot = Populate(Path.Combine(assets, "dedup-browser-library"));
     }
 
     public string LibraryRoot { get; }
 
+    /// <summary>The root of the second registration, which only the browser phase analyzes.</summary>
+    public string BrowserLibraryRoot { get; }
+
     /// <summary>Adds one more unique file, so a second analysis sees a source that really changed.</summary>
-    public void AddUnique(string relative, string content) => Write(relative, Encoding.UTF8.GetBytes(content));
+    public void AddUnique(string relative, string content) => Write(LibraryRoot, relative, Encoding.UTF8.GetBytes(content));
 
     /// <summary>Every path whose bytes or modification time no longer match what the trial created.</summary>
     public IReadOnlyList<string> Unchanged() => [.. originals
@@ -246,6 +323,32 @@ internal sealed class DedupTrialAssets
                 != entry.Value.Hash
             || File.GetLastWriteTimeUtc(entry.Key) != entry.Value.Modified)
         .Select(entry => entry.Key)];
+
+    /// <summary>
+    /// Fills one root with the trial's source. Both registrations are filled the same way, so whichever one
+    /// is analyzed has the same one real duplicate pair, the same two files that are deliberately not read
+    /// and the same unique padding.
+    /// </summary>
+    private string Populate(string root)
+    {
+        Directory.CreateDirectory(root);
+        Directory.CreateDirectory(Path.Combine(root, "set-a"));
+        Directory.CreateDirectory(Path.Combine(root, "set-b"));
+        // One byte-identical pair, written separately so neither file is a link or a copy on write.
+        Write(root, "set-a/original.bin", DuplicateBytes());
+        Write(root, "set-b/copy.bin", DuplicateBytes());
+        Write(root, "unique/readme.txt", Readme);
+        Write(root, "unique/notes_中文.txt", Notes);
+        // Padding, so the analysis is long enough to outlive several heartbeat intervals. It is written as
+        // several files because a single file over the per-file ceiling would be reported as too large
+        // instead of read, and it is unique content, so it can never be mistaken for a duplicate.
+        for (var part = 0; part < PaddingParts; part++)
+        {
+            Write(root, $"unique/padding-{part:D2}.bin", PaddingBytes(part));
+        }
+
+        return root;
+    }
 
     private static byte[] DuplicateBytes()
     {
@@ -274,9 +377,9 @@ internal sealed class DedupTrialAssets
         return bytes;
     }
 
-    private void Write(string relative, byte[] content)
+    private void Write(string root, string relative, byte[] content)
     {
-        var path = Path.Combine(LibraryRoot, relative);
+        var path = Path.Combine(root, relative);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllBytes(path, content);
         originals[path] = (Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(content)), File.GetLastWriteTimeUtc(path));

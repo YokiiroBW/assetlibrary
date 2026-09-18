@@ -8,6 +8,7 @@ using AssetLibrary.Modules.TaskHealth.Application;
 using AssetLibrary.Modules.TaskHealth.Contracts;
 using AssetLibrary.Modules.TaskHealth.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace AssetLibrary.CoreServer.Hosting.Trial;
 
@@ -25,7 +26,8 @@ internal sealed record TrialDedupServices(
     DedupExecutionOptions Options,
     IDurableTaskCoordinator Coordinator,
     IDurableTaskInspector Inspector,
-    IDurableTaskCommitGuard Guard);
+    IDurableTaskCommitGuard Guard,
+    NpgsqlDataSource Tasks);
 
 /// <summary>
 /// Composition root of the exact-duplicate workbench. It supplies the module's application service with
@@ -68,7 +70,11 @@ internal static class TrialDedupComposition
             options,
             tasks,
             execution,
-            execution);
+            execution,
+            // The task store's own data source, exposed so a trial can read the lease columns TaskHealth
+            // records. It is the module's runtime login, which holds SELECT on the schema and no write
+            // grant, so a reader cannot alter the lease it observes.
+            connections.Task);
     }
 
     /// <summary>
@@ -88,12 +94,13 @@ internal static class TrialDedupComposition
     private static DedupExecutionOptions DedupOptions() => new()
     {
         LeaseDuration = TimeSpan.FromSeconds(30),
-        // Shorter than the module's own default, and short on purpose: the read-only trial's synthetic
-        // source is read in well under the default interval, so with the default the monitor would never
-        // fire and a real trial could not observe that a running attempt's lease is really renewed. A
-        // shorter interval only makes the monitor confirm the lease more often; every confirmation still
-        // goes through the same task_health.heartbeat_durable_task and can still be refused.
-        HeartbeatInterval = TimeSpan.FromMilliseconds(400),
+        // Shorter than the module's own default, and short on purpose: this machine's file cache lets the
+        // analyser finish the trial's synthetic source in well under a tenth of the default interval, so
+        // with the default the monitor would never fire and a real trial could not observe that a running
+        // attempt's lease is really renewed. A shorter interval only makes the monitor confirm the lease
+        // more often; every confirmation still goes through the same task_health.heartbeat_durable_task
+        // and can still be refused.
+        HeartbeatInterval = TimeSpan.FromMilliseconds(100),
     };
 
     private static DedupAnalyzer CreateAnalyzer(IDedupSourceScopeQuery scopes) => new(

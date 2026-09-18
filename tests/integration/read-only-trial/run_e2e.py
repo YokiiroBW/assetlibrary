@@ -27,6 +27,9 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--web-root", type=Path, required=True)
     parser.add_argument("--playwright-module", type=Path, required=True)
     parser.add_argument("--evidence", type=Path, default=ROOT / ".runtime/real-trial-evidence")
+    parser.add_argument("--trial", action="append", default=[], metavar="LABEL",
+                        help="Run only the named trial (repeatable). The full set is the default, and a "
+                             "focused run still creates and cleans up its own owned resources.")
     return parser.parse_args()
 
 
@@ -77,6 +80,7 @@ TRIALS = (
         "label": "trial_e2e",
         "test_class": "TrialHostIntegrationTests",
         "state_directory": "state",
+        "deadline_seconds": 300,
         "scenarios": [
             "protected_operator_bootstrap", "runtime_role_boundary", "real_browser_registration",
             "real_worker_initial_scan", "browse_and_full_path_search", "desktop_and_mobile_dark",
@@ -90,10 +94,13 @@ TRIALS = (
         "label": "trial_e2e_dedup",
         "test_class": "DedupTrialIntegrationTests",
         "state_directory": "state-dedup",
+        # Longer than the browse trial: this one runs two full analyses of the synthetic source and drives
+        # a real Chromium through the workbench, both against the same owned cluster.
+        "deadline_seconds": 600,
         "scenarios": [
             "dedup_start_status_results_revalidate_export_cancel", "dedup_authorization_refusal",
-            "dedup_real_lease_and_post_restart_unreadable_report", "dedup_source_unchanged",
-            "dedup_version_bound_export_refusal",
+            "dedup_real_lease_renewal_and_post_restart_unreadable_report", "dedup_cancellation_of_a_running_attempt",
+            "dedup_browser_workbench", "dedup_source_unchanged", "dedup_version_bound_export_refusal",
         ],
     },
 )
@@ -113,6 +120,7 @@ def run_trial(options, module, fixture, trial, runtime: Path, created_logins: li
         "node": str(options.node.resolve()),
         "playwright_module": str(options.playwright_module.resolve()),
         "browser_script": str(ROOT / "tests/integration/read-only-trial/browser.mjs"),
+        "dedup_browser_script": str(ROOT / "tests/integration/read-only-trial/dedup-browser.mjs"),
         "evidence": str(options.evidence.resolve()),
         "dotnet": str(options.dotnet.resolve()),
         "host_dll": str(ROOT / "services/core-server/Host/bin/Release/net10.0/AssetLibrary.CoreServer.Host.dll"),
@@ -137,7 +145,7 @@ def run_trial(options, module, fixture, trial, runtime: Path, created_logins: li
                           text=True, encoding="utf-8", start_new_session=os.name != "nt",
                           creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0) as process:
         try:
-            output, _ = process.communicate(timeout=300)
+            output, _ = process.communicate(timeout=trial["deadline_seconds"])
         except subprocess.TimeoutExpired:
             if os.name == "nt":
                 subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
@@ -160,6 +168,12 @@ def main() -> int:
     if not options.execute:
         print(json.dumps({"status": "not_executed", "reason": "pass --execute to create owned test resources"}))
         return 77
+    trials = TRIALS
+    if options.trial:
+        unknown = sorted(set(options.trial) - {trial["label"] for trial in TRIALS})
+        if unknown:
+            raise RuntimeError(f"unknown trial label(s): {', '.join(unknown)}")
+        trials = tuple(trial for trial in TRIALS if trial["label"] in options.trial)
     for path in (options.dotnet, options.node, options.web_root / "index.html", options.playwright_module):
         if not path.is_file():
             raise RuntimeError("a required test tool or built Web artifact is missing")
@@ -171,8 +185,8 @@ def main() -> int:
     (options.evidence / "run.json").write_text(json.dumps({
         "run_id": run_id, "source_revision": revision, "working_tree_dirty": dirty,
         "web_root": str(options.web_root.resolve()), "playwright_module": str(options.playwright_module.resolve()),
-        "trials": [trial["label"] for trial in TRIALS],
-        "trial_runtime_roots": {trial["label"]: f"<temp>/al20-{trial['label']}" for trial in TRIALS},
+        "trials": [trial["label"] for trial in trials],
+        "trial_runtime_roots": {trial["label"]: f"<temp>/al20-{trial['label']}" for trial in trials},
     }, indent=2), encoding="utf-8")
     print(f"REAL_TRIAL_EVIDENCE {options.evidence}", flush=True)
     module = load_fixture()
@@ -187,12 +201,13 @@ def main() -> int:
         created_logins: list[str] = []
         try:
             fixture_type.setUpClass()
-            results = [run_trial(options, module, fixture, trial, runtime, created_logins) for trial in TRIALS]
+            results = [run_trial(options, module, fixture, trial, runtime, created_logins) for trial in trials]
             exit_code = max(result[0] for result in results)
             if exit_code == 0:
                 (options.evidence / "acceptance.json").write_text(json.dumps({
-                    "status": "passed", "run_id": run_id, "aggregate_tests_passed": len(TRIALS), "skipped": 0,
-                    "scenarios": [scenario for trial in TRIALS for scenario in trial["scenarios"]],
+                    "status": "passed", "run_id": run_id, "aggregate_tests_passed": len(trials), "skipped": 0,
+                    "focused": bool(options.trial),
+                    "scenarios": [scenario for trial in trials for scenario in trial["scenarios"]],
                 }, indent=2), encoding="utf-8")
         finally:
             cleaned = fixture.doCleanups()

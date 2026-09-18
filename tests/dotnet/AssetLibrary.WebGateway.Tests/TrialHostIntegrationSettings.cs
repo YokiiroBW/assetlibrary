@@ -17,6 +17,7 @@ internal sealed record TrialHostIntegrationSettings
     public required string Node { get; init; }
     public required string PlaywrightModule { get; init; }
     public required string BrowserScript { get; init; }
+    public required string DedupBrowserScript { get; init; }
     public required string Evidence { get; init; }
     public required string Dotnet { get; init; }
     public required string HostDll { get; init; }

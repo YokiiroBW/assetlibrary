@@ -14,10 +14,11 @@ internal sealed class DedupTrialDriver(TrialHostIntegrationFixture host, TrialHo
     private const string Prefix = "/assetlink/v1/dedup/";
 
     /// <summary>
-    /// The interval the read-only trial's worker renews a lease on. The trial's synthetic source is sized
-    /// so an attempt outlives it, which is what makes the renewal observable from outside the process.
+    /// The interval the read-only trial's worker renews a lease on, which is the trial's own composition
+    /// value. An attempt on the trial's synthetic source outlives several of them, which is what makes the
+    /// renewal observable from outside the process.
     /// </summary>
-    public static TimeSpan HeartbeatInterval { get; } = TimeSpan.FromMilliseconds(400);
+    public static TimeSpan HeartbeatInterval { get; } = TimeSpan.FromMilliseconds(100);
 
     /// <summary>The version text of one report, which is the job's own identity plus its generation.</summary>
     public static string AnalysisVersion(Guid taskId, long generation) => $"{taskId:D}:{generation}";
@@ -155,8 +156,10 @@ internal sealed class DedupTrialDriver(TrialHostIntegrationFixture host, TrialHo
 
             Assert.AreNotEqual("failed", answer.State, $"The analysis failed: {answer.FailureCode}");
             // A page polls far faster than a person can read: this is what lets a test observe a job that
-            // is still being worked on rather than only its finished state.
-            await Task.Delay(40, deadline.Token);
+            // is still being worked on rather than only its finished state. The interval is short because
+            // an attempt on the trial's synthetic source is short — a slower poll would only ever see the
+            // job before it started and after it finished, and could not state what happened in between.
+            await Task.Delay(10, deadline.Token);
         }
 
         Assert.Fail($"No report became readable for {taskId:D}.");
