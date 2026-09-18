@@ -33,6 +33,8 @@
 | `Application/DedupJobWorker.cs`                                       | Application | 单个已认领任务的执行：按载荷类型分派「分析」或「复核」，两者共用同一租约心跳、取消发现与围栏提交                                                                                                                         | `IDurableTaskCoordinator`、`IDurableTaskCommitGuard`                      | 不写持久数据                                                  |
 | `Application/DedupJobIdentity.cs`                                     | Application | 作业标识派生、状态/复核状态用词、不可变任务载荷（分析载荷与复核载荷各自完整，复核载荷记录要核对的那一代）                                                                                                                | 无                                                                        | 无                                                            |
 | `Web/src/dedup/DedupWorkbench.tsx`                                    | Web 适配层  | 工作台的挂载点：持有会话级客户端与 `useDedupJob`，把路由状态映射为页面输入；壳只做路由级 `lazy` 挂载                                                                                                                     | 唯一 `AssetLinkClient`                                                    | 无                                                            |
+| `Web/src/dedup/dedupActions.ts`（第五轮拆出）                          | Web 适配层  | 四个操作（开始/取消/复核/导出）的执行与导出文档落盘；只记录服务端答案，不解释结果、不构造路径、不猜版本                                                                                                                    | 唯一 `AssetLinkClient`（由 hook 传入）                                    | 无                                                            |
+| `Web/src/dedup/dedupJobState.ts`（第五轮拆出）                         | Web 适配层  | 工作台会话状态与句柄的类型定义（含 `reportVersion`/`stale`）；纯类型，无行为                                                                                                                                    | 无                                                                        | 无                                                            |
 | `Web/src/LibraryAdmin.tsx`                                            | Web 适配层  | 资源库目录/登记/分类/扫描任务页的挂载点；只转发壳给的会话状态与导航意图                                                                                                                                                  | 唯一 `AssetLinkClient`（经壳传入）                                        | 无                                                            |
 
 ## 3. 边界核对
@@ -58,3 +60,9 @@
    一致，替换的是「谁计算窗口」而不是「列表怎么渲染」；它**不**引入无限滚动、不做数据获取、不持有
    业务规则，仍只是视图层的一个纯计算 hook。第四轮修掉的是它自己的订阅稳定性：元素身份是它唯一的状态，
    几何量在写入前先比较（React 只对同值同引用跳过渲染，新对象一定会触发渲染）。
+6. 第五轮把 `apps/web/src/hooks/useDedupJob.ts` 拆成三个同目录模块，理由是 `validate_web_source.py` 的
+   单文件 20 KB 复核上限（拆前 26656 B，拆后 hook 19251 B）：`dedupActions.ts` 承载四个操作的执行
+   （含导出落盘），`dedupJobState.ts` 承载会话状态与句柄类型。依赖方向不变，仍是
+   `DedupWorkbench → useDedupJob → {dedupActions, dedupJobState, dedupClient} → AssetLinkClient`；
+   页面从 `dedupJobState` 取句柄类型而不是从 hook 取，避免页面为了一个类型而依赖请求编排模块。
+   这次拆分只搬移字节与类型，**没有**改变任何行为、没有新增端口、没有把授权或路径判断放进页面。

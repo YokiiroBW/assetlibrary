@@ -11,7 +11,7 @@
 | `dotnet build AssetLibrary.slnx --configuration Release --no-restore`           | 通过，0 警告 0 错误                                                                                                                                                                                 |
 | `dotnet test AssetLibrary.slnx --configuration Release --no-build --no-restore` | 通过                                                                                                                                                                                                |
 
-测试项目明细（通过 / 跳过 / 总计，**第二轮复验值**）：
+测试项目明细（通过 / 跳过 / 总计，**第五轮复验值**）：
 
 - `AssetLibrary.AssetLink.Tests` 13 / 0 / 13
 - `AssetLibrary.Build.Tests` 2 / 0 / 2
@@ -19,10 +19,18 @@
 - `AssetLibrary.TransferOperation.Tests` 64 / 0 / 64
 - `AssetLibrary.ReadCore.Tests` 110 / 25 / 135（含 TS065 的 49 项查重用例与第二轮新增 4 项增长/预算用例；跳过项均为既有 PostgreSQL/POSIX 条件用例）
 - `AssetLibrary.Packaging.Tests` 63 / 0 / 63
-- `AssetLibrary.WebGateway.Tests` 121 / 4 / 125（含本卡新增的 13 项线格式契约用例、6 项端点路由用例与第二轮的 3 项复核围栏用例）
+- `AssetLibrary.WebGateway.Tests` 124 / 5 / 129（含本卡新增的 13 项线格式契约用例、6 项端点路由用例、第二轮的 3 项复核围栏用例与第四轮的 2 项注册表证据用例；第五轮把试运行的导出断言收紧到「复核后的版本与摘要」并新增被取代版本的 409 负例）
 - `AssetLibrary.Preview.Tests` 111 / 24 / 135
 
-合计 **516 通过 / 53 跳过 / 0 失败**（第二轮提交 `eacf26e`）。
+合计 **519 通过 / 54 跳过 / 0 失败**（第五轮提交 `06c1882`）。
+
+### 1.0.4 第五轮（`06c1882`）用例与实测
+
+第五轮没有新增 .NET 用例，只把真实试运行的导出断言收紧：`DedupTrialIntegrationTests` 第 5 步先按
+**复核后**的版本与摘要导出并断言文档自己声明的 `analysis_version`/`plan_digest` 与之相等、
+`grants_file_operation=false`，再按**被取代的 `:1` 版本**导出并断言 409 `dedup_version_conflict`
+（另加一条不存在的版本号）。`DedupTrialDriver` 新增 `DocumentPlanDigest` 读取导出文档自身的摘要。
+真正的修复在页面侧，由 Chromium 用例覆盖（见第 2、3 节）与真实浏览器试运行验证（见第 5 节）。
 
 ### 1.0 第二轮新增用例
 
@@ -200,15 +208,27 @@ cancellation_requested_at`。`WaitForClaimAsync` 等到 `leased` 且 `lease_gene
 | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `prettier --check apps/web/src tests/web`                         | `All matched files use Prettier code style!`                                                                                                                     |
 | `tsc --project apps/web/tsconfig.json --noEmit`                   | 通过（等同 `pnpm run lint` / `typecheck`）                                                                                                                       |
-| `vite build`（工作目录 `apps/web`）                               | 通过：入口 `index-*.js` 297973 B + `DedupWorkbench-*.js` 34415 B + `LibraryAdmin-*.js` 7959 B = 340347 B（预算 344064 B）、`index-*.css` 32394 B（预算 32768 B） |
-| `playwright test --config apps/web/playwright.config.mjs`（全量） | **83 通过 / 0 失败**                                                                                                                                             |
-| 本卡用例 `--repeat-each 2 --workers 2`                            | 22 通过 / 0 失败（稳定性复验）                                                                                                                                   |
+| `vite build`（工作目录 `apps/web`）                               | 通过（第五轮）：入口 `index-*.js` 274777 B + `DedupWorkbench-*.js` 35172 B + `LibraryAdmin-*.js` 7947 B = **317896 B**（预算 327680 B）、`index-*.css` 32394 B（预算 32768 B） |
+| `playwright test --config apps/web/playwright.config.mjs`（全量） | **92 通过 / 0 失败**（本卡 23 项；进程退出码按本仓惯例仍为 1，判据是 `92 passed` 行）                                                                             |
+| 本卡用例 `--repeat-each 2 --workers 2`                            | 22 通过 / 0 失败（第三轮稳定性复验；第五轮改跑全量并单独重跑本卡用例）                                                                                            |
 
 `pnpm` 未在本机 PATH 上，浏览器门禁以固定版本 `node v24.20.0` 直接调用仓库内
 `apps/web/node_modules/@playwright/test/cli.js`、`typescript/bin/tsc`、`vite/bin/vite.js` 与
 `prettier/bin/prettier.cjs`，等价于 `ci-tiers.json` 中 `pnpm --dir apps/web run …` 的对应命令。
 
-## 3. 本卡浏览器用例（`tests/web/dedup-workbench.spec.mjs`，17 项）
+## 3. 本卡浏览器用例（`tests/web/dedup-workbench.spec.mjs`，第五轮 23 项）
+
+第五轮新增/收紧的 6 项（其余 17 项与 3 项 `row-window.spec.mjs` 用例保持通过）：
+
+| 用例                                                             | 断言要点                                                                                                                                                          |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 复核完成后页面切到它落下的版本，导出写的就是该版本               | `results` 恰好被读 2 次（`:1` 与 `:2`）；复核按 `:1` 的摘要提交；导出请求体是 `:2` 的版本与新摘要；页面显示新版本                                                    |
+| 页面首次轮询前就已完成的复核，在第一次轮询即被应用               | 复核完成先于页面的 `revalidate` 轮询时，页面仍切到新版本并重读，不显示成「没有变化」                                                                                |
+| 被拒的复核不写版本，页面保留自己持有的版本并仍可导出             | `refused` 回执不改变版本；导出仍按屏上那一版成功                                                                                                                  |
+| 服务器已更新版本但页面还在读取时，导出被禁用                     | `holdAnswers(state, ["results"])` 卡住读取：禁用态与说明同时出现，读取完成后恢复可用                                                                                |
+| 被取代版本的导出由服务端拒绝时如实报错，不悄悄改写绑定           | 409 `dedup_version_conflict` 原样呈现；页面不重试、不换版本                                                                                                        |
+| 对已离开的库的迟到答案不写进当前打开的库                         | 切库后到达的旧响应不改变新库的状态、版本与导出绑定                                                                                                                |
+
 
 | #   | 用例                                         | 断言要点                                                                                                                        | 截图                                                                          |
 | --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -351,18 +371,22 @@ setter 之前——这正是本轮缺陷的根因。订阅只在 `node` 变化�
   窄屏双击同时进入快速预览，详情抽屉因此不渲染；`EntryDetails.tsx` 的窄屏分支与 `useNarrowWorkspace`
   （1199px）在**基线 `5d9dc39` 就已存在**，不是本卡引入。**未记为通过**，命令、探针输出与建议见交接第 7.4
   与第 9 节；本卡未改共享壳绕过它。
-- **已登录管理员走通六个操作：已执行（第四轮）。** 第四轮起 `run_e2e.py` 有独立的 `trial_e2e_dedup`
-  试运行：HTTP 契约段落 + **真实 Chromium 页面闭环**（登录 → 选库 → 分析 → 状态/结果 → 导出 →
-  重新核对 → 第二个库运行中取消），全部打真实 Core、无任何路由 mock，实测 1/1 通过。
+- **已登录管理员走通六个操作：已执行（第四轮起，第五轮恢复正确顺序）。** 第四轮起 `run_e2e.py` 有独立的
+  `trial_e2e_dedup` 试运行：HTTP 契约段落 + **真实 Chromium 页面闭环**，全部打真实 Core、无任何路由 mock。
+  第五轮把顺序恢复为卡要求的「登录 → 选库 → 开始分析 → 状态/结果（开合组详情）→ 重新核对完成 →
+  确认页面已切到复核落下的新版本 → 导出成功 → 第二个库运行中取消」，实测 1/1 通过（1 分 40 秒），
+  导出文档的 `analysis_version`/`plan_digest` 与服务端及页面一致、`grants_file_operation=false`。
   可用 `--trial trial_e2e_dedup` 单独执行；整轮 `run_e2e.py` 的退出码仍会被上一条既有缺陷拖成 1。
+  注意 `--playwright-module` 必须指向 `@playwright/test/index.mjs`（`playwright/index.mjs` 不导出 `expect`）。
 - **复核在真实租约下的执行：已执行（第四轮）。** 试运行里 `revalidate` 段落跑在真实 worker 的真实租约下
   （回执 `pending` → `completed` → `plan_still_current=true`），并且租约续期本身改为直接读
   `task_health.durable_task` 的 `heartbeat_at`/`lease_until` 断言（见 1.0.3）。
   但**「迟到复核不得覆盖新报告」这一竞争仍不在试运行里**：worker 单线程串行认领，扫描与落盘之间不会插进
   另一次分析，因此该竞争继续由进程内确定性用例
   `DedupRecheckFenceTests.ALateVerdictNeverReplacesANewerAnalysisOfTheSameLibrary` 覆盖（含反向探针）。
-- **复核后页面不重载新版本（本轮发现的既有缺口，未修）。** 落一次复核会让服务端把复核自己的报告作为该库
-  结果的新版本落盘，页面用于判定「要不要重读切片」的键（`task_id:report_available`）没有变化，因此页面
-  仍显示复核前的版本；此时导出会被 409 `dedup_version_conflict` 拒绝。浏览器试运行因此把导出排在复核之前。
-  不在本轮四张卡范围内，已记入交接第 9 节，建议单开卡。
+- **复核后页面不重载新版本：第五轮已修复**（第四轮曾把它记为「既有缺口、未修」，该口径已纠正）。
+  读取开关改为「任务 + 服务端当前报告版本」，版本一律取服务端答案（`status`/`revalidate` 回执/
+  `results` 页自带），读取期间禁用导出并在读取完成后重读切片，迟到旧响应不覆盖新状态，切库仍清空原数据。
+  真实试运行实测版本由 `:1` 变为 `:2`，页面确认新版本后才导出，导出文档即为该版本；
+  被取代版本的导出仍由同一试运行的 HTTP 契约段断言 409 `dedup_version_conflict`。
 - **多实例并发**：本卡未新增调度器，跨实例互斥由 TaskHealth 既有租约保证，未在本机做多进程验证。
