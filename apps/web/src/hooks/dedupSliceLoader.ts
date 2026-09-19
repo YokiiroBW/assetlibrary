@@ -221,10 +221,11 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         if (taken.current !== requestKey) return;
         taken.current = null;
         if (failedRead) return;
-        // A read that ended without putting the reader's answer on screen may recover once, and only once:
-        // an answer the page refused is not progress, so recovering again would repeat the same refused read
-        // at wire speed. What stops the second attempt is this bound, not the answer, and the page keeps the
-        // state the refusal left — the error a failed read states, or the report it already holds.
+        // A read that ended without putting the reader's answer on screen may recover, and the budget is what
+        // bounds it: recovering once is what reads the version the server filed when the answer in hand was
+        // refused as superseded, and the budget is what stops the refusal that follows — an answer the page
+        // refuses is not progress, so recovering again would repeat it at wire speed. Past the budget the page
+        // keeps the state the refusal left: the error a failed read states, or the report it already holds.
         if (recovery.current >= maxRecoveries) return;
         const job = state.current.job;
         if (job === null || !job.report_available) return;
