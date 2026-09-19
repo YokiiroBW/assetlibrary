@@ -111,12 +111,12 @@
   "changed_contracts": [],
   "diff": {
     "files": 97,
-    "insertions": 13541,
+    "insertions": 13542,
     "deletions": 283,
     "note": "5d9dc39b926366076bb419c040cb000dd01455b5..cfd7894 (the seventh-round product commit). The workbench page, its request control and the browser fixtures are the product surface; the remaining files are the module's contract, host and test surface already recorded in the earlier rounds.",
     "fix_round": {
       "files": 4,
-      "insertions": 215,
+      "insertions": 216,
       "deletions": 34,
       "note": "The seventh fix round, against dbfbb3a."
     }
