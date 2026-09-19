@@ -7,10 +7,10 @@
   "owner": "assetlibrary-dedup-workbench",
   "branch": "work/ts-066",
   "worktree": "C:\\YOKI\\Codex\\tianshu-peiban-bot\\worktrees\\TS-066\\assetlibrary",
-  "commit": "cfd7894",
+  "commit": "0fa46f6",
   "base_commit": "5d9dc39b926366076bb419c040cb000dd01455b5",
-  "fix_round_from_commit": "dbfbb3a",
-  "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-7.md",
+  "fix_round_from_commit": "d1d2d85",
+  "fix_round_authority": "docs/development/dsh/TS-066-review-fixes-8.md",
   "changed_files": [
     ".codex/handoffs/TS-066/module-boundaries.md",
     ".codex/handoffs/TS-066/result.json",
@@ -111,14 +111,14 @@
   "changed_contracts": [],
   "diff": {
     "files": 97,
-    "insertions": 13542,
+    "insertions": 13771,
     "deletions": 283,
-    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..cfd7894 (the seventh-round product commit). The workbench page, its request control and the browser fixtures are the product surface; the remaining files are the module's contract, host and test surface already recorded in the earlier rounds.",
+    "note": "5d9dc39b926366076bb419c040cb000dd01455b5..0fa46f6 (the eighth-round product commit). The workbench page, its request control and the browser fixtures are the product surface; the remaining files are the module's contract, host and test surface already recorded in the earlier rounds.",
     "fix_round": {
-      "files": 4,
-      "insertions": 216,
-      "deletions": 34,
-      "note": "The seventh fix round, against dbfbb3a."
+      "files": 3,
+      "insertions": 168,
+      "deletions": 12,
+      "note": "The eighth fix round, against d1d2d85: the recovery budget and the two cases that hold it."
     }
   },
   "tests": {
@@ -133,18 +133,18 @@
       "note": "dotnet test AssetLibrary.slnx -c Release: eight assemblies green. Skips are the pre-existing PostgreSQL/POSIX conditional cases; no TS-066 case is skipped. WebGateway.Tests is 124 passing / 5 skipped, including the two DedupReportRegistryEvidence cases and the strengthened trial export assertions (the recheck's version and digest are the ones the exported document states, and the version the recheck superseded is refused with 409)."
     },
     "browser": {
-      "passed": 99,
+      "passed": 101,
       "failed": 0,
-      "this_task": 30,
-      "note": "playwright test (Chromium) 99 passed in 47s. The workbench spec has 30 cases for this card: the 27 carried from the earlier rounds plus three for the round-seven defect (a version the server filed on its own is taken and not read for in a loop, an answer for a version the server has already replaced is refused while the newer one stays and is exported, and a read that fails is stated as an error with a bounded request count)."
+      "this_task": 32,
+      "note": "playwright test (Chromium) 101 passed in 48s. The workbench spec has 32 cases for this card: the 30 carried from the earlier rounds plus two for the round-eight defect (consecutive answers for a replaced report exhaust the recovery budget, settle at three reads and do not reach the screen; and a section the reader selects after the budget is spent is read again with a fresh budget). Both were run six times each without a flake."
     },
     "strict_build": "passed, zero warnings/errors with TreatWarningsAsErrors",
     "format": "dotnet format --verify-no-changes passed; prettier --check . ../../tests/web passed",
     "typecheck": "tsc --project tsconfig.json --noEmit passed (exit 0, no output).",
-    "production_build": "vite build passed: entry index-*.js 274,777 B + DedupWorkbench-*.js 36,742 B + LibraryAdmin-*.js 7,947 B = 319,466 B javascript, CSS 32,394 B; validate_web_dependencies.py --require-build-artifacts passed inside the original budgets (327,680 / 360,448 / 32,768).",
+    "production_build": "vite build passed: entry index-*.js 274,777 B + DedupWorkbench-*.js 37,016 B + LibraryAdmin-*.js 7,947 B = 319,740 B javascript, CSS 32,394 B; validate_web_dependencies.py --require-build-artifacts passed inside the original budgets (327,680 / 360,448 / 32,768).",
     "repository": "verify_repository.py passed (exit 0): the architecture unittest discovery, the .codex JSON parse (the round-2 result.json carried a UTF-8 BOM and was rewritten without one) and the AST parse of every script.",
     "release_gate": "check_release_gates.py --target v0.1-start: RELEASE_GATE_ALLOWED",
-    "web_boundary": "validate_web_source.py passed: no module was split again this round; useDedupJob.ts is 16919 B and dedupSliceLoader.ts 15796 B, both inside the per-file 20 KB review bound; exactly one fetch( in the tree; the virtualizer binding is unchanged.",
+    "web_boundary": "validate_web_source.py passed: no module was split this round; useDedupJob.ts is 18151 B and dedupSliceLoader.ts 17691 B, both inside the per-file 20 KB review bound; exactly one fetch( in the tree; the virtualizer binding is unchanged.",
     "real_trial": {
       "command": "python -I -B tests/integration/read-only-trial/run_e2e.py --execute --trial trial_e2e_dedup --dotnet <dotnet-10.0.111>\\dotnet.exe --postgres-bin <postgresql-16.15>\\pgsql\\bin --node <node-v24.20.0>\\node.exe --web-root apps/web/dist --playwright-module apps/web/node_modules/@playwright/test/index.mjs --evidence .runtime/review-ts066-r7/real-trial",
       "dedup_trial": "trial_e2e_dedup total=1 passed=1 failed=0 in 1m4s: the real PostgreSQL cluster, the real HTTPS host and the real Chromium page, whose recheck-then-export chain is the round-five fix under the round-seven request control. The exported plan names analysis_version c074d57d-350d-4590-4c16-651b05e6c75a:2 and plan_digest 3ce37199d5246a4dd18d891775f70a66cd573719110faafd7c905c4c1c14ca34 with grants_file_operation=false.",
@@ -158,10 +158,11 @@
       "The trial command's --playwright-module must point at @playwright/test's entry: the playwright package's index.mjs does not export expect, which both trial scripts take from that module. Passing the wrong path fails the script before the page is opened. A command-parameter issue, recorded in docs/handoffs/TS-066.md section 9 item 4, not a product defect."
     ],
     "coordinator_probes": {
-      "review_newer": ".runtime/review-newer.spec.mjs: 1 passed, RESULT_REQUESTS_IN_650MS=3. It failed before this round with 479 requests in 650ms against expect(<6).",
-      "review_queue": ".runtime/review-queue.spec.mjs: 1 passed (the round-six case still holds).",
+      "review_stale_bound": ".runtime/review-stale-bound.spec.mjs: 1 passed, REJECTED_OLD_REPLY_REQUESTS_IN_650MS=3. It failed before this round with 548 requests in 650ms against expect(<=3), which is the blocker the card names.",
+      "review_newer": ".runtime/review-newer.spec.mjs: 1 passed, RESULT_REQUESTS_IN_650MS=3.",
+      "review_queue": ".runtime/review-queue.spec.mjs: 1 passed.",
       "review_window": ".runtime/review-window.spec.mjs: 1 passed, IDLE_MAXIMUM_UPDATE_DEPTH_ERRORS=0.",
-      "reverse_probe": "With the version guard put back to the defective direction, review-newer returns to 449 requests and fails, and the new case 1 fails with it; both pass again after restoring the fix."
+      "reverse_probe": "With the finally block's unconditional recovery = 0 put back, review-stale-bound returns to 511 requests and fails, and both new cases fail with it; all pass again after restoring the fix."
     }
   },
   "risks": [
@@ -214,8 +215,8 @@
       "The shared Web budget passes with 11,094 B of headroom; the next Web task must not assume more, and the gate's summing unit still needs a coordinator decision if the feature set grows."
     ]
   },
-  "handoff_records_head": "cfd7894",
-  "worktree_clean_at": "cfd7894",
+  "handoff_records_head": "0fa46f6",
+  "worktree_clean_at": "0fa46f6",
   "records_commits": [
     "4530212",
     "936439e",
