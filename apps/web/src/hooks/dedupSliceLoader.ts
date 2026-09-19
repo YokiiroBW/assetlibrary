@@ -7,6 +7,18 @@ import type { DedupView } from "../dedup/dedupJobState";
 
 const pageSize = 50;
 
+/**
+ * How many times one read may hand the wire to the read the reader wants before the controller stops
+ * recovering on its own. A read that ended without the answer on screen is normally a read that was for
+ * the wrong slice, and one more read settles it. The larger case is an answer the page refused because
+ * the server had already filed a newer report: recovering once reads that report, which is the point, and
+ * the budget is what stops the second refusal — an answer the page refuses is not progress, so recovering
+ * again would only repeat it at wire speed. Past the budget the page keeps the state it has: the error a
+ * failed read states, or the report it already holds, and the reader's own next action is what starts a
+ * read, which is the explicit retry the card asks for instead of a hidden loop.
+ */
+const maxRecoveries = 2;
+
 /** Everything the read controller needs from the page it serves, all of it live rather than captured. */
 export interface LoadContext {
   readonly client: DedupClient;
@@ -14,7 +26,6 @@ export interface LoadContext {
   readonly state: MutableRefObject<DedupView>;
   readonly activeLoad: MutableRefObject<string | null>;
   readonly reading: MutableRefObject<string | null>;
-  readonly replaced: MutableRefObject<boolean>;
   /** The library the page is open on now. A read whose library is gone is not written to the page. */
   readonly current: MutableRefObject<string | null>;
   readonly liveVersion: MutableRefObject<string | null>;
@@ -24,6 +35,14 @@ export interface LoadContext {
   readonly liveGroup: MutableRefObject<string | null>;
   readonly liveWanted: MutableRefObject<string | null>;
   readonly query: MutableRefObject<AbortController | null>;
+  /** The read that owns the wire, by request key, so a request is never blamed for another's cancellation. */
+  readonly taken: MutableRefObject<string | null>;
+  /** The slice whose read failed, so a failure is stated rather than retried the moment it is stated. */
+  readonly failed: MutableRefObject<string | null>;
+  /** Consecutive recoveries the controller has made, so the recovery itself stays bounded. */
+  readonly recovery: MutableRefObject<number>;
+  /** The slice the reader wants and the wire has not served yet, if a read is on its way to serve it. */
+  readonly pending: MutableRefObject<string | null>;
   readonly setState: (update: (previous: DedupView) => DedupView) => void;
   readonly setReportVersion: (update: (previous: string | null) => string | null) => void;
 }
@@ -49,8 +68,9 @@ export type LoadSlice = (
  * that slice's answer is not already on screen. A read wanted while another is on the wire preempts it:
  * the read for the slice the reader left is aborted and its place taken, so what is being read is always
  * the slice they selected rather than the one they passed through. An answer is written only if it is for
- * the slice the reader wants; an answer for a section, a group or a version they have moved on from is
- * dropped, and the read that ends is the one that reads what they want now.
+ * the slice the reader wants and for a version that is at least as new as the one the page holds; an
+ * answer for a section, a group or a version they have moved on from is dropped, and the read that ends
+ * recovers the slice the reader wants — within a bound, so a refusal can never become a loop.
  */
 export function useSliceLoader(context: LoadContext): LoadSlice {
   const {
@@ -59,7 +79,6 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
     state,
     activeLoad,
     reading,
-    replaced,
     liveVersion,
     readSlice,
     readVersion,
@@ -68,6 +87,10 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
     liveWanted,
     query,
     current,
+    taken,
+    failed,
+    recovery,
+    pending,
     setState,
     setReportVersion,
   } = context;
@@ -78,6 +101,10 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
     cursor: string | null,
     more: boolean,
   ) => {
+    // Whether the read reached the server at all. A read that failed is stated as an error and is not
+    // recovered from: reading the same thing again would fail the same way, so the page keeps the error it
+    // states and the reader's own next action is the retry.
+    let failedRead = false;
     {
       if (libraryId === null) return;
       const requestKey = [libraryId, taskId, kind, groupKey, cursor, more].join("\u0000");
@@ -98,6 +125,11 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
       // slice has taken the wire: a read that went out for another slice will answer that slice rather than
       // this one, so the answer on screen is not what this ask is waiting for and it is read again.
       const superseding = activeLoad.current !== null && reading.current !== asked;
+      // A read that failed is not read again on the spot: the page states the failure and waits for the
+      // reader, so a failure cannot become a read per render. The reader's next action is what reads again —
+      // a section, a group or a version that is not the one whose read failed — and dispatching that read is
+      // what clears this record.
+      if (!more && failed.current === asked) return;
       if (!more && showing && !superseding && liveWanted.current === asked) return;
       // The slice the reader wants is already on the wire, so this is the same read asked for twice and
       // nothing is sent: the answer on its way is the answer to this ask. A read for another slice is one
@@ -111,9 +143,16 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
       }
       activeLoad.current = requestKey;
       reading.current = asked;
+      if (!more) failed.current = null;
+      // The read that holds the wire, recorded per request: the read it displaced can then tell that it was
+      // displaced — and that the read which took its place is the one that will serve the reader — instead
+      // of reading a flag another request may have written.
+      taken.current = requestKey;
+      // The wire is no longer free for the slice the reader wanted, so that want is no longer pending: this
+      // read answers the slice it was asked for, and the read that ends is what recovers anything else.
+      if (!more) pending.current = null;
       const controller = new AbortController();
       query.current = controller;
-      replaced.current = false;
       // A read that replaces what is already on screen keeps the list in place: removing it would move the
       // rows the reader is looking at and take the focus target away with them. The first read of a slice
       // the page holds no answer for is the one that may state it is loading; a read of a slice the page has
@@ -127,12 +166,7 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
           { kind, groupKey: groupKey ?? undefined, cursor, pageSize },
           controller.signal,
         );
-        if (current.current !== libraryId || controller.signal.aborted) {
-          // A read that was aborted is not the read the page is waiting for, so it does not start the next
-          // one: the read that replaced it is already on the wire and will.
-          replaced.current = true;
-          return;
-        }
+        if (current.current !== libraryId || controller.signal.aborted) return;
         // An answer for a slice the reader has left is not written to the page, and it does not become the
         // record of what is on screen either: the reader is looking at another section or another group, so
         // this answer is not the page's answer. What is compared is the slice, not the version, because a
@@ -143,16 +177,12 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         // The version this answer belongs to is the one the server names in it, and the server's own name is
         // the authority for it rather than an increment derived here. An answer that names no version is the
         // version the page asked for, read live rather than from this call's closure: what the page asked for
-        // when the read went out is not what it is asking for now. An answer the server names an older
-        // version in is about a version the server has moved on from, so it is dropped and the version it
-        // holds now is read instead.
+        // when the read went out is not what it is asking for now. An answer that names a version older than
+        // the one the page holds is about a report the server has already replaced, so it is refused and the
+        // page keeps the newer report it has; an answer that names a newer one — a recheck another reader or
+        // this page's own recheck has filed — is the report the server holds now and is taken.
         const answered = page.analysis_version === "" ? (liveVersion.current ?? "") : page.analysis_version;
-        if (
-          liveVersion.current !== null &&
-          liveVersion.current !== answered &&
-          newerThan(liveVersion.current, answered)
-        )
-          return;
+        if (liveVersion.current !== null && !newerThan(liveVersion.current, answered)) return;
         // The record is the switch the read effect compares against, so it is built the same way: the task
         // and the version the answer belongs to, then the section and the open group.
         readSlice.current = sliceKey(libraryId, taskId, answered, kind, groupKey);
@@ -171,6 +201,8 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
           setReportVersion((previous) => (newerThan(previous, answered) ? answered : previous));
       } catch (error: unknown) {
         if (isAbort(error)) return;
+        failedRead = true;
+        if (!more) failed.current = asked;
         setState((previous) => ({ ...previous, loadingMore: false, status: "error", ...failure(error) }));
       } finally {
         if (activeLoad.current === requestKey) activeLoad.current = null;
@@ -182,7 +214,18 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         // was for: they may have moved to another section, another group, or a version the server filed while
         // it was on the wire, and what is on screen is the answer to the slice they left rather than the one
         // they selected.
-        if (replaced.current) return;
+        //
+        // Only the read that still owns the wire recovers: a read the reader's next selection displaced was
+        // cancelled by that selection, and the read that took its place is the one on its way to answer the
+        // reader, so this one has nothing to start.
+        if (taken.current !== requestKey) return;
+        taken.current = null;
+        if (failedRead) return;
+        // A read that ended without putting the reader's answer on screen may recover once, and only once:
+        // an answer the page refused is not progress, so recovering again would repeat the same refused read
+        // at wire speed. What stops the second attempt is this bound, not the answer, and the page keeps the
+        // state the refusal left — the error a failed read states, or the report it already holds.
+        if (recovery.current >= maxRecoveries) return;
         const job = state.current.job;
         if (job === null || !job.report_available) return;
         const nowWanted = sliceIdentity(libraryId, job.task_id, liveSection.current, liveGroup.current);
@@ -194,9 +237,17 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
           readSlice.current ===
             sliceKey(libraryId, job.task_id, readVersion.current ?? "", liveSection.current, liveGroup.current) &&
           readVersion.current === (liveVersion.current ?? "");
-        if (onScreen) return;
+        if (onScreen) {
+          recovery.current = 0;
+          return;
+        }
+        // A read that reached the server and answered a slice the reader has left is progress of its own
+        // kind — the server is answering — so the budget is whole again for whatever the reader wants now.
+        recovery.current = 0;
         // A read for that slice is already on the wire, so it will answer it and this one is not repeated.
         if (reading.current === nowWanted) return;
+        recovery.current += 1;
+        pending.current = nowWanted;
         void load(job.task_id, liveSection.current, liveGroup.current, null, false);
       }
     }

@@ -69,8 +69,18 @@ export function useDedupJob(
   const liveWanted = useRef<string | null>(null);
   /** The slice a read is being made for right now, so coming back to it does not send a second request. */
   const reading = useRef<string | null>(null);
-  /** Whether the read that just ended was aborted by the read that took its place on the wire. */
-  const replaced = useRef(false);
+  /**
+   * The read that owns the wire, by request key, and the reader's want that is still on its way to being
+   * served. Ownership is per request rather than one flag for the whole page, so a read the reader's next
+   * selection displaced cannot mistake another request's cancellation for its own, and `pending` is what
+   * says a wake-up is owed — it is cleared when a read goes out for that want, so nothing recovers twice.
+   */
+  const taken = useRef<string | null>(null);
+  const pending = useRef<string | null>(null);
+  /** The slice whose read last failed, so a stated failure is not retried until the reader acts again. */
+  const failedSlice = useRef<string | null>(null);
+  /** Consecutive recoveries the controller has made without the reader's answer reaching the screen. */
+  const recovery = useRef(0);
   const exportedReceipt = useRef(onExported);
   exportedReceipt.current = onExported;
   useEffect(() => {
@@ -79,6 +89,10 @@ export function useDedupJob(
     activeLoad.current = null;
     readSlice.current = null;
     readVersion.current = null;
+    taken.current = null;
+    pending.current = null;
+    failedSlice.current = null;
+    recovery.current = 0;
     setGroupKey(null);
     // The version belongs to the library that is open, so it is dropped with the rest of that library's
     // state: a version read for one library must never be exported against another.
@@ -101,7 +115,10 @@ export function useDedupJob(
     current,
     activeLoad,
     reading,
-    replaced,
+    taken,
+    pending,
+    failed: failedSlice,
+    recovery,
     liveVersion,
     readSlice,
     readVersion,
@@ -188,7 +205,15 @@ export function useDedupJob(
     const onScreen =
       readVersion.current === reportVersion &&
       readSlice.current === sliceIdentity(libraryId, job.task_id, section, groupKey);
-    if (onScreen) return;
+    if (onScreen) {
+      // The reader's answer is on screen, so nothing is owed to them and the recovery budget is whole again.
+      pending.current = null;
+      recovery.current = 0;
+      return;
+    }
+    // The reader's want is now on its way to being served, which is what stops the read that ends from
+    // recovering the same want a second time.
+    pending.current = sliceIdentity(libraryId, job.task_id, section, groupKey);
     void load(job.task_id, section, groupKey, null, false);
   }, [libraryId, wantedSlice, reportVersion, revision, load, section, groupKey]);
 

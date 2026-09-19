@@ -875,3 +875,93 @@ test("leaving the open group while its member read is on the wire does not put t
   expect(asked.filter((request) => request.body.group_key !== undefined)).toHaveLength(1);
   expect(asked.at(-1).body.kind).toBe("Unverified");
 });
+
+// The three directions of the version comparison, and the bound on recovering from a read that ends
+// without the reader's answer. A report only moves forward inside its task, so an answer for a later
+// generation is the report the server holds now and is taken, an answer for an earlier one is a report the
+// server has already replaced and is refused, and an answer for the version already on screen is not read
+// for again. Recovering from a refusal is what reads the version the server filed; it is bounded, so a
+// refusal that cannot be satisfied stops instead of repeating at wire speed.
+test("a report version the server filed on its own is taken, and the page does not read for it in a loop", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // Another operator rechecks the library and the server files the new report. This page never receives a
+  // recheck receipt of its own — the version moved under it — and it only learns the version when it reads
+  // a section, which is the read the section switch makes.
+  state.publish();
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect(page.getByText(noteOf.Unverified)).toBeVisible({ timeout: 6_000 });
+  await expect(page.getByText("raw/unknown.bin")).toBeVisible();
+  expect(await selectedSection(page)).toContain("未验证内容");
+
+  // The answer named the version the server holds, so it is the answer the page keeps: the version on
+  // screen is the new one, and the read is not repeated for a version the page already has.
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion);
+  // Two reads when the section switch is what carried the page onto the new version, and one more when the
+  // read had already gone out before the server filed it: either way the page reads the new report once and
+  // stops, rather than reading it for as long as the version keeps looking new to it.
+  const results = state.requests.filter((request) => request.operation === "results");
+  expect(results.length).toBeLessThanOrEqual(4);
+  expect(results.at(-1).body.kind).toBe("Unverified");
+});
+
+test("an answer for a report version the server has already replaced is refused, and the newer one stays", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The reader opens the unverified section, and that read is held while the server files the new report.
+  // The page then learns the new version through its own recheck, so the answer still on its way is about
+  // the report the server has replaced: an older generation of the same task.
+  const reads = holdReads(state);
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect.poll(() => reads.kinds().includes("Unverified"), { timeout: 6_000 }).toBe(true);
+  state.publish();
+  await page.getByRole("button", { name: "重新核对" }).click();
+  await expect(page.getByText(/服务器已更新结果版本，正在读取新版本/)).toBeVisible({ timeout: 15_000 });
+  await reads.releaseAll();
+
+  // The superseded answer is refused rather than put on screen, the page reads the report the server holds
+  // now, and what it ends on is that report: the status names it and the export writes it.
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion, { timeout: 8_000 });
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled({ timeout: 8_000 });
+  await expect(page.getByText(noteOf.Unverified)).toBeVisible();
+  await expect(page.getByText("raw/unknown.bin")).toBeVisible();
+  expect(await selectedSection(page)).toContain("未验证内容");
+  await page.getByRole("button", { name: "导出计划" }).click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(secondVersion);
+  expect(exported.body.plan_digest).toBe(secondDigest);
+  // Reading the new report is one more read, and the refusal itself does not become a read of its own.
+  const results = state.requests.filter((request) => request.operation === "results");
+  expect(results.length).toBeLessThanOrEqual(4);
+});
+
+test("a read that fails is stated as an error and is not retried in a loop", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The server refuses the read — a denied read is a failure the page states, never one it hides — and the
+  // page must not answer that by reading again and again: the count stays bounded and the error is on
+  // screen for the reader to act on.
+  state.failure = { results: { status: 403, code: "dedup_forbidden", message: "没有读取该资源库查重结果的权限。" } };
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect(page.getByText("没有读取该资源库查重结果的权限。")).toBeVisible({ timeout: 6_000 });
+  await page.waitForTimeout(900);
+  const results = state.requests.filter((request) => request.operation === "results");
+  expect(results.length).toBeLessThanOrEqual(3);
+  await expect(page.getByText("没有读取该资源库查重结果的权限。")).toBeVisible();
+});

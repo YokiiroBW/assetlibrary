@@ -31,17 +31,32 @@ export function sliceIdentity(
 }
 
 /**
- * Whether a version the server named is later than the one the page is holding. Versions are the task's
- * identity and its generation, and a generation only ever moves forward for a task, so the number after
- * the last colon is the whole comparison. A version that cannot be read that way is taken as later, which
- * keeps a name the page does not understand from freezing it on an older one.
+ * The task a version belongs to, and the generation within it. A version is the server's own name for a
+ * report: the task's identity, then the generation that task has reached, so a comparison is only
+ * meaningful inside one task and a number taken across two of them means nothing.
+ */
+function parts(version: string): { task: string; generation: number } {
+  const colon = version.lastIndexOf(":");
+  const generation = Number.parseInt(version.slice(colon + 1), 10);
+  return { task: colon < 0 ? "" : version.slice(0, colon), generation };
+}
+
+/**
+ * Whether a version the server named is at least as new as the one the page is holding, which is what
+ * decides whether an answer may be written: a report only moves forward within a task, so an answer for a
+ * later generation is the newer report and is taken, and an answer for an earlier one is the superseded
+ * report and is refused. Two names for different tasks are not comparable at all — a generation is only
+ * ordered inside the task that owns it — so they are compared as their task ids are: a name that differs
+ * from the held one in its task is taken as later, which keeps a name the page does not understand from
+ * freezing it on an older report.
  */
 export function newerThan(current: string | null, next: string): boolean {
   if (current === null || current === next) return true;
-  const held = Number.parseInt(current.slice(current.lastIndexOf(":") + 1), 10);
-  const answered = Number.parseInt(next.slice(next.lastIndexOf(":") + 1), 10);
-  if (Number.isNaN(held) || Number.isNaN(answered)) return true;
-  return answered >= held;
+  const held = parts(current);
+  const answered = parts(next);
+  if (held.task !== answered.task) return true;
+  if (Number.isNaN(held.generation) || Number.isNaN(answered.generation)) return true;
+  return answered.generation >= held.generation;
 }
 
 /**
