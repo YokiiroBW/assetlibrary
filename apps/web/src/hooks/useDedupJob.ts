@@ -81,6 +81,15 @@ export function useDedupJob(
   const failedSlice = useRef<string | null>(null);
   /** Consecutive recoveries the controller has made without the reader's answer reaching the screen. */
   const recovery = useRef(0);
+  /** The answer the page last served, and the reader's goal that was being served, for the budget's reset. */
+  const served = useRef<string | null>(null);
+  const readerGoal = useRef<string | null>(null);
+  /**
+   * The slice the reader last asked for. Their selection changing is the one thing that counts as a new
+   * goal, so the recovery budget is made whole by a real change of what is wanted rather than by an effect
+   * that re-ran for the same want — an effect re-run is not the reader asking again.
+   */
+  const lastWanted = useRef<string | null>(null);
   const exportedReceipt = useRef(onExported);
   exportedReceipt.current = onExported;
   useEffect(() => {
@@ -93,6 +102,9 @@ export function useDedupJob(
     pending.current = null;
     failedSlice.current = null;
     recovery.current = 0;
+    served.current = null;
+    readerGoal.current = null;
+    lastWanted.current = null;
     setGroupKey(null);
     // The version belongs to the library that is open, so it is dropped with the rest of that library's
     // state: a version read for one library must never be exported against another.
@@ -119,6 +131,8 @@ export function useDedupJob(
     pending,
     failed: failedSlice,
     recovery,
+    served,
+    readerGoal,
     liveVersion,
     readSlice,
     readVersion,
@@ -214,6 +228,14 @@ export function useDedupJob(
     // The reader's want is now on its way to being served, which is what stops the read that ends from
     // recovering the same want a second time.
     pending.current = sliceIdentity(libraryId, job.task_id, section, groupKey);
+    // A want that differs from the one the reader last asked for is their selection changing, and that is
+    // what a new goal is: it retires the goal being served, so the read that follows is dispatched for a
+    // goal the controller is not serving yet and gets the whole budget back. An effect that re-ran for the
+    // same want leaves the goal in place, so its read spends the budget rather than restoring it.
+    if (lastWanted.current !== wantedSlice) {
+      lastWanted.current = wantedSlice;
+      readerGoal.current = null;
+    }
     void load(job.task_id, section, groupKey, null, false);
   }, [libraryId, wantedSlice, reportVersion, revision, load, section, groupKey]);
 

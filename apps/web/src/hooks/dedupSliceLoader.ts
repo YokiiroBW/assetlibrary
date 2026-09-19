@@ -39,8 +39,19 @@ export interface LoadContext {
   readonly taken: MutableRefObject<string | null>;
   /** The slice whose read failed, so a failure is stated rather than retried the moment it is stated. */
   readonly failed: MutableRefObject<string | null>;
-  /** Consecutive recoveries the controller has made, so the recovery itself stays bounded. */
+  /**
+   * Consecutive recoveries the controller has made, so the recovery itself stays bounded. Only progress
+   * resets it — an answer written for the slice the reader wants, at the version the page holds — because
+   * a refused answer, a failure and a cancelled read are all reads that ended without serving the reader.
+   */
   readonly recovery: MutableRefObject<number>;
+  /**
+   * The slice and version of the answer the page last put on screen, and the reader's goal that was being
+   * served when it did. A read dispatched for a goal the served answer does not already cover is the
+   * reader asking for something new, and that is the other thing that makes the budget whole again.
+   */
+  readonly served: MutableRefObject<string | null>;
+  readonly readerGoal: MutableRefObject<string | null>;
   /** The slice the reader wants and the wire has not served yet, if a read is on its way to serve it. */
   readonly pending: MutableRefObject<string | null>;
   readonly setState: (update: (previous: DedupView) => DedupView) => void;
@@ -90,6 +101,8 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
     taken,
     failed,
     recovery,
+    served,
+    readerGoal,
     pending,
     setState,
     setReportVersion,
@@ -144,6 +157,15 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
       activeLoad.current = requestKey;
       reading.current = asked;
       if (!more) failed.current = null;
+      // A goal the controller has not been serving yet is the reader asking for something new — they
+      // selected another section, another group, or a version the page does not hold — and a new goal gets
+      // the whole budget. A read for a goal already being served is not a new goal, whether the effect
+      // re-ran for it or the read that ended is recovering it, so it spends the budget instead of resetting
+      // it. That is what makes consecutive refusals actually exhaust the budget.
+      if (!more && readerGoal.current !== asked) {
+        recovery.current = 0;
+        readerGoal.current = asked;
+      }
       // The read that holds the wire, recorded per request: the read it displaced can then tell that it was
       // displaced — and that the read which took its place is the one that will serve the reader — instead
       // of reading a flag another request may have written.
@@ -182,7 +204,9 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         // page keeps the newer report it has; an answer that names a newer one — a recheck another reader or
         // this page's own recheck has filed — is the report the server holds now and is taken.
         const answered = page.analysis_version === "" ? (liveVersion.current ?? "") : page.analysis_version;
-        if (liveVersion.current !== null && !newerThan(liveVersion.current, answered)) return;
+        if (liveVersion.current !== null && !newerThan(liveVersion.current, answered)) {
+          return;
+        }
         // The record is the switch the read effect compares against, so it is built the same way: the task
         // and the version the answer belongs to, then the section and the open group.
         readSlice.current = sliceKey(libraryId, taskId, answered, kind, groupKey);
@@ -199,6 +223,13 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         }));
         if (!more && answered !== "")
           setReportVersion((previous) => (newerThan(previous, answered) ? answered : previous));
+        // The reader's answer is on screen: this read served the goal it was made for, so the budget is whole
+        // again. This is the only progress that resets it — a refusal, a failure and a cancellation all end
+        // without reaching this line, and none of them may stand in for progress.
+        if (!more && asked === nowWanted && readerGoal.current === asked) {
+          served.current = `${asked}\u0000${answered}`;
+          recovery.current = 0;
+        }
       } catch (error: unknown) {
         if (isAbort(error)) return;
         failedRead = true;
@@ -224,9 +255,13 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
         // A read that ended without putting the reader's answer on screen may recover, and the budget is what
         // bounds it: recovering once is what reads the version the server filed when the answer in hand was
         // refused as superseded, and the budget is what stops the refusal that follows — an answer the page
-        // refuses is not progress, so recovering again would repeat it at wire speed. Past the budget the page
-        // keeps the state the refusal left: the error a failed read states, or the report it already holds.
-        if (recovery.current >= maxRecoveries) return;
+        // refuses is not progress, so recovering again would repeat it at wire speed. The budget is spent by
+        // every one of these endings and is only made whole by progress or by the reader asking for something
+        // new, so consecutive refusals exhaust it. Past it the page keeps the state the refusal left: the error
+        // a failed read states, or the report it already holds, and the reader's next action reads again.
+        if (recovery.current >= maxRecoveries) {
+          return;
+        }
         const job = state.current.job;
         if (job === null || !job.report_available) return;
         const nowWanted = sliceIdentity(libraryId, job.task_id, liveSection.current, liveGroup.current);
@@ -238,13 +273,7 @@ export function useSliceLoader(context: LoadContext): LoadSlice {
           readSlice.current ===
             sliceKey(libraryId, job.task_id, readVersion.current ?? "", liveSection.current, liveGroup.current) &&
           readVersion.current === (liveVersion.current ?? "");
-        if (onScreen) {
-          recovery.current = 0;
-          return;
-        }
-        // A read that reached the server and answered a slice the reader has left is progress of its own
-        // kind — the server is answering — so the budget is whole again for whatever the reader wants now.
-        recovery.current = 0;
+        if (onScreen) return;
         // A read for that slice is already on the wire, so it will answer it and this one is not repeated.
         if (reading.current === nowWanted) return;
         recovery.current += 1;

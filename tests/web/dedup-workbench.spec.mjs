@@ -965,3 +965,108 @@ test("a read that fails is stated as an error and is not retried in a loop", asy
   expect(results.length).toBeLessThanOrEqual(3);
   await expect(page.getByText("没有读取该资源库查重结果的权限。")).toBeVisible();
 });
+
+// The recovery budget itself. A read the server answers with a report the page has already replaced is a
+// read that made no progress, and no progress must not restore the budget — otherwise consecutive refusals
+// can never exhaust it and the page reads at wire speed for as long as the server keeps answering with the
+// old report. The budget is spent down to nothing, the old report never reaches the screen, and the reader's
+// own next selection is what gets a fresh budget.
+// The recovery budget itself. A read the server answers with a report the page has already replaced is a
+// read that made no progress, and no progress must not restore the budget — otherwise consecutive refusals
+// can never exhaust it and the page reads at wire speed for as long as the server keeps answering with the
+// old report. The budget is spent down to nothing, the old report never reaches the screen, and the reader's
+// own next selection is what gets a fresh budget.
+test("consecutive answers for a replaced report exhaust the recovery budget and do not reach the screen", async ({
+  page,
+}) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+
+  // The server files the new report and the page reads it, so what it holds is the new version.
+  state.publish();
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion, { timeout: 8_000 });
+  await expect(page.getByText(noteOf.Unverified)).toBeVisible();
+
+  // From here the server answers every read with the report it has already replaced, which is a read that can
+  // never be applied: the answer is refused, the read that ended recovers, and that recovery is what the
+  // budget has to bound.
+  state.beforeAnswer = ({ operation }) =>
+    operation === "results"
+      ? {
+          page: {
+            ...state.page,
+            analysis_version: firstVersion,
+            summary: { ...state.page.summary, analysis_version: firstVersion, plan_digest: firstDigest },
+          },
+        }
+      : undefined;
+  const before = state.requests.filter((request) => request.operation === "results").length;
+  const reads = () => state.requests.filter((request) => request.operation === "results").length - before;
+  await page.getByRole("tab", { name: /重复组/ }).click();
+  // The first read plus the whole recovery budget is all this goal may spend, and the last of them is a
+  // recovery the budget then refuses to make again, so this is where the count settles.
+  await expect.poll(reads, { timeout: 6_000 }).toBe(3);
+  // And then it stops: the count is taken again after a wait several times longer than the reads themselves,
+  // so a storm would show up as growth. The budget is what makes this a fixed number rather than a race.
+  await page.waitForTimeout(1_200);
+  expect(reads()).toBe(3);
+
+  // The old report was refused rather than put on screen: the page still holds and exports the new version,
+  // and what is on screen is the section the reader selected, not the section of the refused answer.
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion);
+  await expect(page.getByRole("button", { name: "导出计划" })).toBeEnabled();
+  await expect(page.getByText(noteOf.Unverified)).toHaveCount(0);
+  await expect(page.getByText(noteOf.ByteDuplicateGroup)).toBeVisible();
+  expect(await selectedSection(page)).toContain("重复组");
+  await page.getByRole("button", { name: "导出计划" }).click();
+  const exported = state.requests.filter((request) => request.operation === "export").at(-1);
+  expect(exported.body.analysis_version).toBe(secondVersion);
+  expect(exported.body.plan_digest).toBe(secondDigest);
+});
+
+test("a section the reader selects after the budget is spent is read again with a fresh budget", async ({ page }) => {
+  const state = await mockDedup(page, {
+    job: dedupJob({ state: "succeeded", report_available: true, can_cancel: false }),
+  });
+  await startAnalysis(page);
+  await expect(page.getByRole("button", { name: /2 个文件/ })).toBeVisible({ timeout: 6_000 });
+  state.publish();
+  await page.getByRole("tab", { name: /未验证内容/ }).click();
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion, { timeout: 8_000 });
+
+  // The budget is spent on one section, and the reader then selects another one. Their selection changing is
+  // the new goal, so that section is read — the page is not left with a spent budget and no way forward.
+  state.beforeAnswer = ({ operation }) =>
+    operation === "results"
+      ? {
+          page: {
+            ...state.page,
+            analysis_version: firstVersion,
+            summary: { ...state.page.summary, analysis_version: firstVersion, plan_digest: firstDigest },
+          },
+        }
+      : undefined;
+  const before = state.requests.filter((request) => request.operation === "results").length;
+  const reads = () => state.requests.filter((request) => request.operation === "results").length - before;
+  await page.getByRole("tab", { name: /重复组/ }).click();
+  await expect.poll(reads, { timeout: 6_000 }).toBe(3);
+  await page.waitForTimeout(600);
+  expect(reads()).toBe(3);
+
+  // The next section is a new goal, so its read is made even though the budget was spent on the one before.
+  // The server answers it with the report the page holds, so that section and its content go on screen, and
+  // serving it does not turn into a second read of the same goal.
+  state.beforeAnswer = null;
+  const served = state.requests.filter((request) => request.operation === "results").length;
+  await page.getByRole("tab", { name: /本次不可读/ }).click();
+  await expect(page.getByText(noteOf.Unreadable)).toBeVisible({ timeout: 8_000 });
+  const asked = state.requests.filter((request) => request.operation === "results").slice(served);
+  expect(asked.at(-1).body.kind).toBe("Unreadable");
+  expect(asked.length).toBeLessThanOrEqual(3);
+  expect(await selectedSection(page)).toContain("本次不可读");
+  await expect(page.locator(".dedup-status")).toContainText(secondVersion);
+});
