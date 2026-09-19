@@ -41,10 +41,22 @@ public sealed class IsolatedMediaPackageInspector(
                 cancellationToken).ConfigureAwait(false);
             return new MediaPackageInspectionOutcome(
                 scope,
-                load?.Files ?? [],
-                load?.VerifiedBytes ?? 0,
-                0,
+                load.Files,
+                load.VerifiedBytes,
+                load.EnumeratedEntries,
                 issues);
+        }
+        catch (InspectionRefusal refusal)
+        {
+            // A package-level refusal is a verdict, never an exception: it is recorded in the sink and
+            // reported with the reason the ordered preflight reached. A refusal without a code already
+            // recorded its own reason in the sink.
+            if (refusal.Code is { } code)
+            {
+                issues.Record(code, refusal.Location);
+            }
+
+            return new MediaPackageInspectionOutcome(scope, [], 0, refusal.EnumeratedEntries, issues);
         }
         catch (OperationCanceledException)
         {
@@ -66,10 +78,11 @@ public sealed class IsolatedMediaPackageInspector(
             or NotSupportedException;
 
     /// <summary>
-    /// Returns the verified payload set, or null when the package was already refused and the reason
-    /// has been recorded in <paramref name="issues"/>.
+    /// Returns the verified payload set, or throws <see cref="InspectionRefusal"/> with the named reason
+    /// when the package is refused. The refusal carries the entries already consumed, so the reported
+    /// observation stays truthful about what the preflight really did.
     /// </summary>
-    private async ValueTask<PackageLoad?> InspectCoreAsync(
+    private async ValueTask<PackageLoad> InspectCoreAsync(
         MediaPackageInspectionScope scope,
         MediaPackageManifest manifest,
         MediaPackageInspectionLimits limits,
@@ -79,23 +92,20 @@ public sealed class IsolatedMediaPackageInspector(
         var rootFault = TryOpenRoots(scope, out var stagingBoundary, out var targetBoundary);
         if (rootFault is not null)
         {
-            return Refuse(issues, rootFault, "scope");
+            throw new InspectionRefusal(rootFault, "scope");
         }
 
         if (stagingBoundary!.Overlaps(stagingBoundary.CanonicalRoot, targetBoundary!.CanonicalRoot))
         {
-            return Refuse(issues, "unsafe_path", "scope");
+            throw new InspectionRefusal("unsafe_path", "scope");
         }
 
         // The package must be one directory directly inside the trusted staging root: the manifest can
-        // never widen that to an arbitrary path.
-        if (!TryObservePackageRoot(
-                stagingBoundary,
-                manifest,
-                out var packageRoot,
-                out var packageFault))
+        // never widen that to an arbitrary path. A missing package root and an unavailable one are
+        // different verdicts, because absence is observed through the trusted parent.
+        if (!TryObservePackageRoot(stagingBoundary, manifest, out var packageRoot, out var packageFault))
         {
-            return Refuse(issues, packageFault, manifest.StagingRef);
+            throw new InspectionRefusal(packageFault, manifest.StagingRef);
         }
 
         var targetName = MediaPackagePolicy.TargetDirectoryName(manifest);
@@ -105,14 +115,22 @@ public sealed class IsolatedMediaPackageInspector(
                 out var targetDirectory,
                 out var targetFault))
         {
-            return Refuse(issues, MediaPackagePathBoundary.FaultCode(targetFault), targetName);
+            throw new InspectionRefusal(MediaPackagePathBoundary.FaultCode(targetFault), targetName);
         }
 
-        if (targetBoundary.TryObserve(targetDirectory, out _, out _))
+        // Any existing object at the target name is a conflict, whether it is a file, a directory or a
+        // link. An object that cannot be observed at all is unsafe rather than absent: a refusal is never
+        // read as an absence.
+        if (targetBoundary.TryObserve(targetDirectory, out _, out var targetObserveFault))
         {
-            // Any existing object at the target name is a conflict. Contents are never compared and
-            // never reused.
-            return Refuse(issues, "target_exists", targetName);
+            throw new InspectionRefusal("target_exists", targetName);
+        }
+
+        if (targetObserveFault != MediaPackagePathFault.Missing)
+        {
+            throw new InspectionRefusal(
+                MediaPackagePathBoundary.FaultCode(targetObserveFault),
+                targetName);
         }
 
         // Target absence is only acceptable when the trusted parent root really exists: absence is
@@ -120,8 +138,7 @@ public sealed class IsolatedMediaPackageInspector(
         if (!targetBoundary.TryObserve(targetBoundary.CanonicalRoot, out _, out var parentFault)
             || parentFault != MediaPackagePathFault.None)
         {
-            return Refuse(
-                issues,
+            throw new InspectionRefusal(
                 parentFault == MediaPackagePathFault.None
                     ? "target_unavailable"
                     : MediaPackagePathBoundary.FaultReason(parentFault, parentFault, "target_unavailable"),
@@ -134,17 +151,19 @@ public sealed class IsolatedMediaPackageInspector(
             limits,
             issues,
             stagingBoundary,
+            targetBoundary,
             packageRoot,
             targetDirectory,
             cancellationToken).ConfigureAwait(false);
     }
 
-    private async ValueTask<PackageLoad?> LoadAsync(
+    private async ValueTask<PackageLoad> LoadAsync(
         MediaPackageInspectionScope scope,
         MediaPackageManifest manifest,
         MediaPackageInspectionLimits limits,
         MediaPackageIssueSink issues,
         MediaPackagePathBoundary stagingBoundary,
+        MediaPackagePathBoundary targetBoundary,
         string packageRoot,
         string targetDirectory,
         CancellationToken cancellationToken)
@@ -157,7 +176,7 @@ public sealed class IsolatedMediaPackageInspector(
                 issues,
                 cancellationToken).ConfigureAwait(false))
         {
-            return null;
+            throw new InspectionRefusal("insufficient_space", "target");
         }
 
         var listing = stagingBoundary.Enumerate(packageRoot, issues, cancellationToken);
@@ -168,7 +187,7 @@ public sealed class IsolatedMediaPackageInspector(
                 listing.Directories,
                 issues))
         {
-            return null;
+            throw new InspectionRefusal(null, null, listing.EnumeratedEntries);
         }
 
         var observed = await ReadDeclaredFilesAsync(
@@ -178,36 +197,45 @@ public sealed class IsolatedMediaPackageInspector(
             issues,
             stagingBoundary,
             packageRoot,
+            listing.EnumeratedEntries,
             cancellationToken).ConfigureAwait(false);
-        if (observed is null)
-        {
-            return null;
-        }
 
         // A second listing proves the final file set: a file added while the bytes were being read is a
         // change, not a detail to ignore. Directories are compared too, so an empty directory cannot
         // appear unnoticed.
         var confirm = stagingBoundary.Enumerate(packageRoot, issues, cancellationToken);
-        if (!SameListing(listing, confirm))
+        if (issues.HasIssues || !SameListing(listing, confirm))
         {
-            return Refuse(issues, "source_changed", manifest.StagingRef);
+            throw new InspectionRefusal("source_changed", manifest.StagingRef, confirm.EnumeratedEntries);
+        }
+
+        // Every file verified earlier is re-observed after the last read, so a file that changed while a
+        // later file was being read cannot pass on the strength of its own earlier stamp.
+        ReverifyObserved(stagingBoundary, packageRoot, observed.Files, issues);
+
+        // The target must still be absent: a concurrent publication at the same name is a conflict, not
+        // something this preflight may ignore.
+        if (targetBoundary.TryObserve(targetDirectory, out _, out _))
+        {
+            throw new InspectionRefusal("target_exists", targetDirectory, confirm.EnumeratedEntries);
         }
 
         if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
         {
-            return Refuse(issues, "scope_changed", null);
+            throw new InspectionRefusal("scope_changed", null, confirm.EnumeratedEntries);
         }
 
-        return observed;
+        return observed with { EnumeratedEntries = confirm.EnumeratedEntries };
     }
 
-    private async ValueTask<PackageLoad?> ReadDeclaredFilesAsync(
+    private async ValueTask<PackageLoad> ReadDeclaredFilesAsync(
         MediaPackageInspectionScope scope,
         MediaPackageManifest manifest,
         MediaPackageInspectionLimits limits,
         MediaPackageIssueSink issues,
         MediaPackagePathBoundary stagingBoundary,
         string packageRoot,
+        int enumeratedEntries,
         CancellationToken cancellationToken)
     {
         var observed = new List<MediaPackageObservedFile>(manifest.Files.Count);
@@ -217,13 +245,13 @@ public sealed class IsolatedMediaPackageInspector(
             cancellationToken.ThrowIfCancellationRequested();
             if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
             {
-                return Refuse(issues, "scope_changed", file.Path);
+                throw new InspectionRefusal("scope_changed", file.Path, enumeratedEntries);
             }
 
             var remaining = limits.MaximumReadByteCount - verifiedBytes;
-            if (remaining <= 0)
+            if (remaining <= 0 || file.SizeBytes > remaining)
             {
-                return Refuse(issues, "budget_exceeded", file.Path);
+                throw new InspectionRefusal("budget_exceeded", file.Path, enumeratedEntries);
             }
 
             var facts = await ReadAndRecheckAsync(
@@ -232,79 +260,88 @@ public sealed class IsolatedMediaPackageInspector(
                 file,
                 remaining,
                 issues,
+                enumeratedEntries,
                 cancellationToken).ConfigureAwait(false);
-            if (facts is null)
-            {
-                return null;
-            }
 
             if (facts.Length != file.SizeBytes)
             {
-                return Refuse(issues, "size_mismatch", file.Path);
+                throw new InspectionRefusal("size_mismatch", file.Path, enumeratedEntries);
             }
 
             if (facts.Sha256 != file.Sha256)
             {
-                return Refuse(issues, "hash_mismatch", file.Path);
+                throw new InspectionRefusal("hash_mismatch", file.Path, enumeratedEntries);
             }
 
             verifiedBytes += facts.Length;
             observed.Add(new MediaPackageObservedFile(file.Path, file.Kind, file.Cid, facts));
         }
 
-        return new PackageLoad(observed, verifiedBytes);
+        return new PackageLoad(observed, verifiedBytes, enumeratedEntries);
     }
 
     /// <summary>
     /// Resolves, observes, re-observes and hashes one declared file. The stamp taken before and after the
-    /// read is what makes a quiet substitution during the read a verdict instead of a silent pass.
+    /// read is what makes a quiet substitution during the read a verdict instead of a silent pass, and the
+    /// declared length is compared with the remaining budget before a single byte is read.
     /// </summary>
-    private async ValueTask<PayloadFacts?> ReadAndRecheckAsync(
+    private async ValueTask<PayloadFacts> ReadAndRecheckAsync(
         MediaPackagePathBoundary stagingBoundary,
         string packageRoot,
         MediaPackageFileEntry file,
         long remaining,
         MediaPackageIssueSink issues,
+        int enumeratedEntries,
         CancellationToken cancellationToken)
     {
-        var relative = file.Path.Replace('/', Path.DirectorySeparatorChar);
-        var resolved = stagingBoundary.TryResolveChild(
-            packageRoot,
-            relative,
-            out var absolutePath,
-            out var resolveFault);
-        if (!resolved)
+        if (!stagingBoundary.TryResolveChild(
+                packageRoot,
+                file.Path,
+                out var absolutePath,
+                out var resolveFault))
         {
-            issues.Record(MediaPackagePathBoundary.FaultCode(resolveFault), file.Path);
-            return null;
+            throw new InspectionRefusal(
+                MediaPackagePathBoundary.FaultCode(resolveFault),
+                file.Path,
+                enumeratedEntries);
         }
 
         if (!stagingBoundary.TryObserve(absolutePath, out var length, out var observeFault))
         {
-            issues.Record(
+            throw new InspectionRefusal(
                 MediaPackagePathBoundary.FaultReason(
                     MediaPackagePathFault.None,
                     observeFault,
                     "source_missing"),
-                file.Path);
-            return null;
+                file.Path,
+                enumeratedEntries);
         }
 
         if (!stagingBoundary.Contains(absolutePath, packageRoot))
         {
-            issues.Record("unsafe_path", file.Path);
-            return null;
+            throw new InspectionRefusal("unsafe_path", file.Path, enumeratedEntries);
         }
 
         var before = MediaPackagePathBoundary.Stamp(absolutePath);
-        var facts = await fileHasher
-            .HashAsync(absolutePath, remaining, cancellationToken)
-            .ConfigureAwait(false);
+        PayloadFacts facts;
+        try
+        {
+            facts = await fileHasher
+                .HashAsync(absolutePath, remaining, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (MediaPackageBudgetExceededException)
+        {
+            // The real file outgrew the remaining read budget while it was being read: that is a budget
+            // verdict, not an environment failure.
+            throw new InspectionRefusal("budget_exceeded", file.Path, enumeratedEntries);
+        }
+
         var after = MediaPackagePathBoundary.Stamp(absolutePath);
         if (after != before || length != facts.Length)
         {
             issues.Record("source_changed", file.Path);
-            return null;
+            throw new InspectionRefusal(null, null, enumeratedEntries);
         }
 
         return facts;
@@ -333,10 +370,11 @@ public sealed class IsolatedMediaPackageInspector(
             return true;
         }
 
-        faultCode = MediaPackagePathBoundary.FaultCode(
-            observeFault == MediaPackagePathFault.None
-                ? MediaPackagePathFault.Missing
-                : observeFault);
+        // A package root that is missing and one that cannot be observed are different verdicts: the
+        // second is an environment refusal, never an absence.
+        faultCode = observeFault == MediaPackagePathFault.None
+            ? "source_missing"
+            : MediaPackagePathBoundary.FaultCode(observeFault);
         return false;
     }
 
@@ -369,38 +407,11 @@ public sealed class IsolatedMediaPackageInspector(
             : MediaPackagePathBoundary.FaultCode(fault);
     }
 
-    private static PackageLoad? Refuse(
-        MediaPackageIssueSink issues,
-        string code,
-        string? location)
-    {
-        issues.Record(code, location);
-        return null;
-    }
-
-    private static long DeclaredByteCount(MediaPackageManifest manifest)
-    {
-        long declaredBytes = 0;
-        foreach (var file in manifest.Files)
-        {
-            declaredBytes = declaredBytes > long.MaxValue - file.SizeBytes
-                ? long.MaxValue
-                : declaredBytes + file.SizeBytes;
-        }
-
-        return declaredBytes;
-    }
-
-    private static bool SameListing(
-        MediaPackagePathBoundary.PackageListing left,
-        MediaPackagePathBoundary.PackageListing right)
-    {
-        static string[] Sorted(IReadOnlyList<string> values) =>
-            [.. values.OrderBy(value => value, StringComparer.Ordinal)];
-        return Sorted(left.Files).SequenceEqual(Sorted(right.Files))
-            && Sorted(left.Directories).SequenceEqual(Sorted(right.Directories));
-    }
-
+    /// <summary>
+    /// Decides whether the target volume can still hold the declared payload plus the mandatory
+    /// headroom. It records nothing itself: the caller names the refusal so the same decision cannot
+    /// produce two different codes.
+    /// </summary>
     private async ValueTask<bool> HasTargetCapacityAsync(
         string targetDirectory,
         long declaredBytes,
@@ -408,6 +419,7 @@ public sealed class IsolatedMediaPackageInspector(
         MediaPackageIssueSink issues,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(issues);
         long? available;
         try
         {
@@ -440,9 +452,92 @@ public sealed class IsolatedMediaPackageInspector(
     }
 
     /// <summary>
-    /// The verified payload set of one accepted package.
+    /// Re-observes every file whose bytes were already verified, so a change to an earlier file while a
+    /// later one was being read becomes <c>source_changed</c> instead of a silent pass.
+    /// </summary>
+    private static void ReverifyObserved(
+        MediaPackagePathBoundary stagingBoundary,
+        string packageRoot,
+        IReadOnlyList<MediaPackageObservedFile> observed,
+        MediaPackageIssueSink issues)
+    {
+        foreach (var file in observed)
+        {
+            if (!stagingBoundary.TryResolveChild(
+                    packageRoot,
+                    file.Path,
+                    out var absolutePath,
+                    out var resolveFault))
+            {
+                throw new InspectionRefusal(MediaPackagePathBoundary.FaultCode(resolveFault), file.Path);
+            }
+
+            if (!stagingBoundary.TryObserve(absolutePath, out var length, out var observeFault))
+            {
+                throw new InspectionRefusal(
+                    MediaPackagePathBoundary.FaultReason(
+                        MediaPackagePathFault.None,
+                        observeFault,
+                        "source_changed"),
+                    file.Path);
+            }
+
+            if (length != file.Payload.Length)
+            {
+                issues.Record("source_changed", file.Path);
+                throw new InspectionRefusal(null, null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The verified payload set of one accepted package, with the entries the walk really consumed.
     /// </summary>
     private sealed record PackageLoad(
         IReadOnlyList<MediaPackageObservedFile> Files,
-        long VerifiedBytes);
+        long VerifiedBytes,
+        int EnumeratedEntries);
+
+    private static long DeclaredByteCount(MediaPackageManifest manifest)
+    {
+        long declaredBytes = 0;
+        foreach (var file in manifest.Files)
+        {
+            declaredBytes = declaredBytes > long.MaxValue - file.SizeBytes
+                ? long.MaxValue
+                : declaredBytes + file.SizeBytes;
+        }
+
+        return declaredBytes;
+    }
+
+    /// <summary>
+    /// Order-independent comparison of two listings, so the walk's order is never part of the verdict.
+    /// </summary>
+    private static bool SameListing(
+        MediaPackagePathBoundary.PackageListing left,
+        MediaPackagePathBoundary.PackageListing right)
+    {
+        static string[] Sorted(IReadOnlyList<string> values) =>
+            [.. values.OrderBy(value => value, StringComparer.Ordinal)];
+        return Sorted(left.Files).SequenceEqual(Sorted(right.Files))
+            && Sorted(left.Directories).SequenceEqual(Sorted(right.Directories));
+    }
+
+    /// <summary>
+    /// A named package-level refusal. It exists so the ordered preflight can stop at the first verdict
+    /// without losing which verdict it was, and without turning a verdict into a thrown framework
+    /// exception. A null <see cref="Code"/> means the reason is already in the issue sink.
+    /// </summary>
+    private sealed class InspectionRefusal(
+        string? code,
+        string? location,
+        int enumeratedEntries = 0) : Exception
+    {
+        public string? Code { get; } = code;
+
+        public string? Location { get; } = location;
+
+        public int EnumeratedEntries { get; } = enumeratedEntries;
+    }
 }

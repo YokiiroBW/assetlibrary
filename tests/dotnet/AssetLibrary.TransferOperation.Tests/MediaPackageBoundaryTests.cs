@@ -166,10 +166,80 @@ public sealed class MediaPackageBoundaryTests
         Assert.IsTrue(
             boundary!.TryResolveChild(
                 sandbox.LibraryRoot,
-                Path.Combine("pkg", "child.nfo"),
+                "pkg/child.nfo",
                 out var resolved,
                 out _));
         Assert.IsTrue(boundary.Contains(resolved, sandbox.LibraryRoot));
+    }
+
+    [TestMethod]
+    public void BoundaryAcceptsPosixNestedPathsAndRefusesEveryOtherSeparator()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var root = new CanonicalLibraryRoot(sandbox.LibraryRoot, RootPathComparison.CaseInsensitive);
+        Assert.IsTrue(MediaPackagePathBoundary.TryOpen(
+            sandbox.LibraryRoot,
+            root,
+            out var boundary,
+            out var fault), fault.ToString());
+
+        // The manifest vocabulary is POSIX: a nested path is resolved on every platform, and the
+        // resolved path stays contained in the trusted root.
+        Assert.IsTrue(
+            boundary!.TryResolveChild(
+                sandbox.LibraryRoot,
+                "Season 01/S01E01-cid-101.mp4",
+                out var nested,
+                out var nestedFault),
+            nestedFault.ToString());
+        Assert.IsTrue(boundary.Contains(nested, sandbox.LibraryRoot));
+
+        // A backslash is refused on every platform and a forward slash is refused on Windows, so the raw
+        // spelling stays the only accepted one while a POSIX platform keeps working.
+        Assert.IsFalse(
+            boundary.TryResolveChild(sandbox.LibraryRoot, "Season 01\\S01E01-cid-101.mp4", out _, out var backslashFault));
+        Assert.AreEqual(MediaPackagePathFault.Unsafe, backslashFault);
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.IsFalse(
+                boundary.TryResolveChild(sandbox.LibraryRoot, "Season 01/S01E01-cid-101.mp4/", out _, out _),
+                "A trailing separator is not part of a frozen file path.");
+        }
+    }
+
+    [TestMethod]
+    public void WindowsCanonicalRootIsNotRefusedForItsSeparator()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+
+        // The trusted root arrives in its canonical forward-slash form while the local path arrives in
+        // the platform-native form. Opening the boundary must accept that pair, and containment must
+        // still be decided in the canonical form: a normal Windows directory is never refused for its
+        // separator, and a sibling with a shared prefix is still outside.
+        var canonical = new CanonicalLibraryRoot(sandbox.LibraryRoot, RootPathComparison.CaseInsensitive);
+        Assert.IsTrue(
+            MediaPackagePathBoundary.TryOpen(
+                sandbox.LibraryRoot,
+                canonical,
+                out var boundary,
+                out var fault),
+            fault.ToString());
+        Assert.IsNotNull(boundary);
+        Assert.IsTrue(boundary.Contains(sandbox.LibraryRoot, canonical.Value));
+        Assert.IsTrue(boundary.Contains(Path.Combine(sandbox.LibraryRoot, "pkg"), canonical.Value));
+        Assert.IsTrue(boundary.Contains(sandbox.LibraryRoot, sandbox.LibraryRoot));
+        Assert.IsFalse(
+            boundary.Contains(
+                Path.Combine(Path.GetDirectoryName(sandbox.LibraryRoot)!, "library-sibling"),
+                canonical.Value));
+
+        // A root that names another directory is still refused.
+        Assert.IsFalse(
+            MediaPackagePathBoundary.TryOpen(
+                Path.Combine(sandbox.Root, "outside"),
+                canonical,
+                out _,
+                out _));
     }
 
     [TestMethod]

@@ -1,60 +1,52 @@
 {
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "TS-099",
-  "title": "资产成品包只读预检",
+  "title": "资产成品包只读预检（R1–R6 修复轮）",
   "milestone": "V0.1",
-  "status": "partial",
+  "status": "needs_validation",
   "owner": "dsh-agent",
   "branch": "work/ts-099",
   "worktree": "worktrees/TS-099/assetlibrary",
-  "commit": "",
-  "commit_note": "No local commit exists: this worktree's git metadata directory (projects/assetlibrary/.git/worktrees/assetlibrary5) is outside the session's writable workspace, so git add/commit are denied (index.lock: Permission denied). The full change set is delivered as .runtime/dsh-delivery/changes.patch, which passes git apply --check --cached against the base index and git apply --check --reverse against the working tree. The coordinator applies the patch and creates the commit.",
+  "base_commit": "e850966065ed7f3653770180a6accd922fd95db8",
+  "commit": "5e96662450f1bf4737faa7eb3cfead455f38e354",
+  "commit_note": "5e966624 is the coordinator's own commit of the first 29-file delivery; the coordinator's first validation of it returned changes_requested. This repair round's 15 files are delivered uncommitted: this worktree's git metadata (projects/assetlibrary/.git/worktrees/assetlibrary5) is outside the session's writable workspace, so git add/commit are denied (index.lock: Permission denied) and git writes were not retried. The change set is delivered as .runtime/dsh-delivery/changes.patch (197836 bytes, sha256 fbac87a23b1f66594e936117f8836abfb4cd10047b7d6861bd46321b8a6c28d1), verified to reproduce all 15 files byte-for-byte on top of the base commit with git apply --directory (verify-patch-reproduction.txt). The coordinator fixes the candidate and creates the commit.",
+  "coordinator_commit_required": true,
+  "ready_for_coordinator_commit": true,
   "changed_files": [
-    "services/core-server/Modules/OperationTrash/Contracts/MediaPackageContracts.cs",
-    "services/core-server/Modules/OperationTrash/Contracts/MediaPackageInspectionContracts.cs",
-    "services/core-server/Modules/OperationTrash/Domain/MediaPackagePolicy.cs",
-    "services/core-server/Modules/OperationTrash/Domain/MediaPackagePathPolicy.cs",
-    "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionPorts.cs",
     "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionLimits.cs",
+    "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionPorts.cs",
     "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionService.cs",
-    "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackageManifestReader.cs",
+    "services/core-server/Modules/OperationTrash/Contracts/MediaPackageInspectionContracts.cs",
+    "services/core-server/Modules/OperationTrash/Domain/MediaPackageLayoutPolicy.cs",
+    "services/core-server/Modules/OperationTrash/Domain/MediaPackagePolicy.cs",
+    "services/core-server/Modules/OperationTrash/Domain/MediaPackageShapePolicy.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/IsolatedMediaPackageInspector.cs",
-    "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackagePathBoundary.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackageFileHasher.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageSandbox.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageTestPorts.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageContractTests.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageInspectionTests.cs",
+    "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackageManifestReader.cs",
+    "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackagePathBoundary.cs",
     "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageBoundaryTests.cs",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageContractTests.cs",
     "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageFailureTests.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/README.md",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/semantics.md",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/schema.json",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/examples.json",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/negative-examples.json",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/manifest.json",
-    "docs/integrations/tianshu/media-package-preflight.md",
-    "docs/handoffs/TS-099.md",
-    ".codex/tasks/TS-099.md",
-    ".codex/handoffs/TS-099/summary.md",
-    ".codex/handoffs/TS-099/result.json",
-    ".codex/handoffs/TS-099/tests.md"
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageSandbox.cs"
   ],
+  "source_snapshot": ".runtime/dsh-delivery/source-snapshot.json",
   "changed_contracts": [],
   "tests": {
     "passed": 0,
     "failed": 0,
     "skipped": 0,
     "executed": false,
-    "authored": 43,
+    "authored": 64,
+    "authored_this_round": 22,
     "report": "tests.md",
-    "note": "dotnet test was never able to run: VSTest cannot reach its testhost because this sandbox denies the named pipe between them (90s timeout, log .runtime/dsh-delivery/logs/test-1.txt). Zero tests were executed; nothing here is a passing test."
+    "note": "No test was executed in this sandbox in either round. `dotnet test` cannot start: the VSTest testhost aborts with Win32Exception(5) 'access denied' inside Process.GetProcessHandle before a single test runs, and an earlier round additionally hit the 90s testhost named-pipe timeout. `dotnet format --verify-no-changes` fails the same way at NamedPipeClientStream.TryConnect. Nothing here is a passing test. Real evidence produced in this sandbox: Release build of both projects with 0 warnings and 0 errors under TreatWarningsAsErrors plus the full analyzer set; a 19/19 static self-check of the frozen negative and positive examples against an independent Python reading of the same frozen rules (.runtime/dsh-delivery/logs/static-selfcheck.txt); and byte-exact patch reproduction of all 15 delivered files (.runtime/dsh-delivery/logs/verify-patch-reproduction.txt)."
   },
   "risks": [
-    "43 authored tests have never been executed in this environment; regression risk is carried by the coordinator's re-verification on the fixed commit.",
-    "Static reparse-point refusal does not close hostile concurrent directory replacement (TOCTOU); real NAS semantics and power-loss durability are unverified.",
-    "contracts/media-package/candidate-v1 is a task fixture only (task_fixture_only), not a production publication contract; semantic changes there require fixture and vocabulary updates.",
-    "The private NuGet cache was seeded by a one-way copy from another task; it is only trusted because all 50 in-solution locked packages independently matched the lock contentHash and the .nupkg byte digest."
+    "Behavioural verification is incomplete: R1-R6 correctness rests on compile success, code review and an independent static self-check, not on an executed test run. The coordinator must run the standard restore/build/test/format gates on the fixed candidate.",
+    "Static reparse-point refusal plus before/after stamps plus a final set re-check narrows but does not close hostile concurrent directory replacement (TOCTOU); real NAS semantics and power-loss durability remain unverified (production_path_races).",
+    "The frozen fixtures are the only layout evidence: the multipart 'Season 01' directory name and the S01E{>=2 digits} episode width are pinned by the fixtures, so a future 'Season 02' contract change must extend MediaPackageLayoutPolicy explicitly.",
+    "MediaPackageShapePolicy.cs (548 lines) and IsolatedMediaPackageInspector.cs (543 lines) exceed the 400-line soft guideline; both are single-responsibility units authorised by the coordinator, with no multi-statement lines or blanket suppressions used to hide concentration.",
+    "contracts/media-package/candidate-v1 remains a task fixture only (task_fixture_only), not a production publication contract."
   ],
   "blocked_by": [],
   "recommended_merge_order": 1,
@@ -64,32 +56,32 @@
     "module": "OperationTrash",
     "dependency_direction_ok": true,
     "reused_existing_logic": [
-      "RelativeAssetPath for every manifest path after lexical refusal",
-      "LibraryId and CanonicalLibraryRoot for library identity and root anchoring",
-      "Sha256Digest for raw-byte request digest and streamed file digests",
-      "StorageAvailability and the existing volume-space observer semantics for target capacity",
-      "MediaPackagePathBoundary and MediaPackageFileHasher reused by the inspector instead of duplicating root anchoring or hashing"
+      "CanonicalLibraryRoot and RootPathComparison (LibraryStorage.Contracts) for the canonical trusted root and its comparison semantics, instead of a second root representation",
+      "MediaPackageIssueSink, MediaPackagePreflightCodes, MediaPackageUnverifiedFacts and MediaPackageInspectionLimits reused unchanged, so the frozen 22-code vocabulary, the 7 unverified facts and every budget ceiling stay single-owner",
+      "MediaPackagePathBoundary, MediaPackageFileHasher and MediaPackagePolicy reused by the inspector instead of duplicating root anchoring, hashing or verdict assembly",
+      "The test suite reuses the existing MediaPackageSandbox composition and fixture records rather than a parallel harness"
     ],
     "duplicated_logic": [],
     "cross_module_access": [
-      "LibraryStorage.Contracts (LibraryId, RelativeAssetPath, Sha256Digest) and TransferSync.Contracts (storage availability) are consumed as published read-only contracts only; no other module's Infrastructure or internal entity is referenced."
+      "LibraryStorage.Contracts (LibraryId, CanonicalLibraryRoot, RootPathComparison, StorageAvailability) and TransferSync.Contracts (Sha256Digest, PayloadFacts) are consumed as published read-only contracts only; no other module's Infrastructure or internal entity is referenced."
     ],
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [
-      "No root contract was modified. contracts/media-package/candidate-v1 was read only, byte-exact, as an authorised task input."
+      "No root contract was modified. contracts/media-package/candidate-v1 was never written; the tests now read the byte-exact copies committed under tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/, whose LF-normalized SHA-256 values still match the fixture manifest's five pinned digests.",
+      "The only contract-surface addition is MediaPackageManifestReadResult.IssuesTruncated and the MediaPackageBudgetExceededException port type, both inside this module's own Application/Contracts boundary."
     ],
     "architecture_tests": [
-      "scripts/validate_architecture_baseline.py passed: layer direction Infrastructure -> Application -> Domain, cross-module public layers only, forbidden token 'system.io' absent from Domain, no dependency cycles.",
-      "scripts/validate_dotnet_source.py passed over 666 C# files: no duplicated 60-token block across files, no sensitive logging patterns.",
-      "dotnet build AssetLibrary.slnx -c Release with TreatWarningsAsErrors, EnforceCodeStyleInBuild and the CA1501/CA1502/CA1505/CA1506 budgets enabled: 15 projects, 0 warnings, 0 errors.",
-      "tests/architecture/test_architecture_rules.py could not run here (28 setUp errors from the sandbox denying temp-directory writes); it must be re-run by the coordinator.",
-      "The off-allowlist Infrastructure/StrictJsonReader.cs was deleted; strict JSON now uses System.Text.Json only, so no second general JSON parser exists in the repository."
+      "Release build of services/core-server/AssetLibrary.CoreServer.csproj: 0 warnings, 0 errors with TreatWarningsAsErrors, EnforceCodeStyleInBuild, EnableNETAnalyzers and the CA1501/CA1502/CA1505/CA1506 budgets enabled.",
+      "Release build of tests/dotnet/AssetLibrary.TransferOperation.Tests: 0 warnings, 0 errors, including the MSTEST0037, CA1861, CA1859 and CA1001 rules that previously failed.",
+      "Domain keeps no System.IO dependency: MediaPackageShapePolicy and MediaPackageLayoutPolicy are pure (no IO, no clock, no environment), so the architecture gate's forbidden 'system.io' token check stays satisfied; path spellings are validated lexically and only then normalized by Infrastructure.",
+      "The architecture, database and repository Python gates could not be run in this sandbox (temp-directory and named-pipe denials); the coordinator's earlier run of verify_repository and the v0.1-start gate passed and must be repeated on the fixed candidate."
     ],
     "technical_debt": [
-      "MediaPackagePolicy.cs (776 lines) and MediaPackagePathBoundary.cs (394 lines) sit near the maintainability ceiling; a later split by identity/layout/file-set responsibility is advisable.",
-      "Several CA1506/CA1822 suppressions carry written justifications; they can be reclaimed once a composition root exists.",
-      "MaximumEnumeratedEntries (4096) is a constant rather than a configurable limit, so an oversized staging directory fails with budget_exceeded instead of a tuned path."
+      "MediaPackagePolicy.cs was split as the reviewer required: shape/type/identity reading moved to Domain/MediaPackageShapePolicy.cs and layout/media_extension/selected_parts templates to Domain/MediaPackageLayoutPolicy.cs, leaving MediaPackagePolicy.cs as pure orchestration (budgets, real-list comparison, target-name entry).",
+      "MediaPackagePathBoundary.cs was rewritten around one canonical comparison form and a native access form; the volume-root containment and Linux same-separator cases are now covered by tests.",
+      "MaximumEnumeratedEntries (4096) remains a constant rather than a configurable limit, so an oversized staging directory fails with budget_exceeded instead of a tuned path.",
+      "Several CA1506 suppressions carry written justifications; they can be reclaimed once a composition root exists."
     ]
   }
 }

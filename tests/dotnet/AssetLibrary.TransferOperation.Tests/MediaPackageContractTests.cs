@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AssetLibrary.Modules.LibraryStorage.Contracts;
 using AssetLibrary.Modules.OperationTrash.Application;
 using AssetLibrary.Modules.OperationTrash.Contracts;
@@ -206,11 +207,275 @@ public sealed class MediaPackageContractTests
         Assert.AreEqual(128, lowered.MaximumReadByteCount);
     }
 
+    [TestMethod]
+    public void RootLevelFilesAreAcceptedWithAnExplicitNullCid()
+    {
+        // The frozen layout has four root objects in a single package, and none of them carries a cid.
+        // An explicit JSON null is the accepted spelling, so these must not be refused.
+        var bytes = Mutate("single", root =>
+        {
+            foreach (var entry in Files(root))
+            {
+                var file = entry!.AsObject();
+                if (file["kind"]!.GetValue<string>() is not "video")
+                {
+                    Assert.IsNull(file["cid"], "A root-level entry carries an explicit null cid.");
+                }
+            }
+        });
+
+        var result = ReadWithReader(bytes);
+
+        Assert.IsTrue(result.Succeeded, Describe(result));
+        Assert.AreEqual(MediaPackageLayout.SinglePart, result.Manifest!.Layout);
+        Assert.HasCount(4, result.Manifest.Files);
+    }
+
+    [TestMethod]
+    public void RootLevelFilesMustCarryTheCidKeyAndNotOnlyANullValue()
+    {
+        foreach (var index in new[] { 0, 1, 2, 3 })
+        {
+            var bytes = Mutate("single", root => Files(root)[index]!.AsObject().Remove("cid"));
+            AssertRefused(bytes, InvalidManifest);
+        }
+    }
+
+    [TestMethod]
+    public void UnknownKeysAreRefusedAtEveryNestingLevel()
+    {
+        AssertRefused(
+            Mutate("single", root => root["raw"] = "not part of the frozen shape"),
+            InvalidManifest);
+        AssertRefused(
+            Mutate("single", root => SelectedParts(root)[0]!.AsObject()["raw"] = "extra"),
+            InvalidManifest);
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 0)["raw"] = "extra"),
+            InvalidManifest);
+    }
+
+    [TestMethod]
+    public void SinglePackageLayoutTemplateIsExact()
+    {
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 3)["path"] = "Season 01/S01E01-cid-101.mp4"),
+            "invalid_file_set");
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 3)["path"] = "video.mkv"),
+            "invalid_file_set");
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 0)["path"] = "tvshow.nfo"),
+            "invalid_file_set");
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 2)["path"] = "extra.json"),
+            "invalid_file_set");
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 1)["path"] = "art.png"),
+            "invalid_file_set");
+        AssertRefused(
+            Mutate("single", root => FileAt(root, 3)["path"] = "video.mp4x"),
+            "invalid_file_set");
+    }
+
+    [TestMethod]
+    public void SinglePackageAcceptsBothFrozenImageAndVideoExtensions()
+    {
+        Assert.IsTrue(
+            ReadWithReader(Mutate("single", root => FileAt(root, 1)["path"] = "poster.jpg")).Succeeded);
+        Assert.IsTrue(
+            ReadWithReader(Mutate("single", root =>
+            {
+                root["media_extension"] = "mkv";
+                FileAt(root, 3)["path"] = "video.mkv";
+            })).Succeeded);
+    }
+
+    [TestMethod]
+    public void MultipartCidPrefixAndEpisodeMappingAreExact()
+    {
+        // A cid that is only a prefix of the declared one is not the declared one.
+        AssertRefused(
+            Mutate("multipart", root => FileAt(root, 0)["path"] = "Season 01/S01E01-cid-10.mp4"),
+            "invalid_file_set");
+
+        // A file whose episode number disagrees with its own selected part is not that part's file.
+        AssertRefused(
+            Mutate("multipart", root => FileAt(root, 0)["path"] = "Season 01/S01E02-cid-101.mp4"),
+            "invalid_file_set");
+
+        // A single-digit episode number is not the frozen two-digit spelling.
+        AssertRefused(
+            Mutate("multipart", root => FileAt(root, 0)["path"] = "Season 01/S01E1-cid-101.mp4"),
+            "invalid_file_set");
+
+        // A cid that is not selected at all is an unselected object.
+        AssertRefused(
+            Mutate("multipart", root => FileAt(root, 0)["path"] = "Season 01/S01E01-cid-999.mp4"),
+            "invalid_file_set");
+    }
+
+    [TestMethod]
+    public void MultipartRequiredObjectsAndPerCidThumbCountAreExact()
+    {
+        // The show nfo is required exactly once: dropping it leaves the layout incomplete.
+        AssertRefused(
+            Mutate("multipart", root => Files(root).RemoveAt(Files(root).Count - 1)),
+            "invalid_file_set");
+
+        // One episode may carry at most one thumb.
+        AssertRefused(
+            Mutate("multipart", root => Files(root).Add(new JsonObject
+            {
+                ["path"] = "Season 01/S01E02-cid-202-thumb.jpg",
+                ["kind"] = "episode_thumb",
+                ["cid"] = "202",
+                ["size_bytes"] = 63,
+                ["sha256"] = new string('0', 64),
+            })),
+            "invalid_file_set");
+
+        // A root-level poster is optional, but two of them are not.
+        AssertRefused(
+            Mutate("multipart", root => Files(root).Add(new JsonObject
+            {
+                ["path"] = "poster.jpg",
+                ["kind"] = "poster",
+                ["cid"] = null,
+                ["size_bytes"] = 39,
+                ["sha256"] = new string('1', 64),
+            })),
+            "invalid_file_set");
+    }
+
+    [TestMethod]
+    public void DuplicateAndExtraObjectsAreRefusedWithTheirFrozenCodes()
+    {
+        AssertRefused(
+            Mutate("single", root => Files(root).Add(new JsonObject
+            {
+                ["path"] = "Movie.NFO",
+                ["kind"] = "nfo",
+                ["cid"] = null,
+                ["size_bytes"] = 605,
+                ["sha256"] = new string('2', 64),
+            })),
+            "duplicate_path");
+
+        AssertRefused(
+            Mutate("single", root => Files(root).Add(new JsonObject
+            {
+                ["path"] = "extra.txt",
+                ["kind"] = "source",
+                ["cid"] = null,
+                ["size_bytes"] = 1,
+                ["sha256"] = new string('3', 64),
+            })),
+            "invalid_file_set");
+    }
+
+    [TestMethod]
+    public void RawPathSpellingIsRefusedBeforeAnyNormalization()
+    {
+        foreach (var spelling in new[]
+        {
+            "../movie.nfo",
+            "Season 01/../../video.mp4",
+            "dir\\movie.nfo",
+            "movie.nfo:payload",
+            "C:/movie.nfo",
+            "/movie.nfo",
+            "Season 01//video.mp4",
+        })
+        {
+            AssertRefused(
+                Mutate("single", root => FileAt(root, 0)["path"] = spelling),
+                "invalid_path");
+        }
+    }
+
+    [TestMethod]
+    public void ValidatedManifestCollectionsAreDefensiveSnapshots()
+    {
+        var result = ReadWithReader(Mutate("single", root => Files(root)[0]!["path"] = "movie.nfo"));
+        Assert.IsTrue(result.Succeeded, Describe(result));
+        var manifest = result.Manifest!;
+        var files = (IList<MediaPackageFileEntry>)manifest.Files;
+        var parts = (IList<MediaPackageSelectedPart>)manifest.SelectedParts;
+
+        Assert.ThrowsExactly<NotSupportedException>(
+            () => files.Add(new MediaPackageFileEntry(
+                "poster.jpg",
+                MediaPackageFileKind.Poster,
+                null,
+                1,
+                new Sha256Digest(new string('4', 64)))));
+        Assert.ThrowsExactly<NotSupportedException>(
+            () => parts.Add(new MediaPackageSelectedPart("303", null)));
+        Assert.HasCount(4, manifest.Files);
+        Assert.HasCount(1, manifest.SelectedParts);
+    }
+
     private static byte[] NormalizeLineEndings(byte[] bytes) =>
         bytes.AsSpan().IndexOf("\r\n"u8) < 0
             ? bytes
             : Encoding.UTF8.GetBytes(
                 Encoding.UTF8.GetString(bytes).Replace("\r\n", "\n", StringComparison.Ordinal));
+
+    private static readonly JsonWriterOptions CompactWriter = new()
+    {
+        Indented = false,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
+
+    /// <summary>
+    /// Rebuilds one example manifest with a named mutation applied, so a shape, identity or layout
+    /// refusal is expressed as the single change under test rather than as a hand-written document.
+    /// </summary>
+    private static byte[] Mutate(string exampleName, Action<JsonObject> mutate)
+    {
+        ArgumentNullException.ThrowIfNull(mutate);
+        var example = MediaPackageSandbox.ReadExamples().Single(item => item.Name == exampleName);
+        var root = (JsonObject)JsonNode.Parse(example.ManifestBytes)!;
+        mutate(root);
+        using var stream = new MemoryStream();
+        using (var writer = new Utf8JsonWriter(stream, CompactWriter))
+        {
+            root.WriteTo(writer);
+        }
+
+        return stream.ToArray();
+    }
+
+    private static MediaPackageManifestReadResult ReadWithReader(byte[] bytes) =>
+        new MediaPackageManifestReader(new MediaPackageInspectionLimits())
+            .Read(bytes, new Sha256Digest(Convert.ToHexStringLower(SHA256.HashData(bytes))));
+
+    private static JsonObject FileAt(JsonObject root, int index) =>
+        (JsonObject)root["files"]!.AsArray()[index]!;
+
+    private static JsonArray SelectedParts(JsonObject root) => root["selected_parts"]!.AsArray();
+
+    private static JsonArray Files(JsonObject root) => root["files"]!.AsArray();
+
+    /// <summary>
+    /// Asserts that the mutated manifest is refused and that the expected frozen code is among the
+    /// reported ones.
+    /// </summary>
+    private static void AssertRefused(byte[] manifestBytes, string expectedCode)
+    {
+        var result = ReadWithReader(manifestBytes);
+        Assert.IsNull(result.Manifest, $"The manifest must be refused with {expectedCode}.");
+        var codes = result.FailureCode is null
+            ? result.Issues.Select(issue => issue.Code).ToArray()
+            : [result.FailureCode];
+        CollectionAssert.Contains(codes, expectedCode, Describe(result));
+    }
+
+    private static string Describe(MediaPackageManifestReadResult result) =>
+        "failure=" + (result.FailureCode ?? "-")
+        + " issues=[" + string.Join(", ", result.Issues.Select(issue => issue.Code + "@" + (issue.Location ?? "-")))
+        + "]";
 
     /// <summary>
     /// Rewrites the root object with its members in reverse order while preserving every value, proving

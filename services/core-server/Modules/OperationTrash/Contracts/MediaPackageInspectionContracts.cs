@@ -70,13 +70,15 @@ public sealed record MediaPackagePreflightRequest(
 
 /// <summary>
 /// Outcome of reading a manifest from raw bytes. A named failure replaces any parser or path detail,
-/// so callers never observe a raw <c>JsonException</c> or an absolute path.
+/// so callers never observe a raw <c>JsonException</c> or an absolute path. The truncation flag is part
+/// of the frozen report semantics and is therefore carried out of the reader rather than recomputed.
 /// </summary>
 public sealed record MediaPackageManifestReadResult(
     MediaPackageManifest? Manifest,
     Sha256Digest ManifestDigest,
     string? FailureCode,
-    IReadOnlyList<MediaPackageIssue> Issues)
+    IReadOnlyList<MediaPackageIssue> Issues,
+    bool IssuesTruncated)
 {
     public bool Succeeded => Manifest is not null && FailureCode is null;
 }

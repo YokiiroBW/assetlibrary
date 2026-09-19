@@ -17,14 +17,16 @@ public enum MediaPackagePathFault
 }
 
 /// <summary>
-/// Real path boundary for one trusted root. It resolves only fully qualified, already normalized paths
-/// without alternate separators, re-checks that the result is still contained in the canonical root,
-/// and refuses the root itself or any ancestor that is a reparse point or symbolic link.
+/// Real path boundary for one trusted root. It resolves only fully qualified paths, re-checks that the
+/// result is still contained in the canonical root and refuses the root itself or any ancestor that is a
+/// reparse point or symbolic link.
 /// </summary>
 /// <remarks>
-/// This is a static check plus a re-check before and after a read. It does not claim to close a hostile
-/// concurrent directory swap; that needs a strong path handle and stays behind the production
-/// publication gate.
+/// Canonical comparison happens in the forward-slash form that <see cref="CanonicalLibraryRoot"/> already
+/// uses, so a normal Windows directory is never refused for its separator. Real file access still uses the
+/// platform-native form. This is a static check plus a re-check before and after a read; it does not claim
+/// to close a hostile concurrent directory swap, which needs a strong path handle and stays behind the
+/// production publication gate.
 /// </remarks>
 public sealed class MediaPackagePathBoundary
 {
@@ -34,17 +36,23 @@ public sealed class MediaPackagePathBoundary
     {
         CanonicalRoot = canonicalRoot;
         Comparison = comparison;
-        pathComparison = OperatingSystem.IsWindows()
+        pathComparison = comparison == RootPathComparison.CaseInsensitive
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
     }
 
+    /// <summary>
+    /// The trusted root in canonical forward-slash form, exactly as the shared
+    /// <see cref="CanonicalLibraryRoot"/> type spells it.
+    /// </summary>
     public string CanonicalRoot { get; }
 
     public RootPathComparison Comparison { get; }
 
     /// <summary>
     /// Opens the boundary of an existing root, refusing a reparse point anywhere on its ancestor chain.
+    /// The trusted root arrives in canonical form and the local path arrives in native form; both are
+    /// compared in the same canonical form so a normal local directory always matches.
     /// </summary>
     public static bool TryOpen(
         string root,
@@ -56,14 +64,16 @@ public sealed class MediaPackagePathBoundary
         fault = MediaPackagePathFault.Unsafe;
         if (!TryResolve(root, out var resolved)
             || !string.Equals(
-                TrimSeparators(resolved),
-                TrimSeparators(canonical.Value),
-                StringComparison.Ordinal))
+                Canonicalize(resolved),
+                Canonicalize(canonical.Value),
+                canonical.Comparison == RootPathComparison.CaseInsensitive
+                    ? StringComparison.OrdinalIgnoreCase
+                    : StringComparison.Ordinal))
         {
             return false;
         }
 
-        var candidate = new MediaPackagePathBoundary(canonical.Value, canonical.Comparison);
+        var candidate = new MediaPackagePathBoundary(Canonicalize(canonical.Value), canonical.Comparison);
         if (!TryAnchor(resolved, out fault))
         {
             return false;
@@ -75,9 +85,9 @@ public sealed class MediaPackagePathBoundary
     }
 
     /// <summary>
-    /// Resolves <paramref name="relativePath"/> against an anchored directory and re-checks
-    /// containment. The relative path must use platform separators, like a package-relative path
-    /// mapped from the POSIX manifest form.
+    /// Resolves one POSIX package-relative path against an anchored directory and re-checks containment.
+    /// A backslash is refused on every platform and a forward slash is refused on Windows, so the raw
+    /// manifest form stays the only accepted spelling while a POSIX platform keeps working.
     /// </summary>
     public bool TryResolveChild(
         string anchoredDirectory,
@@ -88,23 +98,25 @@ public sealed class MediaPackagePathBoundary
         resolved = string.Empty;
         if (string.IsNullOrEmpty(relativePath)
             || Path.IsPathRooted(relativePath)
-            || relativePath.Contains(Path.AltDirectorySeparatorChar)
+            || relativePath.Contains('\\')
+            || (OperatingSystem.IsWindows() && relativePath.Contains('/'))
             || relativePath.Contains('\0')
-            || relativePath.Split(Path.DirectorySeparatorChar)
+            || relativePath.Split('/')
                 .Any(segment => segment.Length == 0 || segment is "." or ".."))
         {
             fault = MediaPackagePathFault.Unsafe;
             return false;
         }
 
-        if (!Contains(anchoredDirectory, CanonicalRoot))
+        var native = relativePath.Replace('/', Path.DirectorySeparatorChar);
+        if (!Contains(Canonicalize(anchoredDirectory), CanonicalRoot))
         {
             fault = MediaPackagePathFault.OutsideRoot;
             return false;
         }
 
-        if (!TryResolve(Path.Combine(anchoredDirectory, relativePath), out resolved)
-            || !Contains(resolved, CanonicalRoot))
+        if (!TryResolve(Path.Combine(anchoredDirectory, native), out resolved)
+            || !Contains(Canonicalize(resolved), CanonicalRoot))
         {
             resolved = string.Empty;
             fault = MediaPackagePathFault.OutsideRoot;
@@ -117,7 +129,8 @@ public sealed class MediaPackagePathBoundary
 
     /// <summary>
     /// Confirms that the path still exists and that neither it nor any ancestor is a link. Returns the
-    /// observed length when it is a regular file.
+    /// observed length when it is a regular file. A missing object and an unsafe or unreadable one are
+    /// distinct faults, so a caller can never mistake a refusal for an absence.
     /// </summary>
     public bool TryObserve(
         string resolved,
@@ -125,7 +138,7 @@ public sealed class MediaPackagePathBoundary
         out MediaPackagePathFault fault)
     {
         length = null;
-        if (!Contains(resolved, CanonicalRoot))
+        if (!Contains(Canonicalize(resolved), CanonicalRoot))
         {
             fault = MediaPackagePathFault.OutsideRoot;
             return false;
@@ -136,38 +149,56 @@ public sealed class MediaPackagePathBoundary
             return false;
         }
 
-        if (Directory.Exists(resolved))
+        try
         {
+            if (Directory.Exists(resolved))
+            {
+                fault = MediaPackagePathFault.None;
+                return true;
+            }
+
+            if (!File.Exists(resolved))
+            {
+                fault = MediaPackagePathFault.Missing;
+                return false;
+            }
+
+            length = new FileInfo(resolved).Length;
             fault = MediaPackagePathFault.None;
             return true;
         }
-
-        if (!File.Exists(resolved))
+        catch (Exception exception) when (
+            exception is IOException
+                or UnauthorizedAccessException
+                or System.Security.SecurityException)
         {
-            fault = MediaPackagePathFault.Missing;
+            // An object that exists but cannot be inspected is unsafe, never absent.
+            fault = MediaPackagePathFault.Unsafe;
             return false;
         }
-
-        length = new FileInfo(resolved).Length;
-        fault = MediaPackagePathFault.None;
-        return true;
     }
 
     /// <summary>
-    /// True when <paramref name="candidate"/> is <paramref name="root"/> or lies inside it.
+    /// True when <paramref name="candidate"/> is <paramref name="root"/> or lies inside it. Both values
+    /// are compared in canonical form, and a volume root keeps its trailing separator so it can contain
+    /// its own descendants.
     /// </summary>
     public bool Contains(string candidate, string root)
     {
-        var normalizedCandidate = TrimSeparators(Normalize(candidate));
-        var normalizedRoot = TrimSeparators(Normalize(root));
+        var normalizedCandidate = Canonicalize(candidate);
+        var normalizedRoot = Canonicalize(root);
         if (string.Equals(normalizedCandidate, normalizedRoot, pathComparison))
         {
             return true;
         }
 
-        return normalizedCandidate.Length > normalizedRoot.Length
-            && normalizedCandidate.StartsWith(normalizedRoot, pathComparison)
-            && IsSeparator(normalizedCandidate[normalizedRoot.Length]);
+        if (normalizedCandidate.Length <= normalizedRoot.Length
+            || !normalizedCandidate.StartsWith(normalizedRoot, pathComparison))
+        {
+            return false;
+        }
+
+        return normalizedRoot[^1] == '/' || normalizedCandidate[normalizedRoot.Length] == '/';
     }
 
     /// <summary>
@@ -178,9 +209,9 @@ public sealed class MediaPackagePathBoundary
 
     /// <summary>
     /// Walks one directory tree under a trusted root and returns every file and directory it really
-    /// contains as package-relative POSIX paths. It refuses a reparse point, an entry that is neither a
-    /// file nor a directory, a path that leaves the root, and a tree larger than the instance budget, so
-    /// the caller always compares the declaration against the real set rather than a filtered view.
+    /// contains as package-relative POSIX paths. Entries are counted and cancellation is observed while
+    /// the listing is consumed, so the work and the memory stay bounded by the instance budget rather
+    /// than by the size of a directory.
     /// </summary>
     public PackageListing Enumerate(
         string root,
@@ -197,15 +228,13 @@ public sealed class MediaPackagePathBoundary
         {
             cancellationToken.ThrowIfCancellationRequested();
             var (directory, prefix) = pending.Dequeue();
-            var children = Directory.EnumerateFileSystemEntries(directory).ToArray();
-            Array.Sort(children, StringComparer.Ordinal);
-            foreach (var child in children)
+            foreach (var child in Directory.EnumerateFileSystemEntries(directory))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 if (++scanned > MediaPackageInspectionLimits.MaximumEnumeratedEntries)
                 {
                     issues.Record("budget_exceeded");
-                    return new PackageListing(files, directories);
+                    return new PackageListing(files, directories, scanned);
                 }
 
                 var name = Path.GetFileName(child);
@@ -213,13 +242,13 @@ public sealed class MediaPackagePathBoundary
                 if (!TryResolveChild(directory, name, out var resolved, out var fault))
                 {
                     issues.Record(FaultCode(fault), relative);
-                    return new PackageListing(files, directories);
+                    return new PackageListing(files, directories, scanned);
                 }
 
                 if (IsReparsePoint(resolved))
                 {
                     issues.Record("unsafe_path", relative);
-                    return new PackageListing(files, directories);
+                    return new PackageListing(files, directories, scanned);
                 }
 
                 if (Directory.Exists(resolved))
@@ -232,19 +261,19 @@ public sealed class MediaPackagePathBoundary
                 if (!File.Exists(resolved))
                 {
                     issues.Record("invalid_file_set", relative);
-                    return new PackageListing(files, directories);
+                    return new PackageListing(files, directories, scanned);
                 }
 
                 files.Add(relative);
             }
         }
 
-        return new PackageListing(files, directories);
+        return new PackageListing(files, directories, scanned);
     }
 
     /// <summary>
-    /// Length and last-write stamp of one existing file, taken before and after a read so a quiet
-    /// substitution during the read becomes a verdict.
+    /// Length and last-write stamp of one existing file, taken before and after a read so a substitution
+    /// or a growth during the run becomes a verdict.
     /// </summary>
     public static (long Length, DateTimeOffset ModifiedAt) Stamp(string absolutePath)
     {
@@ -253,14 +282,15 @@ public sealed class MediaPackagePathBoundary
     }
 
     /// <summary>
-    /// Maps a path fault onto the frozen report vocabulary.
+    /// Maps a path fault onto the frozen report vocabulary. <see cref="MediaPackagePathFault.None"/> is
+    /// never a failure, so a caller that reaches here with it has an internal fault, not an IO one.
     /// </summary>
     public static string FaultCode(MediaPackagePathFault fault) => fault switch
     {
         MediaPackagePathFault.Missing => "source_missing",
         MediaPackagePathFault.OutsideRoot => "unsafe_path",
         MediaPackagePathFault.Unsafe => "unsafe_path",
-        _ => "io_failure",
+        _ => "invalid_file_set",
     };
 
     /// <summary>
@@ -283,11 +313,13 @@ public sealed class MediaPackagePathBoundary
         File.GetAttributes(resolved).HasFlag(FileAttributes.ReparsePoint);
 
     /// <summary>
-    /// The real contents of one package root, as package-relative POSIX paths.
+    /// The real contents of one package root, as package-relative POSIX paths, with the number of entries
+    /// actually consumed while walking.
     /// </summary>
     public sealed record PackageListing(
         IReadOnlyList<string> Files,
-        IReadOnlyList<string> Directories);
+        IReadOnlyList<string> Directories,
+        int EnumeratedEntries);
 
     private static bool TryResolve(string path, out string resolved)
     {
@@ -301,7 +333,7 @@ public sealed class MediaPackagePathBoundary
 
         try
         {
-            resolved = TrimSeparators(Normalize(Path.GetFullPath(path)));
+            resolved = TrimNativeSeparators(Path.GetFullPath(path));
             return true;
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException)
@@ -312,8 +344,8 @@ public sealed class MediaPackagePathBoundary
 
     /// <summary>
     /// Walks the path and refuses any component that exists and is a reparse point. A component that
-    /// does not exist ends the walk: a missing segment cannot be a link, and a later component cannot
-    /// be reached through it.
+    /// does not exist ends the walk: a missing segment cannot be a link, and a later component cannot be
+    /// reached through it.
     /// </summary>
     private static bool TryAnchor(string resolved, out MediaPackagePathFault fault)
     {
@@ -375,10 +407,24 @@ public sealed class MediaPackagePathBoundary
         }
     }
 
-    private static string Normalize(string value) =>
-        value.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+    /// <summary>
+    /// Canonical forward-slash form used for every comparison. A volume root and the POSIX root keep
+    /// their trailing separator so containment of their own descendants stays provable.
+    /// </summary>
+    private static string Canonicalize(string value)
+    {
+        var slashed = value.Replace('\\', '/');
+        var root = Path.GetPathRoot(slashed)?.Replace('\\', '/');
+        if (!string.IsNullOrEmpty(root) && string.Equals(slashed, root, StringComparison.Ordinal))
+        {
+            return slashed;
+        }
 
-    private static string TrimSeparators(string value)
+        var trimmed = slashed.TrimEnd('/');
+        return trimmed.Length == 0 ? "/" : trimmed;
+    }
+
+    private static string TrimNativeSeparators(string value)
     {
         var root = Path.GetPathRoot(value);
         if (string.IsNullOrEmpty(root) || string.Equals(value, root, StringComparison.Ordinal))
@@ -388,7 +434,4 @@ public sealed class MediaPackagePathBoundary
 
         return value.TrimEnd(Path.DirectorySeparatorChar);
     }
-
-    private static bool IsSeparator(char value) =>
-        value == Path.DirectorySeparatorChar || value == Path.AltDirectorySeparatorChar;
 }

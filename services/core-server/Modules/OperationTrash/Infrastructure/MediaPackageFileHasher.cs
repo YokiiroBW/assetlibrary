@@ -41,6 +41,14 @@ public sealed class MediaPackageFileHasher : IMediaPackageFileHasher
                 FileShare.Read,
                 bufferBytes,
                 FileOptions.Asynchronous | FileOptions.SequentialScan);
+
+            // The budget is checked against the real length before any byte is read, so a file that
+            // already exceeds it is refused without consuming the remaining allowance.
+            if (stream.Length > byteLimit)
+            {
+                throw new MediaPackageBudgetExceededException();
+            }
+
             using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
             long total = 0;
             while (true)
@@ -57,7 +65,7 @@ public sealed class MediaPackageFileHasher : IMediaPackageFileHasher
                 if (total > byteLimit)
                 {
                     // The file grew past the remaining budget: refuse instead of hashing unbounded input.
-                    throw new IOException("The package file exceeds the remaining read budget.");
+                    throw new MediaPackageBudgetExceededException();
                 }
 
                 hasher.AppendData(buffer, 0, read);

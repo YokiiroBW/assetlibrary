@@ -92,7 +92,7 @@ public sealed class MediaPackageManifestReader(MediaPackageInspectionLimits limi
             var manifest = MediaPackagePolicy.Validate(root, issues);
             return manifest is null
                 ? Failure(digest, null, issues)
-                : new MediaPackageManifestReadResult(manifest, digest, null, issues.Issues);
+                : new MediaPackageManifestReadResult(manifest, digest, null, issues.Issues, issues.IsTruncated);
         }
     }
 
@@ -103,7 +103,12 @@ public sealed class MediaPackageManifestReader(MediaPackageInspectionLimits limi
         Sha256Digest digest,
         string? code,
         MediaPackageIssueSink? issues) =>
-        new(null, digest, code, issues is null ? [] : [.. issues.Issues]);
+        new(
+            null,
+            digest,
+            code,
+            issues is null ? [] : [.. issues.Issues],
+            issues?.IsTruncated ?? false);
 
     /// <summary>
     /// Rejects a byte order mark and any invalid UTF-8 sequence, including overlong three- and

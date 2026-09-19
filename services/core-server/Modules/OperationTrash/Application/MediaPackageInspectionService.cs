@@ -69,7 +69,8 @@ public sealed class MediaPackageInspectionService(
                 read.ManifestDigest,
                 read.Manifest,
                 read.FailureCode ?? "invalid_manifest",
-                issues: read.Issues);
+                issues: read.Issues,
+                issuesTruncated: read.IssuesTruncated);
         }
 
         var manifest = read.Manifest!;
@@ -96,7 +97,15 @@ public sealed class MediaPackageInspectionService(
             }
 
             ValidateScope(scope);
-            if (!await IsAuthorizedAsync(scope, cancellationToken).ConfigureAwait(false))
+
+            // An offline or expired permission is an availability refusal, not a revision change: the
+            // two must never be reported with the same code.
+            if (!IsAvailable(scope))
+            {
+                return Rejected(read.ManifestDigest, manifest, "target_unavailable", scope);
+            }
+
+            if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
             {
                 return Rejected(read.ManifestDigest, manifest, "scope_changed", scope);
             }
@@ -109,8 +118,12 @@ public sealed class MediaPackageInspectionService(
                 cancellationToken).ConfigureAwait(false);
             var completedAt = timeProvider.GetUtcNow();
             ValidateOutcomeScope(outcome, scope);
-            if (outcome.Issues.IsEmpty
-                && !await IsAuthorizedAsync(scope, cancellationToken).ConfigureAwait(false))
+            if (outcome.Issues.IsEmpty && !IsAvailable(scope))
+            {
+                outcome.Issues.Record("target_unavailable");
+            }
+            else if (outcome.Issues.IsEmpty
+                && !await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
             {
                 outcome.Issues.Record("scope_changed");
             }
@@ -128,18 +141,13 @@ public sealed class MediaPackageInspectionService(
         }
     }
 
-    private async ValueTask<bool> IsAuthorizedAsync(
-        MediaPackageInspectionScope scope,
-        CancellationToken cancellationToken)
-    {
-        if (scope.Availability != StorageAvailability.Online
-            || scope.ExpiresAt <= timeProvider.GetUtcNow())
-        {
-            return false;
-        }
-
-        return await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false);
-    }
+    /// <summary>
+    /// True when the granted permission is still usable at all. Availability and expiry are separate from
+    /// revocation, so an offline or expired scope is reported as an availability refusal.
+    /// </summary>
+    private bool IsAvailable(MediaPackageInspectionScope scope) =>
+        scope.Availability == StorageAvailability.Online
+        && scope.ExpiresAt > timeProvider.GetUtcNow();
 
     private static void ValidateOutcomeScope(
         MediaPackageInspectionOutcome outcome,
@@ -183,7 +191,8 @@ public sealed class MediaPackageInspectionService(
         MediaPackageManifest? manifest,
         string code,
         MediaPackageInspectionScope? scope = null,
-        IReadOnlyList<MediaPackageIssue>? issues = null)
+        IReadOnlyList<MediaPackageIssue>? issues = null,
+        bool issuesTruncated = false)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
         IReadOnlyList<MediaPackageIssue> recorded = issues is { Count: > 0 }
@@ -199,7 +208,7 @@ public sealed class MediaPackageInspectionService(
             0,
             0,
             recorded,
-            false);
+            issuesTruncated);
     }
 
     private static void ValidateScope(MediaPackageInspectionScope scope)

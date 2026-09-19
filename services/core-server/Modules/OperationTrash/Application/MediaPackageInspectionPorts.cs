@@ -56,6 +56,30 @@ public interface IMediaPackageVolumeSpaceObserver
 }
 
 /// <summary>
+/// Raised by a reader when the bytes it was allowed to read would exceed the remaining read budget. It
+/// derives from <see cref="IOException"/> so every existing environment-failure handler still catches it,
+/// while the inspection port can translate it into the named <c>budget_exceeded</c> verdict instead of
+/// the generic <c>io_failure</c>.
+/// </summary>
+public sealed class MediaPackageBudgetExceededException : IOException
+{
+    public MediaPackageBudgetExceededException()
+        : base("The package file exceeds the remaining read budget.")
+    {
+    }
+
+    public MediaPackageBudgetExceededException(string message)
+        : base(message)
+    {
+    }
+
+    public MediaPackageBudgetExceededException(string message, Exception innerException)
+        : base(message, innerException)
+    {
+    }
+}
+
+/// <summary>
 /// Bounded asynchronous reader over the package files so the inspector enforces the byte budget while
 /// streaming, instead of trusting a declared length.
 /// </summary>
@@ -63,8 +87,9 @@ public interface IMediaPackageFileHasher
 {
     /// <summary>
     /// Reads the whole file through a bounded buffer and returns its exact length and SHA-256. Throws
-    /// <see cref="IOException"/> when the file exceeds <paramref name="byteLimit"/> and
-    /// <see cref="UnauthorizedAccessException"/> when the file cannot be opened.
+    /// <see cref="MediaPackageBudgetExceededException"/> when the file exceeds
+    /// <paramref name="byteLimit"/> and <see cref="UnauthorizedAccessException"/> when the file cannot be
+    /// opened.
     /// </summary>
     ValueTask<PayloadFacts> HashAsync(
         string absolutePath,

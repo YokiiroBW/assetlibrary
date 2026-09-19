@@ -11,8 +11,10 @@ namespace AssetLibrary.TransferOperation.Tests;
 
 /// <summary>
 /// Real temporary package tree for one test, created only under
-/// <c>.runtime/sandbox-storage/TS-099</c>. It also loads the frozen candidate fixtures from the
-/// repository working tree; the candidate directory itself is never written.
+/// <c>.runtime/sandbox-storage/TS-099</c>. It also loads the frozen candidate fixtures committed to this
+/// repository under the test project's own <c>Fixtures/MediaPackage</c> directory, so a preflight test
+/// reads exactly the bytes that are under version control next to it and never depends on another
+/// directory being present in the working tree.
 /// </summary>
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Maintainability",
@@ -20,7 +22,7 @@ namespace AssetLibrary.TransferOperation.Tests;
     Justification = "The sandbox is the single place where a preflight is wired for tests: it names every port, the service, the real inspector, the limits and the fixture records, and that set is the composition itself rather than a dependency on another module.")]
 internal sealed class MediaPackageSandbox : IDisposable
 {
-    public const string CandidateRelativeDirectory = "contracts/media-package/candidate-v1";
+    public const string FixtureRelativeDirectory = "Fixtures/MediaPackage";
     public const string MarkerName = ".assetlibrary-ts-099-sandbox";
     public const string MarkerValue = "assetlibrary-ts-099-sandbox-v1";
 
@@ -41,9 +43,11 @@ internal sealed class MediaPackageSandbox : IDisposable
 
     public static string FixtureRoot { get; } = Path.Combine(
         RepositoryRoot,
-        "contracts",
-        "media-package",
-        "candidate-v1");
+        "tests",
+        "dotnet",
+        "AssetLibrary.TransferOperation.Tests",
+        "Fixtures",
+        "MediaPackage");
 
     public static MediaPackageSandbox Create()
     {
@@ -261,18 +265,33 @@ internal sealed class MediaPackageSandbox : IDisposable
         return results;
     }
 
+    /// <summary>
+    /// Walks up to the directory that holds this project's own committed fixtures. Both the test binary's
+    /// directory and the current directory are used as starting points, so the search works whether the
+    /// tests are started by the platform runner from the output directory or by any other host.
+    /// </summary>
     private static string FindRepositoryRoot()
     {
-        var cursor = new DirectoryInfo(AppContext.BaseDirectory);
-        while (cursor is not null)
+        foreach (var start in new[] { AppContext.BaseDirectory, Environment.CurrentDirectory })
         {
-            if (File.Exists(Path.Combine(cursor.FullName, "AGENTS.md"))
-                && Directory.Exists(Path.Combine(cursor.FullName, "contracts")))
+            if (string.IsNullOrWhiteSpace(start))
             {
-                return cursor.FullName;
+                continue;
             }
 
-            cursor = cursor.Parent;
+            var cursor = new DirectoryInfo(Path.GetFullPath(start));
+            while (cursor is not null)
+            {
+                if (File.Exists(Path.Combine(cursor.FullName, "AGENTS.md"))
+                    && Directory.Exists(Path.Combine(
+                        cursor.FullName,
+                        FixtureRelativeDirectory.Replace('/', Path.DirectorySeparatorChar))))
+                {
+                    return cursor.FullName;
+                }
+
+                cursor = cursor.Parent;
+            }
         }
 
         throw new InvalidOperationException("The repository root could not be found.");

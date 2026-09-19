@@ -158,7 +158,7 @@ public sealed class MediaPackageFailureTests
     }
 
     [TestMethod]
-    public void OfflineLibraryAvailabilityIsRefusedAsScopeChanged()
+    public void OfflineLibraryAvailabilityIsRefusedAsTargetUnavailable()
     {
         using var sandbox = MediaPackageSandbox.Create();
         var example = Example(sandbox, "single");
@@ -167,16 +167,22 @@ public sealed class MediaPackageFailureTests
             sandbox,
             revision: "scope-rev-offline",
             availability: AssetLibrary.Modules.LibraryStorage.Contracts.StorageAvailability.Offline);
+        var before = sandbox.SnapshotTree();
 
         var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
 
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
-        Assert.AreEqual("scope_changed", report.Issues.Single().Code);
+
+        // An offline permission is an availability refusal, not a revision change: the two must never be
+        // reported with the same code, and an unavailable target must never be guessed as usable.
+        Assert.AreEqual("target_unavailable", report.Issues.Single().Code);
+        Assert.IsFalse(Codes(report).Contains("scope_changed", StringComparer.Ordinal));
         Assert.AreEqual(0, report.VerifiedFileCount);
+        CollectionAssert.AreEqual(before.ToArray(), sandbox.SnapshotTree().ToArray());
     }
 
     [TestMethod]
-    public void ExpiredScopeIsRefusedAsScopeChanged()
+    public void ExpiredScopeIsRefusedAsTargetUnavailable()
     {
         using var sandbox = MediaPackageSandbox.Create();
         var example = Example(sandbox, "single");
@@ -189,7 +195,12 @@ public sealed class MediaPackageFailureTests
         var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
 
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
-        Assert.AreEqual("scope_changed", report.Issues.Single().Code);
+
+        // An expired permission is the same availability refusal as an offline one, and it is decided
+        // before any directory or file is touched.
+        Assert.AreEqual("target_unavailable", report.Issues.Single().Code);
+        Assert.IsFalse(Codes(report).Contains("scope_changed", StringComparer.Ordinal));
+        Assert.AreEqual(0, report.VerifiedFileCount);
     }
 
     [TestMethod]
@@ -329,6 +340,186 @@ public sealed class MediaPackageFailureTests
         Assert.IsFalse(text.Contains(sandbox.Root, StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(text.Contains(sandbox.StagingRoot, StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(text.Contains("SYNTHETIC", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void MissingTrustedTargetRootIsUnavailableRatherThanMissing()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        using var composition = sandbox.Compose();
+
+        // The trusted target root is gone: the target cannot be observed at all, which is an
+        // availability refusal, never an absence of the package and never a conflict.
+        Directory.Delete(sandbox.LibraryRoot);
+        var before = sandbox.SnapshotTree();
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        Assert.AreEqual("target_unavailable", report.Issues.Single().Code);
+        Assert.IsFalse(Codes(report).Contains("source_missing", StringComparer.Ordinal));
+        Assert.AreEqual(0, report.VerifiedFileCount);
+        CollectionAssert.AreEqual(before.ToArray(), sandbox.SnapshotTree().ToArray());
+    }
+
+    [TestMethod]
+    public void UnobservableTargetPathIsRefusedRatherThanReadAsAbsent()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        using var composition = sandbox.Compose();
+
+        // The trusted target root is replaced by a file, so the target name cannot even be resolved.
+        // A refusal must never be read as "the target does not exist yet".
+        Directory.Delete(sandbox.LibraryRoot, recursive: true);
+        File.WriteAllText(sandbox.LibraryRoot, "not a directory");
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        Assert.AreEqual(0, report.VerifiedFileCount);
+        Assert.IsTrue(
+            Codes(report).Any(code => code is "unsafe_path" or "io_failure" or "target_unavailable"),
+            Describe(report));
+        Assert.IsFalse(Codes(report).Contains("target_exists", StringComparer.Ordinal));
+    }
+
+    [TestMethod]
+    public void MissingPackageRootIsSourceMissingRatherThanTargetUnavailable()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = MediaPackageSandbox.ReadExamples().Single(item => item.Name == "single");
+        using var composition = sandbox.Compose();
+
+        // The package is never written into the staging root: the declared staging_ref is absent, which
+        // is a missing source and must not be reported as an unavailable target.
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        CollectionAssert.Contains(Codes(report), "source_missing");
+        Assert.IsFalse(Codes(report).Contains("target_unavailable", StringComparer.Ordinal));
+        Assert.AreEqual(0, report.VerifiedFileCount);
+    }
+
+    [TestMethod]
+    public void RealReadBudgetExactlyCoveringThePackageIsEnough()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        var videoBytes = (long)example.Payloads["video.mp4"].Length;
+        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: videoBytes));
+
+        // Every earlier file is read first, so only the video's own length remains: a budget that is
+        // exactly enough is enough, and the verdict is a real read rather than a guess.
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Inspected, report.Status, Describe(report));
+        Assert.AreEqual(example.Payloads.Values.Sum(payload => (long)payload.Length), report.VerifiedBytes);
+    }
+
+    [TestMethod]
+    public void RealReadBudgetOneByteShortIsRefusedAsBudgetExceeded()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        var videoBytes = (long)example.Payloads["video.mp4"].Length;
+        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: videoBytes - 1));
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+
+        // A budget refusal is a budget verdict: it must not be reported as an environment failure.
+        Assert.AreEqual("budget_exceeded", report.Issues.Single().Code);
+        Assert.IsLessThanOrEqualTo(videoBytes - 1, report.VerifiedBytes);
+    }
+
+    [TestMethod]
+    public void EnumerationBudgetIsEnforcedWhileWalking()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumIssues: 1));
+        var packageRoot = sandbox.PackagePath(example);
+        for (var index = 0; index < MediaPackageInspectionLimits.MaximumEnumeratedEntries; index++)
+        {
+            File.WriteAllText(Path.Combine(packageRoot, $"filler-{index}.txt"), "unexpected");
+        }
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        CollectionAssert.Contains(Codes(report), "budget_exceeded");
+        Assert.AreEqual(0, report.VerifiedFileCount);
+        Assert.HasCount(1, report.Issues);
+        Assert.IsTrue(report.IssuesTruncated, "A capped walk must report truncation.");
+    }
+
+    [TestMethod]
+    public void TargetHeadroomIsAFloorThatCannotBeLowered()
+    {
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new MediaPackageInspectionLimits(minimumTargetHeadroomBytes: 0));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new MediaPackageInspectionLimits(minimumTargetHeadroomBytes: -1));
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(
+            () => new MediaPackageInspectionLimits(
+                minimumTargetHeadroomBytes: MediaPackageInspectionLimits.MinimumTargetHeadroomBytes - 1));
+
+        // A trusted constructor may only raise the floor, never relax it.
+        var raised = new MediaPackageInspectionLimits(
+            minimumTargetHeadroomBytes: MediaPackageInspectionLimits.MinimumTargetHeadroomBytes * 2);
+        Assert.AreEqual(
+            MediaPackageInspectionLimits.MinimumTargetHeadroomBytes * 2,
+            raised.MinimumTargetHeadroomByteCount);
+    }
+
+    [TestMethod]
+    public void HeadroomIsRequiredOnTopOfTheDeclaredPayload()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+        using var composition = sandbox.Compose();
+        var declared = example.Payloads.Values.Sum(payload => (long)payload.Length);
+        composition.Space.AvailableBytes = declared + MediaPackageInspectionLimits.MinimumTargetHeadroomBytes - 1;
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        Assert.AreEqual("insufficient_space", report.Issues.Single().Code);
+        Assert.AreEqual(0, report.VerifiedFileCount);
+    }
+
+    [TestMethod]
+    public void ReportLocationsAreValidatedRelativePathsOrFixedFieldPositions()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "multipart");
+        using var composition = sandbox.Compose();
+        var packageRoot = sandbox.PackagePath(example);
+        File.Delete(Path.Combine(packageRoot, "poster.png"));
+        File.WriteAllText(Path.Combine(packageRoot, "extra.txt"), "unexpected");
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        Assert.IsNotEmpty(report.Issues);
+        foreach (var issue in report.Issues)
+        {
+            var location = issue.Location;
+            if (location is null)
+            {
+                continue;
+            }
+
+            Assert.IsFalse(location.Contains(sandbox.Root, StringComparison.OrdinalIgnoreCase), location);
+            Assert.DoesNotContain(":\\", location, StringComparison.Ordinal);
+            Assert.DoesNotStartWith("/", location);
+            Assert.DoesNotContain('\n', location);
+            Assert.DoesNotContain('\r', location);
+            Assert.AreEqual(location, location.Trim(), location);
+        }
     }
 
     private static MediaPackageExample Example(MediaPackageSandbox sandbox, string name)

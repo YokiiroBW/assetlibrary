@@ -52,7 +52,10 @@ public sealed record MediaPackageInspectionLimits
             throw new ArgumentOutOfRangeException(nameof(streamBufferBytes));
         }
 
-        if (minimumTargetHeadroomBytes < 0 || minimumTargetHeadroomBytes > MinimumTargetHeadroomBytes)
+        // The 64 MiB headroom is a floor, not a maximum that may be relaxed: a trusted constructor can
+        // only raise it, never lower it towards zero.
+        if (minimumTargetHeadroomBytes < MinimumTargetHeadroomBytes
+            || minimumTargetHeadroomBytes > long.MaxValue - MaximumReadBytes)
         {
             throw new ArgumentOutOfRangeException(nameof(minimumTargetHeadroomBytes));
         }
