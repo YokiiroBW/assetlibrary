@@ -1,12 +1,16 @@
 # 媒体成品包只读预检（Media Package Preflight）
 
-状态：TS-099 已完成协调第四次验收后的返修轮。沙箱内产品与测试 Release 编译通过（0 警告 0 错误）；
-私有探针在**真实产品程序集**上复算了本轮唯一生产改动（诊断 sink 的内部有界性）与目标受信根两场景，
-另有既有正例/负例/边界/摘要/只读/端到端项。
-协调第四次验收的真实结果（132 项 129 过 1 失败 2 链接条件 skip）针对**上一版候选**：
-唯一失败是本卡测试侧的夹具构造问题（重复路径夹具拼成非法 JSON），另有一项**真实生产缺陷**
-（`MediaPackageIssueSink` 内部去重集合无界增长）在本轮修好。真实测试执行与格式结论仍待协调环境复验
-（见文末"证据边界"）。交付状态 `needs_validation`。
+状态：TS-099 已完成协调第五次验收后的返修轮（候选 `68a278c358dde0d7a0ce85ed89e66ccdf90a9a6c`，**第五**候选；
+`acd8eb6a` 是**第四**候选）。**全部生产代码已冻结**，本轮**未改任何生产文件**；
+唯一改动是一个测试文件里的一处计数语义，其余为六份文档校准。测试项目 Release 编译通过（0 警告 0 错误）。
+协调第五次验收的真实结果是「**134 项展开结果：131 通过、1 失败、2 链接条件 skip**，
+build/19 个 C# 格式/架构通过」，针对**上一版候选**：唯一失败是本卡测试侧的计数语义问题
+（把「真实哈希次数」误当「换根次数」），唯一生产缺陷（`MediaPackageIssueSink` 内部去重集合无界增长）
+已在上一候选闭合——cap=1、10000 个不同 location 后公开 `Issues=1`、内部 `recorded=1`。
+真实测试执行与格式结论仍待协调环境复验（见文末"证据边界"）。交付状态 `needs_validation`。
+
+**两种口径不要混用**：**测试方法数 128**（本卡 **70**）是 DSH 可静态数出的 `[TestMethod]` 个数；
+**展开结果数 134** 是协调真实运行的结果条数。DSH 从未运行过测试，134/131/1/2 只属于协调环境。
 
 ## 1. 这份契约解决什么
 
@@ -180,24 +184,28 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
 
 调用方在任何情况下都不得把 `report.Status == Inspected` 当作"已发布"。
 
-## 9. 证据边界（协调第四次验收后的返修轮交付时）
+## 9. 证据边界（协调第五次验收后的返修轮交付时）
 
 已在**本工作树沙箱内**实际验证：
 
 - `dotnet restore AssetLibrary.slnx --locked-mode` 通过；50 个在解内锁定包与
   `packages.lock.json` 的 `contentHash` 及 `.nupkg` 字节摘要双向一致。
 - `dotnet build AssetLibrary.slnx -c Release`：15 个项目，**0 警告 0 错误**
-  （`TreatWarningsAsErrors` + `EnforceCodeStyleInBuild` + 分析器预算全开）；
-  本轮改动后产品与测试项目再次单独 Release 编译，均 **0 警告 0 错误**
-  （`.runtime/dsh-delivery/logs/build-r4-core-1.txt` / `build-r4-tests-1.txt`）。
+  （`TreatWarningsAsErrors` + `EnforceCodeStyleInBuild` + 分析器预算全开）。
+  本轮**未改任何生产文件**，故产品构建与真实探针**未重跑**：它们在前一候选已真实通过，
+  协调第五次验收的 Release build 也通过。本轮唯一的编译动作是改动后的测试项目 Release 编译，
+  **0 警告 0 错误**（`.runtime/dsh-delivery/logs/build-r5-tests-1.txt`；
+  沿用的上一候选日志为 `build-r4-core-1.txt` / `build-r4-tests-1.txt`）。
 - **真实程序集探针**（`.runtime/probe/verify/`，本卡私有、不进候选）：引用
   `services/core-server/bin/Release/net10.0/AssetLibrary.CoreServer.dll`，因此驱动的是真实产品程序集。
-  本轮（55 行记录）复算：**诊断 sink 的内部有界性**（cap=1 时同一对重复 → 不置 `IsTruncated`；
-  第二个不同对 → 置 `IsTruncated`；**10000 个不同 location 后公开 1 条，内部 `issues=1`、
-  `recorded=1`、`codes=1`**）、**目标受信根两场景**（初始即普通文件 → `unsafe_path`、
-  `hasher_calls=0`、不报 `target_exists`；首文件 hash 后变普通文件 → `unsafe_path@target`、4 次真实 hash；
-  根被删除仍 `target_unavailable`）。既有项（正例/负例/边界/摘要/只读/端到端）继续成立，
-  全部 55 行**无抛异常、无回显原文**。输出：`.runtime/dsh-delivery/logs/probe-run-44.txt`。
+  55 行记录（`.runtime/dsh-delivery/logs/probe-run-44.txt`）复算：**诊断 sink 的内部有界性**
+  （cap=1 时同一对重复 → 不置 `IsTruncated`；第二个不同对 → 置 `IsTruncated`；
+  **10000 个不同 location 后公开 1 条，内部 `issues=1`、`recorded=1`、`codes=1`**）、
+  **目标受信根两场景**（初始即普通文件 → `unsafe_path`、`hasher_calls=0`、不报 `target_exists`；
+  首文件 hash 后变普通文件 → `unsafe_path@target`、4 次真实 hash；根被删除仍 `target_unavailable`）。
+  既有项（正例/负例/边界/摘要/只读/端到端）继续成立，全部 55 行**无抛异常、无回显原文**。
+  协调第五次验收在自己的环境里再次确认了内部有界与目标根两场景。
+  **探针不是测试宿主**：它不跑 MSTest 夹具生命周期，也不能替代标准测试套件。
 - **夹具不变性**：6 个候选夹具的 LF 归一化字节与 `HEAD` **逐字节相同**（磁盘 4 个 CRLF、2 个 LF），
   5 个被 `manifest.json` 钉住的 LF 归一化摘要 **5/5 相符**。**本轮一字未改夹具**，
   包括那个曾让测试失败的 `examples.json`——修的是测试怎么读它，不是它的内容。
@@ -210,19 +218,21 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
 
 **未**在本环境执行，属 `needs_validation`：
 
-- `dotnet test`：testhost 无法在本沙箱启动（本轮窄过滤器再试一次，仍
-  `vstest.console process failed to connect to testhost process after 90 seconds`，未重试）。
-  **本卡 70 个测试一个都没跑，不得记为通过。**
-  协调第四次验收给出的**真实**结果是「132 项 129 过 1 失败 2 链接条件 skip」，判定
-  `changes_requested`：唯一失败是本卡测试侧的夹具构造问题（重复路径夹具拼成非法 JSON），
-  另有一项**真实生产缺陷**（`MediaPackageIssueSink.Record` 先 `Add` 后判 cap，cap=1 时
-  10000 个不同键在内部留下 10000 条），两者本轮都已处理，但**本轮改动尚未经过任何测试宿主**。
+- `dotnet test`：testhost 无法在本沙箱启动。**已知受限路径，本轮按卡 5 第 21 行不再重试**；
+  **本卡 70 个测试方法一个都没跑，不得记为通过。**
+  协调第五次验收给出的**真实**结果是「**134 项展开结果：131 过 1 失败 2 链接条件 skip**」，判定
+  `changes_requested`：唯一失败是本卡测试侧的计数语义问题——该回归用同一个计数器兼表
+  「真实哈希次数」与「换根次数」，包装器每次真实哈希后都触发回调，读 4 个文件得到 4 而断言写成 1，
+  于是在换根已正确发生、最终也已正确拒绝的情况下提前失败；本轮把 `hashCalls` / `flipCount` /
+  `flipAfterHashCall` 三个计数器分开并分别断言，**不硬编码哈希次数**。
+  唯一生产缺陷（`MediaPackageIssueSink.Record` 先 `Add` 后判 cap）已在上一候选修好并由协调实测确认闭合，
+  **全部生产代码现已冻结**；但**本轮改动尚未经过任何测试宿主**。
 - `dotnet format --verify-no-changes`：`MSBuildWorkspace` 的 build host 需要命名管道，加载工作区即被
-  `UnauthorizedAccessException` at `NamedPipeClientStream.TryConnect` 拒绝。本轮未再重跑、未提权，
-  格式证据只有静态自查。
+  `UnauthorizedAccessException` at `NamedPipeClientStream.TryConnect` 拒绝。**已知受限路径，本轮不再重试**、
+  未提权，格式证据只有静态自查（且静态自查**并非全绿**）。
 - `tests/database`、`tests/architecture` 的 Python 用例：沙箱拒绝在临时目录内写入/清理。
   这些是环境错误，不是断言失败。
-- `.runtime/probe/escape` 临时探针：两次无输出超时后已按协调指令**停止**；
+- `.runtime/probe/escape` 临时探针：两次无输出超时后已按协调指令**停止**并原样保留；
   静态读取还发现它把 `examples.json` 根数组误当对象成员，故其失败**不是产品结论**，
   也不据此改夹具或 reader。
 

@@ -463,15 +463,26 @@ public sealed class MediaPackageFailureTests
         // then is it replaced by a regular file. The first check cannot see this, so the final re-check of the
         // trusted root is what has to refuse it: the run must not report a successful inspection over a
         // target root that stopped being a directory, and it must not report the package as merely existing.
-        var hashed = 0;
+        //
+        // Three counters are kept apart on purpose. hashCalls counts every real hash the run performs, which is
+        // a property of the package under test and NOT of this scenario, so it is never asserted to a fixed
+        // number. flipCount and flipAfterHashCall describe what this test actually did: the root was swapped
+        // exactly once, and it was swapped after the first real hash had returned. Asserting hashCalls == 1
+        // would conflate the two -- the callback fires after every hash, so the counter reaches the number of
+        // files read while only the first callback flips anything.
+        var hashCalls = 0;
+        var flipCount = 0;
+        var flipAfterHashCall = 0;
         using var composition = sandbox.ComposeWithHasher(
             inner => new FlippingFileHasher(
                 inner,
                 () =>
                 {
-                    hashed++;
-                    if (hashed != 1)
+                    hashCalls++;
+                    if (hashCalls != 1)
                     {
+                        // Later hashes still run against the real hasher; the root has already been swapped, so
+                        // they observe the new state and must not swap it again.
                         return;
                     }
 
@@ -484,11 +495,28 @@ public sealed class MediaPackageFailureTests
                         "The replaced root must be inside this test's own sandbox.");
                     Directory.Delete(sandbox.LibraryRoot, recursive: true);
                     File.WriteAllText(sandbox.LibraryRoot, "not a directory");
+
+                    // Recorded only after the swap really happened, so these counters cannot claim a flip that
+                    // never occurred.
+                    flipCount++;
+                    flipAfterHashCall = hashCalls;
                 }));
 
         var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
 
-        Assert.AreEqual(1, hashed, "The flip must happen after a real hash call, not before the run.");
+        Assert.AreEqual(1, flipCount, "The root must be replaced exactly once.");
+        Assert.AreEqual(
+            1,
+            flipAfterHashCall,
+            "The replacement must follow the FIRST real hash, not happen before the run or after a later read.");
+        Assert.IsGreaterThanOrEqualTo(
+            flipAfterHashCall,
+            hashCalls,
+            "The flip must be recorded after a hash that really returned.");
+        Assert.IsGreaterThan(
+            0,
+            hashCalls,
+            "The scenario is only meaningful if the real hasher was actually called.");
         Assert.IsTrue(File.Exists(sandbox.LibraryRoot), "The fixture must have left a regular file at the root.");
         Assert.IsFalse(Directory.Exists(sandbox.LibraryRoot), "The root must not be a directory any more.");
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
@@ -512,10 +540,12 @@ public sealed class MediaPackageFailureTests
     }
 
     /// <summary>
-    /// Delegates every hash to the real streaming hasher and runs one action immediately after the first
-    /// hash returns, so a test can change the tree between two real reads.
+    /// Delegates every hash to the real streaming hasher and invokes <paramref name="afterEveryHash"/>
+    /// immediately after each real hash returns, so a test can change the tree between two real reads. The
+    /// callback runs once per hash, not once per run; deciding what to do on which call is the test's job, so
+    /// the wrapper stays a plain decorator with no notion of a "first" call.
     /// </summary>
-    private sealed class FlippingFileHasher(IMediaPackageFileHasher inner, Action afterFirstHash)
+    private sealed class FlippingFileHasher(IMediaPackageFileHasher inner, Action afterEveryHash)
         : IMediaPackageFileHasher
     {
         public async ValueTask<PayloadFacts> HashAsync(
@@ -524,7 +554,7 @@ public sealed class MediaPackageFailureTests
             CancellationToken cancellationToken)
         {
             var facts = await inner.HashAsync(absolutePath, byteLimit, cancellationToken).ConfigureAwait(false);
-            afterFirstHash();
+            afterEveryHash();
             return facts;
         }
     }
