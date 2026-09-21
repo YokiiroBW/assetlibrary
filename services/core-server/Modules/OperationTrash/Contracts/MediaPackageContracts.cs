@@ -182,9 +182,9 @@ public static class MediaPackageUnverifiedFacts
 /// Bounded, ordered diagnostic sink shared by the manifest reader, the policy and the inspector. It
 /// keeps at most one entry per distinct code and location pair, so a hostile package cannot inflate
 /// the report; the first occurrence of each pair fixes the report order. Every internal store is
-/// bounded by the frozen cap: the sink holds at most the maximum number of issues plus one dedup key
-/// per recorded issue, so a manifest with ten thousand distinct hostile locations can neither grow the
-/// report nor grow the bookkeeping without limit.
+/// bounded by the frozen cap: the dedup store only ever holds pairs that were recorded, so it holds at
+/// most the maximum number of issues and a manifest with ten thousand distinct hostile locations can
+/// neither grow the report nor grow the bookkeeping without limit.
 /// </summary>
 public sealed class MediaPackageIssueSink
 {
@@ -221,16 +221,22 @@ public sealed class MediaPackageIssueSink
     public bool Record(string code, string? location = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
-        if (issues.Count >= MaximumIssues)
+
+        // An already-reported pair carries no new information, so it is recognised before the cap is
+        // consulted: repeating a pair that is already in the report is not a dropped diagnostic and must
+        // not claim truncation. The lookup is bounded because the dedup store only ever holds the pairs
+        // that were actually recorded.
+        if (!recorded.Add((code, location)))
         {
-            // The cap is reached, so no further pair can ever be reported: the dedup store is left as it
-            // is instead of growing one key per hostile location, and the truncation stays visible.
-            IsTruncated = true;
             return false;
         }
 
-        if (!recorded.Add((code, location)))
+        if (issues.Count >= MaximumIssues)
         {
+            // A genuinely new pair arrived after the cap, so its diagnostic really is dropped: the
+            // truncation stays visible and the dedup store is left as it is, instead of growing one key
+            // per hostile location.
+            IsTruncated = true;
             return false;
         }
 

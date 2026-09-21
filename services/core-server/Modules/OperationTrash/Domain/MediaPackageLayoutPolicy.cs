@@ -34,47 +34,14 @@ internal static class MediaPackageLayoutPolicy
     internal const string MovieNfoPath = "movie.nfo";
 
     /// <summary>
-    /// The one directory every multipart episode entry must share. The name is not invented here: it is
-    /// the directory the declared episode paths themselves agree on, so the templates, the declared set
-    /// and the real listing all describe the same directory. A second episode directory is refused.
+    /// The one directory every multipart episode entry lives in. This is a fixed part of the frozen layout,
+    /// not something derived from the manifest: <c>contracts/media-package/candidate-v1/semantics.md</c> pins
+    /// the exact path <c>Season 01/S01E{episode}-cid-{cid}</c>, so a package whose episode entries all agree
+    /// on some other directory (another season number, a self-chosen subdirectory, or the package root) is
+    /// refused. Deriving the directory from the input would let the input define its own template, which is
+    /// exactly what a preflight exists to prevent.
     /// </summary>
-    internal static string? EpisodeDirectory(IReadOnlyList<MediaPackageFileEntry> files)
-    {
-        ArgumentNullException.ThrowIfNull(files);
-        var found = false;
-        var directory = string.Empty;
-        foreach (var file in files)
-        {
-            if (!IsEpisodeEntry(file))
-            {
-                continue;
-            }
-
-            var separator = file.Path.LastIndexOf('/');
-            var candidate = separator < 0 ? string.Empty : file.Path[..separator];
-            if (!found)
-            {
-                directory = candidate;
-                found = true;
-                continue;
-            }
-
-            if (!string.Equals(directory, candidate, StringComparison.Ordinal))
-            {
-                return null;
-            }
-        }
-
-        return directory;
-    }
-
-    /// <summary>
-    /// True for a declared entry that the multipart layout pins to one episode part, and therefore to one
-    /// episode directory.
-    /// </summary>
-    private static bool IsEpisodeEntry(MediaPackageFileEntry file) =>
-        file.Kind is MediaPackageFileKind.Video or MediaPackageFileKind.EpisodeThumb
-        || (file.Kind == MediaPackageFileKind.Nfo && file.Cid is not null);
+    internal const string EpisodeDirectory = "Season 01";
 
     private const string EpisodePrefix = "S01E";
 
@@ -153,16 +120,10 @@ internal static class MediaPackageLayoutPolicy
         // Every root-level role stays unique, because a single package carries exactly one of each.
         var covered = new HashSet<(EntryRole Role, string Key)>();
 
-        // A null directory means the declared episode entries disagree about their own directory, which no
-        // single template can satisfy: the disagreement itself is one named refusal.
-        var sharedDirectory = layout == MediaPackageLayout.Multipart ? EpisodeDirectory(files) : string.Empty;
-        var episodeDirectory = sharedDirectory ?? string.Empty;
+        // The episode directory is the frozen one, so a package that moved every episode entry elsewhere is
+        // refused entry by entry, each against its own fixed field position.
+        var episodeDirectory = layout == MediaPackageLayout.Multipart ? EpisodeDirectory : string.Empty;
         var unmatched = 0;
-        if (sharedDirectory is null)
-        {
-            issues.Record("invalid_file_set", "layout");
-            unmatched++;
-        }
 
         for (var index = 0; index < files.Count; index++)
         {
@@ -369,10 +330,9 @@ internal static class MediaPackageLayoutPolicy
         path is "poster.jpg" or "poster.png";
 
     /// <summary>
-    /// Parses the frozen multipart path <c>{directory}/S01E{episode}-cid-{cid}</c> and returns the stem
-    /// with its directory, so every accepted episode entry is pinned to the one directory the declared
-    /// episode paths agree on. The episode number is at least two digits with no leading zero beyond
-    /// that, and the cid is the exact declared value: <c>cid-1012</c> is not <c>cid-101</c>.
+    /// Parses the frozen multipart path <c>Season 01/S01E{episode}-cid-{cid}</c> and returns the stem with
+    /// its directory. The episode number is at least two digits with no leading zero beyond that, and the cid
+    /// is the exact declared value: <c>cid-1012</c> is not <c>cid-101</c>.
     /// </summary>
     private static bool TryReadEpisodeStem(
         string path,
@@ -382,9 +342,7 @@ internal static class MediaPackageLayoutPolicy
         out string stem)
     {
         stem = string.Empty;
-        var expectedPrefix = episodeDirectory.Length == 0
-            ? EpisodePrefix
-            : episodeDirectory + "/" + EpisodePrefix;
+        var expectedPrefix = episodeDirectory + "/" + EpisodePrefix;
         if (!path.StartsWith(expectedPrefix, StringComparison.Ordinal))
         {
             return false;

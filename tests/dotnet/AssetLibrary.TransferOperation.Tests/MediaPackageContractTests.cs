@@ -316,6 +316,133 @@ public sealed class MediaPackageContractTests
     }
 
     [TestMethod]
+    public void MultipartEpisodeDirectoryIsTheFrozenSeasonDirectory()
+    {
+        // The frozen layout pins "Season 01/": a package whose episode entries all agree on a different
+        // season directory is not the frozen layout. Moving every entry keeps the set internally consistent,
+        // which is exactly why the directory cannot be derived from the input.
+        AssertRefused(MoveEveryEpisodeEntry("Season 01/", "Season 99/"), "invalid_file_set");
+
+        // Dropping the season directory entirely is not the frozen layout either: the episode files are not
+        // root files.
+        AssertRefused(MoveEveryEpisodeEntry("Season 01/", string.Empty), "invalid_file_set");
+
+        // A self-chosen subdirectory is refused for the same reason.
+        AssertRefused(MoveEveryEpisodeEntry("Season 01/", "Season 01/Extras/"), "invalid_file_set");
+
+        // The frozen spelling itself still reads, so the three refusals above are about the directory and
+        // not about the files.
+        Assert.IsTrue(ReadWithReader(Mutate("multipart", _ => { })).Succeeded);
+    }
+
+    /// <summary>
+    /// Rewrites every episode entry of the multipart example from one directory prefix to another, leaving
+    /// the root-level entries untouched, so the mutated package stays internally consistent.
+    /// </summary>
+    private static byte[] MoveEveryEpisodeEntry(string from, string to) =>
+        Mutate(
+            "multipart",
+            root =>
+            {
+                foreach (var file in Files(root))
+                {
+                    var path = file!["path"]!.GetValue<string>();
+                    if (path.StartsWith(from, StringComparison.Ordinal))
+                    {
+                        file["path"] = to + path[from.Length..];
+                    }
+                }
+            });
+
+    [TestMethod]
+    public void EscapedSurrogateHalvesAreRefusedAsAManifestVerdict()
+    {
+        // A JSON escape can spell half of a UTF-16 surrogate pair. That is legal JSON syntax, and the
+        // parser accepts it, but decoding the string fails, so the input must be refused as a named
+        // manifest verdict instead of letting the failure escape as a framework exception. The three
+        // cases below cover a string value, a file path and a property name.
+        foreach (var rawEscape in new[] { "\\uD800", "\\uDC00", "\\uD800XDC00" })
+        {
+            AssertRefusedWithNamedVerdict(
+                Mutate("single", root => root["bvid"] = "BV0000000001" + rawEscape),
+                "a bvid value carrying " + rawEscape);
+            AssertRefusedWithNamedVerdict(
+                Mutate("single", root => FileAt(root, 3)["path"] = "video" + rawEscape + ".mp4"),
+                "a file path carrying " + rawEscape);
+            AssertRefusedWithNamedVerdict(
+                Mutate("single", root => RenameRootKey(root, "provider", "provi" + rawEscape + "der")),
+                "a property name carrying " + rawEscape);
+        }
+    }
+
+    [TestMethod]
+    public void LegalEscapePairsAndTheirUtf8SpellingAreTreatedAlike()
+    {
+        // A legal surrogate pair is well-formed text, so the syntax guard must accept it: the same
+        // character written as UTF-8 and written as a pair of escapes has to behave identically. The
+        // character is not allowed in these fields, so identity validation refuses both with the same
+        // frozen code, which is where field semantics belong.
+        const string SmilingFace = "\uD83D\uDE00";
+        var escaped = Mutate("single", root => root["bvid"] = "BV0000000001" + "\\uD83D\\uDE00");
+        var rawUtf8 = Mutate("single", root => root["bvid"] = "BV0000000001" + SmilingFace);
+
+        AssertRefused(escaped, "invalid_identity");
+        AssertRefused(rawUtf8, "invalid_identity");
+        Assert.AreEqual(
+            Describe(ReadWithReader(rawUtf8)),
+            Describe(ReadWithReader(escaped)),
+            "The same character must not be judged differently depending on how it is spelled.");
+
+        // An escaped backslash followed by the letter u is an ordinary string, not an escape sequence, so
+        // it is not a decode failure either.
+        AssertRefused(
+            Mutate("single", root => root["bvid"] = "BV0000000001" + "\\\\uD800"),
+            "invalid_identity");
+    }
+
+    /// <summary>
+    /// Asserts that the manifest is refused and that the refusal is a named result: the reader reports a
+    /// frozen code, and no framework exception reaches the caller.
+    /// </summary>
+    private static void AssertRefusedWithNamedVerdict(byte[] manifestBytes, string what)
+    {
+        MediaPackageManifestReadResult result;
+        try
+        {
+            result = ReadWithReader(manifestBytes);
+        }
+        catch (Exception exception)
+        {
+            Assert.Fail($"Reading {what} threw {exception.GetType().Name} instead of returning a verdict.");
+            return;
+        }
+
+        Assert.IsNull(result.Manifest, $"Reading {what} must be refused.");
+        Assert.IsTrue(
+            result.FailureCode is not null || result.Issues.Count > 0,
+            $"Reading {what} must report a named code.");
+        Assert.IsTrue(
+            Codes(result).All(code => FrozenCodes.Contains(code, StringComparer.Ordinal)),
+            Describe(result));
+    }
+
+    private static IReadOnlyList<string> Codes(MediaPackageManifestReadResult result) =>
+        result.FailureCode is null
+            ? [.. result.Issues.Select(issue => issue.Code)]
+            : [result.FailureCode];
+
+    /// <summary>
+    /// Replaces one root-level property name, so a mutated key name can be written through the same
+    /// escaping rules as any other string.
+    /// </summary>
+    private static void RenameRootKey(JsonObject root, string from, string to)
+    {
+        var value = root[from]!.DeepClone();
+        Assert.IsTrue(root.Remove(from));
+        root[to] = value;
+    }
+
+    [TestMethod]
     public void MultipartRequiredObjectsAndPerCidThumbCountAreExact()
     {
         // The show nfo is required exactly once: dropping it leaves the layout incomplete.

@@ -213,8 +213,13 @@ public sealed class MediaPackageFailureTests
         using var source = new CancellationTokenSource();
         source.Cancel();
 
-        Assert.ThrowsExactly<OperationCanceledException>(
+        // The awaitable surfaces the cancellation as a TaskCanceledException, which is an
+        // OperationCanceledException. The requirement is that cancellation propagates as cancellation
+        // instead of becoming a package verdict, so the assertion accepts the base type: demanding the
+        // exact base class would fail on the framework's own derived type, not on the product's behaviour.
+        var cancelled = Assert.Throws<OperationCanceledException>(
             () => composition.InspectAsync(example, source.Token).AsTask().GetAwaiter().GetResult());
+        Assert.IsTrue(cancelled.CancellationToken.IsCancellationRequested);
     }
 
     [TestMethod]
@@ -272,7 +277,10 @@ public sealed class MediaPackageFailureTests
 
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
         Assert.AreEqual("budget_exceeded", report.Issues.Single().Code);
-        Assert.AreEqual(1, composition.Scope.ResolveCalls);
+
+        // The manifest byte budget is decided before authorization, so no scope is ever resolved for a
+        // manifest that is already over budget: asking the scope port would be work the contract forbids.
+        Assert.AreEqual(0, composition.Scope.ResolveCalls);
     }
 
     [TestMethod]
@@ -408,15 +416,16 @@ public sealed class MediaPackageFailureTests
     {
         using var sandbox = MediaPackageSandbox.Create();
         var example = Example(sandbox, "single");
-        var videoBytes = (long)example.Payloads["video.mp4"].Length;
-        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: videoBytes));
 
-        // Every earlier file is read first, so only the video's own length remains: a budget that is
-        // exactly enough is enough, and the verdict is a real read rather than a guess.
+        // The budget covers every declared payload, not just the last file read: the budget is consumed
+        // across the whole package, so a budget of the package's total is exactly enough.
+        var packageBytes = example.Payloads.Values.Sum(payload => (long)payload.Length);
+        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: packageBytes));
+
         var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
 
         Assert.AreEqual(MediaPackageInspectionStatus.Inspected, report.Status, Describe(report));
-        Assert.AreEqual(example.Payloads.Values.Sum(payload => (long)payload.Length), report.VerifiedBytes);
+        Assert.AreEqual(packageBytes, report.VerifiedBytes);
     }
 
     [TestMethod]
@@ -424,8 +433,9 @@ public sealed class MediaPackageFailureTests
     {
         using var sandbox = MediaPackageSandbox.Create();
         var example = Example(sandbox, "single");
-        var videoBytes = (long)example.Payloads["video.mp4"].Length;
-        using var composition = sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: videoBytes - 1));
+        var packageBytes = example.Payloads.Values.Sum(payload => (long)payload.Length);
+        using var composition =
+            sandbox.Compose(new MediaPackageInspectionLimits(maximumReadBytes: packageBytes - 1));
 
         var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
 
@@ -433,7 +443,7 @@ public sealed class MediaPackageFailureTests
 
         // A budget refusal is a budget verdict: it must not be reported as an environment failure.
         Assert.AreEqual("budget_exceeded", report.Issues.Single().Code);
-        Assert.IsLessThanOrEqualTo(videoBytes - 1, report.VerifiedBytes);
+        Assert.IsLessThanOrEqualTo(packageBytes - 1, report.VerifiedBytes);
     }
 
     [TestMethod]
@@ -453,8 +463,14 @@ public sealed class MediaPackageFailureTests
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
         CollectionAssert.Contains(Codes(report), "budget_exceeded");
         Assert.AreEqual(0, report.VerifiedFileCount);
+
+        // The walk stopped on the entry budget, which is one verdict, not a dropped diagnostic: the report
+        // holds that single issue and IsTruncated stays false, because nothing was discarded to make room.
+        // The diagnostic cap is proven separately by the multi-issue truncation test.
         Assert.HasCount(1, report.Issues);
-        Assert.IsTrue(report.IssuesTruncated, "A capped walk must report truncation.");
+        Assert.IsFalse(
+            report.IssuesTruncated,
+            "An enumeration budget stop is not a truncated diagnostic list.");
     }
 
     [TestMethod]

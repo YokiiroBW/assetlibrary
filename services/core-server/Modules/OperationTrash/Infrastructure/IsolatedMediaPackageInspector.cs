@@ -41,7 +41,7 @@ public sealed class IsolatedMediaPackageInspector(
                 cancellationToken).ConfigureAwait(false);
             return new MediaPackageInspectionOutcome(
                 scope,
-                load.Files,
+                [.. load.Files.Select(file => file.Entry)],
                 load.VerifiedBytes,
                 load.EnumeratedEntries,
                 issues);
@@ -69,6 +69,35 @@ public sealed class IsolatedMediaPackageInspector(
             issues.Record("io_failure");
             return new MediaPackageInspectionOutcome(scope, [], 0, 0, issues);
         }
+    }
+
+    /// <summary>
+    /// Requires the trusted target parent root to be an observable directory. A regular file is not a
+    /// parent: a target that "does not exist" underneath a file says nothing about the target, so it is
+    /// refused rather than reported as a conflict. A root that is missing is unavailable, and a root that
+    /// exists but cannot be observed is unsafe, so an unobservable object is never read as an absence.
+    /// The same requirement is applied before the first read and again at the final confirmation.
+    /// </summary>
+    private static void RequireTargetParentDirectory(
+        MediaPackagePathBoundary targetBoundary,
+        string location,
+        int enumeratedEntries = 0)
+    {
+        var isDirectory = targetBoundary.TryObserveDirectory(
+            targetBoundary.CanonicalRoot,
+            out var fault);
+        if (isDirectory is true)
+        {
+            return;
+        }
+
+        throw new InspectionRefusal(
+            isDirectory is false || fault != MediaPackagePathFault.Missing
+                ? MediaPackagePathBoundary.FaultCode(
+                    fault == MediaPackagePathFault.None ? MediaPackagePathFault.Unsafe : fault)
+                : "target_unavailable",
+            location,
+            enumeratedEntries);
     }
 
     private static bool IsEnvironmentFailure(Exception exception) =>
@@ -133,18 +162,11 @@ public sealed class IsolatedMediaPackageInspector(
                 targetName);
         }
 
-        // Target absence is only acceptable when the trusted parent root really exists: absence is
-        // observed through the parent, and nothing is created to make it observable. A parent that is
-        // missing is unavailable, while a parent that exists but cannot be observed is unsafe.
-        if (!targetBoundary.TryObserve(targetBoundary.CanonicalRoot, out _, out var parentFault)
-            || parentFault != MediaPackagePathFault.None)
-        {
-            throw new InspectionRefusal(
-                parentFault == MediaPackagePathFault.Missing
-                    ? "target_unavailable"
-                    : MediaPackagePathBoundary.FaultCode(parentFault),
-                targetName);
-        }
+        // Target absence is only acceptable when the trusted parent root really exists and really is a
+        // directory: absence is observed through the parent, and a regular file cannot be a parent. A
+        // parent that is missing is unavailable, a parent that is not a directory or that cannot be
+        // observed is unsafe, and nothing is created to make the environment observable.
+        RequireTargetParentDirectory(targetBoundary, targetName);
 
         return await LoadAsync(
             scope,
@@ -250,16 +272,7 @@ public sealed class IsolatedMediaPackageInspector(
                 confirm.EnumeratedEntries);
         }
 
-        if (!reopenedTarget!.TryObserve(reopenedTarget.CanonicalRoot, out _, out var parentObserveFault)
-            || parentObserveFault != MediaPackagePathFault.None)
-        {
-            throw new InspectionRefusal(
-                parentObserveFault == MediaPackagePathFault.Missing
-                    ? "target_unavailable"
-                    : MediaPackagePathBoundary.FaultCode(parentObserveFault),
-                "target",
-                confirm.EnumeratedEntries);
-        }
+        RequireTargetParentDirectory(reopenedTarget!, "target", confirm.EnumeratedEntries);
 
         if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
         {
@@ -279,7 +292,7 @@ public sealed class IsolatedMediaPackageInspector(
         int enumeratedEntries,
         CancellationToken cancellationToken)
     {
-        var observed = new List<MediaPackageObservedFile>(manifest.Files.Count);
+        var observed = new List<ObservedFile>(manifest.Files.Count);
         long verifiedBytes = 0;
         foreach (var file in manifest.Files)
         {
@@ -315,11 +328,8 @@ public sealed class IsolatedMediaPackageInspector(
             }
 
             verifiedBytes += facts.Payload.Length;
-            observed.Add(new MediaPackageObservedFile(
-                file.Path,
-                file.Kind,
-                file.Cid,
-                facts.Payload,
+            observed.Add(new ObservedFile(
+                new MediaPackageObservedFile(file.Path, file.Kind, file.Cid, facts.Payload),
                 facts.Stamp));
         }
 
@@ -501,18 +511,18 @@ public sealed class IsolatedMediaPackageInspector(
     private static void ReverifyObserved(
         MediaPackagePathBoundary stagingBoundary,
         string packageRoot,
-        IReadOnlyList<MediaPackageObservedFile> observed,
+        IReadOnlyList<ObservedFile> observed,
         MediaPackageIssueSink issues)
     {
         foreach (var file in observed)
         {
             if (!stagingBoundary.TryResolveChild(
                     packageRoot,
-                    file.Path,
+                    file.Entry.Path,
                     out var absolutePath,
                     out var resolveFault))
             {
-                throw new InspectionRefusal(MediaPackagePathBoundary.FaultCode(resolveFault), file.Path);
+                throw new InspectionRefusal(MediaPackagePathBoundary.FaultCode(resolveFault), file.Entry.Path);
             }
 
             if (!stagingBoundary.TryObserve(absolutePath, out var length, out var observeFault))
@@ -522,23 +532,32 @@ public sealed class IsolatedMediaPackageInspector(
                         MediaPackagePathFault.None,
                         observeFault,
                         "source_changed"),
-                    file.Path);
+                    file.Entry.Path);
             }
 
-            if (length != file.Payload.Length
-                || (file.Stamp is { } stamp && MediaPackagePathBoundary.Stamp(absolutePath) != stamp))
+            if (length != file.Entry.Payload.Length
+                || MediaPackagePathBoundary.Stamp(absolutePath) != file.Stamp)
             {
-                issues.Record("source_changed", file.Path);
+                issues.Record("source_changed", file.Entry.Path);
                 throw new InspectionRefusal(null, null);
             }
         }
     }
 
     /// <summary>
+    /// One verified file plus the stamp the inspector alone keeps for the final re-check. The stamp stays
+    /// internal on purpose: the public <see cref="MediaPackageObservedFile"/> port describes what was
+    /// verified, not how this implementation later re-proves it, so the port keeps its original shape.
+    /// </summary>
+    private sealed record ObservedFile(
+        MediaPackageObservedFile Entry,
+        (long Length, DateTimeOffset ModifiedAt) Stamp);
+
+    /// <summary>
     /// The verified payload set of one accepted package, with the entries the walk really consumed.
     /// </summary>
     private sealed record PackageLoad(
-        IReadOnlyList<MediaPackageObservedFile> Files,
+        IReadOnlyList<ObservedFile> Files,
         long VerifiedBytes,
         int EnumeratedEntries);
 

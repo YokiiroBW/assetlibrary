@@ -180,6 +180,57 @@ public sealed class MediaPackagePathBoundary
     }
 
     /// <summary>
+    /// Confirms that the path exists, is a real directory, and that neither it nor any ancestor is a link.
+    /// Returns <c>null</c> when the object cannot be observed at all, which is a refusal rather than an
+    /// answer: a caller must never read "not a directory" out of an observation that did not happen. A
+    /// regular file answers <c>false</c> with <see cref="MediaPackagePathFault.None"/>, because it was
+    /// observed successfully and it is simply not a directory.
+    /// </summary>
+    public bool? TryObserveDirectory(string resolved, out MediaPackagePathFault fault)
+    {
+        if (!Contains(Canonicalize(resolved), CanonicalRoot))
+        {
+            fault = MediaPackagePathFault.OutsideRoot;
+            return null;
+        }
+
+        if (!TryAnchor(resolved, out fault))
+        {
+            return null;
+        }
+
+        try
+        {
+            // Directory.Exists reports false both for "there is a file here" and for "nothing is here",
+            // so the two are separated before it is consulted and an unobservable object is never read as
+            // an absence.
+            if (File.Exists(resolved))
+            {
+                fault = MediaPackagePathFault.None;
+                return false;
+            }
+
+            if (Directory.Exists(resolved))
+            {
+                fault = MediaPackagePathFault.None;
+                return true;
+            }
+
+            fault = MediaPackagePathFault.Missing;
+            return null;
+        }
+        catch (Exception exception) when (
+            exception is IOException
+                or UnauthorizedAccessException
+                or System.Security.SecurityException)
+        {
+            // An object that exists but cannot be inspected is unsafe, never absent.
+            fault = MediaPackagePathFault.Unsafe;
+            return null;
+        }
+    }
+
+    /// <summary>
     /// True when <paramref name="candidate"/> is <paramref name="root"/> or lies inside it. Both values
     /// are compared in canonical form, and a volume root keeps its trailing separator so it can contain
     /// its own descendants.

@@ -98,9 +98,19 @@ public sealed class MediaPackageBoundaryTests
         var composition = sandbox.Compose();
         var text = System.Text.Encoding.UTF8.GetString(
             MediaPackageSandbox.ReadExamples()[0].ManifestBytes);
+
+        // The original entry stays and a second entry is added that differs only in case, so the manifest
+        // really declares two paths that would materialize as one object on a case-insensitive volume.
+        // Rewriting the existing path in place would leave a single entry and prove nothing.
+        const string OriginalPoster = "\"path\":\"poster.png\"";
+        Assert.Contains(OriginalPoster, text, StringComparison.Ordinal);
+        var collision =
+            "{\"cid\":null,\"kind\":\"poster\",\"path\":\"Poster.PNG\","
+            + "\"sha256\":\"e431e99b41ee429184d1a53d07b3a4955a1893def6506a78cc2adc7d2b38e1ea\","
+            + "\"size_bytes\":39}";
         var mutated = text.Replace(
-            "\"path\":\"poster.png\"",
-            "\"path\":\"Poster.PNG\"",
+            OriginalPoster,
+            OriginalPoster + "," + collision,
             StringComparison.Ordinal);
         Assert.AreNotEqual(text, mutated);
         var bytes = System.Text.Encoding.UTF8.GetBytes(mutated);
@@ -335,6 +345,63 @@ public sealed class MediaPackageBoundaryTests
         {
             File.Delete(video);
         }
+    }
+
+    [TestMethod]
+    public void MultipartEpisodeDirectoryIsRefusedWhenEveryEntryLeavesSeason01()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var composition = sandbox.Compose();
+        var multipart = MediaPackageSandbox.ReadExamples().Single(item => item.Name == "multipart");
+
+        // Every episode entry moves together, so the declared set stays internally consistent and only the
+        // frozen "Season 01/" directory is violated. The reader must refuse it: the directory is part of
+        // the contract, not a detail the manifest is allowed to choose.
+        foreach (var (from, to) in new[]
+        {
+            ("Season 01/", "Season 99/"),
+            ("Season 01/", string.Empty),
+        })
+        {
+            var bytes = MoveEveryEpisodeEntry(multipart.ManifestBytes, from, to);
+            var result = composition.Reader.Read(
+                bytes,
+                new AssetLibrary.Modules.TransferSync.Contracts.Sha256Digest(
+                    Convert.ToHexStringLower(
+                        System.Security.Cryptography.SHA256.HashData(bytes))));
+
+            Assert.IsNull(result.Manifest, $"Moving every episode entry to '{to}' must be refused.");
+            CollectionAssert.Contains(
+                result.FailureCode is null
+                    ? result.Issues.Select(issue => issue.Code).ToArray()
+                    : [result.FailureCode],
+                "invalid_file_set");
+        }
+    }
+
+    /// <summary>
+    /// Rewrites every episode entry from one directory prefix to another and leaves the root-level entries
+    /// alone, so only the season directory differs from the frozen layout.
+    /// </summary>
+    private static byte[] MoveEveryEpisodeEntry(byte[] manifestBytes, string from, string to)
+    {
+        var root = (System.Text.Json.Nodes.JsonObject)System.Text.Json.Nodes.JsonNode.Parse(manifestBytes)!;
+        foreach (var file in root["files"]!.AsArray())
+        {
+            var path = file!["path"]!.GetValue<string>();
+            if (path.StartsWith(from, StringComparison.Ordinal))
+            {
+                file["path"] = to + path[from.Length..];
+            }
+        }
+
+        using var stream = new MemoryStream();
+        using (var writer = new System.Text.Json.Utf8JsonWriter(stream))
+        {
+            root.WriteTo(writer);
+        }
+
+        return stream.ToArray();
     }
 
     private static bool TryCreateDirectoryLink(string linkPath, string targetPath)

@@ -5,15 +5,13 @@ namespace AssetLibrary.Modules.OperationTrash.Application;
 
 /// <summary>
 /// One package file whose bytes were really read and hashed, with the facts the policy needs to bind
-/// the observation to the declaration. <see cref="Stamp"/> is the length and last-write stamp observed
-/// right after that read, so the final re-check can compare more than a length.
+/// the observation to the declaration.
 /// </summary>
 public sealed record MediaPackageObservedFile(
     string Path,
     MediaPackageFileKind Kind,
     string? Cid,
-    PayloadFacts Payload,
-    (long Length, DateTimeOffset ModifiedAt)? Stamp = null);
+    PayloadFacts Payload);
 
 /// <summary>
 /// Result of the isolated real-file inspection. The issue sink carries the named failures; the
