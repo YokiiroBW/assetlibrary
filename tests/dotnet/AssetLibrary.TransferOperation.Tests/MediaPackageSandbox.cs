@@ -22,7 +22,14 @@ namespace AssetLibrary.TransferOperation.Tests;
     Justification = "The sandbox is the single place where a preflight is wired for tests: it names every port, the service, the real inspector, the limits and the fixture records, and that set is the composition itself rather than a dependency on another module.")]
 internal sealed class MediaPackageSandbox : IDisposable
 {
-    public const string FixtureRelativeDirectory = "Fixtures/MediaPackage";
+    /// <summary>
+    /// The fixture directory as a path relative to the repository root. It is the complete path, not a
+    /// short tail: the same value both locates the repository and resolves the fixtures, so a root can
+    /// only be accepted when it really holds this project's committed fixtures.
+    /// </summary>
+    public const string FixtureRelativeDirectory =
+        "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage";
+
     public const string MarkerName = ".assetlibrary-ts-099-sandbox";
     public const string MarkerValue = "assetlibrary-ts-099-sandbox-v1";
 
@@ -43,11 +50,7 @@ internal sealed class MediaPackageSandbox : IDisposable
 
     public static string FixtureRoot { get; } = Path.Combine(
         RepositoryRoot,
-        "tests",
-        "dotnet",
-        "AssetLibrary.TransferOperation.Tests",
-        "Fixtures",
-        "MediaPackage");
+        FixtureRelativeDirectory.Replace('/', Path.DirectorySeparatorChar));
 
     public static MediaPackageSandbox Create()
     {
@@ -266,12 +269,15 @@ internal sealed class MediaPackageSandbox : IDisposable
     }
 
     /// <summary>
-    /// Walks up to the directory that holds this project's own committed fixtures. Both the test binary's
-    /// directory and the current directory are used as starting points, so the search works whether the
-    /// tests are started by the platform runner from the output directory or by any other host.
+    /// Walks up from both the test binary's directory and the current directory to the one directory
+    /// that holds <c>AGENTS.md</c> and this project's committed fixtures at the complete
+    /// <see cref="FixtureRelativeDirectory"/> path, so the platform runner works whether it starts in
+    /// the output directory or in the repository. The fixtures are never copied to a second location:
+    /// the tests read exactly the bytes under version control beside them.
     /// </summary>
     private static string FindRepositoryRoot()
     {
+        var fixtureTail = FixtureRelativeDirectory.Replace('/', Path.DirectorySeparatorChar);
         foreach (var start in new[] { AppContext.BaseDirectory, Environment.CurrentDirectory })
         {
             if (string.IsNullOrWhiteSpace(start))
@@ -283,9 +289,7 @@ internal sealed class MediaPackageSandbox : IDisposable
             while (cursor is not null)
             {
                 if (File.Exists(Path.Combine(cursor.FullName, "AGENTS.md"))
-                    && Directory.Exists(Path.Combine(
-                        cursor.FullName,
-                        FixtureRelativeDirectory.Replace('/', Path.DirectorySeparatorChar))))
+                    && Directory.Exists(Path.Combine(cursor.FullName, fixtureTail)))
                 {
                     return cursor.FullName;
                 }
@@ -294,7 +298,8 @@ internal sealed class MediaPackageSandbox : IDisposable
             }
         }
 
-        throw new InvalidOperationException("The repository root could not be found.");
+        throw new InvalidOperationException(
+            "The repository root holding AGENTS.md and " + FixtureRelativeDirectory + " was not found.");
     }
 }
 

@@ -1,35 +1,61 @@
 {
   "$schema": "../../../contracts/handoffs/task-result.schema.json",
   "task_id": "TS-099",
-  "title": "资产成品包只读预检（R1–R6 修复轮）",
+  "title": "资产成品包只读预检（R1–R7 第二次返修轮）",
   "milestone": "V0.1",
   "status": "needs_validation",
   "owner": "dsh-agent",
   "branch": "work/ts-099",
   "worktree": "worktrees/TS-099/assetlibrary",
   "base_commit": "e850966065ed7f3653770180a6accd922fd95db8",
-  "commit": "5e96662450f1bf4737faa7eb3cfead455f38e354",
-  "commit_note": "5e966624 is the coordinator's own commit of the first 29-file delivery; the coordinator's first validation of it returned changes_requested. This repair round's 15 files are delivered uncommitted: this worktree's git metadata (projects/assetlibrary/.git/worktrees/assetlibrary5) is outside the session's writable workspace, so git add/commit are denied (index.lock: Permission denied) and git writes were not retried. The change set is delivered as .runtime/dsh-delivery/changes.patch (197836 bytes, sha256 fbac87a23b1f66594e936117f8836abfb4cd10047b7d6861bd46321b8a6c28d1), verified to reproduce all 15 files byte-for-byte on top of the base commit with git apply --directory (verify-patch-reproduction.txt). The coordinator fixes the candidate and creates the commit.",
+  "commit": "1b5ad8de7508237ffa95ef660c66952a407b5493",
+  "commit_note": "1b5ad8de is the coordinator's own commit of the first candidate (the 31-file candidate as it stood before this round). The coordinator's second validation of it returned changes_requested. The R1-R7 repairs in this round are delivered uncommitted on top of 1b5ad8de and are NOT contained in it: no commit was created for them. This worktree's git metadata (projects/assetlibrary/.git/worktrees/assetlibrary5) is outside the session's writable workspace, so git add/commit are denied (index.lock: Permission denied) and git writes were not retried. The full 31-file candidate is delivered as raw bytes with per-file SHA-256 and length in .runtime/dsh-delivery/source-snapshot.json, and reproduced by .runtime/dsh-delivery/changes.round2.full-raw-bytes.patch (31 blocks, git apply -p1, verified 31/31 with 0 mismatches). 19 of those files differ from 1b5ad8de and 31 differ from the base commit. The coordinator fixes the candidate and creates the commit.",
   "coordinator_commit_required": true,
   "ready_for_coordinator_commit": true,
   "changed_files": [
+    ".codex/handoffs/TS-099/result.json",
+    ".codex/handoffs/TS-099/summary.md",
+    ".codex/handoffs/TS-099/tests.md",
+    ".codex/tasks/TS-099.md",
+    "docs/handoffs/TS-099.md",
+    "docs/integrations/tianshu/media-package-preflight.md",
     "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionLimits.cs",
     "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionPorts.cs",
     "services/core-server/Modules/OperationTrash/Application/MediaPackageInspectionService.cs",
+    "services/core-server/Modules/OperationTrash/Contracts/MediaPackageContracts.cs",
     "services/core-server/Modules/OperationTrash/Contracts/MediaPackageInspectionContracts.cs",
     "services/core-server/Modules/OperationTrash/Domain/MediaPackageLayoutPolicy.cs",
+    "services/core-server/Modules/OperationTrash/Domain/MediaPackagePathPolicy.cs",
     "services/core-server/Modules/OperationTrash/Domain/MediaPackagePolicy.cs",
     "services/core-server/Modules/OperationTrash/Domain/MediaPackageShapePolicy.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/IsolatedMediaPackageInspector.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackageFileHasher.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackageManifestReader.cs",
     "services/core-server/Modules/OperationTrash/Infrastructure/MediaPackagePathBoundary.cs",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/README.md",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/examples.json",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/manifest.json",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/negative-examples.json",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/schema.json",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/semantics.md",
     "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageBoundaryTests.cs",
     "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageContractTests.cs",
     "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageFailureTests.cs",
-    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageSandbox.cs"
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageInspectionTests.cs",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageSandbox.cs",
+    "tests/dotnet/AssetLibrary.TransferOperation.Tests/MediaPackageTestPorts.cs"
   ],
   "source_snapshot": ".runtime/dsh-delivery/source-snapshot.json",
+  "source_snapshot_note": "All 31 candidate entries relative to base e850966065ed7f3653770180a6accd922fd95db8, each with its raw-byte SHA-256 (no LF normalization) and byte length, no duplicate and no omission. The same bytes are reproduced by .runtime/dsh-delivery/changes.round2.full-raw-bytes.patch (31 blocks, applied with `git apply -p1`, verified 31/31 with 0 mismatches by .runtime/dsh-delivery/verify-full-raw-patch.py). 19 entries differ from HEAD 1b5ad8de; the 6 fixtures are byte-identical to HEAD after LF normalization. delivery.json records the patch's byte length and SHA-256; delivery.md repeats them as of the last export, so delivery.json is authoritative if the documents are edited again.",
+  "repairs_this_round": {
+    "R1": "Test entry point: MediaPackageSandbox derives FixtureRoot from a repository-root-relative FULL fixture path and FindRepositoryRoot walks up from both AppContext.BaseDirectory and Environment.CurrentDirectory requiring AGENTS.md plus that full path. This was the sole cause of the coordinator's 59 failing tests.",
+    "R2": "Whole-path layout templates; multipart episode directory derived from the declared episode entries; duplicate roles keyed by (role, part cid) with root roles still globally unique; extra cids and extra root files refused; the two policy classes internal again with no InternalsVisibleTo; MediaPackagePolicy no longer discards the layout verdict.",
+    "R3": "Forward slash accepted on every platform and converted to the native separator only for real access, backslash still refused everywhere, with .., ADS, device names and trailing dot/space rules unchanged; final target observation separates Missing from Unsafe and from unobservable and re-observes the trusted target parent root; target_exists never returns an absolute path.",
+    "R4": "Per-file (length, last-write) stamps kept so the final re-check catches an equal-length rewrite that only changes mtime; MediaPackageFileHasher clamps every read to the remaining real budget and probes one byte past it, raising the named budget exception instead of a generic io_failure.",
+    "R5": "The frozen classification implemented as the card states it: missing target parent root, offline root and unknown space are target_unavailable; expired, revoked or changed scope is scope_changed; source_missing is the source only. Unknown space reports one code; insufficient_space is reserved for an observed shortfall. The issue sink is bounded in its de-duplication table too and exposes read-only views.",
+    "R6": "Well-formedness is decided on the raw JSON bytes before any member name or value is materialised, so a lone surrogate escape is refused as invalid_manifest@surrogate_escape instead of surfacing as InvalidOperationException; neither the exception nor the original text is echoed.",
+    "R7": "The switch-expression arms at MediaPackagePathBoundary.cs 305-311 are indented by the four extra spaces the coordinator's diagnostic required; the six tracking documents were rewritten so every claim is backed by code or an executed check, unsupported claims removed and historical failures kept; the delivery carries all 31 entries with raw-byte digests and lengths relative to the initial base."
+  },
   "changed_contracts": [],
   "tests": {
     "passed": 0,
@@ -37,15 +63,16 @@
     "skipped": 0,
     "executed": false,
     "authored": 64,
-    "authored_this_round": 22,
+    "authored_this_round": 0,
     "report": "tests.md",
-    "note": "No test was executed in this sandbox in either round. `dotnet test` cannot start: the VSTest testhost aborts with Win32Exception(5) 'access denied' inside Process.GetProcessHandle before a single test runs, and an earlier round additionally hit the 90s testhost named-pipe timeout. `dotnet format --verify-no-changes` fails the same way at NamedPipeClientStream.TryConnect. Nothing here is a passing test. Real evidence produced in this sandbox: Release build of both projects with 0 warnings and 0 errors under TreatWarningsAsErrors plus the full analyzer set; a 19/19 static self-check of the frozen negative and positive examples against an independent Python reading of the same frozen rules (.runtime/dsh-delivery/logs/static-selfcheck.txt); and byte-exact patch reproduction of all 15 delivered files (.runtime/dsh-delivery/logs/verify-patch-reproduction.txt)."
+    "note": "No test was executed in this sandbox in any round, and no test was added, deleted, skipped or weakened in this round. One test was renamed and two gained a stricter assertion because the card's R5 line states the frozen classification explicitly: an expired scope is scope_changed (ExpiredScopeIsRefusedAsScopeChanged, which now also asserts that target_unavailable is NOT reported) while an offline root stays target_unavailable (which already asserts that scope_changed is NOT reported). The MSTest host cannot start here: `dotnet test` aborts with a testhost connection failure, and `dotnet format --verify-no-changes` aborts at NamedPipeClientStream.TryConnect with UnauthorizedAccessException before inspecting a file (logs kept as .runtime/dsh-delivery/logs/format-r2-2.txt and format-r2-3.txt). Nothing here is a passing test. What this round did produce as real evidence: Release builds of the product and test projects with 0 warnings and 0 errors under TreatWarningsAsErrors plus the full analyzer set; and an out-of-tree probe that drives the real product assemblies, reproducing the coordinator's 59 root-discovery failures as a fixed discovery path, all 6 layout counterexamples, both frozen positive candidates, all 17 frozen negative candidates through the real reader, the boundary separator decision, the raw-byte digest rule, the read-only validated manifest, the bounded issue sink, all three surrogate-escape refusals, and 10 real end-to-end inspections through MediaPackageInspectionService. The 64-test suite is handed to the coordinator as needs_validation."
   },
   "risks": [
-    "Behavioural verification is incomplete: R1-R6 correctness rests on compile success, code review and an independent static self-check, not on an executed test run. The coordinator must run the standard restore/build/test/format gates on the fixed candidate.",
+    "The 64-test suite was not executed here, so the fixes rest on Release builds plus an out-of-tree probe that recomputes the same expectations; the coordinator must run restore/build/test/format on the fixed candidate.",
+    "MediaPackagePathBoundary.cs lines 304-310 are indented by four extra spaces per the coordinator's original WHITESPACE diagnostic. A later re-check could not be performed because dotnet format cannot run in this sandbox, so that formatting decision is unverified here and must be confirmed by the coordinator's formatter run.",
     "Static reparse-point refusal plus before/after stamps plus a final set re-check narrows but does not close hostile concurrent directory replacement (TOCTOU); real NAS semantics and power-loss durability remain unverified (production_path_races).",
-    "The frozen fixtures are the only layout evidence: the multipart 'Season 01' directory name and the S01E{>=2 digits} episode width are pinned by the fixtures, so a future 'Season 02' contract change must extend MediaPackageLayoutPolicy explicitly.",
-    "MediaPackageShapePolicy.cs (548 lines) and IsolatedMediaPackageInspector.cs (543 lines) exceed the 400-line soft guideline; both are single-responsibility units authorised by the coordinator, with no multi-statement lines or blanket suppressions used to hide concentration.",
+    "The frozen fixtures are the only layout evidence: the multipart episode directory is derived from the declared episode entries, and the S01E{>=2 digits} episode width is pinned by the fixtures, so a future season-directory contract change must extend MediaPackageLayoutPolicy explicitly.",
+    "MediaPackageShapePolicy.cs and IsolatedMediaPackageInspector.cs exceed the 400-line soft guideline; both are single-responsibility units authorised by the coordinator, with no multi-statement lines or blanket suppressions used to hide concentration.",
     "contracts/media-package/candidate-v1 remains a task fixture only (task_fixture_only), not a production publication contract."
   ],
   "blocked_by": [],
@@ -59,6 +86,7 @@
       "CanonicalLibraryRoot and RootPathComparison (LibraryStorage.Contracts) for the canonical trusted root and its comparison semantics, instead of a second root representation",
       "MediaPackageIssueSink, MediaPackagePreflightCodes, MediaPackageUnverifiedFacts and MediaPackageInspectionLimits reused unchanged, so the frozen 22-code vocabulary, the 7 unverified facts and every budget ceiling stay single-owner",
       "MediaPackagePathBoundary, MediaPackageFileHasher and MediaPackagePolicy reused by the inspector instead of duplicating root anchoring, hashing or verdict assembly",
+      "MediaPackagePathPolicy is now the single authority for raw path spelling: the layout policy calls it instead of repeating the same lexical rules",
       "The test suite reuses the existing MediaPackageSandbox composition and fixture records rather than a parallel harness"
     ],
     "duplicated_logic": [],
@@ -68,18 +96,21 @@
     "new_language_or_framework": [],
     "new_major_dependencies": [],
     "contract_changes": [
-      "No root contract was modified. contracts/media-package/candidate-v1 was never written; the tests now read the byte-exact copies committed under tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/, whose LF-normalized SHA-256 values still match the fixture manifest's five pinned digests.",
-      "The only contract-surface addition is MediaPackageManifestReadResult.IssuesTruncated and the MediaPackageBudgetExceededException port type, both inside this module's own Application/Contracts boundary."
+      "No root contract was modified in this round. contracts/media-package/candidate-v1 was never written; the tests read the byte-exact copies committed under tests/dotnet/AssetLibrary.TransferOperation.Tests/Fixtures/MediaPackage/, whose LF-normalized SHA-256 values still match the fixture manifest's five pinned digests and whose LF-normalized bytes still equal the committed HEAD bytes.",
+      "Inside this module's own Domain boundary, MediaPackageLayoutPolicy and MediaPackageShapePolicy are now internal rather than public, because only MediaPackagePolicy consumes them; MediaPackagePolicy and MediaPackagePathPolicy stay public because the committed boundary and contract tests call them directly.",
+      "The R5 classification was corrected in the product and in the two tests it names: the card states that a missing target parent root, an offline root and unknown space are target_unavailable, while an expired, revoked or changed scope is scope_changed. ExpiredScopeIsRefusedAsTargetUnavailable is therefore renamed ExpiredScopeIsRefusedAsScopeChanged and asserts scope_changed (and not target_unavailable); the offline case keeps target_unavailable and asserts not scope_changed. Both assertions are stricter than before, and no assertion was weakened."
     ],
     "architecture_tests": [
       "Release build of services/core-server/AssetLibrary.CoreServer.csproj: 0 warnings, 0 errors with TreatWarningsAsErrors, EnforceCodeStyleInBuild, EnableNETAnalyzers and the CA1501/CA1502/CA1505/CA1506 budgets enabled.",
-      "Release build of tests/dotnet/AssetLibrary.TransferOperation.Tests: 0 warnings, 0 errors, including the MSTEST0037, CA1861, CA1859 and CA1001 rules that previously failed.",
+      "Release build of tests/dotnet/AssetLibrary.TransferOperation.Tests: 0 warnings, 0 errors, including the MSTEST0037, CA1861, CA1859 and CA1001 rules.",
       "Domain keeps no System.IO dependency: MediaPackageShapePolicy and MediaPackageLayoutPolicy are pure (no IO, no clock, no environment), so the architecture gate's forbidden 'system.io' token check stays satisfied; path spellings are validated lexically and only then normalized by Infrastructure.",
       "The architecture, database and repository Python gates could not be run in this sandbox (temp-directory and named-pipe denials); the coordinator's earlier run of verify_repository and the v0.1-start gate passed and must be repeated on the fixed candidate."
     ],
     "technical_debt": [
-      "MediaPackagePolicy.cs was split as the reviewer required: shape/type/identity reading moved to Domain/MediaPackageShapePolicy.cs and layout/media_extension/selected_parts templates to Domain/MediaPackageLayoutPolicy.cs, leaving MediaPackagePolicy.cs as pure orchestration (budgets, real-list comparison, target-name entry).",
-      "MediaPackagePathBoundary.cs was rewritten around one canonical comparison form and a native access form; the volume-root containment and Linux same-separator cases are now covered by tests.",
+      "MediaPackageLayoutPolicy compares complete paths against the frozen templates (episode directory derived from the declared episode entries) and refuses a duplicate role per part, instead of the previous basename-only match that accepted a file in the wrong directory.",
+      "IsolatedMediaPackageInspector now retains each observed file's length and last-write stamp and re-observes the target and its trusted parent at the end of the run, so a same-size rewrite and a removed target root are both refused rather than reported as inspected.",
+      "MediaPackageManifestReader decides surrogate-escape well-formedness from the raw JSON bytes before any member name or value is materialized, because reading such a string is itself what throws.",
+      "MediaPackageIssueSink is bounded and hands out read-only views, so a hostile or pathological input cannot grow the report or mutate it back.",
       "MaximumEnumeratedEntries (4096) remains a constant rather than a configurable limit, so an oversized staging directory fails with budget_exceeded instead of a tuned path.",
       "Several CA1506 suppressions carry written justifications; they can be reclaimed once a composition root exists."
     ]

@@ -53,8 +53,27 @@ public sealed class MediaPackageFileHasher : IMediaPackageFileHasher
             long total = 0;
             while (true)
             {
+                // Each read is limited to what the remaining budget still allows, so the budget bounds the
+                // bytes actually pulled from the file rather than being checked after a full buffer was
+                // already consumed. A file that grew past the remaining allowance is therefore refused at
+                // the exact byte where the allowance ends.
+                var allowed = byteLimit - total;
+                var window = (int)Math.Min(bufferBytes, allowed);
+                if (window <= 0)
+                {
+                    // The allowance is used up but the stream may still hold data: only a stream that is
+                    // really finished may be hashed, otherwise this is a named budget verdict.
+                    if (await stream.ReadAsync(buffer.AsMemory(0, 1), cancellationToken)
+                        .ConfigureAwait(false) != 0)
+                    {
+                        throw new MediaPackageBudgetExceededException();
+                    }
+
+                    break;
+                }
+
                 var read = await stream
-                    .ReadAsync(buffer.AsMemory(0, bufferBytes), cancellationToken)
+                    .ReadAsync(buffer.AsMemory(0, window), cancellationToken)
                     .ConfigureAwait(false);
                 if (read == 0)
                 {
@@ -62,12 +81,6 @@ public sealed class MediaPackageFileHasher : IMediaPackageFileHasher
                 }
 
                 total += read;
-                if (total > byteLimit)
-                {
-                    // The file grew past the remaining budget: refuse instead of hashing unbounded input.
-                    throw new MediaPackageBudgetExceededException();
-                }
-
                 hasher.AppendData(buffer, 0, read);
             }
 

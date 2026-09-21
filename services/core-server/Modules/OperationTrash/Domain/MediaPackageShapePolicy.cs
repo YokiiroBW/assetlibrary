@@ -16,7 +16,7 @@ namespace AssetLibrary.Modules.OperationTrash.Domain;
 /// Every diagnostic it records uses a field position such as <c>files[2].size_bytes</c> rather than a
 /// manifest-supplied string, so an unverified path can never reach a report through this layer.
 /// </remarks>
-public static class MediaPackageShapePolicy
+internal static class MediaPackageShapePolicy
 {
     public const int SupportedSchemaVersion = 1;
     public const string RequiredProvider = "bilibili";
@@ -54,7 +54,7 @@ public static class MediaPackageShapePolicy
     /// Reads the whole manifest shape. Returns null when the document is unacceptable for any reason;
     /// the reason is always named in <paramref name="issues"/>.
     /// </summary>
-    public static MediaPackageShape? Read(JsonElement root, MediaPackageIssueSink issues)
+    internal static MediaPackageShape? Read(JsonElement root, MediaPackageIssueSink issues)
     {
         ArgumentNullException.ThrowIfNull(issues);
         if (!TryObject(root, "manifest", RootKeys, issues, out var fields))
@@ -116,7 +116,7 @@ public static class MediaPackageShapePolicy
     /// True when the object carries exactly the expected member names: a missing required key and an
     /// unknown key are both refusals, at every nesting level.
     /// </summary>
-    public static bool HasExactKeys(JsonElement value, IReadOnlyList<string> expected)
+    internal static bool HasExactKeys(JsonElement value, IReadOnlyList<string> expected)
     {
         ArgumentNullException.ThrowIfNull(expected);
         if (value.ValueKind != JsonValueKind.Object)
@@ -141,7 +141,7 @@ public static class MediaPackageShapePolicy
     /// <summary>
     /// True for a JSON string that is a canonical lowercase <c>D</c> UUID and not the all-zero value.
     /// </summary>
-    public static bool IsCanonicalUuid(string value) =>
+    internal static bool IsCanonicalUuid(string value) =>
         Guid.TryParseExact(value, "D", out var parsed)
         && parsed != Guid.Empty
         && string.Equals(value, parsed.ToString("D", CultureInfo.InvariantCulture), StringComparison.Ordinal);
@@ -149,7 +149,7 @@ public static class MediaPackageShapePolicy
     /// <summary>
     /// True for <c>BV</c> followed by ten ASCII letters or digits.
     /// </summary>
-    public static bool IsBvid(string value) =>
+    internal static bool IsBvid(string value) =>
         value.Length == 12
         && value.StartsWith("BV", StringComparison.Ordinal)
         && value.AsSpan(2).ToArray().All(char.IsAsciiLetterOrDigit);
@@ -157,7 +157,7 @@ public static class MediaPackageShapePolicy
     /// <summary>
     /// True for a lowercase 64-digit hexadecimal digest.
     /// </summary>
-    public static bool IsLowercaseSha256(string value) =>
+    internal static bool IsLowercaseSha256(string value) =>
         value.Length == 64
         && value.All(character => char.IsAsciiDigit(character) || character is >= 'a' and <= 'f');
 
@@ -166,7 +166,7 @@ public static class MediaPackageShapePolicy
     /// and quoted number lexemes, so this is the second half of the same rule: a value that is not an
     /// integer in range is never coerced.
     /// </summary>
-    public static bool TryInteger(JsonElement value, out long number)
+    internal static bool TryInteger(JsonElement value, out long number)
     {
         if (value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out number))
         {
@@ -181,7 +181,7 @@ public static class MediaPackageShapePolicy
     /// Returns the named member, or an undefined element when the member is absent. An undefined
     /// element is never a valid value for any field, so absence is reported by the field check itself.
     /// </summary>
-    public static JsonElement Field(JsonElement fields, string name) =>
+    internal static JsonElement Field(JsonElement fields, string name) =>
         fields.ValueKind == JsonValueKind.Object && fields.TryGetProperty(name, out var member)
             ? member
             : default;
@@ -535,9 +535,10 @@ public static class MediaPackageShapePolicy
 
 /// <summary>
 /// The shape-validated content of one manifest, before any layout or file-set rule is applied. The
-/// collections are owned by this instance and never aliased to the caller's arrays.
+/// collections are owned by this instance and never aliased to the caller's arrays. It stays internal:
+/// it is an intermediate reading inside this module, not part of the published contract surface.
 /// </summary>
-public sealed record MediaPackageShape(
+internal sealed record MediaPackageShape(
     string PackageId,
     string StagingRef,
     LibraryId LibraryId,

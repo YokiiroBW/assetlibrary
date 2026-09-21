@@ -173,7 +173,7 @@ public sealed class MediaPackageFailureTests
 
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
 
-        // An offline permission is an availability refusal, not a revision change: the two must never be
+        // An offline storage root is an availability refusal, not a revision change: the two must never be
         // reported with the same code, and an unavailable target must never be guessed as usable.
         Assert.AreEqual("target_unavailable", report.Issues.Single().Code);
         Assert.IsFalse(Codes(report).Contains("scope_changed", StringComparer.Ordinal));
@@ -182,7 +182,7 @@ public sealed class MediaPackageFailureTests
     }
 
     [TestMethod]
-    public void ExpiredScopeIsRefusedAsTargetUnavailable()
+    public void ExpiredScopeIsRefusedAsScopeChanged()
     {
         using var sandbox = MediaPackageSandbox.Create();
         var example = Example(sandbox, "single");
@@ -196,10 +196,11 @@ public sealed class MediaPackageFailureTests
 
         Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
 
-        // An expired permission is the same availability refusal as an offline one, and it is decided
-        // before any directory or file is touched.
-        Assert.AreEqual("target_unavailable", report.Issues.Single().Code);
-        Assert.IsFalse(Codes(report).Contains("scope_changed", StringComparer.Ordinal));
+        // A lapsed permission is a scope change, not a storage availability refusal: the storage may be
+        // perfectly reachable while the caller's right to read it has expired. It is decided before any
+        // directory or file is touched, and it must never be reported as an unavailable target.
+        Assert.AreEqual("scope_changed", report.Issues.Single().Code);
+        Assert.IsFalse(Codes(report).Contains("target_unavailable", StringComparer.Ordinal));
         Assert.AreEqual(0, report.VerifiedFileCount);
     }
 

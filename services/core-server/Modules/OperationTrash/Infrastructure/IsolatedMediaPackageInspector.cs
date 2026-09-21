@@ -134,14 +134,15 @@ public sealed class IsolatedMediaPackageInspector(
         }
 
         // Target absence is only acceptable when the trusted parent root really exists: absence is
-        // observed through the parent, and nothing is created to make it observable.
+        // observed through the parent, and nothing is created to make it observable. A parent that is
+        // missing is unavailable, while a parent that exists but cannot be observed is unsafe.
         if (!targetBoundary.TryObserve(targetBoundary.CanonicalRoot, out _, out var parentFault)
             || parentFault != MediaPackagePathFault.None)
         {
             throw new InspectionRefusal(
-                parentFault == MediaPackagePathFault.None
+                parentFault == MediaPackagePathFault.Missing
                     ? "target_unavailable"
-                    : MediaPackagePathBoundary.FaultReason(parentFault, parentFault, "target_unavailable"),
+                    : MediaPackagePathBoundary.FaultCode(parentFault),
                 targetName);
         }
 
@@ -154,6 +155,7 @@ public sealed class IsolatedMediaPackageInspector(
             targetBoundary,
             packageRoot,
             targetDirectory,
+            targetName,
             cancellationToken).ConfigureAwait(false);
     }
 
@@ -166,17 +168,19 @@ public sealed class IsolatedMediaPackageInspector(
         MediaPackagePathBoundary targetBoundary,
         string packageRoot,
         string targetDirectory,
+        string targetName,
         CancellationToken cancellationToken)
     {
         var declaredBytes = DeclaredByteCount(manifest);
-        if (!await HasTargetCapacityAsync(
+        if (await TargetCapacityRefusalAsync(
                 targetDirectory,
                 declaredBytes,
                 limits,
-                issues,
-                cancellationToken).ConfigureAwait(false))
+                cancellationToken).ConfigureAwait(false) is { } capacityRefusal)
         {
-            throw new InspectionRefusal("insufficient_space", "target");
+            // Space that was observed to be too small and space that could not be observed at all are
+            // different verdicts, and only the observed one may claim insufficiency.
+            throw new InspectionRefusal(capacityRefusal, "target");
         }
 
         var listing = stagingBoundary.Enumerate(packageRoot, issues, cancellationToken);
@@ -210,14 +214,51 @@ public sealed class IsolatedMediaPackageInspector(
         }
 
         // Every file verified earlier is re-observed after the last read, so a file that changed while a
-        // later file was being read cannot pass on the strength of its own earlier stamp.
+        // later file was being read cannot pass on the strength of its own earlier stamp. Length alone is
+        // not enough: an equal-length rewrite changes the last-write stamp and must be refused.
         ReverifyObserved(stagingBoundary, packageRoot, observed.Files, issues);
 
-        // The target must still be absent: a concurrent publication at the same name is a conflict, not
-        // something this preflight may ignore.
-        if (targetBoundary.TryObserve(targetDirectory, out _, out _))
+        // The target must still be absent, and the absence must be observed rather than assumed: an
+        // object that appeared is a conflict, and an object that cannot be observed at all is unsafe.
+        if (targetBoundary.TryObserve(targetDirectory, out _, out var finalTargetFault))
         {
-            throw new InspectionRefusal("target_exists", targetDirectory, confirm.EnumeratedEntries);
+            throw new InspectionRefusal("target_exists", targetName, confirm.EnumeratedEntries);
+        }
+
+        if (finalTargetFault != MediaPackagePathFault.Missing)
+        {
+            throw new InspectionRefusal(
+                MediaPackagePathBoundary.FaultCode(finalTargetFault),
+                targetName,
+                confirm.EnumeratedEntries);
+        }
+
+        // The trusted target parent root is re-checked at the end: if it disappeared or became
+        // unobservable during the run, absence can no longer be proven through it and the target is
+        // unavailable. Nothing is created to repair that.
+        if (!MediaPackagePathBoundary.TryOpen(
+                scope.TargetLibraryRoot.Value,
+                new CanonicalLibraryRoot(
+                    scope.TargetLibraryRoot.Value,
+                    scope.TargetLibraryRoot.Comparison),
+                out var reopenedTarget,
+                out var parentFault))
+        {
+            throw new InspectionRefusal(
+                MediaPackagePathBoundary.FaultCode(parentFault),
+                "target",
+                confirm.EnumeratedEntries);
+        }
+
+        if (!reopenedTarget!.TryObserve(reopenedTarget.CanonicalRoot, out _, out var parentObserveFault)
+            || parentObserveFault != MediaPackagePathFault.None)
+        {
+            throw new InspectionRefusal(
+                parentObserveFault == MediaPackagePathFault.Missing
+                    ? "target_unavailable"
+                    : MediaPackagePathBoundary.FaultCode(parentObserveFault),
+                "target",
+                confirm.EnumeratedEntries);
         }
 
         if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
@@ -263,18 +304,23 @@ public sealed class IsolatedMediaPackageInspector(
                 enumeratedEntries,
                 cancellationToken).ConfigureAwait(false);
 
-            if (facts.Length != file.SizeBytes)
+            if (facts.Payload.Length != file.SizeBytes)
             {
                 throw new InspectionRefusal("size_mismatch", file.Path, enumeratedEntries);
             }
 
-            if (facts.Sha256 != file.Sha256)
+            if (facts.Payload.Sha256 != file.Sha256)
             {
                 throw new InspectionRefusal("hash_mismatch", file.Path, enumeratedEntries);
             }
 
-            verifiedBytes += facts.Length;
-            observed.Add(new MediaPackageObservedFile(file.Path, file.Kind, file.Cid, facts));
+            verifiedBytes += facts.Payload.Length;
+            observed.Add(new MediaPackageObservedFile(
+                file.Path,
+                file.Kind,
+                file.Cid,
+                facts.Payload,
+                facts.Stamp));
         }
 
         return new PackageLoad(observed, verifiedBytes, enumeratedEntries);
@@ -283,16 +329,18 @@ public sealed class IsolatedMediaPackageInspector(
     /// <summary>
     /// Resolves, observes, re-observes and hashes one declared file. The stamp taken before and after the
     /// read is what makes a quiet substitution during the read a verdict instead of a silent pass, and the
-    /// declared length is compared with the remaining budget before a single byte is read.
+    /// declared length is compared with the remaining budget before a single byte is read. The stamp taken
+    /// after the read is returned so the final re-check can compare the last-write stamp too.
     /// </summary>
-    private async ValueTask<PayloadFacts> ReadAndRecheckAsync(
-        MediaPackagePathBoundary stagingBoundary,
-        string packageRoot,
-        MediaPackageFileEntry file,
-        long remaining,
-        MediaPackageIssueSink issues,
-        int enumeratedEntries,
-        CancellationToken cancellationToken)
+    private async ValueTask<(PayloadFacts Payload, (long Length, DateTimeOffset ModifiedAt) Stamp)>
+        ReadAndRecheckAsync(
+            MediaPackagePathBoundary stagingBoundary,
+            string packageRoot,
+            MediaPackageFileEntry file,
+            long remaining,
+            MediaPackageIssueSink issues,
+            int enumeratedEntries,
+            CancellationToken cancellationToken)
     {
         if (!stagingBoundary.TryResolveChild(
                 packageRoot,
@@ -344,7 +392,7 @@ public sealed class IsolatedMediaPackageInspector(
             throw new InspectionRefusal(null, null, enumeratedEntries);
         }
 
-        return facts;
+        return (facts, after);
     }
 
     private static bool TryObservePackageRoot(
@@ -408,18 +456,18 @@ public sealed class IsolatedMediaPackageInspector(
     }
 
     /// <summary>
-    /// Decides whether the target volume can still hold the declared payload plus the mandatory
-    /// headroom. It records nothing itself: the caller names the refusal so the same decision cannot
-    /// produce two different codes.
+    /// Decides whether the target volume can still hold the declared payload plus the mandatory headroom,
+    /// and returns the one code that decision produced, or null when the capacity is sufficient. An
+    /// unobservable volume is <c>target_unavailable</c>; only an observed value below the requirement is
+    /// <c>insufficient_space</c>. Exactly one code is produced, so the same decision can never be reported
+    /// twice with two different meanings.
     /// </summary>
-    private async ValueTask<bool> HasTargetCapacityAsync(
+    private async ValueTask<string?> TargetCapacityRefusalAsync(
         string targetDirectory,
         long declaredBytes,
         MediaPackageInspectionLimits limits,
-        MediaPackageIssueSink issues,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(issues);
         long? available;
         try
         {
@@ -434,26 +482,21 @@ public sealed class IsolatedMediaPackageInspector(
 
         if (available is null)
         {
-            // An unobservable volume is refused; sufficiency is never assumed.
-            issues.Record("target_unavailable", "target");
-            return false;
+            // An unobservable volume is refused; sufficiency is never assumed and insufficiency is never
+            // inferred from a value that was never observed.
+            return "target_unavailable";
         }
 
         var required = declaredBytes > long.MaxValue - limits.MinimumTargetHeadroomByteCount
             ? long.MaxValue
             : declaredBytes + limits.MinimumTargetHeadroomByteCount;
-        if (available.Value < required)
-        {
-            issues.Record("insufficient_space", "target");
-            return false;
-        }
-
-        return true;
+        return available.Value < required ? "insufficient_space" : null;
     }
 
     /// <summary>
     /// Re-observes every file whose bytes were already verified, so a change to an earlier file while a
-    /// later one was being read becomes <c>source_changed</c> instead of a silent pass.
+    /// later one was being read becomes <c>source_changed</c> instead of a silent pass. The comparison uses
+    /// the stored stamp, not the length alone: an equal-length rewrite is a change.
     /// </summary>
     private static void ReverifyObserved(
         MediaPackagePathBoundary stagingBoundary,
@@ -482,7 +525,8 @@ public sealed class IsolatedMediaPackageInspector(
                     file.Path);
             }
 
-            if (length != file.Payload.Length)
+            if (length != file.Payload.Length
+                || (file.Stamp is { } stamp && MediaPackagePathBoundary.Stamp(absolutePath) != stamp))
             {
                 issues.Record("source_changed", file.Path);
                 throw new InspectionRefusal(null, null);

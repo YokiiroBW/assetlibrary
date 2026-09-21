@@ -1,7 +1,9 @@
 # 媒体成品包只读预检（Media Package Preflight）
 
-状态：TS-099 已完成 R1–R6 修复轮：沙箱内编译通过（0 警告 0 错误）、冻结正反例静态自查 19/19 一致、
-交付补丁可逐文件复现候选；真实测试执行待协调环境复验（见文末"证据边界"）。交付状态 `needs_validation`。
+状态：TS-099 已完成 R1–R7 第二次返修轮：沙箱内产品与测试 Release 编译通过（0 警告 0 错误），
+私有探针在**真实产品程序集**上复算了协调第二次验收列出的每一项（17 负例 `misses: []`、两个正例、
+6 个布局反例、边界判定、原始摘要、只读清单、有界诊断、3 种代理转义、10 个真实端到端预检）；
+真实测试执行与格式结论待协调环境复验（见文末"证据边界"）。交付状态 `needs_validation`。
 
 ## 1. 这份契约解决什么
 
@@ -19,9 +21,12 @@ TS-099 只交付这个**只读预检**。它不搬运、不创建目标、不写
 | 权限 | 先解析调用方授权；未授权时**不做任何 I/O**（连卷空间都不探测） |
 | 目标目录 | 只计算名字，不创建。目标已存在（含文件、目录、链接、重解析点）→ `target_exists`，绝不复用或覆盖；目标父根缺失或不可用 → `target_unavailable` |
 | 路径 | 原始清单路径先做词法拒绝，再交给 `RelativeAssetPath`；拒绝重解析点；反斜杠在任何平台都拒绝 |
+| 分隔符 | 清单词表是 POSIX：`/` 在**所有平台**被接受，并在真实访问前转成平台原生形式；`\` 在任何平台都拒绝；结尾分隔符不属于冻结文件路径 |
 | 报告 | 状态只有 `inspected` / `rejected`；问题最多 100 条并置 `truncated`；`Issue.Location` 只承载已校验相对路径或固定字段位 |
 | 结论 | 报告不得出现真实绝对路径、文件内容或凭据 |
-| 离线/过期授权 | 报 `target_unavailable`；`scope_changed` 只留给**运行中**被撤销的授权 |
+| 离线/过期授权 | 存储离线或不可用 → `target_unavailable`；许可到期、被撤权或版本改变 → `scope_changed`；`source_missing` 仅指源 |
+| 清单字符串 | 任何 `\uXXXX` 转义若只拼出代理对的一半，一律 `invalid_manifest`；该判定在读取任何字符串**之前**按原始字节完成 |
+| 读后复核 | 每个文件保留长度与最后写入时间戳，全部读完后逐一复核；长度相同但时间戳变化的等长改写同样报 `source_changed` |
 
 ## 3. 冻结词表
 
@@ -88,12 +93,18 @@ media_server_import, production_path_races
 | 形态 | 必需 | 可选 |
 | --- | --- | --- |
 | 单 P（`layout=single`） | `video.{mp4\|mkv}`（`cid` 为该 P）、`movie.nfo`（`cid: null`）、`source.json` | `poster.jpg` / `poster.png` |
-| 多 P（`layout=multipart`） | 根级 `tvshow.nfo`、`source.json`，以及每个选中 cid 恰好一份 `Season 01/S01E{集数}-cid-{cid}.{mp4\|mkv}` 与同名 `.nfo` | 每个 cid 至多一张 `Season 01/S01E{集数}-cid-{cid}-thumb.{jpg\|png}`；根级至多一张 `poster.jpg` / `poster.png` |
+| 多 P（`layout=multipart`） | 根级 `tvshow.nfo`、`source.json`，以及每个选中 cid 恰好一份 `<集节目录>/S01E{集数}-cid-{cid}.{mp4\|mkv}` 与同名 `.nfo` | 每个 cid 至多一张 `<集节目录>/S01E{集数}-cid-{cid}-thumb.{jpg\|png}`；根级至多一张 `poster.jpg` / `poster.png` |
+
+**集节目录不写死。** 多集的集节目录由**声明的分集条目自己推导**：所有分集条目必须落在同一个目录里，
+这个共同目录就是模板要求的目录；若声明的分集条目互相矛盾（例如两个不同的季目录），则该清单以
+`invalid_file_set@layout` 拒绝。这样模板既精确，又不把某一个季目录名变成隐藏契约。
 
 严格性要点：`cid` 必须是声明值本身（`cid-10` 不等于 `cid-101`）；集数必须与该 cid 的
 `episode_number` 一致且至少两位；未选中的 cid 一律拒绝；根级文件的 `cid` 必须是**显式 `null`**
 （键缺失同样拒绝）；三层对象（根 / `selected_parts[i]` / `files[i]`）都只接受精确键集，
-未知键与缺键一律 `invalid_manifest`；`media_extension` 声明为 `mp4` 时实际文件不得是 `mkv`。
+未知键与缺键一律 `invalid_manifest`；`media_extension` 声明为 `mp4` 时实际文件不得是 `mkv`；
+比对针对**整条路径**，不接受「去掉目录后文件名相同」的文件；同一 part 出现第二个视频 / nfo / thumb
+即 `invalid_file_set`（不同 part 的同名角色不是重复），根级角色仍全局唯一。
 校验后的清单以只读快照交给调用方，无法再被改写。
 
 ## 7. 组件与依赖方向
@@ -111,6 +122,8 @@ Infrastructure/ MediaPackageManifestReader.cs, IsolatedMediaPackageInspector.cs,
 R1 修复轮按职责拆分了 Domain：`MediaPackageShapePolicy` 只做 JSON 形状/类型/身份读取（三层精确键集、
 `cid` 的显式 null 与缺键区分、整数词素、身份词表、尺寸上限），`MediaPackageLayoutPolicy` 只做布局模板与
 基数判定，`MediaPackagePolicy` 退回为编排层（预算常量、声明字节总量、真实列表比对、服务端目标目录名）。
+R2 返修轮把这两个策略类收紧为 `internal`（只被同模块的 `MediaPackagePolicy` 使用），
+`MediaPackagePolicy` 与 `MediaPackagePathPolicy` 保持 `public`，因为已提交的边界与契约测试直接调用它们。
 
 依赖方向严格为 `Infrastructure -> Application -> Domain`，`Contracts` 被各方只读引用。
 `Domain` 不含 `System.IO`（架构门禁禁止令牌 `system.io`），路径一律以原始字符串传入、由
@@ -118,17 +131,24 @@ R1 修复轮按职责拆分了 Domain：`MediaPackageShapePolicy` 只做 JSON �
 受信根在**比较时**统一为规范正斜杠形式并沿用 scope 的 `RootPathComparison`，真实访问仍用平台原生形式。
 
 JSON 解析使用 .NET 自带 `System.Text.Json`（`Utf8JsonReader`/`JsonDocument`），
-额外施加：重复键拒绝、原始整数词法检查、UTF-8 合法性与字节预算检查。
-仓库内**没有**另一套通用 JSON 解析器。
+额外施加：重复键拒绝、原始整数词法检查、UTF-8 合法性与字节预算检查，以及
+**在读取任何成员名或值之前**按原始字节完成的代理转义良构性检查。最后一项的位置是关键：
+`{"bvid":"BV1\uD800xx"}` 是**合法 JSON**、能解析成功，但读它的字符串会抛
+`InvalidOperationException`（`JsonReaderHelper.TryUnescape` → `ReadIncompleteUTF16` / `ReadInvalidUTF16`），
+所以判定不能建立在"先读出来再检查"之上。命中即记 `invalid_manifest@surrogate_escape`，
+异常类型与原文都不进报告。仓库内**没有**另一套通用 JSON 解析器。
 
 ## 8. 用法
 
 ```csharp
 using var service = new MediaPackageInspectionService(
-    manifestReader, scopeResolver, inspector, clock, limits);
+    manifestReader, scopeQuery, inspector, clock, limits);
 
 MediaPackagePreflightReport report = await service.InspectAsync(
-    new MediaPackageInspectionRequest(stagingRoot, stagingRef, manifestBytes, expectedDigest, caller),
+    new MediaPackagePreflightRequest(
+        new MediaPackageCallerContext("caller-1"),
+        manifestBytes,
+        expectedDigest),
     cancellationToken);
 
 if (report.Status != MediaPackageInspectionStatus.Inspected)
@@ -139,7 +159,7 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
 
 调用方在任何情况下都不得把 `report.Status == Inspected` 当作"已发布"。
 
-## 9. 证据边界（TS-099 R1–R6 修复轮交付时）
+## 9. 证据边界（TS-099 R1–R7 第二次返修轮交付时）
 
 已在**本工作树沙箱内**实际验证：
 
@@ -147,30 +167,36 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
   `packages.lock.json` 的 `contentHash` 及 `.nupkg` 字节摘要双向一致。
 - `dotnet build AssetLibrary.slnx -c Release`：15 个项目，**0 警告 0 错误**
   （`TreatWarningsAsErrors` + `EnforceCodeStyleInBuild` + 分析器预算全开）；
-  R1–R6 改动后产品与测试项目再次单独 Release 编译，均 **0 警告 0 错误**。
-- **静态自查**：以独立 Python 重读同一套冻结规则（路径词法、三层精确键集、身份词表、模板与基数、
-  声明预算、大小写折叠碰撞、原始字节摘要、BOM/UTF-8/重复键/整数词素），重放 17 个反例与 2 个正例
-  并校验服务端目标目录名 → **19/19 与冻结码一致，0 mismatch**。
-  它是独立第二读、能发现实现偏离，但**不是**端到端预检。
-- **补丁可复现**：交付补丁在 base 上以 `git apply --directory` 应用后，**15/15 文件**的字节长度与
-  SHA-256 与源快照完全一致。
+  R1–R7 改动后产品与测试项目再次单独 Release 编译，均 **0 警告 0 错误**。
+- **真实程序集探针**（`.runtime/probe/verify/`，本卡私有、不进候选）：引用
+  `services/core-server/bin/Release/net10.0/AssetLibrary.CoreServer.dll`，因此驱动的是真实产品程序集。
+  本轮复算：R1 根查找修复（测试二进制目录与当前目录都解析到仓库根、夹具 6 个文件）、
+  6 个布局反例全部 `invalid_file_set`、两个正例 `succeeded: true`、17 个负例 `misses: []`、
+  17 拒绝 + 11 接受路径拼写 `misses: []`、`/` 嵌套解析成功且被包含 / `\` 得 `Unsafe` / 5 个逃逸全拒、
+  单集与多集目标目录名、CRLF 与键序重排 `digest_mismatch`、只读清单快照、有界诊断 sink、
+  3 种代理转义拒绝（零异常、原文零回显），以及 10 个真实端到端预检
+  （4 文件/2154 字节与 8 文件/4170 字节通过；`target_exists`、`source_changed`、`target_unavailable`、
+  `budget_exceeded` 各自命中；报告恒 `grants_file_operation=false` 且 `unverified` 顺序与冻结 7 项一致）。
+  输出：`.runtime/dsh-delivery/logs/probe-run-40.txt`。
+- **夹具不变性**：6 个候选夹具的 LF 归一化字节与 `HEAD` **逐字节相同**（磁盘 4 个 CRLF、2 个 LF），
+  5 个被 `manifest.json` 钉住的 LF 归一化摘要 **5/5 相符**。
 - `python -B tests/architecture/check_release_gates.py --target v0.1-start` 允许受控开发。
 - 仓库校验的 12 个步骤通过，含 `validate_dotnet_source.py`（666 个 C# 文件，重复令牌与敏感日志检查）
   与 `validate_architecture_baseline.py`（层级依赖方向、跨模块公开层、禁止令牌、循环依赖）。
 
 **未**在本环境执行，属 `needs_validation`：
 
-- `dotnet test`：VSTest 与其 testhost 之间需要命名管道，本沙箱拒绝（首轮 90 秒超时中止；修复轮复跑
-  时 testhost 更早在 `Process.GetProcessHandle` 处 `Win32Exception(5)` 拒绝访问）。
-  **测试从未运行过，不得记为通过。**
-- `dotnet format --verify-no-changes`：`MSBuildWorkspace` 的 build host 同样需要命名管道，被拒。
+- `dotnet test`：testhost 无法在本沙箱启动。**64 个测试一个都没跑，不得记为通过。**
+  上一轮 128 个测试结果中 59 个失败，全部是 `MediaPackageSandbox` 的仓库根查找缺陷
+  （`InvalidOperationException: The repository root could not be found.`，来自 `..cctor()`），
+  该缺陷已由 R1 修复并由上述探针复算，但标准套件仍须由协调实跑。
+- `dotnet format --verify-no-changes`：`MSBuildWorkspace` 的 build host 需要命名管道，加载工作区即被
+  `UnauthorizedAccessException` at `NamedPipeClientStream.TryConnect` 拒绝；缩小 `--include` 重跑同样失败。
+  因此 **R7 对 `MediaPackagePathBoundary.cs` 305–311 行的缩进修复未经格式工具确认**。
 - `tests/database`、`tests/architecture` 的 Python 用例：沙箱拒绝在临时目录内写入/清理。
   这些是环境错误，不是断言失败。
-- 自建 in-process 反射 runner 曾在真实执行路径上跑出 43 用例 4 通过 / 39 失败，但失败主因是 runner
-  自身的启动目录导致夹具查找错误，**不是产品缺陷**；该路线已按协调指令停止，其原始日志仅作受限留痕，
-  结果**一律不计入测试结论**。
 
-上述各项须由协调方在固定提交后用真实命令
+上述各项须由协调方在固定候选后用真实命令
 （`restore --locked-mode` / `build` / `test` / `format --verify-no-changes`）复验。
 
 ## 10. 未覆盖事项

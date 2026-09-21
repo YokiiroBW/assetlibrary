@@ -141,31 +141,35 @@ public static class MediaPackagePolicy
             : $"bilibili-{manifest.Bvid}";
     }
 
+    /// <summary>
+    /// Validates the selected parts against the layout. The layout policy owns the verdict and names its
+    /// own reason; this method only forwards it.
+    /// </summary>
     private static void ValidateSelectedParts(MediaPackageShape shape, MediaPackageIssueSink issues)
     {
         _ = MediaPackageLayoutPolicy.ValidateSelectedParts(shape.Layout, shape.SelectedParts, issues);
     }
 
+    /// <summary>
+    /// Validates the declared file set: per-kind ceilings and case-folded collisions here, and the exact
+    /// path templates in the layout policy. The layout verdict is deliberately not discarded: every issue
+    /// it records is a rejection, and its boolean is the same verdict.
+    /// </summary>
     private static void ValidateFiles(MediaPackageShape shape, MediaPackageIssueSink issues)
     {
-        foreach (var file in shape.Files)
-        {
-            var pathFailure = MediaPackagePathPolicy.Validate(file.Path);
-            if (pathFailure is not null)
-            {
-                // The raw spelling is unverified, so the report carries the fixed field position only.
-                issues.Record(pathFailure, "path");
-            }
-        }
-
         ValidatePerKindSizeCeilings(shape.Files, issues);
         ValidateDuplicatePaths(shape.Files, issues);
-        _ = MediaPackageLayoutPolicy.ValidateFiles(
+        var layoutAccepted = MediaPackageLayoutPolicy.ValidateFiles(
             shape.Layout,
             shape.MediaExtension,
             shape.SelectedParts,
             shape.Files,
             issues);
+        if (!layoutAccepted && !issues.HasIssues)
+        {
+            // The layout policy always names its own reason; an unnamed refusal would be a defect here.
+            issues.Record("invalid_file_set", "files");
+        }
     }
 
     /// <summary>

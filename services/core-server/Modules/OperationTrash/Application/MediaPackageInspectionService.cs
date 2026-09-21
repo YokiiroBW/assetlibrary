@@ -98,14 +98,17 @@ public sealed class MediaPackageInspectionService(
 
             ValidateScope(scope);
 
-            // An offline or expired permission is an availability refusal, not a revision change: the
-            // two must never be reported with the same code.
+            // The frozen classification keeps three different causes apart. An offline or unknown storage
+            // root is an availability refusal (`target_unavailable`); an expired, revoked or changed
+            // permission is a scope change (`scope_changed`); a missing source is `source_missing`. The
+            // availability decision and the currency decision therefore stay separate, here and at the end.
             if (!IsAvailable(scope))
             {
                 return Rejected(read.ManifestDigest, manifest, "target_unavailable", scope);
             }
 
-            if (!await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
+            if (!IsCurrent(scope)
+                || !await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
             {
                 return Rejected(read.ManifestDigest, manifest, "scope_changed", scope);
             }
@@ -123,7 +126,8 @@ public sealed class MediaPackageInspectionService(
                 outcome.Issues.Record("target_unavailable");
             }
             else if (outcome.Issues.IsEmpty
-                && !await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false))
+                && (!IsCurrent(scope)
+                    || !await scopeQuery.IsCurrentAsync(scope, cancellationToken).ConfigureAwait(false)))
             {
                 outcome.Issues.Record("scope_changed");
             }
@@ -142,12 +146,22 @@ public sealed class MediaPackageInspectionService(
     }
 
     /// <summary>
-    /// True when the granted permission is still usable at all. Availability and expiry are separate from
-    /// revocation, so an offline or expired scope is reported as an availability refusal.
+    /// True while the granted storage root is usable at all. Only the storage availability is decided here:
+    /// an offline or otherwise unavailable root is refused as <c>target_unavailable</c>. An expired, revoked
+    /// or changed permission is decided by <see cref="IsCurrent"/> and
+    /// <see cref="IMediaPackageInspectionScopeQuery.IsCurrentAsync"/>, so the two verdicts never collapse
+    /// into one code.
     /// </summary>
-    private bool IsAvailable(MediaPackageInspectionScope scope) =>
-        scope.Availability == StorageAvailability.Online
-        && scope.ExpiresAt > timeProvider.GetUtcNow();
+    private static bool IsAvailable(MediaPackageInspectionScope scope) =>
+        scope.Availability == StorageAvailability.Online;
+
+    /// <summary>
+    /// True while the granted permission is still in force. A lapsed lease is a scope change, not a storage
+    /// availability refusal: the storage may be perfectly reachable while the caller's right to read it has
+    /// expired, and the frozen vocabulary names those two conditions differently.
+    /// </summary>
+    private bool IsCurrent(MediaPackageInspectionScope scope) =>
+        scope.ExpiresAt > timeProvider.GetUtcNow();
 
     private static void ValidateOutcomeScope(
         MediaPackageInspectionOutcome outcome,

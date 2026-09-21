@@ -181,14 +181,16 @@ public static class MediaPackageUnverifiedFacts
 /// <summary>
 /// Bounded, ordered diagnostic sink shared by the manifest reader, the policy and the inspector. It
 /// keeps at most one entry per distinct code and location pair, so a hostile package cannot inflate
-/// the report; the first occurrence of each pair fixes the report order. The frozen cap is enforced
-/// while recording.
+/// the report; the first occurrence of each pair fixes the report order. Every internal store is
+/// bounded by the frozen cap: the sink holds at most the maximum number of issues plus one dedup key
+/// per recorded issue, so a manifest with ten thousand distinct hostile locations can neither grow the
+/// report nor grow the bookkeeping without limit.
 /// </summary>
 public sealed class MediaPackageIssueSink
 {
     private readonly List<MediaPackageIssue> issues = [];
     private readonly HashSet<(string Code, string? Location)> recorded = [];
-    private readonly HashSet<string> codes = new(StringComparer.Ordinal);
+    private readonly List<string> codes = [];
 
     public MediaPackageIssueSink(int maximumIssues)
     {
@@ -200,9 +202,17 @@ public sealed class MediaPackageIssueSink
 
     public bool IsTruncated { get; private set; }
 
-    public IReadOnlyList<MediaPackageIssue> Issues => issues;
+    /// <summary>
+    /// The recorded issues in first-occurrence order, as a read-only view. It cannot be downcast to a
+    /// mutable list, so a caller can neither reorder nor extend an already-recorded report.
+    /// </summary>
+    public IReadOnlyList<MediaPackageIssue> Issues => issues.AsReadOnly();
 
-    public IReadOnlyCollection<string> Codes => codes;
+    /// <summary>
+    /// The distinct codes seen, in first-occurrence order, bounded by the number of recorded issues so
+    /// the vocabulary cannot be inflated by input the report never shows.
+    /// </summary>
+    public IReadOnlyList<string> Codes => codes.AsReadOnly();
 
     public bool HasIssues => issues.Count > 0;
 
@@ -211,19 +221,25 @@ public sealed class MediaPackageIssueSink
     public bool Record(string code, string? location = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(code);
-        codes.Add(code);
+        if (issues.Count >= MaximumIssues)
+        {
+            // The cap is reached, so no further pair can ever be reported: the dedup store is left as it
+            // is instead of growing one key per hostile location, and the truncation stays visible.
+            IsTruncated = true;
+            return false;
+        }
+
         if (!recorded.Add((code, location)))
         {
             return false;
         }
 
-        if (issues.Count >= MaximumIssues)
+        issues.Add(new MediaPackageIssue(code, location));
+        if (!codes.Contains(code, StringComparer.Ordinal))
         {
-            IsTruncated = true;
-            return false;
+            codes.Add(code);
         }
 
-        issues.Add(new MediaPackageIssue(code, location));
         return true;
     }
 

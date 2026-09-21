@@ -194,8 +194,9 @@ public sealed class MediaPackageBoundaryTests
             nestedFault.ToString());
         Assert.IsTrue(boundary.Contains(nested, sandbox.LibraryRoot));
 
-        // A backslash is refused on every platform and a forward slash is refused on Windows, so the raw
-        // spelling stays the only accepted one while a POSIX platform keeps working.
+        // The manifest vocabulary is POSIX on every platform: a forward slash is the accepted separator
+        // and is converted to the native one before real access, while a backslash is refused everywhere
+        // as an alternate spelling. A trailing separator is not part of a frozen file path.
         Assert.IsFalse(
             boundary.TryResolveChild(sandbox.LibraryRoot, "Season 01\\S01E01-cid-101.mp4", out _, out var backslashFault));
         Assert.AreEqual(MediaPackagePathFault.Unsafe, backslashFault);

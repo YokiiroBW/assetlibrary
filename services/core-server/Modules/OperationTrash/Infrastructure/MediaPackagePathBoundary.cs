@@ -86,8 +86,10 @@ public sealed class MediaPackagePathBoundary
 
     /// <summary>
     /// Resolves one POSIX package-relative path against an anchored directory and re-checks containment.
-    /// A backslash is refused on every platform and a forward slash is refused on Windows, so the raw
-    /// manifest form stays the only accepted spelling while a POSIX platform keeps working.
+    /// The contract spelling is POSIX on every platform: a backslash is refused everywhere, while a
+    /// forward slash is accepted and converted to the native separator before real access, so a legal
+    /// multipart path works on Windows and on Linux alike. Traversal, an alternate separator, a device
+    /// name or an escaping path is still refused by the raw-spelling policy before this point.
     /// </summary>
     public bool TryResolveChild(
         string anchoredDirectory,
@@ -99,7 +101,6 @@ public sealed class MediaPackagePathBoundary
         if (string.IsNullOrEmpty(relativePath)
             || Path.IsPathRooted(relativePath)
             || relativePath.Contains('\\')
-            || (OperatingSystem.IsWindows() && relativePath.Contains('/'))
             || relativePath.Contains('\0')
             || relativePath.Split('/')
                 .Any(segment => segment.Length == 0 || segment is "." or ".."))
@@ -301,13 +302,13 @@ public sealed class MediaPackagePathBoundary
         MediaPackagePathFault resolveFault,
         MediaPackagePathFault observeFault,
         string missingCode = "unsafe_path") => observeFault switch
-    {
-        MediaPackagePathFault.Missing => "source_missing",
-        MediaPackagePathFault.None => resolveFault == MediaPackagePathFault.None
-            ? missingCode
-            : FaultCode(resolveFault),
-        _ => FaultCode(observeFault),
-    };
+        {
+            MediaPackagePathFault.Missing => "source_missing",
+            MediaPackagePathFault.None => resolveFault == MediaPackagePathFault.None
+                ? missingCode
+                : FaultCode(resolveFault),
+            _ => FaultCode(observeFault),
+        };
 
     private static bool IsReparsePoint(string resolved) =>
         File.GetAttributes(resolved).HasFlag(FileAttributes.ReparsePoint);
