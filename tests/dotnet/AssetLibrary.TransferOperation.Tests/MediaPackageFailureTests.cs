@@ -1,6 +1,7 @@
 using System.Text;
 using AssetLibrary.Modules.OperationTrash.Application;
 using AssetLibrary.Modules.OperationTrash.Contracts;
+using AssetLibrary.Modules.TransferSync.Contracts;
 
 namespace AssetLibrary.TransferOperation.Tests;
 
@@ -334,6 +335,64 @@ public sealed class MediaPackageFailureTests
     }
 
     [TestMethod]
+    public void IssueSinkKeepsEveryInternalStoreBoundedAtTheCap()
+    {
+        // A hostile manifest can name ten thousand distinct locations. The report is bounded by the cap, and
+        // so must the bookkeeping be: the sink may only remember a pair it actually reported, because
+        // remembering a refused pair would let a hostile input grow the dedup store without growing the
+        // report. The internal store is inspected read-only, since counting only the public Issues would not
+        // prove the memory bound.
+        var sink = new MediaPackageIssueSink(1);
+
+        Assert.IsTrue(sink.Record("invalid_identity", "files[0]"));
+        Assert.IsFalse(sink.Record("invalid_identity", "files[0]"), "A repeated pair is not a new diagnostic.");
+        Assert.HasCount(1, sink.Issues);
+        Assert.AreEqual(1, InternalStoreCount(sink, "issues"));
+        Assert.AreEqual(1, InternalStoreCount(sink, "recorded"));
+        Assert.IsFalse(sink.IsTruncated, "Repeating an already-reported pair discards nothing.");
+
+        // A second, genuinely different pair arrives with no room left: it is refused and only marks the
+        // truncation. Nothing is stored, so both internal stores stay at the cap.
+        Assert.IsFalse(sink.Record("invalid_path", "files[1]"));
+        Assert.IsTrue(sink.IsTruncated);
+        Assert.HasCount(1, sink.Issues);
+        Assert.AreEqual(1, InternalStoreCount(sink, "issues"));
+        Assert.AreEqual(1, InternalStoreCount(sink, "recorded"));
+        Assert.HasCount(1, sink.Codes);
+
+        // Ten thousand distinct locations must not grow either store beyond the cap.
+        for (var index = 0; index < 10_000; index++)
+        {
+            sink.Record("io_failure", "files[" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + "]");
+        }
+
+        Assert.HasCount(1, sink.Issues);
+        Assert.AreEqual(1, InternalStoreCount(sink, "issues"));
+        Assert.AreEqual(1, InternalStoreCount(sink, "recorded"));
+        Assert.HasCount(1, sink.Codes);
+        Assert.IsTrue(sink.IsTruncated);
+    }
+
+    /// <summary>
+    /// Counts one of the sink's private stores without changing it, so the memory bound is asserted on the
+    /// real internal collection rather than inferred from the public view.
+    /// </summary>
+    private static int InternalStoreCount(MediaPackageIssueSink sink, string fieldName)
+    {
+        var field = typeof(MediaPackageIssueSink).GetField(
+            fieldName,
+            System.Reflection.BindingFlags.Instance
+                | System.Reflection.BindingFlags.NonPublic
+                | System.Reflection.BindingFlags.Public);
+        Assert.IsNotNull(field, $"The sink must still hold an internal '{fieldName}' store.");
+        var value = field.GetValue(sink);
+        Assert.IsNotNull(value, $"The internal '{fieldName}' store must be initialized.");
+        var count = value.GetType().GetProperty("Count");
+        Assert.IsNotNull(count, $"The internal '{fieldName}' store must expose its count.");
+        return (int)count.GetValue(value)!;
+    }
+
+    [TestMethod]
     public void ReportNeverCarriesAbsolutePathsOrFileContent()
     {
         using var sandbox = MediaPackageSandbox.Create();
@@ -392,6 +451,82 @@ public sealed class MediaPackageFailureTests
             Codes(report).Any(code => code is "unsafe_path" or "io_failure" or "target_unavailable"),
             Describe(report));
         Assert.IsFalse(Codes(report).Contains("target_exists", StringComparer.Ordinal));
+    }
+
+    [TestMethod]
+    public void TargetRootReplacedByAFileAfterTheFirstHashIsRefused()
+    {
+        using var sandbox = MediaPackageSandbox.Create();
+        var example = Example(sandbox, "single");
+
+        // The root is a real directory when the run starts and stays one while the first file is read; only
+        // then is it replaced by a regular file. The first check cannot see this, so the final re-check of the
+        // trusted root is what has to refuse it: the run must not report a successful inspection over a
+        // target root that stopped being a directory, and it must not report the package as merely existing.
+        var hashed = 0;
+        using var composition = sandbox.ComposeWithHasher(
+            inner => new FlippingFileHasher(
+                inner,
+                () =>
+                {
+                    hashed++;
+                    if (hashed != 1)
+                    {
+                        return;
+                    }
+
+                    // Destructive step: only this test's own sandbox root, proven to be the root under test.
+                    Assert.IsTrue(
+                        Path.IsPathFullyQualified(sandbox.LibraryRoot),
+                        "The replaced root must be an absolute path inside the sandbox.");
+                    Assert.IsTrue(
+                        sandbox.LibraryRoot.StartsWith(sandbox.Root, StringComparison.OrdinalIgnoreCase),
+                        "The replaced root must be inside this test's own sandbox.");
+                    Directory.Delete(sandbox.LibraryRoot, recursive: true);
+                    File.WriteAllText(sandbox.LibraryRoot, "not a directory");
+                }));
+
+        var report = composition.InspectAsync(example).AsTask().GetAwaiter().GetResult();
+
+        Assert.AreEqual(1, hashed, "The flip must happen after a real hash call, not before the run.");
+        Assert.IsTrue(File.Exists(sandbox.LibraryRoot), "The fixture must have left a regular file at the root.");
+        Assert.IsFalse(Directory.Exists(sandbox.LibraryRoot), "The root must not be a directory any more.");
+        Assert.AreEqual(MediaPackageInspectionStatus.Rejected, report.Status);
+        CollectionAssert.Contains(Codes(report), "unsafe_path", Describe(report));
+        Assert.IsFalse(
+            Codes(report).Contains("target_exists", StringComparer.Ordinal),
+            "The run must not claim the package exists when the root itself is unusable: " + Describe(report));
+        Assert.AreEqual(0, report.VerifiedFileCount);
+        foreach (var issue in report.Issues)
+        {
+            var location = issue.Location;
+            if (location is null)
+            {
+                continue;
+            }
+
+            Assert.IsFalse(location.Contains(sandbox.Root, StringComparison.OrdinalIgnoreCase), location);
+            Assert.DoesNotContain(":\\", location, StringComparison.Ordinal);
+            Assert.IsFalse(Path.IsPathFullyQualified(location), location);
+        }
+    }
+
+    /// <summary>
+    /// Delegates every hash to the real streaming hasher and runs one action immediately after the first
+    /// hash returns, so a test can change the tree between two real reads.
+    /// </summary>
+    private sealed class FlippingFileHasher(IMediaPackageFileHasher inner, Action afterFirstHash)
+        : IMediaPackageFileHasher
+    {
+        public async ValueTask<PayloadFacts> HashAsync(
+            string absolutePath,
+            long byteLimit,
+            CancellationToken cancellationToken)
+        {
+            var facts = await inner.HashAsync(absolutePath, byteLimit, cancellationToken).ConfigureAwait(false);
+            afterFirstHash();
+            return facts;
+        }
     }
 
     [TestMethod]

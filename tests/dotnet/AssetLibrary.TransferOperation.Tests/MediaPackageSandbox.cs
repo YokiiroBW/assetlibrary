@@ -183,6 +183,33 @@ internal sealed class MediaPackageSandbox : IDisposable
         return new MediaPackageComposition(this, service, scope, space, clock, effective);
     }
 
+    /// <summary>
+    /// Composition whose file hasher is wrapped, so a test can act between two real hash calls without
+    /// replacing the port. Everything else, including the real streaming hasher underneath the wrapper, is
+    /// the same composition the product runs.
+    /// </summary>
+    public MediaPackageComposition ComposeWithHasher(
+        Func<IMediaPackageFileHasher, IMediaPackageFileHasher> wrap,
+        MediaPackageInspectionLimits? limits = null)
+    {
+        ArgumentNullException.ThrowIfNull(wrap);
+        var effective = limits ?? new MediaPackageInspectionLimits();
+        var scope = new MediaPackageScopeStub();
+        scope.Grant(this);
+        var space = new MediaPackageSpaceStub();
+        var clock = new MediaPackageClock();
+        var service = new MediaPackageInspectionService(
+            new MediaPackageManifestReader(effective),
+            scope,
+            new IsolatedMediaPackageInspector(
+                scope,
+                wrap(new MediaPackageFileHasher(effective.StreamBufferByteCount)),
+                space),
+            clock,
+            effective);
+        return new MediaPackageComposition(this, service, scope, space, clock, effective);
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(Root))

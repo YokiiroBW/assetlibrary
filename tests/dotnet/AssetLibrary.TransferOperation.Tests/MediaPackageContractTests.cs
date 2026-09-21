@@ -24,6 +24,13 @@ public sealed class MediaPackageContractTests
 {
     private const string InvalidManifest = "invalid_manifest";
 
+    /// <summary>
+    /// An ASCII token that no fixture contains. A mutated manifest carries it wherever a raw escape has to
+    /// end up, and the escape is substituted for it in the final bytes, because a JSON node would otherwise
+    /// re-escape the text and the case would test an ordinary string instead of a surrogate escape.
+    /// </summary>
+    private const string PlaceholderToken = "zzRawEscapeSlotzz";
+
     private static readonly string[] FrozenCodes =
     [
         "invalid_manifest", "digest_mismatch", "unsupported_version", "invalid_identity",
@@ -357,55 +364,92 @@ public sealed class MediaPackageContractTests
     [TestMethod]
     public void EscapedSurrogateHalvesAreRefusedAsAManifestVerdict()
     {
-        // A JSON escape can spell half of a UTF-16 surrogate pair. That is legal JSON syntax, and the
-        // parser accepts it, but decoding the string fails, so the input must be refused as a named
-        // manifest verdict instead of letting the failure escape as a framework exception. The three
-        // cases below cover a string value, a file path and a property name.
-        foreach (var rawEscape in new[] { "\\uD800", "\\uDC00", "\\uD800XDC00" })
+        // A JSON escape can spell half of a UTF-16 surrogate pair. That is legal JSON syntax and the parser
+        // accepts it, but decoding the string fails, so the input must be refused as a syntax-level manifest
+        // verdict instead of letting the failure escape as a framework exception. The three cases cover a
+        // string value, a file path and a property NAME.
+        foreach (var escape in new[] { "\\uD800XDC00", "\\uD800", "\\uDC00" })
         {
-            AssertRefusedWithNamedVerdict(
-                Mutate("single", root => root["bvid"] = "BV0000000001" + rawEscape),
-                "a bvid value carrying " + rawEscape);
-            AssertRefusedWithNamedVerdict(
-                Mutate("single", root => FileAt(root, 3)["path"] = "video" + rawEscape + ".mp4"),
-                "a file path carrying " + rawEscape);
-            AssertRefusedWithNamedVerdict(
-                Mutate("single", root => RenameRootKey(root, "provider", "provi" + rawEscape + "der")),
-                "a property name carrying " + rawEscape);
+            AssertDecodeRefusedWithRawEscape(
+                MutateWithRawEscape("single", root => root["bvid"] = PlaceholderToken, escape),
+                escape,
+                "a bvid value carrying ");
+            AssertDecodeRefusedWithRawEscape(
+                MutateWithRawEscape("single", root => FileAt(root, 3)["path"] = PlaceholderToken, escape),
+                escape,
+                "a file path carrying ");
+            AssertDecodeRefusedWithRawEscape(
+                MutateWithRawEscape(
+                    "single",
+                    root => RenameRootKey(root, "provider", PlaceholderToken),
+                    escape),
+                escape,
+                "a property name carrying ");
         }
     }
 
     [TestMethod]
     public void LegalEscapePairsAndTheirUtf8SpellingAreTreatedAlike()
     {
-        // A legal surrogate pair is well-formed text, so the syntax guard must accept it: the same
-        // character written as UTF-8 and written as a pair of escapes has to behave identically. The
-        // character is not allowed in these fields, so identity validation refuses both with the same
-        // frozen code, which is where field semantics belong.
-        const string SmilingFace = "\uD83D\uDE00";
-        var escaped = Mutate("single", root => root["bvid"] = "BV0000000001" + "\\uD83D\\uDE00");
-        var rawUtf8 = Mutate("single", root => root["bvid"] = "BV0000000001" + SmilingFace);
+        // A legal surrogate pair is well-formed text, so the syntax guard must accept it. The three samples
+        // below are genuinely different byte sequences: the escaped pair spells the character with two
+        // escapes, the UTF-8 sample carries the character's real bytes, and the last one carries an escaped
+        // backslash followed by the letter u, which is an ordinary string rather than an escape at all.
+        var escapedPair = MutateWithRawEscape("single", root => root["bvid"] = PlaceholderToken, "\\uD83D\\uDE00");
+        var rawUtf8 = MutateWithRawEscape("single", root => root["bvid"] = PlaceholderToken, "\uD83D\uDE00");
+        var literalBackslash = MutateWithRawEscape("single", root => root["bvid"] = PlaceholderToken, "\\\\uD800");
 
-        AssertRefused(escaped, "invalid_identity");
-        AssertRefused(rawUtf8, "invalid_identity");
+        // The samples must really differ, and only the first must carry the escape spelling: if a sample were
+        // re-escaped on the way out, the case would stop testing what it claims to test.
+        Assert.IsTrue(ContainsBytes(escapedPair, "\\uD83D\\uDE00"), "The escaped sample must carry a real escape.");
+        Assert.IsFalse(ContainsBytes(rawUtf8, "\\uD83D\\uDE00"), "The UTF-8 sample must not carry the escape spelling.");
+        Assert.IsTrue(ContainsBytes(rawUtf8, "\uD83D\uDE00"), "The UTF-8 sample must carry the character's real bytes.");
+        Assert.IsTrue(ContainsBytes(literalBackslash, "\\\\uD800"), "The literal sample must carry an escaped backslash.");
+        Assert.AreNotEqual(escapedPair.Length, rawUtf8.Length);
+
+        var escapedResult = ReadWithReader(escapedPair);
+        var utf8Result = ReadWithReader(rawUtf8);
+        var literalResult = ReadWithReader(literalBackslash);
+
+        // None of the three is a decode failure: a legal pair is well-formed text and an escaped backslash is
+        // an ordinary string, so the syntax guard lets all three through and field semantics decide.
+        foreach (var (bytes, what) in new[]
+        {
+            (escapedPair, "the escaped legal pair"),
+            (rawUtf8, "the UTF-8 spelling"),
+            (literalBackslash, "an escaped backslash followed by the letter u"),
+        })
+        {
+            var result = ReadWithReader(bytes);
+            Assert.IsNull(result.Manifest, $"Reading {what} must still be refused by field semantics.");
+            Assert.IsFalse(
+                Locations(result).Contains("surrogate_escape", StringComparer.Ordinal),
+                $"Reading {what} must not be refused as a decode failure: {Describe(result)}");
+        }
+
+        // The same character written two ways must reach the same field-semantic verdict.
         Assert.AreEqual(
-            Describe(ReadWithReader(rawUtf8)),
-            Describe(ReadWithReader(escaped)),
+            Describe(utf8Result),
+            Describe(escapedResult),
             "The same character must not be judged differently depending on how it is spelled.");
-
-        // An escaped backslash followed by the letter u is an ordinary string, not an escape sequence, so
-        // it is not a decode failure either.
-        AssertRefused(
-            Mutate("single", root => root["bvid"] = "BV0000000001" + "\\\\uD800"),
-            "invalid_identity");
+        Assert.AreEqual("invalid_identity", escapedResult.Issues.Single().Code);
+        Assert.AreEqual("bvid", escapedResult.Issues.Single().Location);
+        Assert.AreEqual("invalid_identity", utf8Result.Issues.Single().Code);
+        Assert.AreEqual("invalid_identity", literalResult.Issues.Single().Code);
     }
 
     /// <summary>
-    /// Asserts that the manifest is refused and that the refusal is a named result: the reader reports a
-    /// frozen code, and no framework exception reaches the caller.
+    /// Asserts that the manifest is refused as a syntax-level decode failure: the frozen
+    /// <c>invalid_manifest</c> code, the <c>surrogate_escape</c> reason, no field-level diagnostic and no
+    /// framework exception reaching the caller. The raw bytes are checked first, because a sample that was
+    /// re-escaped on the way out would be an ordinary string and would prove nothing about surrogate escapes.
     /// </summary>
-    private static void AssertRefusedWithNamedVerdict(byte[] manifestBytes, string what)
+    private static void AssertDecodeRefusedWithRawEscape(byte[] manifestBytes, string escape, string what)
     {
+        Assert.IsTrue(
+            ContainsBytes(manifestBytes, escape),
+            $"The final bytes of {what}{escape} must carry the real escape, not an escaped backslash.");
+
         MediaPackageManifestReadResult result;
         try
         {
@@ -413,18 +457,30 @@ public sealed class MediaPackageContractTests
         }
         catch (Exception exception)
         {
-            Assert.Fail($"Reading {what} threw {exception.GetType().Name} instead of returning a verdict.");
+            Assert.Fail($"Reading {what}{escape} threw {exception.GetType().Name} instead of returning a verdict.");
             return;
         }
 
-        Assert.IsNull(result.Manifest, $"Reading {what} must be refused.");
-        Assert.IsTrue(
-            result.FailureCode is not null || result.Issues.Count > 0,
-            $"Reading {what} must report a named code.");
-        Assert.IsTrue(
-            Codes(result).All(code => FrozenCodes.Contains(code, StringComparer.Ordinal)),
+        Assert.IsNull(result.Manifest, $"Reading {what}{escape} must be refused.");
+        Assert.AreEqual(
+            "invalid_manifest",
+            result.FailureCode ?? result.Issues.Single().Code,
             Describe(result));
+        CollectionAssert.Contains(Locations(result), "surrogate_escape", Describe(result));
+        foreach (var code in Codes(result))
+        {
+            Assert.AreEqual(
+                "invalid_manifest",
+                code,
+                $"A decode failure is a syntax verdict, not a field verdict: {Describe(result)}");
+        }
     }
+
+    private static string[] Locations(MediaPackageManifestReadResult result) =>
+        [.. result.Issues.Select(issue => issue.Location ?? string.Empty)];
+
+    private static bool ContainsBytes(byte[] haystack, string needle) =>
+        Encoding.UTF8.GetString(haystack).Contains(needle, StringComparison.Ordinal);
 
     private static IReadOnlyList<string> Codes(MediaPackageManifestReadResult result) =>
         result.FailureCode is null
@@ -572,6 +628,28 @@ public sealed class MediaPackageContractTests
         }
 
         return stream.ToArray();
+    }
+
+    /// <summary>
+    /// Rebuilds one example manifest with a named mutation applied, then replaces the
+    /// <see cref="PlaceholderToken"/> in the FINAL BYTES with a raw escape sequence.
+    /// <para>
+    /// The byte-level step is the whole point. Handing the text <c>\uD800</c> to a JSON node and serializing
+    /// it produces <c>\\uD800</c> (an escaped backslash followed by the letter u), which is an ordinary
+    /// string and not a surrogate escape at all, so such a case would silently stop testing the decode guard.
+    /// Injecting the escape after serialization is what puts a real single-backslash escape into the bytes the
+    /// reader receives, and the tests assert that byte shape before drawing any conclusion from the verdict.
+    /// The placeholder is a token that cannot occur in a fixture, and a missing placeholder is a hard failure
+    /// rather than a silent pass.
+    /// </para>
+    /// </summary>
+    private static byte[] MutateWithRawEscape(string exampleName, Action<JsonObject> mutate, string rawEscape)
+    {
+        ArgumentNullException.ThrowIfNull(rawEscape);
+        var bytes = Mutate(exampleName, mutate);
+        var text = Encoding.UTF8.GetString(bytes);
+        Assert.Contains(PlaceholderToken, text, StringComparison.Ordinal);
+        return Encoding.UTF8.GetBytes(text.Replace(PlaceholderToken, rawEscape, StringComparison.Ordinal));
     }
 
     private static MediaPackageManifestReadResult ReadWithReader(byte[] bytes) =>

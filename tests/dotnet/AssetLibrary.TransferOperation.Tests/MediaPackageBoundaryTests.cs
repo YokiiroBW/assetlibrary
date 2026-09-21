@@ -96,24 +96,44 @@ public sealed class MediaPackageBoundaryTests
     {
         using var sandbox = MediaPackageSandbox.Create();
         var composition = sandbox.Compose();
-        var text = System.Text.Encoding.UTF8.GetString(
-            MediaPackageSandbox.ReadExamples()[0].ManifestBytes);
+        var original = MediaPackageSandbox.ReadExamples()[0].ManifestBytes;
 
-        // The original entry stays and a second entry is added that differs only in case, so the manifest
-        // really declares two paths that would materialize as one object on a case-insensitive volume.
-        // Rewriting the existing path in place would leave a single entry and prove nothing.
-        const string OriginalPoster = "\"path\":\"poster.png\"";
-        Assert.Contains(OriginalPoster, text, StringComparison.Ordinal);
-        var collision =
-            "{\"cid\":null,\"kind\":\"poster\",\"path\":\"Poster.PNG\","
-            + "\"sha256\":\"e431e99b41ee429184d1a53d07b3a4955a1893def6506a78cc2adc7d2b38e1ea\","
-            + "\"size_bytes\":39}";
-        var mutated = text.Replace(
-            OriginalPoster,
-            OriginalPoster + "," + collision,
-            StringComparison.Ordinal);
-        Assert.AreNotEqual(text, mutated);
-        var bytes = System.Text.Encoding.UTF8.GetBytes(mutated);
+        // The original poster entry is kept and a second complete entry is appended to the files ARRAY that
+        // differs only in case, so the manifest really declares two paths that would materialize as one
+        // object on a case-insensitive volume. Appending through the array keeps the document valid JSON:
+        // splicing an object into the property list instead produced `"path":"poster.png",{...`, which is not
+        // JSON at all and made the test prove nothing about duplicate paths.
+        var root = (System.Text.Json.Nodes.JsonObject)System.Text.Json.Nodes.JsonNode.Parse(original)!;
+        var files = root["files"]!.AsArray();
+        var poster = files
+            .Select(node => (System.Text.Json.Nodes.JsonObject)node!)
+            .Single(file => file["path"]!.GetValue<string>() == "poster.png");
+        files.Add(new System.Text.Json.Nodes.JsonObject
+        {
+            ["path"] = "Poster.PNG",
+            ["kind"] = poster["kind"]!.GetValue<string>(),
+            ["cid"] = null,
+            ["size_bytes"] = poster["size_bytes"]!.GetValue<long>(),
+            ["sha256"] = poster["sha256"]!.GetValue<string>(),
+        });
+
+        using var stream = new MemoryStream();
+        using (var writer = new System.Text.Json.Utf8JsonWriter(stream))
+        {
+            root.WriteTo(writer);
+        }
+
+        var bytes = stream.ToArray();
+
+        // The mutated input must still parse and must really carry both entries, so the refusal below can
+        // only come from the duplicate-path rule and not from a broken document.
+        var reparsed = (System.Text.Json.Nodes.JsonObject)System.Text.Json.Nodes.JsonNode.Parse(bytes)!;
+        var declaredPaths = reparsed["files"]!.AsArray()
+            .Select(node => node!["path"]!.GetValue<string>())
+            .ToArray();
+        CollectionAssert.Contains(declaredPaths, "poster.png");
+        CollectionAssert.Contains(declaredPaths, "Poster.PNG");
+        Assert.HasCount(files.Count, declaredPaths);
 
         var result = composition.Reader.Read(
             bytes,

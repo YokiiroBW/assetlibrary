@@ -1,11 +1,12 @@
 # 媒体成品包只读预检（Media Package Preflight）
 
-状态：TS-099 已完成协调第三次验收后的返修轮：沙箱内产品与测试 Release 编译通过（0 警告 0 错误），
-私有探针在**真实产品程序集**上复算了本轮每一项（固定 `Season 01` 的三种反例、目标受信根对象种类、
-JSON 解码守卫、sink 去重与截断，另有既有正例/负例/边界/摘要/只读/端到端项）。
-协调第三次验收的真实结果（128 项 120 过 6 失败 2 链接条件 skip）针对**上一版候选**，
-6 个失败全部是本卡测试侧问题并已更正；真实测试执行与格式结论仍待协调环境复验（见文末"证据边界"）。
-交付状态 `needs_validation`。
+状态：TS-099 已完成协调第四次验收后的返修轮。沙箱内产品与测试 Release 编译通过（0 警告 0 错误）；
+私有探针在**真实产品程序集**上复算了本轮唯一生产改动（诊断 sink 的内部有界性）与目标受信根两场景，
+另有既有正例/负例/边界/摘要/只读/端到端项。
+协调第四次验收的真实结果（132 项 129 过 1 失败 2 链接条件 skip）针对**上一版候选**：
+唯一失败是本卡测试侧的夹具构造问题（重复路径夹具拼成非法 JSON），另有一项**真实生产缺陷**
+（`MediaPackageIssueSink` 内部去重集合无界增长）在本轮修好。真实测试执行与格式结论仍待协调环境复验
+（见文末"证据边界"）。交付状态 `needs_validation`。
 
 ## 1. 这份契约解决什么
 
@@ -78,6 +79,12 @@ media_server_import, production_path_races
 `nfo`/`source` ≤ 4 MiB；图片 ≤ 32 MiB；`cid` 匹配 `[1-9][0-9]{0,19}`；`bvid` 为 `BV` + 10 位字母数字；
 `package_id`/`library_id` 为小写规范 `D` 型 UUID 且非全零；`staging_ref` 匹配 `[A-Za-z0-9][A-Za-z0-9_-]{0,63}`。
 
+诊断上限：报告最多 100 条，且**内部存储同样有界**——`MediaPackageIssueSink` 只记住**实际写入报告**的
+`(code, location)` 对，因此去重集合与码表都 ≤ 100。满额后再来的**新的不同**问题只置 `truncated`，
+**不落入任何内部集合**；重复的同一对既不计入上限也不置 `truncated`（它没有丢弃任何诊断）。
+这一条此前被违反过：`Record` 曾先 `Add` 后判上限，cap=1 时 10000 个不同 location 会在内部留下
+10000 条，现已改为**先查询、满则只标截断、有容量才记录**。
+
 ## 6. 目标目录命名
 
 | 形态 | 目录名 |
@@ -141,11 +148,16 @@ R2 返修轮把这两个策略类收紧为 `internal`（只被同模块的 `Medi
 
 JSON 解析使用 .NET 自带 `System.Text.Json`（`Utf8JsonReader`/`JsonDocument`），
 额外施加：重复键拒绝、原始整数词法检查、UTF-8 合法性与字节预算检查，以及
-**在读取任何成员名或值之前**按原始字节完成的代理转义良构性检查。最后一项的位置是关键：
+**在读取任何成员名或值之前**完成的代理转义良构性检查。最后一项的位置与方式都是关键：
 `{"bvid":"BV1\uD800xx"}` 是**合法 JSON**、能解析成功，但读它的字符串会抛
 `InvalidOperationException`（`JsonReaderHelper.TryUnescape` → `ReadIncompleteUTF16` / `ReadInvalidUTF16`），
-所以判定不能建立在"先读出来再检查"之上。命中即记 `invalid_manifest@surrogate_escape`，
-异常类型与原文都不进报告。仓库内**没有**另一套通用 JSON 解析器。
+所以判定不能建立在"先读出来再检查"之上。**判定方式因此是让解析器自己解码**：
+用 `Utf8JsonReader` 遍历文档，对每个 `PropertyName` 与 `String` token 实际调用 `GetString()`，
+解码失败即记 `invalid_manifest@surrogate_escape`，异常类型与原文都不进报告。
+这样同一个字符无论写成 UTF-8 还是写成合法转义，在语法层行为完全一致；
+字段是否允许该字符由身份/布局校验决定。
+（此前一版曾用手写字节扫描，它既漏掉 `\uD800XDC00` 又误拒合法成对 `\uD83D\uDE00`，**已删除**。）
+仓库内**没有**另一套通用 JSON 解析器。
 
 ## 8. 用法
 
@@ -168,7 +180,7 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
 
 调用方在任何情况下都不得把 `report.Status == Inspected` 当作"已发布"。
 
-## 9. 证据边界（协调第三次验收后的返修轮交付时）
+## 9. 证据边界（协调第四次验收后的返修轮交付时）
 
 已在**本工作树沙箱内**实际验证：
 
@@ -177,35 +189,42 @@ if (report.Status != MediaPackageInspectionStatus.Inspected)
 - `dotnet build AssetLibrary.slnx -c Release`：15 个项目，**0 警告 0 错误**
   （`TreatWarningsAsErrors` + `EnforceCodeStyleInBuild` + 分析器预算全开）；
   本轮改动后产品与测试项目再次单独 Release 编译，均 **0 警告 0 错误**
-  （`.runtime/dsh-delivery/logs/build-r3-core-final.txt` / `build-r3-tests-final.txt`）。
+  （`.runtime/dsh-delivery/logs/build-r4-core-1.txt` / `build-r4-tests-1.txt`）。
 - **真实程序集探针**（`.runtime/probe/verify/`，本卡私有、不进候选）：引用
   `services/core-server/bin/Release/net10.0/AssetLibrary.CoreServer.dll`，因此驱动的是真实产品程序集。
-  本轮（55 行记录）新增复算：**固定 `Season 01`**（全部集节目录统一移到 `Season 99/`、全部去掉
-  Season 目录、自定子目录三种反例，原拼写仍可读）、**目标受信根对象种类**（初始即普通文件 →
-  `unsafe_path` 且不报 `target_exists`；首文件 hash 后变普通文件 → `unsafe_path@target`；
-  根被删除仍 `target_unavailable`）、**JSON 解码守卫**（`\uD800XDC00` 在 bvid / path / 键名三处
-  零异常零回显，合法成对 `\uD83D\uDE00` 的转义写法与 UTF-8 写法诊断完全一致，字面 `\\uD800`
-  按普通字符串处理）、**sink 去重与截断**（cap=1 时重复对不置 `IsTruncated`、新对不同对才置 true、
-  10000 个不同键仍只持有 1 项）。既有项（正例/负例/边界/摘要/只读/端到端）继续成立。
-  输出：`.runtime/dsh-delivery/logs/probe-run-42.txt`。
+  本轮（55 行记录）复算：**诊断 sink 的内部有界性**（cap=1 时同一对重复 → 不置 `IsTruncated`；
+  第二个不同对 → 置 `IsTruncated`；**10000 个不同 location 后公开 1 条，内部 `issues=1`、
+  `recorded=1`、`codes=1`**）、**目标受信根两场景**（初始即普通文件 → `unsafe_path`、
+  `hasher_calls=0`、不报 `target_exists`；首文件 hash 后变普通文件 → `unsafe_path@target`、4 次真实 hash；
+  根被删除仍 `target_unavailable`）。既有项（正例/负例/边界/摘要/只读/端到端）继续成立，
+  全部 55 行**无抛异常、无回显原文**。输出：`.runtime/dsh-delivery/logs/probe-run-44.txt`。
 - **夹具不变性**：6 个候选夹具的 LF 归一化字节与 `HEAD` **逐字节相同**（磁盘 4 个 CRLF、2 个 LF），
-  5 个被 `manifest.json` 钉住的 LF 归一化摘要 **5/5 相符**。
+  5 个被 `manifest.json` 钉住的 LF 归一化摘要 **5/5 相符**。**本轮一字未改夹具**，
+  包括那个曾让测试失败的 `examples.json`——修的是测试怎么读它，不是它的内容。
 - `python -B tests/architecture/check_release_gates.py --target v0.1-start` 允许受控开发。
-- 仓库校验的 12 个步骤通过，含 `validate_dotnet_source.py`（666 个 C# 文件，重复令牌与敏感日志检查）
-  与 `validate_architecture_baseline.py`（层级依赖方向、跨模块公开层、禁止令牌、循环依赖）。
+- 仓库校验的 12 个步骤通过，含 `validate_dotnet_source.py` 与
+  `validate_architecture_baseline.py`（层级依赖方向、跨模块公开层、禁止令牌、循环依赖）。
+- 静态空白自查（支持性证据）：19 个 C# 文件中 **7 个仅有超过 120 列的长行**，其余规则无发现
+  （`.runtime/dsh-delivery/logs/whitespace-selfcheck-r4.txt`）。**这不是全绿结论**：
+  脚本退出码 1 即由超列导致，这些长行是不可安全折行的 `Justification`/文档注释/断言消息文本。
 
 **未**在本环境执行，属 `needs_validation`：
 
-- `dotnet test`：testhost 无法在本沙箱启动。**本卡 68 个测试一个都没跑，不得记为通过。**
-  协调第三次验收给出的**真实**结果是「128 项 120 过 6 失败 2 链接条件 skip」，判定
-  `changes_requested`；6 个失败全部是本卡测试侧的构造/断言问题（原地改大小写没有第二条条目、
-  `ThrowsExactly` 要求精确基类、`ResolveCalls` 与授权前判定矛盾、两个读预算用例基准取错、
-  枚举上限强置截断），已逐条更正，但**本轮改动尚未经过任何测试宿主**。
+- `dotnet test`：testhost 无法在本沙箱启动（本轮窄过滤器再试一次，仍
+  `vstest.console process failed to connect to testhost process after 90 seconds`，未重试）。
+  **本卡 70 个测试一个都没跑，不得记为通过。**
+  协调第四次验收给出的**真实**结果是「132 项 129 过 1 失败 2 链接条件 skip」，判定
+  `changes_requested`：唯一失败是本卡测试侧的夹具构造问题（重复路径夹具拼成非法 JSON），
+  另有一项**真实生产缺陷**（`MediaPackageIssueSink.Record` 先 `Add` 后判 cap，cap=1 时
+  10000 个不同键在内部留下 10000 条），两者本轮都已处理，但**本轮改动尚未经过任何测试宿主**。
 - `dotnet format --verify-no-changes`：`MSBuildWorkspace` 的 build host 需要命名管道，加载工作区即被
-  `UnauthorizedAccessException` at `NamedPipeClientStream.TryConnect` 拒绝；缩小 `--include` 重跑同样失败。
-  本轮未再重跑、未提权，格式证据只有静态自查。
+  `UnauthorizedAccessException` at `NamedPipeClientStream.TryConnect` 拒绝。本轮未再重跑、未提权，
+  格式证据只有静态自查。
 - `tests/database`、`tests/architecture` 的 Python 用例：沙箱拒绝在临时目录内写入/清理。
   这些是环境错误，不是断言失败。
+- `.runtime/probe/escape` 临时探针：两次无输出超时后已按协调指令**停止**；
+  静态读取还发现它把 `examples.json` 根数组误当对象成员，故其失败**不是产品结论**，
+  也不据此改夹具或 reader。
 
 上述各项须由协调方在固定候选后用真实命令
 （`restore --locked-mode` / `build` / `test` / `format --verify-no-changes`）复验。
