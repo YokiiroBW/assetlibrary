@@ -33,15 +33,31 @@ class TransferOperationFoundationRepositoryTests(unittest.TestCase):
             hashlib.sha256(contract.read_bytes()).hexdigest(),
         )
 
-    def test_production_modules_define_ports_without_physical_adapters(self) -> None:
+    def test_production_modules_define_ports_and_only_read_only_inspection_adapters(self) -> None:
         allowed_layers = {"Application", "Contracts", "Domain"}
         for root in CORE_ROOTS:
+            expected_layers = allowed_layers | ({"Infrastructure"} if root.name == "OperationTrash" else set())
             self.assertEqual(
-                allowed_layers,
+                expected_layers,
                 {path.name for path in root.iterdir() if path.is_dir()},
             )
 
-        source = read_csharp(CORE_ROOTS)
+        # TS-099 added a read-only inspector; physical publication remains gated.
+        infrastructure = CORE_ROOTS[1] / "Infrastructure"
+        self.assertEqual(
+            {"IsolatedMediaPackageInspector.cs", "MediaPackageFileHasher.cs",
+             "MediaPackageManifestReader.cs", "MediaPackagePathBoundary.cs"},
+            {path.relative_to(infrastructure).as_posix() for path in infrastructure.rglob("*") if path.is_file()},
+        )
+        hasher = (infrastructure / "MediaPackageFileHasher.cs").read_text(encoding="utf-8")
+        self.assertIn("FileMode.Open,", hasher)
+        self.assertIn("FileAccess.Read,", hasher)
+        physical_source = read_csharp((infrastructure,))
+        self.assertNotRegex(physical_source, r"\bFileAccess\.(?:Write|ReadWrite)\b")
+        self.assertNotRegex(physical_source, r"\bFileMode\.(?:Create|CreateNew|OpenOrCreate|Truncate|Append)\b")
+        self.assertNotRegex(physical_source, r"\b(?:File|Directory)\.(?:Write\w*|Append\w*|Create\w*|Copy|Move|Delete|Replace|Set\w*)\s*\(")
+
+        source = read_csharp(tuple(root / layer for root in CORE_ROOTS for layer in sorted(allowed_layers)))
         for forbidden in (
             "System.IO",
             "FileStream",

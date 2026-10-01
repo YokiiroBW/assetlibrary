@@ -45,7 +45,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21.0.12+8'
+          # setup-java compares the complete Adoptium SemVer build metadata.
+          java-version: '21.0.12+8.0.LTS'
       - uses: gradle/actions/setup-gradle@v4
       - uses: actions/setup-dotnet@v4
         with:

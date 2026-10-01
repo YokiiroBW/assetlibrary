@@ -6,8 +6,9 @@ import shutil
 import subprocess
 import tempfile
 import uuid
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+from dotnet_test_results import require_all_tests_passed
 
 
 def verify_interactive_upgrade(test, migrations, root: Path) -> None:
@@ -169,8 +170,6 @@ def _dotnet_checks(test, database, library, root):
         "--logger", "trx;LogFileName=interactive.trx", "--results-directory", str(results)],
         cwd=root, env=environment, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120, check=False)
     test.assertEqual(0, result.returncode, result.stdout + result.stderr)
-    counters = ET.parse(results / "interactive.trx").find("{*}ResultSummary/{*}Counters")
-    test.assertIsNotNone(counters, result.stdout)
-    observed = {key: int(counters.attrib[key]) for key in ("total", "executed", "passed", "failed", "notExecuted")}
+    observed = require_all_tests_passed(results / "interactive.trx")
     test.assertEqual({"total": 1, "executed": 1, "passed": 1, "failed": 0, "notExecuted": 0}, observed)
     print(json.dumps({"v026_dotnet": observed}, sort_keys=True))

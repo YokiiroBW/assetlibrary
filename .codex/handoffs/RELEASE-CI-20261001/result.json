@@ -1,0 +1,69 @@
+{
+  "$schema": "../../../contracts/handoffs/task-result.schema.json",
+  "task_id": "RELEASE-CI-20261001",
+  "title": "Repair exact Java selection and structured .NET CI evidence",
+  "status": "ready_for_review",
+  "owner": "release-coordinator",
+  "branch": "work/release-ci-20261001",
+  "changed_files": [
+    ".github/workflows/handoff-quality.yml",
+    ".github/workflows/platform-quality.yml",
+    "tests/database/dotnet_test_results.py",
+    "tests/database/test_migration_integration.py",
+    "tests/database/web_interaction_checks.py",
+    "tests/repository/test_dotnet_test_results.py",
+    "tests/repository/test_assetlink_sdk_foundation.py",
+    "tests/repository/test_transfer_operation_foundation.py",
+    ".codex/tasks/RELEASE-CI-20261001.md",
+    ".codex/handoffs/RELEASE-CI-20261001/summary.md",
+    ".codex/handoffs/RELEASE-CI-20261001/result.json",
+    ".codex/handoffs/RELEASE-CI-20261001/tests.md"
+  ],
+  "changed_contracts": [],
+  "tests": {
+    "repository_verification": "passed",
+    "isolated_repository_tests": {
+      "passed": 104,
+      "failed": 0,
+      "skipped": 0
+    },
+    "trx_regressions": {
+      "passed": 9
+    },
+    "v0_1_start": "allowed",
+    "alpha_audit": "valid_but_blocked",
+    "hosted_new_sha": "pending"
+  },
+  "risks": [
+    "This handoff records local evidence only; hosted CI must be checked at the immutable new SHA",
+    "No NAS deployment or actual PostgreSQL/.NET execution was performed on this local Windows machine"
+  ],
+  "blocked_by": [
+    "hosted_new_sha_ci_pending"
+  ],
+  "handoff_summary": ".codex/handoffs/RELEASE-CI-20261001/summary.md",
+  "architecture_review": {
+    "module": "CI build selection and database test-result evidence; no product runtime changes",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": [
+      "Existing TRX reporting from interactive database tests, now shared by two consumers",
+      "Existing TS-099 four-file read-only inspection boundary and frozen dependency policy"
+    ],
+    "duplicated_logic": [],
+    "cross_module_access": [
+      "Test support only; no runtime module or database owner access added"
+    ],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": [],
+    "architecture_tests": [
+      "verify_repository.py passed: 627 governed architecture inputs, 668 C# sources, 21 manifest and 14 architecture tests",
+      "v0.1-start allowed; Alpha audit valid and still blocked",
+      "Exact isolated repository suite: 104 tests passed, including nine TRX result-gate tests"
+    ],
+    "technical_debt": [
+      "Hosted .NET/PostgreSQL/browser/Kotlin evidence remains pending for the new commit",
+      "AssetLibrary full Alpha and platform release targets remain independently blocked"
+    ]
+  }
+}

@@ -86,7 +86,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21.0.12+8'
+          # setup-java compares the complete Adoptium SemVer build metadata.
+          java-version: '21.0.12+8.0.LTS'
       - uses: gradle/actions/setup-gradle@v4
       - name: Enable emulator access on the isolated CI runner
         run: sudo setfacl -m u:$(id -un):rw /dev/kvm

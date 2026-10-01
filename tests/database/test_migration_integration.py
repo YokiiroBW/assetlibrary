@@ -18,6 +18,8 @@ import uuid
 from pathlib import Path
 from typing import NoReturn
 
+from dotnet_test_results import require_all_tests_passed
+
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL_PATH = ROOT / "database/migrations/production/migration_tool.py"
@@ -2470,14 +2472,16 @@ INSERT INTO library_storage.library_permission (
         else:
             # The Windows-only ACL case belongs to the Windows trial evidence, not the portable subset.
             native_filter = f"({native_filter})&FullyQualifiedName!~ReadOnlyTrialPermissionIntegrationTests"
+        results = self.backup_directory("readonly-dotnet-results")
         result = subprocess.run(
             [dotnet, "test", str(project), "--configuration", "Release", "--no-build", "--no-restore",
              "--filter", native_filter,
-             "--logger", "console;verbosity=normal"], cwd=ROOT, env=environment,
+             "--logger", "console;verbosity=normal",
+             "--logger", "trx;LogFileName=readonly.trx", "--results-directory", str(results)],
+            cwd=ROOT, env=environment,
             text=True, encoding="utf-8", capture_output=True, timeout=180)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertNotIn("Skipped", result.stdout)
-        self.assertNotIn("已跳过", result.stdout)
+        require_all_tests_passed(results / "readonly.trx")
         evidence = ROOT / ".runtime/V01-017/native-read-only-tests.log"
         evidence.parent.mkdir(parents=True, exist_ok=True)
         evidence.write_text(result.stdout + result.stderr, encoding="utf-8")

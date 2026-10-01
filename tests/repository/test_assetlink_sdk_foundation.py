@@ -85,13 +85,15 @@ class AssetLinkSdkFoundationTests(unittest.TestCase):
         for marker in (
             "node-version: '24.20.0'",
             "version: '11.19.0'",
-            "java-version: '21.0.12+8'",
+            "java-version: '21.0.12+8.0.LTS'",
             "gradle/actions/setup-gradle@v4",
             "matrix.label == 'ubuntu'",
             "matrix.label == 'windows'",
         ):
             self.assertIn(marker, workflow)
         self.assertIsNone(re.search(r"continue-on-error\s*:\s*true", workflow, flags=re.IGNORECASE))
+        platform_workflow = (ROOT / ".github/workflows/platform-quality.yml").read_text(encoding="utf-8")
+        self.assertIn("java-version: '21.0.12+8.0.LTS'", platform_workflow)
 
 
 if __name__ == "__main__":
