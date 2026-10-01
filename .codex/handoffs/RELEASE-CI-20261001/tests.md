@@ -18,3 +18,7 @@ The structured native/database stage passed. The E2E fixture loader exposed the 
 ## Follow-up after run 36877324969
 
 Windows generated trial files/directories now explicitly have the current test-user SID as owner, in addition to the existing private ACL; this is confined to newly created synthetic fixtures. Production permission enforcement is unchanged. The mobile browser sequence now follows the existing image-preview dialog, expands file information, verifies the same filename and relative path, retains no-horizontal-overflow/screenshot checks, and closes the actual dialog. It does not waive a UI failure or reduce the real browser trial. C# source policy668 and Node browser-script syntax passed; hosted execution remains pending.
+
+## Windows owned-directory fixture follow-up
+
+Run 36878599187 at f40a632 passed Ubuntu and the real HTTPS PostgreSQL/worker/browser job. Windows had one remaining Preview test failure before the product Protect call: elevated runners created the supposed user-owned child with Administrators as owner. The fixture now explicitly sets its current-user owner at creation while inheriting the original parent Modify/System ACLs. Assertions for the owner, protected ACL, exact two full-control principals and no inherited grants remain. Product code and permission policy are unchanged. Hosted Windows verification at the follow-up SHA is required.

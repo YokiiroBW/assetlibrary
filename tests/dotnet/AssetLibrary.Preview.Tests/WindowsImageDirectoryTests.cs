@@ -25,7 +25,12 @@ public sealed class WindowsImageDirectoryTests
         access.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null), FileSystemRights.FullControl,
             InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));
         parent.SetAccessControl(access);
-        var child = Directory.CreateDirectory(Path.Combine(parent.FullName, "owned"));
+        // Elevated Windows runners may otherwise assign the Administrators group as owner.
+        // Create this explicitly owned fixture with the current SID while retaining inherited ACLs.
+        var child = new DirectoryInfo(Path.Combine(parent.FullName, "owned"));
+        var childOwner = new DirectorySecurity();
+        childOwner.SetOwner(user);
+        child.Create(childOwner);
         Assert.AreEqual(user, child.GetAccessControl().GetOwner(typeof(SecurityIdentifier)));
         WindowsImageOwnerJournal.Protect(child, user);
         var result = child.GetAccessControl();

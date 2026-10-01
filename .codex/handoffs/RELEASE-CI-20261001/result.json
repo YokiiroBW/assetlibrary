@@ -22,7 +22,8 @@
     "tests/repository/test_nas_image_container_package.py",
     "tests/dotnet/AssetLibrary.Packaging.Tests/HostOptionsTests.cs",
     "tests/dotnet/AssetLibrary.Packaging.Tests/TrialConfigurationFixture.cs",
-    "tests/integration/read-only-trial/browser.mjs"
+    "tests/integration/read-only-trial/browser.mjs",
+    "tests/dotnet/AssetLibrary.Preview.Tests/WindowsImageDirectoryTests.cs"
   ],
   "changed_contracts": [],
   "tests": {
@@ -42,7 +43,12 @@
     "dotnet_source_policy": "passed_668_files",
     "hosted_attempt_e08e06f": "Completed failure: Windows fixture path conversion, Linux root-path fixture, new E2E fixture import dependency; PostgreSQL/TRX stage passed",
     "hosted_attempt_629472d": "Windows private fixture owner mismatch; mobile E2E used superseded detail-dialog selector; native PostgreSQL stage passed",
-    "browser_script_syntax": "node_check_passed"
+    "browser_script_syntax": "node_check_passed",
+    "hosted_attempt_f40a632": {
+      "ubuntu": "success",
+      "database_real_https_browser": "success",
+      "windows": "one_owned_directory_fixture_owner_assertion_failure"
+    }
   },
   "risks": [
     "This handoff records local evidence only; hosted CI must be checked at the immutable new SHA",
