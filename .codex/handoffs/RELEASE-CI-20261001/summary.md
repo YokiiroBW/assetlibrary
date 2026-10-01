@@ -17,3 +17,7 @@ Run 36875315275 resolved Java successfully but exposed CRLF-only hashes in two o
 ## Follow-up after run 36876070081
 
 The structured native/database stage passed. The E2E fixture loader exposed the added top-level import dependency; the native test now imports its TRX reader when actually invoked, and an isolated loader regression prevents recurrence. Linux root-path testing now derives a real root from the absolute temporary path, retaining the rejection assertion without using Windows-only SystemDirectory. The NAS shell fixture excludes its two Linux-container path variables from MSYS environment conversion; no product shell/path policy was relaxed. Local full isolated repository suite: 105 passed; .NET source policy: 668 files passed. Hosted native C#/browser evidence at the next SHA is pending.
+
+## Follow-up after run 36877324969
+
+Windows generated trial files/directories now explicitly have the current test-user SID as owner, in addition to the existing private ACL; this is confined to newly created synthetic fixtures. Production permission enforcement is unchanged. The mobile browser sequence now follows the existing image-preview dialog, expands file information, verifies the same filename and relative path, retains no-horizontal-overflow/screenshot checks, and closes the actual dialog. It does not waive a UI failure or reduce the real browser trial. C# source policy668 and Node browser-script syntax passed; hosted execution remains pending.

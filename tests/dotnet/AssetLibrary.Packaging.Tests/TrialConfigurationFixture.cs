@@ -71,6 +71,7 @@ internal sealed class TrialConfigurationFixture : IDisposable
         {
             using var identity = WindowsIdentity.GetCurrent();
             var security = new FileSecurity();
+            security.SetOwner(identity.User!);
             security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
             security.AddAccessRule(new FileSystemAccessRule(identity.User!, FileSystemRights.FullControl, AccessControlType.Allow));
             new FileInfo(path).SetAccessControl(security);
@@ -87,6 +88,7 @@ internal sealed class TrialConfigurationFixture : IDisposable
         {
             using var identity = WindowsIdentity.GetCurrent();
             var security = new DirectorySecurity();
+            security.SetOwner(identity.User!);
             security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
             security.AddAccessRule(new FileSystemAccessRule(identity.User!, FileSystemRights.FullControl,
                 InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit, PropagationFlags.None, AccessControlType.Allow));

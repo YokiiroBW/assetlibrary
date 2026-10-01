@@ -20,7 +20,9 @@
     ".codex/handoffs/RELEASE-CI-20261001/tests.md",
     "tests/repository/test_database_migration_foundation.py",
     "tests/repository/test_nas_image_container_package.py",
-    "tests/dotnet/AssetLibrary.Packaging.Tests/HostOptionsTests.cs"
+    "tests/dotnet/AssetLibrary.Packaging.Tests/HostOptionsTests.cs",
+    "tests/dotnet/AssetLibrary.Packaging.Tests/TrialConfigurationFixture.cs",
+    "tests/integration/read-only-trial/browser.mjs"
   ],
   "changed_contracts": [],
   "tests": {
@@ -38,7 +40,9 @@
     "hosted_new_sha": "pending",
     "hosted_attempt_cb269585": "Java resolved on both OS; frozen CRLF-only assertions failed on LF checkout; database task still running",
     "dotnet_source_policy": "passed_668_files",
-    "hosted_attempt_e08e06f": "Completed failure: Windows fixture path conversion, Linux root-path fixture, new E2E fixture import dependency; PostgreSQL/TRX stage passed"
+    "hosted_attempt_e08e06f": "Completed failure: Windows fixture path conversion, Linux root-path fixture, new E2E fixture import dependency; PostgreSQL/TRX stage passed",
+    "hosted_attempt_629472d": "Windows private fixture owner mismatch; mobile E2E used superseded detail-dialog selector; native PostgreSQL stage passed",
+    "browser_script_syntax": "node_check_passed"
   },
   "risks": [
     "This handoff records local evidence only; hosted CI must be checked at the immutable new SHA",
@@ -67,7 +71,8 @@
       "v0.1-start allowed; Alpha audit valid and still blocked",
       "Exact isolated repository suite: 104 tests passed, including nine TRX result-gate tests",
       "Retained exact CRLF hashes and verified alternate exact LF hashes from published d7b43ec; no SQL/contract file edits",
-      "105 repository tests passed, including isolated E2E fixture-load regression; source policy668 passed; native C# execution remains hosted-only"
+      "105 repository tests passed, including isolated E2E fixture-load regression; source policy668 passed; native C# execution remains hosted-only",
+      "C# source668 passed after fixture owner fix; browser script syntax passed; real hosted runtime awaits next SHA"
     ],
     "technical_debt": [
       "Hosted .NET/PostgreSQL/browser/Kotlin evidence remains pending for the new commit",

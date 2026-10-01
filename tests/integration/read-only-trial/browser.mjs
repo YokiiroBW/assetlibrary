@@ -84,10 +84,9 @@ try {
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
   await expect(resultEntry).toBeVisible();
   await resultEntry.dblclick();
-  const details = page.getByRole("dialog", { name: "资产详情", exact: true });
-  // The drawer replaces the list below 1200px, so a resize the shell has not observed yet would leave
-  // the inline aside in place instead. The probe states which of the two the shell actually rendered, on
-  // stderr because stdout carries the JSON result this process is required to end with.
+  // Opening an entry now uses the image-preview dialog, including its file-information section.
+  // Keep checking real file details and narrow-screen layout through the current public UI.
+  const details = page.getByRole("dialog", { name: "图片预览", exact: true });
   process.stderr.write(`DRAWER_PROBE ${JSON.stringify(await page.evaluate(() => ({
     width: window.innerWidth,
     dialogs: [...document.querySelectorAll("dialog")].map((node) => node.getAttribute("aria-label")),
@@ -95,6 +94,8 @@ try {
     hasEntry: new URL(location.href).searchParams.has("entry"),
   })))}\n`);
   await expect(details).toContainText("summer-photo.jpg", { timeout: 15000 });
+  await details.locator("summary").filter({ hasText: /^文件信息$/ }).click();
+  await expect(details.locator(".preview-information")).toContainText("album/summer-photo.jpg");
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
   assert.equal(await page.evaluate(() => localStorage.length + sessionStorage.length), 0);
   await page.screenshot({
@@ -102,7 +103,7 @@ try {
     animations: "disabled",
     fullPage: true,
   });
-  await details.getByRole("button", { name: "关闭资产详情", exact: true }).click();
+  await details.getByRole("button", { name: "关闭图片预览", exact: true }).click();
   await expect(details).toHaveCount(0);
   const result = { status: "passed", phase: settings.phase, library_id: libraryId, browser_version: browser.version() };
   await writeFile(join(settings.evidence, `${settings.phase}-browser.json`), JSON.stringify(result, null, 2));
