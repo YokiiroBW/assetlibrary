@@ -374,6 +374,10 @@ exit 9
             environment.pop(key, None)
         environment.update({"FAKE_BIN": self.posix(self.bin), "FAKE_BUNDLE": self.posix(self.bundle), "FAKE_TOOLS": self.posix(Path(self.shell).parent), "FAKE_IMAGE": IMAGE, "FAKE_DEPLOYMENT": DEPLOYMENT})
         environment.update(overrides)
+        # These are Linux container paths, not Windows host paths for MSYS to translate.
+        existing_exclusions = environment.get("MSYS2_ENV_CONV_EXCL", "")
+        environment["MSYS2_ENV_CONV_EXCL"] = ";".join(filter(None, (
+            existing_exclusions, "ASSETLIBRARY_IMAGE_PREVIEW_SOCKET", "ASSETLIBRARY_IMAGE_PREVIEW_WORKER")))
         script = ('PATH="$FAKE_BIN:$FAKE_TOOLS:$PATH"; export PATH; '
                   '[ "$(command -v docker)" = "$FAKE_BIN/docker" ] || exit 99; exec sh "$FAKE_BUNDLE/nasctl.sh" "$@"')
         return subprocess.run([self.shell, "-c", script, "nasctl-fixture", action], cwd=self.bundle,

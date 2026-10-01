@@ -10,3 +10,7 @@ Diagnostic attempts are separate: the first repository invocation omitted requir
 ## Hosted follow-up: frozen LF/CRLF evidence
 
 Run 36875315275 resolved Java successfully but exposed CRLF-only hashes in two old foundation tests. The original hashes remain accepted; alternate LF hashes were verified directly against published d7b43ec Git blobs and differ only by line endings. Exactly those two byte serializations are accepted, without runtime normalization. SQL, contracts and the historical fixture files were not changed. The exact local isolated repository suite was rerun: 104 passed, no failures or skips. Hosted CI on the follow-up SHA remains required.
+
+## Follow-up after run 36876070081
+
+The structured native/database stage passed. The E2E fixture loader exposed the added top-level import dependency; the native test now imports its TRX reader when actually invoked, and an isolated loader regression prevents recurrence. Linux root-path testing now derives a real root from the absolute temporary path, retaining the rejection assertion without using Windows-only SystemDirectory. The NAS shell fixture excludes its two Linux-container path variables from MSYS environment conversion; no product shell/path policy was relaxed. Local full isolated repository suite: 105 passed; .NET source policy: 668 files passed. Hosted native C#/browser evidence at the next SHA is pending.

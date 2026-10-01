@@ -18,8 +18,6 @@ import uuid
 from pathlib import Path
 from typing import NoReturn
 
-from dotnet_test_results import require_all_tests_passed
-
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL_PATH = ROOT / "database/migrations/production/migration_tool.py"
@@ -2448,6 +2446,8 @@ INSERT INTO library_storage.library_permission (
         )
 
     def test_read_only_trial_dotnet_runtime_and_isolated_workers(self) -> None:
+        from dotnet_test_results import require_all_tests_passed
+
         dotnet, host = self.host_command()
         project = ROOT / "tests/dotnet/AssetLibrary.ReadCore.Tests/AssetLibrary.ReadCore.Tests.csproj"
         dll = project.parent / "bin/Release/net10.0/AssetLibrary.ReadCore.Tests.dll"

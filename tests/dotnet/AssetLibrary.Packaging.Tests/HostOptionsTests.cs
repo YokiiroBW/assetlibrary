@@ -12,7 +12,8 @@ public sealed class HostOptionsTests
     {
         var missing = CoreServerHostOptions.Parse([], _ => null);
         var relative = CoreServerHostOptions.Parse(["--state-path", "relative"], _ => null);
-        var root = CoreServerHostOptions.Parse(["--state-path", Path.GetPathRoot(Environment.SystemDirectory)!], _ => null);
+        var stateRoot = Path.GetPathRoot(Path.GetFullPath(Path.GetTempPath()))!;
+        var root = CoreServerHostOptions.Parse(["--state-path", stateRoot], _ => null);
         var unavailable = CoreServerHostOptions.Parse(
             ["--state-path", Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}")],
             _ => null);

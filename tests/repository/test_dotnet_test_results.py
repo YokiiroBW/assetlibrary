@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import subprocess
+import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
@@ -15,6 +17,19 @@ SPEC.loader.exec_module(RESULTS)
 
 
 class DotnetTestResultGateTests(unittest.TestCase):
+    def test_e2e_fixture_loads_without_unittest_discovery_import_path(self) -> None:
+        command = (
+            "import importlib.util; from pathlib import Path; "
+            "p=Path('tests/integration/read-only-trial/run_e2e.py').resolve(); "
+            "s=importlib.util.spec_from_file_location('trial_loader',p); "
+            "m=importlib.util.module_from_spec(s); s.loader.exec_module(m); "
+            "f=m.load_fixture(); print(f.PostgreSqlIntegrationTests.__name__)"
+        )
+        result = subprocess.run([sys.executable, "-I", "-B", "-c", command],
+                                cwd=ROOT, capture_output=True, text=True, timeout=20)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual("PostgreSqlIntegrationTests", result.stdout.strip())
+
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory(prefix="dotnet-result-gate-")
         self.addCleanup(temporary.cleanup)
