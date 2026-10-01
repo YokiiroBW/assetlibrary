@@ -9,3 +9,7 @@ The exact local CI repository command also exposed a pre-existing foundation ass
 Local validation passed: repository verifier, 104 isolated repository tests (including nine result-gate regression tests), and v0.1-start. Alpha audit remains valid and blocked. Hosted CI at the new SHA is pending; this report does not claim it passed. The published rc.1 tag is immutable and will not be moved.
 
 Official selector behavior: https://github.com/actions/setup-java/blob/v4/src/util.ts#L53-L60 and https://github.com/actions/setup-java/blob/v4/src/distributions/temurin/installer.ts#L34-L50.
+
+## Hosted follow-up: frozen LF/CRLF evidence
+
+Run 36875315275 resolved Java successfully but exposed CRLF-only hashes in two old foundation tests. The original hashes remain accepted; alternate LF hashes were verified directly against published d7b43ec Git blobs and differ only by line endings. Exactly those two byte serializations are accepted, without runtime normalization. SQL, contracts and the historical fixture files were not changed. The exact local isolated repository suite was rerun: 104 passed, no failures or skips. Hosted CI on the follow-up SHA remains required.

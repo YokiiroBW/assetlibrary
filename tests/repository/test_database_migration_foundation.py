@@ -11,17 +11,27 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class DatabaseMigrationFoundationRepositoryTests(unittest.TestCase):
-    def test_m0_postgres_spike_inputs_remain_byte_identical(self) -> None:
+    def test_m0_postgres_spike_inputs_remain_frozen_lf_or_crlf(self) -> None:
+        # Retain the original Windows bytes and the published d7b43ec Git LF bytes.
+        # Only these two exact serializations are accepted; content is not normalized.
         expected = {
-            "database/migrations/001_core.sql": "cb6f58bc839748167b31ce67ecf31002b4c9008cd1310a986a67edbec14518c7",
-            "database/migrations/002_ledger.sql": "aa1b037efe268891dced12431a21456e8cd51bcfafe3b0abc7d1c8dbc5acced4",
-            "tests/spikes/postgres/migration_runner.py": "5b3c731217c90d0ddfe081a8ed9a7922fa45a36bda90d155e172751e380659af",
-            "tests/spikes/postgres/test_postgres_spike.py": "3ff51d6976349570045e82bb76e0972e51587c3ded9c1c58b24ba810f86bfd5a",
+            "database/migrations/001_core.sql": (
+                "cb6f58bc839748167b31ce67ecf31002b4c9008cd1310a986a67edbec14518c7",
+                "bdec272b3bbb5ed965cb472fb31914f0794db2b9d5cdf423dbaf8b706a2501f7"),
+            "database/migrations/002_ledger.sql": (
+                "aa1b037efe268891dced12431a21456e8cd51bcfafe3b0abc7d1c8dbc5acced4",
+                "0b18f63ddf48344e7b10e4a59bc1f36d7ba9587822ea73cc66518174716adca1"),
+            "tests/spikes/postgres/migration_runner.py": (
+                "5b3c731217c90d0ddfe081a8ed9a7922fa45a36bda90d155e172751e380659af",
+                "2d5b1bffb00cb363f24890cd9685afe757dfc3a8446a94a046faf49ec9c99b85"),
+            "tests/spikes/postgres/test_postgres_spike.py": (
+                "3ff51d6976349570045e82bb76e0972e51587c3ded9c1c58b24ba810f86bfd5a",
+                "492c9bc7ba6a557886b3f2a94aefa0d64c5e9df7809c2c97bf1ee1ad59a905a3"),
         }
 
-        for relative, checksum in expected.items():
+        for relative, checksums in expected.items():
             actual = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
-            self.assertEqual(actual, checksum, relative)
+            self.assertIn(actual, checksums, relative)
 
     def test_production_manifest_is_the_only_documented_entry_point(self) -> None:
         readme = (ROOT / "database/migrations/README.md").read_text(encoding="utf-8")

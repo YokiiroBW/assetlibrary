@@ -17,7 +17,8 @@
     ".codex/tasks/RELEASE-CI-20261001.md",
     ".codex/handoffs/RELEASE-CI-20261001/summary.md",
     ".codex/handoffs/RELEASE-CI-20261001/result.json",
-    ".codex/handoffs/RELEASE-CI-20261001/tests.md"
+    ".codex/handoffs/RELEASE-CI-20261001/tests.md",
+    "tests/repository/test_database_migration_foundation.py"
   ],
   "changed_contracts": [],
   "tests": {
@@ -32,7 +33,8 @@
     },
     "v0_1_start": "allowed",
     "alpha_audit": "valid_but_blocked",
-    "hosted_new_sha": "pending"
+    "hosted_new_sha": "pending",
+    "hosted_attempt_cb269585": "Java resolved on both OS; frozen CRLF-only assertions failed on LF checkout; database task still running"
   },
   "risks": [
     "This handoff records local evidence only; hosted CI must be checked at the immutable new SHA",
@@ -59,7 +61,8 @@
     "architecture_tests": [
       "verify_repository.py passed: 627 governed architecture inputs, 668 C# sources, 21 manifest and 14 architecture tests",
       "v0.1-start allowed; Alpha audit valid and still blocked",
-      "Exact isolated repository suite: 104 tests passed, including nine TRX result-gate tests"
+      "Exact isolated repository suite: 104 tests passed, including nine TRX result-gate tests",
+      "Retained exact CRLF hashes and verified alternate exact LF hashes from published d7b43ec; no SQL/contract file edits"
     ],
     "technical_debt": [
       "Hosted .NET/PostgreSQL/browser/Kotlin evidence remains pending for the new commit",

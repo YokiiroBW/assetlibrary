@@ -25,12 +25,14 @@ def read_csharp(roots: tuple[Path, ...]) -> str:
 
 
 class TransferOperationFoundationRepositoryTests(unittest.TestCase):
-    def test_canonical_operation_contract_remains_byte_identical(self) -> None:
+    def test_canonical_operation_contract_remains_frozen_lf_or_crlf(self) -> None:
         contract = ROOT / "contracts/operations/operation-plan.schema.json"
 
-        self.assertEqual(
-            "f2e29c8ce5e8b43a79c01b4b8b7b0db8c63b0122aa250ab5d758db27181436b6",
+        # Preserve the original CRLF hash and the published d7b43ec Git LF hash.
+        self.assertIn(
             hashlib.sha256(contract.read_bytes()).hexdigest(),
+            ("f2e29c8ce5e8b43a79c01b4b8b7b0db8c63b0122aa250ab5d758db27181436b6",
+             "4c5d7eddb9f5796325d6b44be203445c44a947a7307f4f3a7fe94bdf9fb0cc4b"),
         )
 
     def test_production_modules_define_ports_and_only_read_only_inspection_adapters(self) -> None:
