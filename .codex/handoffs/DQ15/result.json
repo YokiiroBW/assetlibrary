@@ -1,0 +1,27 @@
+{
+  "task_id": "DQ15",
+  "title": "Remove repeated checks from one CI job",
+  "status": "ready_for_review",
+  "owner": "quality-life coordinator",
+  "branch": "codex/quality-life-20261003",
+  "base_commit": "d7b43eca94136e90303cce585f2b96c80223f3af",
+  "changed_files": [".github/workflows/handoff-quality.yml", "tests/architecture/ci-tiers.json", "tests/repository/test_v0_1_alpha_foundation.py"],
+  "changed_contracts": ["tests/architecture/ci-tiers.json"],
+  "tests": {"passed": 94, "failed": 1, "skipped": 0, "report": "tests.md", "scope": "Repository suite; one unchanged failure reproduced at base. verify_repository passes separately."},
+  "architecture_review": {
+    "module": "CI execution ownership",
+    "dependency_direction_ok": true,
+    "reused_existing_logic": ["scripts/verify_repository.py owns the three retained checks"],
+    "duplicated_logic": [],
+    "cross_module_access": [],
+    "new_language_or_framework": [],
+    "new_major_dependencies": [],
+    "contract_changes": ["Direct CI command catalog now matches the workflow"],
+    "architecture_tests": ["verify_repository passed"],
+    "technical_debt": ["Existing Infrastructure directory assertion failure; not introduced by this patch"]
+  },
+  "risks": ["Remote GitHub Actions not executed"],
+  "blocked_by": [],
+  "recommended_merge_order": 1,
+  "handoff_summary": ".codex/handoffs/DQ15/summary.md"
+}
