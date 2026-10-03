@@ -22,10 +22,8 @@
       "failure_policy": "Any command failure blocks the merge candidate; no continue-on-error is allowed.",
       "commands": [
         "python scripts/verify_repository.py",
-        "python -I -B scripts/validate_v0_1_alpha.py",
         "python -I -B -m unittest discover -s tests/repository -p test_*.py -v",
         "python -B database/migrations/production/migration_tool.py validate",
-        "python -B -m unittest discover -s tests/database -p test_migration_manifest.py -v",
         "python -B -m unittest discover -s tests/database -p test_web_gateway_migrations.py -v",
         "python -B -m unittest discover -s tests/database -p test_*.py -v",
         "python -I -B tests/integration/read-only-trial/run_e2e.py --execute --postgres-external --dotnet \"$(command -v dotnet)\" --postgres-bin /usr/lib/postgresql/16/bin --node \"$(command -v node)\" --web-root apps/web/dist --playwright-module apps/web/node_modules/@playwright/test/index.mjs --evidence .runtime/real-trial-evidence",

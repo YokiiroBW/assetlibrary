@@ -72,9 +72,11 @@ class V01AlphaFoundationTests(unittest.TestCase):
         )
         fast_merge = next(tier for tier in tiers["tiers"] if tier["id"] == "fast-merge")
 
-        self.assertIn(f"run: {AUDIT_COMMAND}", workflow)
+        self.assertIn("run: python scripts/verify_repository.py", workflow)
+        self.assertNotIn(f"run: {AUDIT_COMMAND}", workflow)
         self.assertIn("validate_v0_1_alpha.py", verifier)
-        self.assertIn(AUDIT_COMMAND, fast_merge["commands"])
+        self.assertIn("python scripts/verify_repository.py", fast_merge["commands"])
+        self.assertNotIn(AUDIT_COMMAND, fast_merge["commands"])
         self.assertNotIn(RELEASE_COMMAND, fast_merge["commands"])
         self.assertNotRegex(workflow.lower(), r"continue-on-error\s*:\s*true")
 
